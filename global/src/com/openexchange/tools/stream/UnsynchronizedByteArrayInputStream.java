@@ -53,30 +53,31 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
- * {@link UnsynchronizedByteArrayInputStream} - A simple unsynchronized byte array input stream
+ * {@link UnsynchronizedByteArrayInputStream} - A simple unsynchronized byte array input stream.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStream {
 
     /**
-     * Creates a <code>ByteArrayInputStream</code> so that it uses <code>buf</code> as its buffer array. The buffer array is not copied. The
-     * initial value of <code>pos</code> is <code>0</code> and the initial value of <code>count</code> is the length of <code>buf</code>.
+     * Creates a <code>UnsynchronizedByteArrayInputStream</code> so that it uses <code>buf</code> as its buffer array. The buffer array is
+     * not copied. The initial value of <code>pos</code> is <code>0</code> and the initial value of <code>count</code> is the length of
+     * <code>buf</code>.
      * 
-     * @param buf the input buffer.
+     * @param buf The input buffer.
      */
     public UnsynchronizedByteArrayInputStream(final byte buf[]) {
         super(buf);
     }
 
     /**
-     * Creates <code>ByteArrayInputStream</code> that uses <code>buf</code> as its buffer array. The initial value of <code>pos</code> is
-     * <code>offset</code> and the initial value of <code>count</code> is the minimum of <code>offset+length</code> and
+     * Creates <code>UnsynchronizedByteArrayInputStream</code> that uses <code>buf</code> as its buffer array. The initial value of
+     * <code>pos</code> is <code>offset</code> and the initial value of <code>count</code> is the minimum of <code>offset+length</code> and
      * <code>buf.length</code>. The buffer array is not copied. The buffer's mark is set to the specified offset.
      * 
-     * @param buf the input buffer.
-     * @param offset the offset in the buffer of the first byte to read.
-     * @param length the maximum number of bytes to read from the buffer.
+     * @param buf The input buffer.
+     * @param offset The offset in the buffer of the first byte to read.
+     * @param length The maximum number of bytes to read from the buffer.
      */
     public UnsynchronizedByteArrayInputStream(final byte buf[], final int offset, final int length) {
         super(buf, offset, length);
@@ -88,7 +89,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * <p>
      * This <code>read</code> method cannot block.
      * 
-     * @return the next byte of data, or <code>-1</code> if the end of the stream has been reached.
+     * @return The next byte of data, or <code>-1</code> if the end of the stream has been reached.
      */
     @Override
     public int read() {
@@ -104,10 +105,10 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * <p>
      * This <code>read</code> method cannot block.
      * 
-     * @param b the buffer into which the data is read.
-     * @param off the start offset in the destination array <code>b</code>
-     * @param len the maximum number of bytes read.
-     * @return the total number of bytes read into the buffer, or <code>-1</code> if there is no more data because the end of the stream has
+     * @param b The buffer into which the data is read.
+     * @param off The start offset in the destination array <code>b</code>
+     * @param len The maximum number of bytes read.
+     * @return The total number of bytes read into the buffer, or <code>-1</code> if there is no more data because the end of the stream has
      *         been reached.
      * @exception NullPointerException If <code>b</code> is <code>null</code>.
      * @exception IndexOutOfBoundsException If <code>off</code> is negative, <code>len</code> is negative, or <code>len</code> is greater
@@ -139,8 +140,8 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * The actual number <code>k</code> of bytes to be skipped is equal to the smaller of <code>n</code> and <code>count-pos</code>. The
      * value <code>k</code> is added into <code>pos</code> and <code>k</code> is returned.
      * 
-     * @param n the number of bytes to be skipped.
-     * @return the actual number of bytes skipped.
+     * @param n The number of bytes to be skipped.
+     * @return The actual number of bytes skipped.
      */
     @Override
     public long skip(long n) {
@@ -159,7 +160,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * <p>
      * The value returned is <code>count&nbsp;- pos</code>, which is the number of bytes remaining to be read from the input buffer.
      * 
-     * @return the number of remaining bytes that can be read (or skipped over) from this input stream without blocking.
+     * @return The number of remaining bytes that can be read (or skipped over) from this input stream without blocking.
      */
     @Override
     public int available() {
@@ -168,9 +169,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 
     /**
      * Tests if this <code>InputStream</code> supports mark/reset. The <code>markSupported</code> method of
-     * <code>ByteArrayInputStream</code> always returns <code>true</code>.
-     * 
-     * @since JDK1.1
+     * <code>UnsynchronizedByteArrayInputStream</code> always returns <code>true</code>.
      */
     @Override
     public boolean markSupported() {

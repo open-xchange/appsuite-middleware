@@ -80,8 +80,8 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Creates a new byte array output stream, with a buffer capacity of the specified size, in bytes.
      * 
-     * @param size the initial size.
-     * @exception IllegalArgumentException if size is negative.
+     * @param size The initial size.
+     * @exception IllegalArgumentException If size is negative.
      */
     public UnsynchronizedByteArrayOutputStream(final int size) {
         super(size);
@@ -90,7 +90,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Writes the specified byte to this byte array output stream.
      * 
-     * @param b the byte to be written.
+     * @param b The byte to be written.
      */
     @Override
     public void write(final int b) {
@@ -107,9 +107,9 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code> to this byte array output stream.
      * 
-     * @param b the data.
-     * @param off the start offset in the data.
-     * @param len the number of bytes to write.
+     * @param b The data.
+     * @param off The start offset in the data.
+     * @param len The number of bytes to write.
      */
     @Override
     public void write(final byte b[], final int off, final int len) {
@@ -132,8 +132,8 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      * Writes the complete contents of this byte array output stream to the specified output stream argument, as if by calling the output
      * stream's write method using <code>out.write(buf, 0, count)</code>.
      * 
-     * @param out the output stream to which to write the data.
-     * @exception IOException if an I/O error occurs.
+     * @param out The output stream to which to write the data.
+     * @exception IOException If an I/O error occurs.
      */
     @Override
     public void writeTo(final OutputStream out) throws IOException {
@@ -171,7 +171,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      * Creates a newly allocated byte array. Its size is the current size of this output stream and the valid contents of the buffer have
      * been copied into it.
      * 
-     * @return the current contents of this output stream, as a byte array.
+     * @return The current contents of this output stream, as a byte array.
      */
     @Override
     public byte toByteArray()[] {
@@ -186,7 +186,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      * 
      * @param off The offset in valid contents
      * @param size The demanded size
-     * @return the current contents of this output stream, as a byte array.
+     * @return The current contents of this output stream, as a byte array.
      */
     public byte toByteArray(final int off, final int size)[] {
         if ((off < 0) || (off > count) || (size < 0) || ((off + size) > count) || ((off + size) < 0)) {
@@ -202,7 +202,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Returns the current size of the buffer.
      * 
-     * @return the value of the <code>count</code> field, which is the number of valid bytes in this output stream.
+     * @return The value of the <code>count</code> field, which is the number of valid bytes in this output stream.
      */
     @Override
     public int size() {
@@ -213,7 +213,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      * Converts the buffer's contents into a string, translating bytes into characters according to the platform's default character
      * encoding.
      * 
-     * @return String translated from the buffer's contents.
+     * @return A string translated from the buffer's contents.
      */
     @Override
     public String toString() {
@@ -223,8 +223,8 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Converts the buffer's contents into a string, translating bytes into characters according to the specified character encoding.
      * 
-     * @param enc a character-encoding name.
-     * @return String translated from the buffer's contents.
+     * @param enc The character-encoding name.
+     * @return A string translated from the buffer's contents.
      * @throws UnsupportedEncodingException If the named encoding is not supported.
      */
     @Override
@@ -246,8 +246,8 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      * @deprecated This method does not properly convert bytes into characters. As of JDK&nbsp;1.1, the preferred way to do this is via the
      *             <code>toString(String enc)</code> method, which takes an encoding-name argument, or the <code>toString()</code> method,
      *             which uses the platform's default character encoding.
-     * @param hibyte the high byte of each resulting Unicode character.
-     * @return the current contents of the output stream, as a string.
+     * @param hibyte The high byte of each resulting Unicode character.
+     * @return The current contents of the output stream, as a string.
      */
     @Override
     @Deprecated
@@ -256,12 +256,12 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     }
 
     /**
-     * Closing a <tt>ByteArrayOutputStream</tt> has no effect. The methods in this class can be called after the stream has been closed
-     * without generating an <tt>IOException</tt>.
-     * <p>
+     * Closing a byte array output stream has no effect. The methods in this class can be called after the stream has been closed without
+     * generating an <tt>IOException</tt>.
      */
     @Override
     public void close() throws IOException {
+        // Nothing to do
     }
 
 }
