@@ -12,26 +12,32 @@ We continue by setting the default path, so that we do not have to use the long 
 Now we '''create a task'''. The !-FitNesse-! system uses a fixture to create this data on the server via the HTTP-API. You don't have to care about the specifics, the test suite does this for you. You just write:
 
 !|Table:CreateTask|
-| fixturename | title     | start_date | end_date | note |
-| Demo fixture| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+| Demo fixture |
+| title     | start_date | end_date | note |
+| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+
+So you created a Task with a name ("Demo fixture") and several keys and values. You might also refrain from using the name like that and just add another pair to the table with "fixturename" and "Demo fixture" instead. Other tests do that if you want to see it. The only important thing is that you name the Task at all, because those fixtures that verify a task or delete it need that name to look it up by.  
 
 Then we '''check if the server got all data'''. Again, the requests and responses handled via the HTTP-API are hidden from you. The verification fixture itself uses a lot of requests to check whether the data is correct. For tasks, it calls the task by id, searches it by name, gets all and looks for it in the list, etc.. But you just type in which fields are going to be verified:  
 
 !|Table:VerifyTask|
-| fixturename | title     | start_date | end_date | note |
-| Demo fixture| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+| Demo fixture    |
+| title     | start_date | end_date | note |
+| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
 
 Now we '''update the task''' by changing its title:
 
 !|Table:UpdateTask|
-| fixturename | title          |
-| Demo fixture| Very nice Task |
+| Demo fixture    |
+| title          |
+| Very nice Task |
 
 After that, we '''check if our update made it to the server''' by verifying the field we changed. And, since we already wrote the table, we check the other fields, too. Just to be sure the update did not remove them for some reason:
 
 !|Table:VerifyTask|
-| fixturename | title          | start_date | end_date | note |
-| Demo fixture| Very nice Task | 08:30 AM   | 10:30 AM | Nice note |
+| Demo fixture    |
+| title          | start_date | end_date | note |
+| Very nice Task | 08:30 AM   | 10:30 AM | Nice note |
 
 Afterwards, we '''delete the task'''. Not because this is necessary (the cleanup fixture takes care of that), but because we want to show that deleting is also possible via this test environment:
 
