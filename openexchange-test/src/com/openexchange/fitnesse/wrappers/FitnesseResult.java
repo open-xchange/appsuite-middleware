@@ -20,7 +20,7 @@ public class FitnesseResult {
     
     private List<String> header;
     private List<String> values;
-    private int length;
+    private int length, height;
     
     public FitnesseResult(FixtureDataWrapper givenData){
         this(givenData, NEUTRAL);
@@ -30,7 +30,7 @@ public class FitnesseResult {
         length = givenData.size();
         header = new LinkedList<String>();
         values = new LinkedList<String>();
-        
+        height = givenData.height();
         for (int i = 0; i < length; i++) {
             header.add(NEUTRAL);
             values.add(defaultValue);    
@@ -38,7 +38,22 @@ public class FitnesseResult {
     }
     
     public List<List<String>> toResult(){
-        return Arrays.asList(header,values);
+        LinkedList<List<String>> result = new LinkedList<List<String>>();
+        
+        if(height == 1){
+            result.add(values);
+        }
+        if(height == 2){
+            result.add(header);
+            result.add(values);
+        }
+        if(height == 3){
+            result.add(new LinkedList<String>());
+            result.add(header);
+            result.add(values);
+        }
+        
+        return result;
     }
     
     public void set(int pos, String value){
