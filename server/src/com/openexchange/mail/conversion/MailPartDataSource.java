@@ -76,8 +76,6 @@ public abstract class MailPartDataSource implements DataSource {
         "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid",
         "com.openexchange.mail.conversion.sequenceid" };
 
-    private static final Class<?>[] TYPES = { InputStream.class };
-
     /**
      * Initializes a new {@link MailPartDataSource}
      */
@@ -105,10 +103,10 @@ public abstract class MailPartDataSource implements DataSource {
     }
 
     public String[] getRequiredArguments() {
-        return ARGS;
+        return new String[] { ARGS[0], ARGS[1], ARGS[2] };
     }
 
     public Class<?>[] getTypes() {
-        return TYPES;
+        return new Class<?>[] { InputStream.class };
     }
 }
