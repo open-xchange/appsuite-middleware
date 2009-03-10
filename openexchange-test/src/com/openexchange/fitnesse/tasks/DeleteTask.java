@@ -15,7 +15,7 @@ public class DeleteTask extends AbstractTableTable {
 
         Task task = createTask(fixtureName, data);
 
-        TaskDeleteStep taskStep = new TaskDeleteStep(task, data.getFixtureName(), data.expectedError());
+        TaskDeleteStep taskStep = new TaskDeleteStep(task, data.getFixtureName(), data.getExpectedError());
         taskStep.setIdentitySource(environment.getSymbol(fixtureName));
         environment.registerStep(taskStep);
 

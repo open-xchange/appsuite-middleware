@@ -28,6 +28,8 @@ public class FixtureDataWrapper {
     private int length;
     
     private String fixtureName = null;
+    
+    private String expectedError = null;
 
     public FixtureDataWrapper(List<List<String>> table) {
         super();
@@ -38,21 +40,19 @@ public class FixtureDataWrapper {
             if(FIXTURE_NAME.equals( header.get(i) ) ){
                 fixtureName = values.get(i);
             }
+            if (EXPECTED_ERROR.equals(header.get(i))){
+                expectedError = values.get(i);
+            }
         }
     }
 
     public FixtureDataWrapper(Map<String, String> map) {
-        super();
-        header = new LinkedList<String>();
-        values = new LinkedList<String>();
-        for (String key : map.keySet()) {
-            header.add(key);
-            values.add(map.get(key));
-            if(key.equals(FIXTURE_NAME)){
-                fixtureName = map.get(key);
-            }
-        }
-        length = header.size();
+        this(
+            Arrays.asList(
+                ((List<String>)new LinkedList<String>(map.keySet())), 
+                ((List<String>) new LinkedList<String>(map.values()))
+            )
+        );
     }
 
     public Map<String, String> asMap() {
@@ -77,18 +77,25 @@ public class FixtureDataWrapper {
         return fixtureName;
     }
 
-    public String expectedError() {
-        for (int i = 0; i < header.size(); i++) {
-            if (EXPECTED_ERROR.equals(header.get(i)))
-                return values.get(i);
-        }
-        return null;
+    /**
+     * @return the expected error id (like TSK-0001) or null if not found
+     */
+    public String getExpectedError() {
+        return expectedError;
     }
 
+    /**
+     * @return the amount of fields in the data given, including fixture name and expected error if applicable
+     */
     public int size() {
         return length;
     }
 
+    /**
+     * 
+     * @param pos - position in the list this wrapper holds
+     * @return the value at that position
+     */
     public String get(int pos) {
         return values.get(pos);
     }

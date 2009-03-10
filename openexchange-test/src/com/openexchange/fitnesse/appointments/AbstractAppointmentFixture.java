@@ -69,7 +69,7 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
         String fixtureName = data.getFixtureName();
         AppointmentObject appointment = createAppointment(fixtureName, data);
         
-        Step step = createStep(appointment, fixtureName, data.expectedError());
+        Step step = createStep(appointment, fixtureName, data.getExpectedError());
         return step;
     }
 

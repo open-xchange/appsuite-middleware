@@ -25,7 +25,7 @@ public class CreateTask extends AbstractTableTable {
         final String fixtureName = data.getFixtureName();
         Task task = createTask(fixtureName, data);
 
-        TaskCreateStep taskCreateStep = new TaskCreateStep(task, "create task step", data.expectedError());
+        TaskCreateStep taskCreateStep = new TaskCreateStep(task, "create task step", data.getExpectedError());
         taskCreateStep.perform(environment.getClientForUser1());
         environment.registerStep(taskCreateStep);
         environment.registerSymbol(fixtureName, taskCreateStep);
