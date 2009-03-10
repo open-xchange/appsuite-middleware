@@ -67,19 +67,24 @@ public class LdapConfigurationException extends OXException {
         AUTH_TYPE_WRONG("The given value for authtype \"%s\" is not a possible one", Category.SETUP_ERROR, 1),
 
         /**
+         * The given value for authtype "%s" is not a possible one
+         */
+        SORTING_WRONG("The given value for sorting \"%s\" is not a possible one", Category.SETUP_ERROR, 2),
+
+        /**
          * The given value for searchScope "%s" is not a possible one
          */
-        SEARCH_SCOPE_WRONG("The given value for searchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 2),
+        SEARCH_SCOPE_WRONG("The given value for searchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 3),
 
         /**
          * The parameter "%s" is not set in the property file
          */
-        PARAMETER_NOT_SET("The parameter \"%s\" is not set in the property file", Category.SETUP_ERROR, 3),
+        PARAMETER_NOT_SET("The parameter \"%s\" is not set in the property file", Category.SETUP_ERROR, 4),
 
         /**
          * Value for context "%s" is no integer value
          */
-        NO_INTEGER_VALUE("Value for context \"%s\" is no integer value", Category.SETUP_ERROR, 4);
+        NO_INTEGER_VALUE("Value for context \"%s\" is no integer value", Category.SETUP_ERROR, 5);
 
         /**
          * Message of the exception.

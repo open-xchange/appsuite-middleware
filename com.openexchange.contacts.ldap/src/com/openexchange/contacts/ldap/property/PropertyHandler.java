@@ -96,6 +96,7 @@ public class PropertyHandler {
         searchScope("searchScope"),
         authtype("authtype"),
         contexts("contexts"),
+        sorting("sorting"),
         // Here we begin with the mapping entries
         uniqueid("uniqueid"),
         displayname("displayname"),
@@ -190,7 +191,9 @@ public class PropertyHandler {
         categories("categories"),
         defaultaddress("defaultaddress"),
         title("title"),
-        position("position");
+        position("position"),
+        lastmodified("lastmodified"),
+        creationdate("creationdate");
         
         private final String name;
         
@@ -203,6 +206,11 @@ public class PropertyHandler {
             return bundlename + name;
         }
         
+    }
+    
+    public enum Sorting {
+        server,
+        groupware;
     }
     
     public enum AuthType {
@@ -445,6 +453,12 @@ public class PropertyHandler {
     private String position;
 
     private List<Integer> contexts;
+
+    private Sorting sorting;
+
+    private String lastmodified;
+
+    private String creationdate;
     
     
     private final static String PROPFILE = "contacts-ldap.properties";
@@ -483,6 +497,13 @@ public class PropertyHandler {
         }
         
         this.contexts = getContexts(Parameters.contexts.getName());
+        
+        final String sortingString = checkStringProperty(Parameters.sorting.getName());
+        try {
+            this.sorting = Sorting.valueOf(sortingString);
+        } catch (final IllegalArgumentException e) {
+            throw new LdapConfigurationException(Code.SORTING_WRONG, authstring);
+        }
         
         this.uniqueid = checkStringProperty(Parameters.uniqueid.getName());
         
@@ -672,6 +693,10 @@ public class PropertyHandler {
 
         this.position = checkStringProperty(Parameters.position.getName());
         
+        this.lastmodified = checkStringProperty(Parameters.lastmodified.getName());
+        
+        this.creationdate = checkStringProperty(Parameters.creationdate.getName());
+        
         for (final Integer ctx : this.contexts) {
             final String stringctx = String.valueOf(ctx);
             final Properties file = configuration.getFile(stringctx + ".properties");
@@ -766,6 +791,11 @@ public class PropertyHandler {
         return email1;
     }
 
+    
+    public final String getLastmodified() {
+        return lastmodified;
+    }
+
     public final String getDepartment() {
         return department;
     }
@@ -776,6 +806,11 @@ public class PropertyHandler {
     }
 
     
+    
+    public final String getCreationdate() {
+        return creationdate;
+    }
+
     public final String getBirthday() {
         return birthday;
     }
@@ -1152,6 +1187,10 @@ public class PropertyHandler {
     
     public final String getPosition() {
         return position;
+    }
+
+    public final Sorting getSorting() {
+        return sorting;
     }
 
     public static final PropertyHandler getSingleton() {

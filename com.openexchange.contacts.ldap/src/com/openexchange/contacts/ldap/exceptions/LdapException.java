@@ -75,7 +75,12 @@ public class LdapException extends OXException {
         /**
          * LDAP contacts cannot be deleted
          */
-        ERROR_GETTING_ATTRIBUTE("An error occured while trying to read an LDAP attribute: %s", Category.INTERNAL_ERROR, 2);
+        ERROR_GETTING_ATTRIBUTE("An error occured while trying to read an LDAP attribute: %s", Category.INTERNAL_ERROR, 2),
+
+        /**
+         * The given value "%s" is not possible for a sort field
+         */
+        SORT_FIELD_NOT_POSSIBLE("The given value \"%s\" is not possible for a sort field", Category.INTERNAL_ERROR, 3);
     
         /**
          * Message of the exception.
