@@ -176,7 +176,7 @@ public final class CharsetDetector {
      */
     public static String detectCharset(final ByteArrayInputStream in) {
         if (null == in) {
-            throw new NullPointerException("input stream is null");
+            throw new NullPointerException("byte array input stream is null");
         }
         final nsDetector det = new nsDetector(nsPSMDetector.ALL);
         /*
