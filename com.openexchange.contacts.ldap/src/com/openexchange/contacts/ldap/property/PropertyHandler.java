@@ -49,7 +49,11 @@
 
 package com.openexchange.contacts.ldap.property;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
@@ -64,6 +68,24 @@ import com.openexchange.contacts.ldap.osgi.ServiceRegistry;
  */
 public class PropertyHandler {
     
+    
+    public class ContextDetails {
+        
+        private final String foldername;
+        
+        /**
+         * Initializes a new {@link ContextDetails}.
+         * @param foldername
+         */
+        private ContextDetails(String foldername) {
+            this.foldername = foldername;
+        }
+        
+        public final String getFoldername() {
+            return foldername;
+        }
+    }
+
     private static final String bundlename = "com.openexchange.contacts.ldap.";
     
     private enum Parameters {
@@ -73,6 +95,7 @@ public class PropertyHandler {
         AdminBindPW("AdminBindPW"),
         searchScope("searchScope"),
         authtype("authtype"),
+        contexts("contexts"),
         // Here we begin with the mapping entries
         uniqueid("uniqueid"),
         displayname("displayname"),
@@ -220,6 +243,8 @@ public class PropertyHandler {
     private AtomicBoolean loaded = new AtomicBoolean();
 
     private Properties properties;
+    
+    private Map<Integer, ContextDetails> contextdetails = new ConcurrentHashMap<Integer, ContextDetails>();
     
     private String uri;
     
@@ -418,6 +443,8 @@ public class PropertyHandler {
     private String title;
 
     private String position;
+
+    private List<Integer> contexts;
     
     
     private final static String PROPFILE = "contacts-ldap.properties";
@@ -454,6 +481,8 @@ public class PropertyHandler {
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.AUTH_TYPE_WRONG, authstring);
         }
+        
+        this.contexts = getContexts(Parameters.contexts.getName());
         
         this.uniqueid = checkStringProperty(Parameters.uniqueid.getName());
         
@@ -643,10 +672,39 @@ public class PropertyHandler {
 
         this.position = checkStringProperty(Parameters.position.getName());
         
+        for (final Integer ctx : this.contexts) {
+            final String stringctx = String.valueOf(ctx);
+            final Properties file = configuration.getFile(stringctx + ".properties");
+            final String parameter = bundlename + "context" + stringctx + ".foldername";
+            final String foldername = file.getProperty(parameter);
+            if (null != foldername) {
+                this.contextdetails.put(ctx, new ContextDetails(foldername));
+            } else {
+                throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameter);
+            }
+        }
 //        configuration.getPropertiesInFolder(folderName)
         this.loaded.set(true);
     }
     
+    private List<Integer> getContexts(String name) throws LdapConfigurationException {
+        final String property = this.properties.getProperty(name);
+        if (null != property) {
+            final List<Integer> retval = new ArrayList<Integer>();
+            final String[] split = property.split(",");
+            for (final String ctx : split) {
+                try {
+                    retval.add(Integer.parseInt(ctx));
+                } catch (final NumberFormatException e) {
+                    throw new LdapConfigurationException(Code.NO_INTEGER_VALUE, ctx);
+                }
+            }
+            return retval;
+        } else {
+            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name);
+        }
+    }
+
     public void reloadProperties() {
         
     }

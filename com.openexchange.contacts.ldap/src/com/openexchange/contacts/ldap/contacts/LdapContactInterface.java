@@ -53,6 +53,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -70,10 +72,12 @@ import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.ldap.GlobalLdapPool;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
+import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -85,10 +89,13 @@ public class LdapContactInterface implements ContactInterface {
     
     private final String context;
     
+    private final int admin_id;
+    
     private Session session;
     
-    public LdapContactInterface(final String context) {
+    public LdapContactInterface(final String context, final int admin_id) {
         this.context = context;
+        this.admin_id = admin_id;
     }
     
     
@@ -105,27 +112,11 @@ public class LdapContactInterface implements ContactInterface {
     public SearchIterator<ContactObject> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
         LOG.info("Called getContactsInFolder");
         
-        final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
-//        arrayList.add(getDummyContact(folderId));
-        try {
-            final LdapContext context2 = GlobalLdapPool.getContext();
-            final SearchControls searchControls = new SearchControls();
-            searchControls.setSearchScope(LdapUtility.getSearchControl());
-            final String filter = "(objectclass=posixaccount)";
-            final NamingEnumeration<SearchResult> search = context2.search("dc=oxnbg,dc=int", filter, searchControls);
-            while (search.hasMore()) {
-                final SearchResult next = search.next();
-                final Attributes attributes = next.getAttributes();
-                
-                final ContactObject contact = Mapper.getContact(getLdapGetter(attributes));
-                arrayList.add(contact);
-            }
-        } catch (NamingException e) {
-            // TODO Handle 
-            e.printStackTrace();
+        final Set<Integer> columns = new HashSet<Integer>();
+        for (final int col : cols) {
+            columns.add(Autoboxing.I(col));
         }
-
-        
+        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, "(objectclass=posixaccount)");
         
         final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
         return searchIterator;
@@ -165,15 +156,19 @@ public class LdapContactInterface implements ContactInterface {
 
     public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException {
         LOG.info("Called getObjectsById");
-        final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
+        
+        Set<Integer> columns = new HashSet<Integer>();
+        for (final int col : cols) {
+            columns.add(Autoboxing.I(col));
+        }
+        
+        final ArrayList<ContactObject> contacts = new ArrayList<ContactObject>();
         for (final int[] object : objectIdAndInFolder) {
             final int object_id = object[0];
             final int folder_id = object[1];
-            if (2 == object_id) {
-                arrayList.add(getDummyContact(folder_id));
-            }
+            contacts.addAll(getLDAPContacts(folder_id, columns, "(&(objectclass=posixaccount)(" + PropertyHandler.getInstance().getUniqueid() + "="+ object_id + "))"));
         }
-        return new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
+        return new ArrayIterator<ContactObject>(contacts.toArray(new ContactObject[contacts.size()]));
     }
 
     public ContactObject getUserById(int userId) throws OXException {
@@ -215,6 +210,29 @@ public class LdapContactInterface implements ContactInterface {
         contactObject.setNumberOfAttachments(0);
         contactObject.setLastModified(new Date(System.currentTimeMillis()));
         return contactObject;
+    }
+
+
+    private ArrayList<ContactObject> getLDAPContacts(int folderId, final Set<Integer> columns, String filter) throws LdapException {
+        final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
+        try {
+            final LdapContext context2 = GlobalLdapPool.getContext();
+            final SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(LdapUtility.getSearchControl());
+            final NamingEnumeration<SearchResult> search = context2.search("dc=oxnbg,dc=int", filter, searchControls);
+            while (search.hasMore()) {
+                final SearchResult next = search.next();
+                final Attributes attributes = next.getAttributes();
+                final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns);
+                contact.setParentFolderID(folderId);
+                contact.setCreatedBy(this.admin_id);
+                arrayList.add(contact);
+            }
+        } catch (NamingException e) {
+            // TODO Handle 
+            e.printStackTrace();
+        }
+        return arrayList;
     }
 
 

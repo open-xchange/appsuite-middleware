@@ -62,19 +62,24 @@ public class LdapConfigurationException extends OXException {
      */
     public enum Code {
         /**
-         * The given value for authtype "$1" is not a possible one
+         * The given value for authtype "%s" is not a possible one
          */
         AUTH_TYPE_WRONG("The given value for authtype \"%s\" is not a possible one", Category.SETUP_ERROR, 1),
 
         /**
-         * The given value for searchScope "$1" is not a possible one
+         * The given value for searchScope "%s" is not a possible one
          */
         SEARCH_SCOPE_WRONG("The given value for searchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 2),
 
         /**
-         * The given value for searchScope "$1" is not a possible one
+         * The parameter "%s" is not set in the property file
          */
-        PARAMETER_NOT_SET("The parameter \"%s\" is not set in the property file", Category.SETUP_ERROR, 3);
+        PARAMETER_NOT_SET("The parameter \"%s\" is not set in the property file", Category.SETUP_ERROR, 3),
+
+        /**
+         * Value for context "%s" is no integer value
+         */
+        NO_INTEGER_VALUE("Value for context \"%s\" is no integer value", Category.SETUP_ERROR, 4);
 
         /**
          * Message of the exception.

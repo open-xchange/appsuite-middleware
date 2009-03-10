@@ -56,7 +56,6 @@ import java.sql.SQLException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
@@ -67,16 +66,41 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 
 public class LdapGlobalFolderCreator {
+    
+    public static class FolderIDAndAdminID {
+        
+        /**
+         * Initializes a new {@link FolderIDAndAdminID}.
+         * @param folderid
+         * @param adminid
+         */
+        private FolderIDAndAdminID(int folderid, int adminid) {
+            this.folderid = folderid;
+            this.adminid = adminid;
+        }
+
+        private final int folderid;
+        
+        private final int adminid;
+
+        
+        public final int getFolderid() {
+            return folderid;
+        }
+
+        
+        public final int getAdminid() {
+            return adminid;
+        }
+        
+    }
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class);
     
     private static String globalLdapFolderName = "LDAPneu9";
     
-    private static int testcontextid = 111;
-    
-    public static int createGlobalFolder() throws OXException, DBPoolingException, SQLException {
+    public static FolderIDAndAdminID createGlobalFolder(Context ctx) throws OXException, DBPoolingException, SQLException {
         // First search for a folder with the name if is doesn't exist create it
-        final Context ctx = new ContextImpl(testcontextid);
         final Connection readCon = DBPool.pickup(ctx);
         int ldapFolderID;
         final int admin_user_id;
@@ -91,14 +115,14 @@ public class LdapGlobalFolderCreator {
             final FolderObject fo = createFolderObject(admin_user_id);
             // As we have no possibility right now to access the foldermanager without a session, we have to create
             // a dummy session object here, which provides the needed information
-            final Session dummysession = getDummySessionObj(admin_user_id);
+            final Session dummysession = getDummySessionObj(admin_user_id, ctx.getContextId());
             final OXFolderManager instance = OXFolderManager.getInstance(dummysession);
             ldapFolderID = instance.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
             if (LOG.isInfoEnabled()) {
                 LOG.info("LDAP folder successfully created");
             }
         }
-        return ldapFolderID;
+        return new FolderIDAndAdminID(ldapFolderID, admin_user_id);
     }
 
     /**
@@ -161,11 +185,11 @@ public class LdapGlobalFolderCreator {
         return fo;
     }
 
-    private static Session getDummySessionObj(final int admin_user_id) {
+    private static Session getDummySessionObj(final int admin_user_id, final int contextid) {
         final Session dummysession = new Session(){
 
             public int getContextId() {
-                return testcontextid;
+                return contextid;
             }
 
             public String getLocalIp() {
