@@ -1,3 +1,7 @@
+* 2009-03-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #13364: Setting proper Content-Disposition header when parsing TNEF attachments
+
 * 2009-03-09 - thorben.betten@open-xchange.com
 
  - Bugfix #13157: Overridden java.io.PrintWriter to treat write attempts as a no-op if its error flag is set
