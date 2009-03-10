@@ -227,14 +227,16 @@ public final class CharsetDetector {
          */
         final String prob[] = det.getProbableCharsets();
         String firstPossibleCharset = null;
-        for (int i = 0; i < prob.length && null == firstPossibleCharset; i++) {
+        for (int i = 0; i < prob.length; i++) {
             if (Charset.isSupported(prob[i])) {
                 if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
                     return prob[i];
                 } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
                     return prob[i];
                 }
-                firstPossibleCharset = prob[i];
+                if (null == firstPossibleCharset) {
+                    firstPossibleCharset = prob[i];
+                }
             }
         }
         return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
@@ -303,14 +305,16 @@ public final class CharsetDetector {
                  */
                 final String prob[] = det.getProbableCharsets();
                 String firstPossibleCharset = null;
-                for (int i = 0; i < prob.length && null == firstPossibleCharset; i++) {
+                for (int i = 0; i < prob.length; i++) {
                     if (Charset.isSupported(prob[i])) {
                         if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
                             return prob[i];
                         } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
                             return prob[i];
                         }
-                        firstPossibleCharset = prob[i];
+                        if (null == firstPossibleCharset) {
+                            firstPossibleCharset = prob[i];
+                        }
                     }
                 }
                 return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
