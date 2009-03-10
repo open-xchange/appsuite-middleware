@@ -49,9 +49,6 @@
 
 package com.openexchange.publish;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
 public class Site {
 
@@ -68,8 +65,6 @@ public class Site {
     public void setPath(Path path) {
         this.path = path;
     }
-
-    
 
     public int getContextId() {
         return path.getContextId();

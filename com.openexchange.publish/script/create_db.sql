@@ -6,18 +6,7 @@ id INT4 UNSIGNED NOT NULL AUTO_INCREMENT,
 cid INT4 UNSIGNED NOT NULL, 
 user INT4 UNSIGNED NOT NULL, 
 name VARCHAR(255) NOT NULL, 
+tag_expression VARCHAR(255) NOT NULL, 
 PRIMARY KEY (id), 
 FOREIGN KEY(cid, user) REFERENCES user(cid, id)) 
-ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE publications (
-cid INT4 UNSIGNED NOT NULL, 
-user INT4 UNSIGNED NOT NULL, 
-site_id INT4 UNSIGNED NOT NULL, 
-type INT4 unsigned NOT NULL, 
-object_id INT4 unsigned NOT NULL, 
-folder_id INT4 unsigned NOT NULL, 
-PRIMARY KEY (cid, site_id, type, object_id), 
-FOREIGN KEY (cid, user) REFERENCES user(cid, id), 
-FOREIGN KEY (site_id) REFERENCES publication_sites(id))
 ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

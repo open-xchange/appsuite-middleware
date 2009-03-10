@@ -61,96 +61,31 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 public class PublicationSQL {
 
-    private final static String PUBLICATION_TABLE = "publications";
-
     private final static String SITE_TABLE = "publication_sites";
 
     public static void addSite(Site site) throws SQLException, DBPoolingException {
-        //if (siteExists(site)) {
-        //    return;
-        //}
+        if (siteExists(site)) {
+            return;
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ");
         sb.append(SITE_TABLE);
         sb.append(" (");
-        sb.append("cid, user, name");
+        sb.append("cid, user, name, tag_expression");
         sb.append(") ");
         sb.append("VALUES");
         sb.append(" (");
-        sb.append("?, ?, ?");
+        sb.append("?, ?, ?, ?");
         sb.append(" )");
 
-        Transaction.commitStatement(site.getContextId(), sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
-        // TODO: Publications speichern.
-    }
-
-   /* public static void addPublicatione(Publication publication) throws SQLException, DBPoolingException {
-        if (publicationExists(publication)) {
-            return;
-        }
-
-        Transaction transaction = new Transaction(publication.getContextID());
-        StringBuilder sb;
-        Site site = publication.getSite();
-        int siteId;
-        if (!siteExists(site)) {
-            sb = new StringBuilder();
-            sb.append("INSERT INTO ");
-            sb.append(SITE_TABLE);
-            sb.append(" (");
-            sb.append("cid, user, name");
-            sb.append(") ");
-            sb.append("VALUES");
-            sb.append(" (");
-            sb.append("?, ?, ?");
-            sb.append(" )");
-
-            List<Integer> keys = transaction.executeStatement(sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
-            siteId = keys.get(0);
-        } else {
-            sb = new StringBuilder();
-            sb.append("SELECT * FROM ");
-            sb.append(SITE_TABLE);
-            sb.append(" WHERE cid = ? AND user = ? AND name = ?");
-
-            List<Map<String, Object>> sites = Transaction.commitQuery(
-                publication.getContextID(),
-                sb.toString(),
-                site.getContextId(),
-                site.getOwnerId(),
-                site.getName());
-            siteId = ((Long) sites.get(0).get("id")).intValue();
-        }
-
-        sb = new StringBuilder();
-        sb.append("INSERT INTO ");
-        sb.append(PUBLICATION_TABLE);
-        sb.append(" (");
-        sb.append("cid, user, site_id, type, object_id, folder_id");
-        sb.append(") ");
-        sb.append("VALUES");
-        sb.append(" (");
-        sb.append("?, ?, ?, ?, ?, ?");
-        sb.append(" )");
-
-        try {
-            transaction.executeStatement(
-                sb.toString(),
-                publication.getContextID(),
-                publication.getOwnerId(),
-                siteId,
-                publication.getType(),
-                publication.getObjectID(),
-                publication.getFolderId());
-        } catch (DBPoolingException e) {
-            transaction.rollback();
-            throw e;
-        } catch (SQLException e) {
-            transaction.rollback();
-            throw e;
-        }
-        transaction.commit();
+        Transaction.commitStatement(
+            site.getContextId(),
+            sb.toString(),
+            site.getContextId(),
+            site.getOwnerId(),
+            site.getName(),
+            site.getTagExpression());
     }
 
     public static void removeSite(Site site) throws DBPoolingException, SQLException {
@@ -158,53 +93,12 @@ public class PublicationSQL {
             return;
         }
 
-        Transaction transaction = new Transaction(site.getContextId());
-
-        for (Publication publication : site) {
-            removePublication(publication, transaction);
-        }
-
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM ");
         sb.append(SITE_TABLE);
         sb.append(" WHERE cid = ? AND user = ? AND name = ?");
-        transaction.executeStatement(sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
-    }
 
-    public static void removePublication(Publication publication) throws DBPoolingException, SQLException {
-        Transaction transaction = new Transaction(publication.getContextID());
-        removePublication(publication, transaction);
-        transaction.commit();
-    }
-
-    private static void removePublication(Publication publication, Transaction transaction) throws DBPoolingException, SQLException {
-        if (!publicationExists(publication)) {
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT id FROM ");
-        sb.append(SITE_TABLE);
-        sb.append(" WHERE cid = ? AND user = ? AND name = ?");
-        List<Map<String, Object>> sites = transaction.executeQuery(
-            sb.toString(),
-            publication.getContextID(),
-            publication.getOwnerId(),
-            publication.getSite().getName());
-        Map<String, Object> site = sites.get(0);
-        int siteId = ((Long) site.get("id")).intValue();
-
-        sb = new StringBuilder();
-        sb.append("DELETE FROM ");
-        sb.append(PUBLICATION_TABLE);
-        sb.append(" WHERE cid = ? AND site_id = ? AND type = ? AND object_id = ? AND folder_id = ?");
-        transaction.executeStatement(
-            sb.toString(),
-            publication.getContextID(),
-            siteId,
-            publication.getType(),
-            publication.getObjectID(),
-            publication.getFolderId());
+        Transaction.commitStatement(site.getContextId(), sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
     }
 
     public static Site getSite(Path path) throws DBPoolingException, SQLException {
@@ -223,10 +117,8 @@ public class PublicationSQL {
 
         Site siteObject = new Site();
         siteObject.setPath(path);
-        List<Publication> publications = getPublications(path.getContextId(), ((Long) site.get("id")).intValue());
-        for (Publication publication : publications) {
-            siteObject.addPublication(publication);
-        }
+        siteObject.setTagExpression((String) site.get("tag_expression"));
+
         return siteObject;
     }
 
@@ -240,37 +132,14 @@ public class PublicationSQL {
 
         List<Map<String, Object>> sites = Transaction.commitQuery(contextId, sb.toString(), contextId, userId);
         for (Map<String, Object> site : sites) {
-            List<Publication> publications = getPublications(contextId, (Integer) site.get("id"));
             Site siteObject = new Site();
-            for (Publication publication : publications) {
-                siteObject.addPublication(publication);
-            }
             Path pathObject = new Path();
             pathObject.setContextId(contextId);
             pathObject.setOwnerId(userId);
             pathObject.setSiteName((String) site.get("name"));
-
             siteObject.setPath(pathObject);
+            siteObject.setTagExpression((String) site.get("tag_expression"));
             retval.add(siteObject);
-        }
-
-        return retval;
-    }
-
-    private static List<Publication> getPublications(int contextId, int siteId) throws DBPoolingException, SQLException {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT * FROM ");
-        sb.append(PUBLICATION_TABLE);
-        sb.append(" WHERE site_id = ?");
-
-        List<Map<String, Object>> publications = Transaction.commitQuery(contextId, sb.toString(), siteId);
-        List<Publication> retval = new ArrayList<Publication>();
-        for (Map<String, Object> publication : publications) {
-            Publication pubObject = new Publication();
-            pubObject.setObjectID(((Long) publication.get("object_id")).intValue());
-            pubObject.setFolderId(((Long) publication.get("folder_id")).intValue());
-            pubObject.setType(((Long) publication.get("type")).intValue());
-            retval.add(pubObject);
         }
 
         return retval;
@@ -288,26 +157,4 @@ public class PublicationSQL {
 
         return sites.size() > 0;
     }
-
-    public static boolean publicationExists(Publication publication) throws DBPoolingException, SQLException {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("SELECT * FROM ");
-        sb.append(PUBLICATION_TABLE + " pub");
-        sb.append(" JOIN ");
-        sb.append(SITE_TABLE + " site");
-        sb.append(" WHERE pub.cid = ? AND pub.user = ? AND pub.object_id = ? AND pub.folder_id = ? AND site.name = ?");
-
-        Transaction transaction = new Transaction(publication.getContextID());
-        List<Map<String, Object>> publications = transaction.executeQuery(
-            sb.toString(),
-            publication.getContextID(),
-            publication.getOwnerId(),
-            publication.getObjectID(),
-            publication.getFolderId(),
-            publication.getSite().getName());
-
-        return publications.size() > 0;
-    } */
-
 }
