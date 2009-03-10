@@ -90,6 +90,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -412,11 +413,16 @@ public final class MailMessageParser {
                 if (message.getMAPIProps() != null) {
                     final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(MAPIProp.PR_RTF_COMPRESSED);
                     if (ris != null) {
-                        final byte[] rtfBody = ris.toByteArray();
                         final TNEFBodyPart bodyPart = new TNEFBodyPart();
-                        final String contentTypeStr = new StringBuilder(MIMETypes.MIME_TEXT_RTF).append("; charset=").append(
-                            MailConfig.getDefaultMimeCharset()).toString();
-                        final byte[] decompressedBytes = TNEFUtils.decompressRTF(rtfBody);
+                        /*
+                         * Decompress RTF body
+                         */
+                        final byte[] decompressedBytes = TNEFUtils.decompressRTF(ris.toByteArray());
+                        final String contentTypeStr;
+                        {
+                            final String charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(decompressedBytes));
+                            contentTypeStr = new StringBuilder(MIMETypes.MIME_TEXT_RTF).append("; charset=").append(charset).toString();
+                        }
                         /*
                          * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
                          * for MIME type "text/rtf" when set by setContent() method
@@ -431,56 +437,58 @@ public final class MailMessageParser {
                  * Iterate TNEF attachments and nested messages
                  */
                 final int s = message.getAttachments().size();
-                final Iterator<?> iter = message.getAttachments().iterator();
-                final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-                for (int i = 0; i < s; i++) {
-                    final Attachment attachment = (Attachment) iter.next();
-                    final TNEFBodyPart bodyPart = new TNEFBodyPart();
-                    if (attachment.getNestedMessage() == null) {
-                        /*
-                         * Add TNEF attributes
-                         */
-                        bodyPart.setTNEFAttributes(attachment.getAttributes());
-                        /*
-                         * Translate TNEF attributes to MIME
-                         */
-                        final String attachFilename = attachment.getFilename();
-                        String contentTypeStr = null;
-                        if (attachment.getMAPIProps() != null) {
-                            contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
+                if (s > 0) {
+                    final Iterator<?> iter = message.getAttachments().iterator();
+                    final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
+                    for (int i = 0; i < s; i++) {
+                        final Attachment attachment = (Attachment) iter.next();
+                        final TNEFBodyPart bodyPart = new TNEFBodyPart();
+                        if (attachment.getNestedMessage() == null) {
+                            /*
+                             * Add TNEF attributes
+                             */
+                            bodyPart.setTNEFAttributes(attachment.getAttributes());
+                            /*
+                             * Translate TNEF attributes to MIME
+                             */
+                            final String attachFilename = attachment.getFilename();
+                            String contentTypeStr = null;
+                            if (attachment.getMAPIProps() != null) {
+                                contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
+                            }
+                            if ((contentTypeStr == null) && (attachFilename != null)) {
+                                contentTypeStr = MIMEType2ExtMap.getContentType(attachFilename);
+                            }
+                            if (contentTypeStr == null) {
+                                contentTypeStr = MIMETypes.MIME_APPL_OCTET;
+                            }
+                            final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
+                            bodyPart.setDataHandler(new DataHandler(ds));
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
+                                contentTypeStr,
+                                attachFilename));
+                            if (attachFilename != null) {
+                                final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                                cd.setFilenameParameter(attachFilename);
+                                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(21, cd.toString()));
+                            }
+                            os.reset();
+                            attachment.writeTo(os);
+                            bodyPart.setSize(os.size());
+                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                        } else {
+                            /*
+                             * Nested message
+                             */
+                            final MimeMessage nestedMessage = TNEFMime.convert(
+                                MIMEDefaultSession.getDefaultSession(),
+                                attachment.getNestedMessage());
+                            os.reset();
+                            nestedMessage.writeTo(os);
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
+                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
-                        if ((contentTypeStr == null) && (attachFilename != null)) {
-                            contentTypeStr = MIMEType2ExtMap.getContentType(attachFilename);
-                        }
-                        if (contentTypeStr == null) {
-                            contentTypeStr = MIMETypes.MIME_APPL_OCTET;
-                        }
-                        final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
-                        bodyPart.setDataHandler(new DataHandler(ds));
-                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
-                            contentTypeStr,
-                            attachFilename));
-                        if (attachFilename != null) {
-                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
-                            cd.setFilenameParameter(attachFilename);
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(21, cd.toString()));
-                        }
-                        os.reset();
-                        attachment.writeTo(os);
-                        bodyPart.setSize(os.size());
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
-                    } else {
-                        /*
-                         * Nested message
-                         */
-                        final MimeMessage nestedMessage = TNEFMime.convert(
-                            MIMEDefaultSession.getDefaultSession(),
-                            attachment.getNestedMessage());
-                        os.reset();
-                        nestedMessage.writeTo(os);
-                        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
-                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
             } catch (final IOException tnefExc) {
