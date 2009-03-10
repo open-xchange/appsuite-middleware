@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -165,6 +166,81 @@ public final class CharsetDetector {
     }
 
     /**
+     * Detects the charset of specified byte array input stream's data.
+     * <p>
+     * <b>Note</b>: Specified input stream is going to be closed in this method.
+     * 
+     * @param in The byte array input stream to examine
+     * @throws NullPointerException If input stream is <code>null</code>
+     * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
+     */
+    public static String detectCharset(final ByteArrayInputStream in) {
+        if (null == in) {
+            throw new NullPointerException("input stream is null");
+        }
+        final nsDetector det = new nsDetector(nsPSMDetector.ALL);
+        /*
+         * Set an observer: The Notify() will be called when a matching charset is found.
+         */
+        final CharsetDetectionObserver observer = new CharsetDetectionObserver();
+        det.Init(observer);
+
+        final byte[] buf = new byte[1024];
+        int len;
+        boolean done = false;
+        boolean isAscii = true;
+
+        while ((len = in.read(buf, 0, buf.length)) != -1) {
+            /*
+             * Check if the stream is only ascii.
+             */
+            if (isAscii) {
+                isAscii = det.isAscii(buf, len);
+            }
+            /*
+             * DoIt if non-ascii and not done yet.
+             */
+            if (!isAscii && !done) {
+                done = det.DoIt(buf, len, false);
+            }
+        }
+        det.DataEnd();
+        /*
+         * Check if content is ascii
+         */
+        if (isAscii) {
+            return STR_US_ASCII;
+        }
+        {
+            /*
+             * Check observer
+             */
+            final String charset = observer.getCharset();
+            if (null != charset && Charset.isSupported(charset)) {
+                return charset;
+            }
+        }
+        /*-
+         * Choose first possible charset but prefer:
+         * 1. UTF-8
+         * 2. WINDOWS-1252
+         */
+        final String prob[] = det.getProbableCharsets();
+        String firstPossibleCharset = null;
+        for (int i = 0; i < prob.length && null == firstPossibleCharset; i++) {
+            if (Charset.isSupported(prob[i])) {
+                if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+                    return prob[i];
+                } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+                    return prob[i];
+                }
+                firstPossibleCharset = prob[i];
+            }
+        }
+        return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
+    }
+
+    /**
      * Detects the charset of specified input stream's data.
      * <p>
      * <b>Note</b>: Specified input stream is going to be closed in this method.
@@ -227,16 +303,14 @@ public final class CharsetDetector {
                  */
                 final String prob[] = det.getProbableCharsets();
                 String firstPossibleCharset = null;
-                for (int i = 0; i < prob.length; i++) {
+                for (int i = 0; i < prob.length && null == firstPossibleCharset; i++) {
                     if (Charset.isSupported(prob[i])) {
                         if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
                             return prob[i];
                         } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
                             return prob[i];
                         }
-                        if (null == firstPossibleCharset) {
-                            firstPossibleCharset = prob[i];
-                        }
+                        firstPossibleCharset = prob[i];
                     }
                 }
                 return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
