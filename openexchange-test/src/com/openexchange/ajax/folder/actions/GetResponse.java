@@ -93,7 +93,9 @@ public final class GetResponse extends AbstractAJAXResponse {
             final FolderObject parsed = new FolderObject();
             JSONObject data = (JSONObject) getData();
             try {
-                rearrangeId(data);
+                if(data.has(FolderFields.ID)) {
+                    rearrangeId(data);
+                }
             } catch (JSONException e) {
                 throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e);
             }
