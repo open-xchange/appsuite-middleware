@@ -81,7 +81,7 @@ public abstract class MailPartDataSource implements DataSource {
     /**
      * Initializes a new {@link MailPartDataSource}
      */
-    public MailPartDataSource() {
+    protected MailPartDataSource() {
         super();
     }
 
