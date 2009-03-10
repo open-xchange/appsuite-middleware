@@ -3,11 +3,13 @@ package com.openexchange.publish.json;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
@@ -22,13 +24,20 @@ import com.openexchange.publish.Site;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
 public class PublishJSONServlet extends PermissionServlet {
 
     private static final long serialVersionUID = 12L;
 
     private static final Log LOG = LogFactory.getLog(PublishJSONServlet.class);
 
-    private static final String STANDARD_SITE = "public";
+    private static final String PUBLISH_ACTION = "publish";
+
+    private static final String UNPUBLISH_ACTION = "unpublish";
+
+    private static final String LIST_ACTION = "list";
 
     private static final int POST = 0;
 
@@ -42,6 +51,7 @@ public class PublishJSONServlet extends PermissionServlet {
     protected boolean hasModulePermission(Session session, Context ctx) {
         return true;
     }
+
     protected void doPost(HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         perform(req, resp, POST);
     }
@@ -81,16 +91,88 @@ public class PublishJSONServlet extends PermissionServlet {
             LOG.error("perform", e);
         }
     }
-    private Response doAction(HttpServletRequest req, int method) throws AbstractOXException, JSONException, IOException {
-        
-        /*switch(method) {
-        case PUT: case POST: return writeAction(req);
-        default: return readAction(req);
-        }*/
-        return null;
-        
-    }
-    
-    
 
+    private Response doAction(HttpServletRequest req, int method) throws AbstractOXException, JSONException, IOException {
+
+        switch (method) {
+        case PUT:
+        case POST:
+            return writeAction(req);
+        default:
+            return readAction(req);
+        }
+
+    }
+
+    private Response readAction(HttpServletRequest req) throws JSONException {
+        final Response response = new Response();
+        final String action = req.getParameter("action");
+        final Session session = getSessionObject(req);
+
+        if (action.equals(LIST_ACTION)) {
+            response.setData(list(session));
+        }
+
+        return response;
+    }
+
+    private JSONArray list(Session session) throws JSONException {
+        JSONArray retval = new JSONArray();
+
+        Collection<Site> sites = publicationService.getSites(session.getContextId(), session.getUserId());
+        for (Site site : sites) {
+            retval.put(getJSONObject(site));
+        }
+
+        return retval;
+    }
+
+    private JSONObject getJSONObject(Site site) throws JSONException {
+        JSONObject retval = new JSONObject();
+
+        retval.put("name", site.getPath().getSiteName());
+        retval.put("expression", site.getTagExpression());
+
+        return retval;
+    }
+
+    private Response writeAction(HttpServletRequest req) throws JSONException, IOException {
+        final Response response = new Response();
+        final String action = req.getParameter("action");
+        final Session session = getSessionObject(req);
+
+        if (action.equals(PUBLISH_ACTION)) {
+            JSONObject siteToPublish = new JSONObject(getBody(req));
+            Site site = getSite(siteToPublish, session);
+            publish(site);
+        } else if (action.equals(UNPUBLISH_ACTION)) {
+            JSONObject siteToUnpublish = new JSONObject(getBody(req));
+            Site site = getSite(siteToUnpublish, session);
+            unpublish(site);
+        }
+
+        response.setData(1);
+        return response;
+    }
+
+    private void unpublish(Site site) {
+        publicationService.delete(site);
+    }
+
+    private void publish(Site site) {
+        publicationService.create(site);
+    }
+
+    private Site getSite(JSONObject siteToPublish, Session session) throws JSONException {
+        Site site = new Site();
+        Path path = new Path();
+        path.setContextId(session.getContextId());
+        path.setOwnerId(session.getUserId());
+        path.setSiteName(siteToPublish.getString("name"));
+        site.setPath(path);
+        if (siteToPublish.has("expression")) {
+            site.setTagExpression(siteToPublish.getString("expression"));
+        }
+        return site;
+    }
 }
