@@ -439,6 +439,9 @@ public class AppointmentWriter extends CalendarWriter {
             return true;
         }
         final UserParticipant[] users = appointment.getUsers();
+        if(users == null) {
+            return false;
+        }
         for (final UserParticipant user : users) {
             if (user.getIdentifier() == userId) {
                 return true;
