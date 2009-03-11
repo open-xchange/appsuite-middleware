@@ -61,7 +61,7 @@ public class TaggingSQLBuilderTest extends TestCase {
 
     public void testOneTag() {
         SQLStatement statement = buildSql("myTag");
-        assertEquals("SELECT * FROM tags WHERE tag = ? ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(1, tags.size());
         assertEquals("myTag", tags.get(0));
@@ -69,7 +69,7 @@ public class TaggingSQLBuilderTest extends TestCase {
 
     public void testOr() {
         SQLStatement statement = buildSql("myTag OR myOtherTag");
-        assertEquals("SELECT * FROM tags WHERE tag = ? OR tag = ? ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? OR tag = ? )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(2, tags.size());
         assertEquals("myTag", tags.get(0));
@@ -78,7 +78,7 @@ public class TaggingSQLBuilderTest extends TestCase {
 
     public void testAnd() {
         SQLStatement statement = buildSql("myTag AND myOtherTag");
-        assertEquals("SELECT * FROM tags WHERE tag = ? AND tag = ? ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? AND tag = ? )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(2, tags.size());
         assertEquals("myTag", tags.get(0));
@@ -87,7 +87,7 @@ public class TaggingSQLBuilderTest extends TestCase {
 
     public void testNot() {
         SQLStatement statement = buildSql("myTag AND NOT myOtherTag");
-        assertEquals("SELECT * FROM tags WHERE tag = ? AND tag != ? ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? AND tag != ? )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(2, tags.size());
         assertEquals("myTag", tags.get(0));
@@ -96,7 +96,7 @@ public class TaggingSQLBuilderTest extends TestCase {
 
     public void testBrackets() {
         SQLStatement statement = buildSql("myTag AND (myOtherTag OR myThirdTag)");
-        assertEquals("SELECT * FROM tags WHERE tag = ? AND ( tag = ? OR tag = ? ) ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? AND ( tag = ? OR tag = ? ) )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(3, tags.size());
         assertEquals("myTag", tags.get(0));
@@ -106,7 +106,7 @@ public class TaggingSQLBuilderTest extends TestCase {
     
     public void testNegatedBrackets() {
         SQLStatement statement = buildSql("myTag AND NOT (myOtherTag OR myThirdTag)");
-        assertEquals("SELECT * FROM tags WHERE tag = ? AND NOT ( tag = ? OR tag = ? ) ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? AND NOT ( tag = ? OR tag = ? ) )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(3, tags.size());
         assertEquals("myTag", tags.get(0));
@@ -116,7 +116,7 @@ public class TaggingSQLBuilderTest extends TestCase {
     
     public void testKrass() {
         SQLStatement statement = buildSql("tag1 OR ( NOT tag2 AND (tag3 OR NOT (NOT tag4 AND tag5) OR NOT tag6))");
-        assertEquals("SELECT * FROM tags WHERE tag = ? OR ( tag != ? AND ( tag = ? OR NOT ( tag != ? AND tag = ? ) OR tag != ? ) ) ", statement.getSQLString());
+        assertEquals("SELECT * FROM tags WHERE cid = ? AND (tag = ? OR ( tag != ? AND ( tag = ? OR NOT ( tag != ? AND tag = ? ) OR tag != ? ) ) )", statement.getSQLString());
         List<String> tags = statement.getTags();
         assertEquals(6, tags.size());
         for(int i = 1; i <= 6; i++) {

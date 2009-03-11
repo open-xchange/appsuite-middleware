@@ -61,7 +61,7 @@ import java.util.Collection;
 public interface TaggingService {
     
     public void tagObject(Tagged tagged);
-    public Collection<Tagged> getTaggedObjects(int contextId, String tag);
+    public Collection<Tagged> getTaggedObjects(int contextId, String tagExpression);
     public Collection<String>getTags(int contextId, int objectId, int folderId);
     public void removeTag(Tagged tagged);
     public void removeAllTags(int contextId, int objectId);

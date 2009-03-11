@@ -60,9 +60,9 @@ public class TaggingServiceImpl implements TaggingService {
 
     private static final Log LOG = LogFactory.getLog(TaggingServiceImpl.class);
 
-    public Collection<Tagged> getTaggedObjects(int contextId, String tag) {
+    public Collection<Tagged> getTaggedObjects(int contextId, String tagExpression) {
         try {
-            return TaggingSQL.getObjects(contextId, tag);
+            return TaggingSQL.getObjects(contextId, tagExpression);
         } catch (Exception e) {
             LOG.error("Error during loading of tagged Objects", e);
             return null;

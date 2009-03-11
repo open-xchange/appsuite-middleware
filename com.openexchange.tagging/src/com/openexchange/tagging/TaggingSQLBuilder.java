@@ -102,7 +102,8 @@ public class TaggingSQLBuilder {
                 tags.add(element);
             }
         }
-        return new SQLStatement("SELECT * FROM tags WHERE "+where.toString(), tags);
+        where.append(")");
+        return new SQLStatement("SELECT * FROM tags WHERE cid = ? AND ("+where.toString(), tags);
     }
 
     private boolean isKeyword(String element) {

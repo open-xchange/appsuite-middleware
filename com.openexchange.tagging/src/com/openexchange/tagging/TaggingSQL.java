@@ -134,16 +134,16 @@ public class TaggingSQL {
 
     public static List<Tagged> getObjects(int contextId, String tagString) throws DBPoolingException, SQLException {
         List<Tagged> retval = new ArrayList<Tagged>();
-        if (!tagExists(contextId, tagString)) {
-            return retval;
+        
+        SQLStatement statement = new TaggingSQLBuilder().build(tagString);
+        
+        Object[] args = new Object[statement.getTags().size() + 1];
+        args[0] = contextId;
+        for(int i = 1; i < args.length; i++) {
+            args[i] = statement.getTags().get(i-1);
         }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT * FROM ");
-        sb.append(TAGGING_TABLE);
-        sb.append(" WHERE cid = ? AND tag = ?");
-
-        List<Map<String, Object>> tags = Transaction.commitQuery(contextId, sb.toString(), contextId, tagString);
+        
+        List<Map<String, Object>> tags = Transaction.commitQuery(contextId, statement.getSQLString(), args);
 
         for (Map<String, Object> tag : tags) {
             Tagged t = new Tagged();
