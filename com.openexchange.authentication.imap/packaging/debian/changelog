@@ -1,3 +1,9 @@
+open-xchange-authentication-imap (6.8.1-2) unstable; urgency=low
+
+  * first build for SP5U1 RC2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Mar 2009 16:53:48 +0100
+
 open-xchange-authentication-imap (6.8.1-1) unstable; urgency=low
 
   * first build for SP5U1 RC1

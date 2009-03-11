@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	1
+Release:	2
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,19 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Mar 11 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
+ - Bugfix #13366: Fixed reading mail folder information (total, unread, etc.) on dovecot IMAP server
+* Wed Mar 11 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #13333: Added null check. 
+* Tue Mar 10 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13364: Setting proper Content-Disposition header when parsing TNEF attachments
+* Sun Mar 08 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13340: Accepting ID of a virtual folder on action=get
+* Fri Mar 06 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13329: Notification mails are pooled per changing user
+ - Bugfix #13324: Removed customer names from property file
+ - Bugfix #13334: Ensured enough capacity in backing array
 * Thu Mar 05 2009 - marcus.klein@open-xchange.com
  - Bugfix #12241: Removed context load waiting if context is not found. Added check if filestore still exists.
 * Thu Mar 05 2009 - martin.herfurth@open-xchange.com
@@ -319,8 +332,6 @@ fi
    folder check and if their subscription shall be disabled or not.
 * Tue Mar 03 2009 - martin.herfurth@open-xchange.com
  - Bugfix #12923: Move of an appointment into a shared folder.
-* Tue Mar 03 2009 - marcus.klein@open-xchange.com
- - Bugfix #13157: Updated log4j library to 1.2.15.
 * Mon Mar 02 2009 - francicso.laguna@open-xchange.com
  - Bugfix #13126: Added Validation to check for filenames containing slashes
  - Bugfix #13227: Allow clients to specify the contact search to use the OR habit.
