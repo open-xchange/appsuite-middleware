@@ -72,10 +72,19 @@ public final class NoACLExtension implements ACLExtension {
     }
 
     /**
+     * The full rights containing every possible ASCII character: (<code>'a' &lt;= c &lt;= 'z'</code>)
+     */
+    private final Rights fullRights;
+
+    /**
      * Initializes a new {@link NoACLExtension}.
      */
     private NoACLExtension() {
         super();
+        fullRights = new Rights();
+        for (char c = 'a'; c <= 'z'; c++) {
+            fullRights.add(Rights.Right.getInstance(c));
+        }
     }
 
     public boolean canRead(final Rights rights) {
@@ -134,7 +143,7 @@ public final class NoACLExtension implements ACLExtension {
      * @return An empty rights object.
      */
     public Rights getFullRights() {
-        return new Rights();
+        return fullRights;
     }
 
     public void addFolderAdminRights(final Rights rights) {
