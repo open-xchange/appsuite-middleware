@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
@@ -234,24 +235,18 @@ public final class Tools {
         }
     }
 
-    static void fillStandardFolders(final Set<TaskParticipant> participants,
-        final Set<Folder> folders, final boolean privat) {
-        final Map<Integer, Folder> folderByUser = new HashMap<Integer, Folder>(
-            folders.size(), 1);
+    static void fillStandardFolders(final int cid, final int taskId, final Set<TaskParticipant> participants, final Set<Folder> folders, final boolean privat) {
+        final Map<Integer, Folder> folderByUser = new HashMap<Integer, Folder>(folders.size(), 1);
         for (final Folder folder : folders) {
-            folderByUser.put(Integer.valueOf(folder.getUser()), folder);
+            folderByUser.put(I(folder.getUser()), folder);
         }
         for (final TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
-                final InternalParticipant internal = (InternalParticipant)
-                    participant;
-                Folder folder = folderByUser.get(Integer.valueOf(internal
-                    .getIdentifier()));
+                final InternalParticipant internal = (InternalParticipant) participant;
+                Folder folder = folderByUser.get(I(internal.getIdentifier()));
                 if (null == folder) {
                     if (privat) {
-                        LOG.error(new TaskException(Code
-                            .PARTICIPANT_FOLDER_INCONSISTENCY,
-                            Integer.valueOf(internal.getIdentifier())));
+                        LOG.error(new TaskException(Code.PARTICIPANT_FOLDER_INCONSISTENCY, I(internal.getIdentifier()), I(taskId), I(cid)));
                     }
                     folder = new Folder(0, internal.getIdentifier());
                 }

@@ -273,7 +273,7 @@ class UpdateData {
         if (null == origParticipants) {
             origParticipants = partStor.selectParticipants(ctx, getTaskId(), type);
             if (Tools.isFolderPrivate(folder)) {
-                Tools.fillStandardFolders(getOrigParticipants(), getOrigFolder(), true);
+                Tools.fillStandardFolders(ctx.getContextId(), getTaskId(), getOrigParticipants(), getOrigFolder(), true);
             }
         }
         return origParticipants;
@@ -492,7 +492,7 @@ class UpdateData {
         updated.setParentFolderID(getDestFolderId());
         final Set<TaskParticipant> parts = getUpdatedParticipants();
         if (Tools.isFolderPrivate(getDestFolder())) {
-            Tools.fillStandardFolders(parts, getUpdatedFolder(), true);
+            Tools.fillStandardFolders(ctx.getContextId(), getTaskId(), parts, getUpdatedFolder(), true);
         }
         updated.setParticipants(TaskLogic.createParticipants(parts));
         updated.setUsers(TaskLogic.createUserParticipants(parts));

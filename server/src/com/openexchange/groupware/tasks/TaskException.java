@@ -207,10 +207,10 @@ public class TaskException extends AbstractOXException {
         DELETE_FAILED("SQL problem while deleting task: %s.",
             Category.CODE_ERROR, Detail.OTHER, 11),
         /**
-         * Cannot find folder of task participant %1$d.
+         * Cannot find folder for task %2$d and participant %1$d in context %3$d.
          */
-        PARTICIPANT_FOLDER_INCONSISTENCY("Cannot find folder of task "
-            + "participant %1$d.", Category.CODE_ERROR, Detail.OTHER, 12),
+        PARTICIPANT_FOLDER_INCONSISTENCY("Cannot find folder for task %2$d and participant %1$d in context %3$d.", Category.CODE_ERROR,
+            Detail.OTHER, 12),
         /**
          * SQL problem while listing tasks: %s.
          */

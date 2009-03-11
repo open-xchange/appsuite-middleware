@@ -261,7 +261,7 @@ public final class GetTask {
             return;
         }
         if (!Tools.isFolderPublic(getFolder())) {
-            Tools.fillStandardFolders(getParticipants(), getFolders(), true);
+            Tools.fillStandardFolders(ctx.getContextId(), taskId, getParticipants(), getFolders(), true);
         }
         filledParts = true;
     }
