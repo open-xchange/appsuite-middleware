@@ -1,8 +1,8 @@
 |Table:CreateFolder|
-| fixturename        | parent_folder            | type        | 
+| fixturename        | parent_folder            | type        |
 | myPrivateTestFolder| privateAppointmentFolder | Appointment |
 
 |Table:Grant permissions to User |
 | myPrivateTestFolder |
-| user    | permission  | 
+| user    | permission  |
 | thorben | view_folder, read_all, write_own, delete_own |

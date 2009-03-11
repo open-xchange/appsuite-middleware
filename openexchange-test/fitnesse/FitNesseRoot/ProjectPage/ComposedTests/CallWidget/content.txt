@@ -1,4 +1,4 @@
-Another idea is to use a simple widget that replaces !include and !define.  
+Another idea is to use a simple widget that replaces !include and !define.
 
 On a page named !-LoginAttempt-!:
 !|script|
@@ -8,7 +8,7 @@ On a page named !-LoginAttempt-!:
 |check|extract from|$html|between|start:|and|:end|!-${TRANSLATED_TEXT}-!|
 |shutdown fitnesse|
 
-Now on the page with the tests: 
+Now on the page with the tests:
 The driver for the scenario has to be set up before it can be invoked.  This makes the driver polymorphic with respect to the scenario!
 
 |script|

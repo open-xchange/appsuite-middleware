@@ -22,9 +22,9 @@ The first cell of a slim table tells you what kind of table it is. Here are the 
 |[[Scenario Table][>ScenarioTable]]|A table that can be called from other tables.|
 
 !4 Data Types.
-The data in your tables is all Strings.  However your fixtures don't want to be constrained to Strings.  So Slim comes with several standard data type converters that will automatically convert the strings in the tables into the data types expected by your fixtures. 
+The data in your tables is all Strings.  However your fixtures don't want to be constrained to Strings.  So Slim comes with several standard data type converters that will automatically convert the strings in the tables into the data types expected by your fixtures.
 !see >DataTypes.
-You can also create your own custom type converters if you like. 
+You can also create your own custom type converters if you like.
 !see >CustomTypes.
 
 !4 Extra Goodies that are consistent throughout all Slim tables and ports.

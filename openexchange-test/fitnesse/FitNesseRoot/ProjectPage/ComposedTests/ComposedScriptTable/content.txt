@@ -6,9 +6,9 @@ A scenario table can be called from another script or scenario table.  Think of 
 |$message=|login|
 |$status=|login status|
 
-You can invoke it from another script table just as you would if it were a fixture.  
+You can invoke it from another script table just as you would if it were a fixture.
 This makes the fixture polymorphic with respect to the script table.
-The return values of the script are marked with ?.  
+The return values of the script are marked with ?.
 
 |script|
 |start|login driver|

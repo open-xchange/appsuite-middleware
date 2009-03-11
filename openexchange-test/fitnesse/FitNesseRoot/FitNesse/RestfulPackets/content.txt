@@ -13,16 +13,16 @@ If you access a page with the ?packet responder as in !style_code(http://myFitNe
 If you get the packet for this page by accessing http://localhost:${FITNESSE_PORT}/FitNesse.RestfulPackets?packet you will get the following JSON packet:
 {{{
 {"tables": [
- {"Customer": 
-  { "addr": 
-   { "Street": "555 Witherspoon st.", 
-     "city": "Anyville", 
-     "state": "IL", 
-     "zip": "60083" 
-   }, 
-    "id": "8402", 
-    "name": "Bob Someone", 
-    "phone": "555-1212" 
+ {"Customer":
+  { "addr":
+   { "Street": "555 Witherspoon st.",
+     "city": "Anyville",
+     "state": "IL",
+     "zip": "60083"
+   },
+    "id": "8402",
+    "name": "Bob Someone",
+    "phone": "555-1212"
   }
  }
 ]}

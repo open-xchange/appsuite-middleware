@@ -56,8 +56,8 @@ Next, there's the row of column headers.  If you look carefully at them you'll s
 
 The last column header does have a ''?''.  Decision Table considers it to be an output and so calls it as a function and expects a return value.  That return value is compared to the contents of the column and turns the corresponding cell red or green depending whether it matches.  Note that the cell that contains 'nope' does not match the 'no' that is returned.
 
-The flow is very simple.  
- 1 First the !style_code(ShouldIBuyMilk) fixture is constructed. 
+The flow is very simple.
+ 1 First the !style_code(ShouldIBuyMilk) fixture is constructed.
  1 Next the !style_code(table) method is called if it exists. (see below).
  1 Then for each row in the table:
   1 First the !style_code(reset) function is called (if present), just in case you want to prepare or clean up.

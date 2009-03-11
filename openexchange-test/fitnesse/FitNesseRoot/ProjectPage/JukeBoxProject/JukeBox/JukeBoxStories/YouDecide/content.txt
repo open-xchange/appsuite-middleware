@@ -1,4 +1,4 @@
-When the user presses "You Decide", the juke box will randomly choose a song based on its ranking.  
+When the user presses "You Decide", the juke box will randomly choose a song based on its ranking.
 
 !include <JukeBox.SongInventory
 

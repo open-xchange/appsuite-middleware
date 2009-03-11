@@ -1,9 +1,9 @@
 !1 Welcome to [[FitNesse][FitNesse.FitNesse]]!
 !3 ''The fully integrated stand-alone acceptance testing framework and wiki.''
 
- * TestTest
- * TaskTests
  * AppointmentTests
+ * TaskTests
+ * ContactTests
 
 | '''To Learn More...'''|
 | [[A One-Minute Description][FitNesse.OneMinuteDescription]]|''What is [[FitNesse][FitNesse.FitNesse]]? Start here.''|
