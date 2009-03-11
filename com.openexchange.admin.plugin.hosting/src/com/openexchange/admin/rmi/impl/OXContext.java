@@ -818,7 +818,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 ret = (Context)callPluginMethod("postCreate", (Context)ret, admin_user, createaccess, auth);
             } catch(StorageException e) {
                 log.error(e.getMessage(),e);
-                callPluginMethod("delete", ctx, auth);
+                // callPluginMethod delete may fail here for what ever reason.
+                // this must not prevent us from cleaning up the rest
+                try {
+                    callPluginMethod("delete", ctx, auth);
+                } catch (Exception e1) {
+                    log.error(e.getMessage(), e);
+                }
                 oxcox.delete(ret);
                 throw e;
             }
