@@ -61,7 +61,7 @@ import com.sun.mail.imap.Rights;
 public interface ACLExtension {
 
     /**
-     * Checks if specified rights allow to perform SETACL/DELETEACL.
+     * Checks if specified rights allow to administer; meaning to perform SETACL/DELETEACL.
      * 
      * @param rights The rights to check
      * @return <code>true</code> if specified rights allow to perform SETACL/DELETEACL; otherwise <code>false</code>.
