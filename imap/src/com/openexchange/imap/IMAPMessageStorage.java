@@ -655,7 +655,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     /*
                      * Check if COPY/APPEND is allowed on destination folder
                      */
-                    if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(destFolder, true, session).contains(Rights.Right.INSERT)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(destFolder, true, session))) {
                         throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, destFolder.getFullName());
                     }
                 } catch (final MessagingException e) {

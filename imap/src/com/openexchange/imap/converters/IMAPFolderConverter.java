@@ -62,6 +62,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.NamespaceFolder;
+import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
@@ -334,7 +335,8 @@ public final class IMAPFolderConverter {
                     }
                 }
             }
-            if (selectable && ownRights.contains(Rights.Right.READ)) {
+            final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+            if (selectable && aclExtension.canRead(ownRights)) {
                 mailFolder.setMessageCount(imapFolder.getMessageCount());
                 mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
                 mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
@@ -348,7 +350,7 @@ public final class IMAPFolderConverter {
             mailFolder.setSubscribed(MailConfig.isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : imapFolder.isSubscribed()) : true);
             if (imapConfig.isSupportsACLs()) {
                 // Check if ACLs can be read; meaning GETACL is allowed
-                if (selectable && exists && !isRoot && ACLExtensionFactory.getInstance().getACLExtension(imapConfig).canGetACL(ownRights)) {
+                if (selectable && exists && !isRoot && aclExtension.canGetACL(ownRights)) {
                     try {
                         applyACL2Permissions(imapFolder, session, imapConfig, mailFolder, ownRights, ctx);
                     } catch (final MailException e) {
@@ -364,7 +366,7 @@ public final class IMAPFolderConverter {
             } else {
                 addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
             }
-            if (MailConfig.isUserFlagsEnabled() && exists && selectable && ownRights.contains(Rights.Right.READ) && UserFlagsCache.supportsUserFlags(
+            if (MailConfig.isUserFlagsEnabled() && exists && selectable && aclExtension.canRead(ownRights) && UserFlagsCache.supportsUserFlags(
                 imapFolder,
                 true,
                 session)) {

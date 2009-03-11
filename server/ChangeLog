@@ -1,6 +1,7 @@
 * 2009-03-11 - thorben.betten@open-xchange.com
 
  - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
+ - Bugfix #13366: Fixed reading mail folder information (total, unread, etc.) on dovecot IMAP server
 
 * 2009-03-10 - thorben.betten@open-xchange.com
 

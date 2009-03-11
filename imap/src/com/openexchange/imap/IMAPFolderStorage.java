@@ -675,12 +675,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
                     final Map<String, ACL> m = acl2map(newACLs);
                     if (!equals(initialACLs, m, entity2ACL, args)) {
-                        if (!createMe.myRights().contains(Rights.Right.ADMINISTER)) {
+                        if (!aclExtension.canSetACL(createMe.myRights())) {
                             throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe.getFullName());
                         }
                         boolean adminFound = false;
                         for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                            if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+                            if (aclExtension.canSetACL(newACLs[i].getRights())) {
                                 adminFound = true;
                             }
                         }
@@ -1010,7 +1010,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         {
                             boolean adminFound = false;
                             for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                                if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+                                if (aclExtension.canSetACL(newACLs[i].getRights())) {
                                     adminFound = true;
                                 }
                             }
