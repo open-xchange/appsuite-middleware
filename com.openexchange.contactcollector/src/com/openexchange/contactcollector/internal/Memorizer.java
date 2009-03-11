@@ -182,8 +182,13 @@ public class Memorizer implements Runnable {
 
         final int retval;
         if (null == foundContact) {
-            contactInterface.insertContactObject(contact);
-            retval = contact.getObjectID();
+            final OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(getFolderId(), session.getUserId(), userConfig);
+            if (perm.canCreateObjects()) {
+                contactInterface.insertContactObject(contact);
+                retval = contact.getObjectID();
+            } else {
+                retval = -1;
+            }
         } else {
             try {
                 foundContact.setUserField20(String.valueOf(Integer.parseInt(foundContact.getUserField20() + 1)));
