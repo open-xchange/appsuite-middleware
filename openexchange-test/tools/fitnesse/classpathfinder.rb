@@ -2,14 +2,17 @@ def abs_path(myDir, myFile)
   File.expand_path( File.join( myDir.path, File.basename( myFile ) ) )
 end
 
-myDir = Dir.new("../../../openexchange-test-gui/lib")
-excludes = ["open-xchange-iface-tests.jar"].map{ |elem| abs_path(myDir, elem) }
-myJARs = []
+directories = ["../../../openexchange-test-gui/lib", "../../../common/lib"]
+excludes = ["/open-xchange-iface-tests.jar"]
+jars = []
 
-myDir.each do |entry|
-  if entry =~ /\.jar$/
-     myJARs.push( abs_path(myDir, entry) )
+directories.each do |myDir|
+  myDir = Dir.new(myDir)
+  myDir.each do |entry|
+    if entry =~ /\.jar$/
+       jars.push( abs_path( myDir, entry ) )
+    end
   end
 end
 
-print myJARs.reject{|jar| excludes.include?(jar) }.join(":")
+print jars.reject{|jar| excludes.any?{|elem| jar =~ /#{elem}/} }.join(":")
