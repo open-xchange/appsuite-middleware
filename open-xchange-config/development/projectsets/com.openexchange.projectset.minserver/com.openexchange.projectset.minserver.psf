@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.team.cvs.core.cvsnature">
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/cache,cache"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.conversion,com.openexchange.conversion"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.dataretention,com.openexchange.dataretention"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.xml,com.openexchange.xml"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/common,common"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/config,config"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/global,global"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/management,management"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/monitoring,monitoring"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/server,server"/>
+</provider>
+</psf>
