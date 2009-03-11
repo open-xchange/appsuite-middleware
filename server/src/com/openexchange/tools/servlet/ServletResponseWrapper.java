@@ -159,10 +159,11 @@ public class ServletResponseWrapper implements ServletResponse {
 
     public void flushBuffer() throws IOException {
         if (outputSelection == OUTPUT_WRITER && writer != null) {
+            // Flush through print writer
             writer.flush();
-            servletOutputStream.flushByteBuffer();
         } else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
-            servletOutputStream.flushByteBuffer();
+            // Flush directly on servlet output stream
+            servletOutputStream.flush();
         }
     }
 

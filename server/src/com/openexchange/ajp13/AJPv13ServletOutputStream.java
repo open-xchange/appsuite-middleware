@@ -103,14 +103,14 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
         }
     }
 
-    /**
-     * The <code>flush()</code> method of <code>AJPv13ServletOutputStream</code> does nothing.
-     * <p>
-     * Use {@link #flushByteBuffer()} to really flush data.
-     */
     @Override
     public void flush() throws IOException {
-        // Nothing to do; to enable flushing just call flushByteBuffer()
+        final Lock l = synchronizer.acquire();
+        try {
+            flush2WebServer();
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     @Override
@@ -329,20 +329,6 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;
-        }
-    }
-
-    /**
-     * Flushes the byte buffer into stream.
-     * 
-     * @throws IOException If an I/O error occurs
-     */
-    public void flushByteBuffer() throws IOException {
-        final Lock l = synchronizer.acquire();
-        try {
-            flush2WebServer();
-        } finally {
-            synchronizer.release(l);
         }
     }
 
