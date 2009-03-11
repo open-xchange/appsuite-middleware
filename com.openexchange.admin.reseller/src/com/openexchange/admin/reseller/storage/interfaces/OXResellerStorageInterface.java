@@ -313,6 +313,17 @@ public abstract class OXResellerStorageInterface {
      * @param ctx
      * @throws StorageException
      */
-    public abstract void deleteCustomId(final Context ctx) throws StorageException;
+    public abstract void deleteCustomFields(final Context ctx) throws StorageException;
     
+    /**
+     * @param ctx
+     * @throws StorageException
+     */
+    public abstract void generateCreateTimestamp(final Context ctx) throws StorageException;
+    
+    /**
+     * @param ctx
+     * @throws StorageException
+     */
+    public abstract void updateModifyTimestamp(final Context ctx) throws StorageException;
 }

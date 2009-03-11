@@ -61,8 +61,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -1495,13 +1493,24 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         if( contextExtension != null && contextExtension.getCustomid() != null ) {
             try {
                 con = cache.getConnectionForConfigDB();
-                prep = con.prepareStatement("DELETE FROM context_customfields WHERE cid=?");
+                prep = con.prepareStatement("SELECT cid FROM context_customfields WHERE cid=?");
                 prep.setInt(1, ctx.getId());
-                prep.executeUpdate();
+                rs = prep.executeQuery();
+                boolean idexists = false;
+                if( rs.next() ) {
+                    idexists = true;
+                }
                 prep.close();
-                prep = con.prepareStatement("INSERT INTO context_customfields (cid,customid) VALUES(?,?)");
-                prep.setInt(1, ctx.getId());
-                prep.setString(2, contextExtension.getCustomid());
+                rs.close();
+                if( idexists ) {
+                    prep = con.prepareStatement("UPDATE context_customfields SET customid=? WHERE cid=?");
+                    prep.setString(1, contextExtension.getCustomid());
+                    prep.setInt(2, ctx.getId());
+                } else {
+                    prep = con.prepareStatement("INSERT INTO context_customfields (cid,customid) VALUES(?,?)");
+                    prep.setInt(1, ctx.getId());
+                    prep.setString(2, contextExtension.getCustomid());
+                }
                 prep.executeUpdate();
                 prep.close();
             } catch (final PoolException e) {
@@ -1517,7 +1526,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public void deleteCustomId(Context ctx) throws StorageException {
+    public void deleteCustomFields(Context ctx) throws StorageException {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -1527,6 +1536,66 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, ctx.getId());
             prep.executeUpdate();
             prep.close();
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep, rs);
+        }
+    }
+
+    @Override
+    public void generateCreateTimestamp(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            prep = con.prepareStatement("INSERT INTO context_customfields (cid,createTimestamp,modifyTimestamp) VALUES(?,?,?)");
+            final long ctime = System.currentTimeMillis();
+            prep.setInt(1, ctx.getId());
+            prep.setLong(2, ctime);
+            prep.setLong(3, ctime);
+            prep.executeUpdate();
+            prep.close();
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep, rs);
+        }
+    }
+
+    @Override
+    public void updateModifyTimestamp(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            prep = con.prepareStatement("SELECT * FROM context_customfields WHERE cid=?");
+            prep.setInt(1, ctx.getId());
+            rs = prep.executeQuery();
+            if( ! rs.next() ) {
+                generateCreateTimestamp(ctx);
+                prep.close();
+                rs.close();
+            } else {
+                prep.close();
+                rs.close();
+                prep = con.prepareStatement("UPDATE context_customfields SET modifyTimestamp=? WHERE cid=?");
+                final long ctime = System.currentTimeMillis();
+                prep.setLong(1, ctime);
+                prep.setInt(2, ctx.getId());
+                prep.executeUpdate();
+                prep.close();
+            }
         } catch (final PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
