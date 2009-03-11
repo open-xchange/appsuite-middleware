@@ -2,10 +2,6 @@
 
  - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
 
-* 2009-03-09 - thorben.betten@open-xchange.com
-
- - Bugfix #13157: Overridden java.io.PrintWriter to treat write attempts as a no-op if its error flag is true
-
 * 2009-03-06 - marcus.klein@open-xchange.com
 
  - Bugfix #13319: Skip empty recurrence sets.
