@@ -47,23 +47,22 @@
  *
  */
 
-package com.openexchange.fitnesse.appointments;
+package com.openexchange.fitnesse.contacts;
 
-import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
-import com.openexchange.groupware.container.AppointmentObject;
-
-
+import com.openexchange.ajax.kata.Step;
+import com.openexchange.ajax.kata.contacts.ContactCreateStep;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
- * {@link CreateAppointment}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class CreateAppointment extends AbstractAppointmentFixture {
+public class CreateContact extends AbstractContactFixture{
 
-    protected AppointmentCreateStep createStep(AppointmentObject appointment, String fixtureName, String expectedError) {
-        return new AppointmentCreateStep(appointment, fixtureName, expectedError);
+    @Override
+    protected Step createStep(ContactObject contact, String fixtureName, String expectedError) {
+        return new ContactCreateStep(contact, fixtureName, expectedError);
     }
 
 }

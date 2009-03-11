@@ -47,23 +47,31 @@
  *
  */
 
-package com.openexchange.fitnesse.appointments;
 
-import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
-import com.openexchange.groupware.container.AppointmentObject;
+package com.openexchange.fitnesse.contacts;
 
-
+import com.openexchange.ajax.kata.Step;
+import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.test.fixtures.FixtureException;
 
 /**
- * {@link CreateAppointment}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class CreateAppointment extends AbstractAppointmentFixture {
+public abstract class AbstractContactFixture extends AbstractStepFixture{
 
-    protected AppointmentCreateStep createStep(AppointmentObject appointment, String fixtureName, String expectedError) {
-        return new AppointmentCreateStep(appointment, fixtureName, expectedError);
+    @Override
+    protected Step createStep(FixtureDataWrapper data) throws FixtureException {
+        String fixtureName = data.getFixtureName();
+        ContactObject contact = createContact(fixtureName, data);
+        
+        Step step = createStep(contact, fixtureName, data.getExpectedError());
+        return step;
     }
+
+    protected abstract Step createStep(ContactObject contact, String fixtureName, String expectedError);
 
 }

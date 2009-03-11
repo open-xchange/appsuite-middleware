@@ -47,6 +47,8 @@ public class FixtureDataWrapper {
 
         if(table.size() == TYPE_ONLY_NAME){
             fixtureName = table.get(0).get(0);
+            this.header = new LinkedList<String>();
+            this.values = new LinkedList<String>();
         } 
         if(table.size() == TYPE_KEYS_AND_VALUES){
             this.header = table.get(0);

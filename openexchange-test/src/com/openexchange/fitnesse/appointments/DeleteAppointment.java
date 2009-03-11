@@ -49,21 +49,22 @@
 
 package com.openexchange.fitnesse.appointments;
 
-import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
+import com.openexchange.ajax.kata.Step;
+import com.openexchange.ajax.kata.appointments.AppointmentDeleteStep;
 import com.openexchange.groupware.container.AppointmentObject;
 
-
-
 /**
- * {@link CreateAppointment}
+ * 
+ * {@link DeleteAppointment}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class CreateAppointment extends AbstractAppointmentFixture {
+public class DeleteAppointment extends AbstractAppointmentFixture{
 
-    protected AppointmentCreateStep createStep(AppointmentObject appointment, String fixtureName, String expectedError) {
-        return new AppointmentCreateStep(appointment, fixtureName, expectedError);
+    @Override
+    protected Step createStep(AppointmentObject appointment, String fixtureName, String expectedError) {
+        return new AppointmentDeleteStep(appointment, fixtureName, expectedError);
     }
 
 }
