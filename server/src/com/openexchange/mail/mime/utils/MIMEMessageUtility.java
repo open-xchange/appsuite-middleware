@@ -52,8 +52,12 @@ package com.openexchange.mail.mime.utils;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.BodyPart;
@@ -68,6 +72,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.session.Session;
@@ -81,6 +86,17 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 public final class MIMEMessageUtility {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class);
+
+    private static final Set<HeaderName> ENCODINGS;
+
+    static {
+        final Set<HeaderName> tmp = new HashSet<HeaderName>(4);
+        tmp.add(HeaderName.valueOf("iso-8859-1"));
+        tmp.add(HeaderName.valueOf("windows-1258"));
+        tmp.add(HeaderName.valueOf("UTF-8"));
+        tmp.add(HeaderName.valueOf("us-ascii"));
+        ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
+    }
 
     /**
      * No instantiation
@@ -310,7 +326,7 @@ public final class MIMEMessageUtility {
         return found;
     }
 
-    private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(.+?)(\\?=)");
+    private static final Pattern ENC_PATTERN = Pattern.compile("=\\?(\\S+?)\\?(\\S+?)\\?(.+?)\\?=");
 
     /**
      * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1.
@@ -334,15 +350,64 @@ public final class MIMEMessageUtility {
             do {
                 try {
                     sb.append(hdrVal.substring(lastMatch, m.start()));
-                    sb.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
+                    sb.append(MimeUtility.decodeWord(m.group()));
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error("Unsupported character-encoding in encoded-word: " + m.group(), e);
-                    sb.append(Matcher.quoteReplacement(m.group()));
+                    sb.append(m.group());
+                    lastMatch = m.end();
+                } catch (final ParseException e) {
+                    return decodeMultiEncodedHeaderSafe(headerValue);
+                }
+            } while (m.find());
+            sb.append(hdrVal.substring(lastMatch));
+            return sb.toString();
+        }
+        return hdrVal;
+    }
+
+    /**
+     * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1 in a safe manner.
+     * 
+     * @param headerValue The possibly encoded header value
+     * @return The possibly decoded header value
+     */
+    private static String decodeMultiEncodedHeaderSafe(final String headerValue) {
+        if (headerValue == null) {
+            return null;
+        }
+        final String hdrVal = MIMEMessageUtility.unfold(headerValue);
+        final Matcher m = ENC_PATTERN.matcher(hdrVal);
+        if (m.find()) {
+            final StringBuilder sb = new StringBuilder(hdrVal.length());
+            StringBuilder tmp = null;
+            int lastMatch = 0;
+            do {
+                try {
+                    sb.append(hdrVal.substring(lastMatch, m.start()));
+                    final String enc;
+                    if ("Q".equals(m.group(2))) {
+                        final String charset = m.group(1);
+                        final String preparedEWord = prepareQEncodedValue(m.group(3), charset);
+                        if (null == tmp) {
+                            tmp = new StringBuilder(preparedEWord.length() + 16);
+                        } else {
+                            tmp.setLength(0);
+                        }
+                        tmp.append("=?").append(charset).append('?').append('Q').append('?').append(preparedEWord).append("?=");
+                        enc = tmp.toString();
+                    } else {
+                        enc = m.group();
+                    }
+                    sb.append(MimeUtility.decodeWord(enc));
+                    lastMatch = m.end();
+                } catch (final UnsupportedEncodingException e) {
+                    LOG.error("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                    sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
                     LOG.error("String is not an encoded-word as per RFC 2047: " + m.group(), e);
-                    sb.append(Matcher.quoteReplacement(m.group()));
+                    sb.append(m.group());
                     lastMatch = m.end();
                 }
             } while (m.find());
@@ -350,6 +415,73 @@ public final class MIMEMessageUtility {
             return sb.toString();
         }
         return hdrVal;
+    }
+
+    /**
+     * Prepares specified encoded word, thus even corrupt headers are properly handled.<br>
+     * Here is an example of such a corrupt header:
+     * 
+     * <pre>
+     * =?windows-1258?Q?foo_bar@mail.foobar.com, _Foo_B=E4r_=28fb@somewhere,
+     *  =@unspecified-domain,  =?windows-1258?Q?de=29@mail.foobar.com,
+     *  _Jane_Doe@mail.foobar.com, ?=
+     * </pre>
+     * 
+     * @param eword The possibly corrupt encoded word
+     * @param charset The charset
+     * @return The prepared encoded word which won't cause a {@link ParseException parse error} during decoding
+     */
+    private static String prepareQEncodedValue(final String eword, final String charset) {
+        final int len = eword.length();
+        int pos = eword.indexOf('=');
+        if (pos == -1) {
+            return eword;
+        }
+        final StringBuilder sb = new StringBuilder(len);
+        int prev = 0;
+        do {
+            final char c1 = eword.charAt(pos + 1);
+            final char c2 = eword.charAt(pos + 2);
+            final int nextPos;
+            if (isHex(c1) && isHex(c2)) {
+                nextPos = pos + 3;
+                sb.append(eword.substring(prev, nextPos));
+            } else {
+                nextPos = pos + 1;
+                if (ENCODINGS.contains(HeaderName.valueOf(charset))) {
+                    sb.append(eword.substring(prev, pos)).append("=3D");
+                } else {
+                    sb.append(eword.substring(prev, pos)).append(qencode('=', charset));
+                }
+            }
+            prev = nextPos;
+            pos = nextPos < len ? eword.indexOf('=', nextPos) : -1;
+        } while (pos != -1);
+        if (prev < len) {
+            sb.append(eword.substring(prev));
+        }
+        return sb.toString();
+    }
+
+    private static boolean isHex(final char c) {
+        return ('0' <= c && c <= '9') || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
+    }
+
+    private static String qencode(final char toEncode, final String charset) {
+        if (!Charset.isSupported(charset)) {
+            return String.valueOf(toEncode);
+        }
+        final StringBuilder retval = new StringBuilder(4);
+        try {
+            final byte[] bytes = String.valueOf(toEncode).getBytes(charset);
+            for (int j = 0; j < bytes.length; j++) {
+                retval.append('=').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
+            }
+        } catch (final java.io.UnsupportedEncodingException e) {
+            // Cannot occur
+            LOG.error(e.getMessage(), e);
+        }
+        return retval.toString();
     }
 
     /**
