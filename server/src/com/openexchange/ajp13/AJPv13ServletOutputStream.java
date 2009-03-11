@@ -110,7 +110,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      */
     @Override
     public void flush() throws IOException {
-        // Nothing to do
+        // Nothing to do; to enable flushing just call flushByteBuffer()
     }
 
     @Override
