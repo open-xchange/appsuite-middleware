@@ -98,7 +98,7 @@ public interface ContactInterface {
      * @param orderBy
      * Column id to sort. 0 if no order by is used
      * @param orderDir
-     * Order direction (asc or desc)
+     * Order direction (asc or desc) may be null if no special ordering is requested
      * @param cols
      * The columns filled to the dataobject
      * @param readcon
