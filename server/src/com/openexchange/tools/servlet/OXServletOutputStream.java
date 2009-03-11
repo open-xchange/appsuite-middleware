@@ -103,7 +103,11 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	 */
 	@Override
 	public void close() throws IOException {
-		flushByteBuffer();
+        if (isClosed) {
+            return;
+        }
+        flushByteBuffer();
+        isClosed = true;
 	}
 
 	/*
@@ -127,9 +131,6 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	 * @throws IOException
 	 */
 	public byte[] getData() throws IOException {
-		if (isClosed) {
-			throw new IOException(ERR_OUTPUT_CLOSED);
-		}
 		/*
 		 * try { byteBuffer.flush(); } catch (IOException e) {
 		 * LOG.error(e.getMessage(), e); }
@@ -263,6 +264,8 @@ public final class OXServletOutputStream extends ServletOutputStream {
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
+			// Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
+            isClosed = true;
 			final IOException ioexc = new IOException(e.getMessage());
 			ioexc.initCause(e);
 			throw ioexc;
@@ -293,9 +296,6 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	 * @throws IOException
 	 */
 	public void flushByteBuffer() throws IOException {
-		if (isClosed) {
-			throw new IOException(ERR_OUTPUT_CLOSED);
-		}
 		responseToWebServer();
 	}
 
@@ -303,9 +303,6 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	 * @throws IOException
 	 */
 	public void clearByteBuffer() throws IOException {
-		if (isClosed) {
-			throw new IOException(ERR_OUTPUT_CLOSED);
-		}
 		byteBuffer.reset();
 	}
 }

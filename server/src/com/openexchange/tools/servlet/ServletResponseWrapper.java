@@ -239,10 +239,10 @@ public class ServletResponseWrapper implements ServletResponse {
 		if (outputSelection == USE_OUTPUT_WRITER && writer != null) {
 			try {
 				if (bufferSize > 0) {
-					writer = new ResponsivePrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
 							getCharacterEncoding()), bufferSize), true);
 				} else {
-					writer = new ResponsivePrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
 							getCharacterEncoding())), true);
 				}
 			} catch (final UnsupportedEncodingException e) {
