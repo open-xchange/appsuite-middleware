@@ -103,14 +103,14 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
         }
     }
 
+    /**
+     * The <code>flush()</code> method of <code>AJPv13ServletOutputStream</code> does nothing.
+     * <p>
+     * Use {@link #flushByteBuffer()} to really flush data.
+     */
     @Override
     public void flush() throws IOException {
-        final Lock l = synchronizer.acquire();
-        try {
-            flushByteBuffer();
-        } finally {
-            synchronizer.release(l);
-        }
+        // Nothing to do
     }
 
     @Override
@@ -120,7 +120,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (isClosed) {
                 return;
             }
-            flushByteBuffer();
+            flush2WebServer();
             isClosed = true;
         } finally {
             synchronizer.release(l);
@@ -135,7 +135,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
                 throw new IOException(ERR_OUTPUT_CLOSED);
             }
             if (count >= buf.length) {
-                responseToWebServer();
+                flush2WebServer();
             }
             buf[count++] = (byte) i;
         } finally {
@@ -210,7 +210,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
                  */
                 System.arraycopy(b, off, buf, count, restCapacity);
                 count += restCapacity;
-                responseToWebServer();
+                flush2WebServer();
                 /*
                  * Write exceeding bytes directly to output stream
                  */
@@ -241,7 +241,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      * 
      * @throws IOException If an I/O error occurs
      */
-    private void responseToWebServer() throws IOException {
+    private void flush2WebServer() throws IOException {
         responseToWebServer(buf, 0, count);
         count = 0;
     }
@@ -277,7 +277,8 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             } else {
                 LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
             }
-            // ajpCon.close();
+            // Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
+            isClosed = true;
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;
@@ -315,7 +316,8 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             } else {
                 LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
             }
-            ajpCon.close();
+            // Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
+            isClosed = true;
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;
@@ -335,8 +337,13 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      * 
      * @throws IOException If an I/O error occurs
      */
-    private void flushByteBuffer() throws IOException {
-        responseToWebServer();
+    public void flushByteBuffer() throws IOException {
+        final Lock l = synchronizer.acquire();
+        try {
+            flush2WebServer();
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     /**

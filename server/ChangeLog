@@ -1,3 +1,7 @@
+* 2009-03-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
+
 * 2009-03-10 - thorben.betten@open-xchange.com
 
  - Bugfix #13364: Setting proper Content-Disposition header when parsing TNEF attachments

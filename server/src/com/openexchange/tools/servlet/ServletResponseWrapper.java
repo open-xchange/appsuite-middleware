@@ -160,8 +160,9 @@ public class ServletResponseWrapper implements ServletResponse {
     public void flushBuffer() throws IOException {
         if (outputSelection == OUTPUT_WRITER && writer != null) {
             writer.flush();
+            servletOutputStream.flushByteBuffer();
         } else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
-            servletOutputStream.flush();
+            servletOutputStream.flushByteBuffer();
         }
     }
 
@@ -273,13 +274,11 @@ public class ServletResponseWrapper implements ServletResponse {
             outputSelection = OUTPUT_WRITER;
         }
         if (bufferSize > 0) {
-            writer = new ResponsivePrintWriter(new BufferedWriter(
-                new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
-                bufferSize), true);
-        } else {
-            writer = new ResponsivePrintWriter(
-                new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())),
+            writer = new PrintWriter(
+                new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()), bufferSize),
                 true);
+        } else {
+            writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
         }
         return writer;
     }
