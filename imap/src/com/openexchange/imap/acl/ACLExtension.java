@@ -163,9 +163,9 @@ public interface ACLExtension {
     public boolean canExpunge(Rights rights);
 
     /**
-     * Creates a new instance containing all rights supported by ACL extension.
+     * Returns read-only rights containing all rights supported by ACL extension.
      * 
-     * @return A new instance containing all rights supported by ACL extension.
+     * @return Read-only rights containing all rights supported by ACL extension.
      */
     public Rights getFullRights();
 

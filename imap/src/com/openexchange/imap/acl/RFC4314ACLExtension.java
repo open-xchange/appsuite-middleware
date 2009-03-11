@@ -118,11 +118,14 @@ class RFC4314ACLExtension extends AbstractACLExtension {
      */
     private static final transient Rights RIGHTS_UNMAPPABLE = new Rights("p");
 
+    private final Rights fullRights;
+
     /**
      * Initializes a new {@link RFC4314ACLExtension}.
      */
     RFC4314ACLExtension() {
         super();
+        fullRights = new ReadOnlyRights("lrswipkxtecda");
     }
 
     public boolean canGetACL(final Rights rights) {
@@ -150,7 +153,7 @@ class RFC4314ACLExtension extends AbstractACLExtension {
     }
 
     public Rights getFullRights() {
-        return new Rights("lrswipkxtecda");
+        return fullRights;
     }
 
     public void addFolderAdminRights(final Rights rights) {

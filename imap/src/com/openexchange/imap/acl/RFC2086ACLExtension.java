@@ -105,11 +105,14 @@ class RFC2086ACLExtension extends AbstractACLExtension {
      */
     private static final transient Rights RIGHTS_UNMAPPABLE = new Rights("p");
 
+    private final Rights fullRights;
+
     /**
      * Initializes a new {@link RFC2086ACLExtension}.
      */
     RFC2086ACLExtension() {
         super();
+        fullRights = new ReadOnlyRights("acdilprsw");
     }
 
     public boolean canGetACL(final Rights rights) {
@@ -137,7 +140,7 @@ class RFC2086ACLExtension extends AbstractACLExtension {
     }
 
     public Rights getFullRights() {
-        return new Rights("acdilprsw");
+        return fullRights;
     }
 
     public void addFolderAdminRights(final Rights rights) {

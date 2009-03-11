@@ -81,10 +81,11 @@ public final class NoACLExtension implements ACLExtension {
      */
     private NoACLExtension() {
         super();
-        fullRights = new Rights();
+        final Rights tmp = new Rights();
         for (char c = 'a'; c <= 'z'; c++) {
-            fullRights.add(Rights.Right.getInstance(c));
+            tmp.add(Rights.Right.getInstance(c));
         }
+        fullRights = new ReadOnlyRights(tmp);
     }
 
     public boolean canRead(final Rights rights) {

@@ -56,7 +56,7 @@ import com.sun.mail.imap.Rights;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ReadOnlyRights extends Rights {
+final class ReadOnlyRights extends Rights {
 
     private final boolean constructed;
 
@@ -65,7 +65,7 @@ public final class ReadOnlyRights extends Rights {
      * 
      * @param rights The rights for initialization
      */
-    public ReadOnlyRights(final Rights rights) {
+    ReadOnlyRights(final Rights rights) {
         super(rights);
         constructed = true;
     }
@@ -75,7 +75,7 @@ public final class ReadOnlyRights extends Rights {
      * 
      * @param rights The rights for initialization
      */
-    public ReadOnlyRights(final String rights) {
+    ReadOnlyRights(final String rights) {
         super(rights);
         constructed = true;
     }
@@ -85,7 +85,7 @@ public final class ReadOnlyRights extends Rights {
      * 
      * @param right The right for initialization
      */
-    public ReadOnlyRights(final Right right) {
+    ReadOnlyRights(final Right right) {
         super(right);
         constructed = true;
     }
