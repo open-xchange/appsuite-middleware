@@ -21,10 +21,12 @@
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
+	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
 	<property name="globaljar" value="com.openexchange.global.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
+    	<pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
     </path>
 
