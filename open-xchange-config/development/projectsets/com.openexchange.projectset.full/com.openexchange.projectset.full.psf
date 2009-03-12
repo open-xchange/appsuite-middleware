@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/authentication-db,authentication-db"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/charset,charset"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.open-xchange.authentication.imap,com.open-xchange.authentication.imap"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.authentication.imap,com.openexchange.authentication.imap"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.authentication.ldap,com.openexchange.authentication.ldap"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.configjump.generic,com.openexchange.configjump.generic"/>
@@ -24,12 +21,15 @@
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.security,com.openexchange.security"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.spamhandler.default,com.openexchange.spamhandler.default"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.spamhandler.spamassassin,com.openexchange.spamhandler.spamassassin"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/control,control"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/i18n,i18n"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/imap,imap"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/jcharset,jcharset"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/push-udp,push-udp"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/sessiond,sessiond"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/smtp,smtp"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/authentication-db,com.openexchange.authentication.database"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/charset,com.openexchange.charset"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/control,com.openexchange.control"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/i18n,com.openexchange.i18n"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/imap,com.openexchange.imap"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/jcharset,net.freeutils.jcharset"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/push-udp,com.openexchange.push.udp"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/sessiond,com.openexchange.sessiond"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/smtp,com.openexchange.smtp"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,openexchange-test,openexchange-test"/>
 </provider>
 </psf>
