@@ -56,7 +56,7 @@ import com.openexchange.dataretention.DataRetentionExceptionFactory;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 /**
- * {@link DataRetentionActivator}
+ * {@link DataRetentionActivator} - Simple {@link BundleActivator activator} which registers data retention bundle's exception class.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
