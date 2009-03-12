@@ -28,7 +28,7 @@ public class Activator extends DeferredActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         PublicationService publicationService = getService(PublicationService.class);
-       // PublishJSONServlet.setPublicationService(publicationService);
+        PublishJSONServlet.setPublicationService(publicationService);
 
         final HttpService httpService = getService(HttpService.class);
         try {
@@ -53,7 +53,7 @@ public class Activator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         PublicationService publicationService = getService(PublicationService.class);
-        //PublishJSONServlet.setPublicationService(publicationService);
+        PublishJSONServlet.setPublicationService(publicationService);
 
         if(publicationService == null) {
             return;

@@ -126,10 +126,9 @@ public class PublicationSQL {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM ");
         sb.append(SITE_TABLE);
-        sb.append("WHERE cid = ? AND user = ?");
+        sb.append(" WHERE cid = ? AND user = ?");
 
         List<Site> retval = new ArrayList<Site>();
-
         List<Map<String, Object>> sites = Transaction.commitQuery(contextId, sb.toString(), contextId, userId);
         for (Map<String, Object> site : sites) {
             Site siteObject = new Site();

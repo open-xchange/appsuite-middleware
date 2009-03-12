@@ -47,6 +47,10 @@ public class PublishJSONServlet extends PermissionServlet {
 
     private static PublicationService publicationService;
 
+    public static void setPublicationService(PublicationService service) {
+        publicationService = service;
+    }
+    
     @Override
     protected boolean hasModulePermission(Session session, Context ctx) {
         return true;
@@ -120,6 +124,9 @@ public class PublishJSONServlet extends PermissionServlet {
         JSONArray retval = new JSONArray();
 
         Collection<Site> sites = publicationService.getSites(session.getContextId(), session.getUserId());
+        if(sites == null) {
+            return retval;
+        }
         for (Site site : sites) {
             retval.put(getJSONObject(site));
         }
@@ -144,6 +151,7 @@ public class PublishJSONServlet extends PermissionServlet {
         if (action.equals(PUBLISH_ACTION)) {
             JSONObject siteToPublish = new JSONObject(getBody(req));
             Site site = getSite(siteToPublish, session);
+            unpublish(site);
             publish(site);
         } else if (action.equals(UNPUBLISH_ACTION)) {
             JSONObject siteToUnpublish = new JSONObject(getBody(req));

@@ -9,6 +9,7 @@ import com.openexchange.publish.microformats.PublishMicroformatsServlet;
 import com.openexchange.publish.microformats.internal.Contexts;
 import com.openexchange.publish.microformats.internal.Users;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.tagging.TaggingService;
 import com.openexchange.user.UserService;
 
 public class Activator extends DeferredActivator {
@@ -20,7 +21,7 @@ public class Activator extends DeferredActivator {
     private Servlet publishServlet;
 
     private static final Class<?>[] NEEDED_SERVICES = {
-        HttpService.class, PublicationService.class, ContextService.class, UserService.class };
+        HttpService.class, PublicationService.class, TaggingService.class, ContextService.class, UserService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -32,6 +33,9 @@ public class Activator extends DeferredActivator {
         PublicationService publicationService = getService(PublicationService.class);
         PublishMicroformatsServlet.setPublicationService(publicationService);
 
+        TaggingService taggingService = getService(TaggingService.class);
+        PublishMicroformatsServlet.setTaggingService(taggingService);
+        
         Contexts.setContextService(getService(ContextService.class));
         Users.setUserService(getService(UserService.class));
 
@@ -61,9 +65,13 @@ public class Activator extends DeferredActivator {
         if (publicationService == null) {
             return;
         }
-
+        
         PublishMicroformatsServlet.setPublicationService(publicationService);
 
+        TaggingService taggingService = getService(TaggingService.class);
+        PublishMicroformatsServlet.setTaggingService(taggingService);
+
+        
         ContextService contextService = getService(ContextService.class);
         if (contextService == null) {
             return;

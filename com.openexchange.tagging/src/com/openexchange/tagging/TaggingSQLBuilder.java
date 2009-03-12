@@ -55,60 +55,85 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 /**
  * {@link TaggingSQLBuilder}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class TaggingSQLBuilder {
-    
+
     private static final Set<String> KEYWORDS = new HashSet<String>() {
+
         {
-            add("AND");
             add("OR");
             add(")");
-            
         }
     };
-    
+
     public SQLStatement build(String string) {
         List<String> tags = new ArrayList<String>();
         string = string.replaceAll("\\(", " ( ");
         string = string.replaceAll("\\)", " ) ");
         String[] elements = string.split("\\s+");
+        StringBuilder select = new StringBuilder("SELECT * FROM tags AS t1 ");
         StringBuilder where = new StringBuilder();
         boolean negation = false;
+        boolean addJoin = false;
+        int joinCounter = 1;
         for (String element : elements) {
-            if("NOT".equalsIgnoreCase(element)) {
+            if ("AND".equalsIgnoreCase(element)) {
+                addJoin = true;
+                where.append("AND ");
+            } else if ("NOT".equalsIgnoreCase(element)) {
                 negation = true;
-            }else if("(".equals(element)) {
-                if(negation) {
+            } else if ("(".equals(element)) {
+                if (negation) {
                     where.append("NOT ( ");
                     negation = false;
                 } else {
                     where.append("( ");
                 }
-            } else if(isKeyword(element)) {
+                addJoin = false;
+            } else if (isKeyword(element)) {
                 where.append(element).append(" ");
             } else {
-                if(negation) {
-                    where.append("tag != ? ");
-                    negation = false;
-                } else {
-                    where.append("tag = ? ");
+                String tagExpression = "t1.tag";
+                if(addJoin) {
+                    joinCounter++;
+                    select.append("LEFT JOIN tags AS t").append(joinCounter).append(" ON t1.cid = t").append(joinCounter).append(".cid AND t1.object_id = t").append(joinCounter).append(".object_id ").append(tagsDiffer(joinCounter));
+                    tagExpression = "t"+joinCounter+".tag";
+                    addJoin = false;
                 }
+                
+                if (negation) {
+                    where.append("( ").append(tagExpression).append(" != ? OR ").append(tagExpression).append(" IS NULL ) ");
+                } else {
+                    where.append(tagExpression).append(" = ? ");
+                }
+                
                 tags.add(element);
+                negation = false;
+                
             }
         }
         where.append(")");
-        return new SQLStatement("SELECT * FROM tags WHERE cid = ? AND ("+where.toString(), tags);
+        return new SQLStatement(select.toString()+"WHERE t1.cid = ? AND (" + where.toString(), tags);
+    }
+
+    private String tagsDiffer(int joinCounter) {
+        StringBuilder b = new StringBuilder("AND ");
+        for(int i = 1; i <= joinCounter; i++) {
+            for(int j = i+1; j <= joinCounter; j++) {
+                b.append("t").append(i).append(".tag != t").append(j).append(".tag AND ");
+            }
+        }
+        b.setLength(b.length()-4);
+        return b.toString();
     }
 
     private boolean isKeyword(String element) {
         for (String keyword : KEYWORDS) {
-            if(keyword.equalsIgnoreCase(element)) {
+            if (keyword.equalsIgnoreCase(element)) {
                 return true;
             }
         }
