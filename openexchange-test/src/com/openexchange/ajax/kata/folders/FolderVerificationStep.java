@@ -49,33 +49,28 @@ package com.openexchange.ajax.kata.folders;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
-import com.openexchange.ajax.contact.action.ListRequest;
-import com.openexchange.ajax.contact.action.SearchRequest;
-import com.openexchange.ajax.contact.action.SearchResponse;
-import com.openexchange.ajax.contact.action.UpdatesRequest;
+
+import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
+import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -89,7 +84,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     private FolderTestManager manager;
 
     /**
-     * Initializes a new {@link TaskVerificationStep}.
+     * Initializes a new {@link FolderVerificationStep}.
      * 
      * @param name
      * @param expectedError
@@ -111,8 +106,6 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         checkViaAll(folder);
         checkViaList(folder);
         checkViaUpdates(folder);
-        // TODO: Is there a search-function for folders? HTTP-API (http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22folders.22) says no
-        //checkViaSearch(folder);
     }
 
     private void checkViaGet(FolderObject folder) throws OXException, JSONException {
@@ -127,10 +120,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
 
     private void checkViaList(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { folder.getParentFolderID(), folder.getObjectID() }),
-            FolderObject.ALL_COLUMNS,
-            false);
+        ListRequest listRequest = new ListRequest(Integer.toString(folder.getParentFolderID()));
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
@@ -145,18 +135,12 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
             FolderObject.OBJECT_ID,
             Order.ASCENDING,
             new Date(0));
-        CommonUpdatesResponse response = client.execute(updates);
-        // TODO: write FolderUpdatesParser and FolderUpdatesResponse
+        FolderUpdatesResponse response = (FolderUpdatesResponse) client.execute(updates);
+        // TODO: write FolderUpdatesParser
         //List<FolderObject> folders = response.getFolders();
         //checkInList(folder, folders, "updates-");
     }
-
-//    private void checkViaSearch(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-//        Object[][] rows = getViaSearch(folder);
-//        checkInList(folder, rows, FolderObject.ALL_COLUMNS, "search-");
-//    }
     
-
     private void checkInList(FolderObject folder, Object[][] rows, int[] columns, String typeOfAction) throws AjaxException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
@@ -172,27 +156,10 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
 
     private Object[][] getViaAll(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        AllRequest all = new AllRequest(folder.getParentFolderID(), FolderObject.ALL_COLUMNS);
+        CommonAllRequest all = new CommonAllRequest("/ajax/folders", folder.getParentFolderID(), FolderObject.ALL_COLUMNS, 0, null, true);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
-
-//    private Object[][] getViaSearch(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-//        ContactSearchObject contactSearch = new ContactSearchObject();
-//        contactSearch.setPattern("*");
-//        SearchRequest searchRequest = new SearchRequest(contactSearch, FolderObject.ALL_COLUMNS, false);
-//        SearchResponse searchResponse = client.execute(searchRequest);
-//        JSONArray data = (JSONArray) searchResponse.getResponse().getData();
-//        Object[][] results = new Object[data.length()][];
-//        for (int i = 0; i < results.length; i++) {
-//            JSONArray tempArray = data.getJSONArray(i);
-//            results[i] = new Object[tempArray.length()];
-//            for (int j = 0; j < tempArray.length(); j++) {
-//                results[i][j] = tempArray.get(j);
-//            }
-//        }
-//        return results;
-//    }
 
     private void compare(FolderObject folder, FolderObject loaded) {
         int[] columns = FolderObject.ALL_COLUMNS;

@@ -299,7 +299,7 @@ public class FolderTestManager extends TestCase {
 	}
 
 	/**
-	 * get all folders in one parent folder via the HTTP-API
+	 * get all folders in one parent folder via the HTTP-API (List-Request)
 	 */
 	public FolderObject[] listFoldersOnServer (int parentFolderId) {
 		Vector <FolderObject> allFolders = new Vector<FolderObject>();
@@ -312,15 +312,15 @@ public class FolderTestManager extends TestCase {
 				allFolders.add(iterator.next());
 			}
 		} catch (AjaxException e) {
-			fail("AjaxException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
+			fail("AjaxException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
+			fail("IOException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
+			fail("SAXException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
+			fail("JSONException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
+			fail("OXException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		}
 		FolderObject[] folderArray = new FolderObject[allFolders.size()];
 		allFolders.copyInto(folderArray);
@@ -454,34 +454,35 @@ public class FolderTestManager extends TestCase {
 //		return folderArray;
 //	}	
 	
-//	/**
-//	 * get all folders in one parent folder via the HTTP-API
-//	 */
-//	public FolderObject[] getAllFoldersOnServer (int folderId) {
-//		Vector <FolderObject> allFolders = new Vector<FolderObject>();
-//		CommonAllRequest request = new CommonAllRequest (AbstractFolderRequest.FOLDER_URL, folderId, new int [] {FolderObject.OBJECT_ID}, 0, null, true);
-//		try {
-//			CommonAllResponse response = client.execute(request);
-//			final JSONArray data = (JSONArray) response.getResponse().getData();
-//			for (int i=0; i < data.length(); i++) {
-//				JSONArray temp = (JSONArray) data.optJSONArray(i);
-//				int tempFolderId = temp.getInt(0);
-//				FolderObject tempFolder = getFolderFromServer(tempFolderId);
-//				allFolders.add(tempFolder);
-//			}
-//		} catch (AjaxException e) {
-//			fail("AjaxException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
-//		} catch (IOException e) {
-//			fail("IOException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
-//		} catch (SAXException e) {
-//			fail("SAXException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
-//		} catch (JSONException e) {
-//			fail("JSONException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
-//		}
-//		FolderObject[] folderArray = new FolderObject[allFolders.size()];
-//		allFolders.copyInto(folderArray);
-//		return folderArray;
-//	}	
+	/**
+	 * get all folders in one parent folder via the HTTP-API (All-Request)
+	 */
+	// TODO: It would be nice if the fields of the returned FolderObjects were filled by the original AllRequest, not by separate GetRequests
+	public FolderObject[] getAllFoldersOnServer (int folderId) {
+		Vector <FolderObject> allFolders = new Vector<FolderObject>();
+		CommonAllRequest request = new CommonAllRequest ("/ajax/folders", folderId, new int [] {FolderObject.OBJECT_ID}, 0, null, true);
+		try {
+			CommonAllResponse response = client.execute(request);
+			final JSONArray data = (JSONArray) response.getResponse().getData();
+			for (int i=0; i < data.length(); i++) {
+				JSONArray temp = (JSONArray) data.optJSONArray(i);
+				int tempFolderId = temp.getInt(0);
+				FolderObject tempFolder = getFolderFromServer(tempFolderId);
+				allFolders.add(tempFolder);
+			}
+		} catch (AjaxException e) {
+			fail("AjaxException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
+		} catch (IOException e) {
+			fail("IOException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
+		} catch (SAXException e) {
+			fail("SAXException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
+		} catch (JSONException e) {
+			fail("JSONException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
+		}
+		FolderObject[] folderArray = new FolderObject[allFolders.size()];
+		allFolders.copyInto(folderArray);
+		return folderArray;
+	}	
 	
 //	private void convertJSONArray2Vector(JSONArray data, Vector allFolders) throws JSONException, OXException {
 //		for (int i=0; i < data.length(); i++) {
