@@ -8,4 +8,6 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.dataretention
 Import-Package: com.openexchange.exceptions,
- com.openexchange.groupware
+ com.openexchange.exceptions.osgi,
+ com.openexchange.groupware,
+ org.osgi.framework
