@@ -17,16 +17,16 @@
    >>> Refresh (F5) project "open-xchange-development" <<<
    
 4. Build AJAX front-end by executing default ant task in build.xml file
-   "openexchange-gui/build.xml".
+   "open-xchange-gui/build.xml".
    
    Enable mod_proxy in your apache and add an appropriate configuration to
    apache's "conf.d" directory.
    See configuration file "com.openexchange.server/doc/examples/proxy_ajp_noncluster.conf".
    
    Next step is to make AJAX front-end accessible. A good way would be to link
-   the directory "openexchange-gui" located in your workspace to system user's
+   the directory "open-xchange-gui" located in your workspace to system user's
    "public_html" directory:
-   'ln -s ${workspace_loc}/openexchange-gui Open-Xchange-GUI'
+   'ln -s ${workspace_loc}/open-xchange-gui Open-Xchange-GUI'
    The front-end is then accessible from: "http://localhost/~[username]/Open-Xchange-GUI"
    
    
