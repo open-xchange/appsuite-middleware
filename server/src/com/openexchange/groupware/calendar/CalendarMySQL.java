@@ -2303,6 +2303,11 @@ class CalendarMySQL implements CalendarSqlImp {
      * @return
      */
     private boolean checkRecurrenceMasterTimeUpdate(final CalendarDataObject newObject, final CalendarDataObject currentObject) {
+        //Is sequence?
+        if (!currentObject.containsRecurrenceType() || currentObject.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
+            return false;
+        }
+        
         //Is Exception
         if(newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
             return false;
@@ -2921,28 +2926,36 @@ class CalendarMySQL implements CalendarSqlImp {
                     CalendarCommonCollection.closePreparedStatement(pidm);
                 }
             }
+            PreparedStatement cleanStatement = null;
             PreparedStatement pid = null;
             try {
+                cleanStatement = writecon.prepareStatement("DELETE FROM del_dates_members WHERE object_id = ? AND member_uid = ? AND cid = ?");
                 pid = writecon.prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
                 for (int a = 0; a < newdel_up.length; a++) {
+                    cleanStatement.setInt(1, cdao.getObjectID());
                     pid.setInt(1, cdao.getObjectID());
+                    cleanStatement.setInt(2, newdel_up[a].getIdentifier());
                     pid.setInt(2, newdel_up[a].getIdentifier());
                     if (cdao.getGlobalFolderID() == 0) {
                         pid.setInt(3, newdel_up[a].getPersonalFolderId());
                     } else {
                         pid.setNull(3, java.sql.Types.INTEGER);
                     }
+                    cleanStatement.setInt(3, cid);
                     pid.setInt(4, cid);
                     if (newdel_up[a].containsConfirm()) {
                         pid.setInt(5, newdel_up[a].getConfirm());
                     } else {
                         pid.setNull(5, java.sql.Types.INTEGER);
                     }
+                    cleanStatement.addBatch();
                     pid.addBatch();
                 }
+                cleanStatement.executeBatch();
                 pid.executeBatch();
                 del_master_update = true;
             } finally {
+                CalendarCommonCollection.closeStatement(cleanStatement);
                 CalendarCommonCollection.closePreparedStatement(pid);
             }
         }

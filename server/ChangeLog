@@ -1,6 +1,7 @@
-* 2009-03-05 - martin.herfurth@open-xchange.com
+* 2009-03-13 - martin.herfurth@open-xchange.com
 
  - Bugfix #13358: Deleted groups are resolved and members are added to the appointments.
+ - Bugfix #13377: Remove Participant after changing an appointments timeframe.
 
 * 2009-03-11 - francisco.laguna@open-xchange.com
 
