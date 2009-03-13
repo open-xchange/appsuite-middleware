@@ -11,6 +11,9 @@
     <!-- Replacements -->
     <property name="conf.install.dir" value="${basedir}/${tmp.dir}"/>
 
+	<!-- Data Retention property file -->
+	<property name="dataretention.properties" value="${basedir}/${tmp.dir}/dataretention.properties"/>
+
     <target name="prepare">
         <mkdir dir="${tmp.dir}"/>
     </target>
@@ -38,6 +41,7 @@
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
         <antcall target="patchSessiondProperties"/>
         <antcall target="patchPath"/>
+    	<antcall target="patchDataRetentionProperties"/>
     </target>
 
     <target name="patchSessiondProperties">
@@ -58,5 +62,10 @@
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
     </target>
+
+	<target name="patchDataRetentionProperties">
+		<replace file="${dataretention.properties}" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${conf.install.dir}">
+		</replace>
+	</target>
 
 </project>
