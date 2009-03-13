@@ -54,14 +54,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -73,6 +77,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -91,6 +96,8 @@ public class CalendarAdministration implements DeleteListener {
     private StringBuilder u1;
 
     private static final Log LOG = LogFactory.getLog(CalendarAdministration.class);
+    
+    private Set<Integer> handledObjects = new HashSet<Integer>();
     
     /**
      * Initializes a new {@link CalendarAdministration}
@@ -284,6 +291,131 @@ public class CalendarAdministration implements DeleteListener {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCEGROUP);
     }
     
+    private final Set<Integer> resolveMembersOfGroups(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon) throws SQLException, LdapException {
+        PreparedStatement rightsStatement = null;
+        ResultSet rightsResultSet = null;
+        Set<Integer> usersInRightsTable = new HashSet<Integer>();
+        
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT id, type FROM ");
+            sb.append(CalendarSql.VIEW_TABLE_NAME);
+            sb.append(" WHERE cid = ? AND object_id = ? AND type in (?, ?)");
+            
+            rightsStatement = readcon.prepareStatement(sb.toString());
+            rightsStatement.setInt(1, deleteEvent.getContext().getContextId());
+            rightsStatement.setInt(2, objectId);
+            if (type == Participant.GROUP) {
+                rightsStatement.setInt(3, Participant.GROUP);
+                rightsStatement.setInt(4, Participant.USER);
+            } else if (type == Participant.RESOURCEGROUP) {
+                rightsStatement.setInt(3, Participant.RESOURCEGROUP);
+                rightsStatement.setInt(4, Participant.RESOURCE);
+            }
+            
+            rightsResultSet = rightsStatement.executeQuery();
+            while (rightsResultSet.next()) {
+                if (rightsResultSet.getInt(2) == Participant.USER) {
+                    usersInRightsTable.add(rightsResultSet.getInt(1));
+                } else if (rightsResultSet.getInt(2) == Participant.GROUP) {
+                    if (rightsResultSet.getInt(1) == deleteEvent.getId()) {
+                        continue;
+                    }
+                    Group group = GroupStorage.getInstance().getGroup(rightsResultSet.getInt(1), deleteEvent.getContext());
+                    for (int memberUid : group.getMember()) {
+                        usersInRightsTable.add(memberUid);
+                    }
+                }
+            }
+        } finally {
+            if (rightsResultSet != null) {
+                rightsResultSet.close();
+            }
+            if (rightsStatement != null) {
+                rightsStatement.close();
+            }
+        }
+        
+        return usersInRightsTable;
+    }
+    
+    private final Set<Integer> getUsers(final int objectId, final Context ctx, final int type, final Connection readcon) throws SQLException {
+        PreparedStatement membersStatement = null;
+        ResultSet membersResultSet = null;
+        Set<Integer> usersInMembersTable = new HashSet<Integer>();
+        
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT member_uid FROM ");
+            sb.append(CalendarSql.PARTICIPANT_TABLE_NAME);
+            sb.append(" WHERE cid = ? AND object_id = ?");
+            
+            membersStatement = readcon.prepareStatement(sb.toString());
+            membersStatement.setInt(1, ctx.getContextId());
+            membersStatement.setInt(2, objectId);
+            
+            membersResultSet = membersStatement.executeQuery();
+            while (membersResultSet.next()) {
+                usersInMembersTable.add(membersResultSet.getInt(1));
+            }
+        } finally {
+            if (membersResultSet != null) {
+                membersResultSet.close();
+            }
+            if (membersStatement != null) {
+                membersStatement.close();
+            }
+        }
+        
+        return usersInMembersTable;
+    }
+    
+    private final void resolveDeletedGroupAndAddMembers(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon, final Connection writecon) throws SQLException, LdapException {
+        if ( !(type == Participant.GROUP || type == Participant.RESOURCEGROUP)) {
+            return;
+        }
+        
+        if (handledObjects.contains(objectId)) {
+            return;
+        }
+        
+        PreparedStatement insertStatement = null;
+        Set<Integer> usersToAdd = new HashSet<Integer>();
+        
+        try {
+            usersToAdd.addAll(getUsers(objectId, deleteEvent.getContext(), type, readcon));
+            usersToAdd.removeAll(resolveMembersOfGroups(objectId, deleteEvent, type, readcon));
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT INTO ");
+            sb.append(CalendarSql.VIEW_TABLE_NAME);
+            sb.append(" (object_id, cid, id, type) ");
+            sb.append("VALUES ");
+            sb.append("(?, ?, ?, ?)");
+
+            insertStatement = writecon.prepareStatement(sb.toString());
+            
+            for (int id : usersToAdd) {
+                insertStatement.setInt(1, objectId);
+                insertStatement.setInt(2, deleteEvent.getContext().getContextId());
+                insertStatement.setInt(3, id);
+                if (type == Participant.GROUP) {
+                    insertStatement.setInt(4, Participant.USER);
+                } else if (type == Participant.RESOURCEGROUP) {
+                    insertStatement.setInt(4, Participant.RESOURCE);
+                }
+                insertStatement.addBatch();
+            }
+            insertStatement.executeBatch();
+        } finally {
+            if (insertStatement != null) {
+                insertStatement.close();
+            }
+        }
+        
+        handledObjects.add(objectId);
+    }
+    
     private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws DeleteFailedException, SQLException {
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -303,12 +435,15 @@ public class CalendarAdministration implements DeleteListener {
             while (rs.next()) {
                 final int object_id = rs.getInt(1);
                 eventHandling(object_id, 0, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
+                resolveDeletedGroupAndAddMembers(object_id, deleteEvent, type, readcon, writecon);
                 rs.deleteRow();
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
             }
             update.executeBatch();
             update.close();
         } catch (final OXException e) {
+            throw new DeleteFailedException(e);
+        } catch (LdapException e) {
             throw new DeleteFailedException(e);
         } finally {
             if (rs != null) {

@@ -1,3 +1,7 @@
+* 2009-03-05 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13358: Deleted groups are resolved and members are added to the appointments.
+
 * 2009-03-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #13333: Added null check. 
