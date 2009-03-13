@@ -298,25 +298,6 @@ public class LdapContactInterface implements ContactInterface {
         return columns;
     }
 
-
-    private ContactObject getDummyContact(int folderId) {
-        final ContactObject contactObject = new ContactObject();
-        contactObject.setContextId(111);
-        contactObject.setMiddleName("test1");
-        contactObject.setParentFolderID(folderId);
-        contactObject.setObjectID(2);
-//        contactObject.setInternalUserId(1);
-        contactObject.setNickname("test1");
-        contactObject.setDisplayName("test1");
-        contactObject.setGivenName("test1");
-        // TODO: Put Admin user here
-        contactObject.setCreatedBy(2);
-        contactObject.setNumberOfAttachments(0);
-        contactObject.setLastModified(new Date(System.currentTimeMillis()));
-        return contactObject;
-    }
-
-
     /**
      * @param instance
      * @param col
@@ -523,7 +504,6 @@ public class LdapContactInterface implements ContactInterface {
         final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
         try {
             final PropertyHandler instance = PropertyHandler.getInstance();
-            // instance.getAdminDN(), instance.getAdminDN()
             final LdapContext context = LdapUtility.createContext();
             try {
 
