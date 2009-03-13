@@ -2,8 +2,8 @@ def abs_path(myDir, myFile)
   File.expand_path( File.join( myDir.path, File.basename( myFile ) ) )
 end
 
-directories = ["../../../openexchange-test-gui/lib", "../../../common/lib"]
-excludes = ["/open-xchange-iface-tests.jar"]
+directories = ["../../../openexchange-test-gui/lib", "../../../com.openexchange.common/lib"]
+excludes = ["open-xchange-iface-tests.jar"]
 jars = []
 
 directories.each do |myDir|
