@@ -97,6 +97,7 @@ public class PropertyHandler {
         authtype("authtype"),
         contexts("contexts"),
         sorting("sorting"),
+        memorymapping("memorymapping"),
         // Here we begin with the mapping entries
         uniqueid("uniqueid"),
         displayname("displayname"),
@@ -459,6 +460,8 @@ public class PropertyHandler {
     private String lastmodified;
 
     private String creationdate;
+
+    private boolean memorymapping;
     
     
     private final static String PROPFILE = "contacts-ldap.properties";
@@ -504,6 +507,11 @@ public class PropertyHandler {
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.SORTING_WRONG, authstring);
         }
+        
+        final String memoryMappingString = checkStringProperty(Parameters.memorymapping.getName());
+        
+        // TODO: Throws no error, so use an error checking method
+        this.memorymapping = Boolean.parseBoolean(memoryMappingString);
         
         this.uniqueid = checkStringProperty(Parameters.uniqueid.getName());
         
@@ -901,6 +909,11 @@ public class PropertyHandler {
 
     public final String getMarital_status() {
         return marital_status;
+    }
+
+    
+    public final boolean isMemorymapping() {
+        return memorymapping;
     }
 
     public final String getCellular_telephone1() {

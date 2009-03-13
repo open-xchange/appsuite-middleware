@@ -50,11 +50,13 @@
 
 package com.openexchange.contacts.ldap.ldap;
 
+import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
+import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.contacts.ldap.property.PropertyHandler.SearchScope;
@@ -64,6 +66,8 @@ import com.openexchange.contacts.ldap.property.PropertyHandler.SearchScope;
  */
 public final class LdapUtility {
 
+   private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapUtility.class);
+    
    /**
     * Private constructor prevents instanciation.
     */
@@ -158,34 +162,39 @@ public final class LdapUtility {
 //      return retval;
 //   }
 
-//   /**
-//    * Reads a baseDN for a search from the properties. This baseDN can be
-//    * generic and will then be filled with the necessary values.
-//    * @param props the SearchBaseDN will be read from this properties.
-//    * @param propname The name of the property containing the SearchBaseDN.
-//    * @param values User specific values for the ldap context.
-//    * @return A ready to use BaseDN for the search.
-//    * @throws NamingException if an error occurs.
-//    */
-//   static String getSearchBaseDN(final Properties props, final String propname,
-//      final UserLdapValues values) throws NamingException {
-//      String retval = findProperty(props, propname, false);
-//      if (retval == null) {
-//         retval = "";
-//      }
-//      if (retval.length() > 0 && retval.charAt(0) == '['
-//         && retval.charAt(retval.length() - 1) == ']') {
-//         // if (retval.indexOf("[", 1) != -1) {
-//         Object[] temp = new Object[] { props, null, null, new HashMap(1) };
-//         retval = LineParserUtility.parseLine(retval, filler, temp);
-//         // } else {
-//         //    retval = values.getValue(retval
-//         //       .substring(1, retval.length() - 1));
-//         // }
-//      }
-//      return retval;
-//   }
-
+   public static LdapContext createContext() throws NamingException {
+       if (LOG.isDebugEnabled()) {
+           LOG.debug("Creating new connection.");
+       }
+       long start = System.currentTimeMillis();
+       Hashtable<String, String> env = new Hashtable<String, String>(4, 1f);
+       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+       // Enable connection pooling
+       env.put("com.sun.jndi.ldap.connect.pool", "true");
+       final PropertyHandler instance = PropertyHandler.getInstance();
+       String uri = instance.getUri();
+       if (uri.startsWith("ldap://") || uri.startsWith("ldaps://")) {
+           if (uri.endsWith("/")) {
+               uri = uri.substring(0, uri.length() - 1);
+           }
+           env.put(Context.PROVIDER_URL, uri + "/");
+       } else {
+           env.put(Context.PROVIDER_URL, "ldap://" + uri + ":389/");
+       }
+       if (uri.startsWith("ldaps://")) {
+           env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+       }
+       env.put(Context.SECURITY_PRINCIPAL, instance.getAdminDN());
+       env.put(Context.SECURITY_CREDENTIALS, instance.getAdminBindPW());
+       // TODO Make this configurable
+       env.put(Context.SECURITY_AUTHENTICATION, "simple");
+       LdapContext retval = new InitialLdapContext(env, null);
+       if (LOG.isDebugEnabled()) {
+           LOG.debug("Context creation time: " + (System.currentTimeMillis() - start) + " ms");
+       }
+       return retval;
+   }
+   
    /**
     * Appends two directory service names without affecting the given names.
     * E.g. appends <code>uid=testuser</code> and <code>dc=example,dc=org</code>

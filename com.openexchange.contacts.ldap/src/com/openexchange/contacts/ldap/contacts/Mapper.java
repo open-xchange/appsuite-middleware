@@ -65,13 +65,17 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class Mapper {
 
-    public static ContactObject getContact(final LdapGetter getter, Set<Integer> cols) throws LdapException {
+    public static ContactObject getContact(final LdapGetter getter, Set<Integer> cols, UidInterface uidInterface) throws LdapException {
         final PropertyHandler instance = PropertyHandler.getInstance();
         final ContactObject retval = new ContactObject();
         if (cols.contains(ContactObject.OBJECT_ID)) {
             final String uniqueid = instance.getUniqueid();
             if (0 != uniqueid.length()) {
-                retval.setObjectID(getter.getIntAttribute(uniqueid));
+                if (PropertyHandler.getInstance().isMemorymapping()) {
+                    retval.setObjectID(uidInterface.getUid(getter.getAttribute(uniqueid)));
+                } else {
+                    retval.setObjectID(getter.getIntAttribute(uniqueid));
+                }
             }
         }
         if (cols.contains(ContactObject.DISPLAY_NAME)) {

@@ -52,6 +52,7 @@ package com.openexchange.contacts.ldap.exceptions;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 
 /**
@@ -80,8 +81,29 @@ public class LdapException extends OXException {
         /**
          * The given value "%s" is not possible for a sort field
          */
-        SORT_FIELD_NOT_POSSIBLE("The given value \"%s\" is not possible for a sort field", Category.INTERNAL_ERROR, 3);
+        SORT_FIELD_NOT_POSSIBLE("The given value \"%s\" is not possible for a sort field", Category.INTERNAL_ERROR, 3),
     
+        /**
+         * Contacts cannot be inserted in LDAP
+         */
+        INSERT_NOT_POSSIBLE("Contacts cannot be inserted in LDAP", Category.PERMISSION, 4),
+        
+        /**
+         * The folderid object is null. This is an internal error. Please notify Open-Xchange
+         */
+        FOLDERID_OBJECT_NULL("The folderid object is null. This is an internal error. Please notify Open-Xchange", Category.INTERNAL_ERROR, 5),
+        
+        /**
+         * The search object contains more than one folder id. This is not supported by this implementation
+         */
+        TOO_MANY_FOLDERS("The search object contains more than one folder id. This is not supported by this implementation", Category.INTERNAL_ERROR, 6),
+
+        /**
+         * The mapping table doesn't contain the string uid %s, so it has never been accessed before
+         */
+        NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND("The mapping table doesn't contain the long uid %s, so it has never been accessed before", Category.CODE_ERROR, 7);
+
+
         /**
          * Message of the exception.
          */
