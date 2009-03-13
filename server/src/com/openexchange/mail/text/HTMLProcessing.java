@@ -491,7 +491,7 @@ public final class HTMLProcessing {
                         }
                         try {
                             final byte[] defaultConfig = String.valueOf(
-                                "indent=auto\n" + "indent-spaces=2\n" + "wrap=72\n" + "markup=yes\n" + "clean=yes\n" + "output-xml=no\n" + "input-xml=no\n" + "show-warnings=yes\n" + "numeric-entities=yes\n" + "quote-marks=yes\n" + "quote-nbsp=yes\n" + "quote-ampersand=no\n" + "break-before-br=no\n" + "uppercase-tags=yes\n" + "uppercase-attributes=yes\n" + "#smart-indent=no\n" + "output-xhtml=yes\n" + "char-encoding=latin1").getBytes();
+                                "indent=auto\n" + "indent-spaces=2\n" + "wrap=0\n" + "markup=yes\n" + "clean=yes\n" + "output-xml=no\n" + "input-xml=no\n" + "show-warnings=yes\n" + "numeric-entities=yes\n" + "quote-marks=yes\n" + "quote-nbsp=yes\n" + "quote-ampersand=no\n" + "break-before-br=no\n" + "uppercase-tags=yes\n" + "uppercase-attributes=yes\n" + "#smart-indent=no\n" + "output-xhtml=yes\n" + "char-encoding=latin1").getBytes();
                             properties.load(new UnsynchronizedByteArrayInputStream(defaultConfig));
                         } catch (final UnsupportedEncodingException e) {
                             /*

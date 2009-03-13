@@ -1,3 +1,7 @@
+* 2009-03-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #13382: Setting JTidy's line-wrap argument to zero (max. line length)
+
 * 2009-03-13 - martin.herfurth@open-xchange.com
 
  - Bugfix #13358: Deleted groups are resolved and members are added to the appointments.
