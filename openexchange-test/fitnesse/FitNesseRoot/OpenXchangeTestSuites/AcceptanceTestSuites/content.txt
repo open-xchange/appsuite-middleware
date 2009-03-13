@@ -1,0 +1,4 @@
+ * >ApointmentAcceptanceTestSuite
+ * >ContactAcceptanceTestSuite
+ * >FolderAcceptanceTestSuite
+ * >TaskAcceptanceTestSuite

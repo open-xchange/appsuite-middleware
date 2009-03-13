@@ -1,0 +1,34 @@
+''This test shows the simple life-cycle of a contact object, create-read-update-read-delete''
+
+First we create the contact...
+
+!|Table:CreateContact|
+| hugoHerrlich       |
+| display_name   | given_name | sur_name | title | email1               |
+| Herrlich, Hugo | Hugo       | Herrlich | Dr.   | hugo.herrlich@bla.ox |
+
+
+...then we verify all values we inserted...
+
+!|Table:VerifyContact|
+| hugoHerrlich       |
+| display_name   | given_name | sur_name | title | email1               |
+| Herrlich, Hugo | Hugo       | Herrlich | Dr.   | hugo.herrlich@bla.ox |
+
+...then we change the e-mail...
+
+!|Table:UpdateContact|
+| hugoHerrlich       |
+| email1                       |
+| der_Herrliche@hoster.invalid |
+
+...then we make sure that both the updated and the unchanged values still exist...
+
+!|Table:VerifyContact|
+| hugoHerrlich |
+| display_name   | given_name | sur_name | title | email1                       |
+| Herrlich, Hugo | Hugo       | Herrlich | Dr.   | der_Herrliche@hoster.invalid |
+
+...then we delete the contact...
+!|Table:DeleteContact|
+| hugoHerrlich       |

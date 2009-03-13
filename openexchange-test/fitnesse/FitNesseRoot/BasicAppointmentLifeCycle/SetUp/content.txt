@@ -1,0 +1,4 @@
+!define TEST_SYSTEM {slim}
+
+|Import|
+|com.openexchange.fitnesse.appointments|

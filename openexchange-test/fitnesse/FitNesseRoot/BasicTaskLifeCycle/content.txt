@@ -1,0 +1,52 @@
+''This test shows the life cycle of a task. It is going to be created, updated and deleted. Since this is the exemplary test, we'll explain what each step does along the way. In normal tests, you should describe what you're doing, not the why. That way, the tests is more likely to fit on single screen, making it easier to understand for the reader. So, let's get into the thick of things:''
+
+We start by defining that these tests are Slim tests. Both Fit and Slim tests can be run by !-FitNesse-!, so we decided to use Slim, because they allow for more flexible and nicer tables. The disadvantage is that you have to prefix all class names with "Table:".
+
+!define TEST_SYSTEM {slim}
+
+We continue by setting the default path, so that we do not have to use the long package name for all our fixtures (or "tables", as they are called in Slim). This is usually done in >SetUp so it can be hidden from view, because it distracts from the main point of the test.
+
+|Import|
+|com.openexchange.fitnesse.tasks|
+
+Now we '''create a task'''. The !-FitNesse-! system uses a fixture to create this data on the server via the HTTP-API. You don't have to care about the specifics, the test suite does this for you. You just write:
+
+!|Table:CreateTask|
+| Demo fixture |
+| title     | start_date | end_date | note |
+| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+
+So you created a Task with a name ("Demo fixture") and several keys and values. You might also refrain from using the name like that and just add another pair to the table with "fixturename" and "Demo fixture" instead. Other tests do that if you want to see it. The only important thing is that you name the Task at all, because those fixtures that verify a task or delete it need that name to look it up by.
+
+Then we '''check if the server got all data'''. Again, the requests and responses handled via the HTTP-API are hidden from you. The verification fixture itself uses a lot of requests to check whether the data is correct. For tasks, it calls the task by id, searches it by name, gets all and looks for it in the list, etc.. But you just type in which fields are going to be verified:
+
+!|Table:VerifyTask|
+| Demo fixture    |
+| title     | start_date | end_date | note |
+| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+
+Now we '''update the task''' by changing its title:
+
+!|Table:UpdateTask|
+| Demo fixture    |
+| title          |
+| Very nice Task |
+
+After that, we '''check if our update made it to the server''' by verifying the field we changed. And, since we already wrote the table, we check the other fields, too. Just to be sure the update did not remove them for some reason:
+
+!|Table:VerifyTask|
+| Demo fixture    |
+| title          | start_date | end_date | note |
+| Very nice Task | 08:30 AM   | 10:30 AM | Nice note |
+
+Afterwards, we '''delete the task'''. Not because this is necessary (the cleanup fixture takes care of that), but because we want to show that deleting is also possible via this test environment:
+
+!|Table:DeleteTask|
+| fixturename |
+| Demo fixture|
+
+After all of this, we call '''the clean-up fixture which removes any left-overs'''. Our life-cycle does not leave any artifacts, since we delete in the last step. But in case the delete step was broken or forgot, we use this fixture to make sure. In this particular case, it is boring to use, but let's not forget it is a demo. It is more useful in case you created more than one object, like when testing appointments with tons of participants.
+
+This step is usually moved to >SetUp so it hides from view. As you can see, we use the whole name, including the package name. This is necessary because the clean-up fixture is the same for all kind of !-OXObjects-! and therefore in a different package.
+
+!|Table:com.openexchange.fitnesse.EnvironmentCleanup|

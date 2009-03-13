@@ -1,0 +1,31 @@
+Create a quite ordinary appointment...
+
+!|Table:CreateAppointment|
+| fixturename | title     | start_date | end_date | note |
+| Demo fixture| Nice appointment | 08:30 AM   | 10:30 AM | Nice note |
+
+...verify its contents...
+
+!|Table:VerifyAppointment|
+| fixturename | title     | start_date | end_date | note |
+| Demo fixture| Nice appointment | 08:30 AM   | 10:30 AM | Nice note |
+
+...update its title...
+
+!|Table:UpdateAppointment|
+| fixturename | title          | start_date | end_date | note |
+| Demo fixture| Ugly appointment | 08:30 AM   | 10:30 AM | Nice note |
+
+...verify the update...
+
+!|Table:VerifyAppointment|
+| fixturename | title          | start_date | end_date | note |
+| Demo fixture| Ugly appointment | 08:30 AM   | 10:30 AM | Nice note |
+
+...then delete it.
+
+!|Table:DeleteAppointment|
+| fixturename |
+| Demo fixture|
+
+
