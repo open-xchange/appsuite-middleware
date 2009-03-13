@@ -9,13 +9,13 @@
    may take a few minutes since all listed repositories are fetched from
    CVS.
    
-3. Launch the "Open-Xchange Mail Filter Generator.launch" launcher file
+3. Launch the "com.openexchange.mail.filter/Open-Xchange Mail Filter Generator.launch" launcher file
    with ant. Right click on file and select "Run as" and press first entry.
    This launcher generates the missing source files in mail filter bundle.
 
    >>> Refresh (F5) bundle project "com.openexchange.mail.filter" <<<
    
-4. Launch the "Open-Xchange Configuration Generator.launch" launcher file
+4. Launch the "open-xchange-development/Open-Xchange Configuration Generator.launch" launcher file
    with ant. Right click on file and select "Run as" and press first entry.
    This launcher generates the needed configuration/property files in
    expected directory.
@@ -23,7 +23,7 @@
    >>> Refresh (F5) project "open-xchange-development" <<<
    
 5. To finally start the Open-Xchange server in OSGi runtime launch the
-   "Open-Xchange Server Startup.launch" launcher file. Right click on file
+   "com.openexchange.server/Open-Xchange Server Startup.launch" launcher file. Right click on file
    and select "Run as" and press first entry.
    
 TODO: Explain how to import profile files for formatter, clean-up, etc.
