@@ -49,6 +49,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     protected int secondUserId;
     protected int thirdUserId;
     protected int fourthUserId;
+    protected int groupId;
     protected Context ctx;
     protected CommonAppointments appointments;
     protected CalendarFolderToolkit folders;
@@ -117,8 +118,8 @@ public abstract class AbstractCalendarTest extends TestCase {
         folders = new CalendarFolderToolkit();
     
         group = config.getGroup();
-        final int groupid = tools.resolveGroup(group, ctx);
-        final Group group = tools.loadGroup(groupid, ctx);
+        groupId = tools.resolveGroup(group, ctx);
+        final Group group = tools.loadGroup(groupId, ctx);
         final int memberid = group.getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
     

@@ -1797,4 +1797,37 @@ public class CalendarSqlTest extends AbstractCalendarTest {
             folders.unsharePrivateFolder(session, ctx);
         }
     }
+    
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13358">bug #13358</a>
+     */
+    public void testDeleteUserGroup() throws Throwable {
+        final CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
+        appointment.setTitle("Bug 13358 Test");
+        appointments.save(appointment);
+        final int objectId = appointment.getObjectID();
+        clean.add(appointment);
+        
+        final DeleteEvent deleteEvent = new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctx);
+        final Connection readcon = DBPool.pickup(ctx);
+        final Connection writecon = DBPool.pickupWriteable(ctx);
+        final CalendarAdministration ca = new CalendarAdministration();
+        ca.deletePerformed(deleteEvent, readcon, writecon);
+        
+        final CalendarDataObject loadApp = appointments.load(objectId, folders.getStandardFolder(userId, ctx));
+        Participant[] participants = loadApp.getParticipants();
+        boolean foundGroup = false;
+        boolean foundMember = false;
+        for (Participant participant : participants) {
+            if (participant.getType() == Participant.GROUP) {
+                foundGroup = true;
+            } else if (participant.getIdentifier() == secondUserId) {
+                foundMember = true;
+            }
+        }
+        
+        assertFalse("Group should not be in the participants.", foundGroup);
+        assertTrue("Member should be in the participants.", foundMember);
+
+    }
 }
