@@ -4,6 +4,12 @@
    Moreover ensure you have a proper CVS repository location configured
    through CVS perspective in eclipse.
 
+   Bundle "org.eclipse.equinox.event" must be available at Plug-in Development's
+   target platform.
+   If not, copy "com.openexchange.common/jars/org.eclipse.equinox.event_1.0.100.v20070516.jar"
+   to "${eclipse-installation-dir}/plugins". Reload target platform or restart
+   eclipse.
+
 2. Open file "com.openexchange.projectset.servergui.psf" which is opened in
    ProjectSet-View. Press the "Load/Replace all recursively" button. This
    may take a few minutes since all listed repositories are fetched from
