@@ -59,6 +59,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
+import com.openexchange.contacts.ldap.property.PropertyHandler.AuthType;
 import com.openexchange.contacts.ldap.property.PropertyHandler.SearchScope;
 
 /**
@@ -184,8 +185,10 @@ public final class LdapUtility {
        if (uri.startsWith("ldaps://")) {
            env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
        }
-       env.put(Context.SECURITY_PRINCIPAL, instance.getAdminDN());
-       env.put(Context.SECURITY_CREDENTIALS, instance.getAdminBindPW());
+       if (AuthType.AdminDN.equals(instance.getAuthtype())) {
+           env.put(Context.SECURITY_PRINCIPAL, instance.getAdminDN());
+           env.put(Context.SECURITY_CREDENTIALS, instance.getAdminBindPW());
+       }
        // TODO Make this configurable
        env.put(Context.SECURITY_AUTHENTICATION, "simple");
        LdapContext retval = new InitialLdapContext(env, null);

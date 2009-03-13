@@ -84,7 +84,12 @@ public class LdapConfigurationException extends OXException {
         /**
          * Value for context "%s" is no integer value
          */
-        NO_INTEGER_VALUE("Value for context \"%s\" is no integer value", Category.SETUP_ERROR, 5);
+        NO_INTEGER_VALUE("Value for context \"%s\" is no integer value", Category.SETUP_ERROR, 5),
+
+        /**
+         * Mapping file %s not valid
+         */
+        INVALID_MAPPING_FILE("Mapping file \"%s\" not valid", Category.SETUP_ERROR, 6);
 
         /**
          * Message of the exception.

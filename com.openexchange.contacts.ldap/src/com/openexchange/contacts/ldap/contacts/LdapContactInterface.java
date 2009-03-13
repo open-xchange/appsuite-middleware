@@ -79,6 +79,7 @@ import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
+import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.contacts.ldap.property.PropertyHandler.Sorting;
 import com.openexchange.groupware.contact.ContactException;
@@ -171,7 +172,7 @@ public class LdapContactInterface implements ContactInterface {
         }
         final ArrayList<ContactObject> arrayList;
         if (searchobject.isStartLetter()) {
-            arrayList = getLDAPContacts(folderId, columns, "(&" + FILTER + "("+ PropertyHandler.getInstance().getSurname() + "=" + searchobject.getPattern() + "*))", null);
+            arrayList = getLDAPContacts(folderId, columns, "(&" + FILTER + "("+ PropertyHandler.getInstance().getMappings().getSurname() + "=" + searchobject.getPattern() + "*))", null);
         } else {
             arrayList = getLDAPContacts(folderId, columns, FILTER, null);
         }
@@ -244,13 +245,13 @@ public class LdapContactInterface implements ContactInterface {
                 contacts.addAll(getLDAPContacts(
                     folder_id,
                     columns,
-                    "(&" + FILTER + "(" + instance.getUniqueid() + "=" + oxUidToLdapUid(object_id) + "))",
+                    "(&" + FILTER + "(" + instance.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id) + "))",
                     null));
             } else {
                 contacts.addAll(getLDAPContacts(
                     folder_id,
                     columns,
-                    "(&" + FILTER + "(" + instance.getUniqueid() + "=" + object_id + "))",
+                    "(&" + FILTER + "(" + instance.getMappings().getUniqueid() + "=" + object_id + "))",
                     null));
             }
         }
@@ -304,196 +305,197 @@ public class LdapContactInterface implements ContactInterface {
      * @return a String value or null if no corresponding entry was found
      */
     private String getFieldFromColumn(final Integer col) {
-        final PropertyHandler instance = PropertyHandler.getInstance();
+        final PropertyHandler props = PropertyHandler.getInstance();
+        final Mappings mappings = props.getMappings();
         switch (col) {
         case ContactObject.ANNIVERSARY:
-            return instance.getAnniversary();
+            return mappings.getAnniversary();
         case ContactObject.ASSISTANT_NAME:
-            return instance.getAssistant_name();
+            return mappings.getAssistant_name();
         case ContactObject.BIRTHDAY:
-            return instance.getBirthday();
+            return mappings.getBirthday();
         case ContactObject.BRANCHES:
-            return instance.getBranches();
+            return mappings.getBranches();
         case ContactObject.BUSINESS_CATEGORY:
-            return instance.getBusiness_category();
+            return mappings.getBusiness_category();
         case ContactObject.CELLULAR_TELEPHONE1:
-            return instance.getCellular_telephone1();
+            return mappings.getCellular_telephone1();
         case ContactObject.CELLULAR_TELEPHONE2:
-            return instance.getCellular_telephone2();
+            return mappings.getCellular_telephone2();
         case ContactObject.CITY_BUSINESS:
-            return instance.getCity_business();
+            return mappings.getCity_business();
         case ContactObject.CITY_HOME:
-            return instance.getCity_home();
+            return mappings.getCity_home();
         case ContactObject.CITY_OTHER:
-            return instance.getCity_other();
+            return mappings.getCity_other();
         case ContactObject.COMMERCIAL_REGISTER:
-            return instance.getCommercial_register();
+            return mappings.getCommercial_register();
         case ContactObject.COMPANY:
-            return instance.getCompany();
+            return mappings.getCompany();
         case ContactObject.COUNTRY_BUSINESS:
-            return instance.getCountry_business();
+            return mappings.getCountry_business();
         case ContactObject.COUNTRY_HOME:
-            return instance.getCountry_home();
+            return mappings.getCountry_home();
         case ContactObject.COUNTRY_OTHER:
-            return instance.getCountry_other();
+            return mappings.getCountry_other();
         case ContactObject.DEFAULT_ADDRESS:
-            return instance.getDefaultaddress();
+            return mappings.getDefaultaddress();
         case ContactObject.DEPARTMENT:
-            return instance.getDepartment();
+            return mappings.getDepartment();
         case ContactObject.DISPLAY_NAME:
-            return instance.getDisplayname();
+            return mappings.getDisplayname();
         case ContactObject.EMAIL1:
-            return instance.getEmail1();
+            return mappings.getEmail1();
         case ContactObject.EMAIL2:
-            return instance.getEmail2();
+            return mappings.getEmail2();
         case ContactObject.EMAIL3:
-            return instance.getEmail3();
+            return mappings.getEmail3();
         case ContactObject.EMPLOYEE_TYPE:
-            return instance.getEmployeetype();
+            return mappings.getEmployeetype();
         case ContactObject.FAX_BUSINESS:
-            return instance.getFax_business();
+            return mappings.getFax_business();
         case ContactObject.FAX_HOME:
-            return instance.getFax_home();
+            return mappings.getFax_home();
         case ContactObject.FAX_OTHER:
-            return instance.getFax_other();
+            return mappings.getFax_other();
         case ContactObject.GIVEN_NAME:
-            return instance.getGivenname();
+            return mappings.getGivenname();
         case ContactObject.INFO:
-            return instance.getInfo();
+            return mappings.getInfo();
         case ContactObject.INSTANT_MESSENGER1:
-            return instance.getInstant_messenger1();
+            return mappings.getInstant_messenger1();
         case ContactObject.INSTANT_MESSENGER2:
-            return instance.getInstant_messenger2();
+            return mappings.getInstant_messenger2();
         case ContactObject.MANAGER_NAME:
-            return instance.getManager_name();
+            return mappings.getManager_name();
         case ContactObject.MARITAL_STATUS:
-            return instance.getMarital_status();
+            return mappings.getMarital_status();
         case ContactObject.MIDDLE_NAME:
-            return instance.getMiddle_name();
+            return mappings.getMiddle_name();
         case ContactObject.NICKNAME:
-            return instance.getNickname();
+            return mappings.getNickname();
         case ContactObject.NOTE:
-            return instance.getNote();
+            return mappings.getNote();
         case ContactObject.NUMBER_OF_CHILDREN:
-            return instance.getNumber_of_children();
+            return mappings.getNumber_of_children();
         case ContactObject.NUMBER_OF_EMPLOYEE:
-            return instance.getNumber_of_employee();
+            return mappings.getNumber_of_employee();
         case ContactObject.OBJECT_ID:
-            return instance.getUniqueid();
+            return mappings.getUniqueid();
         case ContactObject.POSITION:
-            return instance.getPosition();
+            return mappings.getPosition();
         case ContactObject.POSTAL_CODE_BUSINESS:
-            return instance.getPostal_code_business();
+            return mappings.getPostal_code_business();
         case ContactObject.POSTAL_CODE_HOME:
-            return instance.getPostal_code_home();
+            return mappings.getPostal_code_home();
         case ContactObject.POSTAL_CODE_OTHER:
-            return instance.getPostal_code_other();
+            return mappings.getPostal_code_other();
         case ContactObject.PROFESSION:
-            return instance.getProfession();
+            return mappings.getProfession();
         case ContactObject.ROOM_NUMBER:
-            return instance.getRoom_number();
+            return mappings.getRoom_number();
         case ContactObject.SALES_VOLUME:
-            return instance.getSales_volume();
+            return mappings.getSales_volume();
         case ContactObject.SPOUSE_NAME:
-            return instance.getSpouse_name();
+            return mappings.getSpouse_name();
         case ContactObject.STATE_BUSINESS:
-            return instance.getState_business();
+            return mappings.getState_business();
         case ContactObject.STATE_HOME:
-            return instance.getState_home();
+            return mappings.getState_home();
         case ContactObject.STATE_OTHER:
-            return instance.getState_other();
+            return mappings.getState_other();
         case ContactObject.STREET_BUSINESS:
-            return instance.getStreet_business();
+            return mappings.getStreet_business();
         case ContactObject.STREET_HOME:
-            return instance.getStreet_home();
+            return mappings.getStreet_home();
         case ContactObject.STREET_OTHER:
-            return instance.getStreet_other();
+            return mappings.getStreet_other();
         case ContactObject.SUFFIX:
-            return instance.getSuffix();
+            return mappings.getSuffix();
         case ContactObject.SUR_NAME:
-            return instance.getSurname();
+            return mappings.getSurname();
         case ContactObject.TAX_ID:
-            return instance.getTax_id();
+            return mappings.getTax_id();
         case ContactObject.TELEPHONE_ASSISTANT:
-            return instance.getTelephone_assistant();
+            return mappings.getTelephone_assistant();
         case ContactObject.TELEPHONE_BUSINESS1:
-            return instance.getTelephone_business1();
+            return mappings.getTelephone_business1();
         case ContactObject.TELEPHONE_BUSINESS2:
-            return instance.getTelephone_business2();
+            return mappings.getTelephone_business2();
         case ContactObject.TELEPHONE_CALLBACK:
-            return instance.getTelephone_callback();
+            return mappings.getTelephone_callback();
         case ContactObject.TELEPHONE_CAR:
-            return instance.getTelephone_car();
+            return mappings.getTelephone_car();
         case ContactObject.TELEPHONE_COMPANY:
-            return instance.getTelephone_company();
+            return mappings.getTelephone_company();
         case ContactObject.TELEPHONE_HOME1:
-            return instance.getTelephone_home1();
+            return mappings.getTelephone_home1();
         case ContactObject.TELEPHONE_HOME2:
-            return instance.getTelephone_home2();
+            return mappings.getTelephone_home2();
         case ContactObject.TELEPHONE_IP:
-            return instance.getTelephone_ip();
+            return mappings.getTelephone_ip();
         case ContactObject.TELEPHONE_ISDN:
-            return instance.getTelephone_isdn();
+            return mappings.getTelephone_isdn();
         case ContactObject.TELEPHONE_OTHER:
-            return instance.getTelephone_other();
+            return mappings.getTelephone_other();
         case ContactObject.TELEPHONE_PAGER:
-            return instance.getTelephone_pager();
+            return mappings.getTelephone_pager();
         case ContactObject.TELEPHONE_PRIMARY:
-            return instance.getTelephone_primary();
+            return mappings.getTelephone_primary();
         case ContactObject.TELEPHONE_RADIO:
-            return instance.getTelephone_radio();
+            return mappings.getTelephone_radio();
         case ContactObject.TELEPHONE_TELEX:
-            return instance.getTelephone_telex();
+            return mappings.getTelephone_telex();
         case ContactObject.TELEPHONE_TTYTDD:
-            return instance.getTelephone_ttytdd();
+            return mappings.getTelephone_ttytdd();
         case ContactObject.TITLE:
-            return instance.getTitle();
+            return mappings.getTitle();
         case ContactObject.URL:
-            return instance.getUrl();
+            return mappings.getUrl();
         case ContactObject.USERFIELD01:
-            return instance.getUserfield01();
+            return mappings.getUserfield01();
         case ContactObject.USERFIELD02:
-            return instance.getUserfield02();
+            return mappings.getUserfield02();
         case ContactObject.USERFIELD03:
-            return instance.getUserfield03();
+            return mappings.getUserfield03();
         case ContactObject.USERFIELD04:
-            return instance.getUserfield04();
+            return mappings.getUserfield04();
         case ContactObject.USERFIELD05:
-            return instance.getUserfield05();
+            return mappings.getUserfield05();
         case ContactObject.USERFIELD06:
-            return instance.getUserfield06();
+            return mappings.getUserfield06();
         case ContactObject.USERFIELD07:
-            return instance.getUserfield07();
+            return mappings.getUserfield07();
         case ContactObject.USERFIELD08:
-            return instance.getUserfield08();
+            return mappings.getUserfield08();
         case ContactObject.USERFIELD09:
-            return instance.getUserfield09();
+            return mappings.getUserfield09();
         case ContactObject.USERFIELD10:
-            return instance.getUserfield10();
+            return mappings.getUserfield10();
         case ContactObject.USERFIELD11:
-            return instance.getUserfield11();
+            return mappings.getUserfield11();
         case ContactObject.USERFIELD12:
-            return instance.getUserfield12();
+            return mappings.getUserfield12();
         case ContactObject.USERFIELD13:
-            return instance.getUserfield13();
+            return mappings.getUserfield13();
         case ContactObject.USERFIELD14:
-            return instance.getUserfield14();
+            return mappings.getUserfield14();
         case ContactObject.USERFIELD15:
-            return instance.getUserfield15();
+            return mappings.getUserfield15();
         case ContactObject.USERFIELD16:
-            return instance.getUserfield16();
+            return mappings.getUserfield16();
         case ContactObject.USERFIELD17:
-            return instance.getUserfield17();
+            return mappings.getUserfield17();
         case ContactObject.USERFIELD18:
-            return instance.getUserfield18();
+            return mappings.getUserfield18();
         case ContactObject.USERFIELD19:
-            return instance.getUserfield19();
+            return mappings.getUserfield19();
         case ContactObject.USERFIELD20:
-            return instance.getUserfield20();
+            return mappings.getUserfield20();
         case ContactObject.LAST_MODIFIED:
-            return instance.getLastmodified();
+            return mappings.getLastmodified();
         case ContactObject.CREATION_DATE:
-            return instance.getCreationdate();
+            return mappings.getCreationdate();
         default:
             return null;
         }
