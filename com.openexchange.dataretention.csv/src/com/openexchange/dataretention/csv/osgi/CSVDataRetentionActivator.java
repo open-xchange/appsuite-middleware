@@ -111,10 +111,13 @@ public final class CSVDataRetentionActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            registration.unregister();
-            CSVWriter.releaseInstance();
-            CSVDataRetentionConfig.releaseInstance();
-        } catch (final Exception e) {
+			if (registration != null) {
+				registration.unregister();
+				registration = null;
+			}
+			CSVWriter.releaseInstance();
+			CSVDataRetentionConfig.releaseInstance();
+		} catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
