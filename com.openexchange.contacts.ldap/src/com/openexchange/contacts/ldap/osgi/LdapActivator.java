@@ -49,7 +49,6 @@
 
 package com.openexchange.contacts.ldap.osgi;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,20 +56,17 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
-import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator.FolderIDAndAdminID;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
  * {@link LdapActivator}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * 
  */
 public final class LdapActivator extends DeferredActivator {
@@ -145,13 +141,15 @@ public final class LdapActivator extends DeferredActivator {
             }
 //            registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new LdapUserFolderCreator(), null);
 
-            PropertyHandler.getInstance().loadProperties();
-            final List<Context> ctxs = getContexts();
-            for (final Context ctx : ctxs) {
-                final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(ctx);
+            final PropertyHandler instance = PropertyHandler.getInstance();
+            instance.loadProperties();
+            final List<Integer> ctxs = instance.getContexts();
+            for (final Integer ctx : ctxs) {
+                final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(new ContextImpl(ctx));
                 final Hashtable<String, String> hashTable = new Hashtable<String, String>();
                 hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, String.valueOf(createGlobalFolder.getFolderid()));
-                context.registerService(ContactInterface.class.getName(), new LdapContactInterface(ctx.getContextId(), createGlobalFolder.getAdminid()), hashTable);
+                context.registerService(ContactInterface.class.getName(), new LdapContactInterface(ctx, createGlobalFolder.getAdminid()), hashTable);
+                LOG.info("Registered global LDAP folder for context: " + ctx);
             }
             
         } catch (final Exception e) {
@@ -161,13 +159,6 @@ public final class LdapActivator extends DeferredActivator {
                 registryFolderCreator.unregister();
             }
         }
-    }
-
-    private List<Context> getContexts() {
-        // Here we fill the Contexts which are affected by this plugin
-        final List<Context> retval = new ArrayList<Context>();
-        retval.add(new ContextImpl(111));
-        return retval;
     }
 
     @Override
