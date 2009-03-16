@@ -195,7 +195,9 @@ public class ReminderObject {
         if (null == date) {
             sb.append("no date");
         } else {
-            sb.append(format.format(getDate()));
+            synchronized (format) {
+                sb.append(format.format(getDate()));
+            }
         }
         return sb.toString();
     }
