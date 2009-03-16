@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-admin-soap
+Name:           open-xchange-contacts-ldap
 BuildArch:	    noarch
 #!BuildIgnore:  post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
