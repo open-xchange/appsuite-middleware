@@ -216,7 +216,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
-        final GroupStorage groups = GroupStorage.getInstance();
+        final GroupStorage groups = GroupStorage.getInstanceWithZero();
         final Group[] r = new Group[ids.length];
         int i = 0;
         for (final int id : ids) {

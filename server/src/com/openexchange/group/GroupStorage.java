@@ -185,7 +185,7 @@ public abstract class GroupStorage {
      */
     public static GroupStorage getInstance(final boolean group0) {
         return group0 ? getInstanceWithZero() : instance;
-	}
+    }
 
     public static void setInstance(final GroupStorage instance) {
         GroupStorage.instance = instance;

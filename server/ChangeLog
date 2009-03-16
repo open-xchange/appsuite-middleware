@@ -5,6 +5,7 @@
 * 2009-03-16 - marcus.klein@open-xchange.com
 
  - Bugfix #13394: Adding delete listener to remove server settings for a user.
+ - Bugfix #13396: Using group storage with group 0 to resolve participants for notification.
 
 * 2009-03-13 - thorben.betten@open-xchange.com
 
