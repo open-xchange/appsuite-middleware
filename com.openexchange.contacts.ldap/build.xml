@@ -64,9 +64,9 @@
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
-    	<mkdir dir="${prefix}/etc/groupware"/>
+    	<mkdir dir="${destdir}/${prefix}/etc/groupware"/>
     	<copy file="etc/contacts-ldap.properties" todir="${destdir}/${prefix}/etc/groupware"/>
-    	<mkdir dir="${prefix}/etc/groupware/contacts-ldap"/>
+    	<mkdir dir="${destdir}/${prefix}/etc/groupware/contacts-ldap"/>
     	<copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware/contacts-ldap">
     		<fileset dir="etc/contacts-ldap">
     			<include name="**"/>
