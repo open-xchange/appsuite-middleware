@@ -6,6 +6,11 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+	<property name="globaljar" value="com.openexchange.global.jar"/>
+	<property name="serverjar" value="com.openexchange.server.jar" />
+	<property name="configjar" value="com.openexchange.configread.jar"/>
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
@@ -22,19 +27,6 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
-    <!-- JAR names for classpath -->
-    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-    
-	<property name="globaljar" value="com.openexchange.global.jar"/>
-	<property name="serverjar" value="com.openexchange.server.jar" />
-    <property name="cachingjar" value="com.openexchange.caching.jar" />
-	<property name="configjar" value="com.openexchange.configread.jar"/>
-    <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
-	
-	<property name="mailjar" value="mail-1.4.1.jar" />
-
-
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -45,7 +37,6 @@
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/activation-1.1.1.jar"/>
-    
     </path>
 
     <target name="compile">
@@ -56,6 +47,7 @@
     </target>
 
     <target name="jar" depends="compile">
+    	<mkdir dir="${tmp.dir}"/>
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
@@ -71,6 +63,9 @@
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
     	<mkdir dir="${prefix}/etc/groupware"/>
+    	<copy file="etc/contacts-ldap.properties" todir="${destdir}/${prefix}/etc/groupware"/>
+    	<mkdir dir="${prefix}/etc/groupware/contacts-ldap"/>
+    	<copy file="etc/contacts-ldap/*" todir="${destdir}/${prefix}/etc/groupware/contacts-ldap"/>
     </target>
 
     <target name="installJar" depends="compile">
