@@ -505,7 +505,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
 
         final List<MailMessage> messages = new ArrayList<MailMessage>();
-        for (final Locale locale : receivers.keySet()) {
+        for (final Map.Entry<Locale, List<EmailableParticipant>> entry : receivers.entrySet()) {
+            final Locale locale = entry.getKey();
             /*
              * Apply new locale to replacements
              */
@@ -516,7 +517,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Iterate over locale's participants
              */
-            final List<EmailableParticipant> participants = receivers.get(locale);
+            final List<EmailableParticipant> participants = entry.getValue();
             for (final EmailableParticipant p : participants) {
                 TimeZone tz = TimeZone.getDefault();
                 boolean sendMail = true;

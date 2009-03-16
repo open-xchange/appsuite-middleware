@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -104,7 +103,19 @@ public class ValidationChain {
 					errorList.add(field);
 				}
 				
-				message.append(validator.getName()).append(": ").append("(");
+				message.append(validator.getName()).append(": ").append('(');
+				for(final Map.Entry<String, List<Metadata>> entry : errors.entrySet()) {
+				    for(final Metadata field : entry.getValue()) {
+				        message.append(field.getName()).append(", ");
+				    }
+				    message.setLength(message.length()-2);
+                    message.append(") ").append(entry.getKey());
+                    message.append('\n');
+				}
+				/*-
+				 * 
+				 * Replaced:
+				 * 
 				for(final String error : errors.keySet()) {
 					for(final Metadata field : errors.get(error)) {
 						message.append(field.getName()).append(", ");
@@ -113,6 +124,7 @@ public class ValidationChain {
 					message.append(") ").append(error);
 					message.append("\n");
 				}
+				*/
 			}	
 		}
 		if(failed) {

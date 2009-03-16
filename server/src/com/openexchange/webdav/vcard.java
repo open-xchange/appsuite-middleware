@@ -504,10 +504,10 @@ public final class vcard extends PermissionServlet {
                 oxc.close();
             }
 
-            for (final Iterator<String> it = entries_db.keySet().iterator(); it.hasNext();) {
-                final String tmp = it.next();
+            for (final Map.Entry<String, String> entry : entries_db.entrySet()) {
+                final String tmp = entry.getKey();
                 if (!entries.contains(tmp)) {
-                    final int object_id = Integer.parseInt(entries_db.get(tmp));
+                    final int object_id = Integer.parseInt(entry.getValue());
 
                     deleteEntry(context, principal_id, object_id);
 
