@@ -71,16 +71,29 @@ public class PropertyHandler {
     
     public class ContextDetails {
         
-        private final String foldername;
+        private String foldername;
+        
+        private String searchfilter;
         
         /**
          * Initializes a new {@link ContextDetails}.
          * @param foldername
          */
-        private ContextDetails(String foldername) {
-            this.foldername = foldername;
+        private ContextDetails() {
         }
         
+        private final void setFoldername(String foldername) {
+            this.foldername = foldername;
+        }
+
+        private final void setSearchfilter(String searchfilter) {
+            this.searchfilter = searchfilter;
+        }
+
+        public final String getSearchfilter() {
+            return searchfilter;
+        }
+
         public final String getFoldername() {
             return foldername;
         }
@@ -241,13 +254,22 @@ public class PropertyHandler {
         for (final Integer ctx : this.contexts) {
             final String stringctx = String.valueOf(ctx);
             final Properties file = configuration.getFile(stringctx + ".properties");
-            final String parameter = bundlename + "context" + stringctx + ".foldername";
-            final String foldername = file.getProperty(parameter);
-            if (null != foldername) {
-                this.contextdetails.put(ctx, new ContextDetails(foldername));
+            final String folderparameter = bundlename + "context" + stringctx + ".foldername";
+            final String searchparameter = bundlename + "context" + stringctx + ".searchfilter";
+            final String foldername = file.getProperty(folderparameter);
+            final String searchfilter = file.getProperty(searchparameter);
+            final ContextDetails contextDetails2 = new ContextDetails();
+            if (null != foldername && foldername.length() != 0) {
+                contextDetails2.setFoldername(foldername);
             } else {
-                throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameter);
+                throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, folderparameter);
             }
+            if (null != searchfilter && searchfilter.length() != 0) {
+                contextDetails2.setSearchfilter(searchfilter);
+            } else {
+                throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, searchfilter);
+            }
+            this.contextdetails.put(ctx, contextDetails2);
         }
 //        configuration.getPropertiesInFolder(folderName)
         this.loaded.set(true);
@@ -328,6 +350,11 @@ public class PropertyHandler {
         return PROPFILE;
     }
     
+    
+    public final Map<Integer, ContextDetails> getContextdetails() {
+        return contextdetails;
+    }
+
     public static String checkStringProperty(Properties props, final String name) throws LdapConfigurationException {
         final String property = props.getProperty(name);
         if (null == property) {
