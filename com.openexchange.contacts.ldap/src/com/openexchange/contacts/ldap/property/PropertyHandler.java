@@ -67,73 +67,12 @@ import com.openexchange.contacts.ldap.osgi.ServiceRegistry;
  *
  */
 public class PropertyHandler {
-    
-    
-    public class ContextDetails {
-        
-        private String foldername;
-        
-        private String searchfilter;
-        
-        /**
-         * Initializes a new {@link ContextDetails}.
-         * @param foldername
-         */
-        private ContextDetails() {
-        }
-        
-        private final void setFoldername(String foldername) {
-            this.foldername = foldername;
-        }
 
-        private final void setSearchfilter(String searchfilter) {
-            this.searchfilter = searchfilter;
-        }
-
-        public final String getSearchfilter() {
-            return searchfilter;
-        }
-
-        public final String getFoldername() {
-            return foldername;
-        }
-    }
-
-    public static final String bundlename = "com.openexchange.contacts.ldap.";
-    
-    private enum Parameters {
-        uri("uri"),
-        baseDN("baseDN"),
-        AdminDN("AdminDN"),
-        AdminBindPW("AdminBindPW"),
-        searchScope("searchScope"),
-        authtype("authtype"),
-        contexts("contexts"),
-        sorting("sorting"),
-        memorymapping("memorymapping"),
-        mappingfile("mappingfile");
-        
-        private final String name;
-        
-        private Parameters(final String name) {
-            this.name = name;
-        }
-
-        
-        public final String getName() {
-            return bundlename + name;
-        }
-        
-    }
-    
-    public enum Sorting {
-        server,
-        groupware;
-    }
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class);
     
     public enum AuthType {
-        anonymous("anonymous"),
         AdminDN("AdminDN"),
+        anonymous("anonymous"),
         user("user");
         
         private final String type;
@@ -148,11 +87,41 @@ public class PropertyHandler {
         }
         
     }
+
+    public class ContextDetails {
+        
+        private String foldername;
+        
+        private String searchfilter;
+        
+        /**
+         * Initializes a new {@link ContextDetails}.
+         * @param foldername
+         */
+        private ContextDetails() {
+        }
+        
+        public final String getFoldername() {
+            return foldername;
+        }
+
+        public final String getSearchfilter() {
+            return searchfilter;
+        }
+
+        private final void setFoldername(String foldername) {
+            this.foldername = foldername;
+        }
+
+        private final void setSearchfilter(String searchfilter) {
+            this.searchfilter = searchfilter;
+        }
+    }
     
     public enum SearchScope {
-        sub("sub"),
         base("base"),
-        one("one");
+        one("one"),
+        sub("sub");
         
         private final String type;
         
@@ -166,57 +135,154 @@ public class PropertyHandler {
         
     }
     
-    private AtomicBoolean loaded = new AtomicBoolean();
+    public enum Sorting {
+        groupware,
+        server;
+    }
+    
+    private enum Parameters {
+        AdminBindPW("AdminBindPW"),
+        AdminDN("AdminDN"),
+        authtype("authtype"),
+        baseDN("baseDN"),
+        contexts("contexts"),
+        mappingfile("mappingfile"),
+        memorymapping("memorymapping"),
+        searchScope("searchScope"),
+        sorting("sorting"),
+        uri("uri");
+        
+        private final String name;
+        
+        private Parameters(final String name) {
+            this.name = name;
+        }
 
-    private Properties properties;
+        
+        public final String getName() {
+            return bundlename + name;
+        }
+        
+    }
     
-    private Map<Integer, ContextDetails> contextdetails = new ConcurrentHashMap<Integer, ContextDetails>();
+    public static final String bundlename = "com.openexchange.contacts.ldap.";
     
-    private String uri;
-    
-    private String baseDN;
+    private final static String PROPFILE = "contacts-ldap.properties";
 
-    private String adminDN;
+    private static PropertyHandler singleton = new PropertyHandler();
     
     private String adminBindPW;
     
-    private SearchScope searchScope;
+    private String adminDN;
     
     private AuthType authtype;
+
+    private String baseDN;
+    
+    private Map<Integer, ContextDetails> contextdetails = new ConcurrentHashMap<Integer, ContextDetails>();
     
     private List<Integer> contexts;
-
-    private Sorting sorting;
+    
+    private AtomicBoolean loaded = new AtomicBoolean();
+    
+    private Mappings mappings;
 
     private boolean memorymapping;
 
-    private Mappings mappings;
+    private Properties properties;
+
+    private SearchScope searchScope;
     
     
-    private final static String PROPFILE = "contacts-ldap.properties";
+    private Sorting sorting;
     
-    private static PropertyHandler singleton = new PropertyHandler();
+    private String uri;
     
+    public static String checkStringProperty(Properties props, final String name) throws LdapConfigurationException {
+        final String property = props.getProperty(name);
+        if (null == property) {
+            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name);
+        } else {
+            return property;
+        }
+        
+    }
+
     public static PropertyHandler getInstance() {
         return singleton;
     }
 
+    public final String getAdminBindPW() {
+        return adminBindPW;
+    }
+
+    public final String getAdminDN() {
+        return adminDN;
+    }
+
+    
+    public final AuthType getAuthtype() {
+        return authtype;
+    }
+
+    
+    public String getBaseDN() {
+        return this.baseDN;
+    }
+
+    
+    public final Map<Integer, ContextDetails> getContextdetails() {
+        return contextdetails;
+    }
+    
+    public final List<Integer> getContexts() {
+        return contexts;
+    }
+
+    
+    public final Mappings getMappings() {
+        return mappings;
+    }
+
+    public final SearchScope getSearchScope() {
+        return searchScope;
+    }
+
+    public final Sorting getSorting() {
+        return sorting;
+    }
+
+    public final String getUri() {
+        return uri;
+    }
+
+    public final boolean isMemorymapping() {
+        return memorymapping;
+    }
+    
     public void loadProperties() throws LdapConfigurationException {
+        
+        final StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("\nLoading Contacts-LDAP properties...\n");
         final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
         this.properties = configuration.getFile(PROPFILE);
         
         // Here we iterate over all properties...
         this.uri = checkStringProperty(this.properties, Parameters.uri.getName());
+        logBuilder.append("\tUri: ").append(this.uri).append('\n');
         
         this.baseDN = checkStringProperty(this.properties, Parameters.baseDN.getName());
+        logBuilder.append("\tBaseDN: ").append(this.baseDN).append('\n');
         
         this.adminDN = checkStringProperty(this.properties, Parameters.AdminDN.getName());
+        logBuilder.append("\tAdminDN: ").append(this.adminDN).append('\n');
         
         this.adminBindPW = checkStringProperty(this.properties, Parameters.AdminBindPW.getName());
         
         final String searchScopeString = checkStringProperty(this.properties, Parameters.searchScope.getName());
         try {
             this.searchScope = SearchScope.valueOf(searchScopeString);
+            logBuilder.append("\tsearchScope: ").append(this.searchScope).append('\n');
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.SEARCH_SCOPE_WRONG, searchScopeString);
         }
@@ -224,6 +290,7 @@ public class PropertyHandler {
         final String authstring = checkStringProperty(this.properties, Parameters.authtype.getName());
         try {
             this.authtype  = AuthType.valueOf(authstring);
+            logBuilder.append("\tauthtype: ").append(this.authtype).append('\n');
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.AUTH_TYPE_WRONG, authstring);
         }
@@ -233,6 +300,7 @@ public class PropertyHandler {
         final String sortingString = checkStringProperty(this.properties, Parameters.sorting.getName());
         try {
             this.sorting = Sorting.valueOf(sortingString);
+            logBuilder.append("\tsorting: ").append(this.sorting).append('\n');
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.SORTING_WRONG, authstring);
         }
@@ -241,6 +309,7 @@ public class PropertyHandler {
         
         // TODO: Throws no error, so use an error checking method
         this.memorymapping = Boolean.parseBoolean(memoryMappingString);
+        logBuilder.append("\tmemorymapping: ").append(this.memorymapping).append('\n');
         
         final String mappingfile = checkStringProperty(this.properties, Parameters.mappingfile.getName());
         
@@ -271,10 +340,16 @@ public class PropertyHandler {
             }
             this.contextdetails.put(ctx, contextDetails2);
         }
-//        configuration.getPropertiesInFolder(folderName)
         this.loaded.set(true);
+        if (LOG.isInfoEnabled()) {
+            LOG.info(logBuilder.toString());
+        }
     }
-    
+
+    public void reloadProperties() {
+        
+    }
+
     private List<Integer> getContexts(String name) throws LdapConfigurationException {
         final String property = this.properties.getProperty(name);
         if (null != property) {
@@ -291,77 +366,5 @@ public class PropertyHandler {
         } else {
             throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name);
         }
-    }
-
-    public void reloadProperties() {
-        
-    }
-    
-    public String getBaseDN() {
-        return this.baseDN;
-    }
-
-    
-    public final String getUri() {
-        return uri;
-    }
-
-    public final String getAdminDN() {
-        return adminDN;
-    }
-
-    
-    public final SearchScope getSearchScope() {
-        return searchScope;
-    }
-
-    
-    public final AuthType getAuthtype() {
-        return authtype;
-    }
-
-    
-    public final String getAdminBindPW() {
-        return adminBindPW;
-    }
-    
-    public static final String getBundlename() {
-        return bundlename;
-    }
-
-    
-    public final boolean isMemorymapping() {
-        return memorymapping;
-    }
-
-    public final Sorting getSorting() {
-        return sorting;
-    }
-
-    public final Mappings getMappings() {
-        return mappings;
-    }
-
-    public static final PropertyHandler getSingleton() {
-        return singleton;
-    }
-
-    public static final String getPROPFILE() {
-        return PROPFILE;
-    }
-    
-    
-    public final Map<Integer, ContextDetails> getContextdetails() {
-        return contextdetails;
-    }
-
-    public static String checkStringProperty(Properties props, final String name) throws LdapConfigurationException {
-        final String property = props.getProperty(name);
-        if (null == property) {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name);
-        } else {
-            return property;
-        }
-        
     }
 }
