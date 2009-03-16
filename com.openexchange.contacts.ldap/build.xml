@@ -82,8 +82,6 @@
                 <include name="**"/>
             </fileset>
         </copy>
-    	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/META-INF"/>
-    	<copy file="META-INF/MANIFEST.MF" todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/META-INF"/>
     </target>
 
     <!-- Dist -->
