@@ -544,9 +544,6 @@ public class LdapContactInterface implements ContactInterface {
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
-        } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
         return arrayList;
     }
