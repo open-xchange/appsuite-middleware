@@ -163,7 +163,7 @@ public final class LdapUtility {
 //      return retval;
 //   }
 
-   public static LdapContext createContext() throws NamingException {
+   public static LdapContext createContext(String username, String password) throws NamingException {
        if (LOG.isDebugEnabled()) {
            LOG.debug("Creating new connection.");
        }
@@ -185,9 +185,19 @@ public final class LdapUtility {
        if (uri.startsWith("ldaps://")) {
            env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
        }
-       if (AuthType.AdminDN.equals(instance.getAuthtype())) {
+       switch (instance.getAuthtype()) {
+       case AdminDN:
            env.put(Context.SECURITY_PRINCIPAL, instance.getAdminDN());
            env.put(Context.SECURITY_CREDENTIALS, instance.getAdminBindPW());
+           break;
+       case user:
+           env.put(Context.SECURITY_PRINCIPAL, username);
+           env.put(Context.SECURITY_CREDENTIALS, password);
+           break;
+       case anonymous:
+           break;
+       default:
+           break;
        }
        // TODO Make this configurable
        env.put(Context.SECURITY_AUTHENTICATION, "simple");
