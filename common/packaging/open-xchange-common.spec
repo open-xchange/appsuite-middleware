@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	2
+Release:	3
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -76,6 +76,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Mon Mar 16 2009 - choeger@open-xchange.com
+ - Bugfix ID#13385: allpluginsloaded does not work with SP5U1RC1
+   added missing @start to commons logging
 * Tue Feb 03 2009 - choeger@open-xchange.com
  - Bugfix ID#12762 "A fragment bundle cannot be started" messages at
    admin/groupware osgi log

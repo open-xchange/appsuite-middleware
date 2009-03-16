@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	2
+Release:	3
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,15 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Mar 16 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13394: Adding delete listener to remove server settings for a user.
+* Mon Mar 16 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13372: Extending auto complete search to support distribution lists.
+* Fri Mar 13 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13358: Deleted groups are resolved and members are added to the appointments.
+ - Bugfix #13377: Remove Participant after changing an appointments timeframe.
+* Fri Mar 13 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13382: Setting JTidy's line-wrap argument to zero (max. line length)
 * Wed Mar 11 2009 - thorben.betten@open-xchange.com
  - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
  - Bugfix #13366: Fixed reading mail folder information (total, unread, etc.) on dovecot IMAP server
