@@ -66,9 +66,10 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/com.openexchange.axis2/services
-%dir /opt/open-xchange/etc/admindaemon/plugin
-/opt/open-xchange/bundles/com.openexchange.axis2/services/*
-%config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
-%doc docs
+%dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
+/opt/open-xchange/etc/groupware/osgi/bundle.d/*
+/opt/open-xchange/bundles/com.openexchange.contacts.ldap.jar
+%config(noreplace) /opt/open-xchange/etc/groupware/contacts-ldap.properties
+%config(noreplace) %dir /opt/open-xchange/etc/groupware/contacts-ldap
+%config(noreplace) /opt/open-xchange/etc/groupware/contacts-ldap/*
 %changelog
