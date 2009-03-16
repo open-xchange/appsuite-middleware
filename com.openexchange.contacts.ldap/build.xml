@@ -67,15 +67,18 @@
     	<mkdir dir="${prefix}/etc/groupware"/>
     	<copy file="etc/contacts-ldap.properties" todir="${destdir}/${prefix}/etc/groupware"/>
     	<mkdir dir="${prefix}/etc/groupware/contacts-ldap"/>
-    	<copy file="etc/contacts-ldap/*" todir="${destdir}/${prefix}/etc/groupware/contacts-ldap"/>
+    	<copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware/contacts-ldap">
+    		<fileset dir="etc/contacts-ldap">
+    			<include name="**"/>
+    		</fileset>
+    	</copy>
     </target>
 
     <target name="installJar" depends="compile">
         <mkdir dir="${destdir}/${bundlesdir}"/>
-    	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}"/>
         	
-        <copy overwrite="true" todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}">
-            <fileset dir="${output..}">
+        <copy overwrite="true" todir="${destdir}/${bundlesdir}">
+            <fileset dir="${tmp.dir}">
                 <include name="**"/>
             </fileset>
         </copy>
