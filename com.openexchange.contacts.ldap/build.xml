@@ -40,6 +40,7 @@
     </path>
 
     <target name="compile">
+    	<mkdir dir="${output..}"/>
         <javac srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
