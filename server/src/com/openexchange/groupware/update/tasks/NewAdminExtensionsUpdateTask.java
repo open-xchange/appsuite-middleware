@@ -311,9 +311,8 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
     private void updateTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
         PreparedStatement stmt = null;
         try {
-            for(final Map.Entry<String, ArrayList<String>> entry : missingCols.entrySet() ) {
-                final String table = entry.getKey();
-                final ArrayList<String> cols = entry.getValue();
+            for(final String table : missingCols.keySet() ) {
+                final ArrayList<String> cols = missingCols.get(table);
                 if( cols.size() > 0 && 
                         ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
                     for( final String col : cols ) {
