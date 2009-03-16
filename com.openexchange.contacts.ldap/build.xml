@@ -74,7 +74,7 @@
     	</copy>
     </target>
 
-    <target name="installJar" depends="compile">
+    <target name="installJar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
         	
         <copy overwrite="true" todir="${destdir}/${bundlesdir}">
