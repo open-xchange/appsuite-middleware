@@ -472,7 +472,7 @@ public final class MIMEMessageConverter {
                 } catch (final AddressException e) {
                     final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_BCC);
                     if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet addresses" + addrs);
+                        LOG1.debug("Unparseable internet addresses" + Arrays.toString(addrs));
                     }
                     mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
                 }
