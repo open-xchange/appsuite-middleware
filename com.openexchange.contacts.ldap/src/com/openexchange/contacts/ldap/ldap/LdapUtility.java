@@ -59,11 +59,10 @@ import javax.naming.directory.SearchControls;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
-import com.openexchange.contacts.ldap.property.PropertyHandler.AuthType;
 import com.openexchange.contacts.ldap.property.PropertyHandler.SearchScope;
 
 /**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein </a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class LdapUtility {
 
