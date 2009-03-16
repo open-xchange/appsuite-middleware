@@ -151,7 +151,7 @@ public final class LdapActivator extends DeferredActivator {
                 final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(ctx);
                 final Hashtable<String, String> hashTable = new Hashtable<String, String>();
                 hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, String.valueOf(createGlobalFolder.getFolderid()));
-                context.registerService(ContactInterface.class.getName(), new LdapContactInterface(String.valueOf(ctx.getContextId()), createGlobalFolder.getAdminid()), hashTable);
+                context.registerService(ContactInterface.class.getName(), new LdapContactInterface(ctx.getContextId(), createGlobalFolder.getAdminid()), hashTable);
             }
             
         } catch (final Exception e) {
