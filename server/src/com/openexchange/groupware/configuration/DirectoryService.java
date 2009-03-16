@@ -57,10 +57,8 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.configuration.SystemConfig;
 
 /**
@@ -125,7 +123,7 @@ public final class DirectoryService {
    /**
     * The customization properties for the directory service.
     */
-   private static Properties props = null;
+   private static volatile Properties props;
 
    /**
     * The URI for the directory service.
@@ -171,24 +169,30 @@ public final class DirectoryService {
      * @return the read customization properties.
      */
     public static Properties getCustomization() {
-        if (null == props) {
-            File propfile = null;
-            try {
-                propfile = new File(SystemConfig.getProperty("LDAPPROPERTIES"));
-            } catch (final NullPointerException e) {
-                LOG.fatal("Config file ldap.properties is not set in "
-                    + "ComfireConfig.");
-            }
-            props = new Properties();
-            try {
-                final FileInputStream fis = new FileInputStream(propfile);
-                props.load(fis);
-                fis.close();
-            } catch (final IOException e) {
-                LOG.error("Cannot load properties for ldap!", e);
+        Properties tmp = props;
+        if (null == tmp) {
+            synchronized (DirectoryService.class) {
+                tmp = props;
+                if (null == tmp) {
+                    File propfile = null;
+                    try {
+                        propfile = new File(SystemConfig.getProperty("LDAPPROPERTIES"));
+                    } catch (final NullPointerException e) {
+                        LOG.fatal("Config file ldap.properties is not set in " + "ComfireConfig.");
+                    }
+                    tmp = new Properties();
+                    try {
+                        final FileInputStream fis = new FileInputStream(propfile);
+                        tmp.load(fis);
+                        fis.close();
+                    } catch (final IOException e) {
+                        LOG.error("Cannot load properties for ldap!", e);
+                    }
+                    props = tmp;
+                }
             }
         }
-        return props;
+        return tmp;
     }
 
    /**
