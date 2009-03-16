@@ -51,11 +51,15 @@ package com.openexchange.contacts.ldap.contacts;
 
 import java.util.Comparator;
 import java.util.Date;
+
+import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.ContactObject;
 
 public class ContactComparator implements Comparator<ContactObject> {
 
     private final int orderfield;
+    
+    private final AlphanumComparator alphanumComparator = new AlphanumComparator();
 
     public ContactComparator(final int orderfield) {
         this.orderfield = orderfield;
@@ -258,12 +262,20 @@ public class ContactComparator implements Comparator<ContactObject> {
                 return 1;
             }
         } else {
-            return string1.compareTo(string2);
+            return this.alphanumComparator.compare(string1, string2);
         }
     }
 
     private int compareDate(final Date date1, final Date date2) {
-        return date1.compareTo(date2);
+        if (null == date1) {
+            if (null == date2) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            return date1.compareTo(date2);
+        }
     }
 
     private int intcompare(final int o1, final int o2) {
