@@ -51,12 +51,11 @@ package com.openexchange.groupware.contact.datahandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.api2.ContactSQLInterface;
@@ -153,7 +152,7 @@ public final class ContactInsertDataHandler implements DataHandler {
 					 * No appropriate definition for current part of the VCard
 					 * stream
 					 */
-					LOG.error("Could not recognize format of the following VCard data:\n" + chunk.getContent());
+					LOG.error("Could not recognize format of the following VCard data:\n" + Arrays.toString(chunk.getContent()));
 				} else {
 					final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(
 							chunk.getContent()), dataProperties.get(DataProperties.PROPERTY_CHARSET));

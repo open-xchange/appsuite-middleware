@@ -454,7 +454,7 @@ public final class MIMEMessageConverter {
                 } catch (final AddressException e) {
                     final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_TO);
                     if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet addresses" + addrs);
+                        LOG1.debug("Unparseable internet addresses" + Arrays.toString(addrs));
                     }
                     mailMessage.addTo(PlainTextAddress.getAddresses(addrs));
                 }
@@ -463,7 +463,7 @@ public final class MIMEMessageConverter {
                 } catch (final AddressException e) {
                     final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_CC);
                     if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet addresses" + addrs);
+                        LOG1.debug("Unparseable internet addresses" + Arrays.toString(addrs));
                     }
                     mailMessage.addCc(PlainTextAddress.getAddresses(addrs));
                 }
