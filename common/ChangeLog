@@ -1,3 +1,8 @@
+* 2009-03-16 - choeger@open-xchange.com
+
+ - Bugfix ID#13385: allpluginsloaded does not work with SP5U1RC1
+   added missing @start to commons logging
+
 * 2009-02-03 - choeger@open-xchange.com
 
  - Bugfix ID#12762 "A fragment bundle cannot be started" messages at
