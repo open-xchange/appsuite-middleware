@@ -36,6 +36,7 @@
 		<pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/common.jar"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/activation-1.1.1.jar"/>
     </path>
 
