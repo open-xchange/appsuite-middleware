@@ -1,0 +1,4 @@
+/opt/open-xchange/etc/groupware/contacts-ldap.properties
+/opt/open-xchange/etc/groupware/contacts-ldap/111.properties
+/opt/open-xchange/etc/groupware/contacts-ldap/mapping.ads.properties
+/opt/open-xchange/etc/groupware/contacts-ldap/mapping.openldap.properties
