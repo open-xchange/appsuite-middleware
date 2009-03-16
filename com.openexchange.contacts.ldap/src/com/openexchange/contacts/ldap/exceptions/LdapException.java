@@ -101,7 +101,17 @@ public class LdapException extends OXException {
         /**
          * The mapping table doesn't contain the string uid %s, so it has never been accessed before
          */
-        NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND("The mapping table doesn't contain the long uid %s, so it has never been accessed before", Category.CODE_ERROR, 7);
+        NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND("The mapping table doesn't contain the long uid %s, so it has never been accessed before", Category.CODE_ERROR, 7),
+
+        /**
+         * Multi-values are not allowed for date attribute: %s
+         */
+        MULTIVALUE_NOT_ALLOWED_DATE("Multi-values are not allowed for date attribute: %s", Category.CODE_ERROR, 8),
+
+        /**
+         * Multi-values are not allowed for int attribute: %s
+         */
+        MULTIVALUE_NOT_ALLOWED_INT("Multi-values are not allowed for int attribute: %s", Category.CODE_ERROR, 9);
 
 
         /**

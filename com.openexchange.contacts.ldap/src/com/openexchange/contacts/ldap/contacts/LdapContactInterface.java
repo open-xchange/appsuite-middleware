@@ -544,6 +544,9 @@ public class LdapContactInterface implements ContactInterface {
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
         return arrayList;
     }
@@ -556,7 +559,12 @@ public class LdapContactInterface implements ContactInterface {
                 try {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
-                        return (String) attribute.get();
+                        if (1 < attribute.size()) {
+                            final NamingEnumeration<?> all = attribute.getAll();
+                            return joinValuesWithSeparator(all, ", ");
+                        } else {
+                            return (String) attribute.get();
+                        }
                     } else {
                         return null;
                     }
@@ -564,13 +572,17 @@ public class LdapContactInterface implements ContactInterface {
                     throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
                 }
             }
-    
+
             public Date getDateAttribute(String attributename) throws LdapException {
                 try {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
-                        final DateFormat dateInstance = DateFormat.getDateInstance();
-                        return dateInstance.parse((String) attribute.get());
+                        if (1 < attribute.size()) {
+                            throw new LdapException(Code.MULTIVALUE_NOT_ALLOWED_DATE, attributename);
+                        } else {
+                            final DateFormat dateInstance = DateFormat.getDateInstance();
+                            return dateInstance.parse((String) attribute.get());
+                        }
                     } else {
                         return null;
                     }
@@ -585,7 +597,11 @@ public class LdapContactInterface implements ContactInterface {
                 try {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
-                        return Integer.parseInt((String) attribute.get());
+                        if (1 < attribute.size()) {
+                            throw new LdapException(Code.MULTIVALUE_NOT_ALLOWED_INT, attributename);
+                        } else {
+                            return Integer.parseInt((String) attribute.get());
+                        }
                     } else {
                         return -1;
                     }
@@ -623,6 +639,17 @@ public class LdapContactInterface implements ContactInterface {
             }
             return arrayList.subList(from, to);
         }
+    }
+
+
+    private static String joinValuesWithSeparator(final NamingEnumeration<?> all, final String separator) {
+        final StringBuilder sb = new StringBuilder();
+        while (all.hasMoreElements()) {
+            sb.append(all.nextElement());
+            sb.append(separator);
+        }
+        sb.delete(sb.length() - separator.length(), sb.length());
+        return sb.toString();
     }
 
 
