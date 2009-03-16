@@ -1,6 +1,6 @@
 * 2009-03-16 - marcus.klein@open-xchange.com
 
- - Bugfix #13385: Starting org.apache.commons.logging bundle in administration daemon.
+ - Bugfix #13394: Adding delete listener to remove server settings for a user.
 
 * 2009-03-13 - thorben.betten@open-xchange.com
 

@@ -67,13 +67,14 @@ import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfigurationDeleteListener;
 import com.openexchange.image.internal.ImageRegistryDeleteListener;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
+import com.openexchange.preferences.UserSettingServerDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 
 /**
  * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener} whose
  * {@link DeleteListener#deletePerformed(DeleteEvent, Connection, Connection)} methods are executed in the order added to this registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteRegistry {
@@ -134,11 +135,12 @@ public final class DeleteRegistry {
          * Remove stored images
          */
         registerDeleteListener(new ImageRegistryDeleteListener());
+        registerDeleteListener(new UserSettingServerDeleteListener());
     }
 
     /**
      * Gets the singleton instance of {@link DeleteRegistry}.
-     * 
+     *
      * @return The singleton instance of {@link DeleteRegistry}.
      */
     public static DeleteRegistry getInstance() {
@@ -160,7 +162,7 @@ public final class DeleteRegistry {
      * Registers an instance of <code>{@link DeleteListener}</code>. <b>Note</b>: Only one instance of a certain
      * <code>{@link DeleteListener}</code> implementation is added, meaning if you try to register a certain implementation twice, the
      * latter one is going to be discarded.
-     * 
+     *
      * @param listener the listener to register
      * @return <code>true</code> if specified delete listener has been added to registry; otherwise <code>false</code>
      */
@@ -180,7 +182,7 @@ public final class DeleteRegistry {
 
     /**
      * Removes given instance of <code>{@link DeleteListener}</code> from this registry's known listeners.
-     * 
+     *
      * @param listener - the listener to remove
      */
     public void unregisterDeleteListener(final DeleteListener listener) {
@@ -195,7 +197,7 @@ public final class DeleteRegistry {
 
     /**
      * Fires the delete event.
-     * 
+     *
      * @param deleteEvent the delete event
      * @param readCon a readable connection
      * @param writeCon a writable connection

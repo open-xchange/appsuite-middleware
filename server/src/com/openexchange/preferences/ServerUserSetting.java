@@ -356,6 +356,22 @@ public class ServerUserSetting {
         }
     }
 
+    public static void deleteEntry(final int cid, final int user, final Connection con) throws SettingException {
+        final String delete = "DELETE FROM user_setting_server WHERE cid=? AND user=?";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(delete);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new SettingException(SettingException.Code.SQL_ERROR, e);
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
     private static boolean hasEntry(final int cid, final int user, final Connection con) throws SettingException {
         boolean retval = false;
         final String select = "SELECT user FROM user_setting_server WHERE cid=? AND user=?";
