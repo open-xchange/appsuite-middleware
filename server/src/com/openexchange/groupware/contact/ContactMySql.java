@@ -586,7 +586,9 @@ public class ContactMySql implements ContactSql {
                 sb.append(Contacts.mapping[ContactObject.EMAIL2].getDBFieldName());
                 sb.append(" is not null OR ");
                 sb.append(Contacts.mapping[ContactObject.EMAIL3].getDBFieldName());
-                sb.append(" is not null) AND ");
+                sb.append(" is not null OR ");
+                sb.append(Contacts.mapping[ContactObject.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
+                sb.append(" > 0) AND ");
             }
         }
 

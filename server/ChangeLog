@@ -1,3 +1,7 @@
+* 2009-03-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #13372: Extending auto complete search to support distribution lists.
+
 * 2009-03-16 - marcus.klein@open-xchange.com
 
  - Bugfix #13394: Adding delete listener to remove server settings for a user.
