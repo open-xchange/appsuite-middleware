@@ -459,55 +459,47 @@ public class ContactRequest {
     }
 
     public JSONArray actionListUser(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException,
-            SearchIteratorException, OXException, AjaxException {
+            OXException, AjaxException {
         timestamp = new Date(0);
-
-        final SearchIterator<ContactObject> it = null;
 
         final JSONArray jsonResponseArray = new JSONArray();
 
-        try {
-            final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
-            final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-            final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
-            final int userIdArray[] = new int[jData.length()];
-            for (int a = 0; a < userIdArray.length; a++) {
-                userIdArray[a] = jData.getInt(a);
-            }
-
-            final int[] internalColumns = checkLastModified(columns);
-
-            Context ctx = null;
-            try {
-                ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-            } catch (final ContextException ct) {
-                throw new ContactException(ct);
-            }
-
-            try {
-                final ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
-                final ContactWriter contactwriter = new ContactWriter(timeZone);
-
-                for (int a = 0; a < userIdArray.length; a++) {
-                    final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
-                    final JSONArray jsonContactArray = new JSONArray();
-                    contactwriter.writeArray(contactObj, internalColumns, jsonContactArray);
-                    jsonResponseArray.put(jsonContactArray);
-
-                    if (timestamp.before(contactObj.getLastModified())) {
-                        timestamp = contactObj.getLastModified();
-                    }
-                }
-            } catch (final JSONException e) {
-                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
-            }
-
-            return jsonResponseArray;
-        } finally {
-            if (it != null) {
-                it.close();
-            }
+        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
+        final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final int userIdArray[] = new int[jData.length()];
+        for (int a = 0; a < userIdArray.length; a++) {
+            userIdArray[a] = jData.getInt(a);
         }
+
+        final int[] internalColumns = checkLastModified(columns);
+
+        Context ctx = null;
+        try {
+            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+        } catch (final ContextException ct) {
+            throw new ContactException(ct);
+        }
+
+        try {
+            final ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            final ContactWriter contactwriter = new ContactWriter(timeZone);
+
+            for (int a = 0; a < userIdArray.length; a++) {
+                final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
+                final JSONArray jsonContactArray = new JSONArray();
+                contactwriter.writeArray(contactObj, internalColumns, jsonContactArray);
+                jsonResponseArray.put(jsonContactArray);
+
+                if (timestamp.before(contactObj.getLastModified())) {
+                    timestamp = contactObj.getLastModified();
+                }
+            }
+        } catch (final JSONException e) {
+            throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+        }
+
+        return jsonResponseArray;
     }
 
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
