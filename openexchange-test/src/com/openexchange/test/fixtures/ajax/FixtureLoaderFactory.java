@@ -6,6 +6,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.resource.Resource;
@@ -16,6 +17,7 @@ import com.openexchange.test.fixtures.Document;
 import com.openexchange.test.fixtures.DocumentFixtureFactory;
 import com.openexchange.test.fixtures.EMailFixtureFactory;
 import com.openexchange.test.fixtures.FixtureLoader;
+import com.openexchange.test.fixtures.FolderFixtureFactory;
 import com.openexchange.test.fixtures.GroupFixtureFactory;
 import com.openexchange.test.fixtures.InfoItem;
 import com.openexchange.test.fixtures.InfoItemFixtureFactory;
@@ -41,6 +43,7 @@ public class FixtureLoaderFactory {
         loader.addFixtureFactory(new ResourceFixtureFactory(loader), Resource.class);
         loader.addFixtureFactory(new EMailFixtureFactory(datapath, loader), MailMessage.class);
         loader.addFixtureFactory(new DocumentFixtureFactory(datapath, loader), Document.class);
+        loader.addFixtureFactory(new FolderFixtureFactory(loader), FolderObject.class);
         return loader;
     }
 }
