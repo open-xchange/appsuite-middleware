@@ -90,6 +90,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -375,7 +376,7 @@ public final class vcard extends PermissionServlet {
                 return;
             }
 
-            Map<String, String> entries_db = new HashMap<String, String>();
+            final Map<String, String> entries_db;
             final Set<String> entries = new HashSet<String>();
 
             final boolean enabledelete = getEnableDelete(req);
@@ -400,30 +401,19 @@ public final class vcard extends PermissionServlet {
 
                 exists = rs.next();
 
-                if (exists) {
-                    principal_id = rs.getInt(1);
-                    db_contactfolder_id = rs.getInt(2);
-
-                    if (db_contactfolder_id != contactfolder_id) {
-                        throw new OXConflictException(new WebdavException(WebdavException.Code.NO_PRINCIPAL, principal));
-                    }
-
-                    entries_db = loadDBEntries(context, principal_id);
-                } else {
+                if (!exists) {
                     throw new OXConflictException(new WebdavException(WebdavException.Code.NO_PRINCIPAL, principal));
                 }
+                principal_id = rs.getInt(1);
+                db_contactfolder_id = rs.getInt(2);
+
+                if (db_contactfolder_id != contactfolder_id) {
+                    throw new OXConflictException(new WebdavException(WebdavException.Code.NO_PRINCIPAL, principal));
+                }
+
+                entries_db = loadDBEntries(context, principal_id);
             } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-
-                if (principalStatement != null) {
-                    principalStatement.close();
-                }
-
-                if (readCon != null) {
-                    DBPool.closeReaderSilent(context, readCon);
-                }
+                DBUtils.closeResources(rs, principalStatement, readCon, true, context);
             }
 
             final VersitDefinition def = Versit.getDefinition(content_type);
