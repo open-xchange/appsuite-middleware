@@ -80,7 +80,7 @@ public final class InlineImageDataSource implements DataSource {
      * <li>com.openexchange.mail.conversion.cid</li>
      * </ul>
      */
-    protected static final String[] ARGS = {
+    private static final String[] ARGS = {
         "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid" };
 
     private static final Class<?>[] TYPES = { InputStream.class };
