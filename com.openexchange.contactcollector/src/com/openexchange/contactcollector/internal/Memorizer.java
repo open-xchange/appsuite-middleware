@@ -191,7 +191,9 @@ public class Memorizer implements Runnable {
             }
         } else {
             try {
-                foundContact.setUserField20(String.valueOf(Integer.parseInt(foundContact.getUserField20() + 1)));
+                int currentCount = Integer.parseInt(foundContact.getUserField20());
+                int newCount = currentCount + 1;
+                foundContact.setUserField20(String.valueOf(newCount));
             } catch (final NumberFormatException nfe) {
                 foundContact.setUserField20(String.valueOf(1));
             }
