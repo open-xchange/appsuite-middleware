@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -1327,7 +1328,7 @@ public final class OXFolderSQL {
             throw e;
         } finally {
             if (isAuto) {
-                writeCon.setAutoCommit(true);
+                autocommit(writeCon);
             }
             closeResources(null, stmt, closeWrite ? writeCon : null, false, ctx);
         }
