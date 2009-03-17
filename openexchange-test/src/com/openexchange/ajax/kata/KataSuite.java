@@ -10,6 +10,9 @@ public class KataSuite extends TestSuite {
         testSuiteForKatas.addTestSuite(AppointmentRunner.class);
         testSuiteForKatas.addTestSuite(ContactRunner.class);
         testSuiteForKatas.addTestSuite(TaskRunner.class);
+        
+        testSuiteForKatas.addTestSuite(FolderRunner.class);
+        
         return testSuiteForKatas;
     }
 }

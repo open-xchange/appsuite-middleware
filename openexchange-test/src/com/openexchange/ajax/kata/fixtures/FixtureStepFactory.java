@@ -109,6 +109,7 @@ public class FixtureStepFactory {
             add(new AppointmentFixtureTransformer());
 			add(new TaskFixtureTransformer());
             add(new ContactFixtureTransformer());
+            add(new FolderFixtureTransformer());
         }};
     }
     

@@ -137,8 +137,8 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
             new Date(0));
         FolderUpdatesResponse response = (FolderUpdatesResponse) client.execute(updates);
         // TODO: write FolderUpdatesParser
-        //List<FolderObject> folders = response.getFolders();
-        //checkInList(folder, folders, "updates-");
+        List<FolderObject> folders = response.getFolders();
+        checkInList(folder, folders, "updates-");
     }
     
     private void checkInList(FolderObject folder, Object[][] rows, int[] columns, String typeOfAction) throws AjaxException, IOException, SAXException, JSONException {
