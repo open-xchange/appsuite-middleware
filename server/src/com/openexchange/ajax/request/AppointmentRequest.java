@@ -1185,7 +1185,7 @@ public class AppointmentRequest {
 
         timestamp = new Date(0);
 
-        final JSONObject jsonResponseObject = new JSONObject();
+        //final JSONObject jsonResponseObject = new JSONObject();
         CalendarDataObject appointmentObj = null;
         try {
             appointmentObj = appointmentSql.getObjectById(id, inFolder);
