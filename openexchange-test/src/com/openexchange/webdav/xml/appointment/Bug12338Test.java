@@ -93,7 +93,6 @@ public final class Bug12338Test extends AbstractWebDAVSession {
     public void testStrangeExternal() throws Throwable {
         final WebDAVClient client = getClient();
         final FolderObject folder = client.getFolderTools().getDefaultAppointmentFolder();
-        System.out.println(folder);
         final TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         final Calendar calendar = Calendar.getInstance(tz);
         calendar.set(Calendar.HOUR_OF_DAY, 12);

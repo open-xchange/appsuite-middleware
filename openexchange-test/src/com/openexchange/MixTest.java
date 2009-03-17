@@ -123,6 +123,7 @@ public final class MixTest {
                     final String sessionId = resp.getSessionId();
                     LoginTools.logout(session, new LogoutRequest(sessionId));
                 } catch (final AssertionFailedError e) {
+                    
                     System.out.println("Login failed! " + e.getMessage());
                 } catch (final Throwable t) {
                     t.printStackTrace();

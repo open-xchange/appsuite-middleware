@@ -238,8 +238,6 @@ public class RefresherTest extends TestCase {
         thread3.start();
         thread1.start();
         thread2.start();
-        System.out.println("Try to find NPE.");
-        System.out.println("Run for 10 seconds.");
         Thread.sleep(100000);
         remover.stop();
         consumer1.stop();

@@ -2,8 +2,6 @@ package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 
 import junit.framework.TestCase;
 
@@ -39,71 +37,31 @@ public class TestFolder extends TestCase {
 		super.tearDown();
 	}
 	
-	public void testGetRootFolders() {
+	public void testGetRootFolders() throws IOException, SAXException {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId);
-		try {
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
-					+ "msec");
-			assertFalse(resp.getText().indexOf("error") > -1);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		resp = wc.getResponse(req);
+		assertFalse(resp.getText().indexOf("error") > -1);
 	}
 	
-	public void testGetSubfolders() {
+	public void testGetSubfolders() throws IOException, SAXException {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&gparent=127");
-		try {
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
-					+ "msec");
-			assertFalse(resp.getText().indexOf("error") > -1);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		resp = wc.getResponse(req);
+		assertFalse(resp.getText().indexOf("error") > -1);
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&gparent=INBOX");
-		try {
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
-					+ "msec");
-			assertFalse(resp.getText().indexOf("error") > -1);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		resp = wc.getResponse(req);
+		assertFalse(resp.getText().indexOf("error") > -1);
 	}
 	
-	public void testGetFolder() {
+	public void testGetFolder() throws IOException, SAXException {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=290");
-		try {
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
-					+ "msec");
-			assertFalse(resp.getText().indexOf("error") > -1);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		resp = wc.getResponse(req);
+		assertFalse(resp.getText().indexOf("error") > -1);
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=INBOX");
-		try {
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
-					+ "msec");
-			assertFalse(resp.getText().indexOf("error") > -1);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		resp = wc.getResponse(req);
+		assertFalse(resp.getText().indexOf("error") > -1);
 	}
 	
-	public void testCreateUpdateDeleteFolder() {
+	public void testCreateUpdateDeleteFolder() throws IOException, SAXException {
 		final String oxFolderName = "CalendarFolder07";
 		final String mailFolderName = "MyMailFolder25";
 		final String newOXFolderObj = "{\"folder_id\":65,\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":140}],\"title\":\""+oxFolderName+"\",\"module\":2}";
@@ -115,165 +73,63 @@ public class TestFolder extends TestCase {
 		/*
 		 * Insert OX Folder
 		 */
-		try {
-			bytes = newOXFolderObj.getBytes("UTF-8");
-			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=65", bais, "text/javascript; charset=UTF-8");
-			System.out.println("Starting Put-Request to insert a OX folder...");
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start) + "msec");
-			if (resp.getText().indexOf('(') > -1) {
-				oxFolderId = Integer.parseInt(resp.getText().substring(resp.getText().indexOf('(') + 1,
-						resp.getText().indexOf(')')));
-			}
-			assertTrue(resp.getText().startsWith(expectedInsertPrefix));
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+		bytes = newOXFolderObj.getBytes("UTF-8");
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=65", bais, "text/javascript; charset=UTF-8");
+		resp = wc.getResponse(req);
+		if (resp.getText().indexOf('(') > -1) {
+			oxFolderId = Integer.parseInt(resp.getText().substring(resp.getText().indexOf('(') + 1,
+					resp.getText().indexOf(')')));
 		}
+		assertTrue(resp.getText().startsWith(expectedInsertPrefix));
 		/*
 		 * Insert Mail Folder
 		 */
-		try {
-			bytes = newMailFolderObj.getBytes("UTF-8");
-			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=INBOX", bais, "text/javascript; charset=UTF-8");
-			System.out.println("Starting Put-Request to insert a IMAP folder...");
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start) + "msec");
-			if (resp.getText().indexOf('(') > -1) {
-				mailFolderFullName = resp.getText().substring(resp.getText().indexOf('(') + 1, resp.getText().indexOf(')'));
-			}
-			assertTrue(resp.getText().startsWith(expectedInsertPrefix));
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+		bytes = newMailFolderObj.getBytes("UTF-8");
+		bais = new ByteArrayInputStream(bytes);
+		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=INBOX", bais, "text/javascript; charset=UTF-8");
+		resp = wc.getResponse(req);
+		if (resp.getText().indexOf('(') > -1) {
+			mailFolderFullName = resp.getText().substring(resp.getText().indexOf('(') + 1, resp.getText().indexOf(')'));
 		}
+		assertTrue(resp.getText().startsWith(expectedInsertPrefix));
 		final String updateOXFolderObj = "{\"folder_id\":65,\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":140}],\"title\":\""+oxFolderName+"_Changed\",\"module\":2}";
 		final String updateMailFolderObj = "{\"folder_id\":\"INBOX\",\"permissions\":[{\"group\":false,\"bits\":\"lrswipcda\",\"entity\":140}],\"title\":\""+mailFolderName+"Changed\",\"module\":"+FolderObject.MAIL+"}";
 		final String expectedUpdatePrefix = "{OK: Folder successfully updated";
 		/*
 		 * Update OX folder
 		 */
-		try {
-			bytes = updateOXFolderObj.getBytes("UTF-8");
-			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
-			System.out.println("Starting Put-Request to update a OX folder...");
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start) + "msec");
-			assertTrue(resp.getText().startsWith(expectedUpdatePrefix));
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		bytes = updateOXFolderObj.getBytes("UTF-8");
+		bais = new ByteArrayInputStream(bytes);
+		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
+		resp = wc.getResponse(req);
+		assertTrue(resp.getText().startsWith(expectedUpdatePrefix));
 		/*
 		 * Update IMAP Folder
 		 */
-		try {
-			bytes = updateMailFolderObj.getBytes("UTF-8");
-			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
-			System.out.println("Starting Put-Request to update a IMAP folder...");
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start) + "msec");
-			assertTrue(resp.getText().startsWith(expectedUpdatePrefix));
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		bytes = updateMailFolderObj.getBytes("UTF-8");
+		bais = new ByteArrayInputStream(bytes);
+		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
+		resp = wc.getResponse(req);
+		assertTrue(resp.getText().startsWith(expectedUpdatePrefix));
 		/*
 		 * Delete OX folder
 		 */
 		final String expectedDeletePrefix = "{OK: Folder successfully deleted";
-		try {
-			bytes = "".getBytes("UTF-8");
-			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
-			System.out.println("Starting Post-Request to delete a OX folder...");
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\t\tDuration: " + (System.currentTimeMillis() - start) + "msec");
-			assertTrue(resp.getText().startsWith(expectedDeletePrefix));
-		}  catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		bytes = "".getBytes("UTF-8");
+		bais = new ByteArrayInputStream(bytes);
+		req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
+		resp = wc.getResponse(req);
+		assertTrue(resp.getText().startsWith(expectedDeletePrefix));
 		/*
 		 * Delete IMAP folder
 		 */
 		mailFolderFullName += "Changed";
-		try {
-			bytes = "".getBytes("UTF-8");
-			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
-			System.out.println("Starting Post-Request to delete a IMAP folder...");
-			final long start = System.currentTimeMillis();
-			resp = wc.getResponse(req);
-			System.out.println("Response:\n" + resp.getText() + "\t\tDuration: " + (System.currentTimeMillis() - start) + "msec");
-			assertTrue(resp.getText().startsWith(expectedDeletePrefix));
-		}  catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		bytes = "".getBytes("UTF-8");
+		bais = new ByteArrayInputStream(bytes);
+		req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
+		resp = wc.getResponse(req);
+		assertTrue(resp.getText().startsWith(expectedDeletePrefix));
 	}
 
 }

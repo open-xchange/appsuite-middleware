@@ -290,7 +290,6 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 	}
 	
 	protected static void assertExceptionMessage(final String message, final String expectedStatus) throws Exception {
-		System.out.println("message: "+ message);
 		final String statusCode = message.substring(1, message.indexOf("]"));
 		assertEquals("Status code is not correct", expectedStatus, statusCode);
 	}

@@ -94,8 +94,7 @@ public class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testGetSubfolders() {
-		try {
+	public void testGetSubfolders() throws MailException {
 			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/* mailConfig */);
@@ -105,18 +104,14 @@ public class MailFolderTest extends AbstractMailTest {
 				assertTrue("No subfolders returned!", flds != null && flds.length > 0);
 
 				for (int i = 0; i < flds.length; i++) {
-					System.out.println(flds[i].getFullname() + " Subscribed=" + flds[i].isSubscribed()
+					final String lala = flds[i].getFullname() + " Subscribed=" + flds[i].isSubscribed()
 							+ " HasSubfolders=" + flds[i].hasSubfolders() + " HasSUbscribedSubfodlers="
-							+ flds[i].hasSubscribedSubfolders());
+							+ flds[i].hasSubscribedSubfolders();
 				}
 
 			} finally {
 				mailAccess.close(true);
 			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 }

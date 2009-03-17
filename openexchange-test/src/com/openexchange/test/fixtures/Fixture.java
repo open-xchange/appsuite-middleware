@@ -79,21 +79,17 @@ public class Fixture<T> {
                 final Object v2 = get.invoke(other);
 
                 if(v1 == null && v2 != null) {
-                	//System.out.println(field+" differs! v1 is null v2 not: v2 = "+v2);
                     return false;
                 }
 
                 if(v1 != null && v2 == null) {
-                	//System.out.println(field+" differs! v2 is null v1 not: v1 = "+v1);
                     return false;
                 }
                 final Comparator<Object> comp = getComparator(field);
                 if(comp != null && comp.compare(v1, v2) != 0) {
-                	//System.out.println(field+" differs "+v1+" != "+v2);
                     return false;	
                 }
                 if(comp == null && !v1.equals(v2)) {
-                	//System.out.println(field+" differs "+v1+" != "+v2);
                     return false;
                 }
 

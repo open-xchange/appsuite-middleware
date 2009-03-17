@@ -145,7 +145,7 @@ public final class ResourceUpdateTest extends TestCase {
 		Init.stopServer();
 	}
 
-	public void testResourceUpdate() {
+	public void testResourceUpdate() throws ResourceException, LdapException {
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
@@ -179,7 +179,6 @@ public final class ResourceUpdateTest extends TestCase {
 					storageVersion.getDisplayName()));
 			assertTrue("Availability has not been properly updated", resource.isAvailable() == storageVersion
 					.isAvailable());
-			System.out.println("Resource successfully updated with ID " + id);
 			/*
 			 * Try to update
 			 */
@@ -203,20 +202,13 @@ public final class ResourceUpdateTest extends TestCase {
 					storageVersion.getDisplayName()));
 			assertTrue("Availability has not been properly updated", resource.isAvailable() == storageVersion
 					.isAvailable());
-			System.out.println("Resource successfully updated with ID " + id);
-		} catch (final ResourceException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final LdapException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
 
 	}
 
-	public void testResourceUpdateIncomplete() {
+	public void testResourceUpdateIncomplete() throws ResourceException, LdapException {
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
@@ -255,13 +247,6 @@ public final class ResourceUpdateTest extends TestCase {
 					displayNameBefore));
 			assertTrue("Email address has been updated, but shouldn't", storageVersion.getMail().equals(mailBefore));
 
-			System.out.println("Resource successfully updated with ID " + id);
-		} catch (final ResourceException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final LdapException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -280,7 +265,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 			fail("Update succeeded with invalid string identifier");
 		} catch (final ResourceException e) {
-			System.out.println("Update failed with invalid string identifier: " + e.getMessage());
+			// Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -299,7 +284,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 			fail("Update succeeded with invalid email address");
 		} catch (final ResourceException e) {
-			System.out.println("Update failed with invalid email address: " + e.getMessage());
+			// Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -318,7 +303,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 			fail("Update succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
-			System.out.println("Update failed with missing mandatory field: " + e.getMessage());
+			// Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -337,7 +322,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 			fail("Update succeeded with invalid string identifier");
 		} catch (final ResourceException e) {
-			System.out.println("Update failed with invalid string identifier: " + e.getMessage());
+			// Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -375,7 +360,6 @@ public final class ResourceUpdateTest extends TestCase {
 			stmt.setInt(2, id);
 			stmt.executeUpdate();
 
-			System.out.println("Temporary resource with ID " + id + " successfully deleted");
 		} catch (final SQLException e) {
 			e.printStackTrace();
 		} finally {

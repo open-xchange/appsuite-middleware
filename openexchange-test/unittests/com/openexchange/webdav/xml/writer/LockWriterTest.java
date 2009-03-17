@@ -58,7 +58,6 @@ public class LockWriterTest extends TestCase {
         lock.setTimeout(23000);
         expect = "<blupp xmlns:D=\"DAV:\"><D:activelock> <D:locktype><D:write /></D:locktype> <D:lockscope><D:shared/></D:lockscope> <D:depth>infinity</D:depth> <D:owner>me</D:owner> <D:timeout>Second-23</D:timeout> <D:locktoken><D:href>opaquelocktoken:blaaaa</D:href></D:locktoken> </D:activelock></blupp>";
         got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
-        System.out.println(got);
         assertTrue(xmlCompare.compare(expect,got));
         		
     }

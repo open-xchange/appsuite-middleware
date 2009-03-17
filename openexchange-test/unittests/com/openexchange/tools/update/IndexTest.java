@@ -36,7 +36,6 @@ public class IndexTest extends TestCase {
 	
 	public void testFindAllIndexes() throws Exception {
 		final List<Index> indexes = Index.findAllIndexes(con, "test_index");
-		System.out.println(indexes);
 		assertEquals(4, indexes.size());
 		assertNamedIndex(indexes, "PRIMARY", "id", "field01");
 		assertNamedIndex(indexes, "named_index", "fid");

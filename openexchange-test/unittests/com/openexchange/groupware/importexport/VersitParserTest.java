@@ -187,7 +187,6 @@ public class VersitParserTest extends TestCase {
         assertEquals("Properties after empty are parsed?", "Added after empty element, but still parsed. Yeah!", obj.getProperty(
             "DESCRIPTION").getValue());
         assertEquals("All properties are parsed?", 10, obj.getPropertyCount());
-        System.out.println(obj);
     }
 
     public void test9765() throws IOException {

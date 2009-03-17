@@ -150,7 +150,7 @@ public final class ResourceDeleteTest extends TestCase {
 
 	private static final String SQL_DELETE_DELETE = "DELETE FROM del_resource WHERE cid = ? AND id = ?";
 
-	public void testResourceDelete() {
+	public void testResourceDelete() throws DBPoolingException, ResourceException, SQLException {
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
@@ -213,21 +213,11 @@ public final class ResourceDeleteTest extends TestCase {
 						e.printStackTrace();
 					}
 				}
-			} catch (final SQLException e) {
-				e.printStackTrace();
-				fail(e.getMessage());
 			} finally {
 				Database.back(ctx, true, con);
 			}
 
-			System.out.println("Resource successfully deleted with ID: " + id);
 			id = -1;
-		} catch (final ResourceException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final DBPoolingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -246,7 +236,7 @@ public final class ResourceDeleteTest extends TestCase {
 
 			fail("Delete succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
-			System.out.println("Delete failed with missing mandatory field: " + e.getMessage());
+		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -284,7 +274,6 @@ public final class ResourceDeleteTest extends TestCase {
 			stmt.setInt(2, id);
 			stmt.executeUpdate();
 
-			System.out.println("Temporary resource with ID " + id + " successfully deleted");
 		} catch (final SQLException e) {
 			e.printStackTrace();
 		} finally {

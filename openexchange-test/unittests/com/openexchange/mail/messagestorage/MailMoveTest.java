@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.messagestorage;
 
+import java.io.IOException;
+import javax.mail.MessagingException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -95,8 +97,7 @@ public final class MailMoveTest extends AbstractMailTest {
 
 	private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
-	public void testMailMove() {
-		try {
+	public void testMailMove() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
@@ -267,7 +268,6 @@ public final class MailMoveTest extends AbstractMailTest {
 
 				} finally {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder successfully deleted");
 				}
 
 			} finally {
@@ -279,11 +279,6 @@ public final class MailMoveTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 }

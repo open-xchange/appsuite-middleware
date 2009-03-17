@@ -206,7 +206,6 @@ public class CalendarRecurringTests extends TestCase {
         //RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         //for (int a = 0; a < m.size(); a++) {
         //    RecurringResult rs = m.getRecurringResult(a);
-        //    System.out.println(">>> "+new Date(rs.getStart()));
         //}
         
         //assertFalse("Test that until is not set", test_dao.containsUntil());
@@ -1435,7 +1434,6 @@ public class CalendarRecurringTests extends TestCase {
             final int test_start_hour = test_start.get(Calendar.HOUR);
             final int test_start_minute = test_start.get(Calendar.MINUTE);
             
-            //System.out.println(">>> "+new Date(rs.getStart()));
             assertEquals("Test hour (of occurence "+rs.getPosition()+")", check_start_hour, test_start_hour);
             assertEquals("Test minute (of occurence "+rs.getPosition()+")", check_start_minute, test_start_minute);
             

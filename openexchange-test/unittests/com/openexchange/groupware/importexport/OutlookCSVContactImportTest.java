@@ -91,18 +91,14 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		return new JUnit4TestAdapter(OutlookCSVContactImportTest.class);
 	}
 
-	protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
+	protected void checkFirstResult(final int objectID ) throws OXException, ContextException, ParseException {
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
 		
 		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		Date compDate = null;
-		try {
-			compDate = sdf.parse(DATE1);
-		} catch (final ParseException e) {
-			System.out.println("Setup error: Date format used for comparison sucks.");
-		}
+		compDate = sdf.parse(DATE1);
 		assertDateEquals(compDate, co.getBirthday());
 	}
 	

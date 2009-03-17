@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.folderstorage;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import javax.mail.MessagingException;
 
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.AbstractMailTest;
@@ -181,8 +183,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testFolderGet() {
-		try {
+	public void testFolderGet() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -218,15 +219,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testFolderCreateAndSubfolders() {
-		try {
+	public void testFolderCreateAndSubfolders() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -334,7 +329,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -342,11 +336,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 	public void testFolderRoot() {
@@ -396,8 +385,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testFolderUpdate() {
-		try {
+	public void testFolderUpdate() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -493,7 +481,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -501,15 +488,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testFolderMove() {
-		try {
+	public void testFolderMove() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -571,7 +552,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertEquals("Unexpected parent: " + mf.getParentFullname(), parentFullname, mf.getParentFullname());
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 					fullname = null;
 				}
 
@@ -608,7 +588,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -616,11 +595,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 	private boolean canCreateSubfolders(final OCLPermission[] perms) {
@@ -635,8 +609,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		return false;
 	}
 
-	public void testFolderRename() {
-		try {
+	public void testFolderRename() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -699,7 +672,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -707,15 +679,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testFolderDelete() {
-		try {
+	public void testFolderDelete() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -822,7 +788,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -830,17 +795,11 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 	private static final MailField[] FIELDS_ID = { MailField.ID };
 
-	public void testFolderClear() {
-		try {
+	public void testFolderClear() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -940,7 +899,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				if (trashedIDs != null) {
@@ -952,15 +910,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testFolderQuota() {
-		try {
+	public void testFolderQuota() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -968,8 +920,6 @@ public final class MailFolderTest extends AbstractMailTest {
 
 			final MailCapabilities caps = mailAccess.getMailConfig().getCapabilities();
 			if (!caps.hasQuota()) {
-				System.out.println("Mail system's capabilities indicate no QUOTA support."
-						+ " Skipping testFolderQuota()...");
 				return;
 			}
 
@@ -1009,7 +959,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				final Quota.Type[] types = new Quota.Type[] { Quota.Type.STORAGE };
 				final long prevUsage = mailAccess.getFolderStorage().getQuotas(fullname, types)[0].getUsage();
 				if (prevUsage == Quota.UNLIMITED) {
-					System.out.println("Current user has unlimited QUOTA. Skipping testFolderQuota()...");
 					return;
 				}
 
@@ -1020,7 +969,6 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -1028,15 +976,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testPath2DefaultFolder() {
-		try {
+	public void testPath2DefaultFolder() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -1140,12 +1082,10 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (anotherFullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(anotherFullname, true);
-					System.out.println("Temporary folder deleted: " + anotherFullname);
 				}
 
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -1153,10 +1093,5 @@ public final class MailFolderTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 }

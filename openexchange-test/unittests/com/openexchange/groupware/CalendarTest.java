@@ -791,7 +791,6 @@ public class CalendarTest extends TestCase {
             boolean found = false;
             while (si.hasNext()) {
                 final CalendarDataObject tdao = si.next();
-                System.out.println(">>> "+tdao.getTitle());
                 found = true;
             }
             si.close();
@@ -900,7 +899,6 @@ public class CalendarTest extends TestCase {
             
         }
         si.close();
-        System.out.println("DEBUG: deleted : "+counter);
         si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0, null);
 
         while (si.hasNext()) {
@@ -1286,7 +1284,6 @@ public class CalendarTest extends TestCase {
         
         int pos = (int)((cdao.getStartDate().getTime()-range_start)/CalendarRecurringCollection.MILLI_DAY);
         int len = (int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY);
-        //System.out.println("pos = "+pos + " len = "+len);
         for (int a = pos; a <= pos+len; a++) {
             check_array[a] = true;
         }
@@ -1296,7 +1293,6 @@ public class CalendarTest extends TestCase {
             final RecurringResult rr = m.getRecurringResult(a);
             pos = (int)((rr.getStart()-range_start)/CalendarRecurringCollection.MILLI_DAY);
             len = (int)((rr.getEnd()-rr.getStart())/CalendarRecurringCollection.MILLI_DAY);
-            //System.out.println("pos = "+pos + " len = "+len);
             for (int b = pos; b <= pos+len; b++) {
                 if (b < check_array.length) {
                     check_array[b] = true;

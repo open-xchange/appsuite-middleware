@@ -88,10 +88,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 	
 	public void notestManyManyMany() throws AbstractOXException, SQLException{
 		createMany();
-		final long start = System.currentTimeMillis();
 		updateTask.perform(schema, existing_ctx_id);
-		final long stop = System.currentTimeMillis();
-		System.out.println(stop-start);
 	}
 	
 	

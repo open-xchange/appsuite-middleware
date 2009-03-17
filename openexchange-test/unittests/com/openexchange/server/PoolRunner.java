@@ -60,7 +60,6 @@ public class PoolRunner implements Runnable {
                     }
                 }
                 modrunner++;
-                //System.out.println("Ganz toll!");
                 simpleAction(con);
                 DBPool.push(c, con);
                 

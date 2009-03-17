@@ -83,8 +83,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 		super(name);
 	}
 
-	public void testFolderCreateAndSubfolders() {
-		try {
+	public void testFolderCreateAndSubfolders() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -146,7 +145,6 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				validName = "Foo 1 Bar";
@@ -167,7 +165,6 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				validName = "1 und 2";
@@ -190,7 +187,6 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -198,15 +194,9 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testFailIfSeparatorContained() {
-		try {
+	public void testFailIfSeparatorContained() throws MailException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -300,7 +290,6 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -308,10 +297,5 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 }

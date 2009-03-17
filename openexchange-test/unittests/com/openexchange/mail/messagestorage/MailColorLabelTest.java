@@ -80,7 +80,6 @@ public final class MailColorLabelTest extends MessageStorageTest {
 			mailAccess.connect();
 
 			if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
-				System.out.println("MailColorLabelTest.testMailColorLabel() aborted since user flags are not supported");
 				return;
 			}
 

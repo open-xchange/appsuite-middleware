@@ -382,7 +382,7 @@ public class AbstractContactTest {
 	public static Importer imp;
 	public Format defaultFormat;
 
-	public static int createTestFolder(final int type, final ServerSession sessObj,final Context ctx, final String folderTitle) throws DBPoolingException, SQLException, LdapException, OXFolderException {
+	public static int createTestFolder(final int type, final ServerSession sessObj,final Context ctx, final String folderTitle) throws LdapException, OXException {
 		final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
 		final FolderObject fo = new FolderObject();
 		fo.setFolderName(folderTitle);
@@ -398,21 +398,11 @@ public class AbstractContactTest {
 		final OXFolderManager oxfa = OXFolderManager.getInstance(sessObj);
 		int tempFolderId = -1;
 		//deleting old folder if existing
-		try {
-			if(fo.exists(sessObj.getContext())){
-				deleteTestFolder(fo.getObjectID());
-			}
-		} catch (final OXException e) {
-			System.out.println("Could not find or delete old folder");
-			e.printStackTrace();
+		if(fo.exists(sessObj.getContext())){
+			deleteTestFolder(fo.getObjectID());
 		}
 		//creating new folder
-		try {
-			tempFolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
-		} catch (final OXException e) {
-			System.out.println("Could not create test folder");
-			e.printStackTrace();
-		}
+		tempFolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 		return tempFolderId; 
 	}
 
@@ -485,12 +475,8 @@ public class AbstractContactTest {
 	 * @param foldername Name of the folder to be used for this tests
 	 * @param errorExpected Is an error expected?
 	 * @return
-	 * @throws DBPoolingException
-	 * @throws SQLException
-	 * @throws ImportExportException
-	 * @throws UnsupportedEncodingException
 	 */
-	protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
+	protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws UnsupportedEncodingException, LdapException, OXException {
 		return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, errorExpected).get(0);
 	}
 	
@@ -503,12 +489,8 @@ public class AbstractContactTest {
 	 * @param foldername Name of the folder to be used for this tests
 	 * @param expectedErrors Are errors expected? Example: If you expect two ImportResults, which both report failure, write <code>true, true</code>.
 	 * @return
-	 * @throws DBPoolingException
-	 * @throws SQLException
-	 * @throws ImportExportException
-	 * @throws UnsupportedEncodingException
 	 */
-	protected List<ImportResult> performMultipleEntryImport(final String file, final Format format, final int folderObjectType, final String foldername, final Context ctx, final Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
+	protected List<ImportResult> performMultipleEntryImport(final String file, final Format format, final int folderObjectType, final String foldername, final Context ctx, final Boolean... expectedErrors) throws UnsupportedEncodingException, LdapException, OXException {
 		folderId = createTestFolder(folderObjectType, sessObj,ctx, foldername);
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));

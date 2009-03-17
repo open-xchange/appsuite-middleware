@@ -187,7 +187,6 @@ public class FolderTest extends TestCase {
             try {
                 oxma.createFolder(fo, true, System.currentTimeMillis());
             } catch (final Exception e) {
-                System.out.println("\n\n\n" + e.getMessage());
                 exc = e;
             }
             assertTrue(exc != null);
@@ -237,7 +236,6 @@ public class FolderTest extends TestCase {
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
             } catch (final Exception e) {
-                System.out.println("\n\n\n" + e.getMessage());
                 exc = e;
             }
             assertTrue(exc != null);
@@ -331,7 +329,6 @@ public class FolderTest extends TestCase {
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
             } catch (final Exception e) {
-                System.out.println("\n\n\n" + e.getMessage());
                 exc = e;
             }
             assertTrue(exc != null);
@@ -399,7 +396,6 @@ public class FolderTest extends TestCase {
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
             } catch (final Exception e) {
-                System.out.println("\n\n\n" + e.getMessage());
                 exc = e;
             }
             assertTrue(exc != null);
@@ -909,7 +905,6 @@ public class FolderTest extends TestCase {
                     // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                     // System.currentTimeMillis(), null, null);
                 } catch (final Exception e) {
-                    System.out.println("\n\n\n" + e.getMessage());
                     exc = e;
                 }
                 assertTrue(exc != null);
@@ -978,7 +973,6 @@ public class FolderTest extends TestCase {
                     // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                     // System.currentTimeMillis(), null, null);
                 } catch (final Exception e) {
-                    System.out.println("\n\n\n" + e.getMessage());
                     exc = e;
                 }
                 assertTrue(exc != null);

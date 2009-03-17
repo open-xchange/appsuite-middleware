@@ -97,45 +97,30 @@ public final class ResourceCreateTest extends TestCase {
 	}
 
 	private static Context resolveContext(final String ctxStr) throws Exception {
-		try {
-			int pos = -1;
-			final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
-			return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
-		} catch (final Throwable t) {
-			t.printStackTrace();
-			return null;
-		}
+	    int pos = -1;
+	    final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
+	    return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
 	}
 
 	private static User resolveUser(final String user, final Context ctx) throws Exception {
-		try {
-			int pos = -1;
-			final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
-			return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
-		} catch (final Throwable t) {
-			t.printStackTrace();
-			return null;
-		}
+		int pos = -1;
+		final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
+		return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
 	}
 
 	@Override
 	protected void setUp() throws Exception {
-		try {
-			/*
-			 * Init
-			 */
-			Init.startServer();
-			/*
-			 * Init test environment
-			 */
-			final String login = AjaxInit.getAJAXProperty("login");
-			ctx = resolveContext(login);
-			user = resolveUser(login, ctx);
-			admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
+		/*
+		 * Init
+		 */
+		Init.startServer();
+		/*
+		 * Init test environment
+		 */
+		final String login = AjaxInit.getAJAXProperty("login");
+		ctx = resolveContext(login);
+		user = resolveUser(login, ctx);
+		admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
 	}
 
 	@Override
@@ -143,7 +128,7 @@ public final class ResourceCreateTest extends TestCase {
 		Init.stopServer();
 	}
 
-	public void testResourceCreation() {
+	public void testResourceCreation() throws SQLException, ResourceException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -161,17 +146,13 @@ public final class ResourceCreateTest extends TestCase {
 					.getLastModified() != null
 					&& resource.getLastModified().getTime() < System.currentTimeMillis());
 
-			System.out.println("Resource successfully created with ID " + id);
-		} catch (final ResourceException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
 
 	}
 
-	public void testResourceCreationFail001() {
+	public void testResourceCreationFail001() throws SQLException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -185,14 +166,14 @@ public final class ResourceCreateTest extends TestCase {
 
 			fail("Creation succeeded with invalid string identifier");
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with invalid string identifier: " + e.getMessage());
+		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
 
 	}
 
-	public void testResourceCreationFail002() {
+	public void testResourceCreationFail002() throws SQLException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -206,14 +187,14 @@ public final class ResourceCreateTest extends TestCase {
 
 			fail("Creation succeeded with invalid email address");
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with invalid email address: " + e.getMessage());
+		 //   Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
 
 	}
 
-	public void testResourceCreationFail003() {
+	public void testResourceCreationFail003() throws SQLException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -240,14 +221,14 @@ public final class ResourceCreateTest extends TestCase {
 			fail("Creation succeeded with duplicate identifier");
 
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with duplicate identifier: " + e.getMessage());
+		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
 
 	}
 
-	public void testResourceCreationFail004() {
+	public void testResourceCreationFail004() throws SQLException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -274,14 +255,14 @@ public final class ResourceCreateTest extends TestCase {
 			fail("Creation succeeded with duplicate email address");
 
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with duplicate email address: " + e.getMessage());
+		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
 
 	}
 
-	public void testResourceFail007() {
+	public void testResourceFail007() throws SQLException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -295,7 +276,7 @@ public final class ResourceCreateTest extends TestCase {
 
 			fail("Creation succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with missing mandatory field: " + e.getMessage());
+		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -303,7 +284,7 @@ public final class ResourceCreateTest extends TestCase {
 
 	private static final String SQL_DELETE = "DELETE FROM resource WHERE cid = ? AND id = ?";
 
-	private static final void deleteResource(final int id, final int cid) {
+	private static final void deleteResource(final int id, final int cid) throws SQLException {
 		if (-1 == id) {
 			return;
 		}
@@ -321,9 +302,6 @@ public final class ResourceCreateTest extends TestCase {
 			stmt.setInt(2, id);
 			stmt.executeUpdate();
 
-			System.out.println("Temporary resource with ID " + id + " successfully deleted");
-		} catch (final SQLException e) {
-			e.printStackTrace();
 		} finally {
 			if (null != stmt) {
 				try {

@@ -49,6 +49,8 @@
 
 package com.openexchange.mail;
 
+import java.io.IOException;
+import javax.mail.MessagingException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -85,8 +87,7 @@ public final class MailIDTest extends AbstractMailTest {
 		super(name);
 	}
 
-	public void testMailID() {
-		try {
+	public void testMailID() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
@@ -218,7 +219,6 @@ public final class MailIDTest extends AbstractMailTest {
 				} finally {
 					if (fullname != null) {
 						mailAccess.getFolderStorage().deleteFolder(fullname, true);
-						System.out.println("Temporary folder deleted: " + fullname);
 					}
 				}
 			} finally {
@@ -227,10 +227,6 @@ public final class MailIDTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 }

@@ -195,7 +195,6 @@ public class LockTest extends ActionTestCase {
 		final XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("owner","locktoken");
 		
-		System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 	}

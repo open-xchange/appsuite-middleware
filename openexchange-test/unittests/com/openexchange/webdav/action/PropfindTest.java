@@ -168,7 +168,6 @@ public class PropfindTest extends ActionTestCase {
 		req.setUrl(testCollection);
 		
 		action.perform(req, res);
-		System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+GUI_URL+"</D:href><D:propstat><D:prop><D:displayname>gui</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX3_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index3.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
@@ -259,7 +258,6 @@ public class PropfindTest extends ActionTestCase {
 		final XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("href");
 
-        System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
 
@@ -285,7 +283,6 @@ public class PropfindTest extends ActionTestCase {
         final XMLCompare compare = new XMLCompare();
         compare.setCheckTextNames("href");
 
-        System.out.println(res.getResponseBodyAsString());
         assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 
     }

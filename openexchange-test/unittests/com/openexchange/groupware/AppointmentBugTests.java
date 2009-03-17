@@ -259,13 +259,6 @@ public class AppointmentBugTests extends TestCase {
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        /*
-        // debug
-        for (int a = 0; a < m.size(); a++) {
-            RecurringResult rs = m.getRecurringResult(a);
-            System.out.println(new Date(rs.getStart()));
-        }
-        */
         assertEquals("Check calculation", 10, m.size());
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -1273,7 +1266,6 @@ public class AppointmentBugTests extends TestCase {
             final long check_end = rr.getEnd();
             final int check_calculator = (int)((check_end-check_start)/CalendarRecurringCollection.MILLI_DAY);
             assertEquals("Check calculated results", calculator, check_calculator);
-            //System.out.println(">>>> "+new Date(check_start) + " ---- "+new Date(check_end));
         }
 
     }

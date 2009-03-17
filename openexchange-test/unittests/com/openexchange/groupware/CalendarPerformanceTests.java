@@ -46,8 +46,6 @@ public class CalendarPerformanceTests extends TestCase {
     private static int userid = 11; // bishoph
     public static int contextid = 1;
     
-    private final boolean debug = true;
-    
     private static boolean init = false;
     
     private static final String testfile = "/home/bishoph/tmp/supertemp/sqloutput"; // "/home/bishoph/tmp/supertemp/sql_dump_dev_prototype"
@@ -133,7 +131,6 @@ public class CalendarPerformanceTests extends TestCase {
     	long high = 0L;
     	String shigh = "";
     	final long all_start = System.currentTimeMillis();
-    	System.out.println("Start");
     	final HashMap<String, Integer> count_cid = new HashMap<String, Integer>();
     	while ((line = lnr.readLine()) != null){
     		final StringTokenizer st = new StringTokenizer(line);
@@ -154,9 +151,6 @@ public class CalendarPerformanceTests extends TestCase {
     			final DateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     			final Date sdate = dateformat.parse(startdate + " "+starttime);
     			final Date edate = dateformat.parse(enddate + " "+endtime);
-    			if (debug) {
-					System.out.print("Processing (" + number + ")"+recstring);
-				}
     			final long start = System.currentTimeMillis();
     	        final CalendarDataObject cdao = new CalendarDataObject();
     	        cdao.setTimezone(TIMEZONE);
@@ -174,18 +168,10 @@ public class CalendarPerformanceTests extends TestCase {
     	        	high = duration;
     	        	shigh = recstring;
     	        }
-    	        if (debug) {
-					System.out.println(" "+duration + " ms");
-				}
-    	        
     		}
     	}
     	final long all_end = System.currentTimeMillis();
     	final long total = all_end - all_start;
-    	System.out.println("Highest :" +high + " "+shigh);
-    	System.out.println("Avg :" + (all/counter));
-    	System.out.println("Time total :" + total);
-    	System.out.println("CID total :" + count_cid.size());
     	final Iterator it = count_cid.keySet().iterator();
     	int hit = 0;
     	while(it.hasNext()) {
@@ -195,7 +181,6 @@ public class CalendarPerformanceTests extends TestCase {
     			hit = check;
     		}
     	}
-    	System.out.println("CID highest :" + hit);
     }    
     
     

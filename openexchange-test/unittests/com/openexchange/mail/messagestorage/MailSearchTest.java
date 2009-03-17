@@ -49,12 +49,15 @@
 
 package com.openexchange.mail.messagestorage;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.mail.MessagingException;
 
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
@@ -113,8 +116,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 	private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
-	public void testMailSearch() {
-		try {
+	public void testMailSearch() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
@@ -127,7 +129,6 @@ public final class MailSearchTest extends AbstractMailTest {
 				long start = System.currentTimeMillis();
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL,
 						null, null, term, FIELDS_ID);
-				System.out.println("Header search took: " + (System.currentTimeMillis() - start) + "msec");
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
 				}
@@ -136,7 +137,6 @@ public final class MailSearchTest extends AbstractMailTest {
 				start = System.currentTimeMillis();
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_MORE);
-				System.out.println("Unseen search took: " + (System.currentTimeMillis() - start) + "msec");
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -152,7 +152,6 @@ public final class MailSearchTest extends AbstractMailTest {
 				start = System.currentTimeMillis();
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_EVEN_MORE);
-				System.out.println("Size search took: " + (System.currentTimeMillis() - start) + "msec");
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -184,7 +183,6 @@ public final class MailSearchTest extends AbstractMailTest {
 					start = System.currentTimeMillis();
 					final MailMessage[] searchedMails = mailAccess.getMessageStorage().searchMessages("INBOX",
 							IndexRange.NULL, null, null, term, FIELDS_ID_AND_HEADER);
-					System.out.println("Message-Id search took: " + (System.currentTimeMillis() - start) + "msec");
 					assertTrue("Search failed: No result", null != searchedMails);
 					assertTrue("Search failed: Non-matching result size", searchedMails.length >= 1);
 					boolean found = false;
@@ -206,11 +204,6 @@ public final class MailSearchTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
 	private static final String RFC822_SRC = "Return-Path: <dream-team-bounces@open-xchange.com>\n"
@@ -307,8 +300,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			+ "      0x15208141 | 2829 F2BE 2242 91F0 24EB C0A7 258E F1A2 1520 8141\n" + "    </div>\n" + "  </body>\n"
 			+ "\n" + "</html>\n" + "\n" + "------=_Part_932_16478682.1207643538866--\n" + "\n";
 
-	public void testMailSearchSmallMailbox() {
-		try {
+	public void testMailSearchSmallMailbox() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -466,7 +458,6 @@ public final class MailSearchTest extends AbstractMailTest {
 
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -474,15 +465,9 @@ public final class MailSearchTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 
-	public void testMailSearchLargeMailbox() {
-		try {
+	public void testMailSearchLargeMailbox() throws MailException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -651,7 +636,6 @@ public final class MailSearchTest extends AbstractMailTest {
 
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -659,10 +643,5 @@ public final class MailSearchTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 }

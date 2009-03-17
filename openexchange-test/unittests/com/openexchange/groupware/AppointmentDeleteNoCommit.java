@@ -93,7 +93,6 @@ public class AppointmentDeleteNoCommit extends TestCase {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
         final CalendarSql csql = new CalendarSql(so);
-        System.out.println("Deleting " + cdao.getTitle() + " with id=" + cdao.getObjectID() + " and cid=" + contextid);
         final CalendarDataObject deleteit = new CalendarDataObject();
         deleteit.setContext(cdao.getContext());
         deleteit.setObjectID(cdao.getObjectID());

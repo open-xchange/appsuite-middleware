@@ -77,12 +77,10 @@ public final class MailAccessTest extends AbstractMailTest {
 		super(name);
 	}
 
-	public void testMailAccess() {
-		try {
+	public void testMailAccess() throws MailException, InterruptedException {
 			final SessionObject session = getSession();
 			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			System.out.println("Active connections: " + MailAccess.getCounter());
 			/*
 			 * close
 			 */
@@ -99,7 +97,6 @@ public final class MailAccessTest extends AbstractMailTest {
 				mailConfig.setServer(getServer());
 				mailConfig.setPort(getPort());
 				mailAccess.connect();
-				System.out.println("Active connections: " + MailAccess.getCounter());
 			} catch (final Exception e) {
 			} finally {
 				try {
@@ -114,7 +111,6 @@ public final class MailAccessTest extends AbstractMailTest {
 			
 			mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			System.out.println("Active connections: " + MailAccess.getCounter());
 			/*
 			 * close
 			 */
@@ -131,13 +127,11 @@ public final class MailAccessTest extends AbstractMailTest {
 			} catch (final Exception e) {
 				assertTrue(true);
 			}
-			System.out.println("Active connections: " + MailAccess.getCounter());
 			
 			
 			session.setPassword(getPassword());
 			mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			System.out.println("Active connections: " + MailAccess.getCounter());
 			mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null,
 					new MailField[] { MailField.ID });
 			/*
@@ -149,15 +143,9 @@ public final class MailAccessTest extends AbstractMailTest {
 			 * Test if cache closes connection
 			 */
 			Thread.sleep(10000);
-			System.out.println("Active connections: " + MailAccess.getCounter());
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 	
-	public void testSimultaneousConnections() {
-		try {
+	public void testSimultaneousConnections() throws InterruptedException {
 			final MyRunnable runnable = new MyRunnable(this);
 			final Thread[] threads = new Thread[50];
 			for (int i = 0; i < threads.length; i++) {
@@ -181,14 +169,8 @@ public final class MailAccessTest extends AbstractMailTest {
 					Thread.sleep(1000);
 				}
 			}
-			System.out.println("All threads finished...");
 			Thread.sleep(10000);
-			System.out.println("\tEND: Active connections: " + MailAccess.getCounter());
 			assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 	}
 	
 	private static final class MyRunnable implements Runnable {
@@ -206,7 +188,6 @@ public final class MailAccessTest extends AbstractMailTest {
 				session.setPassword(testRef.getPassword());
 				MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				/*
 				 * close
 				 */
@@ -214,7 +195,6 @@ public final class MailAccessTest extends AbstractMailTest {
 	
 				mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				/*
 				 * close
 				 */
@@ -231,12 +211,10 @@ public final class MailAccessTest extends AbstractMailTest {
 				} catch (final Exception e) {
 					assertTrue(true);
 				}
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				
 				session.setPassword(testRef.getPassword());
 				mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null,
 						new MailField[] { MailField.ID });
 				/*
@@ -244,8 +222,6 @@ public final class MailAccessTest extends AbstractMailTest {
 				 */
 				mailAccess.close(false);
 	
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
-				
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}

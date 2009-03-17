@@ -102,19 +102,19 @@ public abstract class AbstractBundleTest extends TestCase {
     }
 
     protected String getJMXHost() {
-        return JMXInit.getJMXProperty(JMXInit.Property.JMX_HOST.toString());
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_HOST);
     }
 
     protected int getJMXPort() {
-        return Integer.parseInt(JMXInit.getJMXProperty(JMXInit.Property.JMX_PORT.toString()));
+        return Integer.parseInt(JMXInit.getJMXProperty(JMXInit.Property.JMX_PORT));
     }
 
     protected String getJMXLogin() {
-        return JMXInit.getJMXProperty(JMXInit.Property.JMX_LOGIN.toString());
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_LOGIN);
     }
 
     protected String getJMXPassword() {
-        return JMXInit.getJMXProperty(JMXInit.Property.JMX_PASSWORD.toString());
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_PASSWORD);
     }
 
     protected WebConversation getWebConversation() {
@@ -201,7 +201,6 @@ public abstract class AbstractBundleTest extends TestCase {
             hostname,
             sessionId,
             "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            false,
             true);
         for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
             final FolderObject subfolder = iter.next();
@@ -218,7 +217,6 @@ public abstract class AbstractBundleTest extends TestCase {
             hostname,
             sessionId,
             "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            false,
             true);
         for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
             final FolderObject subfolder = iter.next();
@@ -229,7 +227,7 @@ public abstract class AbstractBundleTest extends TestCase {
         return -1;
     }
 
-    protected static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+    protected static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
@@ -243,9 +241,6 @@ public abstract class AbstractBundleTest extends TestCase {
 
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (respObj.has("error") && !respObj.isNull("error")) {
             throw new OXException("Error occured: " + respObj.getString("error"));
         }

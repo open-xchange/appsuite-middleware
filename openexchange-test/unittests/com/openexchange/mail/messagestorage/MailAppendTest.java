@@ -107,11 +107,9 @@ public final class MailAppendTest extends MessageStorageTest {
         try {
             final MailMessage m = mailAccess.getMessageStorage().getMessage(INBOX, uids[0], true);
             m.removeHeader(MessageHeaders.HDR_X_OX_MARKER);
-            System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
             compareMailMessages(testmessages[0], m, fieldWithoutUidFolderAndFlags, fieldsfull, "test message", "fetched message", true);
-        } catch (final MailException e) {
+        } finally {
             mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-            throw e;
         }
     }
     
@@ -124,12 +122,10 @@ public final class MailAppendTest extends MessageStorageTest {
             for (int i = 0; i < uids.length; i++) {
                 final MailMessage m = mailAccess.getMessageStorage().getMessage(INBOX, uids[i], true);
                 m.removeHeader(MessageHeaders.HDR_X_OX_MARKER);
-                System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
                 compareMailMessages(testmessages[i], m, fieldWithoutUidFolderAndFlags, fieldsfull, "test message", "fetched message", true);
             }
-        } catch (final MailException e) {
+        } finally {
             mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-            throw e;
         }
     }
     
@@ -142,14 +138,12 @@ public final class MailAppendTest extends MessageStorageTest {
                 final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids, fields);
                 assertTrue("The size of the uids is not equal with the size of the fetched mails which is returned from the getMessages method", fetchedMails.length == uids.length);
                 for (int i = 0; i < fetchedMails.length; i++) {
-                    System.out.println("Fetched: " + fetchedMails[i].getMailId());
                     fetchedMails[i].removeHeader(MessageHeaders.HDR_X_OX_MARKER);
                     compareMailMessages(testmessages[i], fetchedMails[i], fieldWithoutUidFolderAndFlags, fields, "test messages", "fetched messages " + i, true);
                 }
             }
-        } catch (final MailException e) {
+        } finally {
             mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-            throw e;
         }
     }
 
@@ -160,18 +154,15 @@ public final class MailAppendTest extends MessageStorageTest {
             final Random random = new Random();
             final int length = MailField.values().length;
             final int nextInt = random.nextInt(variations.length - length) + length;
-            System.out.println("Random: " + nextInt);
             final MailField[] fields = variations[nextInt];
             final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids, fields);
             assertTrue("The size of the uids is not equal with the size of the fetched mails which is returned from the getMessages method", fetchedMails.length == uids.length);
             for (int i = 0; i < fetchedMails.length; i++) {
-                System.out.println("Fetched: " + fetchedMails[i].getMailId());
                 fetchedMails[i].removeHeader(MessageHeaders.HDR_X_OX_MARKER);
                 compareMailMessages(testmessages[i], fetchedMails[i], fieldWithoutUidFolderAndFlags, fields, "test messages", "fetched messages " + i, true);
             }
-        } catch (final MailException e) {
+        } finally {
             mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-            throw e;
         }
     }
 

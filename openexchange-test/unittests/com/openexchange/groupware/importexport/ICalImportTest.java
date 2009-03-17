@@ -89,7 +89,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     }
 
     @Test
-    public void test7472_confidential() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException, LdapException, OXFolderException {
+    public void test7472_confidential() throws UnsupportedEncodingException, LdapException, OXException {
         folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "icalAppointmentTestFolder");
         final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:CONFIDENTIAL\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 
@@ -109,7 +109,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     }
 
     @Test
-    public void test7472_private() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException, LdapException, OXFolderException {
+    public void test7472_private() throws UnsupportedEncodingException, LdapException, OXException {
         folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "icalAppointmentTestFolder");
         final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 

@@ -211,7 +211,6 @@ public class QuotaFileStorageTest extends TestCase {
 					final String id = fs.saveNewFile(new ByteArrayInputStream(bytes));
 					Thread.sleep(w);
 					fs.deleteFile(id);
-					//System.out.println(w);
 				} catch (final Exception e) {
 					e.printStackTrace();
 				}
