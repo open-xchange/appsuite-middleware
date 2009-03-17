@@ -136,24 +136,27 @@ public class Format implements Serializable {
 	public int hashCode(){
 		return id;
 	}
-	
-	@Override
-	public boolean equals(final Object o){
-		try {
-			return ((Format)o).id == id;
-		} catch (final ClassCastException x){
-			return false;
-		}
-	}
 
-	public static Format getByExtension(final String extension) {
-		for(final Format f : VALUES){
-			if(f.getExtension().equals(extension)) {
-				return f;
-			}
-		}
-		return null;
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (null == o) {
+            return false;
+        }
+        try {
+            return ((Format) o).id == id;
+        } catch (final ClassCastException x) {
+            return false;
+        }
+    }
+
+    public static Format getByExtension(final String extension) {
+        for (final Format f : VALUES) {
+            if (f.getExtension().equals(extension)) {
+                return f;
+            }
+        }
+        return null;
+    }
 
 
 }
