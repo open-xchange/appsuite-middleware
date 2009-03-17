@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import javax.mail.internet.MimeUtility;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * UUEncodePart UUEncode part containing all needed information about the attachment.
@@ -134,7 +135,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      * @return inStreamPart - The inputStream
      */
     public InputStream getInputStream() {
-        final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.getBytes());
+        final ByteArrayInputStream bStream = new UnsynchronizedByteArrayInputStream(bodyPart.getBytes());
         try {
             final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
             return (inStreamPart);
