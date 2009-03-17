@@ -136,7 +136,7 @@ public class OldPropertyDefinition {
                     property.addParameter(parameter);
                 } else {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unknown property parameter: " + paramname);
+                        LOG.debug("Unknown property parameter: " + param);
                     }
                 }
             }
