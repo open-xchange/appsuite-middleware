@@ -1,3 +1,7 @@
+* 2009-03-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #13362: Checking requested columns for last-modified field prior to adding it
+
 * 2009-03-16 - thorben.betten@open-xchange.com
 
  - Bugfix #13372: Extending auto complete search to support distribution lists.

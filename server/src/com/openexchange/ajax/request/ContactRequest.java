@@ -268,9 +268,7 @@ public class ContactRequest {
                 bIgnoreDelete = true;
             }
 
-            final int[] internalColumns = new int[columnsToLoad.length + 1];
-            System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
-            internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
+            final int[] internalColumns = checkLastModified(columnsToLoad);
 
             Context ctx = null;
             try {
@@ -379,9 +377,7 @@ public class ContactRequest {
                 oldfolderId = objectIdAndFolderId[0][1];
             }
 
-            final int[] internalColumns = new int[columnsToLoad.length + 1];
-            System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
-            internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
+            final int[] internalColumns = checkLastModified(columnsToLoad);
 
             Context ctx = null;
             try {
@@ -479,9 +475,7 @@ public class ContactRequest {
                 userIdArray[a] = jData.getInt(a);
             }
 
-            final int[] internalColumns = new int[columns.length + 1];
-            System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-            internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+            final int[] internalColumns = checkLastModified(columns);
 
             Context ctx = null;
             try {
@@ -534,9 +528,7 @@ public class ContactRequest {
         SearchIterator<ContactObject> it = null;
 
         try {
-            final int[] internalColumns = new int[columnsToLoad.length + 1];
-            System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
-            internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
+            final int[] internalColumns = checkLastModified(columnsToLoad);
 
             Context ctx = null;
             try {
@@ -700,9 +692,7 @@ public class ContactRequest {
         searchObj.setCatgories(DataParser.parseString(jData, "categories"));
         searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
 
-        final int[] internalColumns = new int[columnsToLoad.length + 1];
-        System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
-        internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
+        final int[] internalColumns = checkLastModified(columnsToLoad);
 
         Context ctx = null;
         try {
@@ -901,5 +891,25 @@ public class ContactRequest {
                 }
             }
         }
+    }
+
+    /**
+     * Ensure last-modified field {@link DataObject#LAST_MODIFIED} is contained in specified columns.
+     * 
+     * @param columns The columns to check
+     * @return Either specified columns if last-modified field is already contained or specified columns extended by last-modified field
+     */
+    private static int[] checkLastModified(final int[] columns) {
+        for (int i = 0; i < columns.length; i++) {
+            if (columns[i] == DataObject.LAST_MODIFIED) {
+                // Last-Modified is already contained in requested columns
+                return columns;
+            }
+        }
+        // Add last-modified to requested columns
+        final int[] internalColumns = new int[columns.length + 1];
+        System.arraycopy(columns, 0, internalColumns, 0, columns.length);
+        internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+        return internalColumns;
     }
 }
