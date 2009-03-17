@@ -655,10 +655,9 @@ public abstract class CalendarObject extends CommonObject {
             setParticipants(new Participant[] { p });
         } else {
             final int newLength = participants.length + 1;
-            Participant[] tmp = participants;
+            final Participant[] tmp = participants;
             participants = new Participant[newLength];
             System.arraycopy(tmp, 0, participants, 0, tmp.length);
-            tmp = null;
             participants[newLength - 1] = p;
         }
     }
