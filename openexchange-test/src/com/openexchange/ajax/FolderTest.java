@@ -140,10 +140,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static List<FolderObject> getRootFolders(final WebConversation conversation, final String hostname, final String sessionId, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-        return getRootFolders(conversation, null, hostname, sessionId, printOutput);
+        return getRootFolders(conversation, null, hostname, sessionId);
     }
 
-    public static List<FolderObject> getRootFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+    public static List<FolderObject> getRootFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
         final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT);
@@ -153,9 +153,6 @@ public class FolderTest extends AbstractAJAXTest {
         final List<FolderObject> folders = new ArrayList<FolderObject>();
         final JSONObject respObj = new JSONObject(resp.getText());
         final JSONArray arr = respObj.getJSONArray("data");
-        if (printOutput) {
-            System.out.println("data: " + arr.toString());
-        }
         for (int i = 0; i < arr.length(); i++) {
             final JSONArray nestedArr = arr.getJSONArray(i);
             final FolderObject rootFolder = new FolderObject();
@@ -186,10 +183,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static FolderObject getFolder(final WebConversation conversation, final String hostname, final String sessionId, final String folderIdentifier, final Calendar timestamp, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-        return getFolder(conversation, null, hostname, sessionId, folderIdentifier, timestamp, printOutput);
+        return getFolder(conversation, null, hostname, sessionId, folderIdentifier, timestamp);
     }
 
-    public static FolderObject getFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String folderIdentifier, final Calendar timestamp, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+    public static FolderObject getFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String folderIdentifier, final Calendar timestamp) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
         final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
@@ -252,9 +249,6 @@ public class FolderTest extends AbstractAJAXTest {
         if (respObj.has("timestamp") && !respObj.isNull("timestamp")) {
             timestamp.setTimeInMillis(respObj.getLong("timestamp"));
         }
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         return fo;
     }
 
@@ -274,11 +268,10 @@ public class FolderTest extends AbstractAJAXTest {
             type,
             sharedForUserId,
             sharedPermsArr,
-            sharedIsAdmin,
-            printOutput);
+            sharedIsAdmin);
     }
 
-    public static int insertFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int entityId, final boolean isGroup, final int[] permsArr, final boolean isAdmin, final int parentFolderId, final String folderName, final String moduleStr, final int type, final int sharedForUserId, final int[] sharedPermsArr, final boolean sharedIsAdmin, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException, OXException {
+    public static int insertFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int entityId, final boolean isGroup, final int[] permsArr, final boolean isAdmin, final int parentFolderId, final String folderName, final String moduleStr, final int type, final int sharedForUserId, final int[] sharedPermsArr, final boolean sharedIsAdmin) throws JSONException, MalformedURLException, IOException, SAXException, OXException {
         final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put("title", folderName);
         final JSONArray perms = new JSONArray();
@@ -314,9 +307,6 @@ public class FolderTest extends AbstractAJAXTest {
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (!respObj.has("data") || respObj.has("error")) {
             throw new OXException("Folder Insert failed" + (respObj.has("error") ? (": " + respObj.getString("error")) : ""));
         }
@@ -335,11 +325,10 @@ public class FolderTest extends AbstractAJAXTest {
             folderName,
             moduleStr,
             type,
-            sharedForUserId,
-            printOutput);
+            sharedForUserId);
     }
 
-    public static int insertFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int entityId, final boolean isGroup, final int parentFolderId, final String folderName, final String moduleStr, final int type, final int sharedForUserId, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException, OXException {
+    public static int insertFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int entityId, final boolean isGroup, final int parentFolderId, final String folderName, final String moduleStr, final int type, final int sharedForUserId) throws JSONException, MalformedURLException, IOException, SAXException, OXException {
         final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put("title", folderName);
         final JSONArray perms = new JSONArray();
@@ -370,9 +359,6 @@ public class FolderTest extends AbstractAJAXTest {
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (!respObj.has("data") || respObj.has("error")) {
             throw new OXException("Folder Insert failed" + (respObj.has("error") ? (": " + respObj.getString("error")) : ""));
         }
@@ -380,10 +366,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean renameFolder(final WebConversation conversation, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
-        return renameFolder(conversation, null, hostname, sessionId, folderId, folderName, moduleStr, type, timestamp, printOutput);
+        return renameFolder(conversation, null, hostname, sessionId, folderId, folderName, moduleStr, type, timestamp);
     }
 
-    public static boolean renameFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
+    public static boolean renameFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
         final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put("id", folderId);
         jsonFolder.put("title", folderName);
@@ -402,9 +388,6 @@ public class FolderTest extends AbstractAJAXTest {
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (respObj.has("error")) {
             return false;
         }
@@ -412,10 +395,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
-        return updateFolder(conversation, null, hostname, sessionId, entityArg, secondEntityArg, folderId, timestamp, printOutput);
+        return updateFolder(conversation, null, hostname, sessionId, entityArg, secondEntityArg, folderId, timestamp);
     }
 
-    public static boolean updateFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
+    public static boolean updateFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
         final String entity = entityArg.indexOf('@') == -1 ? entityArg : entityArg.substring(0, entityArg.indexOf('@'));
         final String secondEntity;
         if (secondEntityArg == null) {
@@ -450,9 +433,6 @@ public class FolderTest extends AbstractAJAXTest {
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (respObj.has("error")) {
             return false;
         }
@@ -460,10 +440,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean moveFolder(final WebConversation conversation, final String hostname, final String sessionId, final String folderId, final String tgtFolderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
-        return moveFolder(conversation, null, hostname, sessionId, folderId, tgtFolderId, timestamp, printOutput);
+        return moveFolder(conversation, null, hostname, sessionId, folderId, tgtFolderId, timestamp);
     }
 
-    public static boolean moveFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String folderId, final String tgtFolderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
+    public static boolean moveFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String folderId, final String tgtFolderId, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
         final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put("id", folderId);
         jsonFolder.put("folder_id", tgtFolderId);
@@ -480,9 +460,6 @@ public class FolderTest extends AbstractAJAXTest {
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (respObj.has("error")) {
             return false;
         }
@@ -490,10 +467,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static int[] deleteFolders(final WebConversation conversation, final String hostname, final String sessionId, final int[] folderIds, final long timestamp, final boolean printOutput) throws JSONException, IOException, SAXException {
-        return deleteFolders(conversation, null, hostname, sessionId, folderIds, timestamp, printOutput);
+        return deleteFolders(conversation, null, hostname, sessionId, folderIds, timestamp);
     }
 
-    public static int[] deleteFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int[] folderIds, final long timestamp, final boolean printOutput) throws JSONException, IOException, SAXException {
+    public static int[] deleteFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int[] folderIds, final long timestamp) throws JSONException, IOException, SAXException {
         final JSONArray deleteIds = new JSONArray(Arrays.toString(folderIds));
         final byte[] bytes = deleteIds.toString().getBytes("UTF-8");
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -507,9 +484,6 @@ public class FolderTest extends AbstractAJAXTest {
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
-        if (printOutput) {
-            System.out.println(respObj.toString());
-        }
         if (respObj.has("error")) {
             throw new JSONException("JSON Response object contains an error: " + respObj.getString("error"));
         }
@@ -520,39 +494,6 @@ public class FolderTest extends AbstractAJAXTest {
         }
         return retval;
     }
-
-    // public static boolean deleteTestFolders(final WebConversation
-    // conversation, final String hostname,
-    // final String sessionId, final int[] folderIds, final boolean printOutput)
-    // throws JSONException,
-    // IOException, SAXException {
-    // String deleteIds = Arrays.toString(folderIds);
-    // deleteIds = deleteIds.substring(1, deleteIds.length() -
-    // 1).replaceAll("\\s+", "");
-    //
-    // byte[] bytes = "".getBytes("UTF-8");
-    // ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-    //
-    // URLParameter urlParam = new URLParameter();
-    // urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, "removetestfolders");
-    // urlParam.setParameter("del_ids", deleteIds);
-    // urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-    //
-    // final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname +
-    // FOLDER_URL + urlParam.getURLParameters(),
-    // bais, "text/javascript; charset=UTF-8");
-    //
-    // final WebResponse resp = conversation.getResponse(req);
-    //
-    // JSONObject respObj = new JSONObject(resp.getText());
-    // if (printOutput)
-    // System.out.println(respObj.toString());
-    // if (respObj.has("error"))
-    // throw new JSONException("JSON Response object contains an error: " +
-    // respObj.getString("error"));
-    // String retval = respObj.getString("data");
-    // return retval.equalsIgnoreCase("ok");
-    // }
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
@@ -707,14 +648,6 @@ public class FolderTest extends AbstractAJAXTest {
         throw new TestException("Private infostore folder not found!");
     }
 
-    public static void printTestStart(final String testName) {
-        System.out.println("\n\n\n--------------------------------" + testName + "--------------------------------");
-    }
-
-    public static void printTestEnd(final String testName) {
-        System.out.println("--------------------------------" + testName + "--------------------------------");
-    }
-
     @Override
     public void setUp() throws Exception {
         sessionId = getSessionId();
@@ -725,56 +658,33 @@ public class FolderTest extends AbstractAJAXTest {
         logout();
     }
 
-    public void testUnknownAction() {
-        try {
-            printTestStart("testUnknownAction");
-            final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FOLDER_URL);
-            req.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-            req.setParameter(AJAXServlet.PARAMETER_ACTION, "unknown");
-            final WebResponse resp = getWebConversation().getResponse(req);
-            final JSONObject respObj = new JSONObject(resp.getText());
-            System.out.println("Response-Object: " + respObj.toString());
-            assertTrue(respObj.has("error") && respObj.getString("error").indexOf(
-                "Action \"unknown\" NOT supported via GET on /ajax/folders") != -1);
-            printTestEnd("testUnknownAction");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
+    public void testUnknownAction() throws IOException, SAXException, JSONException {
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FOLDER_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+        req.setParameter(AJAXServlet.PARAMETER_ACTION, "unknown");
+        final WebResponse resp = getWebConversation().getResponse(req);
+        final JSONObject respObj = new JSONObject(resp.getText());
+        assertTrue(respObj.has("error") && respObj.getString("error").indexOf(
+            "Action \"unknown\" NOT supported via GET on /ajax/folders") != -1);
+    }
+
+    public void testGetUserId() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException {
+        getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+    }
+
+    public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException {
+        final int[] assumedIds = { 1, 2, 3, 9 };
+        final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
+        assertFalse(l == null || l.size() == 0);
+        int i = 0;
+        for (final Iterator iter = l.iterator(); iter.hasNext();) {
+            final FolderObject rf = (FolderObject) iter.next();
+            assertTrue(rf.getObjectID() == assumedIds[i]);
+            i++;
         }
     }
 
-    public void testGetUserId() {
-        try {
-            final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            System.out.println(new StringBuilder(100).append("ID of user \"").append(getLogin()).append("\": ").append(userId));
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    public void testGetRootFolders() {
-        try {
-            printTestStart("testGetRootFolders");
-            final int[] assumedIds = { 1, 2, 3, 9 };
-            final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
-            assertFalse(l == null || l.size() == 0);
-            int i = 0;
-            for (final Iterator iter = l.iterator(); iter.hasNext();) {
-                final FolderObject rf = (FolderObject) iter.next();
-                assertTrue(rf.getObjectID() == assumedIds[i]);
-                i++;
-            }
-            printTestEnd("testGetRootFolders");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    public void testDeleteFolder() {
-        try {
-            printTestStart("testDeleteFolder");
+    public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, AjaxException, ConfigurationException {
             final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
             final int parent = insertFolder(
                 getWebConversation(),
@@ -830,178 +740,149 @@ public class FolderTest extends AbstractAJAXTest {
                 cal.getTimeInMillis(),
                 true);
             assertTrue((failedIds == null || failedIds.length == 0));
-            printTestEnd("testDeleteFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
     }
 
-    public void testFailDeleteFolder() {
+    public void testFailDeleteFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
+        final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+        final int secId = getUserId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
+        final int parent = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            new int[] { 8, 8, 8, 8 },
+            true,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+            "DeleteMeImmediately",
+            "calendar",
+            FolderObject.PUBLIC,
+            secId,
+            new int[] { 8, 8, 8, 8 },
+            false,
+            true);
+        assertFalse(parent == -1);
+        final Calendar cal = GregorianCalendar.getInstance();
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + parent, cal, true);
+
+        final int child01 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            new int[] { 8, 8, 8, 8 },
+            true,
+            parent,
+            "DeleteMeImmediatelyChild01",
+            "calendar",
+            FolderObject.PUBLIC,
+            secId,
+            new int[] { 8, 8, 8, 8 },
+            false,
+            true);
+        assertFalse(child01 == -1);
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + child01, cal, true);
+
+        final int child02 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            new int[] { 8, 8, 8, 8 },
+            true,
+            parent,
+            "DeleteMeImmediatelyChild02",
+            "calendar",
+            FolderObject.PUBLIC,
+            secId,
+            new int[] { 8, 8, 8, 8 },
+            false,
+            true);
+        assertFalse(child02 == -1);
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + child02, cal, true);
+
+        final int subchild01 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            new int[] { 8, 8, 8, 8 },
+            false,
+            child01,
+            "NonDeleteableSubChild01",
+            "calendar",
+            FolderObject.PUBLIC,
+            secId,
+            new int[] { 8, 8, 8, 8 },
+            true,
+            true);
+        assertFalse(subchild01 == -1);
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subchild01, cal, true);
+
+        Exception exc = null;
         try {
-            printTestStart("testFailDeleteFolder");
-            final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            final int secId = getUserId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
-            final int parent = insertFolder(
+            final int[] failedIds = deleteFolders(
                 getWebConversation(),
                 getHostName(),
                 getSessionId(),
-                userId,
-                false,
-                new int[] { 8, 8, 8, 8 },
-                true,
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                "DeleteMeImmediately",
-                "calendar",
-                FolderObject.PUBLIC,
-                secId,
-                new int[] { 8, 8, 8, 8 },
-                false,
-                true);
-            assertFalse(parent == -1);
-            final Calendar cal = GregorianCalendar.getInstance();
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + parent, cal, true);
-
-            final int child01 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                new int[] { 8, 8, 8, 8 },
-                true,
-                parent,
-                "DeleteMeImmediatelyChild01",
-                "calendar",
-                FolderObject.PUBLIC,
-                secId,
-                new int[] { 8, 8, 8, 8 },
-                false,
-                true);
-            assertFalse(child01 == -1);
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + child01, cal, true);
-
-            final int child02 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                new int[] { 8, 8, 8, 8 },
-                true,
-                parent,
-                "DeleteMeImmediatelyChild02",
-                "calendar",
-                FolderObject.PUBLIC,
-                secId,
-                new int[] { 8, 8, 8, 8 },
-                false,
-                true);
-            assertFalse(child02 == -1);
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + child02, cal, true);
-
-            final int subchild01 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                new int[] { 8, 8, 8, 8 },
-                false,
-                child01,
-                "NonDeleteableSubChild01",
-                "calendar",
-                FolderObject.PUBLIC,
-                secId,
-                new int[] { 8, 8, 8, 8 },
-                true,
-                true);
-            assertFalse(subchild01 == -1);
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subchild01, cal, true);
-
-            Exception exc = null;
-            try {
-                final int[] failedIds = deleteFolders(
-                    getWebConversation(),
-                    getHostName(),
-                    getSessionId(),
-                    new int[] { parent },
-                    cal.getTimeInMillis(),
-                    true);
-            } catch (final JSONException e) {
-                exc = e;
-            }
-
-            final byte[] bytes = "ok".getBytes("UTF-8");
-            final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            final URLParameter urlParam = new URLParameter();
-            urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, "removetestfolders");
-            urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-            urlParam.setParameter("del_ids", parent + "," + child01 + "," + child02 + "," + subchild01);
-            final WebRequest req = new PutMethodWebRequest(
-                PROTOCOL + getHostName() + FOLDER_URL + urlParam.getURLParameters(),
-                bais,
-                "text/javascript; charset=UTF-8");
-            final WebResponse resp = getWebConversation().getResponse(req);
-            System.out.println(resp.toString());
-
-            assertTrue(exc != null);
-
-            printTestEnd("testFailDeleteFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    public void testCheckFolderPermissions() {
-        try {
-            printTestStart("testCheckFolderPermissions");
-            final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            final int fuid = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                "CheckMyPermissions",
-                "calendar",
-                FolderObject.PUBLIC,
-                -1,
-                true);
-            final Calendar cal = GregorianCalendar.getInstance();
-            FolderObject fo = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
-            System.out.println("-------------------------------- START FolderObject --------------------------------");
-            System.out.println(fo.toString());
-            System.out.println("-------------------------------- END FolderObject ----------------------------------");
-            updateFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                getLogin(),
-                getSeconduser(),
-                fuid,
+                new int[] { parent },
                 cal.getTimeInMillis(),
                 true);
-            fo = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
-            System.out.println("-------------------------------- START FolderObject --------------------------------");
-            System.out.println(fo.toString());
-            System.out.println("-------------------------------- END FolderObject ----------------------------------");
-            deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
-            printTestEnd("testCheckFolderPermissions");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
+        } catch (final JSONException e) {
+            exc = e;
         }
+
+        final byte[] bytes = "ok".getBytes("UTF-8");
+        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        final URLParameter urlParam = new URLParameter();
+        urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, "removetestfolders");
+        urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        urlParam.setParameter("del_ids", parent + "," + child01 + "," + child02 + "," + subchild01);
+        final WebRequest req = new PutMethodWebRequest(
+            PROTOCOL + getHostName() + FOLDER_URL + urlParam.getURLParameters(),
+            bais,
+            "text/javascript; charset=UTF-8");
+        final WebResponse resp = getWebConversation().getResponse(req);
+        assertTrue(exc != null);
     }
 
-    public void testInsertRenameFolder() {
+    public void testCheckFolderPermissions() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
+        final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+        final int fuid = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+            "CheckMyPermissions",
+            "calendar",
+            FolderObject.PUBLIC,
+            -1,
+            true);
+        final Calendar cal = GregorianCalendar.getInstance();
+        FolderObject fo = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
+        updateFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            getLogin(),
+            getSeconduser(),
+            fuid,
+            cal.getTimeInMillis(),
+            true);
+        fo = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
+        deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
+    }
+
+    public void testInsertRenameFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException, TestException {
         int fuid = -1;
         int[] failedIds = null;
         boolean updated = false;
         try {
-            printTestStart("testInsertRenameFolder");
             final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
             fuid = insertFolder(
                 getWebConversation(),
@@ -1050,7 +931,6 @@ public class FolderTest extends AbstractAJAXTest {
             assertFalse((failedIds != null && failedIds.length > 0));
             fuid = -1;
             final FolderObject myInfostore = getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
-            System.out.println("MyINfostore Folder: " + myInfostore.toString());
             fuid = insertFolder(
                 getWebConversation(),
                 getHostName(),
@@ -1080,10 +960,6 @@ public class FolderTest extends AbstractAJAXTest {
             failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
             assertFalse((failedIds != null && failedIds.length > 0));
             fuid = -1;
-            printTestEnd("testInsertRenameFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         } finally {
             try {
                 if (fuid != -1) {
@@ -1100,12 +976,11 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testInsertUpdateFolder() {
+    public void testInsertUpdateFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
         int fuid = -1;
         int[] failedIds = null;
         boolean updated = false;
         try {
-            printTestStart("testInsertUpdateFolder");
             final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
             fuid = insertFolder(
                 getWebConversation(),
@@ -1136,10 +1011,6 @@ public class FolderTest extends AbstractAJAXTest {
             failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
             assertFalse((failedIds != null && failedIds.length > 0));
             fuid = -1;
-            printTestEnd("testInsertUpdateFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         } finally {
             try {
                 if (fuid != -1) {
@@ -1156,100 +1027,91 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testSharedFolder() {
+    public void testSharedFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
         int fuid01 = -1;
         int fuid02 = -1;
         String anotherSessionId = null;
-        try {
-            printTestStart("testSharedFolder");
-            /*
-             * Create a shared folder with login as creator and define share right for second user
-             */
-            final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            final int secId = getUserId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
-            fuid01 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                "SharedFolder01" + System.currentTimeMillis(),
-                "calendar",
-                FolderObject.PRIVATE,
-                secId,
-                true);
-            assertFalse(fuid01 == -1);
-            fuid02 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                "SharedFolder02" + System.currentTimeMillis(),
-                "calendar",
-                FolderObject.PRIVATE,
-                secId,
-                true);
-            assertFalse(fuid02 == -1);
-            /*
-             * Connect with second user and verify that folder is visible beneath system shared folder
-             */
-            anotherSessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
-            boolean found01 = false;
-            boolean found02 = false;
-            final List<FolderObject> l = getSubfolders(
+        /*
+         * Create a shared folder with login as creator and define share right for second user
+         */
+        final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+        final int secId = getUserId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
+        fuid01 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            "SharedFolder01" + System.currentTimeMillis(),
+            "calendar",
+            FolderObject.PRIVATE,
+            secId,
+            true);
+        assertFalse(fuid01 == -1);
+        fuid02 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            "SharedFolder02" + System.currentTimeMillis(),
+            "calendar",
+            FolderObject.PRIVATE,
+            secId,
+            true);
+        assertFalse(fuid02 == -1);
+        /*
+         * Connect with second user and verify that folder is visible beneath system shared folder
+         */
+        anotherSessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
+        boolean found01 = false;
+        boolean found02 = false;
+        final List<FolderObject> l = getSubfolders(
+            getWebConversation(),
+            getHostName(),
+            anotherSessionId,
+            "" + FolderObject.SYSTEM_SHARED_FOLDER_ID,
+            true);
+        assertFalse(l == null || l.size() == 0);
+        Next: for (final Iterator iter = l.iterator(); iter.hasNext();) {
+            final FolderObject virtualFO = (FolderObject) iter.next();
+            final List<FolderObject> subList = getSubfolders(
                 getWebConversation(),
                 getHostName(),
                 anotherSessionId,
-                "" + FolderObject.SYSTEM_SHARED_FOLDER_ID,
+                virtualFO.getFullName(),
                 true);
-            assertFalse(l == null || l.size() == 0);
-            Next: for (final Iterator iter = l.iterator(); iter.hasNext();) {
-                final FolderObject virtualFO = (FolderObject) iter.next();
-                final List<FolderObject> subList = getSubfolders(
-                    getWebConversation(),
-                    getHostName(),
-                    anotherSessionId,
-                    virtualFO.getFullName(),
-                    true);
-                for (final Iterator iterator = subList.iterator(); iterator.hasNext();) {
-                    final FolderObject sharedFolder = (FolderObject) iterator.next();
-                    if (sharedFolder.getObjectID() == fuid01) {
-                        found01 = true;
-                        if (found01 && found02) {
-                            break Next;
-                        }
+            for (final Iterator iterator = subList.iterator(); iterator.hasNext();) {
+                final FolderObject sharedFolder = (FolderObject) iterator.next();
+                if (sharedFolder.getObjectID() == fuid01) {
+                    found01 = true;
+                    if (found01 && found02) {
+                        break Next;
                     }
-                    if (sharedFolder.getObjectID() == fuid02) {
-                        found02 = true;
-                        if (found01 && found02) {
-                            break Next;
-                        }
+                }
+                if (sharedFolder.getObjectID() == fuid02) {
+                    found02 = true;
+                    if (found01 && found02) {
+                        break Next;
                     }
                 }
             }
-            assertTrue(found01);
-            assertTrue(found02);
-            final String sesID = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
-
-            deleteFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, System.currentTimeMillis(), false);
-            // deleteTestFolders(getWebConversation(), getHostName(), sesID, new
-            // int[] { fuid01, fuid02 }, false);
-
-            printTestEnd("testSharedFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
+        assertTrue(found01);
+        assertTrue(found02);
+        final String sesID = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
+
+        deleteFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, System.currentTimeMillis(), false);
+        // deleteTestFolders(getWebConversation(), getHostName(), sesID, new
+        // int[] { fuid01, fuid02 }, false);
     }
 
-    public void testGetSubfolder() {
+    public void testGetSubfolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
         int fuid = -1;
         int[] subfuids = null;
         try {
-            printTestStart("testGetSubfolder");
             /*
              * Create a temp folder with subfolders
              */
@@ -1293,166 +1155,144 @@ public class FolderTest extends AbstractAJAXTest {
                 assertTrue(subFolder.getObjectID() == subfuids[i]);
                 i++;
             }
-        } catch (final Exception e) {
-            e.printStackTrace();
         } finally {
-            try {
-                if (fuid != -1) {
-                    final Calendar cal = GregorianCalendar.getInstance();
-                    /*
-                     * Call getFolder to receive a valid timestamp for deletion
-                     */
-                    getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
-                    final int[] failedIds = deleteFolders(
-                        getWebConversation(),
-                        getHostName(),
-                        getSessionId(),
-                        new int[] { fuid },
-                        cal.getTimeInMillis(),
-                        true);
-                    if (failedIds != null && failedIds.length > 0) {
-                        if (subfuids != null) {
-                            for (int i = 0; i < subfuids.length; i++) {
-                                if (subfuids[i] > 0) {
-                                    /*
-                                     * Call getFolder to receive a valid timestamp for deletion
-                                     */
-                                    getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subfuids[i], cal, true);
-                                    deleteFolders(
-                                        getWebConversation(),
-                                        getHostName(),
-                                        getSessionId(),
-                                        new int[] { subfuids[i] },
-                                        cal.getTimeInMillis(),
-                                        true);
-                                }
+            if (fuid != -1) {
+                final Calendar cal = GregorianCalendar.getInstance();
+                /*
+                 * Call getFolder to receive a valid timestamp for deletion
+                 */
+                getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
+                final int[] failedIds = deleteFolders(
+                    getWebConversation(),
+                    getHostName(),
+                    getSessionId(),
+                    new int[] { fuid },
+                    cal.getTimeInMillis(),
+                    true);
+                if (failedIds != null && failedIds.length > 0) {
+                    if (subfuids != null) {
+                        for (int i = 0; i < subfuids.length; i++) {
+                            if (subfuids[i] > 0) {
+                                /*
+                                 * Call getFolder to receive a valid timestamp for deletion
+                                 */
+                                getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subfuids[i], cal, true);
+                                deleteFolders(
+                                    getWebConversation(),
+                                    getHostName(),
+                                    getSessionId(),
+                                    new int[] { subfuids[i] },
+                                    cal.getTimeInMillis(),
+                                    true);
                             }
                         }
                     }
                 }
-            } catch (final Exception e1) {
-                e1.printStackTrace();
             }
-            printTestEnd("testGetSubfolder");
         }
     }
 
-    public void testMoveFolder() {
+    public void testMoveFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
         int parent01 = -1;
         int parent02 = -1;
         int moveFuid = -1;
         int[] failedIds = null;
         boolean moved = false;
-        try {
-            printTestStart("testMoveFolder");
-            final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            parent01 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                "Parent01" + System.currentTimeMillis(),
-                "calendar",
-                FolderObject.PRIVATE,
-                -1,
-                true);
-            assertFalse(parent01 == -1);
-            parent02 = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                "Parent02" + System.currentTimeMillis(),
-                "calendar",
-                FolderObject.PRIVATE,
-                -1,
-                true);
-            assertFalse(parent02 == -1);
-            moveFuid = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                parent01,
-                "MoveMe" + System.currentTimeMillis(),
-                "calendar",
-                FolderObject.PRIVATE,
-                -1,
-                true);
-            assertFalse(moveFuid == -1);
-            final Calendar cal = GregorianCalendar.getInstance();
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + moveFuid, cal, true);
-            moved = moveFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                "" + moveFuid,
-                "" + parent02,
-                cal.getTimeInMillis(),
-                true);
-            assertTrue(moved);
-            FolderObject movedFolderObj = null;
-            movedFolderObj = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + moveFuid, cal, true);
-            assertTrue(movedFolderObj.containsParentFolderID() ? movedFolderObj.getParentFolderID() == parent02 : true);
-            failedIds = deleteFolders(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                new int[] { parent01, parent02 },
-                cal.getTimeInMillis(),
-                true);
-            assertFalse((failedIds != null && failedIds.length > 0));
-            printTestEnd("testMoveFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+        final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+        parent01 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            "Parent01" + System.currentTimeMillis(),
+            "calendar",
+            FolderObject.PRIVATE,
+            -1,
+            true);
+        assertFalse(parent01 == -1);
+        parent02 = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            "Parent02" + System.currentTimeMillis(),
+            "calendar",
+            FolderObject.PRIVATE,
+            -1,
+            true);
+        assertFalse(parent02 == -1);
+        moveFuid = insertFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            userId,
+            false,
+            parent01,
+            "MoveMe" + System.currentTimeMillis(),
+            "calendar",
+            FolderObject.PRIVATE,
+            -1,
+            true);
+        assertFalse(moveFuid == -1);
+        final Calendar cal = GregorianCalendar.getInstance();
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + moveFuid, cal, true);
+        moved = moveFolder(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            "" + moveFuid,
+            "" + parent02,
+            cal.getTimeInMillis(),
+            true);
+        assertTrue(moved);
+        FolderObject movedFolderObj = null;
+        movedFolderObj = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + moveFuid, cal, true);
+        assertTrue(movedFolderObj.containsParentFolderID() ? movedFolderObj.getParentFolderID() == parent02 : true);
+        failedIds = deleteFolders(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            new int[] { parent01, parent02 },
+            cal.getTimeInMillis(),
+            true);
+        assertFalse((failedIds != null && failedIds.length > 0));
     }
 
-    public void testGetMailInbox() {
-        try {
-            printTestStart("testGetMailInbox");
-            List<FolderObject> l = getSubfolders(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                true);
-            FolderObject defaultIMAPFolder = null;
-            for (int i = 0; i < l.size(); i++) {
-                final FolderObject fo = l.get(i);
-                if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
-                    defaultIMAPFolder = fo;
-                    break;
-                }
+    public void testGetMailInbox() throws OXException, AjaxException, IOException, SAXException, JSONException {
+        List<FolderObject> l = getSubfolders(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            true);
+        FolderObject defaultIMAPFolder = null;
+        for (int i = 0; i < l.size(); i++) {
+            final FolderObject fo = l.get(i);
+            if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
+                defaultIMAPFolder = fo;
+                break;
             }
-            assertTrue(defaultIMAPFolder != null && defaultIMAPFolder.hasSubfolders());
-            l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), defaultIMAPFolder.getFullName(), true);
-            assertTrue(l != null && l.size() > 0);
-            FolderObject inboxFolder = null;
-            for (int i = 0; i < l.size() && (inboxFolder == null); i++) {
-                final FolderObject fo = l.get(i);
-                if (fo.getFullName().endsWith("INBOX")) {
-                    inboxFolder = fo;
-                }
-            }
-            assertTrue(inboxFolder != null);
-            final Calendar cal = GregorianCalendar.getInstance();
-            getFolder(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), cal, true);
-            printTestEnd("testGetMailInbox");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
+        assertTrue(defaultIMAPFolder != null && defaultIMAPFolder.hasSubfolders());
+        l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), defaultIMAPFolder.getFullName(), true);
+        assertTrue(l != null && l.size() > 0);
+        FolderObject inboxFolder = null;
+        for (int i = 0; i < l.size() && (inboxFolder == null); i++) {
+            final FolderObject fo = l.get(i);
+            if (fo.getFullName().endsWith("INBOX")) {
+                inboxFolder = fo;
+            }
+        }
+        assertTrue(inboxFolder != null);
+        final Calendar cal = GregorianCalendar.getInstance();
+        getFolder(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), cal, true);
     }
 
     public void testGetSortedMailFolder() throws OXException, AjaxException, IOException, SAXException, JSONException {
-        printTestStart("testGetSortedMailFolder");
         List<FolderObject> l = getSubfolders(
             getWebConversation(),
             getHostName(),
@@ -1505,7 +1345,6 @@ public class FolderTest extends AbstractAJAXTest {
             final Calendar cal = GregorianCalendar.getInstance();
             getFolder(getWebConversation(), getHostName(), getSessionId(), trashFolder.getFullName(), cal, true);
         }
-        printTestEnd("testGetSortedMailFolder");
     }
 
     public void testFolderNamesShouldBeEqualRegardlessOfRequestMethod() {

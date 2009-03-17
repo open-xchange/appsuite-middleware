@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.resource;
 
+import java.io.IOException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetResponse;
 import com.openexchange.resource.Resource;
+import com.openexchange.tools.servlet.AjaxException;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 /**
  * {@link ResourceGetAJAXTest} - Tests the GET request on resource servlet
@@ -76,7 +80,7 @@ public final class ResourceGetAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=get</code> request
 	 */
-	public void testUpdate() {
+	public void testUpdate() throws AjaxException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*
@@ -98,21 +102,10 @@ public final class ResourceGetAJAXTest extends AbstractResourceTest {
 			resource = response.getResource();
 			assertTrue("GET failed", resource != null && resource.getIdentifier() == id);
 
-			System.out.println("Get resource: " + resource.toString());
-
             assertTrue(((JSONObject)response.getData()).has("last_modified_utc"));
 
-        } catch (final Exception e) {
-			fail("GET request on resource servlet failed: " + e.getMessage());
 		} finally {
-			try {
-				deleteResource(id);
-			} catch (final Exception e) {
-				System.err.println("Temporary created resource with ID " + id + " could not be deleted: "
-						+ e.getMessage());
-			}
+		    deleteResource(id);
 		}
-
 	}
-
 }

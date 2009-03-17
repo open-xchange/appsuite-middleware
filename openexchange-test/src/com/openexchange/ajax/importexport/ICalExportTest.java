@@ -109,7 +109,6 @@ public class ICalExportTest extends AbstractICalTest {
 			if (title.equals(taskArray[a].getTitle())) {
 				found = true;
 				taskObj.setStartDate(taskArray[a].getStartDate());
-				//System.out.println(taskObj.getEndDate().getTimezoneOffset()+" | "+taskArray[a].getEndDate().getTimezoneOffset());
 				taskArray[a].setParentFolderID(taskFolderId);		
 				TaskTest.compareObject(taskObj, taskArray[a]);
 			}

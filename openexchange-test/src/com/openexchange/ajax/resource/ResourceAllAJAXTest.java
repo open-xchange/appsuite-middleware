@@ -49,14 +49,18 @@
 
 package com.openexchange.ajax.resource;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
 import com.openexchange.ajax.resource.actions.ResourceAllResponse;
 import com.openexchange.resource.Resource;
+import com.openexchange.tools.servlet.AjaxException;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 /**
  * {@link ResourceAllAJAXTest} - Tests the ALL request on resource servlet
@@ -79,7 +83,7 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=all</code>
 	 */
-	public void testAll() {
+	public void testAll() throws AjaxException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*
@@ -101,8 +105,6 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
 			final int[] ids = allResponse.getIDs();
 			assertTrue("All request failed", ids != null && ids.length >= 1);
 
-			System.out.println("IDs: " + Arrays.toString(ids));
-
             JSONArray arr = (JSONArray) allResponse.getData();
             for(int i = 0, size = arr.length(); i < size; i++) {
                 JSONObject res = arr.optJSONObject(i);
@@ -111,8 +113,6 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
             }
 
 
-        } catch (final Exception e) {
-			fail("ALL request on resource servlet failed: " + e.getMessage());
 		} finally {
 			try {
 				deleteResource(id);

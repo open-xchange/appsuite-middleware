@@ -148,7 +148,6 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
 		final int runs = NetsolTestConstants.RUNS;
 		final DurationTracker requestTracker = new DurationTracker(runs);
 		final DurationTracker parseTracker = new DurationTracker(runs);
-		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			BufferedInputStream in = null;
 			try {
@@ -168,16 +167,12 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
 				}
 			}
 		}
-		System.out.println("Attachment Upload: Test runs finished");
-		System.out.println("Request results: " + requestTracker.toString());
-		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 	}
 
 }

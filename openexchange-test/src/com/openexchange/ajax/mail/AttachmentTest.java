@@ -142,7 +142,6 @@ public final class AttachmentTest extends AbstractMailTest {
 			 * Some assertions
 			 */
 			assertTrue("Web response does not indicate HTML content", webResponse.isHTML());
-			System.out.println(webResponse.getText());
 			
 
 		} catch (final Exception e) {
@@ -153,7 +152,6 @@ public final class AttachmentTest extends AbstractMailTest {
 				final String[][] foo = new String[1][];
 				foo[0] = folderAndID;
 				Executor.execute(getSession(), new DeleteRequest(foo, true));
-				System.out.println("Temporary mail deleted");
 			}
 		}
 	}

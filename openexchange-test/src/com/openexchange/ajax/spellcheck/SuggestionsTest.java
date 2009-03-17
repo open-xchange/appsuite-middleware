@@ -86,7 +86,6 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
 		SuggestionsResponse suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "en", true));
 		
 		String[] mw = suggestionsResponse.getSuggestions();
-		System.out.println(Arrays.toString(mw));
 		assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
 		/*
 		 * de
@@ -96,7 +95,6 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
 		assertFalse("Error occured!", suggestionsResponse.hasError());
 		
 		mw = suggestionsResponse.getSuggestions();
-		System.out.println(Arrays.toString(mw));
 		assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
 		
 	}

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import com.openexchange.ajax.framework.Executor;
@@ -57,8 +58,11 @@ import com.openexchange.ajax.resource.actions.ResourceAllResponse;
 import com.openexchange.ajax.resource.actions.ResourceListRequest;
 import com.openexchange.ajax.resource.actions.ResourceListResponse;
 import com.openexchange.resource.Resource;
+import com.openexchange.tools.servlet.AjaxException;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 /**
  * {@link ResourceListAJAXTest} - Tests the LIST request on resource servlet
@@ -81,7 +85,7 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=list</code>
 	 */
-	public void testList() {
+	public void testList() throws AjaxException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*
@@ -111,24 +115,14 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
 
 			assertTrue("List failed", resources != null && resources.length == ids.length);
 			
-			System.out.println("List succeeded:\n" + Arrays.toString(resources));
-
             JSONArray arr = (JSONArray) listResponse.getData();
             for(int i = 0, size = arr.length(); i < size; i++) {
                 JSONObject res = arr.optJSONObject(i);
                 assertNotNull(res);
                 assertTrue(res.has("last_modified_utc"));
             }
-
-        } catch (final Exception e) {
-			fail("LIST request on resource servlet failed: " + e.getMessage());
 		} finally {
-			try {
-				deleteResource(id);
-			} catch (final Exception e) {
-				System.err.println("Temporary created resource with ID " + id + " could not be deleted: "
-						+ e.getMessage());
-			}
+		    deleteResource(id);
 		}
 
 	}

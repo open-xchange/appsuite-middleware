@@ -108,7 +108,6 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 		final int runs = NetsolTestConstants.RUNS;
 		final DurationTracker requestTracker = new DurationTracker(runs);
 		final DurationTracker parseTracker = new DurationTracker(runs);
-		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * "Put" into "Sent" folder through a send request
@@ -126,16 +125,12 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 			requestTracker.addDuration(delResponse.getRequestDuration());
 			parseTracker.addDuration(delResponse.getParseDuration());
 		}
-		System.out.println("Mail Message Delete: Test runs finished");
-		System.out.println("Request results: " + requestTracker.toString());
-		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 	}
 
 }

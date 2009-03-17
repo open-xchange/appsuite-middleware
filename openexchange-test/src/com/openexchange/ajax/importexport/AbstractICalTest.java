@@ -252,19 +252,12 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mailaddress);
-		
 		List<Task> exportData = new ArrayList<Task>();
 		
-		try {
-			final ICalParser parser = new ICal4JParser();
-            final List<ConversionError> errors = new ArrayList<ConversionError>();
-            final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-            exportData = parser.parseTasks(byteArrayInputStream, timeZone, ctx, errors, warnings);
-		} catch (final Exception exc) {
-			System.out.println("error: " + exc);
-		}
+		final ICalParser parser = new ICal4JParser();
+        final List<ConversionError> errors = new ArrayList<ConversionError>();
+        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        exportData = parser.parseTasks(resp.getInputStream(), timeZone, ctx, errors, warnings);
 		
 		return exportData.toArray(new Task[exportData.size()]);
 	}

@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.passwordchange;
 
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link PasswordChangeUpdateAJAXTest} - Tests the UPDATE request on password
@@ -76,22 +80,17 @@ public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJ
 
 	/**
 	 * Tests the <code>action=update</code> request
+	 * @throws JSONException 
+	 * @throws SAXException 
+	 * @throws IOException 
+	 * @throws AjaxException 
 	 */
-	public void testUpdate() {
-		try {
-			/*
-			 * Perform update request
-			 */
-			final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
-			final PasswordChangeUpdateResponse updateResponse = (PasswordChangeUpdateResponse) Executor.execute(
-					getSession(), new PasswordChangeUpdateRequest(oldPassword, oldPassword, true));
-
-			System.out.println("Updated password: " + updateResponse.getResponse().toString());
-
-		} catch (final Exception e) {
-			fail("UPDATE request on password change servlet failed: " + e.getMessage());
-		}
-
+	public void testUpdate() throws AjaxException, IOException, SAXException, JSONException {
+		/*
+		 * Perform update request
+		 */
+		final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
+		final PasswordChangeUpdateResponse updateResponse = (PasswordChangeUpdateResponse) Executor.execute(
+				getSession(), new PasswordChangeUpdateRequest(oldPassword, oldPassword, true));
 	}
-
 }

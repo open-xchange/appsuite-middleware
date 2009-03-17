@@ -97,7 +97,6 @@ public final class FunambolTest extends AbstractAJAXSession {
         app.setEndDate(new Date(TimeTools.getHour(1)));
         app.setIgnoreConflicts(true);
         final Date serverTime = client.getValues().getServerTime();
-        System.out.println("ServerTime: " + serverTime);
         final CommonInsertResponse insertR = Executor.execute(
             client, new InsertRequest(app, tz));
         final GetResponse getR = Executor.execute(client,
@@ -105,7 +104,6 @@ public final class FunambolTest extends AbstractAJAXSession {
         final AppointmentObject reload = getR.getAppointment(tz);
         final Date creationDate = reload.getCreationDate();
         final Date modified = reload.getLastModified();
-        System.out.println("CreationDate: " + creationDate);
         final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
         LOG.info("Time difference: " + difference);
         Executor.execute(client, new DeleteRequest(insertR.getId(), folder, modified));

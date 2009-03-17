@@ -126,7 +126,6 @@ public final class Bug11848Test extends AbstractAJAXSession {
                     }
                 }
             }
-            System.out.println(pos);
         } finally {
             final DeleteRequest[] requests = new DeleteRequest[NUMBER];
             for (int i = 0; i < NUMBER; i++) {

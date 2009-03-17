@@ -96,7 +96,7 @@ public class LockTest extends InfostoreAJAXTest {
 		// TODO create folder in one step with correct permissions.
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
 		    myInfostore.getObjectID(), "NewInfostoreFolder"+Long.MAX_VALUE, "infostore", FolderObject.PUBLIC, -1, true);
-		updateFolder(getWebConversation(),getHostName(),sessionId,userId,secondUserId,folderId,Long.MAX_VALUE,false);
+		updateFolder(getWebConversation(),getHostName(),sessionId,userId,secondUserId,folderId,Long.MAX_VALUE);
 		
 		//folderId=228;
 		final Map<String,String> create = m(
@@ -152,7 +152,6 @@ public class LockTest extends InfostoreAJAXTest {
 		final JSONArray mod = modAndDel.getJSONArray(0);
 		
 		assertEquals(1, mod.length());
-		System.out.println(mod);
 		assertEquals(clean.get(0), (Integer) mod.getInt(0));
 		
 		
@@ -264,7 +263,7 @@ public class LockTest extends InfostoreAJAXTest {
 	
 	
 	public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId,
-			final int entity, final int secondEntity, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
+			final int entity, final int secondEntity, final int folderId, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
 			final JSONObject jsonFolder = new JSONObject();
 			jsonFolder.put("id", folderId);
 			final JSONArray perms = new JSONArray();
@@ -290,9 +289,6 @@ public class LockTest extends InfostoreAJAXTest {
 				"text/javascript; charset=UTF-8");
 			final WebResponse resp = conversation.getResponse(req);
 			final JSONObject respObj = new JSONObject(resp.getText());
-			if (printOutput) {
-				System.out.println(respObj.toString());
-			}
 			if (respObj.has("error")) {
 				return false;
 			}

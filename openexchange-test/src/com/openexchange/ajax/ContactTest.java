@@ -644,8 +644,6 @@ public class ContactTest extends AbstractAJAXTest {
 			parameter.setParameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit);
 		}
 		
-		//System.out.println(host + CONTACT_URL + parameter.getURLParameters());
-		
 		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 		final WebResponse resp = webCon.getResponse(req);
 		

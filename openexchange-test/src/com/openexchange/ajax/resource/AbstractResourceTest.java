@@ -153,8 +153,6 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 		 * Perform delete request
 		 */
 		Executor.execute(getSession(), new ResourceDeleteRequest(getResponse.getResource(), timestamp.getTime(), true));
-		System.out.println(new StringBuilder(32).append("(Temporary) Resource with ID ").append(resourceId).append(
-				" successfully deleted").toString());
 	}
 
 	/**
@@ -179,8 +177,6 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 		 */
 		final int id = (Executor.execute(getSession(), new ResourceNewRequest(toCreate, true)))
 				.getID();
-		System.out.println(new StringBuilder(32).append("(Temporary) Resource with ID ").append(id).append(
-				" successfully created").toString());
 		return id;
 	}
 }

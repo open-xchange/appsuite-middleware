@@ -197,12 +197,10 @@ public final class ICalMailPartImportTest extends AbstractConversionTest {
 				assertFalse("Missing response on action=convert", sa == null);
 				assertTrue("Unexpected response length", sa.length == 1);
 
-				System.out.println("IMPORTED ICAL:\n" + convertResponse.getData());
 			} finally {
 				if (mailFolderAndMailID != null) {
 					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
 					Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
-					System.out.println("Temporary mail successfully deleted!");
 				}
 			}
 		} catch (final Exception e) {

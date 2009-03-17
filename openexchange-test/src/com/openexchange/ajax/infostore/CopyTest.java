@@ -96,12 +96,6 @@ public class CopyTest extends InfostoreAJAXTest {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, copyId, 1);
 			
-			//BufferedReader r = new BufferedReader(new InputStreamReader(is2));
-			//String line = null;
-			//while((line=r.readLine())!=null){
-			//	System.out.println(line);
-			//}
-			
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null) {

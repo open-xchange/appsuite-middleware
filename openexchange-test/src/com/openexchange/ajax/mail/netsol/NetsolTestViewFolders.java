@@ -74,12 +74,10 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 
 		final int runs = NetsolTestConstants.RUNS;
 		final DurationTracker requestTracker = new DurationTracker(runs * 3);
 		final DurationTracker parseTracker = new DurationTracker(runs * 3);
-		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * Get private folders
@@ -114,16 +112,12 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 		}
 		
 		
-		System.out.println("View Folders: Test runs finished");
-		System.out.println("Request results: " + requestTracker.toString());
-		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 	}
 
 }

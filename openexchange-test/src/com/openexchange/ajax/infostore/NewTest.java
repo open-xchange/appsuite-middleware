@@ -64,12 +64,6 @@ public class NewTest extends InfostoreAJAXTest {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
 			
-			//BufferedReader r = new BufferedReader(new InputStreamReader(is2));
-			//String line = null;
-			//while((line=r.readLine())!=null){
-			//	System.out.println(line);
-			//}
-			
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null) {
@@ -145,21 +139,17 @@ public class NewTest extends InfostoreAJAXTest {
 		}
 		
 		try {
-			final int id = createNew(
-					getWebConversation(),
-					getHostName(),
-					sessionId,
-					m(
-							"folder_id" 		,	((Integer)folderId).toString(),
-							"title"  		,  	"test large upload",
-							"description" 	, 	"test large upload description"
-					), largeFile, "text/plain"
-			);
+			final int id = createNew(getWebConversation(), getHostName(), sessionId, m(
+                "folder_id",
+                ((Integer) folderId).toString(),
+                "title",
+                "test large upload",
+                "description",
+                "test large upload description"), largeFile, "text/plain");
 			clean.add(id);
 			fail("Uploaded Large File and got no error");
 		} catch (final Exception x) {
-			System.out.println(x.getMessage());
-			assertTrue(true);
+		    // Exception is expected
 		}
 	}
 	

@@ -105,7 +105,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		boolean found = false;
 		
 		for (int a = 0; a < contactArray.length; a++) {
-			//System.out.println("surname: " + contactArray[a].getSurName() + " == " + contactObj.getSurName());
 			if (contactObj.getSurName().equals(contactArray[a].getSurName()) ) {
 				contactObj.setParentFolderID(contactFolderId);
 				ContactTest.compareObject(contactObj, contactArray[a]);

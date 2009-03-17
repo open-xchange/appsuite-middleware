@@ -33,7 +33,6 @@ public class XMLCompare {
 	}
 	
 	public boolean compareDocuments(final Element expectedDoc, final Element gotDoc) {
-		//System.out.println(expectedDoc.getName()+" == "+gotDoc.getName()+" ? "+expectedDoc.getName().equals(gotDoc.getName()));
 		if(!expectedDoc.getName().equals(gotDoc.getName()) || !expectedDoc.getNamespace().equals(gotDoc.getNamespace())) {
 			return false;
 		}
@@ -78,7 +77,6 @@ Expect: for(final Element expect : expectedNodes) {
 					continue Expect;
 				}
 			}
-			System.out.println("Can't find "+expect+" with text "+expect.getText());
 			return false;
 		}
 		return gotNodes.isEmpty();

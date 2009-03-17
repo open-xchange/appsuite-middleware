@@ -56,7 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class NetsolSendRequest implements AJAXRequest {
+public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
 	public static enum BodyContentType {
 		PLAIN_TEXT("text/plain"), HTML("text/html"), ALTERNATIVE("ALTERNATIVE");
@@ -178,7 +177,7 @@ public class NetsolSendRequest implements AJAXRequest {
 		return MAIL_URL;
 	}
 
-	public AbstractAJAXParser<?> getParser() {
+	public SendParser getParser() {
 		return new SendParser(true);
 	}
 

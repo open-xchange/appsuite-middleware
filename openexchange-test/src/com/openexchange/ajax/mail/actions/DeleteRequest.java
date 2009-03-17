@@ -64,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class DeleteRequest extends AbstractMailRequest {
+public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
 
 	private final String[][] folderAndMailIds;
 

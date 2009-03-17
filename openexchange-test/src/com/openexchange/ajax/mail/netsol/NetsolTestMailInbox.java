@@ -79,7 +79,6 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 
 		/*
 		 * Create a self-addressed JSON mail object
@@ -115,7 +114,6 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 			 */
 			Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString()));
 		}
-		System.out.println("10 mails put into INBOX");
 
 		/*
 		 * Get INBOX mail paths
@@ -125,7 +123,6 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 		final int runs = NetsolTestConstants.RUNS;
 		final DurationTracker requestTracker = new DurationTracker(runs);
 		final DurationTracker parseTracker = new DurationTracker(runs);
-		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * Fetch INBOX mails
@@ -136,16 +133,12 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 			requestTracker.addDuration(resp.getRequestDuration());
 			parseTracker.addDuration(resp.getParseDuration());
 		}
-		System.out.println("Mail Inbox: Test runs finished");
-		System.out.println("Request results: " + requestTracker.toString());
-		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 	}
 
 }

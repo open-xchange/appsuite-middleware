@@ -80,7 +80,6 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 
 		/*
 		 * Create 25kb mail object
@@ -116,7 +115,6 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 		final int runs = NetsolTestConstants.RUNS;
 		final DurationTracker requestTracker = new DurationTracker(runs);
 		final DurationTracker parseTracker = new DurationTracker(runs);
-		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * "Open" 25kb mail
@@ -128,16 +126,12 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 			requestTracker.addDuration(resp.getRequestDuration());
 			parseTracker.addDuration(resp.getParseDuration());
 		}
-		System.out.println("Mail Message Open: Test runs finished");
-		System.out.println("Request results: " + requestTracker.toString());
-		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 	}
 
 }

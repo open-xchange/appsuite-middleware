@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link AbstractMailRequest}
@@ -57,7 +58,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public abstract class AbstractMailRequest implements AJAXRequest {
+public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the tasks AJAX interface.

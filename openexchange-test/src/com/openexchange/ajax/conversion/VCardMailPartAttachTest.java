@@ -185,7 +185,6 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 						new NetsolGetRequest(mailPath, true)));
 				final JSONObject fetchedMailObject = (JSONObject) resp.getData();
 
-				System.out.println("FETCHED MAIL:\n" + fetchedMailObject.toString());
 
 				assertFalse("Missing JSON mail object", fetchedMailObject == null);
 				assertTrue("JSON mail object misses field: " + MailJSONField.ATTACHMENTS.getKey(), fetchedMailObject
@@ -200,7 +199,6 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 				if (mailFolderAndMailID != null) {
 					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
 					Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
-					System.out.println("Temporary mail successfully deleted!");
 				}
 			}
 		} catch (final Exception e) {

@@ -116,12 +116,10 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 			mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), Math.random() + "-> The mail subject");
 			Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString()));
 		}
-		System.out.println(inboxSize + " mails put into INBOX with random subject");
 
 		final int runs = NetsolTestConstants.RUNS;
 		final DurationTracker requestTracker = new DurationTracker(runs);
 		final DurationTracker parseTracker = new DurationTracker(runs);
-		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			final CommonAllResponse response = Executor.execute(getSession(), new NetsolAllRequest(
 					getInboxFolder(), COLUMNS_FOLDER_ID, MailListField.SUBJECT.getField(), Order.ASCENDING));
@@ -130,16 +128,12 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 			requestTracker.addDuration(response.getRequestDuration());
 			parseTracker.addDuration(response.getParseDuration());
 		}
-		System.out.println("Mail Inbox Sort: Test runs finished");
-		System.out.println("Request results: " + requestTracker.toString());
-		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		System.out.println("INBOX, Sent & Trash cleared");
 	}
 
 }

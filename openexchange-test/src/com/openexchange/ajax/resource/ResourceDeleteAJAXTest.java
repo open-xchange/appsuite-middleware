@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.resource;
 
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.resource.Resource;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ResourceDeleteAJAXTest} - Tests the DELETE request on resource servlet
@@ -75,7 +79,7 @@ public final class ResourceDeleteAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=delete</code> request
 	 */
-	public void testDelete() {
+	public void testDelete() throws AjaxException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*
@@ -99,20 +103,9 @@ public final class ResourceDeleteAJAXTest extends AbstractResourceTest {
 			resource.setIdentifier(id);
 			Executor.execute(getSession(), new ResourceDeleteRequest(resource, clientLastModified, true));
 
-			System.out.println("Deleted resource: " + id);
 			id = -1;
-
-		} catch (final Exception e) {
-			fail("DELETE request on resource servlet failed: " + e.getMessage());
 		} finally {
-			try {
-				deleteResource(id);
-			} catch (final Exception e) {
-				System.err.println("Temporary created resource with ID " + id + " could not be deleted: "
-						+ e.getMessage());
-			}
+		    deleteResource(id);
 		}
-
 	}
-
 }
