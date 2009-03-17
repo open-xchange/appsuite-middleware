@@ -6,11 +6,10 @@
  * 
  */
 
-#$SOAPHOST = "10.10.10.154";
-$SOAPHOST = "localhost";
+$SOAPHOST = "cc-server-apache";
 
 $OXMASTER_ADMIN = "oxadminmaster";
-$OXMASTER_ADMIN_PASS = "secret";
+$OXMASTER_ADMIN_PASS = "netline";
 
 $CONTEXT_ID = 1;
 $CONTEXT_ADMIN = "oxadmin";
