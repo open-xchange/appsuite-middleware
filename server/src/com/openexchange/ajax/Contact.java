@@ -54,17 +54,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.parser.ContactParser;
@@ -248,122 +245,144 @@ public class Contact extends DataServlet {
 		writeResponse(response, httpServletResponse);
 		
 	}
-	
+
 	@Override
-			protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		httpServletResponse.setContentType("text/html");
-		String callbackSite = null;
-		final Response response = new Response();
-		String action = ACTION_ERROR;
-		try {
-			final Session sessionObj = getSessionObject(httpServletRequest);
-			action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			if (action.equals(ACTION_NEW)) {
-				UploadEvent upload = null;
-				try {
-					upload = processUpload(httpServletRequest);
-					final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
-					
-					if (uploadFile == null) {
-						throw new AjaxException(AjaxException.Code.NoUploadImage);
-					}
-					
-					final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
-					if(obj == null) {
-						throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "form");
-					}
-					
-					final ContactObject contactobject = new ContactObject();
-					final JSONObject jsonobject = new JSONObject(obj);
-					
-					final ContactParser contactparser = new ContactParser(sessionObj);
-					contactparser.parse(contactobject, jsonobject);
-					
-					if (!contactobject.containsParentFolderID()) {
-						throw new OXMandatoryFieldException("missing folder");
-					}
-					
-					final byte[] b = new byte[(int)uploadFile.getSize()];
-					final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
-					fis.read(b);
-					contactobject.setImageContentType(uploadFile.getContentType());
-					contactobject.setImage1(b);
-					
-					final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-					contactsql.insertContactObject(contactobject);
-					
-					final JSONObject jData = new JSONObject();
-					jData.put(ContactFields.ID, contactobject.getObjectID());
-					
-					response.setData(jData);
-				} finally {
-					if (upload != null) {
-						upload.cleanUp();
-					}
-				}
-			} else if (action.equals(ACTION_UPDATE)) {
-				final int id = parseMandatoryIntParameter(httpServletRequest, AJAXServlet.PARAMETER_ID);
-				final int inFolder = parseMandatoryIntParameter(httpServletRequest, AJAXServlet.PARAMETER_INFOLDER);
-				final Date timestamp = parseMandatoryDateParameter(httpServletRequest, AJAXServlet.PARAMETER_TIMESTAMP);
-				
-				UploadEvent upload = null;
-				try {
-					upload = processUpload(httpServletRequest);
-					final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
-					
-					final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
-					if(obj == null) {
-						throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "form");
-					}
-					
-					final ContactObject contactobject = new ContactObject();
-					final JSONObject jsonobject = new JSONObject(obj);
-					
-					final ContactParser contactparser = new ContactParser(sessionObj);
-					contactparser.parse(contactobject, jsonobject);
-					
-					contactobject.setObjectID(id);
-					
-					if (null == uploadFile) {
-						contactobject.setImage1(null);
-					} else {
-						final byte[] b = new byte[(int)uploadFile.getSize()];
-						final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
-						fis.read(b);
-						contactobject.setImageContentType(uploadFile.getContentType());
-						contactobject.setImage1(b);
-					}
-					
-					final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-					contactsql.updateContactObject(contactobject, inFolder, timestamp);
-				} finally {
-					if (upload != null) {
-						upload.cleanUp();
-					}
-				}
-			} else {
-				throw new AjaxException(AjaxException.Code.UnknownAction, action);
-			}
-		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code
-					.JSON_WRITE_ERROR, e);
-			LOG.error(oje.getMessage(), oje);
-			response.setException(oje);
-		} catch (final AbstractOXException e) {
-			Logging.log(LOG, e);
-			response.setException(e);
-		}
-		try {
-			// Replaces every 2+2x parameter through the 3+2x parameter in the first parameter string
-			callbackSite = AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT, AJAXServlet.PARAMETER_JSON, response.getJSON().toString(), AJAXServlet.PARAMETER_ACTION, action);
-			final PrintWriter pw = httpServletResponse.getWriter();
-			pw.print(callbackSite);
-		} catch (final JSONException e) {
-			log(RESPONSE_ERROR, e);
-			sendError(httpServletResponse);
-		}
-		
-	}
+    protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        httpServletResponse.setContentType("text/html");
+        String callbackSite = null;
+        final Response response = new Response();
+        String action = ACTION_ERROR;
+        try {
+            final Session sessionObj = getSessionObject(httpServletRequest);
+            action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            if (action.equals(ACTION_NEW)) {
+                UploadEvent upload = null;
+                try {
+                    upload = processUpload(httpServletRequest);
+                    final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
+
+                    if (uploadFile == null) {
+                        throw new AjaxException(AjaxException.Code.NoUploadImage);
+                    }
+
+                    final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
+                    if (obj == null) {
+                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "form");
+                    }
+
+                    final ContactObject contactobject = new ContactObject();
+                    final JSONObject jsonobject = new JSONObject(obj);
+
+                    final ContactParser contactparser = new ContactParser(sessionObj);
+                    contactparser.parse(contactobject, jsonobject);
+
+                    if (!contactobject.containsParentFolderID()) {
+                        throw new OXMandatoryFieldException("missing folder");
+                    }
+
+                    final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
+                    try {
+                        final java.io.ByteArrayOutputStream tmp = new com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream(
+                            (int) uploadFile.getSize());
+                        final byte[] buf = new byte[2048];
+                        int len = -1;
+                        while ((len = fis.read(buf)) != -1) {
+                            tmp.write(buf, 0, len);
+                        }
+                        contactobject.setImage1(tmp.toByteArray());
+                    } finally {
+                        fis.close();
+                    }
+                    contactobject.setImageContentType(uploadFile.getContentType());
+
+                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+                    contactsql.insertContactObject(contactobject);
+
+                    final JSONObject jData = new JSONObject();
+                    jData.put(ContactFields.ID, contactobject.getObjectID());
+
+                    response.setData(jData);
+                } finally {
+                    if (upload != null) {
+                        upload.cleanUp();
+                    }
+                }
+            } else if (action.equals(ACTION_UPDATE)) {
+                final int id = parseMandatoryIntParameter(httpServletRequest, AJAXServlet.PARAMETER_ID);
+                final int inFolder = parseMandatoryIntParameter(httpServletRequest, AJAXServlet.PARAMETER_INFOLDER);
+                final Date timestamp = parseMandatoryDateParameter(httpServletRequest, AJAXServlet.PARAMETER_TIMESTAMP);
+
+                UploadEvent upload = null;
+                try {
+                    upload = processUpload(httpServletRequest);
+                    final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
+
+                    final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
+                    if (obj == null) {
+                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "form");
+                    }
+
+                    final ContactObject contactobject = new ContactObject();
+                    final JSONObject jsonobject = new JSONObject(obj);
+
+                    final ContactParser contactparser = new ContactParser(sessionObj);
+                    contactparser.parse(contactobject, jsonobject);
+
+                    contactobject.setObjectID(id);
+
+                    if (null == uploadFile) {
+                        contactobject.setImage1(null);
+                    } else {
+                        final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
+                        try {
+                            final java.io.ByteArrayOutputStream tmp = new com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream(
+                                (int) uploadFile.getSize());
+                            final byte[] buf = new byte[2048];
+                            int len = -1;
+                            while ((len = fis.read(buf)) != -1) {
+                                tmp.write(buf, 0, len);
+                            }
+                            contactobject.setImage1(tmp.toByteArray());
+                        } finally {
+                            fis.close();
+                        }
+                        contactobject.setImageContentType(uploadFile.getContentType());
+                    }
+
+                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+                    contactsql.updateContactObject(contactobject, inFolder, timestamp);
+                } finally {
+                    if (upload != null) {
+                        upload.cleanUp();
+                    }
+                }
+            } else {
+                throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            }
+        } catch (final JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        } catch (final AbstractOXException e) {
+            Logging.log(LOG, e);
+            response.setException(e);
+        }
+        try {
+            // Replaces every 2+2x parameter through the 3+2x parameter in the first parameter string
+            callbackSite = AJAXServlet.substitute(
+                AJAXServlet.JS_FRAGMENT,
+                AJAXServlet.PARAMETER_JSON,
+                response.getJSON().toString(),
+                AJAXServlet.PARAMETER_ACTION,
+                action);
+            final PrintWriter pw = httpServletResponse.getWriter();
+            pw.print(callbackSite);
+        } catch (final JSONException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(httpServletResponse);
+        }
+
+    }
 	
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
