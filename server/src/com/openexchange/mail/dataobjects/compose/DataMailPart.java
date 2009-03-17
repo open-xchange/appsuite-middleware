@@ -76,6 +76,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
@@ -263,13 +264,10 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                          */
                         contentType.setCharsetParameter(System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
                     }
-                    return (dataSource = new MessageDataSource(new FileInputStream(file), contentType));
+                    return (dataSource = new FileDataSource(file, contentType.toString()));
                 }
                 throw new MailException(MailException.Code.NO_CONTENT);
             } catch (final MailConfigException e) {
-                LOG.error(e.getMessage(), e);
-                dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
-            } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }

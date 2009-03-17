@@ -2,6 +2,7 @@
 
  - Bugfix #13362: Checking requested columns for last-modified field prior to adding it
  - Bugfix #13048: Proper export/import of VCards with empty "URL"/"ORG" property. This change fixes handling of "PHOTO" property, too.
+ - Postprocessings for bugfix #13154
 
 * 2009-03-16 - thorben.betten@open-xchange.com
 

@@ -66,12 +66,13 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.session.Session;
 
 /**
@@ -90,7 +91,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 
     private transient DataSource dataSource;
 
-    private transient InputStream docInputSream;
+    private transient final StreamDataSource.InputStreamProvider inputStreamProvider;
 
     private transient Object cachedContent;
 
@@ -112,12 +113,8 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                 throw new MailException(e1);
             }
             final User u = UserStorage.getStorageUser(session.getUserId(), ctx);
-            final DocumentMetadata docMeta = db.getDocumentMetadata(
-                documentId,
-                InfostoreFacade.CURRENT_VERSION,
-                ctx,
-                u,
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
+            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+            final DocumentMetadata docMeta = db.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, ctx, u, uc);
             setSize(docMeta.getFileSize());
             final String docMIMEType = docMeta.getFileMIMEType();
             setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MIMETypes.MIME_APPL_OCTET : docMeta.getFileMIMEType());
@@ -126,35 +123,20 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             } catch (final UnsupportedEncodingException e) {
                 setFileName(docMeta.getFileName());
             }
-            docInputSream = db.getDocument(
-                documentId,
-                InfostoreFacade.CURRENT_VERSION,
-                ctx,
-                u,
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
+            final DocumentInputStreamProvider tmp = new DocumentInputStreamProvider(db, documentId, uc, u, ctx);
+            tmp.setName(getFileName());
+            inputStreamProvider = tmp;
         } catch (final OXException e) {
             throw new MailException(e);
         }
     }
 
-    private DataSource getDataSource() throws MailException {
+    private DataSource getDataSource() {
         /*
          * Lazy creation
          */
         if (null == dataSource) {
-            try {
-                dataSource = new MessageDataSource(docInputSream, getContentType());
-            } catch (final UnsupportedEncodingException e) {
-                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-            } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-            } finally {
-                try {
-                    docInputSream.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            dataSource = new StreamDataSource(inputStreamProvider, getContentType().toString());
         }
         return dataSource;
     }
@@ -173,7 +155,9 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             if (charset == null) {
                 charset = "US-ASCII";
             }
+            InputStream docInputSream = null;
             try {
+                docInputSream = inputStreamProvider.getInputStream();
                 cachedContent = readStream(docInputSream, charset);
             } catch (final FileNotFoundException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
@@ -227,7 +211,11 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      */
     @Override
     public InputStream getInputStream() throws MailException {
-        return docInputSream;
+        try {
+            return inputStreamProvider.getInputStream();
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+        }
     }
 
     /*
@@ -252,5 +240,48 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      */
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.DOCUMENT;
+    }
+
+    private static final class DocumentInputStreamProvider implements StreamDataSource.InputStreamProvider {
+
+        private final InfostoreFacade db;
+
+        private final int documentId;
+
+        private final UserConfiguration userConfiguration;
+
+        private final User user;
+
+        private final Context ctx;
+
+        private String name;
+
+        public DocumentInputStreamProvider(final InfostoreFacade db, final int documentId, final UserConfiguration userConfiguration, final User user, final Context ctx) {
+            super();
+            this.ctx = ctx;
+            this.db = db;
+            this.documentId = documentId;
+            this.user = user;
+            this.userConfiguration = userConfiguration;
+        }
+
+        public InputStream getInputStream() throws IOException {
+            try {
+                return db.getDocument(documentId, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfiguration);
+            } catch (final OXException e) {
+                final IOException io = new IOException("Input stream cannot be retrieved");
+                io.initCause(e);
+                throw io;
+            }
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
     }
 }

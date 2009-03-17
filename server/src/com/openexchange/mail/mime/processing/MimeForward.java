@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.processing;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -85,7 +86,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -337,7 +338,25 @@ public final class MimeForward {
             final MailPart attachmentMailPart;
             {
                 final MimeBodyPart attachmentPart = new MimeBodyPart();
-                attachmentPart.setDataHandler(new DataHandler(new MessageDataSource(originalMsg.getRawInputStream(), originalContentType)));
+                {
+                    final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
+
+                        public InputStream getInputStream() throws IOException {
+                            try {
+                                return originalMsg.getRawInputStream();
+                            } catch (final MessagingException e) {
+                                final IOException io = new IOException(e.getMessage());
+                                io.initCause(e);
+                                throw io;
+                            }
+                        }
+
+                        public String getName() {
+                            return null;
+                        }
+                    };
+                    attachmentPart.setDataHandler(new DataHandler(new StreamDataSource(isp, originalContentType.toString())));
+                }
                 for (final Enumeration<?> e = originalMsg.getAllHeaders(); e.hasMoreElements();) {
                     final Header header = (Header) e.nextElement();
                     final String name = header.getName();

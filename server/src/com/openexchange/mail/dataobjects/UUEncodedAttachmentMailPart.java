@@ -49,14 +49,12 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.io.IOException;
 import java.io.InputStream;
 import javax.activation.DataHandler;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
@@ -87,21 +85,17 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
 
     @Override
     public DataHandler getDataHandler() throws MailException {
-        try {
-            final ContentType contentType;
-            if (!containsContentType()) {
-                contentType = getContentType();
-            } else {
-                String ct = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
-                if ((ct == null) || (ct.length() == 0)) {
-                    ct = MIMETypes.MIME_APPL_OCTET;
-                }
-                contentType = new ContentType(ct);
+        final ContentType contentType;
+        if (!containsContentType()) {
+            contentType = getContentType();
+        } else {
+            String ct = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
+            if ((ct == null) || (ct.length() == 0)) {
+                ct = MIMETypes.MIME_APPL_OCTET;
             }
-            return new DataHandler(new MessageDataSource(uuencPart.getInputStream(), contentType.toString()));
-        } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, new Object[0]);
+            contentType = new ContentType(ct);
         }
+        return uuencPart.getDataHandler(contentType.toString());
     }
 
     @Override

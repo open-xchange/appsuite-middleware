@@ -64,6 +64,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 /**
@@ -119,7 +120,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                             " does not specify a charset. Assumed charset is: ").append(cs).toString());
                     }
                 }
-                dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
+                dataSource = new FileDataSource(uploadFile, getContentType().toString());
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);

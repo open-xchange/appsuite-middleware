@@ -56,7 +56,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import javax.activation.DataHandler;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
+import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -143,6 +146,32 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             LOG.error(e.getMessage(), e);
             return (null);
         }
+    }
+
+    /**
+     * Creates a data handler for this uuencoded part.
+     * 
+     * @param contentType The content type to apply to data handler
+     * @return A data handler for this uuencoded part
+     */
+    public DataHandler getDataHandler(final String contentType) {
+        final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
+
+            public InputStream getInputStream() throws IOException {
+                try {
+                    return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(bodyPart.getBytes()), "uuencode");
+                } catch (final MessagingException e) {
+                    final IOException io = new IOException(e.getMessage());
+                    io.initCause(e);
+                    throw io;
+                }
+            }
+
+            public String getName() {
+                return null;
+            }
+        };
+        return new DataHandler(new StreamDataSource(isp, contentType));
     }
 
     /**

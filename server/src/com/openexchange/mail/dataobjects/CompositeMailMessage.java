@@ -68,7 +68,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource;
 
 /**
  * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by the possibility to add extra parts to an existing
@@ -324,7 +324,25 @@ public final class CompositeMailMessage extends MailMessage {
             for (int i = 0; i < delegateEnclosedCount; i++) {
                 final MailPart mp = delegate.getEnclosedMailPart(i);
                 final MimeBodyPart bodyPart = new MimeBodyPart();
-                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(mp.getInputStream(), mp.getContentType())));
+                {
+                    final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
+
+                        public InputStream getInputStream() throws IOException {
+                            try {
+                                return mp.getInputStream();
+                            } catch (final MailException e) {
+                                final IOException io = new IOException(e.getMessage());
+                                io.initCause(e);
+                                throw io;
+                            }
+                        }
+
+                        public String getName() {
+                            return null;
+                        }
+                    };
+                    bodyPart.setDataHandler(new DataHandler(new StreamDataSource(isp, mp.getContentType().toString())));
+                }
                 final String fileName = mp.getFileName();
                 if (fileName != null && !mp.getContentType().containsNameParameter()) {
                     mp.getContentType().setNameParameter(fileName);
@@ -349,7 +367,25 @@ public final class CompositeMailMessage extends MailMessage {
              */
             for (final MailPart mp : additionalParts) {
                 final MimeBodyPart bodyPart = new MimeBodyPart();
-                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(mp.getInputStream(), mp.getContentType())));
+                {
+                    final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
+
+                        public InputStream getInputStream() throws IOException {
+                            try {
+                                return mp.getInputStream();
+                            } catch (final MailException e) {
+                                final IOException io = new IOException(e.getMessage());
+                                io.initCause(e);
+                                throw io;
+                            }
+                        }
+
+                        public String getName() {
+                            return null;
+                        }
+                    };
+                    bodyPart.setDataHandler(new DataHandler(new StreamDataSource(isp, mp.getContentType().toString())));
+                }
                 final String fileName = mp.getFileName();
                 if (fileName != null && !mp.getContentType().containsNameParameter()) {
                     mp.getContentType().setNameParameter(fileName);
