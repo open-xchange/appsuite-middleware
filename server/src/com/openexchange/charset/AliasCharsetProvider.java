@@ -54,7 +54,6 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -79,12 +78,10 @@ public final class AliasCharsetProvider extends CharsetProvider {
      * Initializes the charset map.
      */
     public static void initCharsetMap() {
-        Map<String, Charset> tmp = name2charset;
-        if (tmp == null) {
+        if (name2charset == null) {
             synchronized (AliasCharsetProvider.class) {
-                tmp = name2charset;
-                if (tmp == null) {
-                    tmp = name2charset = new ConcurrentHashMap<String, Charset>(8);
+                if (name2charset == null) {
+                    name2charset = new ConcurrentHashMap<String, Charset>(8);
                 }
             }
         }
