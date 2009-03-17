@@ -925,6 +925,9 @@ public class AppointmentRequest {
 
             int counter = 0;
 
+            /*-
+             * TODO: Enable if limit is supported
+             * 
             List<CalendarDataObject> recurrenceAppointmentList = null;
             List<CalendarDataObject> appointmentSortedList = null;
 
@@ -932,6 +935,7 @@ public class AppointmentRequest {
                 recurrenceAppointmentList = new ArrayList<CalendarDataObject>();
                 appointmentSortedList = new ArrayList<CalendarDataObject>();
             }
+             */
 
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
