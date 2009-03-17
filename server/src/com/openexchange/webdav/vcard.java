@@ -215,17 +215,7 @@ public final class vcard extends PermissionServlet {
                     entries_db = loadDBEntries(context, principal_id);
                 }
             } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-
-                if (principalStatement != null) {
-                    principalStatement.close();
-                }
-
-                if (readCon != null) {
-                    DBPool.push(context, readCon);
-                }
+                DBUtils.closeResources(rs, principalStatement, readCon, true, context);
             }
 
             final VersitDefinition def = Versit.getDefinition("text/vcard");
