@@ -68,8 +68,6 @@ import com.openexchange.contacts.ldap.osgi.ServiceRegistry;
  */
 public class PropertyHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class);
-    
     public enum AuthType {
         AdminDN("AdminDN"),
         anonymous("anonymous"),
@@ -87,7 +85,7 @@ public class PropertyHandler {
         }
         
     }
-
+    
     public enum SearchScope {
         base("base"),
         one("one"),
@@ -104,7 +102,7 @@ public class PropertyHandler {
         }
         
     }
-    
+
     public enum Sorting {
         groupware,
         server;
@@ -118,6 +116,7 @@ public class PropertyHandler {
         contexts("contexts"),
         mappingfile("mappingfile"),
         memorymapping("memorymapping"),
+        pagesize("pagesize"),
         searchScope("searchScope"),
         sorting("sorting"),
         uri("uri");
@@ -136,6 +135,8 @@ public class PropertyHandler {
     }
     
     public static final String bundlename = "com.openexchange.contacts.ldap.";
+    
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class);
     
     private final static String PROPFILE = "contacts-ldap.properties";
 
@@ -159,13 +160,15 @@ public class PropertyHandler {
 
     private boolean memorymapping;
 
-    private Properties properties;
+    private int pagesize;
 
+    private Properties properties;
+    
+    
     private SearchScope searchScope;
     
-    
     private Sorting sorting;
-    
+
     private String uri;
     
     public static String checkStringProperty(Properties props, final String name) throws LdapConfigurationException {
@@ -214,10 +217,14 @@ public class PropertyHandler {
         return mappings;
     }
 
+    public int getPagesize() {
+        return pagesize;
+    }
+
     public final SearchScope getSearchScope() {
         return searchScope;
     }
-
+    
     public final Sorting getSorting() {
         return sorting;
     }
@@ -231,7 +238,6 @@ public class PropertyHandler {
     }
     
     public void loadProperties() throws LdapConfigurationException {
-        
         final StringBuilder logBuilder = new StringBuilder();
         logBuilder.append("\nLoading Contacts-LDAP properties...\n");
         final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -280,6 +286,15 @@ public class PropertyHandler {
         // TODO: Throws no error, so use an error checking method
         this.memorymapping = Boolean.parseBoolean(memoryMappingString);
         logBuilder.append("\tmemorymapping: ").append(this.memorymapping).append('\n');
+
+        final String pagesizestring = checkStringProperty(this.properties, Parameters.pagesize.getName());
+        try {
+            this.pagesize = Integer.parseInt(pagesizestring);
+            logBuilder.append("\tpagesize: ").append(this.pagesize).append('\n');
+        } catch (final NumberFormatException e) {
+            throw new LdapConfigurationException(Code.INVALID_PAGESIZE, pagesizestring);
+        }
+        
         
         final String mappingfile = checkStringProperty(this.properties, Parameters.mappingfile.getName());
         
@@ -289,7 +304,7 @@ public class PropertyHandler {
         } else {
             this.mappings = Mappings.getMappingsFromProperties(mapprops);
         }
-        
+
         for (final Integer ctx : this.contexts) {
             final String stringctx = String.valueOf(ctx);
             final Properties file = configuration.getFile(stringctx + ".properties");

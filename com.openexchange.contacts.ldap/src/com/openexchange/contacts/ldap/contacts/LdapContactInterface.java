@@ -68,6 +68,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.Control;
 import javax.naming.ldap.LdapContext;
+import javax.naming.ldap.PagedResultsControl;
+import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
 import javax.naming.ldap.SortKey;
 import com.openexchange.api.OXConflictException;
@@ -152,7 +154,6 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     public SearchIterator<ContactObject> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
-        LOG.info("Called getContactsByExtendedSearch");
         final Order valueOf = getOrder(orderDir);
         final Set<Integer> columns = getColumnSet(cols);
         final int[] folders = searchobject.getFolders();
@@ -181,8 +182,6 @@ public class LdapContactInterface implements ContactInterface {
 
     // The all request...
     public SearchIterator<ContactObject> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
-        LOG.info("Called getContactsInFolder");
-        
         final Order valueOf = getOrder(orderDir);
         
         final Set<Integer> columns = getColumnSet(cols);
@@ -216,7 +215,6 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     public SearchIterator<ContactObject> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
-        LOG.info("Called getModifiedContactsInFolder");
         return new ArrayIterator<ContactObject>(new ContactObject[0]);
     }
 
@@ -231,8 +229,6 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException {
-        LOG.info("Called getObjectsById");
-        
         final Set<Integer> columns = getColumnSet(cols);
         final ArrayList<ContactObject> contacts = new ArrayList<ContactObject>();
         for (final int[] object : objectIdAndInFolder) {
@@ -506,35 +502,61 @@ public class LdapContactInterface implements ContactInterface {
         try {
             final PropertyHandler instance = PropertyHandler.getInstance();
             final LdapContext context = LdapUtility.createContext(this.session.getLoginName(), this.session.getPassword());
+            // TODO Implement right check if server support pagedResults
+//            final boolean pagedResultControlSupported = isPagedResultControlSupported(context);
+//            if (!pagedResultControlSupported) {
+//                System.out.println("Paged results are not supported");
+//            }
             try {
-
+                byte[] cookie = null;
+                final int pagesize = instance.getPagesize();
                 if (null != sortField && instance.getSorting().equals(Sorting.server)) {
                     final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField()), sortField.getSort().equals(Order.asc), null);
                     final SortKey[] sortKeyArray = new SortKey[] { sortKey };
-                    context.setRequestControls(new Control[] { new SortControl(sortKeyArray, Control.CRITICAL) });
+                    final Control[] controls = new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
+                    context.setRequestControls(controls);
+                } else {
+                    final Control[] controls = new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
+                    context.setRequestControls(controls);
                 }
                 final SearchControls searchControls = new SearchControls();
                 searchControls.setSearchScope(LdapUtility.getSearchControl());
+                searchControls.setCountLimit(0);
                 searchControls.setReturningAttributes(getAttributes(columns));
-                final NamingEnumeration<SearchResult> search = context.search(instance.getBaseDN(), filter, searchControls);
-                while (search.hasMore()) {
-                    final SearchResult next = search.next();
-                    final Attributes attributes = next.getAttributes();
-                    final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, new UidInterface() {
+                do {
+                    final NamingEnumeration<SearchResult> search = context.search(instance.getBaseDN(), filter, searchControls);
+                    while (null != search && search.hasMore()) {
+                        final SearchResult next = search.next();
+                        final Attributes attributes = next.getAttributes();
+                        final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, new UidInterface() {
 
-                        public Integer getUid(String uid) throws LdapException {
-                            return ldapUidToOxUid(uid);
+                            public Integer getUid(String uid) throws LdapException {
+                                return ldapUidToOxUid(uid);
+                            }
+
+                        });
+                        if (columns.contains(ContactObject.FOLDER_ID)) {
+                            contact.setParentFolderID(folderId);
                         }
-                        
-                    });
-                    if (columns.contains(ContactObject.FOLDER_ID)) {
-                        contact.setParentFolderID(folderId);
+                        if (columns.contains(ContactObject.CREATED_BY)) {
+                            contact.setCreatedBy(this.admin_id);
+                        }
+                        arrayList.add(contact);
                     }
-                    if (columns.contains(ContactObject.CREATED_BY)) {
-                        contact.setCreatedBy(this.admin_id);
+                    // Examine the paged results control response 
+                    Control[] controls = context.getResponseControls();
+                    if (controls != null) {
+                        for (int i = 0; i < controls.length; i++) {
+                            if (controls[i] instanceof PagedResultsResponseControl) {
+                                PagedResultsResponseControl prrc = (PagedResultsResponseControl) controls[i];
+                                cookie = prrc.getCookie();
+                            }
+                        }
                     }
-                    arrayList.add(contact);
-                }
+                    // Re-activate paged results
+                    context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
+                } while (null != cookie);
+                
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
                 throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
@@ -548,7 +570,38 @@ public class LdapContactInterface implements ContactInterface {
         return arrayList;
     }
 
-
+//    /**
+//     * Is paged result control supported?
+//     *
+//     * Query the rootDSE object to find out if the paged result control
+//     * is supported.
+//     */
+//    private static boolean isPagedResultControlSupported(LdapContext ctx) throws NamingException
+//    {
+//        SearchControls ctl = new SearchControls();
+//        ctl.setReturningAttributes(new String[]{"supportedControl"});
+//        ctl.setSearchScope(SearchControls.OBJECT_SCOPE);
+//
+//        /* search for the rootDSE object */
+//        NamingEnumeration<?> results = ctx.search("", "(objectClass=*)", ctl);
+//
+//        while(results.hasMore()){
+//            SearchResult entry = (SearchResult)results.next();
+//            NamingEnumeration<?> attrs = entry.getAttributes().getAll();
+//            while (attrs.hasMore()){
+//                Attribute attr = (Attribute)attrs.next();
+//                NamingEnumeration<?> vals = attr.getAll();
+//                while (vals.hasMore()){
+//                    String value = (String) vals.next();
+//                    if (value.equals("1.2.840.113556.1.4.319")) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+    
     private LdapGetter getLdapGetter(final Attributes attributes) {
         return new LdapGetter() {
     

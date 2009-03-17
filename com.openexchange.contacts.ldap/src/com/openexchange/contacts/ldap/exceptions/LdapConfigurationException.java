@@ -89,7 +89,13 @@ public class LdapConfigurationException extends OXException {
         /**
          * Mapping file %s not valid
          */
-        INVALID_MAPPING_FILE("Mapping file \"%s\" not valid", Category.SETUP_ERROR, 6);
+        INVALID_MAPPING_FILE("Mapping file \"%s\" not valid", Category.SETUP_ERROR, 6),
+        
+        /**
+         * The given value for pagesize "%s" is no integer value
+         */
+        INVALID_PAGESIZE("The given value for pagesize \"%s\" is no integer value", Category.SETUP_ERROR, 7);
+
 
         /**
          * Message of the exception.
