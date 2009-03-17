@@ -88,36 +88,6 @@ public class PropertyHandler {
         
     }
 
-    public class ContextDetails {
-        
-        private String foldername;
-        
-        private String searchfilter;
-        
-        /**
-         * Initializes a new {@link ContextDetails}.
-         * @param foldername
-         */
-        private ContextDetails() {
-        }
-        
-        public final String getFoldername() {
-            return foldername;
-        }
-
-        public final String getSearchfilter() {
-            return searchfilter;
-        }
-
-        private final void setFoldername(String foldername) {
-            this.foldername = foldername;
-        }
-
-        private final void setSearchfilter(String searchfilter) {
-            this.searchfilter = searchfilter;
-        }
-    }
-    
     public enum SearchScope {
         base("base"),
         one("one"),
@@ -179,7 +149,7 @@ public class PropertyHandler {
 
     private String baseDN;
     
-    private Map<Integer, ContextDetails> contextdetails = new ConcurrentHashMap<Integer, ContextDetails>();
+    private Map<Integer, ContextProperties> contextdetails = new ConcurrentHashMap<Integer, ContextProperties>();
     
     private List<Integer> contexts;
     
@@ -231,7 +201,7 @@ public class PropertyHandler {
     }
 
     
-    public final Map<Integer, ContextDetails> getContextdetails() {
+    public final Map<Integer, ContextProperties> getContextdetails() {
         return contextdetails;
     }
     
@@ -323,22 +293,7 @@ public class PropertyHandler {
         for (final Integer ctx : this.contexts) {
             final String stringctx = String.valueOf(ctx);
             final Properties file = configuration.getFile(stringctx + ".properties");
-            final String folderparameter = bundlename + "context" + stringctx + ".foldername";
-            final String searchparameter = bundlename + "context" + stringctx + ".searchfilter";
-            final String foldername = file.getProperty(folderparameter);
-            final String searchfilter = file.getProperty(searchparameter);
-            final ContextDetails contextDetails2 = new ContextDetails();
-            if (null != foldername && foldername.length() != 0) {
-                contextDetails2.setFoldername(foldername);
-            } else {
-                throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, folderparameter);
-            }
-            if (null != searchfilter && searchfilter.length() != 0) {
-                contextDetails2.setSearchfilter(searchfilter);
-            } else {
-                throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, searchfilter);
-            }
-            this.contextdetails.put(ctx, contextDetails2);
+            this.contextdetails.put(ctx, ContextProperties.getContextPropertiesFromProperties(file, stringctx));
         }
         this.loaded.set(true);
         if (LOG.isInfoEnabled()) {

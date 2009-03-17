@@ -54,9 +54,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.api2.OXException;
+import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
@@ -97,22 +99,21 @@ public class LdapGlobalFolderCreator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class);
     
-    private static String globalLdapFolderName = "LDAPneu9";
-    
     public static FolderIDAndAdminID createGlobalFolder(Context ctx) throws OXException, DBPoolingException, SQLException {
         // First search for a folder with the name if is doesn't exist create it
         final Connection readCon = DBPool.pickup(ctx);
         int ldapFolderID;
         final int admin_user_id;
+        final String foldername = PropertyHandler.getInstance().getContextdetails().get(Autoboxing.I(ctx.getContextId())).getFoldername();
         try {
             admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
-            ldapFolderID = getLdapFolderID(globalLdapFolderName, ctx, readCon);
+            ldapFolderID = getLdapFolderID(foldername, ctx, readCon);
         } finally {
             DBPool.closeReaderSilent(ctx, readCon);
         }
 
         if (-1 == ldapFolderID) {
-            final FolderObject fo = createFolderObject(admin_user_id);
+            final FolderObject fo = createFolderObject(admin_user_id, foldername);
             // As we have no possibility right now to access the foldermanager without a session, we have to create
             // a dummy session object here, which provides the needed information
             final Session dummysession = getDummySessionObj(admin_user_id, ctx.getContextId());
@@ -156,7 +157,7 @@ public class LdapGlobalFolderCreator {
         }
     }
 
-    private static FolderObject createFolderObject(final int admin_user_id) {
+    private static FolderObject createFolderObject(final int admin_user_id, final String globalLdapFolderName) {
         final FolderObject fo = new FolderObject();
         final OCLPermission defaultPerm = new OCLPermission();
         defaultPerm.setEntity(admin_user_id);
