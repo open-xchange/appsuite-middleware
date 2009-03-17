@@ -50,10 +50,8 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -118,7 +116,7 @@ public class ContactConfig {
      */
     public Boolean getBoolean(final Property key) {
         logNotInitialized();
-        return new Boolean(props.getProperty(key.propertyName, key.defaultValue));
+        return Boolean.valueOf(props.getProperty(key.propertyName, key.defaultValue));
     }
 
     private void logNotInitialized() {

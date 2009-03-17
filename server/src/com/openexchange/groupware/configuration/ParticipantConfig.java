@@ -50,10 +50,8 @@
 package com.openexchange.groupware.configuration;
 
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -98,7 +96,7 @@ public final class ParticipantConfig {
      */
     public Boolean getProperty(final Property key) {
         logNotInitialized();
-        return new Boolean(props.getProperty(key.name, key.value));
+        return Boolean.valueOf(props.getProperty(key.name, key.value));
     }
 
     public Integer getIntProperty(final Property key) {
