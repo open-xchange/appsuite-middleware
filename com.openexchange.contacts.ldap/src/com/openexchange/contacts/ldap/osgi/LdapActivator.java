@@ -147,9 +147,10 @@ public final class LdapActivator extends DeferredActivator {
             for (final Integer ctx : ctxs) {
                 final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(new ContextImpl(ctx));
                 final Hashtable<String, String> hashTable = new Hashtable<String, String>();
-                hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, String.valueOf(createGlobalFolder.getFolderid()));
+                final String folderid = String.valueOf(createGlobalFolder.getFolderid());
+                hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, folderid);
                 context.registerService(ContactInterface.class.getName(), new LdapContactInterface(ctx, createGlobalFolder.getAdminid()), hashTable);
-                LOG.info("Registered global LDAP folder for context: " + ctx);
+                LOG.info("Registered global LDAP folder \"" + instance.getContextdetails().get(ctx).getFoldername() + "\" with id \"" + folderid + "\" for context: " + ctx);
             }
             
         } catch (final Exception e) {
