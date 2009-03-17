@@ -382,10 +382,9 @@ public abstract class CalendarObject extends CommonObject {
         if (change_exceptions == null) {
             setChangeExceptions(new Date[] { change_exception });
         } else {
-            Date[] tmp = change_exceptions;
+            final Date[] tmp = change_exceptions;
             change_exceptions = new Date[tmp.length + 1];
             System.arraycopy(tmp, 0, change_exceptions, 0, tmp.length);
-            tmp = null;
             change_exceptions[change_exceptions.length - 1] = change_exception;
         }
     }
@@ -813,15 +812,16 @@ public abstract class CalendarObject extends CommonObject {
         return !isPartOfSeries();
     }
 
-    public Set<Integer> findDifferingFields(DataObject dataObject) {
+    @Override
+    public Set<Integer> findDifferingFields(final DataObject dataObject) {
 
-        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
 
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
             return differingFields;
         }
 
-        CalendarObject other = (CalendarObject) dataObject;
+        final CalendarObject other = (CalendarObject) dataObject;
 
         if ((!containsChangeExceptions() && other.containsChangeExceptions()) || (containsChangeExceptions() && other.containsChangeExceptions() && getChangeException() != other.getChangeException() && (getChangeException() == null || isDifferent(
             getChangeException(),
@@ -924,16 +924,16 @@ public abstract class CalendarObject extends CommonObject {
         return differingFields;
     }
 
-    private boolean isDifferent(Participant[] p1, Participant[] p2) {
+    private boolean isDifferent(final Participant[] p1, final Participant[] p2) {
         if (p1.length != p2.length) {
             return true;
         }
-        Set<Integer> ids = new HashSet<Integer>(p1.length);
-        for (Participant participant : p1) {
+        final Set<Integer> ids = new HashSet<Integer>(p1.length);
+        for (final Participant participant : p1) {
             ids.add(participant.getIdentifier());
         }
 
-        for (Participant participant : p2) {
+        for (final Participant participant : p2) {
             if (!ids.remove(participant.getIdentifier())) {
                 return true;
             }
@@ -942,7 +942,7 @@ public abstract class CalendarObject extends CommonObject {
         return false;
     }
 
-    private boolean isDifferent(UserParticipant[] u1, UserParticipant[] u2) {
+    private boolean isDifferent(final UserParticipant[] u1, final UserParticipant[] u2) {
         if (u1 == u2) {
             return false;
         }
@@ -956,15 +956,15 @@ public abstract class CalendarObject extends CommonObject {
             return true;
         }
 
-        Set<Integer> ids = new HashSet<Integer>(u1.length);
-        for (Participant participant : u1) {
+        final Set<Integer> ids = new HashSet<Integer>(u1.length);
+        for (final Participant participant : u1) {
             if (participant == null) {
                 continue;
             } // Ignore nulls
             ids.add(participant.getIdentifier());
         }
 
-        for (Participant participant : u2) {
+        for (final Participant participant : u2) {
             if (participant == null) {
                 continue;
             } // Ignore nulls
@@ -975,7 +975,7 @@ public abstract class CalendarObject extends CommonObject {
         return false;
     }
 
-    private boolean isDifferent(Date[] dates1, Date[] dates2) {
+    private boolean isDifferent(final Date[] dates1, final Date[] dates2) {
         if (dates1 == dates2) {
             return false;
         }
@@ -1006,7 +1006,7 @@ public abstract class CalendarObject extends CommonObject {
      * @see com.openexchange.groupware.container.CommonObject#set(int, java.lang.Object)
      */
     @Override
-    public void set(int field, Object value) {
+    public void set(final int field, final Object value) {
         switch (field) {
         case UNTIL:
             setUntil((Date) value);
@@ -1079,7 +1079,7 @@ public abstract class CalendarObject extends CommonObject {
      * @see com.openexchange.groupware.container.CommonObject#get(int)
      */
     @Override
-    public Object get(int field) {
+    public Object get(final int field) {
         switch (field) {
         case UNTIL:
             return getUntil();
@@ -1134,7 +1134,7 @@ public abstract class CalendarObject extends CommonObject {
      * @see com.openexchange.groupware.container.CommonObject#contains(int)
      */
     @Override
-    public boolean contains(int field) {
+    public boolean contains(final int field) {
         switch (field) {
         case UNTIL:
             return containsUntil();
@@ -1186,7 +1186,7 @@ public abstract class CalendarObject extends CommonObject {
      * @see com.openexchange.groupware.container.CommonObject#remove(int)
      */
     @Override
-    public void remove(int field) {
+    public void remove(final int field) {
         switch (field) {
         case UNTIL:
             removeUntil();
