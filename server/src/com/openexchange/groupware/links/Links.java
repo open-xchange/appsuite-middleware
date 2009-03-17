@@ -55,13 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -198,10 +197,10 @@ public class Links {
                 int fid = -1;
                 try {
                     fid = com.openexchange.groupware.calendar.Tools.getAppointmentFolder(oid, user, ct);
-                } catch (OXObjectNotFoundException x) {
+                } catch (final OXObjectNotFoundException x) {
                     // may not read and is not participant
                     return false;
-                } catch (OXException ox) {
+                } catch (final OXException ox) {
                     LOG.error("UNABLE TO CHECK CALENDAR READRIGHT FOR LINK", ox);
                     return false;
                 }
@@ -513,7 +512,7 @@ public class Links {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("Fetching rights for Module: " + type + " id:" + id + " folder:" + folder
-                    + " user:" + user + " group:" + group));
+                    + " user:" + user + " group:" + Arrays.toString(group)));
         }
 
         if (!modules.get(Integer.valueOf(type)).isReadable(id, folder, user, group, so)) {
