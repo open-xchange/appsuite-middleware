@@ -128,7 +128,7 @@ public final class AliasCharsetProvider extends CharsetProvider {
         /*
          * Look-up charset
          */
-        Charset charset = null;
+        final Charset charset;
         try {
             charset = Charset.forName(delegateName);
         } catch (final IllegalCharsetNameException e) {
