@@ -491,7 +491,7 @@ public class ContactRequest {
                 for (int a = 0; a < userIdArray.length; a++) {
                     final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
                     final JSONArray jsonContactArray = new JSONArray();
-                    contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                    contactwriter.writeArray(contactObj, internalColumns, jsonContactArray);
                     jsonResponseArray.put(jsonContactArray);
 
                     if (timestamp.before(contactObj.getLastModified())) {
