@@ -398,10 +398,9 @@ public abstract class CalendarObject extends CommonObject {
         if (delete_exceptions == null) {
             setDeleteExceptions(new Date[] { delete_exception });
         } else {
-            Date[] tmp = delete_exceptions;
+            final Date[] tmp = delete_exceptions;
             delete_exceptions = new Date[tmp.length + 1];
             System.arraycopy(tmp, 0, delete_exceptions, 0, tmp.length);
-            tmp = null;
             delete_exceptions[delete_exceptions.length - 1] = delete_exception;
         }
     }
