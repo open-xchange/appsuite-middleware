@@ -65,7 +65,7 @@ public class URIValueDefinition extends ValueDefinition {
 
     public static final URIValueDefinition Default = new URIValueDefinition();
 
-    private static Pattern URIPattern = Pattern.compile("[^,]+");
+    private static final Pattern URIPattern = Pattern.compile("[^,]+");
 
     @Override
     public Object createValue(final StringScanner s, final Property property) throws IOException {
