@@ -558,7 +558,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (next == null) {
                 return retval;
             }
-            retval.offer(next);
+            retval.add(next);
             if (prefetchQueue != null) {
                 retval.addAll(prefetchQueue);
                 return retval;

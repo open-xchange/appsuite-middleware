@@ -192,7 +192,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
             }
             while (delegate.hasNext()) {
                 try {
-                    data.offer(delegate.next());
+                    data.add(delegate.next());
                 } catch (final OXException e) {
                     oxExc = e;
                     break;
