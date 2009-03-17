@@ -53,14 +53,17 @@ import com.openexchange.groupware.container.Participant;
 
 public class CalendarSearchObject extends SearchObject {
 
-    public static String NO_TITLE = null;
+    public static final String NO_TITLE = null;
 
 	private String title = NO_TITLE;
 
-	private Participant[] participants = null;
+	private Participant[] participants;
 	
-	private boolean searchInNote = false;
+	private boolean searchInNote;
 
+	/**
+	 * Initializes a new CalendarSearchObject
+	 */
 	public CalendarSearchObject() {
 		super();
 	}
