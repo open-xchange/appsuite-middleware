@@ -58,9 +58,14 @@ public abstract class AbstractTableTable implements SlimTableTable{
             entry.setParentFolderID(defaultFolder);
             return entry;
         }
-        FolderResolver folderResolver = new FolderResolver(environment.getClientForUser1(), environment);
-        entry.setParentFolderID(folderResolver.getFolderId(data.getFolderExpression()));
+        entry.setParentFolderID(resolveFolder(data.getFolderExpression()));
         return entry;
+    }
+    
+    protected int resolveFolder(String folderExpression) throws FitnesseException {
+        FolderResolver folderResolver = new FolderResolver(environment.getClientForUser1(), environment);
+        return folderResolver.getFolderId(folderExpression);
+        
     }
     
     protected AJAXClient getClient() {

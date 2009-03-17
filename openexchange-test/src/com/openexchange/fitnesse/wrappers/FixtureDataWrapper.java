@@ -29,6 +29,8 @@ public class FixtureDataWrapper {
     public static final String FOLDER = "folder";
 
     public static final String PARENT = "parent";
+    
+    public static final String DESTINATION = "destination";
 
     public static final int TYPE_ONLY_NAME = 1;
     public static final int TYPE_KEYS_AND_VALUES = 2;
@@ -45,6 +47,8 @@ public class FixtureDataWrapper {
     private String expectedError = null;
 
     private String folder;
+
+    private String destination;
 
     
     public FixtureDataWrapper(List<List<String>> table) {
@@ -127,6 +131,12 @@ public class FixtureDataWrapper {
         return folder;
     }
 
+    public String getDestination(){
+        if(destination != null) {
+            return destination;
+        }
+        return destination = asMap().get(DESTINATION);
+    }
     /**
      * @return the amount of fields in the data given, including fixture name and expected error if applicable
      */

@@ -50,68 +50,37 @@
 package com.openexchange.ajax.kata.tasks;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.kata.AbstractStep;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.ajax.task.actions.UpdateRequest;
+import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TaskTestManager;
+
 
 
 /**
- * {@link TaskCreateStep}
+ * {@link TaskMoveStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class TaskCreateStep extends AbstractStep implements IdentitySource<Task> {
+public class TaskMoveStep extends NeedExistingStep<Task> {
 
-    private Task entry;
-    private boolean inserted;
-    private TaskTestManager manager;
+    private int destinationFolder;
+    
     /**
-     * Initializes a new {@link TaskCreateStep}.
+     * Initializes a new {@link TaskMoveStep}.
      * @param name
      * @param expectedError
      */
-    public TaskCreateStep(Task entry, String name, String expectedError) {
+    public TaskMoveStep(int destinationFolder, String name, String expectedError) {
         super(name, expectedError);
-        this.entry = entry;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
-     */
-    public void assumeIdentity(Task task) {
-        task.setObjectID( entry.getObjectID() );
-        task.setParentFolderID( entry.getParentFolderID());
-        task.setLastModified( entry.getLastModified());
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
-     */
-    public void rememberIdentityValues(Task task) {
-        entry.setLastModified(task.getLastModified());
-        if(task.containsParentFolderID())
-            entry.setParentFolderID(task.getParentFolderID());
-    }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
-     */
-    public void forgetIdentity(Task entry) {
-        inserted = false;
+        this.destinationFolder = destinationFolder;
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
     public void cleanUp() throws Exception {
-        if(!inserted) {
-            return;
-        }
-        manager.deleteTaskOnServer(entry);
     }
 
     /* (non-Javadoc)
@@ -119,16 +88,20 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
      */
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
-        this.manager = new TaskTestManager(client);
         
-        InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
-        InsertResponse insertResponse = execute(insertRequest);
-        insertResponse.fillTask(entry);
-        inserted = !insertResponse.hasError();
-        checkError(insertResponse);
+        Task entry = new Task();
+        assumeIdentity(entry);
+        int inFolder = entry.getParentFolderID();
+        entry.setParentFolderID(destinationFolder);
+        
+        UpdateRequest updateRequest = new UpdateRequest(inFolder, entry, getTimeZone(), false);
+        UpdateResponse updateResponse = execute(updateRequest);
+        
+        if(!updateResponse.hasError()) {
+            entry.setLastModified(updateResponse.getTimestamp());
+            rememberIdentityValues(entry);
+        }
+        checkError(updateResponse);
     }
 
-    public Class<Task> getType() {
-        return Task.class;
-    }
 }
