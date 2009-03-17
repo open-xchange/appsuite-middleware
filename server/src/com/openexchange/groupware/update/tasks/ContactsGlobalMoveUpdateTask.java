@@ -50,13 +50,11 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -159,8 +157,6 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
             	OXFolderAccess oxa = null;
                 resultSet = st.executeQuery(SQL_QUERY);
                 
-                StringBuilder sb = new StringBuilder();
-                
                 if (LOG.isDebugEnabled()) {
                 	LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
                 }
@@ -179,7 +175,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                 		LOG.warn("UPDATING OPBJECT "+id+" IN CONTEXT "+cid+" MOVING TO "+des.getObjectID());
                 	}
                 		
-                	sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
+                	final StringBuilder sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
                 	sb.append(des.getObjectID());
                 	sb.append(" , changing_date = ");
                 	sb.append(System.currentTimeMillis());    

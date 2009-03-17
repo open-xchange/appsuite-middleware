@@ -132,7 +132,6 @@ public final class LoginPerformer {
      */
     public Login doLogin(final String login, final String password, final String remoteAddress) throws LoginException {
         Session session = null;
-        LoginImpl retval = new LoginImpl(null, null, null);
         try {
             final Authenticated authed = Authentication.login(login, password);
 
@@ -191,7 +190,7 @@ public final class LoginPerformer {
             final String sessionId = sessiondService.addSession(userId, username, password, context, remoteAddress, login);
             session = sessiondService.getSession(sessionId);
 
-            retval = new LoginImpl(session, context, u);
+            final LoginImpl retval = new LoginImpl(session, context, u);
             /*
              * Trigger registered login handlers
              */
