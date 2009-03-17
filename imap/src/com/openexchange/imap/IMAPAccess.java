@@ -76,7 +76,7 @@ import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages
+ * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -110,7 +110,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private boolean decrement;
 
     /**
-     * Initializes a new {@link IMAPAccess IMAP access}
+     * Initializes a new {@link IMAPAccess IMAP access}.
      * 
      * @param session The session providing needed user data
      */
@@ -189,11 +189,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     /**
-     * Simple getter for config field
+     * Gets the IMAP configuration.
      * 
-     * @return The IMAP configs
+     * @return The IMAP configuration
      */
-    IMAPConfig getIMAPConfig() {
+    public IMAPConfig getIMAPConfig() {
         try {
             return (IMAPConfig) getMailConfig();
         } catch (final MailException e) {
