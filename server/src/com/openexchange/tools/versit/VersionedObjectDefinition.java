@@ -129,7 +129,9 @@ public class VersionedObjectDefinition extends ObjectDefinition {
                 }
                 return child;
             }
-            object.addProperty(property);
+            if (!property.isInvalid()) {
+                object.addProperty(property);
+            }
             if (property.name.equalsIgnoreCase("VERSION")) {
                 setVersion(property.getValue().toString());
             }

@@ -137,4 +137,12 @@ public class StringScanner extends Scanner {
         return Text.substring(start);
     }
 
+    /**
+     * Gets this string scanner's text length
+     * 
+     * @return The text length
+     */
+    public int length() {
+        return Text.length();
+    }
 }

@@ -83,7 +83,7 @@ public class ListValueDefinition extends ValueDefinition {
             }
             s.read();
         }
-        return retval;
+        return retval.isEmpty() ? null : retval;
     }
 
     @Override

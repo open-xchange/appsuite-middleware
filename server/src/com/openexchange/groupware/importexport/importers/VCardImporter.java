@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -220,7 +221,7 @@ public class VCardImporter extends AbstractImporter {
 				if (def == null) {
 					// could not find appropriate parser for this part of the
 					// vcard file
-					LOG.error("Could not recognize format of the following VCard data: " + chunk.getContent());
+					LOG.error("Could not recognize format of the following VCard data: " + Arrays.toString(chunk.getContent()));
 					importResult.setDate(new Date(System.currentTimeMillis()));
 					importResult.setException(importExportExceptionFactory.create(5, chunk.getContent()));
 				} else {

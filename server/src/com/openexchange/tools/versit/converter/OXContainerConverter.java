@@ -77,7 +77,6 @@ import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -106,7 +105,6 @@ import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.encodings.BASE64Encoding;
 import com.openexchange.tools.versit.values.DateTimeValue;
 import com.openexchange.tools.versit.values.DurationValue;
 import com.openexchange.tools.versit.values.RecurrenceValue;
@@ -757,17 +755,19 @@ public class OXContainerConverter {
             final Parameter uriParam = property.getParameter("URI");
             if (uriParam == null) {
                 String value;
-                if (property.getValue() instanceof byte[]) {
-                    try {
-                        value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), CHARSET_ISO_8859_1));
-                    } catch (final IOException e) {
-                        throw new ConverterException(e.getMessage(), e);
-                    }
-                } else if (property.getValue() instanceof URI) {
-                    loadImageFromURL(contactContainer, property.getValue().toString());
+                final Object propertyValue = property.getValue();
+                if (propertyValue instanceof byte[]) {
+                    /*
+                     * Apply image data as it is since ValueDefinition#parse(Scanner s, Property property) already decodes value dependent
+                     * on "ENCODING" parameter
+                     */
+                    contactContainer.setImage1((byte[]) propertyValue);
+                    value = null;
+                } else if (propertyValue instanceof URI) {
+                    loadImageFromURL(contactContainer, propertyValue.toString());
                     value = null;
                 } else {
-                    value = property.getValue().toString();
+                    value = propertyValue.toString();
                     if (value != null) {
                         try {
                             final URL url = new URL(value);
@@ -781,16 +781,20 @@ public class OXContainerConverter {
                         }
                     }
                 }
-                try {
-                    if (value != null) {
+                if (value != null) {
+                    try {
                         contactContainer.setImage1(value.getBytes(CHARSET_ISO_8859_1));
+                    } catch (final UnsupportedEncodingException e) {
+                        LOG.error("Image could not be set", e);
                     }
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.error("Image could not be set", e);
                 }
                 final Parameter type = property.getParameter(P_TYPE);
                 if (type != null && type.getValueCount() == 1) {
-                    contactContainer.setImageContentType(type.getValue(0).getText());
+                    String stype = type.getValue(0).getText().toLowerCase();
+                    if (!stype.startsWith("image/")) {
+                        stype = "image/" + stype;
+                    }
+                    contactContainer.setImageContentType(stype);
                 }
             } else {
                 if (uriParam.getValueCount() == 1) {
@@ -1665,9 +1669,10 @@ public class OXContainerConverter {
         addProperty(object, "NICKNAME", getList(contact.getNickname(), ','));
         // PHOTO
         if (contact.getImage1() != null) {
+            final byte[] imageData = contact.getImage1();
             // First try as URI
             try {
-                addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(contact.getImage1(), CHARSET_ISO_8859_1)));
+                addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, CHARSET_ISO_8859_1)));
             } catch (final UnsupportedEncodingException e2) {
                 LOG.error(e2);
                 throw new ConverterException(e2);
@@ -1686,8 +1691,11 @@ public class OXContainerConverter {
                     }
                     type.addValue(new ParameterValue(param));
                 }
-                final byte[] encodedImg = Base64.encodeBase64(contact.getImage1(), true);
-                addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, encodedImg).addParameter(type);
+                /*
+                 * Add image data as it is since ValueDefinition#write(FoldingWriter fw, Property property)) applies proper encoding
+                 * dependent on "ENCODING" parameter
+                 */
+                addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, imageData).addParameter(type);
             }
         }
         String s = null;
@@ -2117,5 +2125,16 @@ public class OXContainerConverter {
 
     private static String getMimeType(final String filename) {
         return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+    }
+
+    private static boolean isValidImage(final byte[] data) {
+        java.awt.image.BufferedImage bimg = null;
+        try {
+
+            bimg = javax.imageio.ImageIO.read(new com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream(data));
+        } catch (final Exception e) {
+            return false;
+        }
+        return (bimg != null);
     }
 }

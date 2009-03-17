@@ -69,6 +69,12 @@ public class URIValueDefinition extends ValueDefinition {
 
     @Override
     public Object createValue(final StringScanner s, final Property property) throws IOException {
+
+        if (s.length() == 0) {
+            // Return null on empty URL
+            return null;
+        }
+
         final String value = s.regex(URIPattern);
         if (value == null) {
             throw new VersitException(s, "URI expected");
