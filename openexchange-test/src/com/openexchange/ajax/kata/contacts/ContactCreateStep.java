@@ -109,5 +109,9 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
     public void forgetIdentity(ContactObject entry) {
         inserted = false;
     }
+    
+    public Class<ContactObject> getType() {
+        return ContactObject.class;
+    }
 
 }

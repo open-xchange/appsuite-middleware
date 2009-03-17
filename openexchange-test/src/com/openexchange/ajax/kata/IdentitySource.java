@@ -59,8 +59,9 @@ package com.openexchange.ajax.kata;
  */
 public interface IdentitySource<T> {
 
-    void assumeIdentity(T entry);
-    void rememberIdentityValues(T entry);
-    void forgetIdentity(T entry);
+    public void assumeIdentity(T entry);
+    public void rememberIdentityValues(T entry);
+    public void forgetIdentity(T entry);
+    public Class<T> getType();
     
 }

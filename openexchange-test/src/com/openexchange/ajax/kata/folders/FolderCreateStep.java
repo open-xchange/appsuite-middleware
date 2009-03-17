@@ -81,14 +81,10 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new FolderTestManager(client);
-        
-        int folderId = client.getValues().getPrivateInfostoreFolder();
-        entry.setParentFolderID(folderId);
-        
+             
         InsertRequest insertRequest = new InsertRequest(entry, false);
         CommonInsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillObject(entry);
-        manager.insertFolderOnServer(entry);
         inserted = !insertResponse.hasError();
         checkError(insertResponse);        
     }
@@ -105,6 +101,10 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
 
     public void forgetIdentity(FolderObject entry) {
         inserted = false;
+    }
+    
+    public Class<FolderObject> getType() {
+        return FolderObject.class;
     }
 
 }

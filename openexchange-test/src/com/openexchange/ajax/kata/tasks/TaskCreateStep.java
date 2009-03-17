@@ -119,9 +119,6 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         this.client = client;
         this.manager = new TaskTestManager(client);
         
-        int folderId = client.getValues().getPrivateTaskFolder();
-        entry.setParentFolderID(folderId);
-
         InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
         InsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillTask(entry);
@@ -129,4 +126,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         checkError(insertResponse);
     }
 
+    public Class<Task> getType() {
+        return Task.class;
+    }
 }

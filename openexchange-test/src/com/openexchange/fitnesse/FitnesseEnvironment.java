@@ -13,6 +13,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.fitnesse.environment.CleanupHandler;
 import com.openexchange.fitnesse.environment.SymbolHandler;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -35,7 +36,7 @@ public class FitnesseEnvironment {
         cleanup = new CleanupHandler();
         
         try {
-            System.setProperty("test.propfile", "/Users/development/workspace/openexchange-test/conf/test.properties");
+            System.setProperty("test.propfile", "/Users/fla/Documents/workspace/openexchange-test/conf/test.properties"); //TODO: move to setup
             AJAXConfig.init();
         } catch (ConfigurationException e) {
             // TODO Auto-generated catch block
@@ -80,7 +81,11 @@ public class FitnesseEnvironment {
         cleanup.add(step);
     }
     
-    public void registerSymbol(String symbolName, IdentitySource symbolObject){
+    public void registerSymbol(String symbolName, IdentitySource symbolObject) throws FitnesseException{
+        IdentitySource oldSymbol = symbols.get(symbolName);
+        if(oldSymbol != null && oldSymbol.getType() != symbolObject.getType()) {
+            throw new FitnesseException("Can not override symbol "+symbolName+" of type "+oldSymbol.getType().getName()+" with type "+symbolObject.getType().getName());
+        }
         symbols.add(symbolName, symbolObject);
     }
     

@@ -47,69 +47,61 @@
  *
  */
 
-package com.openexchange.fitnesse;
+package com.openexchange.fitnesse.tasks;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.List;
-import org.junit.ComparisonFailure;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.kata.NeedExistingStep;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.fitnesse.wrappers.FitnesseResult;
+import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.AbstractTableTable;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.test.fixtures.Fixtures;
+import com.openexchange.test.fixtures.TaskFixtureFactory;
+import com.openexchange.tools.servlet.AjaxException;
+
 
 /**
- * {@link AbstractStepFixture}
- * 
+ * {@link AbstractTaskFixture}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public abstract class AbstractStepFixture extends AbstractTableTable {
+public abstract class AbstractTaskFixture extends AbstractStepFixture {
 
-    /**
-     * Initializes a new {@link AbstractStepFixture}.
-     */
-    public AbstractStepFixture() {
-        super();
-        environment = FitnesseEnvironment.getInstance();
-    }
-
-    protected abstract Step createStep(FixtureDataWrapper data) throws Exception;
-
+    
     @Override
-    public List doTable() throws Exception {
-
-        Step step = createStep(data);
+    protected Step createStep(FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException {
+        String fixtureName = data.getFixtureName();
+        Task task = createTask(fixtureName, data);
         
-        if (NeedExistingStep.class.isInstance(step)) {
-            IdentitySource identitySource = environment.getSymbol(data.getFixtureName());
-            ((NeedExistingStep) step).setIdentitySource(identitySource);
-        }
-        
-        FitnesseResult returnValues = new FitnesseResult(data, FitnesseResult.PASS);
-        try {
-            step.perform(environment.getClientForUser1());
-        } catch (ComparisonFailure failure) {
-            int pos = findFailedFieldPosition(failure.getExpected());
-            returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());
-        }
-
-        environment.registerStep(step);
-
-        if (IdentitySource.class.isInstance(step)) {
-            environment.registerSymbol(data.getFixtureName(), (IdentitySource) step);
-        }
-
-        return returnValues.toResult();
+        Step step = createStep(task, fixtureName, data.getExpectedError());
+        return step;
     }
-
-    public int findFailedFieldPosition(String expectedValue) {
-        for (int i = 0; i < data.size(); i++) {
-            if (expectedValue.equals(data.get(i)))
-                return i;
-        }
-        throw new IllegalStateException("Could not find the broken field in the list of fields. This should not happen.");
-
+    
+    
+    /**
+     * Creates a task via TaskFixtureFactory
+     * @throws JSONException 
+     * @throws SAXException 
+     * @throws IOException 
+     * @throws AjaxException 
+     * @throws FitnesseException 
+     */
+    public Task createTask(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException{
+        TaskFixtureFactory taskFixtureFactory = new TaskFixtureFactory(null, null);
+        Fixtures<Task> fixtures = taskFixtureFactory.createFixture(fixtureName, data.asFixtureMap("task"));
+        Fixture<Task> entry = fixtures.getEntry("task");
+        int folderId = getClient().getValues().getPrivateTaskFolder();
+        return (Task) addFolder(entry.getEntry(), data, folderId);
     }
+    
 
+    protected abstract Step createStep(Task task, String fixtureName, String expectedError);
 }

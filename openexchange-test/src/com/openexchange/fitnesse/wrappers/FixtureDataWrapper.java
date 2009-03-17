@@ -25,6 +25,10 @@ public class FixtureDataWrapper {
     public static final String FIXTURE_NAME = "fixturename";
 
     public static final String EXPECTED_ERROR = "expectedError";
+    
+    public static final String FOLDER = "folder";
+
+    public static final String PARENT = "parent";
 
     public static final int TYPE_ONLY_NAME = 1;
     public static final int TYPE_KEYS_AND_VALUES = 2;
@@ -39,6 +43,8 @@ public class FixtureDataWrapper {
     private String fixtureName = null;
 
     private String expectedError = null;
+
+    private String folder;
 
     
     public FixtureDataWrapper(List<List<String>> table) {
@@ -108,6 +114,17 @@ public class FixtureDataWrapper {
      */
     public String getExpectedError() {
         return expectedError;
+    }
+    
+    public String getFolderExpression() {
+        if(folder != null) {
+            return folder;
+        }
+        folder = asMap().get(FOLDER);
+        if(folder == null) {
+            folder = asMap().get(PARENT);
+        }
+        return folder;
     }
 
     /**

@@ -47,15 +47,33 @@
  *
  */
 
-package com.openexchange.test.fixtures;
+package com.openexchange.fitnesse.exceptions;
 
 
 /**
- * {@link FolderLookup}
+ * {@link FitnesseException}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface FolderLookup {
+public class FitnesseException extends Exception {
+
+    private static final long serialVersionUID = -1647176934587932760L;
+
+    public FitnesseException() {
+        super();
+    }
+
+    public FitnesseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public FitnesseException(String message) {
+        super(message);
+    }
+
+    public FitnesseException(Throwable cause) {
+        super(cause);
+    }
 
 }

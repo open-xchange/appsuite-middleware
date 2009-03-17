@@ -47,69 +47,24 @@
  *
  */
 
-package com.openexchange.fitnesse;
+package com.openexchange.fitnesse.folders;
 
-import java.util.Collections;
-import java.util.List;
-import org.junit.ComparisonFailure;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.fitnesse.wrappers.FitnesseResult;
-import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
-import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.ajax.kata.folders.FolderDeleteStep;
+import com.openexchange.groupware.container.FolderObject;
+
 
 /**
- * {@link AbstractStepFixture}
- * 
+ * {@link DeleteFolder}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public abstract class AbstractStepFixture extends AbstractTableTable {
-
-    /**
-     * Initializes a new {@link AbstractStepFixture}.
-     */
-    public AbstractStepFixture() {
-        super();
-        environment = FitnesseEnvironment.getInstance();
-    }
-
-    protected abstract Step createStep(FixtureDataWrapper data) throws Exception;
+public class DeleteFolder extends AbstractFolderFixture {
 
     @Override
-    public List doTable() throws Exception {
-
-        Step step = createStep(data);
-        
-        if (NeedExistingStep.class.isInstance(step)) {
-            IdentitySource identitySource = environment.getSymbol(data.getFixtureName());
-            ((NeedExistingStep) step).setIdentitySource(identitySource);
-        }
-        
-        FitnesseResult returnValues = new FitnesseResult(data, FitnesseResult.PASS);
-        try {
-            step.perform(environment.getClientForUser1());
-        } catch (ComparisonFailure failure) {
-            int pos = findFailedFieldPosition(failure.getExpected());
-            returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());
-        }
-
-        environment.registerStep(step);
-
-        if (IdentitySource.class.isInstance(step)) {
-            environment.registerSymbol(data.getFixtureName(), (IdentitySource) step);
-        }
-
-        return returnValues.toResult();
-    }
-
-    public int findFailedFieldPosition(String expectedValue) {
-        for (int i = 0; i < data.size(); i++) {
-            if (expectedValue.equals(data.get(i)))
-                return i;
-        }
-        throw new IllegalStateException("Could not find the broken field in the list of fields. This should not happen.");
-
+    protected Step createStep(FolderObject folder, String fixtureName, String expectedError) {
+        return new FolderDeleteStep(folder, fixtureName, expectedError);
     }
 
 }

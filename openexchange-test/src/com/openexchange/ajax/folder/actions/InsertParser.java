@@ -75,10 +75,11 @@ class InsertParser extends CommonInsertParser {
     protected CommonInsertResponse createResponse(final Response response)
         throws JSONException {
         final CommonInsertResponse retval = instantiateResponse(response);
+        final int folderId = Integer.parseInt((String) retval.getData());
+        retval.setId(folderId);
+        
         if (isFailOnError()) {
-            final int folderId = Integer.parseInt((String) retval.getData());
             assertTrue("Problem while inserting folder.", folderId > 0);
-            retval.setId(folderId);
         }
         return retval;
     }

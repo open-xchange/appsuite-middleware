@@ -47,69 +47,56 @@
  *
  */
 
-package com.openexchange.fitnesse;
+package com.openexchange.fitnesse.folders;
 
-import java.util.Collections;
-import java.util.List;
-import org.junit.ComparisonFailure;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.fitnesse.wrappers.FitnesseResult;
+import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.test.fixtures.Fixtures;
+import com.openexchange.test.fixtures.FolderFixtureFactory;
+
 
 /**
- * {@link AbstractStepFixture}
- * 
+ * {@link AbstractFolderFixture}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public abstract class AbstractStepFixture extends AbstractTableTable {
+public abstract class AbstractFolderFixture extends AbstractStepFixture {
 
-    /**
-     * Initializes a new {@link AbstractStepFixture}.
+    /* (non-Javadoc)
+     * @see com.openexchange.fitnesse.AbstractStepFixture#createStep(com.openexchange.fitnesse.wrappers.FixtureDataWrapper)
      */
-    public AbstractStepFixture() {
-        super();
-        environment = FitnesseEnvironment.getInstance();
-    }
-
-    protected abstract Step createStep(FixtureDataWrapper data) throws Exception;
-
     @Override
-    public List doTable() throws Exception {
-
-        Step step = createStep(data);
+    protected Step createStep(FixtureDataWrapper data) throws Exception {
+        String fixtureName = data.getFixtureName();
+        FolderObject folder = createFolder(fixtureName, data);
         
-        if (NeedExistingStep.class.isInstance(step)) {
-            IdentitySource identitySource = environment.getSymbol(data.getFixtureName());
-            ((NeedExistingStep) step).setIdentitySource(identitySource);
+        Step step = createStep(folder, fixtureName, data.getExpectedError());
+        return step;
+    }
+    
+    /**
+     * @param fixtureName
+     * @param data
+     * @throws FitnesseException 
+     */
+    protected FolderObject createFolder(String fixtureName, FixtureDataWrapper data) throws FixtureException, FitnesseException {
+        FolderFixtureFactory factory = new FolderFixtureFactory(null);
+        Fixtures<FolderObject> fixtures = factory.createFixture(data.getFixtureName(), data.asFixtureMap("folder"));
+        Fixture<FolderObject> fixture = fixtures.getEntry("folder");
+        FolderObject folder = fixture.getEntry();
+        if(!folder.containsFolderName()) {
+            folder.setFolderName(data.getFixtureName());
         }
-        
-        FitnesseResult returnValues = new FitnesseResult(data, FitnesseResult.PASS);
-        try {
-            step.perform(environment.getClientForUser1());
-        } catch (ComparisonFailure failure) {
-            int pos = findFailedFieldPosition(failure.getExpected());
-            returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());
-        }
-
-        environment.registerStep(step);
-
-        if (IdentitySource.class.isInstance(step)) {
-            environment.registerSymbol(data.getFixtureName(), (IdentitySource) step);
-        }
-
-        return returnValues.toResult();
+        return (FolderObject) addFolder(folder, data, 0);
     }
 
-    public int findFailedFieldPosition(String expectedValue) {
-        for (int i = 0; i < data.size(); i++) {
-            if (expectedValue.equals(data.get(i)))
-                return i;
-        }
-        throw new IllegalStateException("Could not find the broken field in the list of fields. This should not happen.");
-
-    }
+    protected abstract Step createStep(FolderObject folder, String fixtureName, String expectedError) throws Exception;
 
 }

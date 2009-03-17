@@ -128,5 +128,9 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         inserted = false;
     }
     
+    public Class<AppointmentObject> getType() {
+        return AppointmentObject.class;
+    }
+    
  
 }

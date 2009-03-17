@@ -49,11 +49,19 @@
 
 package com.openexchange.fitnesse.appointments;
 
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.test.fixtures.AppointmentFixtureFactory;
+import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.test.fixtures.Fixtures;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -65,13 +73,26 @@ import com.openexchange.test.fixtures.FixtureException;
 public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
 
     @Override
-    protected Step createStep(FixtureDataWrapper data) throws FixtureException {
+    protected Step createStep(FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException {
         String fixtureName = data.getFixtureName();
         AppointmentObject appointment = createAppointment(fixtureName, data);
         
         Step step = createStep(appointment, fixtureName, data.getExpectedError());
         return step;
     }
+    
+    /**
+     * Creates an appointment via AppointmentFixtureFactory
+     * @throws FitnesseException 
+     */
+    public AppointmentObject createAppointment(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException{
+        AppointmentFixtureFactory appointmentFixtureFactory = new AppointmentFixtureFactory(null, null);
+        Fixtures<AppointmentObject> fixtures = appointmentFixtureFactory.createFixture(fixtureName, data.asFixtureMap("appointment"));
+        Fixture<AppointmentObject> entry = fixtures.getEntry("appointment");
+        int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        return (AppointmentObject) addFolder(entry.getEntry(), data, folderId);
+    }
+   
 
     protected abstract Step createStep(AppointmentObject appointment, String fixtureName, String expectedError);
 

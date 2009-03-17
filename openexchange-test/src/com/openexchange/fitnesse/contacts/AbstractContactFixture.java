@@ -50,11 +50,19 @@
 
 package com.openexchange.fitnesse.contacts;
 
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.test.fixtures.ContactFixtureFactory;
+import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.test.fixtures.Fixtures;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -64,12 +72,24 @@ import com.openexchange.test.fixtures.FixtureException;
 public abstract class AbstractContactFixture extends AbstractStepFixture{
 
     @Override
-    protected Step createStep(FixtureDataWrapper data) throws FixtureException {
+    protected Step createStep(FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException {
         String fixtureName = data.getFixtureName();
         ContactObject contact = createContact(fixtureName, data);
         
         Step step = createStep(contact, fixtureName, data.getExpectedError());
         return step;
+    }
+    
+    /**
+     * Creates a contact via ContactFixtureFactory
+     * @throws FitnesseException 
+     */
+    public ContactObject createContact(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException{
+        ContactFixtureFactory contactFixtureFactory = new ContactFixtureFactory(null);
+        Fixtures<ContactObject> fixtures = contactFixtureFactory.createFixture(fixtureName, data.asFixtureMap("contact"));
+        Fixture<ContactObject> entry = fixtures.getEntry("contact");
+        int folderId = getClient().getValues().getPrivateContactFolder();
+        return (ContactObject) addFolder(entry.getEntry(), data, folderId);
     }
 
     protected abstract Step createStep(ContactObject contact, String fixtureName, String expectedError);

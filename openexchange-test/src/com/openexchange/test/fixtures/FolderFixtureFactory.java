@@ -49,10 +49,11 @@
 
 package com.openexchange.test.fixtures;
 
+import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.fixtures.transformators.FolderModuleTransformator;
-import com.openexchange.test.fixtures.transformators.ParentFolderTransformator;
+import com.openexchange.test.fixtures.transformators.FolderTypeTransformator;
 
 /**
  * {@link FolderFixtureFactory}
@@ -61,22 +62,45 @@ import com.openexchange.test.fixtures.transformators.ParentFolderTransformator;
  */
 public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
 
-    private FolderLookup folderLookup;
+    private FixtureLoader fixtureLoader;
 
+    public FolderFixtureFactory(FixtureLoader fixtureLoader) {
+        this.fixtureLoader = fixtureLoader;
+    }
+    
     public Fixtures<FolderObject> createFixture(String fixtureName, Map<String, Map<String, String>> entries) {
-        return null;
+        return new FolderFixtures(entries, fixtureLoader );
     }
 
     private class FolderFixtures extends DefaultFixtures<FolderObject> {
 
-        public FolderFixtures(Class<FolderObject> klass, Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
-            super(klass, values, fixtureLoader);
+        private Map<String, Map<String, String>> entries;
+
+        private Map<String, Fixture<FolderObject>> folders = new HashMap<String, Fixture<FolderObject>>();
+
+        public FolderFixtures( Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+            super(FolderObject.class, values, fixtureLoader);
+            addTransformator(new FolderModuleTransformator(), "module");
+            addTransformator(new FolderTypeTransformator(), "type");
+            this.entries = values;
         }
 
         public Fixture<FolderObject> getEntry(String entryName) throws FixtureException {
-            addTransformator(new FolderModuleTransformator(), "module");
-            addTransformator(new ParentFolderTransformator(folderLookup), "parent_folder");
-            return null;
+            if (folders.containsKey(entryName)) {
+                return folders.get(entryName);
+            }
+            final Map<String, String> values = entries.get(entryName);
+            if (null == values) {
+                throw new FixtureException("Entry with name " + entryName + " not found");
+            }
+            final FolderObject folder = new FolderObject();
+            apply(folder, values);
+            final Fixture<FolderObject> fixture = new Fixture<FolderObject>(
+                folder,
+                values.keySet().toArray(new String[values.size()]),
+                values);
+            folders.put(entryName, fixture);
+            return fixture;
         }
 
     }

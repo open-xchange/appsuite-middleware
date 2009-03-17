@@ -1,9 +1,16 @@
 package com.openexchange.fitnesse;
 
+import java.io.IOException;
 import java.util.List;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
+import com.openexchange.fitnesse.folders.FolderResolver;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.fixtures.AppointmentFixtureFactory;
 import com.openexchange.test.fixtures.ContactFixtureFactory;
@@ -11,6 +18,7 @@ import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.Fixtures;
 import com.openexchange.test.fixtures.TaskFixtureFactory;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -45,33 +53,17 @@ public abstract class AbstractTableTable implements SlimTableTable{
      */
     public abstract List doTable() throws Exception ;
     
-    /**
-     * Creates a task via TaskFixtureFactory
-     */
-    public Task createTask(String fixtureName, FixtureDataWrapper data) throws FixtureException{
-        TaskFixtureFactory taskFixtureFactory = new TaskFixtureFactory(null, null);
-        Fixtures<Task> fixtures = taskFixtureFactory.createFixture(fixtureName, data.asFixtureMap("task"));
-        Fixture<Task> entry = fixtures.getEntry("task");
-        return entry.getEntry();
+    protected FolderChildObject addFolder(FolderChildObject entry, FixtureDataWrapper data, int defaultFolder) throws FitnesseException {
+        if(data.getFolderExpression()  == null) {
+            entry.setParentFolderID(defaultFolder);
+            return entry;
+        }
+        FolderResolver folderResolver = new FolderResolver(environment.getClientForUser1(), environment);
+        entry.setParentFolderID(folderResolver.getFolderId(data.getFolderExpression()));
+        return entry;
     }
     
-    /**
-     * Creates an appointment via AppointmentFixtureFactory
-     */
-    public AppointmentObject createAppointment(String fixtureName, FixtureDataWrapper data) throws FixtureException{
-        AppointmentFixtureFactory appointmentFixtureFactory = new AppointmentFixtureFactory(null, null);
-        Fixtures<AppointmentObject> fixtures = appointmentFixtureFactory.createFixture(fixtureName, data.asFixtureMap("appointment"));
-        Fixture<AppointmentObject> entry = fixtures.getEntry("appointment");
-        return entry.getEntry();
-    }
-    
-    /**
-     * Creates a contact via ContactFixtureFactory
-     */
-    public ContactObject createContact(String fixtureName, FixtureDataWrapper data) throws FixtureException{
-        ContactFixtureFactory contactFixtureFactory = new ContactFixtureFactory(null);
-        Fixtures<ContactObject> fixtures = contactFixtureFactory.createFixture(fixtureName, data.asFixtureMap("contact"));
-        Fixture<ContactObject> entry = fixtures.getEntry("contact");
-        return entry.getEntry();
+    protected AJAXClient getClient() {
+        return environment.getClientForUser1();
     }
 }

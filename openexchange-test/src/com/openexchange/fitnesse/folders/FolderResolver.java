@@ -47,37 +47,81 @@
  *
  */
 
-package com.openexchange.test.fixtures.transformators;
+package com.openexchange.fitnesse.folders;
 
-import com.openexchange.test.fixtures.FixtureException;
-import com.openexchange.test.fixtures.FolderLookup;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.folder.tree.FolderNode;
+import com.openexchange.ajax.folder.tree.RootNode;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.IdentitySource;
+import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
+import com.openexchange.groupware.container.FolderObject;
 
 
 /**
- * {@link ParentFolderTransformator}
+ * {@link FolderResolver}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ParentFolderTransformator implements Transformator {
+public class FolderResolver {
     
+    private AJAXClient client;
+    private FitnesseEnvironment environment;
+
+    public FolderResolver(AJAXClient client, FitnesseEnvironment environment) {
+        this.client = client;
+        this.environment = environment;
+    }
     
-    /**
-     * Initializes a new {@link ParentFolderTransformator}.
-     * @param folderLookup
-     */
-    public ParentFolderTransformator(FolderLookup folderLookup) {
-        // TODO Auto-generated constructor stub
-        super();
+    public int getFolderId(String folderExpression) throws FitnesseException {
+        int folderId = tryEnvironment(folderExpression);
+        if(folderId != -1) {
+            return folderId;
+        }
         
+        return tryServer(folderExpression);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.test.fixtures.transformators.Transformator#transform(java.lang.String)
+    private int tryServer(String folderExpression) throws FitnesseException {
+        String[] path = folderExpression.split("/");
+        path = eliminateEmptyElements(path);
+        FolderNode node = new RootNode(client).resolve(path);
+        if(node == null)
+            throw new FitnesseException("Could not resolve folder. Given expression was: " + folderExpression);
+        return node.getFolder().getObjectID();
+    }
+
+    /**
+     * @param folderExpression
+     * @return
      */
-    public Object transform(String value) throws FixtureException {
-        // TODO Auto-generated method stub
-        return null;
+    private int tryEnvironment(String folderExpression) {
+        IdentitySource identitySource = environment.getSymbol(folderExpression);
+        if(identitySource == null) {
+            return -1;
+        }
+        if(identitySource.getType() == FolderObject.class) {
+            FolderObject folderObject = new FolderObject();
+            identitySource.assumeIdentity(folderObject);
+            return folderObject.getObjectID();
+        }
+        return -1;
     }
 
+    private String[] eliminateEmptyElements(String[] path) {
+        List<String> newPath = new ArrayList<String>();
+        for(String pathElement : path) {
+            if(! isEmpty( pathElement )) {
+                newPath.add(pathElement);
+            }
+        }
+        return newPath.toArray(new String[newPath.size()]);
+    }
+
+    private boolean isEmpty(String pathElement) {
+        return pathElement.trim().equals("");
+    }
 }
