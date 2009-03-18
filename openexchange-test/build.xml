@@ -22,7 +22,7 @@
     <property name="src.common" value="common"/>
     <property name="src.iface" value="src"/>
     <property name="src.unit" value="unittests"/>
-    <property name="build" value="bin"/>
+    <property name="build" value="build"/>
     <property name="lib" value="lib"/>
 
     <!-- Runtime constants -->
