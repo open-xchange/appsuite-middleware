@@ -27,14 +27,18 @@ public class FitnesseResult {
     }
 
     public FitnesseResult(FixtureDataWrapper givenData, String defaultValue){
-        length = givenData.size();
+    }
+    
+    public FitnesseResult(int length, int height, String defaultValue) {
+        this.length = length;
         header = new LinkedList<String>();
-        values = new LinkedList<String>();
-        height = givenData.height();
+        this.values = new LinkedList<String>();
+        this.height = height;
         for (int i = 0; i < length; i++) {
             header.add(NEUTRAL);
             values.add(defaultValue);    
         }
+        
     }
     
     public List<List<String>> toResult(){

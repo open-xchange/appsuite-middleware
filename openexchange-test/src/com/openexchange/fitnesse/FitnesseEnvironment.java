@@ -1,6 +1,8 @@
 package com.openexchange.fitnesse;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -14,6 +16,7 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.fitnesse.environment.CleanupHandler;
 import com.openexchange.fitnesse.environment.SymbolHandler;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
+import com.openexchange.fitnesse.folders.PermissionDefinition;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -29,6 +32,7 @@ public class FitnesseEnvironment {
     private static FitnesseEnvironment instance;
     private SymbolHandler symbols;
     private CleanupHandler cleanup;
+    private Map<String, PermissionDefinition> permissionDefinitions = new HashMap<String, PermissionDefinition>();
 
     private FitnesseEnvironment() {
         super();
@@ -91,5 +95,16 @@ public class FitnesseEnvironment {
     
     public IdentitySource getSymbol(String symbolName){
         return symbols.get(symbolName);
+    }
+
+    /**
+     * @param permissions
+     */
+    public void registerPermissions(PermissionDefinition permissions) {
+        permissionDefinitions.put(permissions.getFixtureName(), permissions);
+    }
+    
+    public PermissionDefinition getPermissions(String permissionRef) {
+        return permissionDefinitions.get(permissionRef);
     }
 }

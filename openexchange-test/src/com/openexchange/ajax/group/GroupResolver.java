@@ -47,42 +47,36 @@
  *
  */
 
-package com.openexchange.fitnesse.folders;
+package com.openexchange.ajax.group;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.fitnesse.AbstractTableTable;
-import com.openexchange.fitnesse.FitnesseEnvironment;
-import com.openexchange.fitnesse.SlimTableTable;
-import com.openexchange.fitnesse.wrappers.FitnesseResult;
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.group.actions.SearchRequest;
+import com.openexchange.ajax.group.actions.SearchResponse;
+import com.openexchange.group.Group;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 
 /**
- * {@link DefinePermissions}
+ * {@link GroupResolver}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class DefinePermissions implements SlimTableTable {
+public class GroupResolver {
+    private AJAXClient client;
 
-    public List doTable(List<List<String>> table) throws Exception {
-        FitnesseEnvironment environment = FitnesseEnvironment.getInstance();
-        PermissionDefinition permissions = new PermissionDefinition(table, environment.getClientForUser1());
-        environment.registerPermissions(permissions);
-        return fillTable(table, FitnesseResult.NEUTRAL);
+    public GroupResolver(AJAXClient client) {
+        this.client = client;
     }
-
-    private List fillTable(List<List<String>> table, String value) {
-        List<List<String>> results = new ArrayList<List<String>>();
-        for(List<String> row : table) {
-            List<String> resultRow = new ArrayList<String>(row.size());
-            for(int i = 0, size = row.size(); i < size; i++) {
-                resultRow.add(value);
-            }
-            results.add(resultRow);
-        }
-        return results;
+    
+    public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+        SearchRequest req = new SearchRequest(pattern, false);
+        SearchResponse response = client.execute(req);
+        return response.getGroups();
     }
-
-
 }

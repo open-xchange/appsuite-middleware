@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertParser;
@@ -75,6 +76,9 @@ class InsertParser extends CommonInsertParser {
     protected CommonInsertResponse createResponse(final Response response)
         throws JSONException {
         final CommonInsertResponse retval = instantiateResponse(response);
+        if(JSONObject.NULL == retval.getData()) {
+            fail("Problem while inserting folder: "+ response.getErrorMessage());
+        }
         final int folderId = Integer.parseInt((String) retval.getData());
         retval.setId(folderId);
         

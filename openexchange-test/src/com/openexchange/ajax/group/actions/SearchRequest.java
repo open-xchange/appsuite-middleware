@@ -58,7 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SearchRequest extends AbstractGroupRequest {
+public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
 
     private final String pattern;
 

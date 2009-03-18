@@ -49,6 +49,7 @@
 
 package com.openexchange.fitnesse.folders;
 
+import java.util.Map;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.fitnesse.AbstractStepFixture;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
@@ -88,13 +89,32 @@ public abstract class AbstractFolderFixture extends AbstractStepFixture {
      */
     protected FolderObject createFolder(String fixtureName, FixtureDataWrapper data) throws FixtureException, FitnesseException {
         FolderFixtureFactory factory = new FolderFixtureFactory(null);
-        Fixtures<FolderObject> fixtures = factory.createFixture(data.getFixtureName(), data.asFixtureMap("folder"));
+        Map<String, Map<String, String>> fixtureMap = data.asFixtureMap("folder");
+        
+        String permissionRef = removePermissions(fixtureMap.get("folder"));
+        
+        Fixtures<FolderObject> fixtures = factory.createFixture(data.getFixtureName(), fixtureMap);
         Fixture<FolderObject> fixture = fixtures.getEntry("folder");
         FolderObject folder = fixture.getEntry();
         if(!folder.containsFolderName()) {
             folder.setFolderName(data.getFixtureName());
         }
+        
+        if(permissionRef != null) {
+            PermissionDefinition permissions = environment.getPermissions(permissionRef);
+            if(permissions == null) {
+                throw new FitnesseException("Can't find permission set: "+permissions);
+            }
+            folder.setPermissions(permissions.getPermissions());
+        }
         return (FolderObject) addFolder(folder, data, 0);
+    }
+
+    /**
+     * @param map
+     */
+    private String removePermissions(Map<String, String> map) {
+        return map.remove("permissions");
     }
 
     protected abstract Step createStep(FolderObject folder, String fixtureName, String expectedError) throws Exception;

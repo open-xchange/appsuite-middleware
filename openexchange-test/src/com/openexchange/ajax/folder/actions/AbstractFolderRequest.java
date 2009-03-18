@@ -52,7 +52,6 @@ package com.openexchange.ajax.folder.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.fields.FolderFields;
@@ -62,7 +61,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
@@ -88,24 +86,29 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
 
     protected JSONObject convert(final FolderObject folder) throws JSONException {
         final JSONObject jsonFolder = new JSONObject();
-        jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
+        if (folder.containsFolderName()) {
+            jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
+        }
         final JSONArray jsonPerms = new JSONArray();
         for (final OCLPermission perm : folder.getPermissions()) {
             final JSONObject jsonPermission = new JSONObject();
             jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
             jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
-            jsonPermission.put(FolderFields.BITS,
-                FolderTest.createPermissionBits(
-                    perm.getFolderPermission(),
-                    perm.getReadPermission(),
-                    perm.getWritePermission(),
-                    perm.getDeletePermission(),
-                    perm.isFolderAdmin()));
+            jsonPermission.put(FolderFields.BITS, FolderTest.createPermissionBits(
+                perm.getFolderPermission(),
+                perm.getReadPermission(),
+                perm.getWritePermission(),
+                perm.getDeletePermission(),
+                perm.isFolderAdmin()));
             jsonPerms.put(jsonPermission);
         }
         jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
-        jsonFolder.put(FolderFields.MODULE, convertModule(folder.getModule()));
-        jsonFolder.put(FolderFields.TYPE, folder.getType());
+        if (folder.containsModule()) {
+            jsonFolder.put(FolderFields.MODULE, convertModule(folder.getModule()));
+        }
+        if (folder.containsType()) {
+            jsonFolder.put(FolderFields.TYPE, folder.getType());
+        }
         return jsonFolder;
     }
 

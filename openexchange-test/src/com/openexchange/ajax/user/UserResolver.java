@@ -47,42 +47,42 @@
  *
  */
 
-package com.openexchange.fitnesse.folders;
+package com.openexchange.ajax.user;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.fitnesse.AbstractTableTable;
-import com.openexchange.fitnesse.FitnesseEnvironment;
-import com.openexchange.fitnesse.SlimTableTable;
-import com.openexchange.fitnesse.wrappers.FitnesseResult;
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.UserTest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.user.actions.SearchRequest;
+import com.openexchange.ajax.user.actions.SearchResponse;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link DefinePermissions}
+ * {@link UserResolver}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class DefinePermissions implements SlimTableTable {
+public class UserResolver {
+    private AJAXClient client;
 
-    public List doTable(List<List<String>> table) throws Exception {
-        FitnesseEnvironment environment = FitnesseEnvironment.getInstance();
-        PermissionDefinition permissions = new PermissionDefinition(table, environment.getClientForUser1());
-        environment.registerPermissions(permissions);
-        return fillTable(table, FitnesseResult.NEUTRAL);
+    public UserResolver(AJAXClient client) {
+        this.client = client;
     }
-
-    private List fillTable(List<List<String>> table, String value) {
-        List<List<String>> results = new ArrayList<List<String>>();
-        for(List<String> row : table) {
-            List<String> resultRow = new ArrayList<String>(row.size());
-            for(int i = 0, size = row.size(); i < size; i++) {
-                resultRow.add(value);
-            }
-            results.add(resultRow);
-        }
-        return results;
+    
+    public User[] resolveUser(String searchPattern) throws AjaxException, IOException, SAXException, JSONException {
+        final ContactSearchObject search = new ContactSearchObject();
+        search.setPattern(searchPattern);
+        search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
+        final SearchResponse response = client.execute(request);
+        return response.getUser();
     }
-
-
 }

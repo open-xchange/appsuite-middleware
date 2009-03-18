@@ -74,7 +74,9 @@ public class CreateFolder extends AbstractFolderFixture{
      */
     @Override
     protected Step createStep(FolderObject folder, String fixtureName, String expectedError) throws AjaxException, IOException, SAXException, JSONException {
-        addDefaultPermission(folder);
+        if(!folder.containsPermissions()) {
+            addDefaultPermission(folder);
+        }
         return new FolderCreateStep(folder, fixtureName, expectedError);
     }
 
