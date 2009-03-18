@@ -1199,15 +1199,20 @@ public class OXFolderTools {
             "AND (ot.module = ?)",
             OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
             "ORDER BY ot.fuid");
-        Connection readCon = readConArg;
-        boolean closeReadCon = false;
+        final Connection readCon;
+        final boolean closeReadCon = (readConArg == null);
+        try {
+            if (closeReadCon) {
+                readCon = DBPool.pickup(ctx);
+            } else {
+                readCon = readConArg;
+            }
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
             stmt = readCon.prepareStatement(sqlSelectStr);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
@@ -1218,9 +1223,6 @@ public class OXFolderTools {
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
-        } catch (final DBPoolingException e) {
-            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
-            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final Throwable t) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
