@@ -1,3 +1,7 @@
+* 2009-03-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #13406: Ensured applying receiver's locale to action replacement for proper translation
+
 * 2009-03-17 - thorben.betten@open-xchange.com
 
  - Bugfix #13362: Checking requested columns for last-modified field prior to adding it

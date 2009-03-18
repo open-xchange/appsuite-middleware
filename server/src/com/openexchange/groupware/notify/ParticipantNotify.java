@@ -629,6 +629,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         final Template createTemplate = state.getTemplate();
         final StringHelper strings = new StringHelper(locale);
         b.setLength(0);
+        actionRepl.setLocale(locale);
         msg.title = b.append(actionRepl.getReplacement()).append(": ").append(title).toString();
         b.setLength(0);
         if (isUpdate) {
