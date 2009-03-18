@@ -100,6 +100,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
+import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
@@ -795,6 +796,8 @@ public class OXContainerConverter {
                         stype = "image/" + stype;
                     }
                     contactContainer.setImageContentType(stype);
+                } else if (propertyValue instanceof byte[]) {
+                    contactContainer.setImageContentType(ImageTypeDetector.getMimeType((byte[]) propertyValue));
                 }
             } else {
                 if (uriParam.getValueCount() == 1) {
@@ -1109,7 +1112,13 @@ public class OXContainerConverter {
         }
         if (bytes != null) {
             contactContainer.setImage1(bytes);
-            contactContainer.setImageContentType(mimeType == null ? getMimeType(url.toString()) : mimeType);
+            if (mimeType == null) {
+                mimeType = ImageTypeDetector.getMimeType(bytes);
+                if ("application/octet-stream".equals(mimeType)) {
+                    mimeType = getMimeType(url.toString());
+                }
+            }
+            contactContainer.setImageContentType(mimeType);
         }
     }
 
