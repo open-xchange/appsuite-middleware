@@ -472,8 +472,6 @@ public class ContactRequest {
             userIdArray[a] = jData.getInt(a);
         }
 
-        final int[] internalColumns = checkLastModified(columns);
-
         Context ctx = null;
         try {
             ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
@@ -488,7 +486,7 @@ public class ContactRequest {
             for (int a = 0; a < userIdArray.length; a++) {
                 final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, internalColumns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
