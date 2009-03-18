@@ -53,11 +53,9 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.AbstractOXException.Parsing;
 import com.openexchange.groupware.container.DataObject;
@@ -279,7 +277,7 @@ public abstract class DataParser {
 
     public static int checkInt(final JSONObject jsonObj, final String name) throws OXJSONException, JSONException, AjaxException {
         final String tmp = checkString(jsonObj, name);
-        if (tmp != null && tmp.length() == 0) {
+        if (tmp == null || tmp.length() == 0) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
         }
 
@@ -292,7 +290,7 @@ public abstract class DataParser {
 
     public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
         final String tmp = jsonObj.getString(name);
-        if (tmp != null && tmp.length() == 0) {
+        if (tmp == null || tmp.length() == 0) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
         }
         return Boolean.parseBoolean(tmp);
@@ -300,7 +298,7 @@ public abstract class DataParser {
 
     public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
         final String tmp = jsonObj.getString(name);
-        if (tmp != null && tmp.length() == 0) {
+        if (tmp == null || tmp.length() == 0) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
         }
 
