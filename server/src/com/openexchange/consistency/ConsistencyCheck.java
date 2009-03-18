@@ -54,13 +54,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -411,8 +409,12 @@ public class ConsistencyCheck {
         }
 
         private void print(final Map<Integer, List<String>> result) {
-            for(final int ctxId : result.keySet()) {
-                final List<String> brokenFiles = result.get(ctxId);
+            if (null == result) {
+                return;
+            }
+            for(final Map.Entry<Integer, List<String>> entry : result.entrySet()) {
+                final int ctxId = entry.getKey().intValue();
+                final List<String> brokenFiles = entry.getValue();
                 System.out.println("I found "+brokenFiles.size()+" problems in context "+ctxId);
                 for (final String brokenFile : brokenFiles) {
                     System.out.println("\t"+brokenFile);
