@@ -59,118 +59,89 @@ public final class ImageTypeDetector {
     /**
      * 42 4d
      */
-    private static final byte[] PREFIX_BITMAP = { (byte) Integer.parseInt("42", 16), (byte) Integer.parseInt("4D", 16) };
+    private static final byte[] PREFIX_BITMAP = { (byte) 0x42, (byte) 0x4D };
 
     /**
      * 53 49 4d 50 4c 45
      */
-    private static final byte[] PREFIX_FITS = {
-        (byte) Integer.parseInt("53", 16), (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("4D", 16),
-        (byte) Integer.parseInt("50", 16), (byte) Integer.parseInt("4C", 16), (byte) Integer.parseInt("45", 16) };
+    private static final byte[] PREFIX_FITS = { (byte) 0x53, (byte) 0x49, (byte) 0x4D, (byte) 0x50, (byte) 0x4C, (byte) 0x45 };
 
     /**
      * 47 49 46 38
      */
-    private static final byte[] PREFIX_GIF = {
-        (byte) Integer.parseInt("47", 16), (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("46", 16),
-        (byte) Integer.parseInt("38", 16) };
+    private static final byte[] PREFIX_GIF = { (byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38 };
 
     /**
      * 47 4b 53 4d
      */
-    private static final byte[] PREFIX_GKSM = {
-        (byte) Integer.parseInt("47", 16), (byte) Integer.parseInt("4B", 16), (byte) Integer.parseInt("53", 16),
-        (byte) Integer.parseInt("4D", 16) };
+    private static final byte[] PREFIX_GKSM = { (byte) 0x47, (byte) 0x4B, (byte) 0x53, (byte) 0x4D };
 
     /**
      * 01 da
      */
-    private static final byte[] PREFIX_IRIS = { (byte) Integer.parseInt("01", 16), (byte) Integer.parseInt("DA", 16) };
+    private static final byte[] PREFIX_IRIS = { (byte) 0x01, (byte) 0xDA };
 
     /**
      * f1 00 40 bb
      */
-    private static final byte[] PREFIX_ITC = {
-        (byte) Integer.parseInt("F1", 16), (byte) Integer.parseInt("00", 16), (byte) Integer.parseInt("40", 16),
-        (byte) Integer.parseInt("BB", 16) };
+    private static final byte[] PREFIX_ITC = { (byte) 0xF1, (byte) 0x00, (byte) 0x40, (byte) 0xBB };
 
     /**
      * ff d8 ff e0
      */
-    private static final byte[] PREFIX_JPEG = {
-        (byte) Integer.parseInt("FF", 16), (byte) Integer.parseInt("D8", 16), (byte) Integer.parseInt("FF", 16),
-        (byte) Integer.parseInt("E0", 16) };
+    private static final byte[] PREFIX_JPEG = { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
 
     /**
      * 49 49 4e 31
      */
-    private static final byte[] PREFIX_NIFF = {
-        (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("4E", 16),
-        (byte) Integer.parseInt("31", 16) };
+    private static final byte[] PREFIX_NIFF = { (byte) 0x49, (byte) 0x49, (byte) 0x4E, (byte) 0x31 };
 
     /**
      * 56 49 45 57
      */
-    private static final byte[] PREFIX_PM = {
-        (byte) Integer.parseInt("56", 16), (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("45", 16),
-        (byte) Integer.parseInt("57", 16) };
+    private static final byte[] PREFIX_PM = { (byte) 0x56, (byte) 0x49, (byte) 0x45, (byte) 0x57 };
 
     /**
      * 89 50 4e 47
      */
-    private static final byte[] PREFIX_PNG = {
-        (byte) Integer.parseInt("89", 16), (byte) Integer.parseInt("50", 16), (byte) Integer.parseInt("4E", 16),
-        (byte) Integer.parseInt("47", 16) };
+    private static final byte[] PREFIX_PNG = { (byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47 };
 
     /**
      * 25 21
      */
-    private static final byte[] PREFIX_POSTSCRIPT = { (byte) Integer.parseInt("25", 16), (byte) Integer.parseInt("21", 16) };
+    private static final byte[] PREFIX_POSTSCRIPT = { (byte) 0x25, (byte) 0x21 };
 
     /**
      * 59 a6 6a 95
      */
-    private static final byte[] PREFIX_SUN_RASTERFILE = {
-        (byte) Integer.parseInt("59", 16), (byte) Integer.parseInt("A6", 16), (byte) Integer.parseInt("6A", 16),
-        (byte) Integer.parseInt("95", 16) };
+    private static final byte[] PREFIX_SUN_RASTERFILE = { (byte) 0x59, (byte) 0xA6, (byte) 0x6A, (byte) 0x95 };
 
     /**
      * 4d 4d 00 2a
      */
-    private static final byte[] PREFIX_TIFF_BIGENDIAN = {
-        (byte) Integer.parseInt("4D", 16), (byte) Integer.parseInt("4D", 16), (byte) Integer.parseInt("00", 16),
-        (byte) Integer.parseInt("2A", 16) };
+    private static final byte[] PREFIX_TIFF_BIGENDIAN = { (byte) 0x4D, (byte) 0x4D, (byte) 0x00, (byte) 0x2A };
 
     /**
      * 49 49 2a 00
      */
-    private static final byte[] PREFIX_TIFF_LITTLEENDIAN = {
-        (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("49", 16), (byte) Integer.parseInt("2A", 16),
-        (byte) Integer.parseInt("00", 16) };
+    private static final byte[] PREFIX_TIFF_LITTLEENDIAN = { (byte) 0x49, (byte) 0x49, (byte) 0x2A, (byte) 0x00 };
 
     /**
      * 67 69 6d 70 20 78 63 66 20 76
      */
     private static final byte[] PREFIX_XCF_GIMP = {
-        (byte) Integer.parseInt("67", 16), (byte) Integer.parseInt("69", 16), (byte) Integer.parseInt("6D", 16),
-        (byte) Integer.parseInt("70", 16), (byte) Integer.parseInt("20", 16), (byte) Integer.parseInt("78", 16),
-        (byte) Integer.parseInt("63", 16), (byte) Integer.parseInt("66", 16), (byte) Integer.parseInt("20", 16),
-        (byte) Integer.parseInt("76", 16) };
+        (byte) 0x67, (byte) 0x69, (byte) 0x6D, (byte) 0x70, (byte) 0x20, (byte) 0x78, (byte) 0x63, (byte) 0x66, (byte) 0x20, (byte) 0x76 };
 
     /**
      * 23 46 49 47
      */
-    private static final byte[] PREFIX_XFIG = {
-        (byte) Integer.parseInt("23", 16), (byte) Integer.parseInt("46", 16), (byte) Integer.parseInt("49", 16),
-        (byte) Integer.parseInt("47", 16) };
+    private static final byte[] PREFIX_XFIG = { (byte) 0x23, (byte) 0x46, (byte) 0x49, (byte) 0x47 };
 
     /**
      * 2f 2a 20 58 50 4d 20 2a 2f
      */
     private static final byte[] PREFIX_XPM = {
-        (byte) Integer.parseInt("2F", 16), (byte) Integer.parseInt("2A", 16), (byte) Integer.parseInt("20", 16),
-        (byte) Integer.parseInt("58", 16), (byte) Integer.parseInt("50", 16), (byte) Integer.parseInt("4D", 16),
-        (byte) Integer.parseInt("20", 16), (byte) Integer.parseInt("2A", 16), (byte) Integer.parseInt("2F", 16) };
+        (byte) 0x2F, (byte) 0x2A, (byte) 0x20, (byte) 0x58, (byte) 0x50, (byte) 0x4D, (byte) 0x20, (byte) 0x2A, (byte) 0x2F };
 
     /**
      * Initializes a new {@link ImageTypeDetector}.
