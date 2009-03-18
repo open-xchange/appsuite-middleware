@@ -176,7 +176,7 @@ public class RecurrenceValueDefinition extends ValueDefinition {
                             }
                             week = sign * s.parseNumber();
                         }
-                        recur.ByDay.add(recur.new Weekday(week, parseWeekday(s)));
+                        recur.ByDay.add(new Weekday(week, parseWeekday(s)));
                         if (s.peek != ',') {
                             break;
                         }

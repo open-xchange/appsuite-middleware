@@ -60,6 +60,7 @@ import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.valuedefinitions.rfc2445.DateOrDateTimeValueDefinition;
 import com.openexchange.tools.versit.values.DateTimeValue;
 import com.openexchange.tools.versit.values.RecurrenceValue;
+import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
 
 public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 
@@ -92,7 +93,7 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
             recur.Interval = ss.parseNumber();
             ss.skipWS();
             while (ss.peek >= 'A' && ss.peek <= 'Z') {
-                recur.ByDay.add(recur.new Weekday(0, parseWeekday(ss)));
+                recur.ByDay.add(new Weekday(0, parseWeekday(ss)));
                 ss.skipWS();
             }
             break;
@@ -113,7 +114,7 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
                         if (weekNo == 0) {
                             throw new VersitException(ss, "Invalid recurrence");
                         }
-                        recur.ByDay.add(recur.new Weekday(weekNo, parseWeekday(ss)));
+                        recur.ByDay.add(new Weekday(weekNo, parseWeekday(ss)));
                     }
                     ss.skipWS();
                     week = ss.regex(WeekNo);

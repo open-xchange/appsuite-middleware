@@ -109,6 +109,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.values.DateTimeValue;
 import com.openexchange.tools.versit.values.DurationValue;
 import com.openexchange.tools.versit.values.RecurrenceValue;
+import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
 
 /**
  * This class transforms VersitObjects to OX Contacts, Appointments and Tasks and back. If you want to translate more fields used in ICAL or
@@ -2078,7 +2079,7 @@ public class OXContainerConverter {
                 } else {
                     for (int i = 0; i < 7; i++) {
                         if ((mdays & (1 << i)) != 0) {
-                            recur.ByDay.add(recur.new Weekday(monthDay, Calendar.SUNDAY + i));
+                            recur.ByDay.add(new Weekday(monthDay, Calendar.SUNDAY + i));
                         }
                     }
                 }
@@ -2087,7 +2088,7 @@ public class OXContainerConverter {
                 final int days = oxobject.getDays();
                 for (int i = 0; i < 7; i++) {
                     if ((days & (1 << i)) != 0) {
-                        recur.ByDay.add(recur.new Weekday(0, Calendar.SUNDAY + i));
+                        recur.ByDay.add(new Weekday(0, Calendar.SUNDAY + i));
                     }
                 }
             }
