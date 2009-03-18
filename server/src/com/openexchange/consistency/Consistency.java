@@ -58,10 +58,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -146,7 +144,7 @@ public abstract class Consistency implements ConsistencyMBean {
         for(final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
             checkOneContext(ctx,recorder,recorder,doNothing,getDatabase(),getAttachments(), getFileStorage(ctx));
-            retval.put(ctx.getContextId(), recorder.getProblems());
+            retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
     }
@@ -157,7 +155,7 @@ public abstract class Consistency implements ConsistencyMBean {
         for(final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
             checkOneContext(ctx,doNothing,doNothing,recorder,getDatabase(),getAttachments(), getFileStorage(ctx));
-            retval.put(ctx.getContextId(), recorder.getProblems());
+            retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
     }
@@ -314,9 +312,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
 
     private static final class ResolverPolicy {
-        private final ProblemSolver dbsolver;
-        private final ProblemSolver attachmentsolver;
-        private final ProblemSolver filesolver;
+        final ProblemSolver dbsolver;
+        final ProblemSolver attachmentsolver;
+        final ProblemSolver filesolver;
 
         public ResolverPolicy(final ProblemSolver dbsolver, final ProblemSolver attachmentsolver, final ProblemSolver filesolver) {
             this.dbsolver = dbsolver;
@@ -334,26 +332,26 @@ public abstract class Consistency implements ConsistencyMBean {
                 final String[] tuple = option.split("\\s*:\\s*");
                 final String condition = tuple[0];
                 final String action = tuple[1];
-                if(condition.equals("missing_file_for_infoitem")) {
-                    if(action.equals("create_dummy")) {
+                if("missing_file_for_infoitem".equals(condition)) {
+                    if("create_dummy".equals(action)) {
                         dbsolver = new CreateDummyFileForInfoitem(database, stor);
-                    } else if (action.equals("delete")) {
+                    } else if ("delete".equals(action)) {
                         dbsolver = new DeleteInfoitem(database);
                     } else {
                         dbsolver = new DoNothingSolver();
                     }
-                } else if (condition.equals("missing_file_for_attachment")) {
-                    if(action.equals("create_dummy")) {
+                } else if ("missing_file_for_attachment".equals(condition)) {
+                    if("create_dummy".equals(action)) {
                        attachmentsolver = new CreateDummyFileForAttachment(attach,stor);
-                    } else if (action.equals("delete")) {
+                    } else if ("delete".equals(action)) {
                        attachmentsolver = new DeleteAttachment(attach);
                     } else {
                         attachmentsolver = new DoNothingSolver();
                     }
-                } else if (condition.equals("missing_entry_for_file")) {
-                    if(action.equals("create_admin_infoitem")) {
+                } else if ("missing_entry_for_file".equals(condition)) {
+                    if("create_admin_infoitem".equals(action)) {
                        filesolver = new CreateInfoitem(database,stor,consistency);
-                    } else if (action.equals("delete")) {
+                    } else if ("delete".equals(action)) {
                        filesolver = new RemoveFile(stor);
                     } else {
                        filesolver = new DoNothingSolver();
@@ -366,7 +364,6 @@ public abstract class Consistency implements ConsistencyMBean {
 
     }
 
-
     private static interface ProblemSolver {
         public void solve(Context ctx, Set<String> problems) throws OXException ;
 
@@ -374,6 +371,10 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class DoNothingSolver implements ProblemSolver {
+
+        public DoNothingSolver() {
+            super();
+        }
 
         public void solve(final Context ctx, final Set<String> problems) throws OXException {
             // Ignore
@@ -385,6 +386,10 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class RecordSolver implements ProblemSolver {
+
+        public RecordSolver() {
+            super();
+        }
 
         private final List<String> memory = new ArrayList<String>();
 
@@ -423,6 +428,9 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
+
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForInfoitem.class);
+
         private final DatabaseImpl database;
 
         public CreateDummyFileForInfoitem(final DatabaseImpl database, final FileStorage storage) {
@@ -443,26 +451,26 @@ public abstract class Consistency implements ConsistencyMBean {
                             identifier, "\nCaution! The file has changed",
                             "text/plain", ctx);
                     database.commit();
-                    if (changed == 1 && LOG.isInfoEnabled()) {
-                        LOG.info("Modified entry for identifier " + old_identifier +
+                    if (changed == 1 && LOG1.isInfoEnabled()) {
+                        LOG1.info("Modified entry for identifier " + old_identifier +
                                 " in context " + ctx.getContextId() + " to new " +
                                 "dummy identifier " + identifier);
                     }
                 } catch (final FileStorageException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                 } catch (final OXException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                     try {
                         database.rollback();
                         return;
                     } catch (final TransactionException e1) {
-                        LOG.debug("", e1);
+                        LOG1.debug("", e1);
                     }
                 } finally {
                     try {
                         database.finish();
                     } catch (final TransactionException e) {
-                        LOG.debug("", e);
+                        LOG1.debug("", e);
                     }
                 }
             }
@@ -474,6 +482,9 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
+
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForAttachment.class);
+
         private final AttachmentBase attachments;
 
         public CreateDummyFileForAttachment(final AttachmentBase attachments, final FileStorage storage) {
@@ -498,33 +509,33 @@ public abstract class Consistency implements ConsistencyMBean {
                     final int changed = attachments.modifyAttachment(old_identifier, identifier,
                             "\nCaution! The file has changed", "text/plain", ctx);
                     attachments.commit();
-                    if (changed == 1 && LOG.isInfoEnabled()) {
-                        LOG.info("Created dummy entry for: " + old_identifier +
+                    if (changed == 1 && LOG1.isInfoEnabled()) {
+                        LOG1.info("Created dummy entry for: " + old_identifier +
                                 ". New identifier is: " + identifier);
                     }
                 } catch (final FileStorageException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                 } catch (final TransactionException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                     try {
                         attachments.rollback();
                         return;
                     } catch (final TransactionException e1) {
-                        LOG.error("", e1);
+                        LOG1.error("", e1);
                     }
                 } catch (final OXException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                     try {
                         attachments.rollback();
                         return;
                     } catch (final TransactionException e1) {
-                        LOG.debug("", e1);
+                        LOG1.debug("", e1);
                     }
                 } finally {
                     try {
                         attachments.finish();
                     } catch (final TransactionException e) {
-                        LOG.debug("", e);
+                        LOG1.debug("", e);
                     }
                 }
             }
@@ -538,7 +549,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class RemoveFile implements ProblemSolver {
 
-        private FileStorage storage = null;
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(RemoveFile.class);
+
+        private final FileStorage storage;
 
         public RemoveFile(final FileStorage storage) {
             this.storage = storage;
@@ -547,8 +560,8 @@ public abstract class Consistency implements ConsistencyMBean {
         public void solve(final Context ctx, final Set<String> problems) throws OXException {
             try {
                 for (final String identifier : problems) {
-                    if (storage.deleteFile(identifier) == true && LOG.isInfoEnabled()) {
-                        LOG.info("Deleted identifier: " + identifier);
+                    if (storage.deleteFile(identifier) && LOG1.isInfoEnabled()) {
+                        LOG1.info("Deleted identifier: " + identifier);
                     }
                 }
                 /* Afterwards we recreate the state file because it could happen that
@@ -556,7 +569,7 @@ public abstract class Consistency implements ConsistencyMBean {
 			 */
                 storage.recreateStateFile();
             } catch (final FileStorageException e) {
-                LOG.error("", e);
+                LOG1.error("", e);
             }
         }
 
@@ -567,7 +580,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteInfoitem implements ProblemSolver {
 
-        private DatabaseImpl database = null;
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(DeleteInfoitem.class);
+
+        private final DatabaseImpl database;
 
         public DeleteInfoitem(final DatabaseImpl database) {
             this.database = database;
@@ -581,27 +596,27 @@ public abstract class Consistency implements ConsistencyMBean {
                     database.setRequestTransactional(true);
                     final int[] numbers = database.removeDocument(identifier, ctx);
                     database.commit();
-                    if (numbers[0] == 1 && LOG.isInfoEnabled()) {
-                        LOG.info("Have to change infostore version number " +
+                    if (numbers[0] == 1 && LOG1.isInfoEnabled()) {
+                        LOG1.info("Have to change infostore version number " +
                                 "for entry: " + identifier);
                     }
-                    if (numbers[1] == 1 && LOG.isInfoEnabled()) {
-                        LOG.info("Deleted entry " + identifier + " from " +
+                    if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
+                        LOG1.info("Deleted entry " + identifier + " from " +
                                 "infostore_documents.");
                     }
                 } catch (final OXException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                     try {
                         database.rollback();
                         return;
                     } catch (final TransactionException e1) {
-                        LOG.debug("", e1);
+                        LOG1.debug("", e1);
                     }
                 } finally {
                     try {
                         database.finish();
                     } catch (final TransactionException e) {
-                        LOG.debug("", e);
+                        LOG1.debug("", e);
                     }
                 }
             }
@@ -613,6 +628,9 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class DeleteAttachment implements ProblemSolver {
+
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(DeleteAttachment.class);
+        
         private final AttachmentBase attachments;
         public DeleteAttachment(final AttachmentBase attachments) {
             this.attachments = attachments;
@@ -627,36 +645,36 @@ public abstract class Consistency implements ConsistencyMBean {
                     attachments.startTransaction();
                     final int[] numbers = attachments.removeAttachment(identifier, ctx);
                     attachments.commit();
-                    if (numbers[0] ==  1 && LOG.isInfoEnabled()) {
-                        LOG.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId()
+                    if (numbers[0] ==  1 && LOG1.isInfoEnabled()) {
+                        LOG1.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId()
                                 + " in " + "del_attachments");
                     }
-                    if (numbers[1] == 1 && LOG.isInfoEnabled()) {
-                        LOG.info("Removed attachment database entry for: " + identifier);
+                    if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
+                        LOG1.info("Removed attachment database entry for: " + identifier);
                     }
                 } catch (final TransactionException e) {
-                    LOG.debug("", e);
+                    LOG1.debug("", e);
                     try {
                         attachments.rollback();
                         return;
                     } catch (final TransactionException e1) {
-                        LOG.debug("", e1);
+                        LOG1.debug("", e1);
                     }
                     return;
                 } catch (final OXException e) {
-                    LOG.error("", e);
+                    LOG1.error("", e);
                     try {
                         attachments.rollback();
                         return;
                     } catch (final TransactionException e1) {
-                        LOG.debug("", e1);
+                        LOG1.debug("", e1);
                     }
                     return;
                 } finally {
                     try {
                         attachments.finish();
                     } catch (final TransactionException e) {
-                        LOG.debug("", e);
+                        LOG1.debug("", e);
                     }
                 }
             }
@@ -669,17 +687,19 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateInfoitem implements ProblemSolver {
 
-        private final String description = "This file needs attention";
-        private final String title = "Restoredfile";
-        private final String fileName = "Restoredfile";
-        private final String versioncomment = "";
-        private final String categories = "";
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(CreateInfoitem.class);
+
+        private static final String description = "This file needs attention";
+        private static final String title = "Restoredfile";
+        private static final String fileName = "Restoredfile";
+        private static final String versioncomment = "";
+        private static final String categories = "";
 
         private final DatabaseImpl database;
         private final FileStorage storage;
         private final Consistency consistency;
 
-        private CreateInfoitem(final DatabaseImpl database, final FileStorage storage, final Consistency consistency) {
+        public CreateInfoitem(final DatabaseImpl database, final FileStorage storage, final Consistency consistency) {
             this.database = database;
             this.storage = storage;
             this.consistency = consistency;
@@ -702,38 +722,38 @@ public abstract class Consistency implements ConsistencyMBean {
                         database.startTransaction();
                         final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
                         database.commit();
-                        if (numbers[2] == 1 && LOG.isInfoEnabled()) {
-                            LOG.info("Dummy entry for " + identifier + " in database " +
+                        if (numbers[2] == 1 && LOG1.isInfoEnabled()) {
+                            LOG1.info("Dummy entry for " + identifier + " in database " +
                                     "created. The admin of this context has now " +
                                     "a new document");
                         }
                     } catch (final FileStorageException e) {
-                        LOG.error("", e);
+                        LOG1.error("", e);
                         try {
                             database.rollback();
                             return;
                         } catch (final TransactionException e1) {
-                            LOG.debug("", e1);
+                            LOG1.debug("", e1);
                         }
                     } catch (final OXException e) {
-                        LOG.error("", e);
+                        LOG1.error("", e);
                         try {
                             database.rollback();
                             return;
                         } catch (final TransactionException e1) {
-                            LOG.debug("", e1);
+                            LOG1.debug("", e1);
                         }
                     } finally {
                         try {
                             database.finish();
                         } catch (final TransactionException e) {
-                            LOG.debug("", e);
+                            LOG1.debug("", e);
                         }
                     }
                 }
 
             } catch (final LdapException e) {
-                LOG.error("", e);
+                LOG1.error("", e);
             }
         }
 

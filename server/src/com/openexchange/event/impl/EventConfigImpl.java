@@ -113,7 +113,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
             LOG.error("Cannot read propfile: " + propfile, exc);
         }
 
-        isEventQueueEnabled = parseProperty(prop, "com.openexchange.event.isEventQueueEnabled", isEventQueueEnabled);
+        isEventQueueEnabled = parseProperty(prop, "com.openexchange.event.isEventQueueEnabled", false);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled=" + isEventQueueEnabled);
         }

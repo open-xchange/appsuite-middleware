@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tasks.TaskException;
@@ -68,8 +67,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class TaskCreateUserSettingServer implements UpdateTask {
 
-    private final String TABLE_NAME = "user_setting_server";
-    private final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
+    private static final String TABLE_NAME = "user_setting_server";
+    private static final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
             "cid INT4 UNSIGNED NOT NULL," +
             "user INT4 UNSIGNED NOT NULL," +
             "contact_collect_folder INT4 UNSIGNED," +
