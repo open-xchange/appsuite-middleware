@@ -168,7 +168,7 @@ public abstract class DataParser {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -193,7 +193,7 @@ public abstract class DataParser {
         try {
             return Float.parseFloat(tmp);
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -284,7 +284,7 @@ public abstract class DataParser {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -305,7 +305,7 @@ public abstract class DataParser {
         try {
             return Float.parseFloat(tmp);
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -318,7 +318,7 @@ public abstract class DataParser {
         try {
             return new Date(Long.parseLong(tmp));
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -333,7 +333,7 @@ public abstract class DataParser {
             d.setTime(d.getTime()-offset);
             return d;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -371,7 +371,7 @@ public abstract class DataParser {
 
             return i;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
@@ -417,7 +417,7 @@ public abstract class DataParser {
 
             return d;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
 
