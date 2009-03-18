@@ -51,22 +51,20 @@ package com.openexchange.webdav.protocol.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
-public class DummyResourceManager implements WebdavFactory {
+public final class DummyResourceManager implements WebdavFactory {
 
+    private static final Log LOG = LogFactory.getLog(DummyResourceManager.class);
 	private static final DummyResourceManager INSTANCE = new DummyResourceManager();
-	private static final Log LOG = LogFactory.getLog(DummyResourceManager.class);
-	
+
 	public static DummyResourceManager getInstance(){
 		return INSTANCE;
 	}

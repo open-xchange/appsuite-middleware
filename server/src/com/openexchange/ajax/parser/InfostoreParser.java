@@ -52,10 +52,8 @@
 package com.openexchange.ajax.parser;
 
 import java.util.Iterator;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -66,7 +64,7 @@ public class InfostoreParser {
     /**
      * TODO Error codes
      */
-    public class UnknownMetadataException extends Exception {
+    public static class UnknownMetadataException extends Exception {
 
 		private static final long serialVersionUID = 3260737756212968495L;
 		private final String columnId;

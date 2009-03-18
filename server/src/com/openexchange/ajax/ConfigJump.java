@@ -51,16 +51,13 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.net.URL;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ICookie;
@@ -161,7 +158,7 @@ public class ConfigJump extends SessionServlet {
         }
     }
 
-    private class CookieImpl implements ICookie {
+    private static class CookieImpl implements ICookie {
         private final String name;
         private final String value;
         public CookieImpl(final String name, final String value) {

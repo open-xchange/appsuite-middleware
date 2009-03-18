@@ -54,10 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -94,7 +92,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		return counter;
 	}
 
-    protected int doUpdates(List<UpdateBlock> updates) throws TransactionException, UpdateException {
+    protected int doUpdates(final List<UpdateBlock> updates) throws TransactionException, UpdateException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
     }
 
@@ -155,7 +153,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		
 	}
 	
-	protected class UpdateException extends Exception {
+	protected static class UpdateException extends Exception {
 		
 		private static final long serialVersionUID = -3823990951502455901L;
 		private final UpdateBlock update;

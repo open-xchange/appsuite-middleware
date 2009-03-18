@@ -66,7 +66,7 @@ import com.openexchange.server.ServerTimer;
  */
 public final class AJAXUploadFile implements ManagedUploadFile {
 
-    private final class AJAXUploadFileTimerTask extends TimerTask {
+    private static final class AJAXUploadFileTimerTask extends TimerTask {
 
         private final AJAXUploadFile file;
 

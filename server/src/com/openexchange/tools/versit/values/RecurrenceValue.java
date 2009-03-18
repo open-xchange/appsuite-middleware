@@ -135,7 +135,7 @@ public class RecurrenceValue {
      * 
      * @author Viktor Pracht
      */
-    public class Weekday {
+    public static class Weekday {
 
         /**
          * Number of the week inside the main frequency unit. 0 indicates every week, positive values indicate week numbers counted from the
