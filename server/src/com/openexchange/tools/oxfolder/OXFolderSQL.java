@@ -1334,7 +1334,7 @@ public final class OXFolderSQL {
         }
     }
 
-    /*
+    /*-
      * -------------- Helper methods for OXFolderDeleteListener (User removal) --------------
      */
 
