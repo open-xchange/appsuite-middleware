@@ -8,34 +8,31 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link FixtureDataWrapper} - wraps all data needed to set up a fixture and 
- * returns it in all the shitty nested lists and maps that are required for 
- * FitNesse and the yaml suite. Note: This implementation contains the order of 
- * the given lists.
+ * {@link FixtureDataWrapper} - wraps all data needed to set up a fixture and returns it in all the shitty nested lists and maps that are
+ * required for FitNesse and the yaml suite. Note: This implementation contains the order of the given lists.
  * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- * 
- * TODO: Maybe remove fixturename and expectedError from key/value list and 
- *       just store them.
- * TODO: Maybe refactor to be interface for three different subclasses 
- *       according to types
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> 
+ * TODO: Maybe remove fixturename and expectedError from key/value list (and size calculation) and just store them. 
+ * TODO: Maybe refactor to be interface for three different subclasses according to types
  */
 public class FixtureDataWrapper {
 
     public static final String FIXTURE_NAME = "fixturename";
 
     public static final String EXPECTED_ERROR = "expectedError";
-    
+
     public static final String FOLDER = "folder";
 
     public static final String PARENT = "parent";
-    
+
     public static final String DESTINATION = "destination";
 
     public static final int TYPE_ONLY_NAME = 1;
+
     public static final int TYPE_KEYS_AND_VALUES = 2;
+
     public static final int TYPE_NAME_AND_KEYS_AND_VALUES = 3;
-    
+
     private List<String> header;
 
     private List<String> values;
@@ -50,17 +47,17 @@ public class FixtureDataWrapper {
 
     private String destination;
 
-    
     public FixtureDataWrapper(List<List<String>> table) {
-        if(table.size() < 1 || table.size() > 3)
-            throw new IllegalArgumentException("These kinds of tables can only be set up with one row (only name), two rows (key-value pairs) or three rows (name and key-value pairs)");
+        if (table.size() < 1 || table.size() > 3)
+            throw new IllegalArgumentException(
+                "These kinds of tables can only be set up with one row (only name), two rows (key-value pairs) or three rows (name and key-value pairs)");
 
-        if(table.size() == TYPE_ONLY_NAME){
+        if (table.size() == TYPE_ONLY_NAME) {
             fixtureName = table.get(0).get(0);
             this.header = new LinkedList<String>();
             this.values = new LinkedList<String>();
-        } 
-        if(table.size() == TYPE_KEYS_AND_VALUES){
+        }
+        if (table.size() == TYPE_KEYS_AND_VALUES) {
             this.header = table.get(0);
             this.values = table.get(1);
             for (int i = 0; i < header.size(); i++) {
@@ -68,12 +65,12 @@ public class FixtureDataWrapper {
                     fixtureName = values.get(i);
                 }
             }
-        } 
-        if ( table.size() == TYPE_NAME_AND_KEYS_AND_VALUES){
+        }
+        if (table.size() == TYPE_NAME_AND_KEYS_AND_VALUES) {
             header = table.get(1);
             values = table.get(2);
             fixtureName = table.get(0).get(0);
-        } 
+        }
         this.length = header.size();
         this.height = table.size();
 
@@ -85,10 +82,7 @@ public class FixtureDataWrapper {
     }
 
     public FixtureDataWrapper(Map<String, String> map) {
-        this(
-            Arrays.asList(
-                ((List<String>) new LinkedList<String>(map.keySet())), 
-                ((List<String>) new LinkedList<String>(map.values()))));
+        this(Arrays.asList(((List<String>) new LinkedList<String>(map.keySet())), ((List<String>) new LinkedList<String>(map.values()))));
     }
 
     public Map<String, String> asMap() {
@@ -119,24 +113,25 @@ public class FixtureDataWrapper {
     public String getExpectedError() {
         return expectedError;
     }
-    
+
     public String getFolderExpression() {
-        if(folder != null) {
+        if (folder != null) {
             return folder;
         }
         folder = asMap().get(FOLDER);
-        if(folder == null) {
+        if (folder == null) {
             folder = asMap().get(PARENT);
         }
         return folder;
     }
 
-    public String getDestination(){
-        if(destination != null) {
+    public String getDestination() {
+        if (destination != null) {
             return destination;
         }
         return destination = asMap().get(DESTINATION);
     }
+
     /**
      * @return the amount of fields in the data given, including fixture name and expected error if applicable
      */
@@ -145,7 +140,8 @@ public class FixtureDataWrapper {
     }
 
     /**
-     * @return the number of rows this wrapper has. Usually this either one (only a name), two (key-value pairs) or three (name and key-value pairs)
+     * @return the number of rows this wrapper has. Usually this either one (only a name), two (key-value pairs) or three (name and
+     *         key-value pairs)
      */
     public int height() {
         return height;
