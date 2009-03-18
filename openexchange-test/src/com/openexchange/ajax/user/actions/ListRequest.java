@@ -47,47 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.ajax.user.actions;
 
-import org.json.JSONObject;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.contact.action.AbstractContactRequest;
+import com.openexchange.ajax.request.ContactRequest;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link ListRequest}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class GetResponse extends AbstractAJAXResponse {
+public class ListRequest extends AbstractContactRequest<ListResponse> {
 
-    private ContactObject contactObj;
+    private final int[] userIds;
 
-    /**
-     * @param response
-     */
-    public GetResponse(final Response response) {
-        super(response);
+    private final int[] columns;
+
+    public ListRequest(final int[] userIds, final int[] columns) {
+        super();
+        this.userIds = userIds;
+        this.columns = columns;
     }
 
-    /**
-     * @return the contact
-     * @throws OXException parsing the contact out of the response fails.
-     */
-    public ContactObject getContact() throws OXException {
-        if (null == contactObj) {
-            this.contactObj = new ContactObject();
-            new ContactParser().parse(contactObj, (JSONObject) getResponse().getData());
+    public Object getBody() throws JSONException {
+        final JSONArray json = new JSONArray();
+        for (final int userId : userIds) {
+            json.put(userId);
         }
-        return contactObj;
+        return json;
     }
 
-    /**
-     * @param contactObj the contact to set
-     */
-    public void setContact(final ContactObject contactObj) {
-        this.contactObj = contactObj;
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_LIST_USER),
+            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
+        };
+    }
+
+    public ListParser getParser() {
+        return new ListParser(true, columns);
     }
 }

@@ -11,6 +11,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.user.actions.ListResponse;
 import com.openexchange.groupware.container.ContactObject;
 
 public class ListTest extends ContactTest {
@@ -88,11 +89,12 @@ public class ListTest extends ContactTest {
 	}
 	
 	public void testListUser() throws Exception {
-		final int[] userIdArray = new int[] { userId };
-		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
-		
-		final ContactObject[] contactArray = listUser(getWebConversation(), userIdArray, cols, PROTOCOL + getHostName(), getSessionId());
-		assertEquals("check response array", 1, contactArray.length);
+		final int[] userIdArray = { userId };
+		final int[] cols = { ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME };
+		final com.openexchange.ajax.user.actions.ListRequest request = new com.openexchange.ajax.user.actions.ListRequest(userIdArray, cols);
+		final ListResponse response = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId())).execute(request);
+		final ContactObject[] contactArray = response.getUsers();
+		assertEquals("check response array", userIdArray.length, contactArray.length);
 	}
 
     // Node 2652

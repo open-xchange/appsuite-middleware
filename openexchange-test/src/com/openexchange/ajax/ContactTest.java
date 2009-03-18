@@ -771,36 +771,6 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] listUser(final WebConversation webCon, final int[] objectIdArray, final int[] cols, String host, final String session) throws Exception {
-		host = appendPrefix(host);
-		
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_LIST_USER);
-		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String( cols ));
-		
-		final JSONArray jsonArray = new JSONArray();
-		
-		for (int a = 0; a < objectIdArray.length; a++) {
-			jsonArray.put(objectIdArray[a]);
-		}
-		
-		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		final WebResponse resp = webCon.getResponse(req);
-		final Response response = Response.parse(resp.getText());
-		
-		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
-		}
-		
-		assertNotNull("timestamp", response.getTimestamp());
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
-	}
-	
 	public static ContactObject loadUser(final WebConversation webCon, final int userId, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		

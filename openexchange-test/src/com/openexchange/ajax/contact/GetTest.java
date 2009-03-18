@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.contact.action.UserGetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -67,9 +66,8 @@ public class GetTest extends ContactTest {
 		assertNotNull("contact object is null", loadContact);
 		assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
 		assertTrue("object id not set", loadContact.getObjectID() > 0);
-		final GetResponse response = (GetResponse) Executor.execute(
-		    new AJAXClient(new AJAXSession(getWebConversation(), getSessionId())),
-		    new UserGetRequest(userId));
+		final GetResponse response = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId())).execute(
+		    new com.openexchange.ajax.user.actions.GetRequest(userId));
 		loadContact = response.getContact();
 		assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());

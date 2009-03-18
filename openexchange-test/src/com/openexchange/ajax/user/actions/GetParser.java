@@ -47,65 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.ajax.user.actions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.request.ContactRequest;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UserGetRequest extends AbstractContactRequest {
-
-    /**
-     * Unique identifier of the user.
-     */
-    private final int userId;
+public class GetParser extends AbstractAJAXParser<GetResponse> {
 
     /**
      * Default constructor.
-     * @param userId unique identifier of the user.
      */
-    public UserGetRequest(final int userId) {
-        super();
-        this.userId = userId;
+    public GetParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
-        return null;
+    @Override
+    protected GetResponse createResponse(final Response response) throws JSONException {
+        return new GetResponse(response);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, ContactRequest
-                .ACTION_GET_USER),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, FolderObject
-                .SYSTEM_LDAP_FOLDER_ID),
-            new Parameter(AJAXServlet.PARAMETER_ID, userId)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public UserGetParser getParser() {
-        return new UserGetParser(true);
+    @Override
+    public GetResponse parse(final String body) throws JSONException {
+        final GetResponse retval = super.parse(body);
+        try {
+            final ContactObject contact = retval.getContact();
+            final JSONObject json = (JSONObject) retval.getData();
+            contact.setInternalUserId(json.getInt(ContactFields.USER_ID));
+        } catch (final OXException e) {
+            throw new JSONException(e);
+        }
+        return retval;
     }
 }

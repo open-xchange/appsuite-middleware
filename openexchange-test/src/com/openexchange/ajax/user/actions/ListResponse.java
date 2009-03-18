@@ -47,47 +47,30 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
-
-import org.json.JSONObject;
+package com.openexchange.ajax.user.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.api2.OXException;
+import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.groupware.container.ContactObject;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link ListResponse}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class GetResponse extends AbstractAJAXResponse {
+public class ListResponse extends CommonListResponse {
 
-    private ContactObject contactObj;
+    private ContactObject[] users;
 
-    /**
-     * @param response
-     */
-    public GetResponse(final Response response) {
+    public ListResponse(final Response response) {
         super(response);
     }
 
-    /**
-     * @return the contact
-     * @throws OXException parsing the contact out of the response fails.
-     */
-    public ContactObject getContact() throws OXException {
-        if (null == contactObj) {
-            this.contactObj = new ContactObject();
-            new ContactParser().parse(contactObj, (JSONObject) getResponse().getData());
-        }
-        return contactObj;
+    public ContactObject[] getUsers() {
+        return users;
     }
 
-    /**
-     * @param contactObj the contact to set
-     */
-    public void setContact(final ContactObject contactObj) {
-        this.contactObj = contactObj;
+    void setUsers(final ContactObject[] users) {
+        this.users = users;
     }
 }
