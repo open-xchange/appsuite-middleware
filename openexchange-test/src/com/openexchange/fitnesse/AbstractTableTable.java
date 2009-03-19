@@ -1,24 +1,11 @@
 package com.openexchange.fitnesse;
 
-import java.io.IOException;
 import java.util.List;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.folders.FolderResolver;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.fixtures.AppointmentFixtureFactory;
-import com.openexchange.test.fixtures.ContactFixtureFactory;
-import com.openexchange.test.fixtures.Fixture;
-import com.openexchange.test.fixtures.FixtureException;
-import com.openexchange.test.fixtures.Fixtures;
-import com.openexchange.test.fixtures.TaskFixtureFactory;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 

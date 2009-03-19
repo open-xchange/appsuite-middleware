@@ -11,9 +11,9 @@ import java.util.Map;
  * {@link FixtureDataWrapper} - wraps all data needed to set up a fixture and returns it in all the shitty nested lists and maps that are
  * required for FitNesse and the yaml suite. Note: This implementation contains the order of the given lists.
  * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> 
- * TODO: Maybe remove fixturename and expectedError from key/value list (and size calculation) and just store them. 
- * TODO: Maybe refactor to be interface for three different subclasses according to types
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> TODO: Maybe remove fixturename and expectedError from key/value
+ *         list (and size calculation) and just store them. TODO: Maybe refactor to be interface for three different subclasses according to
+ *         types
  */
 public class FixtureDataWrapper {
 
@@ -129,7 +129,13 @@ public class FixtureDataWrapper {
         if (destination != null) {
             return destination;
         }
-        return destination = asMap().get(DESTINATION);
+
+        destination = asMap().get(DESTINATION);
+
+        if (destination == null)
+            destination = getFolderExpression();
+
+        return destination;
     }
 
     /**
