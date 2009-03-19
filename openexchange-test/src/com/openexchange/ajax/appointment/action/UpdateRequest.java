@@ -50,17 +50,15 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
- * Implements creating the necessary values for a appointment update request. All
- * necessary values are read from the appointment object. The appointment must contain the folder and
- * object identifier and the last modification timestamp.
+ * Implements creating the necessary values for a appointment update request. All necessary values are read from the appointment object. The
+ * appointment must contain the folder and object identifier and the last modification timestamp.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
@@ -71,22 +69,29 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     private final boolean failOnError;
 
+    private int originFolder;
+
     /**
      * Default constructor.
-     * @param appointmentObj Appointment object with updated attributes. This appointment must contain
-     * the attributes parent folder identifier, object identifier and last
-     * modification timestamp.
+     * 
+     * @param appointmentObj Appointment object with updated attributes. This appointment must contain the attributes parent folder
+     *            identifier, object identifier and last modification timestamp.
      */
     public UpdateRequest(final AppointmentObject appointmentObj, final TimeZone timeZone) {
         this(appointmentObj, timeZone, true);
     }
 
-    public UpdateRequest(final AppointmentObject appointmentObj,
-        final TimeZone timeZone, final boolean failOnError) {
+    public UpdateRequest(final AppointmentObject appointment, final TimeZone timezone, final boolean failOnError) {
+        this(appointment.getParentFolderID(), appointment, timezone, failOnError);
+
+    }
+
+    public UpdateRequest(final int originFolder, final AppointmentObject appointment, final TimeZone timezone, final boolean failOnError) {
         super();
-        this.appointmentObj = appointmentObj;
-        this.timeZone = timeZone;
+        this.appointmentObj = appointment;
+        this.timeZone = timezone;
         this.failOnError = failOnError;
+        this.originFolder = originFolder;
     }
 
     /**
@@ -108,15 +113,10 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
      */
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(appointmentObj
-                .getParentFolderID())),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(appointmentObj
-                .getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(appointmentObj
-                .getLastModified().getTime()))
-        };
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
+            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(appointmentObj.getObjectID())),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(appointmentObj.getLastModified().getTime())) };
     }
 
     /**

@@ -47,60 +47,27 @@
  *
  */
 
-package com.openexchange.fitnesse.folders;
+package com.openexchange.fitnesse.contacts;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.folders.FolderCreateStep;
-import com.openexchange.fitnesse.exceptions.FitnesseException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
-
+import com.openexchange.ajax.kata.contacts.ContactMoveStep;
+import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 
 
 /**
- * {@link CreateFolder}
+ * {@link MoveContact}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class CreateFolder extends AbstractFolderFixture{
+public class MoveContact extends AbstractStepFixture {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.fitnesse.folders.AbstractFolderFixture#createStep(com.openexchange.groupware.container.FolderObject, java.lang.String, java.lang.String)
-     */
     @Override
-    protected Step createStep(FolderObject folder, String fixtureName, String expectedError) throws AjaxException, IOException, SAXException, JSONException, FitnesseException {
-        if(!folder.containsPermissions()) {
-            addDefaultPermission(folder);
-        }
-        verifyFolder(folder);
-        return new FolderCreateStep(folder, fixtureName, expectedError);
-    }
-
-    /**
-     * @param folder
-     * @throws FitnesseException 
-     */
-    private void verifyFolder(FolderObject folder) throws FitnesseException {
-        if(! folder.containsFolderName()){
-            throw new FitnesseException("Folder needs a name.");
-        }
-        if(! folder.containsModule() ){
-            throw new FitnesseException("Folder needs to belong to a module.");
-        }
-    }
-
-    private void addDefaultPermission(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        OCLPermission oclp = new OCLPermission();
-        oclp.setFolderAdmin(true);
-        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        oclp.setEntity(getClient().getValues().getUserId());
-        folder.setPermissionsAsArray(new OCLPermission[]{oclp});
+    protected Step createStep(FixtureDataWrapper data) throws Exception {
+        String destination = data.getDestination();
+        int folder = resolveFolder(destination);
+        return new ContactMoveStep(folder, data.getFixtureName(), data.getExpectedError());
     }
 
 }

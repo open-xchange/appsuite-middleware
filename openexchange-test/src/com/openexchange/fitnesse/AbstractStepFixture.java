@@ -51,10 +51,12 @@ package com.openexchange.fitnesse;
 
 import java.util.Collections;
 import java.util.List;
+import junit.framework.AssertionFailedError;
 import org.junit.ComparisonFailure;
 import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 import com.openexchange.test.fixtures.FixtureException;
@@ -78,8 +80,12 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
 
     @Override
     public List doTable() throws Exception {
-
-        Step step = createStep(data);
+        Step step = null;
+        try {
+            step = createStep(data);
+        } catch(FitnesseException e){
+            return new FitnesseResult(data, FitnesseResult.ERROR + e.getMessage() ).toResult();
+        }
         
         if (NeedExistingStep.class.isInstance(step)) {
             IdentitySource identitySource = environment.getSymbol(data.getFixtureName());
@@ -92,6 +98,10 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
         } catch (ComparisonFailure failure) {
             int pos = findFailedFieldPosition(failure.getExpected());
             returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());
+            failure.printStackTrace();
+        } catch (AssertionFailedError e) {
+            returnValues.set(0, FitnesseResult.ERROR + e.getMessage());
+            e.printStackTrace();
         }
 
         environment.registerStep(step);

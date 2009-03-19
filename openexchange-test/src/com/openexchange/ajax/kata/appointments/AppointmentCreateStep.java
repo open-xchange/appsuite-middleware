@@ -57,7 +57,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.AbstractStep;
 import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.CalendarTestManager;
 
 
@@ -87,16 +86,13 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         if(!inserted) {
             return;
         }
-        manager.deleteAppointmentOnServer(entry);
+        manager.deleteAppointmentOnServer(entry, false);
     }
 
     public void perform(AJAXClient client) throws Exception {
         
         this.client = client;
         this.manager = new CalendarTestManager(client);
-        
-        int folderId = client.getValues().getPrivateAppointmentFolder();
-        entry.setParentFolderID(folderId);
         
         InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
         inserted = false;
@@ -122,6 +118,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
 
     public void rememberIdentityValues(AppointmentObject appointment) {
         entry.setLastModified(appointment.getLastModified());
+        entry.setParentFolderID(appointment.getParentFolderID());
     }
 
     public void forgetIdentity(AppointmentObject entry) {

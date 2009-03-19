@@ -69,6 +69,7 @@ import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -88,6 +89,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     private Task entry;
     private TaskTestManager manager;
+    private int expectedFolderId;
 
     /**
      * Initializes a new {@link TaskVerificationStep}.
@@ -97,6 +99,16 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     public TaskVerificationStep(Task entry, String name) {
         super(name, null);
         this.entry = entry;
+    }
+    
+    @Override
+    protected void assumeIdentity(Task thing) {
+        expectedFolderId = entry.getParentFolderID();
+        boolean containsFolderId = entry.containsParentFolderID();
+        super.assumeIdentity(entry);
+        if( ! containsFolderId ){
+            expectedFolderId = entry.getParentFolderID();
+        }
     }
 
     public void perform(AJAXClient client) throws Exception {
@@ -115,7 +127,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     private void checkViaGet(Task task) throws OXException, JSONException {
-        Task loaded = manager.getTaskFromServer(task);
+        Task loaded = manager.getTaskFromServer(expectedFolderId, task.getObjectID());
         compare(task, loaded);
     }
 
@@ -127,7 +139,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     private void checkViaList(Task task) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }),
+            ListIDs.l(new int[] { expectedFolderId, task.getObjectID() }),
             Task.ALL_COLUMNS);
         CommonListResponse response = client.execute(listRequest);
 
@@ -137,7 +149,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     private void checkViaUpdates(Task task) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
-        UpdatesRequest updates = new UpdatesRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0), getTimeZone());
+        UpdatesRequest updates = new UpdatesRequest(expectedFolderId, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0), getTimeZone());
         TaskUpdatesResponse response = client.execute(updates);
 
         List<Task> tasks = response.getTasks();
@@ -151,13 +163,14 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
-        AllRequest all = new AllRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
+        AllRequest all = new AllRequest(expectedFolderId, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
     
     private Object[][] getViaSearch(Task task) throws AjaxException, IOException, SAXException, JSONException{
         TaskSearchObject searchObject = new TaskSearchObject();
+        searchObject.addFolder(expectedFolderId);
         searchObject.setPattern("*");
         SearchRequest searchRequest = new SearchRequest(searchObject, Task.ALL_COLUMNS);
         SearchResponse searchResponse = client.execute(searchRequest);

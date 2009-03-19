@@ -71,19 +71,28 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
 
     private final Date lastModified;
 
-    /**
-     * Default constructor.
-     */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
+    private boolean failOnError;
+
+    public DeleteRequest(final int folderId, final int objectId, final Date lastModified, boolean failOnError) {
         super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.lastModified = lastModified;
+        this.failOnError = failOnError;
+    }
+
+    public DeleteRequest(final ContactObject contact, boolean failOnError) {
+        this(contact.getParentFolderID(), contact.getObjectID(),
+            contact.getLastModified(), failOnError);
+    }
+
+    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
+        this(folderId, objectId, lastModified, true);
 	}
 
     public DeleteRequest(final ContactObject contact) {
         this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
+            contact.getLastModified(), true);
     }
 
     /**
@@ -118,6 +127,6 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
      * {@inheritDoc}
      */
     public DeleteParser getParser() {
-        return new DeleteParser();
+        return new DeleteParser(failOnError);
     }
 }

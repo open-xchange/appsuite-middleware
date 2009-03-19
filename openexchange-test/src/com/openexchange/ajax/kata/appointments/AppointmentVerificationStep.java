@@ -89,6 +89,8 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
     private CalendarTestManager manager;
 
+    private int expectedFolderId;
+
     /**
      * Initializes a new {@link AppointmentVerificationStep}.
      * 
@@ -103,14 +105,20 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.kata.Step#perform()
-     */
+    protected void assumeIdentity(AppointmentObject thing) {
+        expectedFolderId = entry.getParentFolderID();
+        boolean containsFolderId = entry.containsParentFolderID();
+        super.assumeIdentity(entry);
+        if (!containsFolderId) {
+            expectedFolderId = entry.getParentFolderID();
+        }
+    }
+
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new CalendarTestManager(client);
         assumeIdentity(entry);
+
         checkWithReadMethods(entry);
     }
 
@@ -124,7 +132,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
     }
 
     private void checkViaGet(AppointmentObject appointment) throws OXException, JSONException {
-        AppointmentObject loaded = manager.getAppointmentFromServer(appointment);
+        AppointmentObject loaded = manager.getAppointmentFromServer(expectedFolderId, appointment.getObjectID());
         compare(appointment, loaded);
     }
 
@@ -136,7 +144,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
     private void checkViaList(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }),
+            ListIDs.l(new int[] { expectedFolderId, appointment.getObjectID() }),
             AppointmentObject.ALL_COLUMNS);
         CommonListResponse response = client.execute(listRequest);
 
@@ -146,7 +154,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
     }
 
     private void checkViaUpdates(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
-        UpdatesRequest updates = new UpdatesRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(0), true);
+        UpdatesRequest updates = new UpdatesRequest(expectedFolderId, AppointmentObject.ALL_COLUMNS, new Date(0), true);
         UpdatesResponse response = client.execute(updates);
 
         List<AppointmentObject> appointments = response.getAppointments(getTimeZone());
@@ -171,8 +179,13 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
     private Object[][] getViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
         long rangeStart = appointment.getStartDate().getTime() - 24 * 3600000;
         long rangeEnd = appointment.getEndDate().getTime() + 24 * 3600000;
-        AllRequest all = new AllRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(rangeStart), new Date(
-            rangeEnd), getTimeZone(), true);
+        AllRequest all = new AllRequest(
+            expectedFolderId,
+            AppointmentObject.ALL_COLUMNS,
+            new Date(rangeStart),
+            new Date(rangeEnd),
+            getTimeZone(),
+            true);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
@@ -180,7 +193,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
     private Object[][] getViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
         SearchRequest searchRequest = new SearchRequest(
             "*",
-            appointment.getParentFolderID(),
+            expectedFolderId,
             new Date(0),
             new Date(Integer.MAX_VALUE),
             AppointmentObject.ALL_COLUMNS,

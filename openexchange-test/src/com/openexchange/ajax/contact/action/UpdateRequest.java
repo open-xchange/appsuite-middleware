@@ -64,6 +64,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
 
     private final ContactObject contactObj;
     private boolean failOnError;
+    private int originFolder;
 
     /**
      * Default constructor.
@@ -76,9 +77,15 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     }
     
     public UpdateRequest(final ContactObject contactObj, boolean failOnError) {
+        this(contactObj.getParentFolderID(), contactObj, failOnError);
+    }
+
+    public UpdateRequest(int inFolder, ContactObject entry, boolean failOnError) {
         super();
-        this.contactObj = contactObj;
+        this.contactObj = entry;
         this.failOnError = failOnError;
+        this.originFolder = inFolder;
+        
     }
 
     /**
@@ -102,8 +109,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
                 .ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(contactObj
-                .getParentFolderID())),
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
             new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj
                 .getObjectID())),
             new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj

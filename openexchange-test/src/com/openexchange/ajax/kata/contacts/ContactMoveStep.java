@@ -47,60 +47,49 @@
  *
  */
 
-package com.openexchange.fitnesse.folders;
+package com.openexchange.ajax.kata.contacts;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.folders.FolderCreateStep;
-import com.openexchange.fitnesse.exceptions.FitnesseException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
-
+import com.openexchange.ajax.contact.action.UpdateRequest;
+import com.openexchange.ajax.contact.action.UpdateResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.groupware.container.ContactObject;
 
 
 /**
- * {@link CreateFolder}
+ * {@link ContactMoveStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class CreateFolder extends AbstractFolderFixture{
+public class ContactMoveStep extends NeedExistingStep<ContactObject>{
 
-    /* (non-Javadoc)
-     * @see com.openexchange.fitnesse.folders.AbstractFolderFixture#createStep(com.openexchange.groupware.container.FolderObject, java.lang.String, java.lang.String)
-     */
-    @Override
-    protected Step createStep(FolderObject folder, String fixtureName, String expectedError) throws AjaxException, IOException, SAXException, JSONException, FitnesseException {
-        if(!folder.containsPermissions()) {
-            addDefaultPermission(folder);
-        }
-        verifyFolder(folder);
-        return new FolderCreateStep(folder, fixtureName, expectedError);
+    private int destinationFolder;
+    
+    public ContactMoveStep(int destinationFolder, String name, String expectedError) {
+        super(name, expectedError);
+        this.destinationFolder = destinationFolder;
+    }
+    
+    public void cleanUp() throws Exception {
     }
 
-    /**
-     * @param folder
-     * @throws FitnesseException 
-     */
-    private void verifyFolder(FolderObject folder) throws FitnesseException {
-        if(! folder.containsFolderName()){
-            throw new FitnesseException("Folder needs a name.");
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        
+        ContactObject entry = new ContactObject();
+        assumeIdentity(entry);
+        int inFolder = entry.getParentFolderID();
+        entry.setParentFolderID(destinationFolder);
+        
+        UpdateRequest updateRequest = new UpdateRequest(inFolder, entry, false);
+        UpdateResponse updateResponse = execute(updateRequest);
+        
+        if(!updateResponse.hasError()) {
+            entry.setLastModified(updateResponse.getTimestamp());
+            rememberIdentityValues(entry);
         }
-        if(! folder.containsModule() ){
-            throw new FitnesseException("Folder needs to belong to a module.");
-        }
-    }
-
-    private void addDefaultPermission(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        OCLPermission oclp = new OCLPermission();
-        oclp.setFolderAdmin(true);
-        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        oclp.setEntity(getClient().getValues().getUserId());
-        folder.setPermissionsAsArray(new OCLPermission[]{oclp});
+        checkError(updateResponse);
     }
 
 }

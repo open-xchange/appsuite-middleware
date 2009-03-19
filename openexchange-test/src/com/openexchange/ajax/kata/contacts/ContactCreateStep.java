@@ -78,16 +78,13 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
     public void cleanUp() throws Exception {
         if( inserted ){
             entry.setLastModified(new Date(Long.MAX_VALUE));
-            manager.deleteContactOnServer(entry);
+            manager.deleteContactOnServer(entry, false);
         }
     }
 
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new ContactTestManager(client);
-        
-        int folderId = client.getValues().getPrivateContactFolder();
-        entry.setParentFolderID(folderId);
         
         InsertRequest insertRequest = new InsertRequest(entry, false);
         InsertResponse insertResponse = execute(insertRequest);
@@ -103,7 +100,8 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
     }
 
     public void rememberIdentityValues(ContactObject contact) {
-        contact.setLastModified( entry.getLastModified());        
+        contact.setLastModified( entry.getLastModified());  
+        contact.setParentFolderID(entry.getParentFolderID());
     }
 
     public void forgetIdentity(ContactObject entry) {

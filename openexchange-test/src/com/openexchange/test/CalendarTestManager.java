@@ -186,6 +186,19 @@ public class CalendarTestManager {
             return null;
         }
     }
+    
+    public AppointmentObject getAppointmentFromServer(int parentFolderID, int objectID, boolean failOnError) throws OXException, JSONException {
+        try {
+            GetRequest get = new GetRequest(parentFolderID, objectID, failOnError);
+            GetResponse response = execute(get);        
+            return response.getAppointment(timezone);
+        } catch (OXException e){
+            if(failOnError )
+                throw e;
+            return null;
+        }
+    }
+    
     /**
      * @param appointment
      * @return

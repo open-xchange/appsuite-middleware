@@ -27,6 +27,7 @@ public class FitnesseResult {
     }
 
     public FitnesseResult(FixtureDataWrapper givenData, String defaultValue){
+        this(givenData.size(), givenData.height(), defaultValue);
     }
     
     public FitnesseResult(int length, int height, String defaultValue) {

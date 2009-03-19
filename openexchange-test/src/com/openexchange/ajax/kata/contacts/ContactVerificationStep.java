@@ -87,6 +87,8 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
 
     private ContactTestManager manager;
 
+    private int expectedFolderId;
+
     /**
      * Initializes a new {@link TaskVerificationStep}.
      * 
@@ -98,10 +100,20 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
         this.entry = entry;
     }
 
+    @Override
+    protected void assumeIdentity(ContactObject thing) {
+        expectedFolderId = entry.getParentFolderID();
+        boolean containsFolderId = entry.containsParentFolderID();
+        super.assumeIdentity(entry);
+        if( ! containsFolderId ){
+            expectedFolderId = entry.getParentFolderID();
+        }
+    }
+    
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new ContactTestManager(client);
-        assumeIdentity(entry);
+        assumeIdentity(entry); 
         checkWithReadMethods(entry);
     }
 
@@ -114,7 +126,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     }
 
     private void checkViaGet(ContactObject contact) throws OXException, JSONException {
-        ContactObject loaded = manager.getContactFromServer(contact);
+        ContactObject loaded = manager.getContactFromServer(expectedFolderId, contact.getObjectID());
         compare(contact, loaded);
     }
 
@@ -126,7 +138,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
 
     private void checkViaList(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { contact.getParentFolderID(), contact.getObjectID() }),
+            ListIDs.l(new int[] { expectedFolderId, contact.getObjectID() }),
             ContactObject.ALL_COLUMNS,
             false);
         CommonListResponse response = client.execute(listRequest);
@@ -138,7 +150,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
 
     private void checkViaUpdates(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
         UpdatesRequest updates = new UpdatesRequest(
-            contact.getParentFolderID(),
+            expectedFolderId,
             ContactObject.ALL_COLUMNS,
             ContactObject.OBJECT_ID,
             Order.ASCENDING,
@@ -170,7 +182,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     }
 
     private Object[][] getViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
-        AllRequest all = new AllRequest(contact.getParentFolderID(), ContactObject.ALL_COLUMNS);
+        AllRequest all = new AllRequest(expectedFolderId, ContactObject.ALL_COLUMNS);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
@@ -178,6 +190,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     private Object[][] getViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ContactSearchObject contactSearch = new ContactSearchObject();
         contactSearch.setPattern("*");
+        contactSearch.addFolder(expectedFolderId);
         SearchRequest searchRequest = new SearchRequest(contactSearch, ContactObject.ALL_COLUMNS, false);
         SearchResponse searchResponse = client.execute(searchRequest);
         JSONArray data = (JSONArray) searchResponse.getResponse().getData();

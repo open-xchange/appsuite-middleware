@@ -182,7 +182,7 @@ public class ContactTestManager {
 	public void deleteContactOnServer(ContactObject contactToDelete, boolean failOnError){
 		try{
 		    contactToDelete.setLastModified( new Date( Long.MAX_VALUE ) );
-			DeleteRequest request = new DeleteRequest(contactToDelete);
+			DeleteRequest request = new DeleteRequest(contactToDelete, failOnError);
 			client.execute(request);
 		} catch (AjaxException e) {
 			if (failOnError)
