@@ -50,17 +50,15 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ReminderRequest;
 import com.openexchange.api.OXConflictException;
@@ -102,7 +100,7 @@ public class Reminder extends DataServlet {
 
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
-			final Object responseObj = reminderRequest.action(action, jsonObj);
+			final JSONValue responseObj = reminderRequest.action(action, jsonObj);
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final OXMandatoryFieldException e) {
@@ -163,7 +161,7 @@ public class Reminder extends DataServlet {
 
 				jsonObj.put(PARAMETER_DATA, jData);
 				
-				final Object responseObj = reminderRequest.action(action, jsonObj);
+				final JSONValue responseObj = reminderRequest.action(action, jsonObj);
 				response.setData(responseObj);
 			} else {
 				final JSONObject jData = new JSONObject(data);

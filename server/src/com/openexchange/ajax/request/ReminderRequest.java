@@ -53,13 +53,12 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ReminderWriter;
@@ -93,7 +92,12 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
-public class ReminderRequest {
+/**
+ * {@link ReminderRequest} - Handles request to reminder servlet.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ */
+public final class ReminderRequest {
 
     private final Session sessionObj;
 
@@ -105,18 +109,42 @@ public class ReminderRequest {
 
     private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
 
+    /**
+     * Gets the time stamp.
+     * 
+     * @return The time stamp.
+     */
     public Date getTimestamp() {
         return timestamp;
     }
 
-    public ReminderRequest(final Session sessionObj, final Context ctx) {
+    /**
+     * Initializes a new {@link ReminderRequest}.
+     * 
+     * @param session The session
+     * @param ctx The context
+     */
+    public ReminderRequest(final Session session, final Context ctx) {
         super();
-        this.sessionObj = sessionObj;
+        this.sessionObj = session;
         this.ctx = ctx;
-        userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
     }
 
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+    /**
+     * Handles the request dependent on specified action string.
+     * 
+     * @param action The action string
+     * @param jsonObject The JSON object containing request's data & parameters
+     * @return A JSON result object dependent on triggered action method
+     * @throws OXMandatoryFieldException If a mandatory field is missing in passed JSON request object
+     * @throws OXException If a server-related error occurs
+     * @throws JSONException If a JSON error occurs
+     * @throws SearchIteratorException If a search-iterator error occurs
+     * @throws AjaxException If an AJAX error occurs
+     * @throws OXJSONException If a JSON error occurs
+     */
+    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
             return actionDelete(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
@@ -141,14 +169,14 @@ public class ReminderRequest {
             final ReminderDeleteInterface reminderDeleteInterface;
             final int module = reminder.getModule();
             switch (module) {
-                case Types.APPOINTMENT:
-                    reminderDeleteInterface = new CalendarReminderDelete();
-                    break;
-                case Types.TASK:
-                    reminderDeleteInterface = new ModifyThroughDependant();
-                    break;
-                default:
-                    reminderDeleteInterface = new EmptyReminderDeleteImpl();
+            case Types.APPOINTMENT:
+                reminderDeleteInterface = new CalendarReminderDelete();
+                break;
+            case Types.TASK:
+                reminderDeleteInterface = new ModifyThroughDependant();
+                break;
+            default:
+                reminderDeleteInterface = new EmptyReminderDeleteImpl();
             }
             reminderSql.setReminderDeleteInterface(reminderDeleteInterface);
 
@@ -170,7 +198,7 @@ public class ReminderRequest {
                 return jsonArray;
             }
             throw oxe;
-        } catch(final AbstractOXException exc) {
+        } catch (final AbstractOXException exc) {
             throw new OXException(exc);
         }
         return jsonArray;
@@ -189,21 +217,21 @@ public class ReminderRequest {
 
             while (it.hasNext()) {
                 final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(userObj.getTimeZone()));
-                final ReminderObject reminderObj = (ReminderObject)it.next();
+                final ReminderObject reminderObj = (ReminderObject) it.next();
 
                 if (reminderObj.isRecurrenceAppointment()) {
                     final int targetId = reminderObj.getTargetId();
                     final int inFolder = reminderObj.getFolder();
 
-//                    currently disabled because not used by the UI
-//                    final ReminderObject latestReminder = getLatestReminder(targetId, inFolder, sessionObj, end);
-//
-//                    if (latestReminder == null) {
-//                        continue;
-//                    } else {
-//                        reminderObj.setDate(latestReminder.getDate());
-//                        reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
-//                    }
+                    // currently disabled because not used by the UI
+                    // final ReminderObject latestReminder = getLatestReminder(targetId, inFolder, sessionObj, end);
+                    //
+                    // if (latestReminder == null) {
+                    // continue;
+                    // } else {
+                    // reminderObj.setDate(latestReminder.getDate());
+                    // reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
+                    // }
                 }
 
                 if (hasModulePermission(reminderObj)) {
@@ -251,7 +279,9 @@ public class ReminderRequest {
                             LOG.warn("Cannot load target object of this reminder.", e);
                             reminderSql.deleteReminder(reminder.getTargetId(), userObj.getId(), reminder.getModule());
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + sessionObj.getContextId(), e);
+                            LOG.error(
+                                "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + sessionObj.getContextId(),
+                                e);
                         }
                     }
                     if (hasModulePermission(reminder)) {
@@ -272,20 +302,18 @@ public class ReminderRequest {
     protected boolean hasModulePermission(final ReminderObject reminderObj) {
         switch (reminderObj.getModule()) {
         case Types.APPOINTMENT:
-            return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-                    ctx).hasCalendar();
+            return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasCalendar();
         case Types.TASK:
-            return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-                    ctx).hasTask();
+            return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasTask();
         default:
             return true;
         }
     }
 
     /**
-     * This method returns the lastest reminder object of the recurrence
-     * appointment. The reminder object contains only the alarm attribute and
-     * the recurrence position.
+     * This method returns the lastest reminder object of the recurrence appointment. The reminder object contains only the alarm attribute
+     * and the recurrence position.
+     * 
      * @return <code>true</code> if a latest reminder was found.
      */
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
@@ -335,8 +363,9 @@ public class ReminderRequest {
                 calendarDataObject.getUntil().getTime(),
                 0);
         } catch (final OXException e) {
-            LOG.error("Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context "
-                + sessionObj.getContextId(), e);
+            LOG.error(
+                "Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context " + sessionObj.getContextId(),
+                e);
             return null;
         }
         if (null == recurringResults || recurringResults.size() == 0) {
