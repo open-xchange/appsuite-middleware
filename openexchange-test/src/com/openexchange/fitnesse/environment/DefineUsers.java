@@ -47,74 +47,73 @@
  *
  */
 
-package com.openexchange.ajax.kata;
+package com.openexchange.fitnesse.environment;
 
-import static junit.framework.Assert.fail;
 import java.io.IOException;
-import java.util.TimeZone;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
-import org.junit.Assert;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.SlimTableTable;
+import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.tools.servlet.AjaxException;
 
-
 /**
- * {@link AbstractStep}
- *
+ * {@link DefineUsers}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public abstract class AbstractStep implements Step{
-    protected String name;
-    protected String expectedError;
-    protected AJAXClient client;
-    
-    public AbstractStep(String name, String expectedError) {
-        this.name = name;
-        this.expectedError = expectedError;
-    }
-    
-    protected void checkError(AbstractAJAXResponse response) {
-        if(response.hasError()) {
-            String message = response.getResponse().getErrorMessage();
-            if(expectedError != null) {
-                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
-            } else {
-                fail(name+" did not expect error, but failed with: "+message);
-            }
+public class DefineUsers implements SlimTableTable {
 
-        } else {
-            
-            if(expectedError != null) {
-                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
+    public List doTable(List<List<String>> table) {
+        FitnesseEnvironment env = FitnesseEnvironment.getInstance();
+        LinkedList<List<String>> results = new LinkedList<List<String>>();
+
+        for (List<String> row : table) {
+            final String username = row.get(0);
+            final String password = row.get(1);
+            try {
+                env.login(username, password);
+                handleSuccess(results);
+            } catch (AjaxException e) {
+                handleException(results, username, password, e);
+            } catch (IOException e) {
+                handleException(results, username, password, e);
+            } catch (SAXException e) {
+                handleException(results, username, password, e);
+            } catch (JSONException e) {
+                handleException(results, username, password, e);
+            } catch (Throwable t) {
+                handleException(results, username, password, t);
             }
         }
+        return results;
     }
-    
-    protected boolean expectsError() {
-        return expectedError != null;
-    }
-    
-    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
-        return client.getValues().getTimeZone();
-    }
-    
-    protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
-        try {
-            return client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JsonException during task creation: " + e.getLocalizedMessage());
+
+    /**
+     * @param results
+     * @param e
+     */
+    private void handleException(LinkedList<List<String>> results, String username, String password, Throwable e) {
+        if(e.getMessage().contains("LGI-0006")) {
+            wrongCredentials(results, username, password);
+            return;
         }
-        return null;
+        String resultString = FitnesseResult.ERROR+e.getMessage();
+        results.add(Arrays.asList(resultString, resultString));
+    }
+
+    private void wrongCredentials(LinkedList<List<String>> results, String username, String password) {
+        results.add(Arrays.asList(FitnesseResult.ERROR+username, FitnesseResult.ERROR+password)); //TODO find out why this is yellow, not red.
+    }
+
+    /**
+     * @param results
+     */
+    private void handleSuccess(LinkedList<List<String>> results) {
+        results.add(Arrays.asList(FitnesseResult.PASS, FitnesseResult.PASS));
     }
 
 }

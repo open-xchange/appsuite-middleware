@@ -111,7 +111,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         if(!inserted) {
             return;
         }
-        manager.deleteTaskOnServer(entry);
+        manager.deleteTaskOnServer(entry,false);
     }
 
     /* (non-Javadoc)

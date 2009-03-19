@@ -47,74 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.kata;
+package com.openexchange.fitnesse.environment;
 
-import static junit.framework.Assert.fail;
-import java.io.IOException;
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.junit.Assert;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.tools.servlet.AjaxException;
+import java.util.Arrays;
+import java.util.List;
+import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.SlimTableTable;
+import com.openexchange.fitnesse.exceptions.FitnesseException;
+import com.openexchange.fitnesse.wrappers.FitnesseResult;
 
 
 /**
- * {@link AbstractStep}
+ * {@link SwitchUser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class AbstractStep implements Step{
-    protected String name;
-    protected String expectedError;
-    protected AJAXClient client;
-    
-    public AbstractStep(String name, String expectedError) {
-        this.name = name;
-        this.expectedError = expectedError;
-    }
-    
-    protected void checkError(AbstractAJAXResponse response) {
-        if(response.hasError()) {
-            String message = response.getResponse().getErrorMessage();
-            if(expectedError != null) {
-                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
-            } else {
-                fail(name+" did not expect error, but failed with: "+message);
-            }
+public class SwitchUser implements SlimTableTable {
 
-        } else {
-            
-            if(expectedError != null) {
-                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
-            }
-        }
-    }
-    
-    protected boolean expectsError() {
-        return expectedError != null;
-    }
-    
-    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
-        return client.getValues().getTimeZone();
-    }
-    
-    protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
+    public List doTable(List<List<String>> table) throws Exception {
+        String username = table.get(0).get(0);
+        FitnesseEnvironment env = FitnesseEnvironment.getInstance();
         try {
-            return client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JsonException during task creation: " + e.getLocalizedMessage());
+            env.switchUser(username);
+        } catch (FitnesseException x) {
+            return Arrays.asList( Arrays.asList( FitnesseResult.ERROR+x.getMessage()));
         }
-        return null;
+        return Arrays.asList( Arrays.asList( FitnesseResult.PASS) );
     }
 
 }

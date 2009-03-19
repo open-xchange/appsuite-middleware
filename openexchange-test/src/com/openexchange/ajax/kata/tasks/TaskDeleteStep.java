@@ -51,7 +51,9 @@ package com.openexchange.ajax.kata.tasks;
 
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
 
@@ -75,10 +77,20 @@ public class TaskDeleteStep extends NeedExistingStep<Task> {
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         TaskTestManager manager = new TaskTestManager(client);
-        Assert.assertNotNull("Should have found task before deletion", manager.getTaskFromServer(this.entry, false));
-        manager.deleteTaskOnServer(this.entry, false);
-        Assert.assertNull("Should not have found task after deletion", manager.getTaskFromServer(this.entry, false));
-        forgetIdentity(entry);
+        if(!expectsError()) {
+            Assert.assertNotNull("Should have found task before deletion", manager.getTaskFromServer(this.entry, false));
+        }
+        
+        DeleteRequest request = new DeleteRequest(entry, !expectsError());
+        CommonDeleteResponse response = client.execute(request);
+        checkError(response);
+        
+        if(!expectsError()) {
+            Assert.assertNull("Should not have found task after deletion", manager.getTaskFromServer(this.entry, false));
+        }
+        if(!response.hasError()) {
+            forgetIdentity(entry);
+        }
     }
 
 }

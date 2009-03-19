@@ -66,7 +66,7 @@ public class DefinePermissions implements SlimTableTable {
 
     public List doTable(List<List<String>> table) throws Exception {
         FitnesseEnvironment environment = FitnesseEnvironment.getInstance();
-        PermissionDefinition permissions = new PermissionDefinition(table, environment.getClientForUser1());
+        PermissionDefinition permissions = new PermissionDefinition(table, environment.getClient());
         environment.registerPermissions(permissions);
         return fillTable(table, FitnesseResult.NEUTRAL);
     }

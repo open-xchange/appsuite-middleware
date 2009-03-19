@@ -47,74 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.kata;
+package com.openexchange.fitnesse.environment;
 
-import static junit.framework.Assert.fail;
-import java.io.IOException;
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.junit.Assert;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.tools.servlet.AjaxException;
-
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.SlimTableTable;
 
 /**
- * {@link AbstractStep}
- *
+ * {@link ConfigureEnvironment}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public abstract class AbstractStep implements Step{
-    protected String name;
-    protected String expectedError;
-    protected AJAXClient client;
-    
-    public AbstractStep(String name, String expectedError) {
-        this.name = name;
-        this.expectedError = expectedError;
-    }
-    
-    protected void checkError(AbstractAJAXResponse response) {
-        if(response.hasError()) {
-            String message = response.getResponse().getErrorMessage();
-            if(expectedError != null) {
-                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
-            } else {
-                fail(name+" did not expect error, but failed with: "+message);
-            }
+public class ConfigureEnvironment implements SlimTableTable {
 
-        } else {
-            
-            if(expectedError != null) {
-                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
+    private static final String HOSTNAME = "hostname";
+
+    private static final String PROTOCOL = "protocol";
+
+    public List doTable(List<List<String>> table) throws Exception {
+        Map<String, String> myMap = new HashMap<String, String>();
+
+        if (table.size() != 0) {
+            List<String> headers = table.get(0);
+            List<String> values = table.get(1);
+            for (int i = 0; i < headers.size(); i++) {
+                myMap.put(headers.get(i), values.get(i));
             }
         }
+
+        FitnesseEnvironment env = FitnesseEnvironment.getInstance();
+        env.setHostname(get(myMap, HOSTNAME, "localhost"));
+        env.setProtocol(get(myMap, PROTOCOL, "http"));
+        return Collections.EMPTY_LIST;
     }
-    
-    protected boolean expectsError() {
-        return expectedError != null;
-    }
-    
-    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
-        return client.getValues().getTimeZone();
-    }
-    
-    protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
-        try {
-            return client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JsonException during task creation: " + e.getLocalizedMessage());
+
+    private String get(Map<String, String> myMap, String key, String defaultValue) {
+        if (!myMap.containsKey(key)) {
+            return defaultValue;
         }
-        return null;
+        return myMap.get(key);
     }
 
 }

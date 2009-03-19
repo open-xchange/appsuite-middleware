@@ -192,7 +192,7 @@ public class TaskTestManager {
     }
     
     public void deleteTaskOnServer(Task taskToDelete, boolean failOnError) {
-        DeleteRequest request = new DeleteRequest(taskToDelete);
+        DeleteRequest request = new DeleteRequest(taskToDelete,failOnError);
         try {
             client.execute(request);
         } catch (AjaxException e) {

@@ -63,12 +63,12 @@ public abstract class AbstractTableTable implements SlimTableTable{
     }
     
     protected int resolveFolder(String folderExpression) throws FitnesseException {
-        FolderResolver folderResolver = new FolderResolver(environment.getClientForUser1(), environment);
+        FolderResolver folderResolver = new FolderResolver(environment.getClient(), environment);
         return folderResolver.getFolderId(folderExpression);
         
     }
     
     protected AJAXClient getClient() {
-        return environment.getClientForUser1();
+        return environment.getClient();
     }
 }

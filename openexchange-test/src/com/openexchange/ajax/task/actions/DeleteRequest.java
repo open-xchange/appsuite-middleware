@@ -70,15 +70,14 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
 
     private final Date lastModified;
 
+    private boolean failOnError;
+
     /**
      * Default constructor.
      */
     public DeleteRequest(final int folderId, final int taskId,
         final Date lastModified) {
-        super();
-        this.folderId = folderId;
-        this.taskId = taskId;
-        this.lastModified = lastModified;
+        this(folderId, taskId, lastModified, true);
     }
 
     /**
@@ -87,7 +86,7 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
      */
     public DeleteRequest(final Task task) {
         this(task.getParentFolderID(), task.getObjectID(),
-            task.getLastModified());
+            task.getLastModified(), true);
     }
 
     /**
@@ -95,7 +94,36 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
      * deleting the task.
      */
     public DeleteRequest(final InsertResponse insert) {
-        this(insert.getFolderId(), insert.getId(), insert.getTimestamp());
+        this(insert.getFolderId(), insert.getId(), insert.getTimestamp(), true);
+    }
+    
+    /**
+     * Default constructor.
+     */
+    public DeleteRequest(final int folderId, final int taskId,
+        final Date lastModified, boolean failOnError) {
+        super();
+        this.folderId = folderId;
+        this.taskId = taskId;
+        this.lastModified = lastModified;
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * @param task Task object to delete. This object must contain the folder
+     * identifier, the object identifier and the last modification timestamp.
+     */
+    public DeleteRequest(final Task task, boolean failOnError) {
+        this(task.getParentFolderID(), task.getObjectID(),
+            task.getLastModified(), failOnError);
+    }
+
+    /**
+     * @param insert An insert response contains all necessary information for
+     * deleting the task.
+     */
+    public DeleteRequest(final InsertResponse insert, boolean failOnError) {
+        this(insert.getFolderId(), insert.getId(), insert.getTimestamp(), failOnError);
     }
 
     /**
@@ -131,6 +159,6 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
      * {@inheritDoc}
      */
     public DeleteParser getParser() {
-        return new DeleteParser();
+        return new DeleteParser(failOnError);
     }
 }

@@ -88,7 +88,7 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
         
         FitnesseResult returnValues = new FitnesseResult(data, FitnesseResult.PASS);
         try {
-            step.perform(environment.getClientForUser1());
+            step.perform(environment.getClient());
         } catch (ComparisonFailure failure) {
             int pos = findFailedFieldPosition(failure.getExpected());
             returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());

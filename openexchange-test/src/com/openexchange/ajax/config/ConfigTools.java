@@ -225,7 +225,7 @@ public final class ConfigTools extends Assert {
     public static GetResponse get(final AJAXClient client,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return get(client.getSession(), request);
+        return client.execute(request);
     }
 
     public static GetResponse get(final AJAXSession session,
@@ -237,6 +237,16 @@ public final class ConfigTools extends Assert {
     public static SetResponse set(final AJAXClient client,
         final SetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return Executor.execute(client.getSession(), request);
+        return client.execute(request);
     }
+    
+    public static GetResponse get(final AJAXSession session,
+        final GetRequest request, String protocol, String hostname) throws AjaxException, IOException,
+        SAXException, JSONException {
+        if(protocol != null && hostname != null) {
+            return Executor.execute(session, request, protocol, hostname);
+        }
+        return Executor.execute(session, request);
+    }
+
 }

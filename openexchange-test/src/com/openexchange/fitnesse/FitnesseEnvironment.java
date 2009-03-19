@@ -14,6 +14,7 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.fitnesse.environment.CleanupHandler;
+import com.openexchange.fitnesse.environment.DefineUsers;
 import com.openexchange.fitnesse.environment.SymbolHandler;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.folders.PermissionDefinition;
@@ -33,7 +34,14 @@ public class FitnesseEnvironment {
     private SymbolHandler symbols;
     private CleanupHandler cleanup;
     private Map<String, PermissionDefinition> permissionDefinitions = new HashMap<String, PermissionDefinition>();
+    private Map<String, AJAXClient> clients = new HashMap<String, AJAXClient>();
+    private AJAXClient currentClient;
 
+    private String firstUser = null;
+    
+    private String hostname;
+    private String protocol;
+    
     private FitnesseEnvironment() {
         super();
         symbols = new SymbolHandler();
@@ -60,25 +68,11 @@ public class FitnesseEnvironment {
         instance = null;
     }
     
-    public AJAXClient getClientForUser1(){
-        try {
-            AJAXSession session = new AJAXSession();
-            session.setId(LoginTools.login(session, new LoginRequest("thorben","netline")).getSessionId());
-            return new AJAXClient( session );
-        } catch (AjaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+    public AJAXClient getClient(){
+        if(currentClient == null) {
+            currentClient = clients.get(firstUser);
         }
-        return null;
+        return currentClient;
     }
     
     public void registerStep(Step step){
@@ -107,4 +101,56 @@ public class FitnesseEnvironment {
     public PermissionDefinition getPermissions(String permissionRef) {
         return permissionDefinitions.get(permissionRef);
     }
+
+    /**
+     * @param username
+     * @param password
+     * @throws JSONException 
+     * @throws SAXException 
+     * @throws IOException 
+     * @throws AjaxException 
+     */
+    public void login(String username, String password) throws AjaxException, IOException, SAXException, JSONException {
+        if(firstUser == null) {
+            firstUser = username;
+        }
+        AJAXSession session = new AJAXSession();
+        session.setId(LoginTools.login(session, new LoginRequest(username,password), getProtocol(), getHostname()).getSessionId());
+        AJAXClient client = new AJAXClient( session );
+        client.setHostname(getHostname());
+        client.setProtocol(getProtocol());
+        clients.put(username, client);        
+    }
+
+    /**
+     * @param username
+     * @throws FitnesseException 
+     */
+    public void switchUser(String username) throws FitnesseException {
+        if(! clients.containsKey(username) )
+            throw new FitnesseException("User '"+username+"' not found. Was it declared using "+DefineUsers.class.getName()+"?");
+        currentClient = clients.get(username);
+    }
+
+    
+    public String getHostname() {
+        return hostname;
+    }
+
+    
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    
+    public String getProtocol() {
+        return protocol;
+    }
+
+    
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+    
+    
 }
