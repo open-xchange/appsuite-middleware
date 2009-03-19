@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.openexchange.groupware.container.AppointmentObject;
 
+//TODO: Do the fucking clean-up! --Tierlieb
 public class Bug10760Test extends AbstractRecurrenceTest {
 	
 	public Bug10760Test(final String name) {
