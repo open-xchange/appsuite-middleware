@@ -81,6 +81,8 @@ import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
@@ -413,6 +415,11 @@ public final class ServerActivator extends DeferredActivator {
             SearchException.SEARCH_COMPONENT.getAbbreviation(),
             "com.openexchange.search",
             SearchExceptionFactory.getInstance()));
+        componentRegistrationList.add(new ComponentRegistration(
+            context,
+            ManagedFileException.MANAGED_FILE_COMPONENT.getAbbreviation(),
+            "com.openexchange.filemanagement",
+            ManagedFileExceptionFactory.getInstance()));
     }
 
     @Override
