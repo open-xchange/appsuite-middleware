@@ -1,0 +1,16 @@
+|Import|
+|com.openexchange.fitnesse.tasks|
+|com.openexchange.fitnesse.appointments|
+|com.openexchange.fitnesse.contacts|
+|com.openexchange.fitnesse.folders|
+|com.openexchange.fitnesse.environment|
+|com.openexchange.fitnesse|
+
+!|Table:ConfigureEnvironment|
+|hostname|
+|192.168.32.163|
+
+!|Table:DefineUsers|
+|thorben|netline|
+|bond|netline|
+

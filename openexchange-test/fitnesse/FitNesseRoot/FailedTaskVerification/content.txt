@@ -1,3 +1,5 @@
+!include CommonSetup
+
 ''This test shows how a failed verification looks.''
 
 To do this, we create a task:

@@ -1,3 +1,5 @@
+!include CommonSetup
+
 ''With this test, we show you how to test for expected errors.''
 
 So, we create a test, as usual.

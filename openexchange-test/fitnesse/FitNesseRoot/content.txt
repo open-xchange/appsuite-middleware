@@ -15,6 +15,7 @@ These are the paths needed for the classpath:
 !define fitnesseClasses {../bin}
 !define testGuiJars {../../openexchange-test-gui/lib}
 !define commonJars {../../com.openexchange.common/lib}
+
 -
 
 This is the classpath to the libraries needed to run OX-tests.:

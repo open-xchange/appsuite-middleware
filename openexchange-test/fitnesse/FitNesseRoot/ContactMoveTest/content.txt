@@ -1,0 +1,27 @@
+!include CommonSetup
+
+!|Table:CreateFolder|
+| start_folder   |
+| parent         | module |
+| /Public folders| contacts  |
+
+
+!|Table:CreateFolder|
+| destination_folder   |
+| parent         | module |
+| /Public folders| contacts  |
+
+
+!|Table:CreateContact|
+| My movable contact |
+|folder      | given_name | surname |
+|start_folder| Alan       | Turing |
+
+
+!|Table:VerifyContact|
+| My movable contact |
+| folder             | given_name | surname |
+| start_folder | Alan       | Turing  |
+
+!include CommonTearDown
+

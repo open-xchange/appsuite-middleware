@@ -6,8 +6,7 @@ We start by defining that these tests are Slim tests. Both Fit and Slim tests ca
 
 We continue by setting the default path, so that we do not have to use the long package name for all our fixtures (or "tables", as they are called in Slim). This is usually done in >SetUp so it can be hidden from view, because it distracts from the main point of the test.
 
-|Import|
-|com.openexchange.fitnesse.tasks|
+!include CommonSetup
 
 Now we '''create a task'''. The !-FitNesse-! system uses a fixture to create this data on the server via the HTTP-API. You don't have to care about the specifics, the test suite does this for you. You just write:
 

@@ -1,2 +1,3 @@
 !see .BasicContactLifeCycle
 !see .BrokenEmailAdressContactTest
+!see .ContactMoveTest

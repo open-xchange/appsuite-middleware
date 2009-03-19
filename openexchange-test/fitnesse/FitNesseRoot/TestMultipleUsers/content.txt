@@ -1,0 +1,34 @@
+!include CommonSetup
+
+
+!|Table:DefinePermissions|
+|Both|
+|thorben| folder_admin, read_admin, write_admin, delete_admin |
+|bond   | see_folder, read_admin, write_all |
+
+!|Table:CreateFolder|
+|editable by both|
+|parent         | module | permissions |
+|/Public folders| tasks  | Both        |
+
+!|Table:CreateTask|
+|MyTask|
+|title | folder           |
+|MyTask| editable by both |
+
+!|Table:SwitchUser|
+|bond|
+
+!|Table:UpdateTask|
+|MyTask     |
+|title      |
+|UpdatedTask|
+
+The following will fail:
+
+!|Table:DeleteTask|
+|MyTask           |
+| expectedError   |
+| TSK-0014        |
+
+!|Table:EnvironmentCleanup|
