@@ -51,7 +51,6 @@ package com.openexchange.fitnesse.folders;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.fitnesse.AbstractTableTable;
 import com.openexchange.fitnesse.FitnesseEnvironment;
 import com.openexchange.fitnesse.SlimTableTable;
 import com.openexchange.fitnesse.wrappers.FitnesseResult;
