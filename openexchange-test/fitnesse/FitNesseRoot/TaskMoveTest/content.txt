@@ -1,5 +1,6 @@
 |Import|
 |com.openexchange.fitnesse.tasks|
+|com.openexchange.fitnesse.folders|
 
 !|Table:CreateTask|
 | Demo fixture |
@@ -13,7 +14,7 @@
 
 !|Table:MoveTask|
 | Demo fixture |
-|folder|
+|destination|
 |new_folder|
 
 !|Table:VerifyTask|
