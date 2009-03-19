@@ -1,3 +1,4 @@
+|TaskMoveTest||17:58:57 Thu, Mar 19, 2009|
 |BasicTaskMove||17:50:13 Thu, Mar 19, 2009|
 |OpenXchangeTestSuites.AcceptanceTestSuites.TaskAcceptanceTestSuite||17:49:18 Thu, Mar 19, 2009|
 |AppointmentMoveTest||17:38:25 Thu, Mar 19, 2009|
@@ -19,7 +20,6 @@
 |FrontPage||17:48:35 Mi, Mrz 18, 2009|
 |FailedTaskVerification.TearDown||17:46:54 Mi, Mrz 18, 2009|
 |FailedTaskVerification.SetUp||17:46:14 Mi, Mrz 18, 2009|
-|TaskMoveTest||17:38:29 Mi, Mrz 18, 2009|
 |TaskWithStartDateBeforeEndDate.TearDown||17:14:51 Mi, Mrz 18, 2009|
 |TaskWithStartDateBeforeEndDate.SetUp||17:14:37 Mi, Mrz 18, 2009|
 |OpenXchangeTestSuites.AcceptanceTestSuites||12:21:08 Mi, Mrz 18, 2009|
