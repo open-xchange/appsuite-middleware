@@ -51,6 +51,7 @@ package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -81,6 +82,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.impl.Version;
@@ -159,7 +161,81 @@ public class MailObject {
     }
 
     /**
-     * Adds a file attachment to this mail object
+     * Adds a file attachment to this mail object.
+     * 
+     * @param contentType The content type (incl. charset parameter)
+     * @param file The file to attach
+     * @throws MailException If file attachment cannot be added
+     */
+    public void addFileAttachment(final ContentType contentType, final File file) throws MailException {
+        /*
+         * Determine proper content type
+         */
+        final String fileName = file.getName();
+        final ContentType ct = new ContentType();
+        ct.setContentType(contentType);
+        if (ct.isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+            /*
+             * Try to determine MIME type
+             */
+            final String ctStr = MIMEType2ExtMap.getContentType(fileName);
+            final int pos = ctStr.indexOf('/');
+            ct.setPrimaryType(ctStr.substring(0, pos));
+            ct.setSubType(ctStr.substring(pos + 1));
+        }
+        try {
+            /*
+             * Generate body part
+             */
+            final MimeBodyPart bodyPart = new MimeBodyPart();
+            bodyPart.setDataHandler(new DataHandler(new FileDataSource(file, ct.toString())));
+            /*
+             * Content-Type
+             */
+            if (fileName != null && !ct.containsNameParameter()) {
+                ct.setNameParameter(fileName);
+            }
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
+            /*
+             * Force base64 encoding to keep data as it is
+             */
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+            /*
+             * Disposition
+             */
+            final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+            if (disposition == null) {
+                final String disp;
+                if (fileName == null) {
+                    disp = Part.ATTACHMENT;
+                } else {
+                    final ContentDisposition contentDisposition = new ContentDisposition(Part.ATTACHMENT);
+                    contentDisposition.setFilenameParameter(fileName);
+                    disp = fold(21, contentDisposition.toString());
+                }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, disp);
+            } else {
+                final ContentDisposition contentDisposition = new ContentDisposition(disposition);
+                contentDisposition.setDisposition(Part.ATTACHMENT);
+                if (fileName != null && !contentDisposition.containsFilenameParameter()) {
+                    contentDisposition.setFilenameParameter(fileName);
+                }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
+            }
+            /*
+             * Add to multipart
+             */
+            if (multipart == null) {
+                multipart = new MimeMultipart("mixed");
+            }
+            multipart.addBodyPart(bodyPart);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Adds a file attachment to this mail object.
      * 
      * @param contentType The content type (incl. charset parameter)
      * @param fileName The attachment's file name
