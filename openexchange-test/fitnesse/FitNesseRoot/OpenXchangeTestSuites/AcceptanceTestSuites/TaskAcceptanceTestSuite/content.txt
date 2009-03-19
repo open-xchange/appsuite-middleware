@@ -1,2 +1,3 @@
 !see .BasicTaskLifeCycle
 !see .TaskWithStartDateBeforeEndDate
+!see .TaskMoveTest
