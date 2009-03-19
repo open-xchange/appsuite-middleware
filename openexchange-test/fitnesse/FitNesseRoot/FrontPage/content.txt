@@ -1,18 +1,12 @@
 !1 Welcome to the Open-Xchange [[FitNesse][FitNesse.FitNesse]] server!
 
 
- * OpenXchangeTestSuites
-
-
-
- * TaskTests
- * ContactTests
-
 | '''Tests on this server'''|
 | [[All test suites][OpenXchangeTestSuites]]|''All test suites are bundled into this one.''|
 | [[All acceptance test suites][OpenXchangeTestSuites.AcceptanceTestSuites]]|''If you're a customer or just want to write an acceptance test, you should start here.''|
-| [[An example test][BasicTaskLifeCycle]]|''An example test to get you started''|
+| [[Example tests][TestExamples]]|''An set of example tests to get you started''|
 | [[Guidelines][OxTestGuidelines]]|''How to organize tests in this system''|
+
 
 | '''To Learn More about !-FitNesse-!'''|
 | [[A One-Minute Description][FitNesse.OneMinuteDescription]]|''What is [[FitNesse][FitNesse.FitNesse]]? Start here.''|
