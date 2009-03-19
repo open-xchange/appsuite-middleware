@@ -1,6 +1,4 @@
-|Import|
-|com.openexchange.fitnesse.tasks|
-|com.openexchange.fitnesse.folders|
+!include CommonSetup
 
 !|Table:CreateTask|
 | Demo fixture |
@@ -14,12 +12,12 @@
 
 !|Table:MoveTask|
 | Demo fixture |
-|destination|
+|folder|
 |new_folder|
 
 !|Table:VerifyTask|
 | Demo fixture    |
-| title     | start_date | end_date | note |
-| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+| title     | start_date | end_date | note | folder |
+| Nice Task | 08:30 AM   | 10:30 AM | Nice note | new_folder |
 
-!|Table:com.openexchange.fitnesse.EnvironmentCleanup|
+!include CommonTeardown
