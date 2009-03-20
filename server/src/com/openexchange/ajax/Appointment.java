@@ -50,17 +50,15 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api.OXConflictException;
@@ -100,7 +98,7 @@ public class Appointment extends DataServlet {
 			}
 			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
 			final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, ctx);
-			final Object responseObj = appointmentRequest.action(action, jsonObj);
+			final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
 			response.setTimestamp(appointmentRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final OXMandatoryFieldException e) {
@@ -164,7 +162,7 @@ public class Appointment extends DataServlet {
 				if (data.charAt(0) == '[') {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
-					final Object responseObj = appointmentRequest.action(action, jsonObj);
+					final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
 					response.setTimestamp(appointmentRequest.getTimestamp());
 					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {

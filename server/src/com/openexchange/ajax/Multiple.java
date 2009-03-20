@@ -225,7 +225,7 @@ public class Multiple extends SessionServlet {
 				}
 				jsonWriter.object();
 				try {
-					final Object tmp = appointmentRequest.action(action, jsonObj);
+					final JSONValue tmp = appointmentRequest.action(action, jsonObj);
 					jsonWriter.key(ResponseFields.DATA);
 					jsonWriter.value(tmp);
 					if (null != appointmentRequest.getTimestamp()) {

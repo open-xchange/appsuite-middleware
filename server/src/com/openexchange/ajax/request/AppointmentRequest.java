@@ -65,6 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.DateOrderObject;
 import com.openexchange.ajax.fields.AppointmentFields;
@@ -190,7 +191,7 @@ public class AppointmentRequest {
         return timestamp;
     }
 
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
         if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasCalendar()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
         }
