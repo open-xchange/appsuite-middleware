@@ -101,8 +101,8 @@ public interface ManagedFileManagement {
     /**
      * Creates a possibly managed input stream from specified bytes with default capacity.
      * <p>
-     * On first try bytes are kept in memory unless they exceed default capacity. If capacity is exceeded, bytes are turned into a managed
-     * file to reduce memory consumption.
+     * Bytes are kept in memory unless they exceed default capacity. If capacity is exceeded, bytes are turned into a managed file to reduce
+     * memory consumption.
      * 
      * @param bytes The bytes held by this input stream
      * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
@@ -112,8 +112,8 @@ public interface ManagedFileManagement {
     /**
      * Creates a possibly managed input stream from specified bytes.
      * <p>
-     * On first try bytes are kept in memory unless they exceed specified capacity. If capacity is exceeded, bytes are turned into a managed
-     * file to reduce memory consumption.
+     * Bytes are kept in memory unless they exceed specified capacity. If capacity is exceeded, bytes are turned into a managed file to
+     * reduce memory consumption.
      * 
      * @param bytes The bytes held by this input stream
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
@@ -124,8 +124,8 @@ public interface ManagedFileManagement {
     /**
      * Creates a possibly managed input stream from specified input stream with default capacity and unknown stream size.
      * <p>
-     * On first try stream's data is kept in memory unless it exceeds default capacity. If capacity is exceeded, stream's data is turned
-     * into a managed file to reduce memory consumption.
+     * Stream's data is kept in memory unless it exceeds default capacity. If capacity is exceeded, stream's data is turned into a managed
+     * file to reduce memory consumption.
      * 
      * @param in The input stream to manage
      * @throws ManagedFileException If an appropriate managed file cannot be created.
@@ -135,8 +135,8 @@ public interface ManagedFileManagement {
     /**
      * Creates a possibly managed input stream from specified input stream with unknown stream size.
      * <p>
-     * On first try stream's data is kept in memory unless it exceeds specified capacity. If capacity is exceeded, stream's data is turned
-     * into a managed file to reduce memory consumption.
+     * Stream's data is kept in memory unless it exceeds specified capacity. If capacity is exceeded, stream's data is turned into a managed
+     * file to reduce memory consumption.
      * 
      * @param in The input stream to manage
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
@@ -147,8 +147,8 @@ public interface ManagedFileManagement {
     /**
      * Creates a possibly managed input stream from specified input stream.
      * <p>
-     * On first try stream's data is kept in memory unless specified size exceeds specified capacity. If capacity is exceeded, stream's data
-     * is turned into a managed file to reduce memory consumption.
+     * OStream's data is kept in memory unless specified size exceeds specified capacity. If capacity is exceeded, stream's data is turned
+     * into a managed file to reduce memory consumption.
      * 
      * @param in The input stream to manage
      * @param size The stream's size; leave to <code>-1</code> if unknown
