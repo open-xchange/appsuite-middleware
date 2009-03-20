@@ -50,15 +50,13 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.groupware.AbstractOXException;
@@ -102,7 +100,7 @@ public class Resource extends DataServlet {
 
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
-			final Object responseObj = resourceRequest.action(action, jsonObj);
+			final JSONValue responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final AbstractOXException e) {
@@ -152,7 +150,7 @@ public class Resource extends DataServlet {
 
 				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
-				final Object responseObj = resourceRequest.action(action, jsonObj);
+				final JSONValue responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
 			} else {

@@ -333,7 +333,7 @@ public class Multiple extends SessionServlet {
 				final ResourceRequest resourceRequest = new ResourceRequest(session, ctx);
 				jsonWriter.object();
 				try {
-					final Object tmp = resourceRequest.action(action, jsonObj);
+					final JSONValue tmp = resourceRequest.action(action, jsonObj);
 					jsonWriter.key(ResponseFields.DATA);
 					jsonWriter.value(tmp);
 					if (null != resourceRequest.getTimestamp()) {
