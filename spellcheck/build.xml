@@ -20,28 +20,31 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
-    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	<property name="jsdkjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+
+	<property name="configreadjar" value="com.openexchange.configread.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	
+	<property name="jsonjar" value="json.jar" />
 	<property name="chardetjar" value="chardet-1.0.jar" />
 	
+	<property name="jazzyjar" value="jazzy-0.5.2.jar" />
 	<!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
-        <pathelement location="${bundlesdir}/${osgijar}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-    	<pathelement location="${bundlesdir}/${jsdkjar}"/>
+
+    	<pathelement location="${bundlesdir}/${configreadjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${serverjar}"/>
     	
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}" />
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
     	
-    	<pathelement location="lib/lib/jazzy-core.jar"/>
+    	<pathelement location="lib/${jazzyjar}"/>
     </path>
 
     <!-- Compile -->
