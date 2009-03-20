@@ -50,13 +50,11 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-
 import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.SearchFields;
@@ -99,8 +97,8 @@ public class GroupRequest {
 
     private static final String MODULE_GROUP = "group";
 
-    public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
-        Object retval = null;
+    public JSONValue action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
+        JSONValue retval = null;
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
             retval = actionList(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {

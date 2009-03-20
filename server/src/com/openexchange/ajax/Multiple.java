@@ -279,7 +279,7 @@ public class Multiple extends SessionServlet {
 				final GroupRequest groupRequest = new GroupRequest(session, ctx);
 				jsonWriter.object();
 				try {
-					final Object tmp = groupRequest.action(action, jsonObj);
+					final JSONValue tmp = groupRequest.action(action, jsonObj);
 					jsonWriter.key(ResponseFields.DATA);
 					jsonWriter.value(tmp);
 					if (null != groupRequest.getTimestamp()) {

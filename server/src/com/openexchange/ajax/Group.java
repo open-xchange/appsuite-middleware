@@ -50,17 +50,15 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.groupware.AbstractOXException;
@@ -103,7 +101,7 @@ public class Group extends DataServlet {
 			}
 			final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
 			final GroupRequest groupRequest = new GroupRequest(session, ctx);
-			final Object responseObj = groupRequest.action(action, jsonObj);
+			final JSONValue responseObj = groupRequest.action(action, jsonObj);
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
 			//response.setData(new JSONObject(sw.toString()));
@@ -146,7 +144,7 @@ public class Group extends DataServlet {
 			
 				jsonObj.put(AJAXServlet.PARAMETER_DATA, jData);
 
-				final Object responseObj = groupRequest.action(action, jsonObj);
+				final JSONValue responseObj = groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
 				// According to the documentation this is definitely an array
 				response.setData(responseObj);
