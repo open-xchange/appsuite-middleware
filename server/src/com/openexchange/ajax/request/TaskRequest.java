@@ -53,13 +53,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -161,7 +160,7 @@ public class TaskRequest {
 		return timestamp;
 	}
 
-	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
+	public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				ctx).hasTask()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");

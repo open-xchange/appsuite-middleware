@@ -50,17 +50,15 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.TaskRequest;
 import com.openexchange.api.OXConflictException;
@@ -109,7 +107,7 @@ public class Tasks extends DataServlet {
             final Context ctx = ContextStorage.getInstance().getContext(
                 sessionObj.getContextId());
 			final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
-			final Object responseObj = taskRequest.action(action, jsonObj);
+			final JSONValue responseObj = taskRequest.action(action, jsonObj);
 			response.setTimestamp(taskRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final OXMandatoryFieldException e) {
@@ -183,7 +181,7 @@ public class Tasks extends DataServlet {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(PARAMETER_DATA, jsonDataArray);
 				
-					final Object responseObj = taskRequest.action(action, jsonObj);
+					final JSONValue responseObj = taskRequest.action(action, jsonObj);
 					response.setTimestamp(taskRequest.getTimestamp());
 					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {

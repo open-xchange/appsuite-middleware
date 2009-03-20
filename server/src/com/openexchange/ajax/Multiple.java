@@ -360,7 +360,7 @@ public class Multiple extends SessionServlet {
 				final TaskRequest taskRequest = new TaskRequest(session, ctx);
 				jsonWriter.object();
 				try {
-					final Object tmp = taskRequest.action(action, jsonObj);
+					final JSONValue tmp = taskRequest.action(action, jsonObj);
 					jsonWriter.key(ResponseFields.DATA);
 					jsonWriter.value(tmp);
 					if (null != taskRequest.getTimestamp()) {
