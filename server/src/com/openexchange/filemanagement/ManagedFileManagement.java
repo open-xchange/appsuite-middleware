@@ -91,7 +91,7 @@ public interface ManagedFileManagement {
     public ManagedFile getByID(String id) throws ManagedFileException;
 
     /**
-     * Removes an existing managed file by its unique ID.
+     * Manually removes an existing managed file by its unique ID.
      * 
      * @param id The managed file's unique ID
      * @throws ManagedFileException If managed file exists and cannot be removed
