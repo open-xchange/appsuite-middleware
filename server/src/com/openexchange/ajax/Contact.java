@@ -62,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.parser.ContactParser;
@@ -168,7 +169,7 @@ public class Contact extends DataServlet {
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			
 			final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
-			final Object responseObj = contactRequest.action(action, jsonObj);
+			final JSONValue responseObj = contactRequest.action(action, jsonObj);
 			response.setTimestamp(contactRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final JSONException e) {
@@ -213,7 +214,7 @@ public class Contact extends DataServlet {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
 					
-					final Object responseObj = contactRequest.action(action, jsonObj);
+					final JSONValue responseObj = contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
 					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {

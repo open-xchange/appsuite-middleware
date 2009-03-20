@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -137,7 +138,7 @@ public class ContactRequest {
         }
     }
 
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException,
+    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException,
             JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException,
             OXJSONException {
         if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasContact()) {

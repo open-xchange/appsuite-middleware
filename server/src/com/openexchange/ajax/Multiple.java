@@ -252,7 +252,7 @@ public class Multiple extends SessionServlet {
 				final ContactRequest contactRequest = new ContactRequest(session, ctx);
 				jsonWriter.object();
 				try {
-					final Object tmp = contactRequest.action(action, jsonObj);
+					final JSONValue tmp = contactRequest.action(action, jsonObj);
 					jsonWriter.key(ResponseFields.DATA);
 					jsonWriter.value(tmp);
 					if (null != contactRequest.getTimestamp()) {
