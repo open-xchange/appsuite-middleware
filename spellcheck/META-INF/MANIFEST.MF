@@ -17,5 +17,5 @@ Import-Package: com.openexchange.config,
  org.osgi.framework;version="1.3.0"
 Bundle-Activator: com.openexchange.spellcheck.osgi.SpellCheckActivator
 Bundle-ClassPath: .,
- lib/lib/jazzy-core.jar
+ lib/jazzy-core.jar
 Export-Package: com.openexchange.spellcheck
