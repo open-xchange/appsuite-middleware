@@ -127,7 +127,7 @@ public class LinkedInContactParser {
 			vcardString = textUntilEnd + "PHOTO;VALUE=URI:" + pictureUrl + "\n" + "END:VCARD" + "\n";
 		}
 		//System.out.println(vcardString);
-		byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
+		byte[] vcard = vcardString.getBytes();
 		//System.out.println(vcardPage.getContent());
 		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
 		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
