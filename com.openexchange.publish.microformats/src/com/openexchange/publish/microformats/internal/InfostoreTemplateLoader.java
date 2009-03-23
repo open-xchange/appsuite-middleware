@@ -95,7 +95,17 @@ public class InfostoreTemplateLoader {
             while( iterator.hasNext() ) {
                 DocumentMetadata document = (DocumentMetadata) iterator.next();
                 
-                if(document.getTitle().contains(site.getName()) || document.getFileName().contains(site.getName())) {
+                String title = document.getTitle();
+                if(title == null) {
+                    title = "";
+                }
+                
+                String fileName = document.getFileName();
+                if(fileName == null){
+                    fileName = "";
+                }
+                
+                if(title.contains(site.getName()) || fileName.contains(site.getName())) {
                     return load(document, ctx, user, userConfig);
                 }
             }

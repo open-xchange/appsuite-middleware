@@ -134,7 +134,7 @@ public class Infostore extends PermissionServlet {
 
 	public static final InfostoreFacade VIRTUAL_FACADE = new VirtualFolderInfostoreFacade();
 
-	public static final InfostoreFacadeImpl FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
+	public static final InfostoreFacade FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
 	static {
 		FACADE.setTransactional(true);
 		FACADE.setSessionHolder(ThreadLocalSessionHolder.getInstance());

@@ -115,8 +115,24 @@ public class ContactHandler {
     
 
     protected boolean isSame(ContactObject first, ContactObject second){
-        return first.getGivenName().equals(second.getGivenName()) 
-        &&  first.getSurName().equals(second.getSurName());
+        if(first.containsGivenName()) {
+            if(!first.getGivenName().equals(second.getGivenName())) {
+                return false;
+            }
+        }
+        
+        if(first.containsSurName()) {
+            if(!first.getSurName().equals(second.getSurName())) {
+                return false;
+            }
+        }
+        
+        if(first.containsDisplayName()) {
+            if(!first.getDisplayName().equals(second.getDisplayName())) {
+                return false;
+            }
+        }
+        return true;
     }
     
 }
