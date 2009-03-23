@@ -3,8 +3,8 @@
 
 !|Table:DefinePermissions|
 |Both|
-|thorben| folder_admin, read_admin, write_admin, delete_admin |
-|bond   | see_folder, read_admin, write_all |
+|thorben | folder_admin, read_admin, write_admin, delete_admin |
+|marcus  | see_folder, read_admin, write_all |
 
 !|Table:CreateFolder|
 |editable by both|
@@ -17,7 +17,7 @@
 |MyTask| editable by both |
 
 !|Table:SwitchUser|
-|bond|
+|marcus|
 
 !|Table:UpdateTask|
 |MyTask     |

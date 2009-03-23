@@ -1,3 +1,5 @@
+|TestMultipleUsers||16:43:00 Mo, Mrz 23, 2009|
+|OpenXchangeTestSuites.AcceptanceTestSuites.TaskAcceptanceTestSuite||16:40:55 Mo, Mrz 23, 2009|
 |BasicAppointmentLifeCycle||13:12:15 Mo, Mrz 23, 2009|
 |BrokenEmailAdressContactTest||12:38:22 Mo, Mrz 23, 2009|
 |BasicContactLifeCycle||12:37:36 Mo, Mrz 23, 2009|
@@ -6,7 +8,6 @@
 |CommonSetup||11:48:23 Mo, Mrz 23, 2009|
 |||11:48:06 Mo, Mrz 23, 2009|
 |BasicTaskMove||11:40:14 Mo, Mrz 23, 2009|
-|TestMultipleUsers||12:58:36 Fr, Mrz 20, 2009|
 |SandBox||14:17:07 Do, Mrz 19, 2009|
 |FrontPage||17:48:35 Mi, Mrz 18, 2009|
 |FailedTaskVerification||17:46:59 Mi, Mrz 18, 2009|
@@ -17,7 +18,6 @@
 |TaskWithStartDateBeforeEndDate||17:18:24 Mi, Mrz 18, 2009|
 |TaskWithStartDateBeforeEndDate.TearDown||17:14:51 Mi, Mrz 18, 2009|
 |TaskWithStartDateBeforeEndDate.SetUp||17:14:37 Mi, Mrz 18, 2009|
-|OpenXchangeTestSuites.AcceptanceTestSuites.TaskAcceptanceTestSuite||17:13:55 Mi, Mrz 18, 2009|
 |OpenXchangeTestSuites.AcceptanceTestSuites.ContactAcceptanceTestSuite||12:01:19 Mi, Mrz 18, 2009|
 |OpenXchangeTestSuites.AcceptanceTestSuites.AppointmentAcceptanceTestSuite||11:36:52 Mi, Mrz 18, 2009|
 |BrokenEmailAdressContactTest.TearDown||14:32:22 Do, Mrz 12, 2009|

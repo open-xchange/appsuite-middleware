@@ -2,3 +2,4 @@
 !see .TaskWithStartDateBeforeEndDate
 !see .TaskMoveTest
 !see .BasicTaskMove
+!see .TestMultipleUsers
