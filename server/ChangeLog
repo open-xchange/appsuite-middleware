@@ -1,3 +1,7 @@
+* 2009-03-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #12220: Enhanced forward/reply calls by an optional "view" parameter to define the desired format
+
 * 2009-03-18 - thorben.betten@open-xchange.com
 
  - Bugfix #13406: Ensured applying receiver's locale to action replacement for proper translation

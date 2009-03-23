@@ -135,6 +135,20 @@ public final class MimeReply {
      * @throws MailException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session) throws MailException {
+        return getReplyMail(originalMail, replyAll, session, null);
+    }
+
+    /**
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
+     * 
+     * @param originalMail The referenced original mail
+     * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
+     * @param session The session containing needed user data
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @return An instance of {@link MailMessage} representing an user-editable reply mail
+     * @throws MailException If reply mail cannot be composed
+     */
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final UserSettingMail usm) throws MailException {
         final MimeMessage mimeMessage = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail);
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
@@ -164,7 +178,7 @@ public final class MimeReply {
                 preferToAsRecipient = originalMailFolder.equals(arr[StorageUtility.INDEX_SENT]) || originalMailFolder.equals(arr[StorageUtility.INDEX_DRAFTS]);
             }
         }
-        return getReplyMail(mimeMessage, replyAll, preferToAsRecipient, session, MIMEDefaultSession.getDefaultSession());
+        return getReplyMail(mimeMessage, replyAll, preferToAsRecipient, session, MIMEDefaultSession.getDefaultSession(), usm);
     }
 
     /**
@@ -175,13 +189,16 @@ public final class MimeReply {
      * @param preferToAsRecipient <code>true</code> to prefer header 'To' as recipient; otherwise <code>false</code>
      * @param session The session containing needed user data
      * @param mailSession The mail session
+     * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws MailException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final javax.mail.Session mailSession) throws MailException {
+    private static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws MailException {
         try {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+            final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(
+                session.getUserId(),
+                ctx) : userSettingMail;
             /*
              * New MIME message with a dummy session
              */

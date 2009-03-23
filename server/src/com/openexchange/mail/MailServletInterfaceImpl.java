@@ -444,7 +444,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs) throws MailException {
+    public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs, final UserSettingMail usm) throws MailException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -453,7 +453,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < folders.length; i++) {
             originalMails[i] = mailAccess.getMessageStorage().getMessage(prepareMailFolderParam(folders[i]), fowardMsgUIDs[i], false);
         }
-        return mailAccess.getLogicTools().getFowardMessage(originalMails);
+        return mailAccess.getLogicTools().getFowardMessage(originalMails, usm);
     }
 
     @Override
@@ -718,11 +718,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(final String folder, final long replyMsgUID, final boolean replyToAll) throws MailException {
+    public MailMessage getReplyMessageForDisplay(final String folder, final long replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws MailException {
         initConnection();
         final String fullname = prepareMailFolderParam(folder);
         final MailMessage originalMail = mailAccess.getMessageStorage().getMessage(fullname, replyMsgUID, false);
-        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll);
+        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm);
     }
 
     @Override

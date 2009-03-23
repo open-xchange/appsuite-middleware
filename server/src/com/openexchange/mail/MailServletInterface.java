@@ -57,6 +57,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -237,14 +238,14 @@ public abstract class MailServletInterface {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, long replyMsgUID, boolean replyToAll) throws MailException;
+    public abstract MailMessage getReplyMessageForDisplay(String folder, long replyMsgUID, boolean replyToAll, UserSettingMail usm) throws MailException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
      * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
      * the forward.
      */
-    public abstract MailMessage getForwardMessageForDisplay(String[] folders, long[] fowardMsgUIDs) throws MailException;
+    public abstract MailMessage getForwardMessageForDisplay(String[] folders, long[] fowardMsgUIDs, UserSettingMail usm) throws MailException;
 
     /**
      * Deletes the message located in given folder corresponding to given <code>msgUID</code>

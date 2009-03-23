@@ -686,6 +686,28 @@ public class Mail extends PermissionServlet implements UploadListener {
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String view = paramContainer.getStringParam(PARAMETER_VIEW);
+            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
+                session.getUserId(),
+                session.getContextId());
+            /*
+             * Deny saving for this request-specific settings
+             */
+            usmNoSave.setNoSave(true);
+            /*
+             * Overwrite settings with request's parameters
+             */
+            if (null != view) {
+                if (VIEW_TEXT.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(false);
+                } else if (VIEW_HTML.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(true);
+                    usmNoSave.setAllowHTMLImages(true);
+                } else {
+                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
+                        ". Using user's mail settings as fallback."));
+                }
+            }
             /*
              * Get reply message
              */
@@ -697,10 +719,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     closeMailInterface = true;
                 }
                 data = MessageWriter.writeMailMessage(
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all),
+                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave),
                     DisplayMode.MODIFYABLE,
                     session,
-                    null);
+                    usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -763,6 +785,28 @@ public class Mail extends PermissionServlet implements UploadListener {
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String view = paramContainer.getStringParam(PARAMETER_VIEW);
+            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
+                session.getUserId(),
+                session.getContextId());
+            /*
+             * Deny saving for this request-specific settings
+             */
+            usmNoSave.setNoSave(true);
+            /*
+             * Overwrite settings with request's parameters
+             */
+            if (null != view) {
+                if (VIEW_TEXT.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(false);
+                } else if (VIEW_HTML.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(true);
+                    usmNoSave.setAllowHTMLImages(true);
+                } else {
+                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
+                        ". Using user's mail settings as fallback."));
+                }
+            }
             /*
              * Get forward message
              */
@@ -775,7 +819,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(
                     new String[] { folderPath },
-                    new long[] { uid }), DisplayMode.MODIFYABLE, session, null);
+                    new long[] { uid },
+                    usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -1590,6 +1635,28 @@ public class Mail extends PermissionServlet implements UploadListener {
                 folders[i] = folderAndID.getString(PARAMETER_FOLDERID);
                 ids[i] = Long.parseLong(folderAndID.get(PARAMETER_ID).toString());
             }
+            final String view = paramContainer.getStringParam(PARAMETER_VIEW);
+            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
+                session.getUserId(),
+                session.getContextId());
+            /*
+             * Deny saving for this request-specific settings
+             */
+            usmNoSave.setNoSave(true);
+            /*
+             * Overwrite settings with request's parameters
+             */
+            if (null != view) {
+                if (VIEW_TEXT.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(false);
+                } else if (VIEW_HTML.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(true);
+                    usmNoSave.setAllowHTMLImages(true);
+                } else {
+                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
+                        ". Using user's mail settings as fallback."));
+                }
+            }
             /*
              * Get forward message
              */
@@ -1601,10 +1668,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     closeMailInterface = true;
                 }
                 data = MessageWriter.writeMailMessage(
-                    mailInterface.getForwardMessageForDisplay(folders, ids),
+                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
                     DisplayMode.MODIFYABLE,
                     session,
-                    null);
+                    usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
