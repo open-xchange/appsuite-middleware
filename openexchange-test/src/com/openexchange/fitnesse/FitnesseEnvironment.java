@@ -46,15 +46,6 @@ public class FitnesseEnvironment {
         super();
         symbols = new SymbolHandler();
         cleanup = new CleanupHandler();
-        
-        try {
-            System.setProperty("test.propfile", "/Users/fla/Documents/workspace/openexchange-test/conf/test.properties"); //TODO: move to setup
-            AJAXConfig.init();
-        } catch (ConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
     }
     
     public static FitnesseEnvironment getInstance(){
