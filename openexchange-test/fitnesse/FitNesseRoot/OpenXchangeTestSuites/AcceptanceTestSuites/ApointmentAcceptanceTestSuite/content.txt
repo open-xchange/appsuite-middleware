@@ -1,2 +1,0 @@
-!see .BasicAppointmentLifeCycle
-!see .AppointmentMoveTest
