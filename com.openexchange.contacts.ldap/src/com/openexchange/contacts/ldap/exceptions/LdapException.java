@@ -111,7 +111,12 @@ public class LdapException extends OXException {
         /**
          * Multi-values are not allowed for int attribute: %s
          */
-        MULTIVALUE_NOT_ALLOWED_INT("Multi-values are not allowed for int attribute: %s", Category.CODE_ERROR, 9);
+        MULTIVALUE_NOT_ALLOWED_INT("Multi-values are not allowed for int attribute: %s", Category.CODE_ERROR, 9),
+
+        /**
+         * Error while trying to create connection to LDAP server: %s
+         */
+        INITIAL_LDAP_ERROR("Error while trying to create connection to LDAP server: %s", Category.CODE_ERROR, 10);
 
 
         /**

@@ -50,13 +50,14 @@
 package com.openexchange.contacts.ldap.osgi;
 
 import java.util.Hashtable;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator.FolderIDAndAdminID;
+import com.openexchange.contacts.ldap.property.ContextProperties;
+import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -143,14 +144,16 @@ public final class LdapActivator extends DeferredActivator {
 
             final PropertyHandler instance = PropertyHandler.getInstance();
             instance.loadProperties();
-            final List<Integer> ctxs = instance.getContexts();
-            for (final Integer ctx : ctxs) {
-                final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(new ContextImpl(ctx));
-                final Hashtable<String, String> hashTable = new Hashtable<String, String>();
-                final String folderid = String.valueOf(createGlobalFolder.getFolderid());
-                hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, folderid);
-                context.registerService(ContactInterface.class.getName(), new LdapContactInterface(ctx, createGlobalFolder.getAdminid()), hashTable);
-                LOG.info("Registered global LDAP folder \"" + instance.getContextdetails().get(ctx).getFoldername() + "\" with id \"" + folderid + "\" for context: " + ctx);
+            for (final Integer ctx : instance.getContextdetails().keySet()) {
+                final ContextProperties contextProperties = instance.getContextdetails().get(ctx);
+                for (final FolderProperties folderprop : contextProperties.getFolderproperties()) {
+                    final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(new ContextImpl(ctx), folderprop);
+                    final int folderid = createGlobalFolder.getFolderid();
+                    final String stringfolderid = String.valueOf(folderid);
+                    final LdapContactInterface ldapContactInterface = new LdapContactInterface(ctx, createGlobalFolder.getAdminid(), folderprop, folderid);
+                    context.registerService(ContactInterface.class.getName(), ldapContactInterface, getHashtableWithFolderID(stringfolderid));
+                    LOG.info("Registered global LDAP folder \"" + folderprop.getFoldername() + "\" with id \"" + stringfolderid + "\" for context: " + ctx);
+                }
             }
             
         } catch (final Exception e) {
@@ -179,6 +182,12 @@ public final class LdapActivator extends DeferredActivator {
         } finally {
             started.set(false);
         }
+    }
+
+    private Hashtable<String, String> getHashtableWithFolderID(final String folderid) {
+        final Hashtable<String, String> hashTable = new Hashtable<String, String>();
+        hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, folderid);
+        return hashTable;
     }
 
 }

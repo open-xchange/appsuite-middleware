@@ -69,7 +69,6 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/bundles/com.openexchange.contacts.ldap.jar
-%config(noreplace) /opt/open-xchange/etc/groupware/contacts-ldap.properties
 %config(noreplace) %dir /opt/open-xchange/etc/groupware/contacts-ldap
 %config(noreplace) /opt/open-xchange/etc/groupware/contacts-ldap/*
 %changelog

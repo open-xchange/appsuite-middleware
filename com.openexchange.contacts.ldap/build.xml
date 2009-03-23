@@ -65,7 +65,6 @@
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     	<mkdir dir="${destdir}/${prefix}/etc/groupware"/>
-    	<copy file="etc/contacts-ldap.properties" todir="${destdir}/${prefix}/etc/groupware"/>
     	<mkdir dir="${destdir}/${prefix}/etc/groupware/contacts-ldap"/>
     	<copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware/contacts-ldap">
     		<fileset dir="etc/contacts-ldap">

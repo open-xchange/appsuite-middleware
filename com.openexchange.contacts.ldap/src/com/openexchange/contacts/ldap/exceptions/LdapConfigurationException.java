@@ -79,7 +79,7 @@ public class LdapConfigurationException extends OXException {
         /**
          * The parameter "%s" is not set in the property file
          */
-        PARAMETER_NOT_SET("The parameter \"%s\" is not set in the property file", Category.SETUP_ERROR, 4),
+        PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file \"%s\"", Category.SETUP_ERROR, 4),
 
         /**
          * Value for context "%s" is no integer value

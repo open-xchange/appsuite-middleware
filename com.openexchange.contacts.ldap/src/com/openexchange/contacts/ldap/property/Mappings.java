@@ -106,12 +106,18 @@ public class Mappings {
 
         private final String name;
         
+        private static String prefix;
+        
         private Parameters(final String name) {
             this.name = name;
         }
 
-        public final String getName() {
-            return PropertyHandler.bundlename + name;
+        public String getName() {
+            return prefix + '.' + name;
+        }
+        
+        public static void setPrefix(final String pref) {
+            prefix = pref;
         }
     }
     
@@ -211,200 +217,201 @@ public class Mappings {
     private String userfield19;
     private String userfield20;
 
-    public static Mappings getMappingsFromProperties(final Properties props) throws LdapConfigurationException {
+    public static Mappings getMappingsFromProperties(final Properties props, final String prefix, final String mappingfile) throws LdapConfigurationException {
         final Mappings retval = new Mappings();
+        Parameters.setPrefix(prefix);
         
-        retval.setDisplayname(PropertyHandler.checkStringProperty(props, Parameters.displayname.getName()));
+        retval.setDisplayname(PropertyHandler.checkStringProperty(props, Parameters.displayname.getName(), mappingfile));
         
-        retval.setGivenname(PropertyHandler.checkStringProperty(props, Parameters.givenname.getName()));
+        retval.setGivenname(PropertyHandler.checkStringProperty(props, Parameters.givenname.getName(), mappingfile));
         
-        retval.setSurname(PropertyHandler.checkStringProperty(props, Parameters.surname.getName()));
+        retval.setSurname(PropertyHandler.checkStringProperty(props, Parameters.surname.getName(), mappingfile));
 
-        retval.setEmail1(PropertyHandler.checkStringProperty(props, Parameters.email1.getName()));
+        retval.setEmail1(PropertyHandler.checkStringProperty(props, Parameters.email1.getName(), mappingfile));
         
-        retval.setDepartment(PropertyHandler.checkStringProperty(props, Parameters.department.getName()));
+        retval.setDepartment(PropertyHandler.checkStringProperty(props, Parameters.department.getName(), mappingfile));
         
-        retval.setCompany(PropertyHandler.checkStringProperty(props, Parameters.company.getName()));
+        retval.setCompany(PropertyHandler.checkStringProperty(props, Parameters.company.getName(), mappingfile));
 
-        retval.setBirthday(PropertyHandler.checkStringProperty(props, Parameters.birthday.getName()));
+        retval.setBirthday(PropertyHandler.checkStringProperty(props, Parameters.birthday.getName(), mappingfile));
         
-        retval.setAnniversary(PropertyHandler.checkStringProperty(props, Parameters.anniversary.getName()));
+        retval.setAnniversary(PropertyHandler.checkStringProperty(props, Parameters.anniversary.getName(), mappingfile));
         
-        retval.setBranches(PropertyHandler.checkStringProperty(props, Parameters.branches.getName()));
+        retval.setBranches(PropertyHandler.checkStringProperty(props, Parameters.branches.getName(), mappingfile));
         
-        retval.setBusiness_category(PropertyHandler.checkStringProperty(props, Parameters.business_category.getName()));
+        retval.setBusiness_category(PropertyHandler.checkStringProperty(props, Parameters.business_category.getName(), mappingfile));
         
-        retval.setPostal_code_business(PropertyHandler.checkStringProperty(props, Parameters.postal_code_business.getName()));
+        retval.setPostal_code_business(PropertyHandler.checkStringProperty(props, Parameters.postal_code_business.getName(), mappingfile));
         
-        retval.setState_business(PropertyHandler.checkStringProperty(props, Parameters.state_business.getName()));
+        retval.setState_business(PropertyHandler.checkStringProperty(props, Parameters.state_business.getName(), mappingfile));
         
-        retval.setStreet_business(PropertyHandler.checkStringProperty(props, Parameters.street_business.getName()));
+        retval.setStreet_business(PropertyHandler.checkStringProperty(props, Parameters.street_business.getName(), mappingfile));
         
-        retval.setTelephone_callback(PropertyHandler.checkStringProperty(props, Parameters.telephone_callback.getName()));
+        retval.setTelephone_callback(PropertyHandler.checkStringProperty(props, Parameters.telephone_callback.getName(), mappingfile));
         
-        retval.setCity_home(PropertyHandler.checkStringProperty(props, Parameters.city_home.getName()));
+        retval.setCity_home(PropertyHandler.checkStringProperty(props, Parameters.city_home.getName(), mappingfile));
         
-        retval.setCommercial_register(PropertyHandler.checkStringProperty(props, Parameters.commercial_register.getName()));
+        retval.setCommercial_register(PropertyHandler.checkStringProperty(props, Parameters.commercial_register.getName(), mappingfile));
         
-        retval.setCountry_home(PropertyHandler.checkStringProperty(props, Parameters.country_home.getName()));
+        retval.setCountry_home(PropertyHandler.checkStringProperty(props, Parameters.country_home.getName(), mappingfile));
         
-        retval.setEmail2(PropertyHandler.checkStringProperty(props, Parameters.email2.getName()));
+        retval.setEmail2(PropertyHandler.checkStringProperty(props, Parameters.email2.getName(), mappingfile));
         
-        retval.setEmail3(PropertyHandler.checkStringProperty(props, Parameters.email3.getName()));
+        retval.setEmail3(PropertyHandler.checkStringProperty(props, Parameters.email3.getName(), mappingfile));
         
-        retval.setEmployeetype(PropertyHandler.checkStringProperty(props, Parameters.employeetype.getName()));
+        retval.setEmployeetype(PropertyHandler.checkStringProperty(props, Parameters.employeetype.getName(), mappingfile));
         
-        retval.setFax_business(PropertyHandler.checkStringProperty(props, Parameters.fax_business.getName()));
+        retval.setFax_business(PropertyHandler.checkStringProperty(props, Parameters.fax_business.getName(), mappingfile));
         
-        retval.setFax_home(PropertyHandler.checkStringProperty(props, Parameters.fax_home.getName()));
+        retval.setFax_home(PropertyHandler.checkStringProperty(props, Parameters.fax_home.getName(), mappingfile));
         
-        retval.setFax_other(PropertyHandler.checkStringProperty(props, Parameters.fax_other.getName()));
+        retval.setFax_other(PropertyHandler.checkStringProperty(props, Parameters.fax_other.getName(), mappingfile));
         
-        retval.setInstant_messenger1(PropertyHandler.checkStringProperty(props, Parameters.instant_messenger1.getName()));
+        retval.setInstant_messenger1(PropertyHandler.checkStringProperty(props, Parameters.instant_messenger1.getName(), mappingfile));
         
-        retval.setInstant_messenger2(PropertyHandler.checkStringProperty(props, Parameters.instant_messenger2.getName()));
+        retval.setInstant_messenger2(PropertyHandler.checkStringProperty(props, Parameters.instant_messenger2.getName(), mappingfile));
         
-        retval.setTelephone_ip(PropertyHandler.checkStringProperty(props, Parameters.telephone_ip.getName()));
+        retval.setTelephone_ip(PropertyHandler.checkStringProperty(props, Parameters.telephone_ip.getName(), mappingfile));
         
-        retval.setTelephone_isdn(PropertyHandler.checkStringProperty(props, Parameters.telephone_isdn.getName()));
+        retval.setTelephone_isdn(PropertyHandler.checkStringProperty(props, Parameters.telephone_isdn.getName(), mappingfile));
         
-        retval.setManager_name(PropertyHandler.checkStringProperty(props, Parameters.manager_name.getName()));
+        retval.setManager_name(PropertyHandler.checkStringProperty(props, Parameters.manager_name.getName(), mappingfile));
         
-        retval.setMarital_status(PropertyHandler.checkStringProperty(props, Parameters.marital_status.getName()));
+        retval.setMarital_status(PropertyHandler.checkStringProperty(props, Parameters.marital_status.getName(), mappingfile));
         
-        retval.setCellular_telephone1(PropertyHandler.checkStringProperty(props, Parameters.cellular_telephone1.getName()));
+        retval.setCellular_telephone1(PropertyHandler.checkStringProperty(props, Parameters.cellular_telephone1.getName(), mappingfile));
         
-        retval.setCellular_telephone2(PropertyHandler.checkStringProperty(props, Parameters.cellular_telephone2.getName()));
+        retval.setCellular_telephone2(PropertyHandler.checkStringProperty(props, Parameters.cellular_telephone2.getName(), mappingfile));
         
-        retval.setInfo(PropertyHandler.checkStringProperty(props, Parameters.info.getName()));
+        retval.setInfo(PropertyHandler.checkStringProperty(props, Parameters.info.getName(), mappingfile));
         
-        retval.setNickname(PropertyHandler.checkStringProperty(props, Parameters.nickname.getName()));
+        retval.setNickname(PropertyHandler.checkStringProperty(props, Parameters.nickname.getName(), mappingfile));
         
-        retval.setNumber_of_children(PropertyHandler.checkStringProperty(props, Parameters.number_of_children.getName()));
+        retval.setNumber_of_children(PropertyHandler.checkStringProperty(props, Parameters.number_of_children.getName(), mappingfile));
         
-        retval.setNote(PropertyHandler.checkStringProperty(props, Parameters.note.getName()));
+        retval.setNote(PropertyHandler.checkStringProperty(props, Parameters.note.getName(), mappingfile));
         
-        retval.setNumber_of_employee(PropertyHandler.checkStringProperty(props, Parameters.number_of_employee.getName()));
+        retval.setNumber_of_employee(PropertyHandler.checkStringProperty(props, Parameters.number_of_employee.getName(), mappingfile));
         
-        retval.setTelephone_pager(PropertyHandler.checkStringProperty(props, Parameters.telephone_pager.getName()));
+        retval.setTelephone_pager(PropertyHandler.checkStringProperty(props, Parameters.telephone_pager.getName(), mappingfile));
         
-        retval.setTelephone_assistant(PropertyHandler.checkStringProperty(props, Parameters.telephone_assistant.getName()));
+        retval.setTelephone_assistant(PropertyHandler.checkStringProperty(props, Parameters.telephone_assistant.getName(), mappingfile));
         
-        retval.setTelephone_business1(PropertyHandler.checkStringProperty(props, Parameters.telephone_business1.getName()));
+        retval.setTelephone_business1(PropertyHandler.checkStringProperty(props, Parameters.telephone_business1.getName(), mappingfile));
         
-        retval.setTelephone_business2(PropertyHandler.checkStringProperty(props, Parameters.telephone_business2.getName()));
+        retval.setTelephone_business2(PropertyHandler.checkStringProperty(props, Parameters.telephone_business2.getName(), mappingfile));
         
-        retval.setTelephone_car(PropertyHandler.checkStringProperty(props, Parameters.telephone_car.getName()));
+        retval.setTelephone_car(PropertyHandler.checkStringProperty(props, Parameters.telephone_car.getName(), mappingfile));
         
-        retval.setTelephone_company(PropertyHandler.checkStringProperty(props, Parameters.telephone_company.getName()));
+        retval.setTelephone_company(PropertyHandler.checkStringProperty(props, Parameters.telephone_company.getName(), mappingfile));
         
-        retval.setTelephone_home1(PropertyHandler.checkStringProperty(props, Parameters.telephone_home1.getName()));
+        retval.setTelephone_home1(PropertyHandler.checkStringProperty(props, Parameters.telephone_home1.getName(), mappingfile));
         
-        retval.setTelephone_home2(PropertyHandler.checkStringProperty(props, Parameters.telephone_home2.getName()));
+        retval.setTelephone_home2(PropertyHandler.checkStringProperty(props, Parameters.telephone_home2.getName(), mappingfile));
         
-        retval.setTelephone_other(PropertyHandler.checkStringProperty(props, Parameters.telephone_other.getName()));
+        retval.setTelephone_other(PropertyHandler.checkStringProperty(props, Parameters.telephone_other.getName(), mappingfile));
         
-        retval.setPostal_code_home(PropertyHandler.checkStringProperty(props, Parameters.postal_code_home.getName()));
+        retval.setPostal_code_home(PropertyHandler.checkStringProperty(props, Parameters.postal_code_home.getName(), mappingfile));
         
-        retval.setProfession(PropertyHandler.checkStringProperty(props, Parameters.profession.getName()));
+        retval.setProfession(PropertyHandler.checkStringProperty(props, Parameters.profession.getName(), mappingfile));
         
-        retval.setTelephone_radio(PropertyHandler.checkStringProperty(props, Parameters.telephone_radio.getName()));
+        retval.setTelephone_radio(PropertyHandler.checkStringProperty(props, Parameters.telephone_radio.getName(), mappingfile));
         
-        retval.setRoom_number(PropertyHandler.checkStringProperty(props, Parameters.room_number.getName()));
+        retval.setRoom_number(PropertyHandler.checkStringProperty(props, Parameters.room_number.getName(), mappingfile));
         
-        retval.setSales_volume(PropertyHandler.checkStringProperty(props, Parameters.sales_volume.getName()));
+        retval.setSales_volume(PropertyHandler.checkStringProperty(props, Parameters.sales_volume.getName(), mappingfile));
         
-        retval.setCity_other(PropertyHandler.checkStringProperty(props, Parameters.city_other.getName()));
+        retval.setCity_other(PropertyHandler.checkStringProperty(props, Parameters.city_other.getName(), mappingfile));
         
-        retval.setCountry_other(PropertyHandler.checkStringProperty(props, Parameters.country_other.getName()));
+        retval.setCountry_other(PropertyHandler.checkStringProperty(props, Parameters.country_other.getName(), mappingfile));
         
-        retval.setMiddle_name(PropertyHandler.checkStringProperty(props, Parameters.middle_name.getName()));
+        retval.setMiddle_name(PropertyHandler.checkStringProperty(props, Parameters.middle_name.getName(), mappingfile));
         
-        retval.setPostal_code_other(PropertyHandler.checkStringProperty(props, Parameters.postal_code_other.getName()));
+        retval.setPostal_code_other(PropertyHandler.checkStringProperty(props, Parameters.postal_code_other.getName(), mappingfile));
         
-        retval.setState_other(PropertyHandler.checkStringProperty(props, Parameters.state_other.getName()));
+        retval.setState_other(PropertyHandler.checkStringProperty(props, Parameters.state_other.getName(), mappingfile));
         
-        retval.setStreet_other(PropertyHandler.checkStringProperty(props, Parameters.street_other.getName()));
+        retval.setStreet_other(PropertyHandler.checkStringProperty(props, Parameters.street_other.getName(), mappingfile));
         
-        retval.setSpouse_name(PropertyHandler.checkStringProperty(props, Parameters.spouse_name.getName()));
+        retval.setSpouse_name(PropertyHandler.checkStringProperty(props, Parameters.spouse_name.getName(), mappingfile));
         
-        retval.setState_home(PropertyHandler.checkStringProperty(props, Parameters.state_home.getName()));
+        retval.setState_home(PropertyHandler.checkStringProperty(props, Parameters.state_home.getName(), mappingfile));
         
-        retval.setStreet_home(PropertyHandler.checkStringProperty(props, Parameters.street_home.getName()));
+        retval.setStreet_home(PropertyHandler.checkStringProperty(props, Parameters.street_home.getName(), mappingfile));
         
-        retval.setSuffix(PropertyHandler.checkStringProperty(props, Parameters.suffix.getName()));
+        retval.setSuffix(PropertyHandler.checkStringProperty(props, Parameters.suffix.getName(), mappingfile));
 
-        retval.setTax_id(PropertyHandler.checkStringProperty(props, Parameters.tax_id.getName()));
+        retval.setTax_id(PropertyHandler.checkStringProperty(props, Parameters.tax_id.getName(), mappingfile));
         
-        retval.setTelephone_telex(PropertyHandler.checkStringProperty(props, Parameters.telephone_telex.getName()));
+        retval.setTelephone_telex(PropertyHandler.checkStringProperty(props, Parameters.telephone_telex.getName(), mappingfile));
         
-        retval.setTelephone_ttytdd(PropertyHandler.checkStringProperty(props, Parameters.telephone_ttytdd.getName()));
+        retval.setTelephone_ttytdd(PropertyHandler.checkStringProperty(props, Parameters.telephone_ttytdd.getName(), mappingfile));
         
-        retval.setUrl(PropertyHandler.checkStringProperty(props, Parameters.url.getName()));
+        retval.setUrl(PropertyHandler.checkStringProperty(props, Parameters.url.getName(), mappingfile));
         
-        retval.setUserfield01(PropertyHandler.checkStringProperty(props, Parameters.userfield01.getName()));
+        retval.setUserfield01(PropertyHandler.checkStringProperty(props, Parameters.userfield01.getName(), mappingfile));
         
-        retval.setUserfield02(PropertyHandler.checkStringProperty(props, Parameters.userfield02.getName()));
+        retval.setUserfield02(PropertyHandler.checkStringProperty(props, Parameters.userfield02.getName(), mappingfile));
         
-        retval.setUserfield03(PropertyHandler.checkStringProperty(props, Parameters.userfield03.getName()));
+        retval.setUserfield03(PropertyHandler.checkStringProperty(props, Parameters.userfield03.getName(), mappingfile));
         
-        retval.setUserfield04(PropertyHandler.checkStringProperty(props, Parameters.userfield04.getName()));
+        retval.setUserfield04(PropertyHandler.checkStringProperty(props, Parameters.userfield04.getName(), mappingfile));
         
-        retval.setUserfield05(PropertyHandler.checkStringProperty(props, Parameters.userfield05.getName()));
+        retval.setUserfield05(PropertyHandler.checkStringProperty(props, Parameters.userfield05.getName(), mappingfile));
         
-        retval.setUserfield06(PropertyHandler.checkStringProperty(props, Parameters.userfield06.getName()));
+        retval.setUserfield06(PropertyHandler.checkStringProperty(props, Parameters.userfield06.getName(), mappingfile));
         
-        retval.setUserfield07(PropertyHandler.checkStringProperty(props, Parameters.userfield07.getName()));
+        retval.setUserfield07(PropertyHandler.checkStringProperty(props, Parameters.userfield07.getName(), mappingfile));
         
-        retval.setUserfield08(PropertyHandler.checkStringProperty(props, Parameters.userfield08.getName()));
+        retval.setUserfield08(PropertyHandler.checkStringProperty(props, Parameters.userfield08.getName(), mappingfile));
         
-        retval.setUserfield09(PropertyHandler.checkStringProperty(props, Parameters.userfield09.getName()));
+        retval.setUserfield09(PropertyHandler.checkStringProperty(props, Parameters.userfield09.getName(), mappingfile));
         
-        retval.setUserfield10(PropertyHandler.checkStringProperty(props, Parameters.userfield10.getName()));
+        retval.setUserfield10(PropertyHandler.checkStringProperty(props, Parameters.userfield10.getName(), mappingfile));
         
-        retval.setUserfield10(PropertyHandler.checkStringProperty(props, Parameters.userfield10.getName()));
+        retval.setUserfield10(PropertyHandler.checkStringProperty(props, Parameters.userfield10.getName(), mappingfile));
         
-        retval.setUserfield11(PropertyHandler.checkStringProperty(props, Parameters.userfield11.getName()));
+        retval.setUserfield11(PropertyHandler.checkStringProperty(props, Parameters.userfield11.getName(), mappingfile));
         
-        retval.setUserfield12(PropertyHandler.checkStringProperty(props, Parameters.userfield12.getName()));
+        retval.setUserfield12(PropertyHandler.checkStringProperty(props, Parameters.userfield12.getName(), mappingfile));
         
-        retval.setUserfield13(PropertyHandler.checkStringProperty(props, Parameters.userfield13.getName()));
+        retval.setUserfield13(PropertyHandler.checkStringProperty(props, Parameters.userfield13.getName(), mappingfile));
         
-        retval.setUserfield14(PropertyHandler.checkStringProperty(props, Parameters.userfield14.getName()));
+        retval.setUserfield14(PropertyHandler.checkStringProperty(props, Parameters.userfield14.getName(), mappingfile));
         
-        retval.setUserfield15(PropertyHandler.checkStringProperty(props, Parameters.userfield15.getName()));
+        retval.setUserfield15(PropertyHandler.checkStringProperty(props, Parameters.userfield15.getName(), mappingfile));
         
-        retval.setUserfield16(PropertyHandler.checkStringProperty(props, Parameters.userfield16.getName()));
+        retval.setUserfield16(PropertyHandler.checkStringProperty(props, Parameters.userfield16.getName(), mappingfile));
         
-        retval.setUserfield17(PropertyHandler.checkStringProperty(props, Parameters.userfield17.getName()));
+        retval.setUserfield17(PropertyHandler.checkStringProperty(props, Parameters.userfield17.getName(), mappingfile));
         
-        retval.setUserfield18(PropertyHandler.checkStringProperty(props, Parameters.userfield18.getName()));
+        retval.setUserfield18(PropertyHandler.checkStringProperty(props, Parameters.userfield18.getName(), mappingfile));
         
-        retval.setUserfield19(PropertyHandler.checkStringProperty(props, Parameters.userfield19.getName()));
+        retval.setUserfield19(PropertyHandler.checkStringProperty(props, Parameters.userfield19.getName(), mappingfile));
         
-        retval.setUserfield20(PropertyHandler.checkStringProperty(props, Parameters.userfield20.getName()));
+        retval.setUserfield20(PropertyHandler.checkStringProperty(props, Parameters.userfield20.getName(), mappingfile));
         
-        retval.setCity_business(PropertyHandler.checkStringProperty(props, Parameters.city_business.getName()));
+        retval.setCity_business(PropertyHandler.checkStringProperty(props, Parameters.city_business.getName(), mappingfile));
         
-        retval.setCountry_business(PropertyHandler.checkStringProperty(props, Parameters.country_business.getName()));
+        retval.setCountry_business(PropertyHandler.checkStringProperty(props, Parameters.country_business.getName(), mappingfile));
         
-        retval.setAssistant_name(PropertyHandler.checkStringProperty(props, Parameters.assistant_name.getName()));
+        retval.setAssistant_name(PropertyHandler.checkStringProperty(props, Parameters.assistant_name.getName(), mappingfile));
         
-        retval.setTelephone_primary(PropertyHandler.checkStringProperty(props, Parameters.telephone_primary.getName()));
+        retval.setTelephone_primary(PropertyHandler.checkStringProperty(props, Parameters.telephone_primary.getName(), mappingfile));
         
-        retval.setCategories(PropertyHandler.checkStringProperty(props, Parameters.categories.getName()));
+        retval.setCategories(PropertyHandler.checkStringProperty(props, Parameters.categories.getName(), mappingfile));
         
-        retval.setDefaultaddress(PropertyHandler.checkStringProperty(props, Parameters.defaultaddress.getName()));
+        retval.setDefaultaddress(PropertyHandler.checkStringProperty(props, Parameters.defaultaddress.getName(), mappingfile));
         
-        retval.setTitle(PropertyHandler.checkStringProperty(props, Parameters.title.getName()));
+        retval.setTitle(PropertyHandler.checkStringProperty(props, Parameters.title.getName(), mappingfile));
 
-        retval.setPosition(PropertyHandler.checkStringProperty(props, Parameters.position.getName()));
+        retval.setPosition(PropertyHandler.checkStringProperty(props, Parameters.position.getName(), mappingfile));
         
-        retval.setLastmodified(PropertyHandler.checkStringProperty(props, Parameters.lastmodified.getName()));
+        retval.setLastmodified(PropertyHandler.checkStringProperty(props, Parameters.lastmodified.getName(), mappingfile));
         
-        retval.setCreationdate(PropertyHandler.checkStringProperty(props, Parameters.creationdate.getName()));
+        retval.setCreationdate(PropertyHandler.checkStringProperty(props, Parameters.creationdate.getName(), mappingfile));
 
-        retval.setUniqueid(PropertyHandler.checkStringProperty(props, Parameters.uniqueid.getName()));
+        retval.setUniqueid(PropertyHandler.checkStringProperty(props, Parameters.uniqueid.getName(), mappingfile));
 
         return retval;
     }

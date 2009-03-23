@@ -81,12 +81,14 @@ import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
+import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
-import com.openexchange.contacts.ldap.property.PropertyHandler;
-import com.openexchange.contacts.ldap.property.PropertyHandler.Sorting;
+import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
@@ -107,7 +109,7 @@ public class LdapContactInterface implements ContactInterface {
          * @param field
          * @param sort
          */
-        private SortInfo(int field, Order sort) {
+        private SortInfo(final int field, final Order sort) {
             this.field = field;
             this.sort = sort;
         }
@@ -137,23 +139,29 @@ public class LdapContactInterface implements ContactInterface {
     
     private final int context;
     
+    private final FolderProperties folderprop;
+    
+    private final int folderid;
+    
     private final Map<Integer, String> keys = new ConcurrentHashMap<Integer, String>();
     
     private final Map<String, Integer> values = new ConcurrentHashMap<String, Integer>();
     
     private Session session;
     
-    public LdapContactInterface(final int context, final int admin_id) {
+    public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid) {
         this.context = context;
         this.admin_id = admin_id;
+        this.folderprop = folderprop;
+        this.folderid = folderid;
     }
     
     
-    public void deleteContactObject(int oid, int fuid, Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
+    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
         throw new LdapException(Code.DELETE_NOT_POSSIBLE);
     }
 
-    public SearchIterator<ContactObject> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<ContactObject> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         final Set<Integer> columns = getColumnSet(cols);
         final int[] folders = searchobject.getFolders();
@@ -168,10 +176,9 @@ public class LdapContactInterface implements ContactInterface {
             throw new LdapException(Code.FOLDERID_OBJECT_NULL);
         }
         final ArrayList<ContactObject> arrayList;
-        final PropertyHandler instance = PropertyHandler.getInstance();
-        final String searchfilter = instance.getContextdetails().get(this.context).getSearchfilter();
+        final String searchfilter = folderprop.getSearchfilter();
         if (searchobject.isStartLetter()) {
-            arrayList = getLDAPContacts(folderId, columns, "(&" + searchfilter + "("+ instance.getMappings().getSurname() + "=" + searchobject.getPattern() + "*))", null);
+            arrayList = getLDAPContacts(folderId, columns, "(&" + searchfilter + "("+ folderprop.getMappings().getSurname() + "=" + searchobject.getPattern() + "*))", null);
         } else {
             arrayList = getLDAPContacts(folderId, columns, searchfilter, null);
         }
@@ -181,11 +188,11 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     // The all request...
-    public SearchIterator<ContactObject> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<ContactObject> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         
         final Set<Integer> columns = getColumnSet(cols);
-        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, PropertyHandler.getInstance().getContextdetails().get(this.context).getSearchfilter(), null);
+        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, folderprop.getSearchfilter(), null);
         
         // Get only the needed parts...
         final List<ContactObject> subList = getSubList(from, to, arrayList);
@@ -196,82 +203,73 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    public SearchIterator<ContactObject> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+    public SearchIterator<ContactObject> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         LOG.info("Called getDeletedContactsInFolder");
         return null;
     }
 
 
     public int getFolderId() {
-        // TODO Auto-generated method stub
-        return 0;
+        return folderid;
     }
 
 
     public LdapServer getLdapServer() {
         final LdapServer ldapServer = new LdapServer();
-        ldapServer.setContext(String.valueOf(this.context));
+        ldapServer.setContext(String.valueOf(context));
         return ldapServer;
     }
 
-    public SearchIterator<ContactObject> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+    public SearchIterator<ContactObject> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         return new ArrayIterator<ContactObject>(new ContactObject[0]);
     }
 
-    public int getNumberOfContacts(int folderId) throws OXException {
+    public int getNumberOfContacts(final int folderId) throws OXException {
         LOG.info("Called getNumberOfContacts");
         return 0;
     }
 
-    public ContactObject getObjectById(int objectId, int inFolder) throws OXException {
+    public ContactObject getObjectById(final int objectId, final int inFolder) throws OXException {
         LOG.info("Called getObjectById");
         return null;
     }
 
-    public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException {
+    public SearchIterator<ContactObject> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
         final Set<Integer> columns = getColumnSet(cols);
         final ArrayList<ContactObject> contacts = new ArrayList<ContactObject>();
         for (final int[] object : objectIdAndInFolder) {
             final int object_id = object[0];
             final int folder_id = object[1];
-            final PropertyHandler instance = PropertyHandler.getInstance();
-            final String searchfilter = instance.getContextdetails().get(this.context).getSearchfilter();
-            if (instance.isMemorymapping()) {
-                contacts.addAll(getLDAPContacts(
-                    folder_id,
-                    columns,
-                    "(&" + searchfilter + "(" + instance.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id) + "))",
-                    null));
+            final String searchfilter = folderprop.getSearchfilter();
+            final String filterpart = "(&" + searchfilter + "(" + folderprop.getMappings().getUniqueid() + "=";
+            if (folderprop.isMemorymapping()) {
+                contacts.addAll(getLDAPContacts(folder_id, columns, filterpart + oxUidToLdapUid(object_id) + "))", null));
             } else {
-                contacts.addAll(getLDAPContacts(
-                    folder_id,
-                    columns,
-                    "(&" + searchfilter + "(" + instance.getMappings().getUniqueid() + "=" + object_id + "))",
-                    null));
+                contacts.addAll(getLDAPContacts(folder_id, columns, filterpart + object_id + "))", null));
             }
         }
         return new ArrayIterator<ContactObject>(contacts.toArray(new ContactObject[contacts.size()]));
     }
 
-    public ContactObject getUserById(int userId) throws OXException {
+    public ContactObject getUserById(final int userId) throws OXException {
         LOG.info("Called getUserById");
         return null;
     }
 
-    public void insertContactObject(ContactObject co) throws OXException {
+    public void insertContactObject(final ContactObject co) throws OXException {
         throw new LdapException(Code.INSERT_NOT_POSSIBLE);
     }
 
-    public SearchIterator<ContactObject> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<ContactObject> searchContacts(final String searchpattern, final int folderId, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         LOG.info("Called searchContacts");
         return null;
     }
 
-    public void setSession(Session s) throws OXException {
-        this.session = s;
+    public void setSession(final Session s) throws OXException {
+        session = s;
     }
 
-    public void updateContactObject(ContactObject co, int fid, Date d) throws OXException, OXConcurrentModificationException, ContactException {
+    public void updateContactObject(final ContactObject co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
         LOG.info("Called updateContactObject");
     }
 
@@ -286,7 +284,7 @@ public class LdapContactInterface implements ContactInterface {
         return retval.toArray(new String[retval.size()]);
     }
 
-    private Set<Integer> getColumnSet(int[] cols) {
+    private Set<Integer> getColumnSet(final int[] cols) {
         final Set<Integer> columns = new HashSet<Integer>();
         for (final int col : cols) {
             columns.add(Autoboxing.I(col));
@@ -300,8 +298,7 @@ public class LdapContactInterface implements ContactInterface {
      * @return a String value or null if no corresponding entry was found
      */
     private String getFieldFromColumn(final Integer col) {
-        final PropertyHandler props = PropertyHandler.getInstance();
-        final Mappings mappings = props.getMappings();
+        final Mappings mappings = folderprop.getMappings();
         switch (col) {
         case ContactObject.ANNIVERSARY:
             return mappings.getAnniversary();
@@ -375,7 +372,7 @@ public class LdapContactInterface implements ContactInterface {
             return mappings.getNumber_of_children();
         case ContactObject.NUMBER_OF_EMPLOYEE:
             return mappings.getNumber_of_employee();
-        case ContactObject.OBJECT_ID:
+        case DataObject.OBJECT_ID:
             return mappings.getUniqueid();
         case ContactObject.POSITION:
             return mappings.getPosition();
@@ -487,9 +484,9 @@ public class LdapContactInterface implements ContactInterface {
             return mappings.getUserfield19();
         case ContactObject.USERFIELD20:
             return mappings.getUserfield20();
-        case ContactObject.LAST_MODIFIED:
+        case DataObject.LAST_MODIFIED:
             return mappings.getLastmodified();
-        case ContactObject.CREATION_DATE:
+        case DataObject.CREATION_DATE:
             return mappings.getCreationdate();
         default:
             return null;
@@ -497,20 +494,25 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private ArrayList<ContactObject> getLDAPContacts(int folderId, final Set<Integer> columns, final String filter, SortInfo sortField) throws LdapException {
+    private ArrayList<ContactObject> getLDAPContacts(final int folderId, final Set<Integer> columns, final String filter, final SortInfo sortField) throws LdapException {
         final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
+        final LdapContext context;
         try {
-            final PropertyHandler instance = PropertyHandler.getInstance();
-            final LdapContext context = LdapUtility.createContext(this.session.getLoginName(), this.session.getPassword());
+            context = LdapUtility.createContext(session.getLoginName(), session.getPassword(), folderprop);
+        } catch (final NamingException e1) {
+            LOG.error(e1.getMessage(), e1);
+            throw new LdapException(Code.INITIAL_LDAP_ERROR, e1.getMessage());
+        }
             // TODO Implement right check if server support pagedResults
 //            final boolean pagedResultControlSupported = isPagedResultControlSupported(context);
 //            if (!pagedResultControlSupported) {
 //                System.out.println("Paged results are not supported");
 //            }
+        try {
             try {
                 byte[] cookie = null;
-                final int pagesize = instance.getPagesize();
-                if (null != sortField && instance.getSorting().equals(Sorting.server)) {
+                final int pagesize = folderprop.getPagesize();
+                if (null != sortField && folderprop.getSorting().equals(Sorting.server)) {
                     final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField()), sortField.getSort().equals(Order.asc), null);
                     final SortKey[] sortKeyArray = new SortKey[] { sortKey };
                     final Control[] controls = new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
@@ -520,35 +522,35 @@ public class LdapContactInterface implements ContactInterface {
                     context.setRequestControls(controls);
                 }
                 final SearchControls searchControls = new SearchControls();
-                searchControls.setSearchScope(LdapUtility.getSearchControl());
+                searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop));
                 searchControls.setCountLimit(0);
                 searchControls.setReturningAttributes(getAttributes(columns));
                 do {
-                    final NamingEnumeration<SearchResult> search = context.search(instance.getBaseDN(), filter, searchControls);
+                    final NamingEnumeration<SearchResult> search = context.search(folderprop.getBaseDN(), filter, searchControls);
                     while (null != search && search.hasMore()) {
                         final SearchResult next = search.next();
                         final Attributes attributes = next.getAttributes();
-                        final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, new UidInterface() {
+                        final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, folderprop, new UidInterface() {
 
-                            public Integer getUid(String uid) throws LdapException {
+                            public Integer getUid(final String uid) throws LdapException {
                                 return ldapUidToOxUid(uid);
                             }
 
                         });
-                        if (columns.contains(ContactObject.FOLDER_ID)) {
+                        if (columns.contains(FolderChildObject.FOLDER_ID)) {
                             contact.setParentFolderID(folderId);
                         }
-                        if (columns.contains(ContactObject.CREATED_BY)) {
-                            contact.setCreatedBy(this.admin_id);
+                        if (columns.contains(DataObject.CREATED_BY)) {
+                            contact.setCreatedBy(admin_id);
                         }
                         arrayList.add(contact);
                     }
                     // Examine the paged results control response 
-                    Control[] controls = context.getResponseControls();
+                    final Control[] controls = context.getResponseControls();
                     if (controls != null) {
                         for (int i = 0; i < controls.length; i++) {
                             if (controls[i] instanceof PagedResultsResponseControl) {
-                                PagedResultsResponseControl prrc = (PagedResultsResponseControl) controls[i];
+                                final PagedResultsResponseControl prrc = (PagedResultsResponseControl) controls[i];
                                 cookie = prrc.getCookie();
                             }
                         }
@@ -605,7 +607,7 @@ public class LdapContactInterface implements ContactInterface {
     private LdapGetter getLdapGetter(final Attributes attributes) {
         return new LdapGetter() {
     
-            public String getAttribute(String attributename) throws LdapException {
+            public String getAttribute(final String attributename) throws LdapException {
                 try {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
@@ -623,7 +625,7 @@ public class LdapContactInterface implements ContactInterface {
                 }
             }
 
-            public Date getDateAttribute(String attributename) throws LdapException {
+            public Date getDateAttribute(final String attributename) throws LdapException {
                 try {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
@@ -636,14 +638,14 @@ public class LdapContactInterface implements ContactInterface {
                     } else {
                         return null;
                     }
-                } catch (ParseException e) {
+                } catch (final ParseException e) {
                     throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
-                } catch (NamingException e) {
+                } catch (final NamingException e) {
                     throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
                 }
             }
     
-            public int getIntAttribute(String attributename) throws LdapException {
+            public int getIntAttribute(final String attributename) throws LdapException {
                 try {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
@@ -666,7 +668,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private Order getOrder(String orderDir) {
+    private Order getOrder(final String orderDir) {
         Order valueOf = null;
         if (null != orderDir) {
             final String lowerCase = orderDir.toLowerCase();
@@ -703,8 +705,8 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private void sorting(int orderBy, String orderDir, Order valueOf, final List<ContactObject> subList) {
-        if (null != orderDir && PropertyHandler.getInstance().getSorting().equals(Sorting.groupware)) {
+    private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<ContactObject> subList) {
+        if (null != orderDir && folderprop.getSorting().equals(Sorting.groupware)) {
             Collections.sort(subList, new ContactComparator(orderBy));
         }
     }

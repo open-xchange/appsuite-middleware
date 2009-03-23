@@ -1,67 +1,50 @@
 package com.openexchange.contacts.ldap.property;
 
-import java.util.Properties;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code;
 
 
 public class ContextProperties {
 
-    private enum Parameters {
-        foldername("foldername"),
-        searchfilter("searchfilter");
-        
-        private final String name;
-        
-        private Parameters(final String name) {
-            this.name = name;
-        }
+    private List<FolderProperties> folderproperties;
 
-        public final String getName() {
-            return name;
-        }    
+    /**
+     * Initializes a new {@link ContextProperties}.
+     */
+    private ContextProperties() {
+        this.folderproperties = new ArrayList<FolderProperties>();
     }
     
-    private String foldername;
-    
-    private String searchfilter;
-    
-    private void setFoldername(String foldername) {
-        this.foldername = foldername;
-    }
-
-    private void setSearchfilter(String searchfilter) {
-        this.searchfilter = searchfilter;
-    }
-
-    public String getFoldername() {
-        return foldername;
-    }
-
-    public String getSearchfilter() {
-        return searchfilter;
-    }
-
-    public static ContextProperties getContextPropertiesFromProperties(final Properties props, final String contextnr) throws LdapConfigurationException {
-        final String prefix = PropertyHandler.bundlename + "context" + contextnr + ".";
-        
+    public static ContextProperties getContextPropertiesFromDir(final ConfigurationService service, final File dir, final int contextid, StringBuilder logBuilder) throws LdapConfigurationException {
         final ContextProperties retval = new ContextProperties();
-        
-        final String folderparameter = prefix + Parameters.foldername.getName();
-        final String searchparameter = prefix + Parameters.searchfilter.getName();
-        final String foldername = props.getProperty(folderparameter);
-        final String searchfilter = props.getProperty(searchparameter);
-        if (null != foldername && foldername.length() != 0) {
-            retval.setFoldername(foldername);
-        } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, folderparameter);
+        // First list the folderdirs which should be registered to that context
+        final File[] folderdirs = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.isFile();
+            }
+        });
+        for (final File folderdir : folderdirs) {
+            final String name = folderdir.getName();
+            final String purename = name.replace(".properties", "");
+            retval.addFolderProperties(FolderProperties.getFolderPropertiesFromProperties(service, name, purename, String.valueOf(contextid), logBuilder));
         }
-        if (null != searchfilter && searchfilter.length() != 0) {
-            retval.setSearchfilter(searchfilter);
-        } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, searchfilter);
-        }
-
         return retval;
+    }
+
+    public List<FolderProperties> getFolderproperties() {
+        return folderproperties;
+    }
+
+    /**
+     * @param o
+     * @return
+     * @see java.util.List#add(java.lang.Object)
+     */
+    private boolean addFolderProperties(FolderProperties o) {
+        return folderproperties.add(o);
     }
 }

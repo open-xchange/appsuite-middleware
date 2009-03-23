@@ -54,11 +54,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.api2.OXException;
-import com.openexchange.contacts.ldap.property.PropertyHandler;
+import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
@@ -99,12 +98,12 @@ public class LdapGlobalFolderCreator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class);
     
-    public static FolderIDAndAdminID createGlobalFolder(Context ctx) throws OXException, DBPoolingException, SQLException {
+    public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, DBPoolingException, SQLException {
         // First search for a folder with the name if is doesn't exist create it
         final Connection readCon = DBPool.pickup(ctx);
         int ldapFolderID;
         final int admin_user_id;
-        final String foldername = PropertyHandler.getInstance().getContextdetails().get(Autoboxing.I(ctx.getContextId())).getFoldername();
+        final String foldername = folderprops.getFoldername();
         try {
             admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
             ldapFolderID = getLdapFolderID(foldername, ctx, readCon);

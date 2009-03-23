@@ -58,8 +58,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
-import com.openexchange.contacts.ldap.property.PropertyHandler;
-import com.openexchange.contacts.ldap.property.PropertyHandler.SearchScope;
+import com.openexchange.contacts.ldap.property.FolderProperties;
+import com.openexchange.contacts.ldap.property.FolderProperties.SearchScope;
 
 /**
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -108,7 +108,7 @@ public final class LdapUtility {
       context.reconnect(null);
    }
 
-   public static void removeLogin(LdapContext context) throws NamingException {
+   public static void removeLogin(final LdapContext context) throws NamingException {
       if (context == null) {
          return;
       }
@@ -118,9 +118,8 @@ public final class LdapUtility {
       context.addToEnvironment(Context.SECURITY_AUTHENTICATION, "simple");
    }
    
-   public static int getSearchControl() {
-       final PropertyHandler instance = PropertyHandler.getInstance();
-       final SearchScope searchScope = instance.getSearchScope();
+   public static int getSearchControl(final FolderProperties folderProperties) {
+       final SearchScope searchScope = folderProperties.getSearchScope();
        switch (searchScope) {
        case one:
            return SearchControls.ONELEVEL_SCOPE;
@@ -133,46 +132,16 @@ public final class LdapUtility {
        }
    }
 
-//   /**
-//    * Finds the appropriate BaseDN. Patterns can be
-//    * <ul>
-//    * <li>userBaseDN</li>
-//    * <li>groupBaseDN</li>
-//    * <li>credentialsBaseDN</li>
-//    * </ul>
-//    * @param pattern the BaseDN pattern
-//    * @return the appropriate BaseDN
-//    */
-//   static String getSearchBaseDN(Properties props, String classname,
-//      String propname, UserLdapValues values) throws NamingException {
-//      String retval = findProperty(props, classname, propname);
-//      if (retval.length() > 0 && retval.charAt(0) == '['
-//         && retval.charAt(retval.length() - 1) == ']') {
-//         if (retval.indexOf("[", 1) != -1) {
-//            Object[] temp = new Object[4];
-//            temp[0] = props;
-//            temp[1] = classname;
-//            temp[2] = null; // values
-//            temp[3] = new HashMap(1);
-//            retval = LineParserUtility.parseLine(retval, filler, temp);
-//         } else {
-//            retval = values.getValue(retval.substring(1, retval.length() - 1));
-//         }
-//      }
-//      return retval;
-//   }
-
-   public static LdapContext createContext(String username, String password) throws NamingException {
+   public static LdapContext createContext(final String username, final String password, final FolderProperties folderProperties) throws NamingException {
        if (LOG.isDebugEnabled()) {
            LOG.debug("Creating new connection.");
        }
-       long start = System.currentTimeMillis();
-       Hashtable<String, String> env = new Hashtable<String, String>(4, 1f);
+       final long start = System.currentTimeMillis();
+       final Hashtable<String, String> env = new Hashtable<String, String>(4, 1f);
        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
        // Enable connection pooling
        env.put("com.sun.jndi.ldap.connect.pool", "true");
-       final PropertyHandler instance = PropertyHandler.getInstance();
-       String uri = instance.getUri();
+       String uri = folderProperties.getUri();
        if (uri.startsWith("ldap://") || uri.startsWith("ldaps://")) {
            if (uri.endsWith("/")) {
                uri = uri.substring(0, uri.length() - 1);
@@ -184,10 +153,10 @@ public final class LdapUtility {
        if (uri.startsWith("ldaps://")) {
            env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
        }
-       switch (instance.getAuthtype()) {
+       switch (folderProperties.getAuthtype()) {
        case AdminDN:
-           env.put(Context.SECURITY_PRINCIPAL, instance.getAdminDN());
-           env.put(Context.SECURITY_CREDENTIALS, instance.getAdminBindPW());
+           env.put(Context.SECURITY_PRINCIPAL, folderProperties.getAdminDN());
+           env.put(Context.SECURITY_CREDENTIALS, folderProperties.getAdminBindPW());
            break;
        case user:
            env.put(Context.SECURITY_PRINCIPAL, username);
@@ -200,7 +169,7 @@ public final class LdapUtility {
        }
        // TODO Make this configurable
        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-       LdapContext retval = new InitialLdapContext(env, null);
+       final LdapContext retval = new InitialLdapContext(env, null);
        if (LOG.isDebugEnabled()) {
            LOG.debug("Context creation time: " + (System.currentTimeMillis() - start) + " ms");
        }
@@ -220,170 +189,9 @@ public final class LdapUtility {
     */
    public static Name append(final Name name1, final Name name2)
       throws InvalidNameException {
-      Name retval = (Name) name2.clone();
+      final Name retval = (Name) name2.clone();
       retval.addAll(name1);
       return retval;
-   }
-
-//   /**
-//    * Builds a distinguished name.
-//    * @param props Properties configuring the directory service.
-//    * @param classname Name of the class that needs the property.
-//    * @param propname Name of the property that contains the definition for the
-//    *        distinguished name to build.
-//    * @param replace Map containing the values that fill the dynamic parts of
-//    *        the configuration properties.
-//    * @param values user specific ldap values.
-//    * @return the full qualified distinguished name.
-//    * @throws NamingException if a property is missing.
-//    * @deprecated The classname is used only for the factory.
-//    */
-//   public static Name buildDN(final Properties props, final String classname,
-//      final String propname, final Map replace, final UserLdapValues values)
-//      throws NamingException {
-//      return buildDN(props, propname, replace, values);
-//   }
-
-//   /**
-//    * Builds a distinguished name that contains no user specific parts.
-//    * @param props Properties configuring the directory service.
-//    * @param classname Name of the class that needs the property.
-//    * @param propName Name of the property that contains the definition for the
-//    *        distinguished name to build.
-//    * @param replace Map containing the values that fill the dynamic parts of
-//    *        the configuration properties.
-//    * @return the full qualified distinguished name.
-//    * @throws NamingException if a property is missing.
-//    * @deprecated The classname is used only for the factory.
-//    */
-//   public static Name buildDN(final Properties props, final String classname,
-//      final String propName, final Map replace) throws NamingException {
-//      return buildDN(props, propName, replace, null);
-//   }
-
-//   /**
-//    * Builds a distinguished name that contains no user specific parts.
-//    * @param props Properties configuring the directory service.
-//    * @param propName Name of the property that contains the definition for the
-//    *        distinguished name to build.
-//    * @param replace Map containing the values that fill the dynamic parts of
-//    *        the configuration properties.
-//    * @return the full qualified distinguished name.
-//    * @throws NamingException if a property is missing.
-//    */
-//   public static Name buildDN(final Properties props, final String propName,
-//      final Map replace) throws NamingException {
-//      return buildDN(props, propName, replace, null);
-//   }
-
-//   /**
-//    * Builds a distinguished name.
-//    * @param props Properties configuring the directory service.
-//    * @param propName Name of the property that contains the definition for the
-//    *        distinguished name to build.
-//    * @param replace Map containing the values that fill the dynamic parts of
-//    *        the configuration properties.
-//    * @param values user specific ldap values.
-//    * @return the full qualified distinguished name.
-//    * @throws NamingException if a property is missing.
-//    */
-//   public static Name buildDN(final Properties props, final String propName,
-//      final Map replace, final UserLdapValues values) throws NamingException {
-//      String pattern = findProperty(props, propName);
-//      Object[] temp = new Object[] { props, null, values, replace };
-//      return new LdapName(LineParserUtility.parseLine(pattern, filler, temp));
-//   }
-
-//   /**
-//    * Builds a distinguished name for binding. The baseDN of the context will be
-//    * added.
-//    * @param props Properties configuring the directory service.
-//    * @param replace Map containing the values that fill the dynamic parts of
-//    *        the configuration properties.
-//    * @param values user specific ldap values.
-//    * @return the full qualified distinguished name.
-//    * @throws NamingException if a property is missing.
-//    */
-//   public static Name buildBindDN(final Properties props, final Map replace,
-//      final UserLdapValues values) throws NamingException {
-//      Name retval = buildDN(props, Names.USER_DN, replace, values);
-//      Name baseDN = new LdapName(PropertyHandler.getInstance().getBaseDN());
-//      return append(retval, baseDN);
-//   }
-
-//   /**
-//    * Builds a distinguished name for binding. The baseDN of the context will be
-//    * added.
-//    * @param props Properties configuring the directory service.
-//    * @param classname Name of the class that needs the property.
-//    * @param propname Name of the property that contains the definition for the
-//    *        distinguished name to build.
-//    * @param replace Map containing the values that fill the dynamic parts of
-//    *        the configuration properties.
-//    * @param values user specific ldap values.
-//    * @return the full qualified distinguished name.
-//    * @throws NamingException if a property is missing.
-//    * @deprecated The classname is used only for the factory.
-//    */
-//   public static String buildCredentials(final Properties props,
-//      final String classname, final String propname, final Map replace,
-//      final UserLdapValues values) throws NamingException {
-//      return buildBindDN(props, replace, values).toString();
-//   }
-
-//   private static final TagFiller filler = new TagFillerAdapter() {
-//      public String replace(String tag, Object data) {
-//         Object[] temp = (Object[]) data;
-//         Properties props = (Properties) temp[0];
-//         String classname = (String) temp[1];
-//         UserLdapValues values = (UserLdapValues) temp[2];
-//         Map datamap = (Map) temp[3];
-//         String retval = tag;
-//         if (datamap != null && datamap.containsKey(tag)) {
-//            return (String) datamap.get(tag);
-//         } else if (values != null && props != null && tag.endsWith("BaseDN")) {
-//            try {
-//               if (null != classname) {
-//                  retval = LdapUtility.getSearchBaseDN(props, classname, tag,
-//                     values);
-//               } else {
-//                  retval = LdapUtility.getSearchBaseDN(props, tag, values);
-//               }
-//            } catch (NamingException e) {
-//               retval = e.getMessage();
-//            }
-//         } else {
-//            try {
-//               String property = LdapUtility.findProperty(props, tag);
-//               if (!property.equals("[" + tag + "]")) {
-//                   retval = LineParserUtility.parseLine(property, this, data);
-//               }
-//            } catch (NamingException e) {
-//            }
-//         }
-//         return retval;
-//      }
-//   };
-
-   /*
-    * More general helper methods.
-    */
-
-   static NamingException propertyNotFound(String[] classnames, String property) {
-      StringBuffer message = new StringBuffer("Property ");
-      message.append(property);
-      message.append(" not found under \"");
-      for (int i = 0; i < classnames.length; i++) {
-         message.append(classnames[i]);
-         message.append("\",\"");
-      }
-      message.delete(message.length() - 2, message.length());
-      message.append(" !");
-      return new NamingException(message.toString());
-   }
-
-   static NamingException propertyNotFound(String classname, String property) {
-      return propertyNotFound(new String[] { classname }, property);
    }
 
 }

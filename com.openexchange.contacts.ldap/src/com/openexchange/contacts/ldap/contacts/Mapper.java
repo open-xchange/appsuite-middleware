@@ -53,9 +53,11 @@ import java.util.Date;
 import java.util.Set;
 import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
+import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
-import com.openexchange.contacts.ldap.property.PropertyHandler;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
 
 
 /**
@@ -66,14 +68,13 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class Mapper {
 
-    public static ContactObject getContact(final LdapGetter getter, Set<Integer> cols, UidInterface uidInterface) throws LdapException {
-        final PropertyHandler props = PropertyHandler.getInstance();
-        final Mappings mappings = props.getMappings();
+    public static ContactObject getContact(final LdapGetter getter, final Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface) throws LdapException {
+        final Mappings mappings = folderprop.getMappings();
         final ContactObject retval = new ContactObject();
-        if (cols.contains(ContactObject.OBJECT_ID)) {
+        if (cols.contains(DataObject.OBJECT_ID)) {
             final String uniqueid = mappings.getUniqueid();
             if (0 != uniqueid.length()) {
-                if (PropertyHandler.getInstance().isMemorymapping()) {
+                if (folderprop.isMemorymapping()) {
                     retval.setObjectID(uidInterface.getUid(getter.getAttribute(uniqueid)));
                 } else {
                     retval.setObjectID(getter.getIntAttribute(uniqueid));
@@ -608,7 +609,7 @@ public class Mapper {
                 retval.setTelephonePrimary(getter.getAttribute(telephone_primary));
             }
         }
-        if (cols.contains(ContactObject.CATEGORIES)) {
+        if (cols.contains(CommonObject.CATEGORIES)) {
             final String categories = mappings.getCategories();
             if (0 != categories.length()) {
                 retval.setCategories(getter.getAttribute(categories));
@@ -633,11 +634,11 @@ public class Mapper {
             }
         }
         // Finally we add the timestamps here
-        if (cols.contains(ContactObject.LAST_MODIFIED)) {
+        if (cols.contains(DataObject.LAST_MODIFIED)) {
             // TODO Fetch it through operational attributes
             retval.setLastModified(new Date());
         }
-        if (cols.contains(ContactObject.CREATION_DATE)) {
+        if (cols.contains(DataObject.CREATION_DATE)) {
             // TODO Fetch it through operational attributes
             retval.setCreationDate(new Date());
         }

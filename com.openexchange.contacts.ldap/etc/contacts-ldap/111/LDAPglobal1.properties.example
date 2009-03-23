@@ -1,0 +1,46 @@
+# A property file for the context with id 111
+
+# Specify the uri of the LDAP server here e.g. ldap://localhost
+com.openexchange.contacts.ldap.context111.LDAPglobal1.uri=ldap://10.10.10.80
+
+# Specify the baseDN here
+#com.openexchange.contacts.ldap.baseDN=dc=oxnbg,dc=int
+com.openexchange.contacts.ldap.context111.LDAPglobal1.baseDN=cn=users,DC=exchange,DC=local
+
+# Specify the bindDN here (optional)
+#com.openexchange.contacts.ldap.AdminDN=cn=Administrator,dc=oxnbg,dc=int
+com.openexchange.contacts.ldap.context111.LDAPglobal1.AdminDN=cn=administrator,cn=users,DC=exchange,DC=local
+
+# Specify the bindPW here (optional)
+com.openexchange.contacts.ldap.context111.LDAPglobal1.AdminBindPW=secret
+
+# Specify the search base here (sub, base, one)
+com.openexchange.contacts.ldap.context111.LDAPglobal1.searchScope=sub
+
+# Specify the type of authentication here. Possible values are "anonymous", "AdminDN" or "user"
+com.openexchange.contacts.ldap.context111.LDAPglobal1.authtype=AdminDN
+
+# Specify if server-side sorting should be used or if the data should be sorted in the groupware.
+# Possible values are "server", "groupware"
+com.openexchange.contacts.ldap.context111.LDAPglobal1.sorting=groupware
+
+# Specify if the value given for uniqueid is a unique long value in LDAP and can be used for
+# identifying (setting "false"), or if it's a string value then memorymapping must be enabled
+# to generate the longs (setting "true")
+# Possible values are "true", "false"
+com.openexchange.contacts.ldap.context111.LDAPglobal1.memorymapping=true
+
+# Specify the pagesize for paged results here. e.g. active directory only allows a max page size
+# of 1000
+com.openexchange.contacts.ldap.context111.LDAPglobal1.pagesize=500
+
+# This properties defines which file contains the mapping for the attributes
+com.openexchange.contacts.ldap.context111.LDAPglobal1.mappingfile=mapping.ads.properties
+
+
+# Specify the foldername for the global ldap folder here
+com.openexchange.contacts.ldap.context111.LDAPglobal1.foldername=LDAPglobal1
+
+# Specify the searchfilter for the global ldap folder here
+com.openexchange.contacts.ldap.context111.LDAPglobal1.searchfilter=(objectclass=person)
+
