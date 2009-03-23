@@ -70,19 +70,15 @@ import junit.framework.TestCase;
  */
 public abstract class AbstractFitnesseJUnitTest extends TestCase {
 
-    protected Properties settings = new Properties();
-
     protected JUnitHelper helper;
 
     public AbstractFitnesseJUnitTest(String name) {
         super();
         try {
-            settings.load(new FileInputStream("/Users/development/workspace/openexchange-test/conf/fitnesse.properties"));
-
             helper = new JUnitHelper(new TestRunner(
-                initRepository(settings.getProperty("fitnesseWiki")),
-                initEngine(settings.getProperty("engine")),
-                initOutputPath(settings.getProperty("htmlOutputDir"))));
+                initRepository( getWithDefault("fitnesseWikiLocation","/Users/development/workspace/openexchange-test/fitnesse/") ),
+                initEngine( getWithDefault("fitnesseEngine","slim") ),
+                initOutputPath( getWithDefault("ftinesseOutputPath","/tmp") ) ));
 
         } catch (IOException e) {
             fail("Instantiation failed: " + e.getMessage());
@@ -103,4 +99,10 @@ public abstract class AbstractFitnesseJUnitTest extends TestCase {
         return new FitNesseRepository(value);
     }
 
+    protected String getWithDefault(String key, String defaultValue){
+        String value = System.getProperty(key);
+        if(value == null)
+            return defaultValue;
+        return value;
+    }
 }
