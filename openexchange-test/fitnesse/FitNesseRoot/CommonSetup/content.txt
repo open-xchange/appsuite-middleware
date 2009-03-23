@@ -8,9 +8,9 @@
 
 !|Table:ConfigureEnvironment|
 |hostname|
-|192.168.32.163|
+|localhost|
 
 !|Table:DefineUsers|
 |thorben|netline|
-|bond|netline|
+|marcus|netline|
 

@@ -31,4 +31,4 @@ The following will fail:
 | expectedError   |
 | TSK-0014        |
 
-!|Table:EnvironmentCleanup|
+!include CommonTearDown
