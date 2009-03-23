@@ -54,8 +54,8 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.XingSubscriptionHandler;
-import com.openexchange.subscribe.XingSubscriptionService;
+import com.openexchange.subscribe.ExternalSubscriptionHandler;
+import com.openexchange.subscribe.ExternalSubscriptionService;
 import com.openexchange.subscribe.json.SubscribeJSONServlet;
 
 /**
@@ -69,7 +69,7 @@ public class Activator extends DeferredActivator {
 
     private Servlet subscribeServlet;
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscribeService.class, SubscriptionHandler.class, XingSubscriptionService.class, XingSubscriptionHandler.class };
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscribeService.class, SubscriptionHandler.class, ExternalSubscriptionService.class, ExternalSubscriptionHandler.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -84,11 +84,11 @@ public class Activator extends DeferredActivator {
         SubscriptionHandler subscriptionHandler = getService(SubscriptionHandler.class);
         SubscribeJSONServlet.setSubscriptionHandler(subscriptionHandler);
         
-        XingSubscriptionService xingSubscriptionService = getService(XingSubscriptionService.class);
-        SubscribeJSONServlet.setXingSubscribeService(xingSubscriptionService);
+        ExternalSubscriptionService xingSubscriptionService = getService(ExternalSubscriptionService.class);
+        SubscribeJSONServlet.setExternalSubscribeService(xingSubscriptionService);
         
-        XingSubscriptionHandler xingSubscriptionHandler = getService(XingSubscriptionHandler.class);
-        SubscribeJSONServlet.setXingSubscriptionHandler(xingSubscriptionHandler);
+        ExternalSubscriptionHandler xingSubscriptionHandler = getService(ExternalSubscriptionHandler.class);
+        SubscribeJSONServlet.setExternalSubscriptionHandler(xingSubscriptionHandler);
         
         
         final HttpService httpService = getService(HttpService.class);
@@ -123,11 +123,11 @@ public class Activator extends DeferredActivator {
         SubscriptionHandler subscriptionHandler = getService(SubscriptionHandler.class);
         SubscribeJSONServlet.setSubscriptionHandler(subscriptionHandler);
         
-        XingSubscriptionService xingSubscriptionService = getService(XingSubscriptionService.class);
-        SubscribeJSONServlet.setXingSubscribeService(xingSubscriptionService);
+        ExternalSubscriptionService xingSubscriptionService = getService(ExternalSubscriptionService.class);
+        SubscribeJSONServlet.setExternalSubscribeService(xingSubscriptionService);
         
-        XingSubscriptionHandler xingSubscriptionHandler = getService(XingSubscriptionHandler.class);
-        SubscribeJSONServlet.setXingSubscriptionHandler(xingSubscriptionHandler);
+        ExternalSubscriptionHandler xingSubscriptionHandler = getService(ExternalSubscriptionHandler.class);
+        SubscribeJSONServlet.setExternalSubscriptionHandler(xingSubscriptionHandler);
         
         
         try {

@@ -1,6 +1,10 @@
 
 package com.openexchange.publish.microformats.internal;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
@@ -12,25 +16,33 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.publish.Path;
 import com.openexchange.publish.microformats.ItemLoader;
 import com.openexchange.session.Session;
-import com.openexchange.tagging.Tagged;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 public class ContactLoader implements ItemLoader<ContactObject> {
 
     private static final Log LOG = LogFactory.getLog(ContactLoader.class);
 
-    public ContactObject load(Tagged tagged, Path path) {
+    public List<ContactObject> load(int folderId, Path path) {
         Session session = createSession(path);
         Context ctx = loadContext(path);
         if (ctx == null) {
-            return null;
+            return Collections.emptyList();
         }
         ContactInterface contacts = new RdbContactSQLInterface(session, ctx);
-
         try {
-            return contacts.getObjectById(tagged.getObjectId(), tagged.getFolderId());
+            SearchIterator<ContactObject> inFolder = contacts.getModifiedContactsInFolder(folderId, ContactObject.ALL_COLUMNS, new Date(0));
+            List<ContactObject> allContacts = new ArrayList<ContactObject>();
+            while(inFolder.hasNext()) {
+                allContacts.add(inFolder.next());
+            }
+            return allContacts;
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-            return null;
+            return Collections.emptyList();
+        } catch (SearchIteratorException e) {
+            LOG.error(e.getMessage(), e);
+            return Collections.emptyList();
         }
     }
 

@@ -65,9 +65,7 @@ public class SubscriptionSQL {
     private static final String SUBSCRIPTION_TABLE = "subscriptions";
 
     public static void addSubscription(Subscription subscription) throws DBPoolingException, SQLException {
-        if (subscriptionExists(subscription)) {
-            return;
-        }
+        removeSubscription(subscription);
 
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ");
@@ -89,21 +87,15 @@ public class SubscriptionSQL {
     }
 
     public static void removeSubscription(Subscription subscription) throws DBPoolingException, SQLException {
-        if (!subscriptionExists(subscription)) {
-            return;
-        }
-
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM ");
         sb.append(SUBSCRIPTION_TABLE);
-        sb.append(" WHERE cid = ? AND user = ? AND url = ? AND folder_id = ?");
+        sb.append(" WHERE cid = ? AND folder_id = ?");
 
         Transaction.commitStatement(
             subscription.getContextId(),
             sb.toString(),
             subscription.getContextId(),
-            subscription.getUserId(),
-            subscription.getUrl(),
             subscription.getFolderId());
     }
 

@@ -3,13 +3,10 @@ package com.openexchange.publish.microformats;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
@@ -24,8 +21,6 @@ import com.openexchange.publish.Site;
 import com.openexchange.publish.microformats.internal.ContactLoader;
 import com.openexchange.publish.microformats.internal.ContactWriter;
 import com.openexchange.publish.microformats.internal.InfostoreTemplateLoader;
-import com.openexchange.tagging.Tagged;
-import com.openexchange.tagging.TaggingService;
 
 public class PublishMicroformatsServlet extends HttpServlet {
 
@@ -34,8 +29,6 @@ public class PublishMicroformatsServlet extends HttpServlet {
     private static final String HTML = "text/html;charset=utf-8";
 
     private static PublicationService publicationService;
-
-    private static TaggingService taggingService;
 
     private static InfostoreTemplateLoader templateLoader = new InfostoreTemplateLoader();
 
@@ -51,10 +44,6 @@ public class PublishMicroformatsServlet extends HttpServlet {
 
     public static void setPublicationService(PublicationService service) {
         publicationService = service;
-    }
-
-    public static void setTaggingService(TaggingService service) {
-        taggingService = service;
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -120,28 +109,11 @@ public class PublishMicroformatsServlet extends HttpServlet {
     private Context createContext(Site site) {
 
         Context context = new VelocityContext();
-
-        Collection<Tagged> taggedObjects = taggingService.getTaggedObjects(site.getContextId(), site.getTagExpression());
-
-        for (Tagged tagged : taggedObjects) {
-            int type = getType(tagged);
-            Class clazz = getClassForType(type);
-            String name = getNameForType(type);
-
-            List<Object> objects = null;
-            if (context.containsKey(name)) {
-                objects = (List<Object>) context.get(name);
-            } else {
-                objects = new ArrayList<Object>();
-                context.put(name, objects);
-            }
-
-            Object item = load(clazz, tagged, site.getPath());
-            if (item != null) {
-                objects.add(item);
-            }
-
-        }
+        
+        ContactLoader contactLoader = new ContactLoader();
+        List<ContactObject> contacts = contactLoader.load(site.getFolderId(), site.getPath());
+        
+        context.put("contacts", contacts);
 
         return context;
     }
@@ -149,19 +121,16 @@ public class PublishMicroformatsServlet extends HttpServlet {
     private String writePlainSite(Site site) {
         StringBuilder builder = new StringBuilder();
         writeHeader(builder);
-        Collection<Tagged> taggedObjects = taggingService.getTaggedObjects(site.getContextId(), site.getTagExpression());
+        
+        ContactLoader contactLoader = new ContactLoader();
+        List<ContactObject> contacts = contactLoader.load(site.getFolderId(), site.getPath());
 
-        for (Tagged tagged : taggedObjects) {
-            int type = getType(tagged);
-            Class clazz = getClassForType(type);
-            Object item = load(clazz, tagged, site.getPath());
-            ItemWriter writer = itemWriters.getWriter(clazz, type);
-            if (writer == null) {
-                builder.append("<p>I do not know how to write a ").append(clazz).append("</p>");
-            } else {
-                builder.append(writer.write(item));
-            }
+        ContactWriter writer = new ContactWriter();
+        
+        for(ContactObject contact : contacts) {
+            builder.append(writer.write(contact));
         }
+   
         writeFooter(builder);
 
         return builder.toString();
@@ -175,23 +144,4 @@ public class PublishMicroformatsServlet extends HttpServlet {
         builder.append("</body></html>");
     }
 
-    private <T> T load(Class<T> clazz, Tagged tagged, Path path) {
-        ItemLoader<T> loader = itemLoaders.getItemLoader(clazz, getType(tagged));
-        if (loader == null) {
-            return null;
-        }
-        return loader.load(tagged, path);
-    }
-
-    private int getType(Tagged tagged) {
-        return Types.CONTACT;
-    }
-
-    private Class<?> getClassForType(int type) {
-        return ContactObject.class;
-    }
-
-    private String getNameForType(int type) {
-        return "contacts";
-    }
 }

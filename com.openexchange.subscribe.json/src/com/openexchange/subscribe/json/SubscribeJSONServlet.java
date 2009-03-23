@@ -76,9 +76,9 @@ import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.XingSubscription;
-import com.openexchange.subscribe.XingSubscriptionHandler;
-import com.openexchange.subscribe.XingSubscriptionService;
+import com.openexchange.subscribe.ExternalSubscription;
+import com.openexchange.subscribe.ExternalSubscriptionHandler;
+import com.openexchange.subscribe.ExternalSubscriptionService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.servlet.http.Tools;
@@ -104,11 +104,11 @@ public class SubscribeJSONServlet extends PermissionServlet {
     
     private static final String CLEAR_ACTION = "clear";
 
-    private static final String SUBSCRIBE_XING = "subscribeXing";
+    private static final String SUBSCRIBE_EXTERNAL = "subscribeExternal";
 
     private static final String LOAD_ACTION = "load";
 
-    private static final String LOAD_XING = "loadXing";
+    private static final String LOAD_EXTERNAL = "loadExternal";
 
     private static final String REFRESH_ACTION = "refresh";
 
@@ -116,9 +116,9 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
     private static SubscriptionHandler subscriptionHandler;
 
-    private static XingSubscriptionService xingSubscribeService;
+    private static ExternalSubscriptionService externalSubscribeService;
 
-    private static XingSubscriptionHandler xingSubscriptionHandler;
+    private static ExternalSubscriptionHandler externalSubscriptionHandler;
 
     public static void setSubscribeService(final SubscribeService subscribeService) {
         SubscribeJSONServlet.subscribeService = subscribeService;
@@ -128,12 +128,12 @@ public class SubscribeJSONServlet extends PermissionServlet {
         SubscribeJSONServlet.subscriptionHandler = subscriptionHandler;
     }
 
-    public static void setXingSubscribeService(XingSubscriptionService service) {
-        SubscribeJSONServlet.xingSubscribeService = service;
+    public static void setExternalSubscribeService(ExternalSubscriptionService service) {
+        SubscribeJSONServlet.externalSubscribeService = service;
     }
 
-    public static void setXingSubscriptionHandler(XingSubscriptionHandler service) {
-        SubscribeJSONServlet.xingSubscriptionHandler = service;
+    public static void setExternalSubscriptionHandler(ExternalSubscriptionHandler service) {
+        SubscribeJSONServlet.externalSubscriptionHandler = service;
     }
 
     @Override
@@ -202,8 +202,8 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
         if (action.equals(LOAD_ACTION)) {
             response.setData(load(session));
-        } else if (action.equals(LOAD_XING)) {
-            response.setData(loadXing(session));
+        } else if (action.equals(LOAD_EXTERNAL)) {
+            response.setData(loadExternal(session, req.getParameter("service")));
         }
 
         return response;
@@ -220,8 +220,8 @@ public class SubscribeJSONServlet extends PermissionServlet {
         return retval;
     }
     
-    private JSONObject loadXing(final Session session) throws JSONException {
-        return getJSONObject(xingSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId()), session);
+    private JSONObject loadExternal(final Session session, String externalService) throws JSONException {
+        return getJSONObject(externalSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId(), externalService), session);
     }
 
     private Response writeAction(final HttpServletRequest req) throws JSONException, IOException {
@@ -240,10 +240,10 @@ public class SubscribeJSONServlet extends PermissionServlet {
         } else if (action.equals(REFRESH_ACTION)) {
             int folderId = Integer.parseInt(req.getParameter("folderId"));
             refresh(session, folderId);
-        } else if (action.equals(SUBSCRIBE_XING)) {
+        } else if (action.equals(SUBSCRIBE_EXTERNAL)) {
             final JSONObject objectToSubscribe = new JSONObject(getBody(req));
-            final XingSubscription subscription = getXingSubscription(objectToSubscribe, session);
-            saveXingSubscription(subscription);
+            final ExternalSubscription subscription = getXingSubscription(objectToSubscribe, session);
+            saveExternalSubscription(subscription);
         } else if (action.equals(CLEAR_ACTION)) {
             clearAllSubscriptions(session);
         }
@@ -257,9 +257,11 @@ public class SubscribeJSONServlet extends PermissionServlet {
         for (Subscription subscription : subscriptions) {
             subscriptionHandler.handleSubscription(subscription);
         }
-        XingSubscription subscriptionForUser = xingSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId());
-        if (subscriptionForUser != null && subscriptionForUser.getTargetFolder() == folderId) {
-            xingSubscriptionHandler.handleSubscription(subscriptionForUser);
+        for(String service : externalSubscriptionHandler.getServices()) {
+            ExternalSubscription subscriptionForUser = externalSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId(), service);
+            if (subscriptionForUser != null && subscriptionForUser.getTargetFolder() == folderId) {
+                externalSubscriptionHandler.handleSubscription(subscriptionForUser);
+            }
         }
     }
 
@@ -267,44 +269,47 @@ public class SubscribeJSONServlet extends PermissionServlet {
         final Subscription subscription = new Subscription();
         subscription.setContextId(session.getContextId());
         subscription.setUserId(session.getUserId());
-        subscription.setFolderId(resolveFolder(objectToSubscribe.getString("folder"), session));
-        subscription.setUrl(objectToSubscribe.getString("url"));
+        subscription.setFolderId(objectToSubscribe.getInt("folder"));
+        subscription.setUrl(objectToSubscribe.optString("url"));
         subscription.setLastUpdate(new Date(0));
 
         return subscription;
     }
 
-    private XingSubscription getXingSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
-        XingSubscription subscription = new XingSubscription();
+    private ExternalSubscription getXingSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
+        ExternalSubscription subscription = new ExternalSubscription();
         subscription.setContextId(session.getContextId());
         subscription.setUserId(session.getUserId());
         subscription.setTargetFolder(resolveFolder(objectToSubscribe.getString("folder"), session));
-        subscription.setXingUserName(objectToSubscribe.getString("xingUser"));
-        subscription.setXingPassword(objectToSubscribe.getString("xingPassword"));
+        subscription.setUserName(objectToSubscribe.getString("user"));
+        subscription.setPassword(objectToSubscribe.getString("password"));
+        subscription.setExternalService(objectToSubscribe.getString("service"));
         return subscription;
     }
 
     private JSONObject getJSONObject(final Subscription subscription, Session session) throws JSONException {
         final JSONObject subscriptionObject = new JSONObject();
-        subscriptionObject.put("folder", getName(subscription.getFolderId(),  session));
+        subscriptionObject.put("folder", subscription.getFolderId());
         subscriptionObject.put("last_update", subscription.getLastUpdate().getTime());
         subscriptionObject.put("url", subscription.getUrl());
         return subscriptionObject;
     }
     
-    private JSONObject getJSONObject(final XingSubscription subscription, Session session) throws JSONException {
+    private JSONObject getJSONObject(final ExternalSubscription subscription, Session session) throws JSONException {
         final JSONObject subscriptionObject = new JSONObject();
         
         if(subscription == null) {
             subscriptionObject.put("folder", "");
-            subscriptionObject.put("xingUser", "");
-            subscriptionObject.put("xingPassword", "");
+            subscriptionObject.put("user", "");
+            subscriptionObject.put("password", "");
+            subscriptionObject.put("service", "");
             return subscriptionObject;
         }
         
         subscriptionObject.put("folder", getName(subscription.getTargetFolder(), session));
-        subscriptionObject.put("xingUser", subscription.getXingUserName());
-        subscriptionObject.put("xingPassword", subscription.getXingPassword());
+        subscriptionObject.put("user", subscription.getUserName());
+        subscriptionObject.put("password", subscription.getPassword());
+        subscriptionObject.put("service", subscription.getExternalService());
         return subscriptionObject;
     }
 
@@ -323,8 +328,8 @@ public class SubscribeJSONServlet extends PermissionServlet {
         }
     }
     
-    private void saveXingSubscription(final XingSubscription subscription) {
-        xingSubscribeService.saveXingSubscription(subscription);
+    private void saveExternalSubscription(final ExternalSubscription subscription) {
+        externalSubscribeService.saveSubscription(subscription);
     }
 
     private int resolveFolder(String fname, Session session) {

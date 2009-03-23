@@ -60,25 +60,23 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.XingSubscription;
-import com.openexchange.subscribe.XingSubscriptionHandler;
+import com.openexchange.subscribe.ExternalSubscription;
+import com.openexchange.subscribe.ExternalSubscriptionHandler;
 
 /**
- * {@link XingHandler}
+ * {@link ExternalSubscriptionHandlerImpl}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class XingHandler extends ContactHandler implements XingSubscriptionHandler {
+public class ExternalSubscriptionHandlerImpl extends ContactHandler implements ExternalSubscriptionHandler {
 
-    private static final Log LOG = LogFactory.getLog(XingHandler.class);
+    private static final Log LOG = LogFactory.getLog(ExternalSubscriptionHandlerImpl.class);
 
-    public void handleSubscription(XingSubscription xingSubscription) {
+    public void handleSubscription(ExternalSubscription subscription) {
         try {
-            ContactObject[] xingContactsForUser = new XingContactParser().getXingContactsForUser(
-                xingSubscription.getXingUserName(),
-                xingSubscription.getXingPassword());
-            List<ContactObject> contacts = Arrays.asList(xingContactsForUser);
-            storeContacts(new XingSubscriptionSession(xingSubscription), xingSubscription.getTargetFolder(), contacts);
+            ContactObject[] contactsForUser = getContacts(subscription);
+            List<ContactObject> contacts = Arrays.asList(contactsForUser);
+            storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         } catch (SAXException e) {
@@ -90,11 +88,26 @@ public class XingHandler extends ContactHandler implements XingSubscriptionHandl
         }
     }
 
+    private ContactObject[] getContacts(ExternalSubscription subscription) throws IOException, SAXException {
+        if ("xing".equalsIgnoreCase(subscription.getExternalService())) {
+            return new XingContactParser().getXingContactsForUser(subscription.getUserName(), subscription.getPassword());
+        } else if ("linkedin".equalsIgnoreCase(subscription.getExternalService())) {
+            return new LinkedInContactParser().getLinkedInContactsForUser(subscription.getUserName(), subscription.getPassword());
+        } else if ("facebook".equalsIgnoreCase(subscription.getExternalService())) {
+            return new FacebookContactParser().getFacebookContactsForUser(subscription.getUserName(), subscription.getPassword());
+        }
+        return null;
+    }
+    
+    public String[] getServices() {
+        return new String[]{"xing", "linkedin", "facebook"};
+    }
+
     private static final class XingSubscriptionSession implements Session {
 
-        private XingSubscription subscription;
+        private ExternalSubscription subscription;
 
-        public XingSubscriptionSession(XingSubscription subscription) {
+        public XingSubscriptionSession(ExternalSubscription subscription) {
             this.subscription = subscription;
         }
 

@@ -51,17 +51,18 @@ package com.openexchange.subscribe;
 
 
 /**
- * {@link XingSubscription}
+ * {@link ExternalSubscription}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class XingSubscription {
+public class ExternalSubscription {
     private int userId;
     private int contextId;
-    private String xingUserName;
-    private String xingPassword;
+    private String userName;
+    private String password;
     private int targetFolder;
+    private String externalService;
     
     public int getUserId() {
         return userId;
@@ -79,20 +80,20 @@ public class XingSubscription {
         this.contextId = contextId;
     }
     
-    public String getXingUserName() {
-        return xingUserName;
+    public String getUserName() {
+        return userName;
     }
     
-    public void setXingUserName(String xingUserName) {
-        this.xingUserName = xingUserName;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
     
-    public String getXingPassword() {
-        return xingPassword;
+    public String getPassword() {
+        return password;
     }
     
-    public void setXingPassword(String xingPassword) {
-        this.xingPassword = xingPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
     
     public int getTargetFolder() {
@@ -104,5 +105,13 @@ public class XingSubscription {
     }
 
     
+    public String getExternalService() {
+        return externalService;
+    }
+
+    
+    public void setExternalService(String externalService) {
+        this.externalService = externalService;
+    }
     
 }

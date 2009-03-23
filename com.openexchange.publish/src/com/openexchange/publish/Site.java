@@ -53,7 +53,7 @@ package com.openexchange.publish;
 public class Site {
 
     private Path path;
-    private String tagExpression;
+    private int folderId;
     
     public Site() {
     }
@@ -78,11 +78,11 @@ public class Site {
         return path.getOwnerId();
     }
 
-    public void setTagExpression(String tagExpression) {
-        this.tagExpression = tagExpression;
+    public void setFolderId(int folderId) {
+        this.folderId = folderId;
     }
     
-    public String getTagExpression() {
-        return tagExpression;
+    public int getFolderId() {
+        return folderId;
     }
 }

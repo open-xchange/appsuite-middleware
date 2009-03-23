@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.server.impl.DBPoolingException;
+import static com.openexchange.publish.Transaction.INT;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -72,7 +73,7 @@ public class PublicationSQL {
         sb.append("INSERT INTO ");
         sb.append(SITE_TABLE);
         sb.append(" (");
-        sb.append("cid, user, name, tag_expression");
+        sb.append("cid, user, name, folderId");
         sb.append(") ");
         sb.append("VALUES");
         sb.append(" (");
@@ -85,7 +86,7 @@ public class PublicationSQL {
             site.getContextId(),
             site.getOwnerId(),
             site.getName(),
-            site.getTagExpression());
+            site.getFolderId());
     }
 
     public static void removeSite(Site site) throws DBPoolingException, SQLException {
@@ -96,9 +97,9 @@ public class PublicationSQL {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM ");
         sb.append(SITE_TABLE);
-        sb.append(" WHERE cid = ? AND user = ? AND name = ?");
+        sb.append(" WHERE cid = ? AND folderId = ?");
 
-        Transaction.commitStatement(site.getContextId(), sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
+        Transaction.commitStatement(site.getContextId(), sb.toString(), site.getContextId(), site.getFolderId());
     }
 
     public static Site getSite(Path path) throws DBPoolingException, SQLException {
@@ -117,7 +118,7 @@ public class PublicationSQL {
 
         Site siteObject = new Site();
         siteObject.setPath(path);
-        siteObject.setTagExpression((String) site.get("tag_expression"));
+        siteObject.setFolderId(INT(site.get("folderId")));
 
         return siteObject;
     }
@@ -137,7 +138,7 @@ public class PublicationSQL {
             pathObject.setOwnerId(userId);
             pathObject.setSiteName((String) site.get("name"));
             siteObject.setPath(pathObject);
-            siteObject.setTagExpression((String) site.get("tag_expression"));
+            siteObject.setFolderId(INT(site.get("folderId")));
             retval.add(siteObject);
         }
 
@@ -149,10 +150,10 @@ public class PublicationSQL {
 
         sb.append("SELECT * FROM ");
         sb.append(SITE_TABLE);
-        sb.append(" WHERE cid = ? AND user = ? AND name = ?");
+        sb.append(" WHERE cid = ? AND folderId = ?");
 
         Transaction transaction = new Transaction(site.getContextId());
-        List<Map<String, Object>> sites = transaction.executeQuery(sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
+        List<Map<String, Object>> sites = transaction.executeQuery(sb.toString(), site.getContextId(), site.getFolderId());
 
         return sites.size() > 0;
     }

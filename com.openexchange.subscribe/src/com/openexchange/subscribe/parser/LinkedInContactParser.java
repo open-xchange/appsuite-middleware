@@ -5,21 +5,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.TimeZone;
 import java.util.Vector;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.ClickableElement;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.gargoylesoftware.htmlunit.html.SubmittableElement;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -118,19 +112,18 @@ public class LinkedInContactParser {
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		// get the vcard object
 		TextPage vcardPage = vcardLink.click(); 
-		String vcardString = vcardPage.getWebResponse().getContentAsString();
-		
+		String encoding = "ISO-8859-1";
+		String vcardString = vcardPage.getWebResponse().getContentAsString(encoding);
 		// if there is a picture for this contact enter its url into the vcard
 		if (!pictureUrl.equals("")){
 			int indexEnd = vcardString.indexOf("END:VCARD");
 			String textUntilEnd = vcardString.substring(0, indexEnd);
 			vcardString = textUntilEnd + "PHOTO;VALUE=URI:" + pictureUrl + "\n" + "END:VCARD" + "\n";
 		}
-		//System.out.println(vcardString);
-		byte[] vcard = vcardString.getBytes();
+		byte[] vcard = vcardString.getBytes(encoding);
 		//System.out.println(vcardPage.getContent());
 		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
+		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
 		try {
 			VersitObject versitObject = def.parse(versitReader);
 			// parse it into a contact object

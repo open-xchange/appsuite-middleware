@@ -16,7 +16,6 @@ import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Path;
 import com.openexchange.publish.PublicationService;
@@ -138,7 +137,7 @@ public class PublishJSONServlet extends PermissionServlet {
         JSONObject retval = new JSONObject();
 
         retval.put("name", site.getPath().getSiteName());
-        retval.put("expression", site.getTagExpression());
+        retval.put("folder", site.getFolderId());
 
         return retval;
     }
@@ -176,10 +175,10 @@ public class PublishJSONServlet extends PermissionServlet {
         Path path = new Path();
         path.setContextId(session.getContextId());
         path.setOwnerId(session.getUserId());
-        path.setSiteName(siteToPublish.getString("name"));
+        path.setSiteName(siteToPublish.optString("name"));
         site.setPath(path);
-        if (siteToPublish.has("expression")) {
-            site.setTagExpression(siteToPublish.getString("expression"));
+        if (siteToPublish.has("folder")) {
+            site.setFolderId(siteToPublish.getInt("folder"));
         }
         return site;
     }

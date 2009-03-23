@@ -51,13 +51,12 @@ package com.openexchange.subscribe;
 
 
 /**
- * {@link XingSubscriptionService}
+ * {@link ExternalSubscriptionHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface XingSubscriptionService {
-    public XingSubscription getSubscriptionForUser(int contextId, int userId);
-    public void saveXingSubscription(XingSubscription subscription);
-    public void removeXingSubscription(XingSubscription subscription);
+public interface ExternalSubscriptionHandler {
+    public void handleSubscription(ExternalSubscription subscription);
+    public String[] getServices();
 }

@@ -60,24 +60,24 @@ import com.openexchange.server.impl.DBPoolingException;
 import static com.openexchange.publish.Transaction.INT;
 
 /**
- * {@link XingSubscriptionServiceImpl}
+ * {@link ExternalSubscriptionServiceImpl}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class XingSubscriptionServiceImpl implements XingSubscriptionService {
+public class ExternalSubscriptionServiceImpl implements ExternalSubscriptionService {
     
-    private static final Log LOG = LogFactory.getLog(XingSubscriptionServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(ExternalSubscriptionServiceImpl.class);
     
-    public XingSubscription getSubscriptionForUser(int contextId, int userId) {
+    public ExternalSubscription getSubscriptionForUser(int contextId, int userId, String externalService) {
         try {
-            List<Map<String,Object>> results = Transaction.commitQuery(contextId, "SELECT xingUser, xingPassword, targetFolder FROM xing_subscriptions WHERE user = ? and cid = ?", userId, contextId);
+            List<Map<String,Object>> results = Transaction.commitQuery(contextId, "SELECT userName, password, targetFolder FROM external_subscriptions WHERE user = ? and cid = ? and externalService = ?", userId, contextId, externalService);
             if(results.isEmpty()) {
                 return null;
             }
-            XingSubscription subscription = transform(results.get(0));
+            ExternalSubscription subscription = transform(results.get(0));
             subscription.setContextId(contextId);
             subscription.setUserId(userId);
-            
+            subscription.setExternalService(externalService);
             return subscription;
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
@@ -87,45 +87,47 @@ public class XingSubscriptionServiceImpl implements XingSubscriptionService {
         return null;
     }
 
-    private XingSubscription transform(Map<String, Object> map) {
-        String xingUser = (String) map.get("xingUser");
-        String xingPassword = (String) map.get("xingPassword");
+    private ExternalSubscription transform(Map<String, Object> map) {
+        String xingUser = (String) map.get("userName");
+        String xingPassword = (String) map.get("password");
         int targetFolder = INT(map.get("targetFolder"));
         
-        XingSubscription subscription = new XingSubscription();
-        subscription.setXingUserName(xingUser);
-        subscription.setXingPassword(xingPassword);
+        ExternalSubscription subscription = new ExternalSubscription();
+        subscription.setUserName(xingUser);
+        subscription.setPassword(xingPassword);
         subscription.setTargetFolder(targetFolder);
         
         return subscription;
     }
 
-    public void removeXingSubscription(XingSubscription subscription) {
-        executeUpdate(subscription.getContextId(), "DELETE FROM xing_subscriptions WHERE user = ? and cid = ?", subscription.getUserId(), subscription.getContextId());
+    public void removeSubscription(ExternalSubscription subscription) {
+        executeUpdate(subscription.getContextId(), "DELETE FROM external_subscriptions WHERE user = ? and cid = ? and externalService = ?", subscription.getUserId(), subscription.getContextId(), subscription.getExternalService());
 
     }
 
-    public void saveXingSubscription(XingSubscription subscription) {
-        subscription.getXingPassword();
-        XingSubscription oldSubscription = getSubscriptionForUser(subscription.getContextId(), subscription.getUserId());
+    public void saveSubscription(ExternalSubscription subscription) {
+        subscription.getPassword();
+        ExternalSubscription oldSubscription = getSubscriptionForUser(subscription.getContextId(), subscription.getUserId(), subscription.getExternalService());
         if (oldSubscription != null) {
             executeUpdate(
                 subscription.getContextId(),
-                "UPDATE xing_subscriptions SET xingUser = ?, xingPassword = ?, targetFolder = ? WHERE user = ? AND cid = ?",
-                subscription.getXingUserName(),
-                subscription.getXingPassword(),
+                "UPDATE external_subscriptions SET userName = ?, password = ?, targetFolder = ? WHERE user = ? AND cid = ? and externalService = ?",
+                subscription.getUserName(),
+                subscription.getPassword(),
                 subscription.getTargetFolder(),
                 subscription.getUserId(),
-                subscription.getContextId());
+                subscription.getContextId(),
+                subscription.getExternalService());
         } else {
             executeUpdate(
                 subscription.getContextId(),
-                "INSERT INTO xing_subscriptions (xingUser, xingPassword, targetFolder, user, cid) VALUES (?,?,?,?,?) ",
-                subscription.getXingUserName(),
-                subscription.getXingPassword(),
+                "INSERT INTO external_subscriptions (userName, password, targetFolder, user, cid, externalService) VALUES (?,?,?,?,?,?) ",
+                subscription.getUserName(),
+                subscription.getPassword(),
                 subscription.getTargetFolder(),
                 subscription.getUserId(),
-                subscription.getContextId());
+                subscription.getContextId(),
+                subscription.getExternalService());
         }
 
     }
