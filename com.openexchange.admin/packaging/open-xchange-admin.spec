@@ -32,7 +32,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
+Version:	6.9.0.0
 Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -221,6 +221,13 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Feb 24 2009 - choeger@open-xchange.com
+ - Bugfix #12517: [L3] Foldercache does not synchronize properly
+     set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
+* Mon Feb 23 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13248: Checking existance of a group on already existing connection to prevent problems with not committed groups. 
+ * Thu Jan 29 2009 - choeger@open-xchange.com
+ - Bugfix ID#13087 Credentials cache not cleared when deleting a context
 * Wed Jan 07 2009 - marcus.klein@open-xchange.com
  - Bugfix #12864: Only creating the statement if the available flag is set.
 * Wed Jan 07 2009 - choeger@open-xchange.com
