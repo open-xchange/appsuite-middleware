@@ -32,7 +32,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
+Version:	6.9.0.0
 Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -40,8 +40,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
-Requires:       open-xchange-admin >= 6.8.1
-Requires:       open-xchange-admin-client >= 6.8.1
+Requires:       open-xchange-admin >= 6.9.0.0
+Requires:       open-xchange-admin-client >= 6.9.0.0
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
@@ -104,6 +104,9 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Feb 23 2009 - choeger@open-xchange.com
+ - Bugfix #13252: oxinstaller broken when system has no FQDN
+   give proper error message
 * Tue Jan 20 2009 - marcus.klein@open-xchange.com
  - Bugfix #13006: Removed stripping of file:/ protocol in URI of filestore.
 * Mon Jan 19 2009 - marcus.klein@open-xchange.com
