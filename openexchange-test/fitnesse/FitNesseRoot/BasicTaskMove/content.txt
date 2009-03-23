@@ -30,7 +30,7 @@ Now we make sure it really is in that folder:
 | folder             | title           |
 | start_folder       | My movable task |
 
-Now we are ready to move it. To do so, we add another attribute called "destination". This is one of the attributes that are not specified in the HTTP-API. 
+Now we are ready to move it. To do so, we add another attribute called "destination". This is one of the attributes that are not specified in the HTTP-API.
 
 !|Table:MoveTask     |
 | My movable task    |
@@ -45,6 +45,6 @@ After all of that, we make sure our task arrived in the correct folder.
 | destination_folder | My movable task |
 
 In the end, we call our clean-up helper to get rid of the folders and the task we created.
- 
+
 !include CommonTearDown
 

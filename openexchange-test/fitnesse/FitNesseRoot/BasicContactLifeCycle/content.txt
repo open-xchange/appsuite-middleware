@@ -1,5 +1,8 @@
 ''This test shows the simple life-cycle of a contact object, create-read-update-read-delete''
 
+Let's get the setup done with so we can start...
+!include CommonSetup
+
 First we create the contact...
 
 !|Table:CreateContact|
@@ -32,3 +35,7 @@ First we create the contact...
 ...then we delete the contact...
 !|Table:DeleteContact|
 | hugoHerrlich       |
+
+
+...and clean-up afterwards:
+!include CommonTearDown

@@ -1,3 +1,5 @@
+!include CommonSetup
+
 Create a quite ordinary appointment...
 
 !|Table:CreateAppointment|
@@ -29,3 +31,4 @@ Create a quite ordinary appointment...
 | Demo fixture|
 
 
+!include CommonTearDown

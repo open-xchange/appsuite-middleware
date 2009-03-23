@@ -1,3 +1,6 @@
+!include CommonSetup
+
+
 We try to create a contact with an invalid e-mail address
 
 !|Table:CreateContact|
@@ -27,3 +30,6 @@ And afterwards, we verify that rejecting the invalid e-mail address did not remo
 | hugoHerrlich       |
 | display_name   | given_name | sur_name | title | email1               |
 | Herrlich, Hugo | Hugo       | Herrlich | Dr.   | hugo.herrlich@bla.ox |
+
+
+!include CommonTearDown
