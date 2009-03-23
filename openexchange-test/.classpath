@@ -45,5 +45,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.common/jars/org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
 	<classpathentry kind="lib" path="lib/fitnesse.jar"/>
 	<classpathentry kind="lib" path="lib/fitnesserunner-1.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
