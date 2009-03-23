@@ -6,10 +6,21 @@ We start by defining that these tests are Slim tests. Both Fit and Slim tests ca
 
 (This has actually be set for the whole wiki as a default, so it is not necessary. But this is a tutorial, so...)
 
-We continue by setting the default path, so that we do not have to use the long package name for all our fixtures (or "tables", as they are called in Slim). This is usually done, with tons of other small steps, in CommonSetup so it can be hidden from view, because it distracts from the main point of the test. But for the sake of demonstation:
+We continue by setting the default path, so that we do not have to use the long package name for all our fixtures (or "tables", as they are called in Slim). We also tell our system where the server to test against is and what users exist. All of this is usually done in CommonSetup so it can be hidden from view, because it distracts from the main point of the test. But for the sake of demonstration:
 
 |Import|
 |com.openexchange.fitnesse.tasks|
+|com.openexchange.fitnesse.environment|
+
+!|Table:ConfigureEnvironment|
+|hostname|
+|localhost|
+
+!|Table:DefineUsers|
+|thorben|netline|
+|marcus|netline|
+
+
 
 Now we '''create a task'''. The !-FitNesse-! system uses a fixture to create this data on the server via the HTTP-API. You don't have to care about the specifics, the test suite does this for you. You just write:
 
