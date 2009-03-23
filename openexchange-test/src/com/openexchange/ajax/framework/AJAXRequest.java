@@ -51,6 +51,7 @@ package com.openexchange.ajax.framework;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 
@@ -89,6 +90,9 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         }
         public Parameter(final String name, final Date time) {
             this(name, time.getTime());
+        }
+        public Parameter(final String name, final Date time, final TimeZone tz) {
+            this(name, time.getTime() + tz.getOffset(time.getTime()));
         }
         public Parameter(final String name, final boolean schalter) {
             this(name, String.valueOf(schalter));

@@ -62,7 +62,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
-import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -121,7 +120,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             lastModified = appointment.getLastModified();
 
             // Step 3
-            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L)); // 29.12.08 - 02.01.09
+            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
             final HasResponse hasResponse = client.execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
@@ -181,7 +180,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             lastModified = appointment.getLastModified();
 
             // Step 3
-            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L)); // 29.12.08 - 02.01.09
+            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
             final HasResponse hasResponse = client.execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
@@ -241,7 +240,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             lastModified = appointment.getLastModified();
 
             // Step 3
-            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L)); // 29.12.08 - 02.01.09
+            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
             final HasResponse hasResponse = client.execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
@@ -301,7 +300,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             lastModified = appointment.getLastModified();
 
             // Step 3
-            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L)); // 29.12.08 - 02.01.09
+            final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
             final HasResponse hasResponse = client.execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
@@ -350,8 +349,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
         Object[][] responseColumns = response.getArray();
         for (Object[] obj : responseColumns) {
-            DeleteRequest deleteRequest = new DeleteRequest((Integer) obj[0], folderId, (Date) obj[1]);
-            client.execute(deleteRequest);
+            client.execute(new DeleteRequest(((Integer) obj[0]).intValue(), folderId, (Date) obj[1]));
         }
     }
 

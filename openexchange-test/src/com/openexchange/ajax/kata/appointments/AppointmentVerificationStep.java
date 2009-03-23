@@ -105,6 +105,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
     }
 
+    @Override
     protected void assumeIdentity(AppointmentObject thing) {
         expectedFolderId = entry.getParentFolderID();
         boolean containsFolderId = entry.containsParentFolderID();
@@ -168,7 +169,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
     }
 
     private void checkViaHas(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        HasRequest hasRequest = new HasRequest(appointment.getStartDate(), appointment.getEndDate());
+        HasRequest hasRequest = new HasRequest(appointment.getStartDate(), appointment.getEndDate(), getTimeZone());
         HasResponse hasResponse = client.execute(hasRequest);
         boolean[] values = hasResponse.getValues();
         for (int i = 0; i < values.length; i++) {
@@ -223,7 +224,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
         for (int i = 0; i < rows.length; i++) {
             Object[] row = rows[i];
-            int id = (Integer) row[idPos];
+            int id = ((Integer) row[idPos]).intValue();
             if (id == appointment.getObjectID()) {
                 compare(appointment, row, columns);
                 return;
@@ -274,8 +275,8 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         switch (column) {
         case AppointmentObject.START_DATE:
         case AppointmentObject.END_DATE:
-            int offset = getTimeZone().getOffset((Long) actual);
-            return new Date((Long) actual - offset);
+            int offset = getTimeZone().getOffset(((Long) actual).longValue());
+            return new Date(((Long) actual).longValue() - offset);
         }
 
         return actual;

@@ -52,22 +52,26 @@ package com.openexchange.ajax.appointment.action;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class HasRequest extends AbstractAppointmentRequest<HasResponse> {
 
-    private Date start;
+    private final Date start;
 
-    private Date end;
+    private final Date end;
 
-    public HasRequest(Date start, Date end) {
+    private final TimeZone tz;
+
+    public HasRequest(final Date start, final Date end, final TimeZone tz) {
+        super();
         this.start = start;
         this.end = end;
+        this.tz = tz;
     }
 
     public Object getBody() throws JSONException {
@@ -81,13 +85,12 @@ public class HasRequest extends AbstractAppointmentRequest<HasResponse> {
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_HAS));
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, start));
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_END, end));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, start, tz));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_END, end, tz));
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
-    public AbstractAJAXParser<HasResponse> getParser() {
+    public HasParser getParser() {
         return new HasParser();
     }
-
 }
