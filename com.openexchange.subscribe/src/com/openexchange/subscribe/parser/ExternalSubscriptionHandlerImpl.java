@@ -74,6 +74,7 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler implements E
 
     public void handleSubscription(ExternalSubscription subscription) {
         try {
+            System.out.println("Handle subscription: "+subscription.getExternalService()+" "+subscription.getUserName());
             ContactObject[] contactsForUser = getContacts(subscription);
             List<ContactObject> contacts = Arrays.asList(contactsForUser);
             storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);

@@ -15,7 +15,9 @@ Import-Package: com.openexchange.context,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.xml.sax,
- org.xml.sax.helpers
+ org.xml.sax.helpers,
+ javax.net.ssl,
+ javax.net
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.subscribe
 Bundle-ClassPath: .,
