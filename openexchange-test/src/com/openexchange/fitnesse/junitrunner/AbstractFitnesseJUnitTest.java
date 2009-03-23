@@ -50,16 +50,14 @@
 package com.openexchange.fitnesse.junitrunner;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
+import junit.framework.TestCase;
 import com.neuri.trinidad.JUnitHelper;
 import com.neuri.trinidad.TestEngine;
 import com.neuri.trinidad.TestRunner;
 import com.neuri.trinidad.fitnesserunner.FitNesseRepository;
 import com.neuri.trinidad.fitnesserunner.FitTestEngine;
 import com.neuri.trinidad.fitnesserunner.SlimTestEngine;
-import junit.framework.TestCase;
 
 /**
  * 
