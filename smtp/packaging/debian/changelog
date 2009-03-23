@@ -1,3 +1,9 @@
+open-xchange-smtp (6.9.0.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Mar 2009 15:59:04 +0100
+
 open-xchange-smtp (6.8.1-3) unstable; urgency=low
 
   * first build for SP5U1 RC3

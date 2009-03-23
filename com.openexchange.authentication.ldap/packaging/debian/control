@@ -2,12 +2,12 @@ Source: open-xchange-authentication-ldap
 Section: unknown
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.8.1), open-xchange-global (>=6.8.1), open-xchange-configread (>=6.8.1)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.9.0.0), open-xchange-global (>=6.8.1), open-xchange-configread (>=6.8.1)
 Standards-Version: 3.6.1
 
 Package: open-xchange-authentication-ldap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.8.1), open-xchange-global (>=6.8.1), open-xchange-configread (>=6.8.1)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.9.0.0), open-xchange-global (>=6.8.1), open-xchange-configread (>=6.8.1)
 Provides: open-xchange-authentication
 Description: The Open-Xchange LDAP Authentication
 Conflicts: open-xchange-authentication-database

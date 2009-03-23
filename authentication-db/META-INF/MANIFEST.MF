@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database Authentication
 Bundle-SymbolicName: com.openexchange.authentication.database
-Bundle-Version: 6.8.1
+Bundle-Version: 6.9.0.0
 Bundle-Activator: com.openexchange.authentication.database.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

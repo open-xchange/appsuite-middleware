@@ -33,8 +33,8 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
-Release:	3
+Version:	6.9.0.0
+Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,8 +303,17 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Mar 23 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12220: Enhanced forward/reply calls by an optional "view" parameter to define the desired format
+* Wed Mar 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13406: Ensured applying receiver's locale to action replacement for proper translation
+* Tue Mar 17 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13362: Checking requested columns for last-modified field prior to adding it
+ - Bugfix #13048: Proper export/import of VCards with empty "URL"/"ORG" property. This change fixes handling of "PHOTO" property, too.
+ - Postprocessings for bugfix #13154
 * Mon Mar 16 2009 - marcus.klein@open-xchange.com
  - Bugfix #13394: Adding delete listener to remove server settings for a user.
+ - Bugfix #13396: Using group storage with group 0 to resolve participants for notification.
 * Mon Mar 16 2009 - thorben.betten@open-xchange.com
  - Bugfix #13372: Extending auto complete search to support distribution lists.
 * Fri Mar 13 2009 - martin.herfurth@open-xchange.com

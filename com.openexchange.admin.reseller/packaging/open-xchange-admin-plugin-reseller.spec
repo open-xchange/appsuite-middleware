@@ -4,8 +4,8 @@
 Name:           open-xchange-admin-plugin-reseller
 BuildArch:	noarch
 BuildRequires:  ant
-BuildRequires:  open-xchange-admin >= 6.8.1
-BuildRequires:  open-xchange-admin-plugin-hosting >= 6.8.1
+BuildRequires:  open-xchange-admin >= 6.9.0.0
+BuildRequires:  open-xchange-admin-plugin-hosting >= 6.9.0.0
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -33,7 +33,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
+Version:	6.9.0.0
 Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -41,9 +41,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Context Restore Plugin
-Requires:       open-xchange-admin >= 6.8.1
-Requires:       open-xchange-admin-client >= 6.8.1
-Requires:       open-xchange-admin-plugin-hosting >= 6.8.1
+Requires:       open-xchange-admin >= 6.9.0.0
+Requires:       open-xchange-admin-client >= 6.9.0.0
+Requires:       open-xchange-admin-plugin-hosting >= 6.9.0.0
 #
 %package -n	open-xchange-admin-plugin-reseller-soap
 Group:          Applications/Productivity
