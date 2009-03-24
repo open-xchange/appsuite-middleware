@@ -210,7 +210,9 @@ public enum Tree {
     /** [inside GUI] "true" or "false" */
     HoverTaskEnabled("/gui/effects/hover/tasks"),
     
-    /** [inside GUI] "1" (=short) - "3" (=long) */
+    /** [inside GUI] 1 = short  =  500 milliseconds 
+     *               2 = middle = 1000 milliseconds
+     *               3 = long   = 2000 milliseconds */
     HoverSpeed("/gui/effects/hover/speed"),
 
     //TODO: more gui settings
