@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -70,7 +69,9 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.najp.threadpool.AJPv13ThreadFactory;
 import com.openexchange.ajp13.najp.threadpool.Java6SynchronousQueue;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link AJPv13TaskWatcher} - Keeps track of submitted AJP tasks.
@@ -131,7 +132,7 @@ public class AJPv13TaskWatcher {
         }
     }
 
-    private Task task;
+    private ScheduledTimerTask task;
 
     private final ConcurrentMap<Long, WatcherFutureTask> listeners;
 
@@ -145,7 +146,14 @@ public class AJPv13TaskWatcher {
             /*
              * Start task if enabled
              */
-            ServerTimer.getTimer().schedule((task = new Task(listeners.values(), LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (null != timer) {
+                task = timer.scheduleWithFixedDelay(
+                    new Task(listeners.values(), LOG),
+                    1000,
+                    AJPv13Config.getAJPWatcherFrequency(),
+                    TimeUnit.MILLISECONDS);
+            }
         }
     }
 
@@ -164,13 +172,16 @@ public class AJPv13TaskWatcher {
         }
         listeners.clear();
         if (null != task) {
-            task.cancel();
+            task.cancel(true);
             task = null;
-            ServerTimer.getTimer().purge();
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (null != timer) {
+                timer.purge();
+            }
         }
     }
 
-    private static class Task extends TimerTask {
+    private static class Task implements Runnable {
 
         private final Collection<WatcherFutureTask> listeners;
 
@@ -197,7 +208,6 @@ public class AJPv13TaskWatcher {
                 new AJPv13ThreadFactory("AJPTaskWatcher-"));
         }
 
-        @Override
         public void run() {
             try {
                 final boolean enabled = AJPv13Config.getAJPWatcherPermission();

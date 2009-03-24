@@ -123,6 +123,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
+import com.openexchange.timer.Timer;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
@@ -154,7 +155,7 @@ public final class ServerActivator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class, EventAdmin.class };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class };
+        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class, Timer.class };
 
     private final List<ServiceRegistration> registrationList;
 
