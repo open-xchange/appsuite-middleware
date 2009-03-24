@@ -400,6 +400,10 @@
         <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
     </target>
 
+	<target name="install-bundle">
+	<antcall target="install-jar"></antcall>
+    </target>
+	
 	<target name="install-client" depends="client">
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>

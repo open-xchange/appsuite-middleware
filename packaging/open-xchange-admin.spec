@@ -40,6 +40,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Admin Daemon
+Requires:	open-xchange-admin-lib = 6.9.0.0
 Requires:       open-xchange-common open-xchange-server open-xchange
 %if 0%{?suse_version}
 Requires:  mysql-client >= 5.0.0
@@ -81,6 +82,18 @@ Authors:
 --------
     Open-Xchange
 
+%package -n	open-xchange-admin-lib
+Group:          Applications/Productivity
+Summary:	The Open Xchange Admin Daemon Bundle client library
+
+
+%description -n open-xchange-admin-lib
+The Open Xchange Admin Daemon Bundle client library
+
+Authors:
+--------
+    Open-Xchange
+
 %package -n	open-xchange-admin-doc
 Group:          Applications/Productivity
 Summary:	Documentation for the Open Xchange RMI client library.
@@ -116,6 +129,7 @@ mkdir -p %{buildroot}/sbin
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb doc install
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install-client
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install-bundle
 mv doc javadoc
 ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 
@@ -195,13 +209,11 @@ fi
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/sbin
-%dir /opt/open-xchange/bundles
 %dir /opt/open-xchange/etc/admindaemon
 %dir /opt/open-xchange/etc/admindaemon/osgi
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 /opt/open-xchange/sbin/*
 /etc/init.d/*
-/opt/open-xchange/bundles/*
 /sbin/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/*.properties
 %config(noreplace) /opt/open-xchange/etc/admindaemon/*.ccf
@@ -216,6 +228,11 @@ fi
 %defattr(-,root,root)
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
+
+%files -n open-xchange-admin-lib
+%defattr(-,root,root)
+%dir /opt/open-xchange/bundles/
+/opt/open-xchange/bundles/*
 
 %files -n open-xchange-admin-doc
 %defattr(-,root,root)
