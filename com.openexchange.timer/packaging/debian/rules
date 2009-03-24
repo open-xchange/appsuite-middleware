@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-dataretention
+oxroot=$(CURDIR)/debian/open-xchange-timer
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
