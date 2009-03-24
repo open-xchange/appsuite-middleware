@@ -5,3 +5,4 @@ This category contains tests that are meant as examples. They may not be written
 !see .TaskWithStartDateBeforeEndDate  - this shows how to work with '''exceptions''' and how to tests for them.
 !see .FailedTaskVerification - this shows you what happens if exceptions appear and a specific problem fitness has with multiple errors
 !see TestMultipleUsers - This test uses more than one user.
+!see TestQueries - Shows The queries you can run to investigate your system
