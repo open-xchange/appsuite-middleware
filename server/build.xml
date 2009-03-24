@@ -103,7 +103,7 @@
     	<pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
-    	<pathelement location="${bundlesdir}/${xmlBundle}/${timerjar}"/>
+    	<pathelement location="${bundlesdir}/${timerjar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}" />
