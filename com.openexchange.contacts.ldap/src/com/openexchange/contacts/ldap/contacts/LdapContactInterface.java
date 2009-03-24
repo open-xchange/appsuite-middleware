@@ -521,22 +521,13 @@ public class LdapContactInterface implements ContactInterface {
                     final Control[] controls = new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
                     context.setRequestControls(controls);
                 }
-                final SearchControls searchControls = new SearchControls();
-                searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop));
-                searchControls.setCountLimit(0);
-                searchControls.setReturningAttributes(getAttributes(columns));
+                final SearchControls searchControls = getSearchControl(columns);
                 do {
                     final NamingEnumeration<SearchResult> search = context.search(folderprop.getBaseDN(), filter, searchControls);
                     while (null != search && search.hasMore()) {
                         final SearchResult next = search.next();
                         final Attributes attributes = next.getAttributes();
-                        final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, folderprop, new UidInterface() {
-
-                            public Integer getUid(final String uid) throws LdapException {
-                                return ldapUidToOxUid(uid);
-                            }
-
-                        });
+                        final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, folderprop, getUidInterface());
                         if (columns.contains(FolderChildObject.FOLDER_ID)) {
                             contact.setParentFolderID(folderId);
                         }
@@ -570,6 +561,26 @@ public class LdapContactInterface implements ContactInterface {
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
         return arrayList;
+    }
+
+
+    private UidInterface getUidInterface() {
+        return new UidInterface() {
+
+            public Integer getUid(final String uid) throws LdapException {
+                return ldapUidToOxUid(uid);
+            }
+
+        };
+    }
+
+
+    private SearchControls getSearchControl(final Set<Integer> columns) {
+        final SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScope()));
+        searchControls.setCountLimit(0);
+        searchControls.setReturningAttributes(getAttributes(columns));
+        return searchControls;
     }
 
 //    /**

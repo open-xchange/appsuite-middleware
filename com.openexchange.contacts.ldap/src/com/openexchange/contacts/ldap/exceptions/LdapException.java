@@ -116,8 +116,17 @@ public class LdapException extends OXException {
         /**
          * Error while trying to create connection to LDAP server: %s
          */
-        INITIAL_LDAP_ERROR("Error while trying to create connection to LDAP server: %s", Category.CODE_ERROR, 10);
+        INITIAL_LDAP_ERROR("Error while trying to create connection to LDAP server: %s", Category.CODE_ERROR, 10),
+        
+        /**
+         * The LDAP search for the user contains too many results
+         */
+        TOO_MANY_USER_RESULTS("The LDAP search for the user contains too many results", Category.CODE_ERROR, 11),
 
+        /**
+         * The LDAP search for the user object contains no results
+         */
+        NO_USER_RESULTS("The LDAP search for the user object contains no results", Category.CODE_ERROR, 12);
 
         /**
          * Message of the exception.

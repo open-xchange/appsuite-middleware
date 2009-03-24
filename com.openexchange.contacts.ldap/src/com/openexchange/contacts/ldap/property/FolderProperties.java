@@ -9,38 +9,20 @@ import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code
 public class FolderProperties {
 
     public enum AuthType {
-        AdminDN("AdminDN"),
-        anonymous("anonymous"),
-        user("user");
-        
-        private final String type;
-        
-        private AuthType(final String type) {
-            this.type = type;
-        }
-
-        
-        public final String getType() {
-            return type;
-        }
-        
+        AdminDN,
+        anonymous,
+        user;
+    }
+    
+    public enum UserAuthType {
+        AdminDN,
+        anonymous;
     }
     
     public enum SearchScope {
-        base("base"),
-        one("one"),
-        sub("sub");
-        
-        private final String type;
-        
-        private SearchScope(final String type) {
-            this.type = type;
-        }
-
-        public final String getType() {
-            return type;
-        }
-        
+        base,
+        one,
+        sub;
     }
 
     public enum Sorting {
@@ -50,18 +32,25 @@ public class FolderProperties {
 
     
     private enum Parameters {
-        foldername("foldername"),
-        searchfilter("searchfilter"),
         AdminBindPW("AdminBindPW"),
         AdminDN("AdminDN"),
         authtype("authtype"),
         baseDN("baseDN"),
+        foldername("foldername"),
         mappingfile("mappingfile"),
         memorymapping("memorymapping"),
         pagesize("pagesize"),
+        searchfilter("searchfilter"),
         searchScope("searchScope"),
         sorting("sorting"),
-        uri("uri");
+        uri("uri"),
+        userSearchFilter("userSearchFilter"),
+        userSearchAttribute("userSearchAttribute"),
+        userSearchBaseDN("userSearchBaseDN"),
+        userAuthType("userAuthType"),
+        userAdminDN("userAdminDN"),
+        userAdminBindPW("userAdminBindPW"),
+        userSearchScope("userSearchScope");
 
         
         private final String name;
@@ -75,17 +64,15 @@ public class FolderProperties {
         }    
     }
     
-    private String foldername;
-    
-    private String searchfilter;
-
     private String adminBindPW;
-
+    
     private String adminDN;
 
     private AuthType authtype;
 
     private String baseDN;
+
+    private String foldername;
 
     private Mappings mappings;
 
@@ -93,107 +80,27 @@ public class FolderProperties {
 
     private int pagesize;
 
+    private String searchfilter;
+
     private SearchScope searchScope;
 
     private Sorting sorting;
 
     private String uri;
-    
-    private void setFoldername(final String foldername) {
-        this.foldername = foldername;
-    }
 
-    private void setSearchfilter(final String searchfilter) {
-        this.searchfilter = searchfilter;
-    }
+    private String userSearchFilter;
 
-    public String getFoldername() {
-        return foldername;
-    }
+    private String userSearchAttribute;
 
-    public String getSearchfilter() {
-        return searchfilter;
-    }
+    private String userSearchBaseDN;
 
-    public String getAdminBindPW() {
-        return adminBindPW;
-    }
+    private SearchScope userSearchScope;
 
-    public String getAdminDN() {
-        return adminDN;
-    }
+    private UserAuthType userAuthType;
 
-    public AuthType getAuthtype() {
-        return authtype;
-    }
+    private String userAdminDN;
 
-    public String getBaseDN() {
-        return baseDN;
-    }
-
-    public Mappings getMappings() {
-        return mappings;
-    }
-
-    public int getPagesize() {
-        return pagesize;
-    }
-
-    public SearchScope getSearchScope() {
-        return searchScope;
-    }
-
-    public Sorting getSorting() {
-        return sorting;
-    }
-
-    public boolean isMemorymapping() {
-        return memorymapping;
-    }
-
-    public final String getUri() {
-        return uri;
-    }
-    
-    private void setAdminBindPW(final String adminBindPW) {
-        this.adminBindPW = adminBindPW;
-    }
-    
-    private void setAdminDN(final String adminDN) {
-        this.adminDN = adminDN;
-    }
-    
-    private void setAuthtype(final AuthType authtype) {
-        this.authtype = authtype;
-    }
-    
-    private void setBaseDN(final String baseDN) {
-        this.baseDN = baseDN;
-    }
-    
-    private void setMappings(final Mappings mappings) {
-        this.mappings = mappings;
-    }
-    
-    private void setMemorymapping(final boolean memorymapping) {
-        this.memorymapping = memorymapping;
-    }
-    
-    private void setPagesize(final int pagesize) {
-        this.pagesize = pagesize;
-    }
-    
-    private void setSearchScope(final SearchScope searchScope) {
-        this.searchScope = searchScope;
-    }
-    
-    private void setSorting(final Sorting sorting) {
-        this.sorting = sorting;
-    }
-    
-    private void setUri(final String uri) {
-        this.uri = uri;
-    }
+    private String userAdminBindPW;
 
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -223,18 +130,18 @@ public class FolderProperties {
         }
 
         // Here we iterate over all properties...
-        retval.setUri(PropertyHandler.checkStringProperty(conf, prefix + Parameters.uri.getName(), null));
+        retval.setUri(PropertyHandler.checkStringProperty(conf, prefix + Parameters.uri.getName(), name));
         logBuilder.append("\tUri: ").append(retval.getUri()).append('\n');
         
-        retval.setBaseDN(PropertyHandler.checkStringProperty(conf, prefix + Parameters.baseDN.getName(), null));
+        retval.setBaseDN(PropertyHandler.checkStringProperty(conf, prefix + Parameters.baseDN.getName(), name));
         logBuilder.append("\tBaseDN: ").append(retval.getBaseDN()).append('\n');
         
-        retval.setAdminDN(PropertyHandler.checkStringProperty(conf, prefix + Parameters.AdminDN.getName(), null));
+        retval.setAdminDN(PropertyHandler.checkStringProperty(conf, prefix + Parameters.AdminDN.getName(), name));
         logBuilder.append("\tAdminDN: ").append(retval.getAdminDN()).append('\n');
         
-        retval.setAdminBindPW(PropertyHandler.checkStringProperty(conf, prefix + Parameters.AdminBindPW.getName(), null));
+        retval.setAdminBindPW(PropertyHandler.checkStringProperty(conf, prefix + Parameters.AdminBindPW.getName(), name));
         
-        final String searchScopeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.searchScope.getName(), null);
+        final String searchScopeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.searchScope.getName(), name);
         try {
             retval.setSearchScope(SearchScope.valueOf(searchScopeString));
             logBuilder.append("\tsearchScope: ").append(retval.getSearchScope()).append('\n');
@@ -242,15 +149,15 @@ public class FolderProperties {
             throw new LdapConfigurationException(Code.SEARCH_SCOPE_WRONG, searchScopeString);
         }
         
-        final String authstring = PropertyHandler.checkStringProperty(conf, prefix + Parameters.authtype.getName(), null);
+        final String authstring = PropertyHandler.checkStringProperty(conf, prefix + Parameters.authtype.getName(), name);
         try {
             retval.setAuthtype(AuthType.valueOf(authstring));
             logBuilder.append("\tauthtype: ").append(retval.getAuthtype()).append('\n');
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.AUTH_TYPE_WRONG, authstring);
         }
-
-        final String sortingString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.sorting.getName(), null);
+        
+        final String sortingString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.sorting.getName(), name);
         try {
             retval.setSorting(Sorting.valueOf(sortingString));
             logBuilder.append("\tsorting: ").append(retval.getSorting()).append('\n');
@@ -258,13 +165,62 @@ public class FolderProperties {
             throw new LdapConfigurationException(Code.SORTING_WRONG, authstring);
         }
         
-        final String memoryMappingString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.memorymapping.getName(), null);
+        retval.setUserSearchFilter(PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchFilter.getName(), name));
+        logBuilder.append("\tuserSearchFilter: ").append(retval.getUserSearchFilter()).append('\n');
+        
+        final String userSearchScopeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchScope.getName(), name);
+        if (0 != userSearchScopeString.length()) {
+            try {
+                retval.setUserSearchScope(SearchScope.valueOf(userSearchScopeString));
+            } catch (final IllegalArgumentException e) {
+                throw new LdapConfigurationException(Code.USER_SEARCH_SCOPE_WRONG, authstring);
+            }
+        } else {
+            retval.setUserSearchScope(retval.getSearchScope());
+        }
+        logBuilder.append("\tuserSearchScope: ").append(retval.getUserSearchScope()).append('\n');
+        
+        retval.setUserSearchAttribute(PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchAttribute.getName(), name));
+        logBuilder.append("\tuserSearchAttribute: ").append(retval.getUserSearchAttribute()).append('\n');
+        
+        final String userSearchBaseDNString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchBaseDN.getName(), name);
+        if (0 != userSearchBaseDNString.length()) {
+            retval.setUserSearchBaseDN(userSearchBaseDNString);
+        } else {
+            retval.setUserSearchBaseDN(retval.getBaseDN());
+        }        
+        logBuilder.append("\tuserSearchBaseDN: ").append(retval.getUserSearchBaseDN()).append('\n');
+        
+        final String userAuthTypeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userAuthType.getName(), name);
+        try {
+            retval.setUserAuthType(UserAuthType.valueOf(userAuthTypeString));
+        } catch (final IllegalArgumentException e) {
+            throw new LdapConfigurationException(Code.USER_AUTH_TYPE_WRONG);
+        }
+        logBuilder.append("\tuserAuthType: ").append(retval.getUserAuthType()).append('\n');
+        
+        final String userAdminDNString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userAdminDN.getName(), name);
+        if (0 != userAdminDNString.length()) {
+            retval.setUserAdminDN(userAdminDNString);
+        } else {
+            retval.setUserAdminDN(retval.getAdminDN());
+        }
+        logBuilder.append("\tuserAdminDN: ").append(retval.getUserAdminDN()).append('\n');
+        
+        final String userAdminBindPWString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userAdminBindPW.getName(), name);
+        if (0 != userAdminBindPWString.length()) {
+            retval.setUserAdminBindPW(userAdminBindPWString);
+        } else {
+            retval.setUserAdminBindPW(retval.getAdminBindPW());
+        }
+        
+        final String memoryMappingString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.memorymapping.getName(), name);
         
         // TODO: Throws no error, so use an error checking method
         retval.setMemorymapping(Boolean.parseBoolean(memoryMappingString));
         logBuilder.append("\tmemorymapping: ").append(retval.isMemorymapping()).append('\n');
 
-        final String pagesizestring = PropertyHandler.checkStringProperty(conf, prefix + Parameters.pagesize.getName(), null);
+        final String pagesizestring = PropertyHandler.checkStringProperty(conf, prefix + Parameters.pagesize.getName(), name);
         try {
             retval.setPagesize(Integer.parseInt(pagesizestring));
             logBuilder.append("\tpagesize: ").append(retval.getPagesize()).append('\n');
@@ -272,7 +228,7 @@ public class FolderProperties {
             throw new LdapConfigurationException(Code.INVALID_PAGESIZE, pagesizestring);
         }
 
-        final String mappingfile = PropertyHandler.checkStringProperty(conf, prefix + Parameters.mappingfile.getName(), null);
+        final String mappingfile = PropertyHandler.checkStringProperty(conf, prefix + Parameters.mappingfile.getName(), name);
         final Properties mapprops = configuration.getFile(mappingfile);
         if (mapprops.isEmpty()) {
             throw new LdapConfigurationException(Code.INVALID_MAPPING_FILE, mappingfile);
@@ -281,6 +237,213 @@ public class FolderProperties {
         }
 
         return retval;
+    }
+
+    /**
+     * @param userAdminBindPW
+     */
+    private void setUserAdminBindPW(String userAdminBindPW) {
+        this.userAdminBindPW = userAdminBindPW;
+    }
+
+    /**
+     * Gets the userAdminBindPW
+     *
+     * @return The userAdminBindPW
+     */
+    public String getUserAdminBindPW() {
+        return userAdminBindPW;
+    }
+
+    /**
+     * @param userAdminDN
+     */
+    private void setUserAdminDN(String userAdminDN) {
+        this.userAdminDN = userAdminDN;
+    }
+
+    /**
+     * Gets the userAdminDN
+     *
+     * @return The userAdminDN
+     */
+    public String getUserAdminDN() {
+        return userAdminDN;
+    }
+
+    /**
+     * @param userAuthType
+     */
+    private void setUserAuthType(UserAuthType userAuthType) {
+        this.userAuthType = userAuthType;
+    }
+    
+    /**
+     * Gets the userAuthType
+     *
+     * @return The userAuthType
+     */
+    public UserAuthType getUserAuthType() {
+        return userAuthType;
+    }
+
+    /**
+     * @return
+     */
+    public SearchScope getUserSearchScope() {
+        return this.userSearchScope;
+    }
+
+    /**
+     * @param userSearchScope
+     */
+    private void setUserSearchScope(final SearchScope userSearchScope) {
+        this.userSearchScope = userSearchScope;
+    }
+
+    /**
+     * @return
+     */
+    public String getUserSearchBaseDN() {
+        return this.userSearchBaseDN;
+    }
+
+    /**
+     * @param userSearchBaseDN
+     */
+    private void setUserSearchBaseDN(final String userSearchBaseDN) {
+        this.userSearchBaseDN = userSearchBaseDN;
+    }
+
+    /**
+     * @param userSearchAttribute
+     */
+    private void setUserSearchAttribute(final String userSearchAttribute) {
+        this.userSearchAttribute = userSearchAttribute;
+    }
+
+    /**
+     * @param userSearchFilter
+     */
+    private void setUserSearchFilter(final String userSearchFilter) {
+        this.userSearchFilter = userSearchFilter;
+    }
+
+    
+    
+    /**
+     * Gets the userSearchFilter
+     *
+     * @return The userSearchFilter
+     */
+    public String getUserSearchFilter() {
+        return userSearchFilter;
+    }
+
+    
+    /**
+     * Gets the userSearchAttribute
+     *
+     * @return The userSearchAttribute
+     */
+    public String getUserSearchAttribute() {
+        return userSearchAttribute;
+    }
+
+    public String getAdminBindPW() {
+        return adminBindPW;
+    }
+
+    public String getAdminDN() {
+        return adminDN;
+    }
+
+    public AuthType getAuthtype() {
+        return authtype;
+    }
+
+    public String getBaseDN() {
+        return baseDN;
+    }
+
+    public String getFoldername() {
+        return foldername;
+    }
+
+    public Mappings getMappings() {
+        return mappings;
+    }
+
+    public int getPagesize() {
+        return pagesize;
+    }
+
+    public String getSearchfilter() {
+        return searchfilter;
+    }
+
+    public SearchScope getSearchScope() {
+        return searchScope;
+    }
+
+    public Sorting getSorting() {
+        return sorting;
+    }
+
+    public final String getUri() {
+        return uri;
+    }
+
+    public boolean isMemorymapping() {
+        return memorymapping;
+    }
+    
+    private void setAdminBindPW(final String adminBindPW) {
+        this.adminBindPW = adminBindPW;
+    }
+    
+    private void setAdminDN(final String adminDN) {
+        this.adminDN = adminDN;
+    }
+    
+    private void setAuthtype(final AuthType authtype) {
+        this.authtype = authtype;
+    }
+    
+    private void setBaseDN(final String baseDN) {
+        this.baseDN = baseDN;
+    }
+    
+    private void setFoldername(final String foldername) {
+        this.foldername = foldername;
+    }
+    
+    private void setMappings(final Mappings mappings) {
+        this.mappings = mappings;
+    }
+    
+    private void setMemorymapping(final boolean memorymapping) {
+        this.memorymapping = memorymapping;
+    }
+    
+    private void setPagesize(final int pagesize) {
+        this.pagesize = pagesize;
+    }
+    
+    private void setSearchfilter(final String searchfilter) {
+        this.searchfilter = searchfilter;
+    }
+    
+    private void setSearchScope(final SearchScope searchScope) {
+        this.searchScope = searchScope;
+    }
+
+    private void setSorting(final Sorting sorting) {
+        this.sorting = sorting;
+    }
+
+    private void setUri(final String uri) {
+        this.uri = uri;
     }
 
 }

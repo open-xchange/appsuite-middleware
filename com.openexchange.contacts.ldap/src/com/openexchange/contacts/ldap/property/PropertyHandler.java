@@ -81,7 +81,7 @@ public class PropertyHandler {
     public static String checkStringProperty(Properties props, final String name, String filename) throws LdapConfigurationException {
         final String property = props.getProperty(name);
         if (null == property) {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name);
+            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name, filename);
         } else {
             return property;
         }

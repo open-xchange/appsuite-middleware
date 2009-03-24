@@ -22,13 +22,13 @@ public class ContextProperties {
     public static ContextProperties getContextPropertiesFromDir(final ConfigurationService service, final File dir, final int contextid, StringBuilder logBuilder) throws LdapConfigurationException {
         final ContextProperties retval = new ContextProperties();
         // First list the folderdirs which should be registered to that context
-        final File[] folderdirs = dir.listFiles(new FileFilter() {
+        final File[] files = dir.listFiles(new FileFilter() {
             public boolean accept(File pathname) {
-                return pathname.isFile();
+                return pathname.isFile() && pathname.getName().endsWith(".properties");
             }
         });
-        for (final File folderdir : folderdirs) {
-            final String name = folderdir.getName();
+        for (final File file : files) {
+            final String name = file.getName();
             final String purename = name.replace(".properties", "");
             retval.addFolderProperties(FolderProperties.getFolderPropertiesFromProperties(service, name, purename, String.valueOf(contextid), logBuilder));
         }

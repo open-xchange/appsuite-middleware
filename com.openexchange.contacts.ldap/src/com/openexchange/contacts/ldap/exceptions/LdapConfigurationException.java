@@ -94,8 +94,17 @@ public class LdapConfigurationException extends OXException {
         /**
          * The given value for pagesize "%s" is no integer value
          */
-        INVALID_PAGESIZE("The given value for pagesize \"%s\" is no integer value", Category.SETUP_ERROR, 7);
+        INVALID_PAGESIZE("The given value for pagesize \"%s\" is no integer value", Category.SETUP_ERROR, 7),
 
+        /**
+         * The given value for userauthtype "%s" is not a possible one
+         */
+        USER_AUTH_TYPE_WRONG("The given value for userauthtype \"%s\" is not a possible one", Category.SETUP_ERROR, 8),
+
+        /**
+         * The given value for userSearchScope "%s" is not a possible one
+         */
+        USER_SEARCH_SCOPE_WRONG("The given value for userSearchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 9);
 
         /**
          * Message of the exception.

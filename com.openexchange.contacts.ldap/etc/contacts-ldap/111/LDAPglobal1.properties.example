@@ -18,11 +18,35 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.AdminBindPW=secret
 com.openexchange.contacts.ldap.context111.LDAPglobal1.searchScope=sub
 
 # Specify the type of authentication here. Possible values are "anonymous", "AdminDN" or "user"
-com.openexchange.contacts.ldap.context111.LDAPglobal1.authtype=AdminDN
+com.openexchange.contacts.ldap.context111.LDAPglobal1.authtype=user
 
 # Specify if server-side sorting should be used or if the data should be sorted in the groupware.
 # Possible values are "server", "groupware"
 com.openexchange.contacts.ldap.context111.LDAPglobal1.sorting=groupware
+
+# Specify the user search filter here (optional). This is the first part which can be chosse freely
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchFilter=(objectclass=person)
+
+# Specify the user search scope here (optional). Possible value are sub, base and one. If this
+# value is left empty the default searchScope will be used
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchScope=sub
+
+# Specify the user search attribute here (optional). This value specifies which attribute contains the
+# loginname which is used for the groupware
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchAttribute=name
+
+# Specify the baseDN for the user search here (optional). If this value is left empty the global baseDN
+# will be used
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchBaseDN=
+
+# Specify the user auth type here (optional). Possible values are "anonymous" or "AdminDN"
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userAuthType=AdminDN
+
+# Specify the user AdminDN here (optional). If this value is left empty the global AdminDN will be used
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userAdminDN=
+
+# Specify the user AdminBindDN here (optional). If this value is left empty the global AdminBindPW will be used
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userAdminBindPW=secret
 
 # Specify if the value given for uniqueid is a unique long value in LDAP and can be used for
 # identifying (setting "false"), or if it's a string value then memorymapping must be enabled
