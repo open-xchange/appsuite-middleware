@@ -2,7 +2,7 @@ Source: open-xchange-server
 Section: unknown
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.9.0.0), open-xchange-configread (>= 6.9.0.0), open-xchange-global (>= 6.8.1), open-xchange-conversion (>=6.8.1), open-xchange-monitoring (>= 6.8.1), open-xchange-cache (>= 6.8.1), open-xchange-xml (>= 6.8.1), open-xchange-dataretention (>= 6.8.1), open-xchange-timer
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.9.0.0), open-xchange-configread (>= 6.9.0.0), open-xchange-global (>= 6.9.0.0), open-xchange-conversion (>=6.8.1), open-xchange-monitoring (>= 6.8.1), open-xchange-cache (>= 6.8.1), open-xchange-xml (>= 6.8.1), open-xchange-dataretention (>= 6.8.1), open-xchange-timer
 Standards-Version: 3.6.1
 
 Package: open-xchange-server
