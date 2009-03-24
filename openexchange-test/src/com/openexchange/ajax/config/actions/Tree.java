@@ -191,6 +191,27 @@ public enum Tree {
 
     /** [inside GUI] Effects: Global. If you set this, please also set EffectsFading to the same value. */
     EffectsGlobal("/gui/effects/global"),
+    
+    /** [inside GUI] "true" or "false" */
+    HoverCalendarEnabled("/gui/effects/hover/calendar"),
+    
+    /** [inside GUI] "true" or "false" */
+    HoverContactsEnabled("/gui/effects/hover/contacts"),
+    
+    /** [inside GUI] "true" or "false" */
+    HoverInfostoreEnabled("/gui/effects/hover/infostore"),
+    
+    /** [inside GUI] "true" or "false" */
+    HoverMailEnabled("/gui/effects/hover/mail"),
+    
+    /** [inside GUI] "true" or "false" */
+    HoverPortalEnabled("/gui/effects/hover/portal"),
+    
+    /** [inside GUI] "true" or "false" */
+    HoverTaskEnabled("/gui/effects/hover/tasks"),
+    
+    /** [inside GUI] "1" (=short) - "3" (=long) */
+    HoverSpeed("/gui/effects/hover/speed"),
 
     //TODO: more gui settings
 
