@@ -105,4 +105,13 @@ public interface Timer {
      */
     public ScheduledTimerTask scheduleWithFixedDelay(Runnable task, long initialDelay, long delay, TimeUnit unit);
 
+    /**
+     * Tries to remove from the work queue all tasks that have been canceled.
+     * <p>
+     * This method can be useful as a storage reclamation operation, that has no other impact on functionality. Canceled tasks are never
+     * executed, but may accumulate in work queues until worker threads can actively remove them. Invoking this method instead tries to
+     * remove them now. However, this method may fail to remove tasks in the presence of interference by other threads.
+     */
+    public void purge();
+
 }

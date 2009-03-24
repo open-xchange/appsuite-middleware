@@ -50,7 +50,6 @@
 package com.openexchange.timer.internal;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,7 +67,7 @@ public final class TimerImpl implements Timer {
 
     private final AtomicBoolean started;
 
-    private ScheduledExecutorService executorService;
+    private ScheduledThreadPoolExecutor executorService;
 
     /**
      * Initializes a new {@link TimerImpl}.
@@ -85,8 +84,10 @@ public final class TimerImpl implements Timer {
         if (!started.compareAndSet(false, true)) {
             return;
         }
-        executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1, new TimerThreadFactory("Timer-"));
-        ((ScheduledThreadPoolExecutor) executorService).prestartAllCoreThreads();
+        executorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(
+            Runtime.getRuntime().availableProcessors() + 1,
+            new TimerThreadFactory("Timer-"));
+        executorService.prestartAllCoreThreads();
     }
 
     /**
@@ -117,6 +118,10 @@ public final class TimerImpl implements Timer {
 
     public ScheduledTimerTask scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
         return new WrappingScheduledTimerTask(executorService.scheduleWithFixedDelay(command, initialDelay, delay, unit));
+    }
+
+    public void purge() {
+        executorService.purge();
     }
 
 }
