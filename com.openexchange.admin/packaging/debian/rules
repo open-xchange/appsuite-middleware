@@ -12,6 +12,7 @@
 adminname=open-xchange-admin
 adminroot=$(CURDIR)/debian/$(adminname)
 clientroot=$(CURDIR)/debian/$(adminname)-client
+libroot=$(CURDIR)/debian/$(adminname)-lib
 docroot=$(CURDIR)/debian/$(adminname)-doc
 oxprefix=/opt/open-xchange
 
@@ -59,6 +60,7 @@ install: build
 	# Add here commands to install the package into debian/open-xchange-admin.
 	ant -Dprefix=$(oxprefix) -Ddestdir=$(adminroot) doc install
 	ant -Dprefix=$(oxprefix) -Ddestdir=$(clientroot) install-client
+	ant -Dprefix=$(oxprefix) -Ddestdir=$(libroot) install-bundle
 	mv doc javadoc
 
 
