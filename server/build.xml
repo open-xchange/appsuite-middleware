@@ -65,6 +65,7 @@
 	<property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="commonjar" value="common.jar"/>
     <property name="xmlbundlejar" value="com.openexchange.xml.jar" />
+	<property name="timerjar" value="com.openexchange.timer.jar" />
 
     <property name="activationjar" value="activation-1.1.1.jar" />
     <property name="commonscodecjar" value="commons-codec-1.3.jar" />
@@ -102,6 +103,7 @@
     	<pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
+    	<pathelement location="${bundlesdir}/${xmlBundle}/${timerjar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}" />
