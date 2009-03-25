@@ -112,12 +112,24 @@ public final class TimerImpl implements Timer {
         return new WrappingScheduledTimerTask(executorService.schedule(command, delay, unit));
     }
 
+    public ScheduledTimerTask schedule(final Runnable command, final long delay) {
+        return schedule(command, delay, TimeUnit.MILLISECONDS);
+    }
+
     public ScheduledTimerTask scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
         return new WrappingScheduledTimerTask(executorService.scheduleAtFixedRate(command, initialDelay, period, unit));
     }
 
+    public ScheduledTimerTask scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period) {
+        return scheduleAtFixedRate(command, initialDelay, period, TimeUnit.MILLISECONDS);
+    }
+
     public ScheduledTimerTask scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
         return new WrappingScheduledTimerTask(executorService.scheduleWithFixedDelay(command, initialDelay, delay, unit));
+    }
+
+    public ScheduledTimerTask scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay) {
+        return scheduleWithFixedDelay(command, initialDelay, delay, TimeUnit.MILLISECONDS);
     }
 
     public void purge() {

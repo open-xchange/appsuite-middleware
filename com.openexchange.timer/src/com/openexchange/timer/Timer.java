@@ -72,6 +72,19 @@ public interface Timer {
     public ScheduledTimerTask schedule(Runnable task, long delay, TimeUnit unit);
 
     /**
+     * Convenience method that invokes {@link #schedule(Runnable, long, TimeUnit)} with time unit set to {@link TimeUnit#MILLISECONDS}.
+     * <p>
+     * Creates and executes a one-shot action that becomes enabled after the given delay.
+     * 
+     * @param task The task to execute.
+     * @param delay The time from now to delay execution.
+     * @return A cancelable scheduled timer task representing pending completion of the task.
+     * @throws RejectedExecutionException If task cannot be scheduled for execution.
+     * @throws NullPointerException If command is <code>null</code>
+     */
+    public ScheduledTimerTask schedule(Runnable task, long delay);
+
+    /**
      * Creates and executes a periodic action that becomes enabled first after the given initial delay, and subsequently with the given
      * period; that is executions will commence after <tt>initialDelay</tt> then <tt>initialDelay+period</tt>, then
      * <tt>initialDelay + 2 * period</tt>, and so on. If any execution of the task encounters an exception, subsequent executions are
@@ -89,6 +102,25 @@ public interface Timer {
     public ScheduledTimerTask scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit unit);
 
     /**
+     * Convenience method that invokes {@link #scheduleAtFixedRate(Runnable, long, long, TimeUnit)} with time unit set to
+     * {@link TimeUnit#MILLISECONDS}.
+     * <p>
+     * Creates and executes a periodic action that becomes enabled first after the given initial delay, and subsequently with the given
+     * period; that is executions will commence after <tt>initialDelay</tt> then <tt>initialDelay+period</tt>, then
+     * <tt>initialDelay + 2 * period</tt>, and so on. If any execution of the task encounters an exception, subsequent executions are
+     * suppressed. Otherwise, the task will only terminate via cancellation or termination of the executor.
+     * 
+     * @param task The task to execute.
+     * @param initialDelay The time to delay first execution.
+     * @param period The period between successive executions.
+     * @return A cancelable scheduled timer task representing pending completion of the task.
+     * @throws RejectedExecutionException If task cannot be scheduled for execution.
+     * @throws NullPointerException If command is <code>null</code>
+     * @throws IllegalArgumentException If period is less than or equal to zero.
+     */
+    public ScheduledTimerTask scheduleAtFixedRate(Runnable task, long initialDelay, long period);
+
+    /**
      * Creates and executes a periodic action that becomes enabled first after the given initial delay, and subsequently with the given
      * delay between the termination of one execution and the commencement of the next. If any execution of the task encounters an
      * exception, subsequent executions are suppressed. Otherwise, the task will only terminate via cancellation or termination of the
@@ -104,6 +136,25 @@ public interface Timer {
      * @throws IllegalArgumentException If delay is less than or equal to zero.
      */
     public ScheduledTimerTask scheduleWithFixedDelay(Runnable task, long initialDelay, long delay, TimeUnit unit);
+
+    /**
+     * Convenience method that invokes {@link #scheduleWithFixedDelay(Runnable, long, long, TimeUnit)} with time unit set to
+     * {@link TimeUnit#MILLISECONDS}.
+     * <p>
+     * Creates and executes a periodic action that becomes enabled first after the given initial delay, and subsequently with the given
+     * delay between the termination of one execution and the commencement of the next. If any execution of the task encounters an
+     * exception, subsequent executions are suppressed. Otherwise, the task will only terminate via cancellation or termination of the
+     * executor.
+     * 
+     * @param task The task to execute.
+     * @param initialDelay The time to delay first execution.
+     * @param delay The delay between the termination of one execution and the commencement of the next.
+     * @return A cancelable scheduled timer task representing pending completion of the task.
+     * @throws RejectedExecutionException If task cannot be scheduled for execution.
+     * @throws NullPointerException If command is <code>null</code>
+     * @throws IllegalArgumentException If delay is less than or equal to zero.
+     */
+    public ScheduledTimerTask scheduleWithFixedDelay(Runnable task, long initialDelay, long delay);
 
     /**
      * Tries to remove from the work queue all tasks that have been canceled.
