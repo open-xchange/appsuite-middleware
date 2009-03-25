@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.cache;
 
-import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SessionCacheTimer extends TimerTask {
+public class SessionCacheTimer implements Runnable {
 
     /**
      * Logger.
@@ -75,7 +74,6 @@ public class SessionCacheTimer extends TimerTask {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void run() {
         try {
             SessionCache.getInstance().testConnection();

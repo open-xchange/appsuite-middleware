@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
@@ -68,14 +67,15 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Autoboxing;
-import com.openexchange.server.ServerTimer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.event.SessiondEventConstants;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link SessionHandler} - Provides access to sessions
@@ -102,6 +102,8 @@ public final class SessionHandler {
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     private static final Log LOG = LogFactory.getLog(SessionHandler.class);
+
+    private static ScheduledTimerTask sessiondTimer;
 
     /**
      * Initializes a new {@link SessionHandler session handler}
@@ -133,9 +135,13 @@ public final class SessionHandler {
 
             noLimit = (config.getMaxSessions() == 0);
 
-            final SessiondTimer sessiondTimer = new SessiondTimer();
-            final Timer t = ServerTimer.getTimer();
-            t.schedule(sessiondTimer, config.getSessionContainerTimeout(), config.getSessionContainerTimeout());
+            final Timer timer = SessiondServiceRegistry.getServiceRegistry().getService(Timer.class);
+            if (timer != null) {
+                sessiondTimer = timer.scheduleWithFixedDelay(
+                    new SessiondTimer(),
+                    config.getSessionContainerTimeout(),
+                    config.getSessionContainerTimeout());
+            }
         }
     }
 
@@ -546,6 +552,10 @@ public final class SessionHandler {
             sessionIdGenerator = null;
             config = null;
             noLimit = false;
+            if (sessiondTimer != null) {
+                sessiondTimer.cancel(true);
+                sessiondTimer = null;
+            }
         }
     }
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class SessiondTimer extends TimerTask {
+public class SessiondTimer implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(SessiondTimer.class);
 
@@ -72,7 +71,6 @@ public class SessiondTimer extends TimerTask {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void run() {
         try {
             SessionHandler.cleanUp();

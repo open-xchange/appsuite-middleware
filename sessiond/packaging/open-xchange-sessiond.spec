@@ -4,7 +4,7 @@
 Name:           open-xchange-sessiond
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management open-xchange-timer
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -40,7 +40,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Session Daemon
-Requires:       open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management
+Requires:       open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management open-xchange-timer
 #
 
 %description

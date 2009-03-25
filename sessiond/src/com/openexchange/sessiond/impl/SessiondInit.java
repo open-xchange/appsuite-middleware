@@ -50,19 +50,19 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.ServerTimer;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.cache.SessionCacheTimer;
 import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
@@ -80,7 +80,7 @@ public class SessiondInit implements Initialization {
 
     private static final SessiondInit singleton = new SessiondInit();
 
-    private TimerTask sessionCacheTimer;
+    private ScheduledTimerTask sessionCacheTimer;
 
     public static SessiondInit getInstance() {
         return singleton;
@@ -111,9 +111,9 @@ public class SessiondInit implements Initialization {
             }
 
             SessionCacheConfiguration.getInstance().start();
-            sessionCacheTimer = new SessionCacheTimer();
-            final Timer t = ServerTimer.getTimer();
-            t.schedule(sessionCacheTimer, 0, 30000);
+            
+            final Timer timer = SessiondServiceRegistry.getServiceRegistry().getService(Timer.class, true);
+            sessionCacheTimer = timer.scheduleWithFixedDelay(new SessionCacheTimer(), 0, 30000);
         }
     }
 
@@ -123,7 +123,7 @@ public class SessiondInit implements Initialization {
             return;
         }
         if (null != sessionCacheTimer) {
-            sessionCacheTimer.cancel();
+            sessionCacheTimer.cancel(false);
             sessionCacheTimer = null;
         }
         SessionCacheConfiguration.getInstance().stop();
