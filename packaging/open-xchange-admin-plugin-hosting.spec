@@ -46,6 +46,18 @@ Requires:       open-xchange-admin-client >= 6.9.0.0
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
+%package -n     open-xchange-adminplugin-hosting-client
+Group:          Applications/Productivity
+Summary:        The Open Xchange Admin Hosting RMI client library
+
+
+%description -n open-xchange-admin-plugin-hosting-client
+The Open Xchange Admin Hosting RMI client library
+
+Authors:
+--------
+    Open-Xchange
+
 %package -n     open-xchange-admin-plugin-hosting-lib
 Group:          Applications/Productivity
 Summary:        The Open Xchange Admin Hosting Bundle client library
@@ -104,12 +116,15 @@ mv doc javadoc
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 %dir /opt/open-xchange/sbin
-%dir /opt/open-xchange/lib
 %dir /opt/open-xchange/etc/admindaemon/plugin
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
 /opt/open-xchange/sbin/*
-/opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
+
+%files -n open-xchange-admin-plugin-hosting-client
+%defattr(-,root,root)
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/*
 
 %files -n open-xchange-admin-plugin-hosting-lib
 %defattr(-,root,root)
