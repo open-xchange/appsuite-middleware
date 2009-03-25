@@ -4,7 +4,7 @@
 Name:           open-xchange-admin-plugin-hosting
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-admin-lib
+BuildRequires:  ant open-xchange-admin-lib open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
