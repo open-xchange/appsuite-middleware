@@ -56,10 +56,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
@@ -69,8 +69,9 @@ import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.server.ServerTimer;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link ManagedFileManagementImpl} - The file management designed to keep large content as a temporary file on disk.
@@ -78,6 +79,12 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ManagedFileManagementImpl implements ManagedFileManagement {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagedFileManagementImpl.class);
+
+    private static final int DELAY = 10000;
+
+    private static final int INITIAL_DELAY = 1000;
 
     private class FileManagementPropertyListener implements PropertyListener {
 
@@ -99,7 +106,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
     }
 
-    private static class FileManagementTimerTask extends TimerTask {
+    private static class FileManagementTask implements Runnable {
 
         private final org.apache.commons.logging.Log logger;
 
@@ -107,14 +114,13 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
         private final int time2live;
 
-        public FileManagementTimerTask(final ConcurrentMap<String, ManagedFile> files, final int time2live, final org.apache.commons.logging.Log logger) {
+        public FileManagementTask(final ConcurrentMap<String, ManagedFile> files, final int time2live, final org.apache.commons.logging.Log logger) {
             super();
             tfiles = files;
             this.time2live = time2live;
             this.logger = logger;
         }
 
-        @Override
         public void run() {
             try {
                 final long now = System.currentTimeMillis();
@@ -132,8 +138,6 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     private static volatile ManagedFileManagementImpl instance;
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagedFileManagementImpl.class);
 
     /*-
      * ############################ MEMBER SECTION ############################
@@ -181,7 +185,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private PropertyListener propertyListener;
 
-    private TimerTask timerTask;
+    private ScheduledTimerTask timerTask;
 
     private final AtomicReference<File> tmpDirReference;
 
@@ -192,16 +196,24 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         super();
         files = new ConcurrentHashMap<String, ManagedFile>();
         tmpDirReference = new AtomicReference<File>();
+        ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
         // Get configuration service
-        final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService cs = registry.getService(ConfigurationService.class);
         if (null == cs) {
             throw new IllegalStateException("Missing configuration service");
         }
         final String path = cs.getProperty("UPLOAD_DIRECTORY", (propertyListener = new FileManagementPropertyListener(tmpDirReference)));
         tmpDirReference.set(getTmpDirByPath(path));
         // Register timer task
-        timerTask = new FileManagementTimerTask(files, TIME_TO_LIVE, LOG);
-        ServerTimer.getTimer().schedule(timerTask, 1000, 10000);
+        final Timer timer = registry.getService(Timer.class);
+        if (null == timer) {
+            throw new IllegalStateException("Missing timer service");
+        }
+        timerTask = timer.scheduleWithFixedDelay(
+            new FileManagementTask(files, TIME_TO_LIVE, LOG),
+            INITIAL_DELAY,
+            DELAY,
+            TimeUnit.MILLISECONDS);
     }
 
     public InputStream createInputStream(final byte[] bytes) throws ManagedFileException {
@@ -347,8 +359,11 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             propertyListener = null;
         }
         if (timerTask != null) {
-            timerTask.cancel();
-            ServerTimer.getTimer().purge();
+            timerTask.cancel(true);
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (null != timer) {
+                timer.purge();
+            }
             timerTask = null;
         }
         tmpDirReference.set(null);
@@ -358,8 +373,15 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     void startUp() {
         if (timerTask == null) {
             // Register timer task
-            timerTask = new FileManagementTimerTask(files, TIME_TO_LIVE, LOG);
-            ServerTimer.getTimer().schedule(timerTask, 1000, 10000);
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (null == timer) {
+                throw new IllegalStateException("Missing timer service");
+            }
+            timerTask = timer.scheduleWithFixedDelay(
+                new FileManagementTask(files, TIME_TO_LIVE, LOG),
+                INITIAL_DELAY,
+                DELAY,
+                TimeUnit.MILLISECONDS);
         }
     }
 
