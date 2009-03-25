@@ -255,7 +255,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 out.write(bytes, 0, bytes.length);
                 out.flush();
             } catch (final IOException e) {
-                if (!tmpFile.delete() && LOG.isWarnEnabled()) {
+                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
                     LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
