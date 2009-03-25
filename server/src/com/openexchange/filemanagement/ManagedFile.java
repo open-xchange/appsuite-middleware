@@ -95,8 +95,9 @@ public interface ManagedFile {
     public long getSize();
 
     /**
-     * Sets the (optional) size. <br>
-     * <b><i>Note that size should already be set if created through managed file management.</i></b>
+     * Sets the (optional) size.
+     * <p>
+     * Note that size should already be set if created through managed file management.
      * 
      * @param size The size
      */
