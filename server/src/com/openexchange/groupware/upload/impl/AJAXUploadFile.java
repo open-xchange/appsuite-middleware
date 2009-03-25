@@ -51,13 +51,14 @@ package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * AJAXUploadFile
@@ -66,13 +67,15 @@ import com.openexchange.server.ServerTimer;
  */
 public final class AJAXUploadFile implements ManagedUploadFile {
 
-    private static final class AJAXUploadFileTimerTask extends TimerTask {
+    private static final class AJAXUploadFileTimerTask implements Runnable {
 
         private final AJAXUploadFile file;
 
         private final Map<String, ? extends ManagedUploadFile> managedUploadFiles;
 
         private final String id;
+
+        private volatile ScheduledTimerTask scheduledTimerTask;
 
         /**
          * Constructor
@@ -83,11 +86,6 @@ public final class AJAXUploadFile implements ManagedUploadFile {
             this.id = id;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.TimerTask#run()
-         */
-        @Override
         public void run() {
             try {
                 if (file != null && !file.isDeleted() && !file.isBlockedForTimer() && ((System.currentTimeMillis() - file.getLastAccess()) >= IDLE_TIME_MILLIS)) {
@@ -101,12 +99,26 @@ public final class AJAXUploadFile implements ManagedUploadFile {
                     /*
                      * Cancel this task
                      */
-                    cancel();
-                    ServerTimer.getTimer().purge();
+                    if (scheduledTimerTask != null) {
+                        scheduledTimerTask.cancel(false);
+                    }
+                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    if (timer != null) {
+                        timer.purge();
+                    }
                 }
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+
+        /**
+         * Set scheduled timer task for its cancellation on remove.
+         * 
+         * @param scheduledTimerTask The scheduled timer task corresponding to this task.
+         */
+        public void setScheduledTimerTask(final ScheduledTimerTask scheduledTimerTask) {
+            this.scheduledTimerTask = scheduledTimerTask;
         }
 
     }
@@ -138,7 +150,7 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 
     private boolean deleted;
 
-    private TimerTask timerTask;
+    private ScheduledTimerTask timerTask;
 
     private final AtomicBoolean timerTaskStarted = new AtomicBoolean();
 
@@ -209,11 +221,12 @@ public final class AJAXUploadFile implements ManagedUploadFile {
      */
     public void startTimerTask(final String id, final Map<String, ? extends ManagedUploadFile> managedUploadFiles) {
         if (timerTaskStarted.compareAndSet(false, true) && timerTask == null) {
-            timerTask = new AJAXUploadFileTimerTask(this, id, managedUploadFiles);
-            /*
-             * Start timer task
-             */
-            ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, IDLE_TIME_MILLIS / 5);
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (timer != null) {
+                final AJAXUploadFileTimerTask taskToSchedule = new AJAXUploadFileTimerTask(this, id, managedUploadFiles);
+                timerTask = timer.scheduleWithFixedDelay(taskToSchedule, 1000/* 1sec */, IDLE_TIME_MILLIS / 5);
+                taskToSchedule.setScheduledTimerTask(timerTask);
+            }
         }
     }
 
@@ -226,11 +239,14 @@ public final class AJAXUploadFile implements ManagedUploadFile {
          */
         if (timerTaskStarted.get()) {
             blockedForTimer.set(true);
-            timerTask.cancel();
+            timerTask.cancel(false);
             /*
              * Clean from timer
              */
-            ServerTimer.getTimer().purge();
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (timer != null) {
+                timer.purge();
+            }
         }
     }
 
