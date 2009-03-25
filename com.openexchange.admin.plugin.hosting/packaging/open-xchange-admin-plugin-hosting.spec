@@ -40,10 +40,23 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
+Requires:       open-xchange-admin-plugin-hosting-lib >= 6.9.0.0
 Requires:       open-xchange-admin >= 6.9.0.0
 Requires:       open-xchange-admin-client >= 6.9.0.0
 Conflicts:	open-xchange-admin-plugin-context-light
 #
+
+%package -n     open-xchange-admin-plugin-hosting-lib
+Group:          Applications/Productivity
+Summary:        The Open Xchange Admin Hosting Bundle client library
+
+
+%description -n open-xchange-admin-plugin-hosting-lib
+The Open Xchange Admin Hosting Bundle client library
+
+Authors:
+--------
+    Open-Xchange
 
 %package -n     open-xchange-admin-plugin-hosting-doc
 Group:          Applications/Productivity

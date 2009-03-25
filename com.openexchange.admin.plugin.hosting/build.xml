@@ -172,10 +172,13 @@
         </copy>
     </target>
 
-    <target name="install" depends="jar,doc,replacer">
-        <mkdir dir="${destdir}/${prefix}/sbin"/>
+	<target name="install-bundle" depends="client">
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
+    </target>
+
+    <target name="install" depends="jar,doc,replacer">
+        <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
             <fileset dir="etc" excludes="**/*.in"/>
