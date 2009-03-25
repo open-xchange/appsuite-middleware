@@ -90,16 +90,6 @@ public final class AJPv13Task implements Runnable {
     private volatile boolean waitingOnAJPSocket;
 
     /**
-     * The keep-alive time stamp.
-     */
-    private volatile long keepAliveStamp;
-
-    /**
-     * The keep-alive counter.
-     */
-    private volatile long keepAliveCounter;
-
-    /**
      * The borrowed thread.
      */
     private volatile Thread thread;
@@ -205,38 +195,6 @@ public final class AJPv13Task implements Runnable {
      */
     long getProcessingStartTime() {
         return processingStart;
-    }
-
-    /**
-     * @return The keep-alive time stamp
-     */
-    long getKeepAliveStamp() {
-        return keepAliveStamp;
-    }
-
-    /**
-     * Sets the keep-alive time stamp
-     * 
-     * @param keepAliveStamp The keep-alive time stamp to set
-     */
-    void setKeepAliveStamp(final long keepAliveStamp) {
-        this.keepAliveStamp = keepAliveStamp;
-    }
-
-    /**
-     * Gets the keep-alive counter
-     * 
-     * @return The keep-alive counter
-     */
-    long getKeepAliveCounter() {
-        return keepAliveCounter;
-    }
-
-    /**
-     * Increments the keep-alive counter
-     */
-    void incrementKeepAliveCounter() {
-        keepAliveCounter++;
     }
 
     /**

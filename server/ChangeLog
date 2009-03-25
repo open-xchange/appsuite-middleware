@@ -1,3 +1,7 @@
+* 2009-03-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #13343: Proper last-accessed check when deciding whether to send an AJP KEEP-ALIVE or not
+
 * 2009-03-23 - thorben.betten@open-xchange.com
 
  - Bugfix #12220: Enhanced forward/reply calls by an optional "view" parameter to define the desired format
