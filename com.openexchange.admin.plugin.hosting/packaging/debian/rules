@@ -12,6 +12,7 @@
 pkgname=open-xchange-admin-plugin-hosting
 pkgroot=$(CURDIR)/debian/$(pkgname)
 libroot=$(CURDIR)/debian/$(pkgname)-lib
+clientroot=$(CURDIR)/debian/$(pkgname)-client
 oxprefix=/opt/open-xchange
 adminbundle=open_xchange_admin.jar
 
@@ -59,9 +60,11 @@ install: build
 	# Add here commands to install the package into debian/open-xchange-admin.
 	ant 	-Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
 		-Dprefix=$(oxprefix) \
-		-Ddestdir=$(pkgroot) doc install install-client
+		-Ddestdir=$(pkgroot) doc install
 	ant     -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
 		-Dprefix=$(oxprefix) -Ddestdir=$(libroot) install-bundle
+	ant     -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
+		-Dprefix=$(oxprefix) -Ddestdir=$(clientroot) install-client
 
 	mv doc javadoc
 
