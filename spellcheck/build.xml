@@ -25,6 +25,7 @@
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+	<property name="timerjar" value="com.openexchange.timer.jar"/>
 	
 	<property name="jsonjar" value="json.jar" />
 	<property name="chardetjar" value="chardet-1.0.jar" />
@@ -40,6 +41,7 @@
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${timerjar}"/>
     	
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}" />
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
