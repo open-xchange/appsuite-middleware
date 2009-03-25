@@ -455,7 +455,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                 return EMPTY_RETVAL;
             } else if (limit > 0) {
-                final int newLength = Math.min(limit, msgs.length);
+                final int newLength = ((limit <= msgs.length) ? limit : msgs.length);
                 final Message[] retval = new Message[newLength];
                 System.arraycopy(msgs, 0, retval, 0, newLength);
                 return MIMEMessageConverter.convertMessages(retval, fields);

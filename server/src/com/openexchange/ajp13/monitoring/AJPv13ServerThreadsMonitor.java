@@ -144,7 +144,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
     }
 
     private final void setMinUseTime(final long minUseTime) {
-        this.minUseTime = Math.min(minUseTime, this.minUseTime);
+        this.minUseTime = (minUseTime <= this.minUseTime) ? minUseTime : this.minUseTime;
     }
 
     public void resetMinUseTime() {
