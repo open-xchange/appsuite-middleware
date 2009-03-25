@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -65,7 +64,9 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
 import com.openexchange.i18n.tools.RenderMap;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link NotificationPool} - Pools instances of {@link PooledNotification} for a consolidated update notification.
@@ -95,7 +96,7 @@ public final class NotificationPool {
 
     private final Lock readLock;
 
-    private TimerTask timerTask;
+    private ScheduledTimerTask timerTask;
 
     private final Map<PooledNotification, PooledNotification> map;
 
@@ -195,8 +196,10 @@ public final class NotificationPool {
             /*
              * Create timer task and schedule it
              */
-            timerTask = new NotificationPoolTimerTask(map, queue, lock.writeLock());
-            ServerTimer.getTimer().schedule(timerTask, 1000, 60000);
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (null != timer) {
+                timerTask = timer.scheduleWithFixedDelay(new NotificationPoolTimerTask(map, queue, lock.writeLock()), 1000, 60000);
+            }
         }
     }
 
@@ -205,15 +208,18 @@ public final class NotificationPool {
      */
     public void shutdown() {
         if (started.compareAndSet(true, false)) {
-            timerTask.cancel();
-            ServerTimer.getTimer().purge();
+            timerTask.cancel(false);
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (null != timer) {
+                timer.purge();
+            }
             map.clear();
             queue.clear();
             timerTask = null;
         }
     }
 
-    private class NotificationPoolTimerTask extends TimerTask {
+    private class NotificationPoolTimerTask implements Runnable {
 
         private final org.apache.commons.logging.Log logger;
 
@@ -231,7 +237,6 @@ public final class NotificationPool {
             this.taskWriteLock = writeLock;
         }
 
-        @Override
         public void run() {
             taskWriteLock.lock();
             try {

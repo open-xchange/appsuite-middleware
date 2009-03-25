@@ -61,7 +61,7 @@ import com.openexchange.ajp13.AJPv13Config;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13JSessionIDCleaner extends TimerTask {
+public final class AJPv13JSessionIDCleaner implements Runnable {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13JSessionIDCleaner.class);
 
@@ -77,7 +77,6 @@ public final class AJPv13JSessionIDCleaner extends TimerTask {
         this.jsessionids = jsessionids;
     }
 
-    @Override
     public void run() {
         try {
             if (AJPv13Config.getJSessionIDTTL() <= 0) {

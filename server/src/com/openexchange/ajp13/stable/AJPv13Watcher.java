@@ -51,12 +51,13 @@ package com.openexchange.ajp13.stable;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of their run time.
@@ -67,7 +68,7 @@ final class AJPv13Watcher {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Watcher.class);
 
-    private static Task task;
+    private static ScheduledTimerTask task;
 
     private static final ConcurrentMap<Integer, AJPv13Listener> listeners = new ConcurrentHashMap<Integer, AJPv13Listener>();
 
@@ -76,15 +77,21 @@ final class AJPv13Watcher {
             /*
              * Start task
              */
-            ServerTimer.getTimer().schedule((task = new Task(listeners, LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (timer != null) {
+                task = timer.scheduleWithFixedDelay(new Task(listeners, LOG), 1000, AJPv13Config.getAJPWatcherFrequency());
+            }
         }
     }
 
     static void resetAJPv13Watcher() {
         if (null != task) {
-            task.cancel();
+            task.cancel(false);
             task = null;
-            ServerTimer.getTimer().purge();
+            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (timer != null) {
+                timer.purge();
+            }
         }
     }
 
@@ -122,7 +129,7 @@ final class AJPv13Watcher {
         }
     }
 
-    private static class Task extends TimerTask {
+    private static class Task implements Runnable {
 
         private final Map<Integer, AJPv13Listener> listeners;
 
@@ -140,11 +147,6 @@ final class AJPv13Watcher {
             this.log = log;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        @Override
         public void run() {
             try {
                 int countWaiting = 0;

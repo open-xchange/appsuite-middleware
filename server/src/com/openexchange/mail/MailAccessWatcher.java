@@ -52,14 +52,15 @@ package com.openexchange.mail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link MailAccessWatcher} - Keeps track of connected instances of {@link MailAccess} and allows a forced close if connection time exceeds
@@ -75,7 +76,7 @@ public final class MailAccessWatcher {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static WatcherTask watcherTask;
+    private static ScheduledTimerTask watcherTask;
 
     /**
      * Initializes and starts mail connection watcher if not done, yet
@@ -90,8 +91,13 @@ public final class MailAccessWatcher {
                     /*
                      * Start task
                      */
-                    watcherTask = new WatcherTask(mailAccesses, LOG);
-                    ServerTimer.getTimer().schedule(watcherTask, 1000, MailConfig.getWatcherFrequency());
+                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    if (null != timer) {
+                        watcherTask = timer.scheduleWithFixedDelay(
+                            new WatcherTask(mailAccesses, LOG),
+                            1000,
+                            MailConfig.getWatcherFrequency());
+                    }
                     initialized.set(true);
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Mail connection watcher successfully established and ready for tracing");
@@ -111,8 +117,11 @@ public final class MailAccessWatcher {
                     return;
                 }
                 if (MailConfig.isWatcherEnabled()) {
-                    watcherTask.cancel();
-                    ServerTimer.getTimer().purge();
+                    watcherTask.cancel(false);
+                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    if (null != timer) {
+                        timer.purge();
+                    }
                     mailAccesses.clear();
                     initialized.set(false);
                     if (LOG.isInfoEnabled()) {
@@ -167,7 +176,7 @@ public final class MailAccessWatcher {
 
     private static final String INFO_PREFIX3 = "\n\tDONE";
 
-    private static class WatcherTask extends TimerTask {
+    private static class WatcherTask implements Runnable {
 
         private final ConcurrentMap<MailAccess<?, ?>, Long> mailAccessMap;
 
@@ -179,7 +188,6 @@ public final class MailAccessWatcher {
             this.logger = logger;
         }
 
-        @Override
         public void run() {
             try {
                 final StringBuilder sb = new StringBuilder(512);

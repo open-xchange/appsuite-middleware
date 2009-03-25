@@ -51,12 +51,13 @@ package com.openexchange.tools.servlet.http;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpSession;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link HttpSessionManagement} - Management for HTTP sessions
@@ -71,7 +72,7 @@ public final class HttpSessionManagement {
 
     private static Map<String, HttpSessionWrapper> sessions;
 
-    private static SessionRemover sessionRemover;
+    private static ScheduledTimerTask sessionRemover;
 
     /**
      * Initializes HTTP session management
@@ -81,7 +82,10 @@ public final class HttpSessionManagement {
             synchronized (initialized) {
                 if (!initialized.get()) {
                     sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
-                    ServerTimer.getTimer().schedule((sessionRemover = new SessionRemover()), 100, 3600000);
+                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    if (null != timer) {
+                        sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(), 100, 3600000);
+                    }
                     initialized.set(true);
                 }
             }
@@ -97,8 +101,11 @@ public final class HttpSessionManagement {
                 if (initialized.get()) {
                     sessions.clear();
                     sessions = null;
-                    sessionRemover.cancel();
-                    ServerTimer.getTimer().purge();
+                    sessionRemover.cancel(false);
+                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    if (null != timer) {
+                        timer.purge();
+                    }
                     sessionRemover = null;
                     initialized.set(false);
                 }
@@ -225,9 +232,12 @@ public final class HttpSessionManagement {
         return s.toString();
     }
 
-    private static final class SessionRemover extends TimerTask {
+    private static final class SessionRemover implements Runnable {
 
-        @Override
+        public SessionRemover() {
+            super();
+        }
+
         public void run() {
             try {
                 for (final Iterator<Map.Entry<String, HttpSessionWrapper>> iter = sessions.entrySet().iterator(); iter.hasNext();) {

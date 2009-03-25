@@ -49,11 +49,12 @@
 
 package com.openexchange.ajp13;
 
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.timertask.AJPv13JSessionIDCleaner;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.Timer;
 
 /**
  * {@link AJPv13TimerTaskStarter} - Starts timer tasks for AJP module.
@@ -61,6 +62,10 @@ import com.openexchange.server.ServerTimer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13TimerTaskStarter implements Initialization {
+
+    private static volatile AJPv13TimerTaskStarter instance;
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TimerTaskStarter.class);
 
     /**
      * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
@@ -86,15 +91,30 @@ public final class AJPv13TimerTaskStarter implements Initialization {
             synchronized (AJPv13TimerTaskStarter.class) {
                 if (instance != null) {
                     if (instance.task != null && instance.started.compareAndSet(false, true)) {
-                        instance.task.cancel();
+                        instance.task.cancel(false);
                         instance.task = null;
-                        ServerTimer.getTimer().purge();
+                        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                        if (null != timer) {
+                            timer.purge();
+                        }
                         LOG.info(AJPv13TimerTaskStarter.class.getName() + " successfully stopped due to singleton release");
                     }
                     instance = null;
                 }
             }
         }
+    }
+
+    private final AtomicBoolean started;
+
+    private ScheduledTimerTask task;
+
+    /**
+     * Initializes a new {@link AJPv13TimerTaskStarter}
+     */
+    private AJPv13TimerTaskStarter() {
+        super();
+        started = new AtomicBoolean();
     }
 
     public void start() {
@@ -104,8 +124,10 @@ public final class AJPv13TimerTaskStarter implements Initialization {
         if (task != null) {
             return;
         }
-        task = new AJPv13JSessionIDCleaner(AJPv13ForwardRequest.jsessionids);
-        ServerTimer.getTimer().schedule(task, 1000, 3600000); // every hour
+        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+        if (null != timer) {
+            task = timer.scheduleWithFixedDelay(new AJPv13JSessionIDCleaner(AJPv13ForwardRequest.jsessionids), 1000, 3600000); // every hour
+        }
         LOG.info(this.getClass().getName() + " successfully started");
     }
 
@@ -116,26 +138,13 @@ public final class AJPv13TimerTaskStarter implements Initialization {
         if (task == null) {
             return;
         }
-        task.cancel();
+        task.cancel(false);
         task = null;
-        ServerTimer.getTimer().purge();
+        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+        if (null != timer) {
+            timer.purge();
+        }
         LOG.info(this.getClass().getName() + " successfully stopped");
     }
-
-    /**
-     * Initializes a new {@link AJPv13TimerTaskStarter}
-     */
-    private AJPv13TimerTaskStarter() {
-        super();
-        started = new AtomicBoolean();
-    }
-
-    private static volatile AJPv13TimerTaskStarter instance;
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TimerTaskStarter.class);
-
-    private final AtomicBoolean started;
-
-    private TimerTask task;
 
 }
