@@ -51,13 +51,11 @@ package com.openexchange.image.internal;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
-
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
-final class SessionBoundImagesCleaner extends TimerTask {
+final class SessionBoundImagesCleaner implements Runnable {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SessionBoundImagesCleaner.class);
@@ -75,7 +73,6 @@ final class SessionBoundImagesCleaner extends TimerTask {
 		this.toIterate = toIterate;
 	}
 
-	@Override
 	public void run() {
 		try {
 			final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);

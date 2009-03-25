@@ -51,13 +51,11 @@ package com.openexchange.image.internal;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
-
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
-final class ContextBoundImagesCleaner extends TimerTask {
+final class ContextBoundImagesCleaner implements Runnable {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ContextBoundImagesCleaner.class);
@@ -75,7 +73,6 @@ final class ContextBoundImagesCleaner extends TimerTask {
 		this.toIterate = toIterate;
 	}
 
-	@Override
 	public void run() {
 		try {
 			if (toIterate.isEmpty()) {

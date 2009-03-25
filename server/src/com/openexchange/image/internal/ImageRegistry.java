@@ -66,6 +66,10 @@ import com.openexchange.timer.Timer;
  */
 public final class ImageRegistry {
 
+    private static final int DELAY = 30000;
+
+    private static final int INITIAL_DELAY = 1000;
+
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class);
 
     private static final ImageRegistry INSTANCE = new ImageRegistry();
@@ -99,13 +103,13 @@ public final class ImageRegistry {
      */
     void startHeartbeat() {
         /*
-         * Schedule tasks for every minute
+         * Schedule tasks for specified period
          */
         final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
         if (null != timer) {
             tasks = new ScheduledTimerTask[2];
-            tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap), 1000, 30000);
-            tasks[1] = timer.scheduleWithFixedDelay(new ContextBoundImagesCleaner(contextBoundImagesMap), 1000, 30000);
+            tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap), INITIAL_DELAY, DELAY);
+            tasks[1] = timer.scheduleWithFixedDelay(new ContextBoundImagesCleaner(contextBoundImagesMap), INITIAL_DELAY, DELAY);
         }
     }
 
