@@ -354,7 +354,7 @@
         </copy>
     </target>
 
-    <target name="install" depends="replacer,jar">
+    <target name="install" depends="replacer">
         <mkdir dir="${destdir}/var/log/open-xchange"/>
         <mkdir dir="${destdir}/${prefix}/libexec"/>
         <mkdir dir="${destdir}/${prefix}/sbin"/>
