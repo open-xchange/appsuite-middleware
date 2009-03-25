@@ -95,9 +95,8 @@ public interface ManagedFile {
     public long getSize();
 
     /**
-     * Sets the (optional) size.
-     * <p>
-     * Note that size should already be set if created through managed file management.
+     * Sets the (optional) size. <br>
+     * <b><i>Note that size should already be set if created through managed file management.</i></b>
      * 
      * @param size The size
      */
@@ -111,9 +110,9 @@ public interface ManagedFile {
     public File getFile();
 
     /**
-     * Gets this manages file's unique ID.
+     * Gets this managed file's unique ID.
      * 
-     * @return This manages file's unique ID
+     * @return This managed file's unique ID
      */
     public String getID();
 
