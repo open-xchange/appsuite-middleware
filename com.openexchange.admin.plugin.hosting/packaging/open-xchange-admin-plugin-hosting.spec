@@ -91,7 +91,7 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
     -Ddoccorelink=/usr/share/doc/packages/open-xchange-admin-doc/javadoc/doc \
-    doc install install-client
+    doc install install-client install-bundle
 mv doc javadoc
 
 
@@ -102,16 +102,19 @@ mv doc javadoc
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 %dir /opt/open-xchange/sbin
 %dir /opt/open-xchange/lib
 %dir /opt/open-xchange/etc/admindaemon/plugin
-/opt/open-xchange/bundles/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
 /opt/open-xchange/sbin/*
 /opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
+
+%files -n open-xchange-admin-plugin-hosting-lib
+%defattr(-,root,root)
+%dir /opt/open-xchange/bundles/
+/opt/open-xchange/bundles/*
 
 %files -n open-xchange-admin-plugin-hosting-doc
 %defattr(-,root,root)
