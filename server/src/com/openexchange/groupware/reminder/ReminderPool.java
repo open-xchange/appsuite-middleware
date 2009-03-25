@@ -55,21 +55,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.Timer;
 
 /**
- * ReminderPool
+ * ReminderPool - Not used by now.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
-public class ReminderPool extends TimerTask {
+public class ReminderPool implements Runnable {
 	
 	private static final Map<String, ReminderEvent> register = new HashMap<String, ReminderEvent>();
 
@@ -85,8 +81,10 @@ public class ReminderPool extends TimerTask {
 			
 			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
 
-			final Timer t = ServerTimer.getTimer();
-			t.schedule(this, reminderConfig.getReminderInterval());
+			final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            if (timer != null) {
+                timer.schedule(this, reminderConfig.getReminderInterval());
+            }
 		} else {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("ReminderPool is disabled");
@@ -94,9 +92,8 @@ public class ReminderPool extends TimerTask {
 		}
 	}
 	
-	@Override
 	public void run() {
-
+	    // TODO: Do something useful here
 	}
 	
 	public static void addReminderEvent( final ReminderEvent reminderevent, final int module ) {
