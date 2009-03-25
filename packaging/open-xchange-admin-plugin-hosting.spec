@@ -46,7 +46,7 @@ Requires:       open-xchange-admin-client >= 6.9.0.0
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
-%package -n     open-xchange-adminplugin-hosting-client
+%package -n     open-xchange-admin-plugin-hosting-client
 Group:          Applications/Productivity
 Summary:        The Open Xchange Admin Hosting RMI client library
 
