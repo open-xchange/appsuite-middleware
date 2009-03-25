@@ -269,6 +269,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 }
             }
             mf = new ManagedFileImpl(UUID.randomUUID().toString(), tmpFile);
+            mf.setSize(bytes.length);
         } while (!tmpDirReference.compareAndSet(tmpFile, tmpFile)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
         return mf;
@@ -279,6 +280,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         File tmpFile = null;
         do {
             OutputStream out = null;
+            long countedSize = 0;
             try {
                 tmpFile = File.createTempFile(PREFIX, SUFFIX, tmpDirReference.get());
                 tmpFile.deleteOnExit();
@@ -287,6 +289,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 int len = -1;
                 while ((len = inputStream.read(buf, 0, buf.length)) != -1) {
                     out.write(buf, 0, len);
+                    countedSize += len;
                 }
                 out.flush();
             } catch (final IOException e) {
@@ -304,6 +307,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 }
             }
             mf = new ManagedFileImpl(UUID.randomUUID().toString(), tmpFile);
+            mf.setSize(countedSize);
         } while (!tmpDirReference.compareAndSet(tmpFile, tmpFile)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
         return mf;

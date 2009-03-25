@@ -60,42 +60,43 @@ import java.io.InputStream;
 public interface ManagedFile {
 
     /**
-     * Gets the (optional) file name
+     * Gets the (optional) file name.
      * 
      * @return The file name
      */
     public String getFileName();
 
     /**
-     * Sets the (optional) file name
+     * Sets the (optional) file name.
      * 
      * @param fileName The file name
      */
     public void setFileName(String fileName);
 
     /**
-     * Gets the (optional) content type
+     * Gets the (optional) content type.
      * 
      * @return The content type
      */
     public String getContentType();
 
     /**
-     * Sets the (optional) content type
+     * Sets the (optional) content type.
      * 
      * @param contentType The content type
      */
     public void setContentType(String contentType);
 
     /**
-     * Gets the (optional) size
+     * Gets the (optional) size.
      * 
      * @return The size
      */
     public long getSize();
 
     /**
-     * Sets the (optional) size
+     * Sets the (optional) size. <br>
+     * <b><i>Note that size should already be set if created through managed file management.</i></b>
      * 
      * @param size The size
      */

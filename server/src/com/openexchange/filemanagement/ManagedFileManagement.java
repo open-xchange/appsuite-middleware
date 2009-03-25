@@ -65,6 +65,8 @@ public interface ManagedFileManagement {
 
     /**
      * Creates a new managed file from specified input stream.
+     * <p>
+     * Size attribute is already set in returned managed file.
      * 
      * @param inputStream The input stream whose content is filled into newly created file
      * @return A new managed file
@@ -74,6 +76,8 @@ public interface ManagedFileManagement {
 
     /**
      * Creates a new managed file from specified bytes.
+     * <p>
+     * Size attribute is already set in returned managed file.
      * 
      * @param bytes The bytes which are filled into newly created file
      * @return A new managed file
