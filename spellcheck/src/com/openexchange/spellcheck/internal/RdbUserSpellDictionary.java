@@ -93,22 +93,22 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
         /**
          * Unique identifier of the context.
          */
-        private final int contextId;
+        final int contextId;
 
         /**
          * Object key of the cached object.
          */
-        private final int userId;
+        final int userId;
 
         /**
          * Hash code of the context specific object.
          */
-        private final int hash;
+        final int hash;
 
         /**
          * Initialization timestamp
          */
-        private final long timestamp;
+        final long timestamp;
 
         /**
          * Initializes a new {@link Key}
