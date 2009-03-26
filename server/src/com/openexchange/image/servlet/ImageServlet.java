@@ -234,7 +234,7 @@ public final class ImageServlet extends HttpServlet {
 		if (cookies != null) {
 			for (final Cookie cookie : cookies) {
 				final String name = cookie.getName();
-				if (name != null && name.startsWith(Login.cookiePrefix, 0)) {
+				if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
 					sessionIds.add(cookie.getValue());
 					break;
 				}

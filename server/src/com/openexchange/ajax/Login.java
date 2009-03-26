@@ -89,15 +89,15 @@ public class Login extends AJAXServlet {
      */
     private static final long serialVersionUID = 7680745138705836499L;
 
-    public static final String _random = "random";
+    public static final String PARAM_RANDOM = "random";
 
-    private static final String _name = "name";
+    private static final String PARAM_NAME = "name";
 
-    private static final String _password = "password";
+    private static final String PARAM_PASSWORD = "password";
 
-    private static final String _redirectUrl = "/index.html#id=";
+    private static final String REDIRECT_URL = "/index.html#id=";
 
-    public static final String cookiePrefix = "open-xchange-session-";
+    public static final String COOKIE_PREFIX = "open-xchange-session-";
 
     private static transient final Log LOG = LogFactory.getLog(Login.class);
 
@@ -116,14 +116,14 @@ public class Login extends AJAXServlet {
             /*
              * Look-up necessary credentials
              */
-            final String name = req.getParameter(_name);
+            final String name = req.getParameter(PARAM_NAME);
             if (null == name) {
-                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, _name));
+                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_NAME));
                 return;
             }
-            final String password = req.getParameter(_password);
+            final String password = req.getParameter(PARAM_PASSWORD);
             if (null == password) {
-                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, _password));
+                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_PASSWORD));
                 return;
             }
             /*
@@ -206,7 +206,7 @@ public class Login extends AJAXServlet {
             String sessionId = null;
             final Cookie[] cookies = req.getCookies();
             if (cookies != null) {
-                final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+                final String cookieName = new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString();
                 int stat = 0;
                 for (int a = 0; a < cookies.length && stat != 3; a++) {
                     if (cookieName.equals(cookies[a].getName())) {
@@ -240,7 +240,7 @@ public class Login extends AJAXServlet {
              * The magic spell to disable caching
              */
             Tools.disableCaching(resp);
-            final String randomToken = req.getParameter(_random);
+            final String randomToken = req.getParameter(PARAM_RANDOM);
             if (randomToken == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -279,7 +279,7 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             }
             writeCookie(resp, session);
-            resp.sendRedirect(_redirectUrl + session.getSecret());
+            resp.sendRedirect(REDIRECT_URL + session.getSecret());
         } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Cookie[] cookies = req.getCookies();
             final Response response = new Response();
@@ -290,7 +290,7 @@ public class Login extends AJAXServlet {
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 for (final Cookie cookie : cookies) {
                     final String cookieName = cookie.getName();
-                    if (cookieName.startsWith(cookiePrefix)) {
+                    if (cookieName.startsWith(COOKIE_PREFIX)) {
                         final String sessionId = cookie.getValue();
                         if (sessiondService.refreshSession(sessionId)) {
                             final Session session = sessiondService.getSession(sessionId);
@@ -386,7 +386,7 @@ public class Login extends AJAXServlet {
      * @param session The session providing the secret cookie identifier
      */
     protected static void writeCookie(final HttpServletResponse resp, final Session session) {
-        final Cookie cookie = new Cookie(cookiePrefix + session.getSecret(), session.getSessionID());
+        final Cookie cookie = new Cookie(COOKIE_PREFIX + session.getSecret(), session.getSessionID());
         cookie.setPath("/");
         resp.addCookie(cookie);
     }
@@ -394,7 +394,7 @@ public class Login extends AJAXServlet {
     private JSONObject writeLogin(final Session sessionObj) throws JSONException {
         final JSONObject retval = new JSONObject();
         retval.put(PARAMETER_SESSION, sessionObj.getSecret());
-        retval.put(_random, sessionObj.getRandomToken());
+        retval.put(PARAM_RANDOM, sessionObj.getRandomToken());
         return retval;
     }
 }

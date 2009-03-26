@@ -243,7 +243,7 @@ public class SessionWrapper {
                     this.httpSession.setAttribute(USERNAME_SESSION, username);
                     return;
                 }
-            } else if (null == username && null != cookieId && new StringBuilder(Login.cookiePrefix).append(cookieId).toString().equals(cookie.getName())) {
+            } else if (null == username && null != cookieId && new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString().equals(cookie.getName())) {
                 // groupware mode
                 final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
                 if (null == service) {

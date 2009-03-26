@@ -238,7 +238,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	    final Cookie[] cookies = req.getCookies();
 	    String sessionId = null;
         if (cookies != null) {
-            final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+            final String cookieName = new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString();
             for (final Cookie cookie : cookies) {
                 if (cookieName.equals(cookie.getName())) {
                     sessionId = cookie.getValue();

@@ -222,7 +222,7 @@ public final class Tools {
     private static final CookieNameMatcher OX_COOKIE_MATCHER = new CookieNameMatcher() {
 
         public boolean matches(final String cookieName) {
-            return (null != cookieName && (cookieName.startsWith(Login.cookiePrefix) || AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookieName)));
+            return (null != cookieName && (cookieName.startsWith(Login.COOKIE_PREFIX) || AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookieName)));
         }
     };
 
