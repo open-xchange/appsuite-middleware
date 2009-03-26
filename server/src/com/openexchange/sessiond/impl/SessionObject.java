@@ -54,205 +54,212 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.Session;
 import com.openexchange.groupware.ldap.Credentials;
+import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
- * {@link SessionObject} - Implements {@link com.openexchange.session.Session}.
+ * {@link SessionObject} - Implemets {@link com.openexchange.session.Session}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionObject implements com.openexchange.session.Session {
 
-    private final String sessionid;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessionObject.class);
 
-    private String username;
+	private final String sessionid;
 
-    private String userlogin;
+	private String username;
 
-    private String loginName;
+	private String userlogin;
 
-    private String password;
+	private String loginName;
 
-    private String language;
+	private String password;
 
-    private String localip;
+	private String language;
 
-    private String host;
+	private String localip;
 
-    private long lifetime;
+	private String host;
 
-    private Date timestamp;
+	private long lifetime;
 
-    private Date creationtime;
+	private Date timestamp;
 
-    private String secret;
+	private Date creationtime;
 
-    private String randomToken;
+	private String secret;
 
-    private int contextId;
+	private String randomToken;
 
-    private Credentials cred;
+	private int contextId;
 
-    private Session mailSession;
+	private Credentials cred;
 
-    private String login;
+	private Session mailSession;
 
-    private final Map<String, Object> parameters;
+	private String login;
 
-    public SessionObject(final String sessionid) {
-        this.sessionid = sessionid;
-        parameters = new ConcurrentHashMap<String, Object>();
-    }
+	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
 
-    public void setUsername(final String username) {
-        this.username = username;
-    }
+	private final Map<String, Object> parameters;
 
-    public void setUserlogin(final String userlogin) {
-        this.userlogin = userlogin;
-    }
+	public SessionObject(final String sessionid) {
+		this.sessionid = sessionid;
+		parameters = new ConcurrentHashMap<String, Object>();
+		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
+	}
 
-    public void setPassword(final String password) {
-        this.password = password;
-    }
+	public void setUsername(final String username) {
+		this.username = username;
+	}
 
-    public void setLanguage(final String language) {
-        this.language = language;
-    }
+	public void setUserlogin(final String userlogin) {
+		this.userlogin = userlogin;
+	}
 
-    public void setLocalIp(final String localip) {
-        this.localip = localip;
-    }
+	public void setPassword(final String password) {
+		this.password = password;
+	}
 
-    public void setHost(final String host) {
-        this.host = host;
-    }
+	public void setLanguage(final String language) {
+		this.language = language;
+	}
 
-    public void setLifetime(final long lifetime) {
-        this.lifetime = lifetime;
-    }
+	public void setLocalIp(final String localip) {
+		this.localip = localip;
+	}
 
-    public void setTimestamp(final Date timestamp) {
-        this.timestamp = (Date) timestamp.clone();
-    }
+	public void setHost(final String host) {
+		this.host = host;
+	}
 
-    public void setCreationtime(final Date creationtime) {
-        this.creationtime = (Date) creationtime.clone();
-    }
+	public void setLifetime(final long lifetime) {
+		this.lifetime = lifetime;
+	}
 
-    public void setContextId(final int contextId) {
-        this.contextId = contextId;
-    }
+	public void setTimestamp(final Date timestamp) {
+		this.timestamp = (Date) timestamp.clone();
+	}
 
-    public String getSessionID() {
-        return sessionid;
-    }
+	public void setCreationtime(final Date creationtime) {
+		this.creationtime = (Date) creationtime.clone();
+	}
 
-    public int getUserId() {
-        return Integer.parseInt(username);
-    }
+	public void setContextId(final int contextId) {
+		this.contextId = contextId;
+	}
 
-    public String getUsername() {
-        return username;
-    }
+	public String getSessionID() {
+		return sessionid;
+	}
 
-    public String getUserlogin() {
-        return userlogin;
-    }
+	public int getUserId() {
+		return Integer.parseInt(username);
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public String getLanguage() {
-        return language;
-    }
+	public String getUserlogin() {
+		return userlogin;
+	}
 
-    public String getLocalIp() {
-        return localip;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public String getHost() {
-        return host;
-    }
+	public String getLanguage() {
+		return language;
+	}
 
-    public long getLifetime() {
-        return lifetime;
-    }
+	public String getLocalIp() {
+		return localip;
+	}
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
+	public String getHost() {
+		return host;
+	}
 
-    public Date getCreationtime() {
-        return creationtime;
-    }
+	public long getLifetime() {
+		return lifetime;
+	}
 
-    public int getContextId() {
-        return contextId;
-    }
+	public Date getTimestamp() {
+		return timestamp;
+	}
 
-    public void setCredentials(final Credentials cred) {
-        this.cred = cred;
-    }
+	public Date getCreationtime() {
+		return creationtime;
+	}
 
-    public Credentials getCredentials() {
-        return cred;
-    }
+	public int getContextId() {
+		return contextId;
+	}
 
-    public void setLoginName(final String loginName) {
-        this.loginName = loginName;
-    }
+	public void setCredentials(final Credentials cred) {
+		this.cred = cred;
+	}
 
-    public String getLoginName() {
-        return loginName;
-    }
+	public Credentials getCredentials() {
+		return cred;
+	}
 
-    public void setRandomToken(final String randomToken) {
-        this.randomToken = randomToken;
-    }
+	public void setLoginName(final String loginName) {
+		this.loginName = loginName;
+	}
 
-    public String getRandomToken() {
-        return randomToken;
-    }
+	public String getLoginName() {
+		return loginName;
+	}
 
-    public Session getMailSession() {
-        return mailSession;
-    }
+	public void setRandomToken(final String randomToken) {
+		this.randomToken = randomToken;
+	}
 
-    public void setMailSession(final Session mailSession) {
-        this.mailSession = mailSession;
-    }
+	public String getRandomToken() {
+		return randomToken;
+	}
 
-    public void closingOperations() {
-    }
+	public Session getMailSession() {
+		return mailSession;
+	}
 
-    public String getSecret() {
-        return secret;
-    }
+	public void setMailSession(final Session mailSession) {
+		this.mailSession = mailSession;
+	}
 
-    public void setSecret(final String secret) {
-        this.secret = secret;
-    }
+	public void closingOperations() {
+	}
 
-    public Object getParameter(final String name) {
-        return parameters.get(name);
-    }
+	public String getSecret() {
+		return secret;
+	}
 
-    public void setParameter(final String name, final Object value) {
-        parameters.put(name, value);
-    }
+	public void setSecret(final String secret) {
+		this.secret = secret;
+	}
 
-    public void removeRandomToken() {
-        randomToken = null;
-    }
+	public Object getParameter(final String name) {
+		return parameters.get(name);
+	}
 
-    public String getLogin() {
-        return login;
-    }
+	public void setParameter(final String name, final Object value) {
+		parameters.put(name, value);
+	}
 
-    public void setLogin(final String login) {
-        this.login = login;
-    }
+	public void removeRandomToken() {
+		randomToken = null;
+	}
+
+	public String getLogin() {
+		return login;
+	}
+
+	public void setLogin(final String login) {
+		this.login = login;
+	}
 
 }
