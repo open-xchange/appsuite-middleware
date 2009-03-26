@@ -1,0 +1,30 @@
+!include CommonSetup
+
+!|Table:CreateFolder|
+|start_folder|
+|folder| module|
+|/Public folders| tasks|
+
+!|Table:CreateFolder|
+|destination_folder|
+|folder| module|
+|/Public folders| tasks|
+
+!|Table:CreateFolder|
+|folder_to_move|
+|folder| module|
+|start_folder| tasks|
+
+!|Table:MoveFolder|
+| folder_to_move |
+|folder|
+|destination_folder|
+
+!|Table:VerifyFolder|
+| folder_to_move    |
+| folder |
+| destination_folder |
+
+
+
+!include CommonTearDown
