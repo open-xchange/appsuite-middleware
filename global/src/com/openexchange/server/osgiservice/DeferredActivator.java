@@ -347,6 +347,12 @@ public abstract class DeferredActivator implements BundleActivator {
      * @return The service obtained by service tracker or <code>null</code>
      */
     protected final <S extends Object> S getService(final Class<? extends S> clazz) {
+        if (null == services) {
+            /*
+             * Services not initialized
+             */
+            return null;
+        }
         final Object service = services.get(clazz);
         if (null == service) {
             /*
