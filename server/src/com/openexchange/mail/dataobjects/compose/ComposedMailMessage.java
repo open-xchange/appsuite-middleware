@@ -55,12 +55,15 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -157,29 +160,41 @@ public abstract class ComposedMailMessage extends MailMessage {
         if (null != filler) {
             filler.deleteReferencedUploadFiles();
         }
-        if (null != session) {
-            try {
-                final int count = getEnclosedCount();
-                for (int i = 0; i < count; i++) {
-                    if (getEnclosedMailPart(i) instanceof ComposedMailPart) {
-                        final ComposedMailPart composedMailPart = (ComposedMailPart) getEnclosedMailPart(i);
-                        if (ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
-                            final String fileId = ((ReferencedMailPart) (composedMailPart)).getFileID();
-                            if (null != fileId) {
-                                session.removeUploadedFile(fileId);
+        try {
+            final int count = getEnclosedCount();
+            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            for (int i = 0; i < count; i++) {
+                if (getEnclosedMailPart(i) instanceof ComposedMailPart) {
+                    final ComposedMailPart composedMailPart = (ComposedMailPart) getEnclosedMailPart(i);
+                    if (ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
+                        final String fileId = ((ReferencedMailPart) (composedMailPart)).getFileID();
+                        if (null != fileId) {
+                            try {
+                                mfm.removeByID(fileId);
+                            } catch (final ManagedFileException e) {
+                                LOG.warn(e.getMessage(), e);
                             }
-                        } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
-                            final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
-                            if (f.exists() && !f.delete()) {
-                                LOG.warn(new StringBuilder().append("Temporary store file '").append(f.getName()).append(
-                                    "' could not be deleted."));
+                        }
+                    } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
+                        final String fileId = ((DataMailPart) (composedMailPart)).getFileID();
+                        if (null != fileId) {
+                            try {
+                                mfm.removeByID(fileId);
+                            } catch (final ManagedFileException e) {
+                                LOG.warn(e.getMessage(), e);
                             }
+                        }
+                    } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
+                        final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
+                        if (f.exists() && !f.delete()) {
+                            LOG.warn(new StringBuilder().append("Temporary store file '").append(f.getName()).append(
+                                "' could not be deleted."));
                         }
                     }
                 }
-            } catch (final MailException e) {
-                LOG.error(e.getMessage(), e);
             }
+        } catch (final MailException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 

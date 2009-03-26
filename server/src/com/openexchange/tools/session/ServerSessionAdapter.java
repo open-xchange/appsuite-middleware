@@ -6,7 +6,6 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -43,12 +42,12 @@ public class ServerSessionAdapter implements ServerSession {
      * @throws ContextException If context look-up fails
      */
     public ServerSessionAdapter(final Session session) throws ContextException {
-        if(ServerSession.class.isInstance(session)) {
+        if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
-            return;
+        } else {
+            this.session = session;
+            ctx = ContextStorage.getStorageContext(getContextId());
         }
-        this.session = session;
-        ctx = ContextStorage.getStorageContext(getContextId());
     }
 
     /**
@@ -58,12 +57,12 @@ public class ServerSessionAdapter implements ServerSession {
      * @param ctx The session's context object
      */
     public ServerSessionAdapter(final Session session, final Context ctx) {
-        if(ServerSession.class.isInstance(session)) {
+        if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
-            return;
+        } else {
+            this.session = session;
+            this.ctx = ctx;
         }
-        this.session = session;
-        this.ctx = ctx;
     }
 
     /**
@@ -74,13 +73,13 @@ public class ServerSessionAdapter implements ServerSession {
      * @param user The session's user object
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
-        if(ServerSession.class.isInstance(session)) {
+        if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
-            return;
+        } else {
+            this.session = session;
+            this.ctx = ctx;
+            this.user = user;
         }
-        this.session = session;
-        this.ctx = ctx;
-        this.user = user;
     }
 
     public int getContextId() {
@@ -115,10 +114,6 @@ public class ServerSessionAdapter implements ServerSession {
         return session().getSessionID();
     }
 
-    public ManagedUploadFile getUploadedFile(final String id) {
-        return session().getUploadedFile(id);
-    }
-
     public int getUserId() {
         return session().getUserId();
     }
@@ -127,24 +122,8 @@ public class ServerSessionAdapter implements ServerSession {
         return session().getUserlogin();
     }
 
-    public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
-        session().putUploadedFile(id, uploadFile);
-    }
-
-    public ManagedUploadFile removeUploadedFile(final String id) {
-        return session().removeUploadedFile(id);
-    }
-
-    public void removeUploadedFileOnly(final String id) {
-        session().removeUploadedFileOnly(id);
-    }
-
     public void setParameter(final String name, final Object value) {
         session().setParameter(name, value);
-    }
-
-    public boolean touchUploadedFile(final String id) {
-        return session().touchUploadedFile(id);
     }
 
     public void removeRandomToken() {
@@ -152,7 +131,7 @@ public class ServerSessionAdapter implements ServerSession {
     }
 
     public Context getContext() {
-        if(serverSession != null) {
+        if (serverSession != null) {
             return serverSession.getContext();
         }
         return ctx;
@@ -163,7 +142,7 @@ public class ServerSessionAdapter implements ServerSession {
     }
 
     public User getUser() {
-        if(serverSession != null) {
+        if (serverSession != null) {
             return serverSession.getUser();
         }
         User tmp = user;
@@ -179,7 +158,7 @@ public class ServerSessionAdapter implements ServerSession {
     }
 
     public UserConfiguration getUserConfiguration() {
-        if(serverSession != null) {
+        if (serverSession != null) {
             return serverSession.getUserConfiguration();
         }
         UserConfiguration tmp = userConfiguration;
@@ -199,7 +178,7 @@ public class ServerSessionAdapter implements ServerSession {
     }
 
     public UserSettingMail getUserSettingMail() {
-        if(serverSession != null) {
+        if (serverSession != null) {
             return serverSession.getUserSettingMail();
         }
         UserSettingMail tmp = userSettingMail;
@@ -213,9 +192,9 @@ public class ServerSessionAdapter implements ServerSession {
         }
         return tmp;
     }
-    
+
     private Session session() {
-        if(serverSession != null) {
+        if (serverSession != null) {
             return serverSession;
         }
         return session;

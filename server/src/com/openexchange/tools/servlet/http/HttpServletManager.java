@@ -54,10 +54,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ConcurrentModificationException;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -78,7 +79,7 @@ public class HttpServletManager {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static final Map<String, ServletQueue> SERVLET_POOL = new HashMap<String, ServletQueue>();
+    private static final ConcurrentMap<String, ServletQueue> SERVLET_POOL = new ConcurrentHashMap<String, ServletQueue>();
 
     private static Map<String, Constructor<?>> servletConstructorMap;
 
@@ -255,8 +256,13 @@ public class HttpServletManager {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
                     "\" has already been registered before.").toString());
             }
+            final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
+            if (null == configLoader) {
+                throw new ServletException(
+                    "Aborting servlet registration: HTTP service has not been initialized since default servlet configuration loader is null.");
+            }
             if ((null != initParams) && !initParams.isEmpty()) {
-                ServletConfigLoader.getDefaultInstance().setConfig(servlet.getClass().getCanonicalName(), initParams);
+                configLoader.setConfig(servlet.getClass().getCanonicalName(), initParams);
             }
             /*
              * Try to determine default constructor for later instantiations
@@ -277,13 +283,16 @@ public class HttpServletManager {
                 se.initCause(e);
                 throw se;
             }
-            final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(servlet.getClass().getCanonicalName(), path);
+            final ServletConfig conf = configLoader.getConfig(servlet.getClass().getCanonicalName(), path);
             servlet.init(conf);
             servletQueue.enqueue(servlet);
             /*
              * Put into servlet pool for being accessible
              */
-            SERVLET_POOL.put(path, servletQueue);
+            if (SERVLET_POOL.putIfAbsent(path, servletQueue) != null) {
+                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
+                    "\" has already been registered before.").toString());
+            }
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(64).append("New servlet \"").append(servlet.getClass().getCanonicalName()).append(
                     "\" successfully registered to \"").append(path).append('"'));
@@ -306,7 +315,12 @@ public class HttpServletManager {
         RW_LOCK.acquireWrite();
         try {
             final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
-            ServletConfigLoader.getDefaultInstance().removeConfig(SERVLET_POOL.get(path).dequeue().getClass().getCanonicalName());
+            final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
+            if (null == configLoader) {
+                LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
+                return;
+            }
+            configLoader.removeConfig(SERVLET_POOL.get(path).dequeue().getClass().getCanonicalName());
             SERVLET_POOL.remove(path);
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
@@ -386,6 +400,12 @@ public class HttpServletManager {
     private static final void createServlets() {
         RW_LOCK.acquireWrite();
         try {
+            final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
+            if (null == configLoader) {
+                LOG.error("Aborting servlets' initialization: HTTP service has not been initialized since default servlet configuration loader is null.");
+                return;
+            }
+
             for (final Iterator<Map.Entry<String, Constructor<?>>> iter = servletConstructorMap.entrySet().iterator(); iter.hasNext();) {
                 final Map.Entry<String, Constructor<?>> entry = iter.next();
                 String path;
@@ -410,9 +430,7 @@ public class HttpServletManager {
                             final int servletPoolSize = AJPv13Config.getServletPoolSize();
                             servletQueue = new ServletQueue(servletPoolSize, servletConstructor);
                             if (servletPoolSize > 0) {
-                                final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
-                                    servletInstance.getClass().getCanonicalName(),
-                                    path);
+                                final ServletConfig conf = configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path);
                                 servletInstance.init(conf);
                                 servletQueue.enqueue(servletInstance);
                                 /*
@@ -426,9 +444,7 @@ public class HttpServletManager {
                             }
                         } else {
                             servletQueue = new ServletQueue(1, servletConstructor);
-                            servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
-                                servletInstance.getClass().getCanonicalName(),
-                                path));
+                            servletInstance.init(configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path));
                             servletQueue.enqueue(servletInstance);
                         }
                     } catch (final Throwable t) {

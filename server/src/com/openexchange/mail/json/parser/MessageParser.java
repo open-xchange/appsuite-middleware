@@ -77,11 +77,13 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadUtility;
@@ -519,6 +521,7 @@ public final class MessageParser {
          */
         MailAccess<?, ?> access = null;
         try {
+            ManagedFileManagement management = null;
             NextAttachment: for (int i = 1; i < len; i++) {
                 final JSONObject attachment = attachmentArray.getJSONObject(i);
                 final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
@@ -526,7 +529,10 @@ public final class MessageParser {
                     /*
                      * A file reference
                      */
-                    processReferencedUploadFile(provider, session, transportMail, seqId, quotaChecker);
+                    if (null == management) {
+                        management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+                    }
+                    processReferencedUploadFile(provider, management, transportMail, seqId, quotaChecker);
                 } else {
                     /*
                      * Prefer MSGREF from attachment if present, otherwise get MSGREF from superior mail
@@ -622,23 +628,25 @@ public final class MessageParser {
         return retval;
     }
 
-    private static void processReferencedUploadFile(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final String seqId, final QuotaChecker quotaChecker) throws MailException {
+    private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final ComposedMailMessage transportMail, final String seqId, final QuotaChecker quotaChecker) throws MailException {
         /*
          * A file reference
          */
-        final ManagedUploadFile managedUploadFile = session.getUploadedFile(seqId.substring(FILE_PREFIX.length()));
-        if (managedUploadFile == null) {
-            LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()));
+        final ManagedFile managedFile;
+        try {
+            managedFile = management.getByID(seqId.substring(FILE_PREFIX.length()));
+        } catch (ManagedFileException e) {
+            LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()), e);
             return;
         }
         // Add to quota checker
-        quotaChecker.addConsumed(managedUploadFile.getSize(), managedUploadFile.getFileName());
+        quotaChecker.addConsumed(managedFile.getSize(), managedFile.getFileName());
         // Create wrapping upload file
         final UploadFile wrapper = new UploadFile();
-        wrapper.setContentType(managedUploadFile.getContentType());
-        wrapper.setFileName(managedUploadFile.getFileName());
-        wrapper.setSize(managedUploadFile.getSize());
-        wrapper.setTmpFile(managedUploadFile.getFile());
+        wrapper.setContentType(managedFile.getContentType());
+        wrapper.setFileName(managedFile.getFileName());
+        wrapper.setSize(managedFile.getSize());
+        wrapper.setTmpFile(managedFile.getFile());
         transportMail.addEnclosedPart(provider.getNewFilePart(wrapper));
     }
 

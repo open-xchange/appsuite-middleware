@@ -80,6 +80,9 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
@@ -87,7 +90,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
@@ -113,6 +115,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -219,19 +222,14 @@ public class MIMEMessageFiller {
         if (uploadFileIDs != null) {
             final int size = uploadFileIDs.size();
             final Iterator<String> iter = uploadFileIDs.iterator();
-            final StringBuilder sb;
-            if (LOG.isInfoEnabled()) {
-                sb = new StringBuilder(128);
-            } else {
-                sb = null;
-            }
-            for (int i = 0; i < size; i++) {
-                final ManagedUploadFile uploadFile = session.removeUploadedFile(iter.next());
-                final String fileName = uploadFile.getFile().getName();
-                uploadFile.delete();
-                if (null != sb) {
-                    sb.setLength(0);
-                    LOG.info(sb.append("Upload file \"").append(fileName).append("\" removed from session and deleted from disk"));
+            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            if (mfm != null) {
+                for (int i = 0; i < size; i++) {
+                    try {
+                        mfm.removeByID(iter.next());
+                    } catch (final ManagedFileException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
             uploadFileIDs.clear();
@@ -1184,11 +1182,14 @@ public class MIMEMessageFiller {
         final StringBuilder sb = new StringBuilder(htmlContent.length());
         if (m.find()) {
             msgFiller.uploadFileIDs = new HashSet<String>();
+            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final StringBuilder tmp = new StringBuilder(128);
             do {
                 final String id = m.group(5);
-                final ManagedUploadFile uploadFile = msgFiller.session.getUploadedFile(id);
-                if (uploadFile == null) {
+                final ManagedFile mf;
+                try {
+                    mf = mfm.getByID(id);
+                } catch (final ManagedFileException e) {
                     if (LOG.isWarnEnabled()) {
                         tmp.setLength(0);
                         LOG.warn(tmp.append("No upload file found with id \"").append(id).append("\". Referenced image is skipped.").toString());
@@ -1198,22 +1199,22 @@ public class MIMEMessageFiller {
                      */
                     tmp.setLength(0);
                     mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound").toString()));
-                } else {
-                    final boolean appendBodyPart;
-                    if (msgFiller.uploadFileIDs.contains(id)) {
-                        appendBodyPart = false;
-                    } else {
-                        /*
-                         * Remember id to avoid duplicate attachment and for later cleanup
-                         */
-                        msgFiller.uploadFileIDs.add(id);
-                        appendBodyPart = true;
-                    }
-                    /*
-                     * Replace image tag
-                     */
-                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart, tmp, mp)));
+                    continue;
                 }
+                final boolean appendBodyPart;
+                if (msgFiller.uploadFileIDs.contains(id)) {
+                    appendBodyPart = false;
+                } else {
+                    /*
+                     * Remember id to avoid duplicate attachment and for later cleanup
+                     */
+                    msgFiller.uploadFileIDs.add(id);
+                    appendBodyPart = true;
+                }
+                /*
+                 * Replace image tag
+                 */
+                mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(mf, id, appendBodyPart, tmp, mp)));
             } while (m.find());
         }
         mr.appendTail(sb);
@@ -1232,7 +1233,7 @@ public class MIMEMessageFiller {
      * @throws MessagingException If appending as body part fails
      * @throws MailException If a mail error occurs
      */
-    protected final static String processLocalImage(final ManagedUploadFile uploadFile, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, MailException {
+    protected final static String processLocalImage(final ManagedFile uploadFile, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, MailException {
         /*
          * Determine filename
          */

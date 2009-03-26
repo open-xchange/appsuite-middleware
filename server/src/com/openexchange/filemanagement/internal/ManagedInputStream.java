@@ -160,6 +160,8 @@ public final class ManagedInputStream extends InputStream {
                     delegate = management.createManagedFile(new CombinedInputStream(tmp.toByteArray(), in)).getInputStream();
                 } else {
                     delegate = new UnsynchronizedByteArrayInputStream(tmp.toByteArray());
+                    // Input stream completely copied to memory, so close it
+                    in.close();
                 }
             } catch (final IOException e) {
                 throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());

@@ -396,6 +396,9 @@ public class UploadEvent {
             }
         }
         uploadFiles.clear();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Upload event cleaned-up. All temporary stored files deleted.");
+        }
     }
 
     /**

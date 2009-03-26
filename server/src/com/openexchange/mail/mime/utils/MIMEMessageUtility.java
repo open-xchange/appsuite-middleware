@@ -67,6 +67,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -75,6 +77,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -185,8 +188,13 @@ public final class MIMEMessageUtility {
     public static boolean hasReferencedLocalImages(final String htmlContent, final Session session) {
         final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
         if (m.find()) {
+            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             do {
-                session.touchUploadedFile(m.group(5));
+                try {
+                    mfm.getByID(m.group(5));
+                } catch (final ManagedFileException e) {
+                    LOG.warn(e.getMessage(), e);
+                }
             } while (m.find());
             return true;
         }

@@ -51,10 +51,12 @@ package com.openexchange.filemanagement.internal;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,6 +74,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.Timer;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ManagedFileManagementImpl} - The file management designed to keep large content as a temporary file on disk.
@@ -196,7 +199,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         super();
         files = new ConcurrentHashMap<String, ManagedFile>();
         tmpDirReference = new AtomicReference<File>();
-        ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+        final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
         // Get configuration service
         final ConfigurationService cs = registry.getService(ConfigurationService.class);
         if (null == cs) {
@@ -244,45 +247,32 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     public ManagedFile createManagedFile(final byte[] bytes) throws ManagedFileException {
-        ManagedFile mf = null;
-        File tmpFile = null;
-        do {
-            OutputStream out = null;
-            try {
-                tmpFile = File.createTempFile(PREFIX, SUFFIX, tmpDirReference.get());
-                tmpFile.deleteOnExit();
-                out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
-                out.write(bytes, 0, bytes.length);
-                out.flush();
-            } catch (final IOException e) {
-                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
-                    LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
-                }
-                throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
-            } finally {
-                if (null != out) {
-                    try {
-                        out.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
-            }
-            mf = new ManagedFileImpl(UUID.randomUUID().toString(), tmpFile);
-            mf.setSize(bytes.length);
-        } while (!tmpDirReference.compareAndSet(tmpFile, tmpFile)); // Directory changed in the meantime
-        files.put(mf.getID(), mf);
-        return mf;
+        return createManagedFile0(new UnsynchronizedByteArrayInputStream(bytes), false);
     }
 
     public ManagedFile createManagedFile(final InputStream inputStream) throws ManagedFileException {
+        return createManagedFile0(inputStream, true);
+    }
+
+    private ManagedFile createManagedFile0(final InputStream inputStream, final boolean closeStream) throws ManagedFileException {
         ManagedFile mf = null;
         File tmpFile = null;
+        File directory = null;
         do {
+            directory = tmpDirReference.get();
             OutputStream out = null;
             long countedSize = 0;
             try {
-                tmpFile = File.createTempFile(PREFIX, SUFFIX, tmpDirReference.get());
+                if (null != tmpFile) {
+                    final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
+                    copyFile(tmpFile, tmp);
+                    if (!tmpFile.delete()) {
+                        LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
+                    }
+                    tmpFile = tmp;
+                } else {
+                    tmpFile = File.createTempFile(PREFIX, SUFFIX, directory);
+                }
                 tmpFile.deleteOnExit();
                 out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
                 final byte[] buf = new byte[8192];
@@ -305,10 +295,17 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                         LOG.error(e.getMessage(), e);
                     }
                 }
+                if (closeStream) {
+                    try {
+                        inputStream.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
             }
             mf = new ManagedFileImpl(UUID.randomUUID().toString(), tmpFile);
             mf.setSize(countedSize);
-        } while (!tmpDirReference.compareAndSet(tmpFile, tmpFile)); // Directory changed in the meantime
+        } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
         return mf;
     }
@@ -386,6 +383,27 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 INITIAL_DELAY,
                 DELAY,
                 TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private static void copyFile(final File sourceFile, final File destFile) throws IOException {
+        if (!destFile.exists()) {
+            destFile.createNewFile();
+        }
+
+        FileChannel source = null;
+        FileChannel destination = null;
+        try {
+            source = new FileInputStream(sourceFile).getChannel();
+            destination = new FileOutputStream(destFile).getChannel();
+            destination.transferFrom(source, 0, source.size());
+        } finally {
+            if (source != null) {
+                source.close();
+            }
+            if (destination != null) {
+                destination.close();
+            }
         }
     }
 

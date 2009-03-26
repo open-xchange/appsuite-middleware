@@ -57,7 +57,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
@@ -224,10 +223,6 @@ public class LdapGlobalFolderCreator {
                 return null;
             }
 
-            public ManagedUploadFile getUploadedFile(String id) {
-                return null;
-            }
-
             public int getUserId() {
                 return admin_user_id;
             }
@@ -236,24 +231,10 @@ public class LdapGlobalFolderCreator {
                 return null;
             }
 
-            public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
-            }
-
             public void removeRandomToken() {
             }
 
-            public ManagedUploadFile removeUploadedFile(String id) {
-                return null;
-            }
-
-            public void removeUploadedFileOnly(String id) {
-            }
-
             public void setParameter(String name, Object value) {
-            }
-
-            public boolean touchUploadedFile(String id) {
-                return false;
             }
             
         };

@@ -49,15 +49,11 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.session.Session;
 
 /**
@@ -67,8 +63,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionImpl implements Session {
-
-    private static final transient Log LOG = LogFactory.getLog(SessionImpl.class);
 
     private final String loginName;
 
@@ -87,8 +81,6 @@ public final class SessionImpl implements Session {
     private String randomToken;
 
     private String localIp;
-
-    private final Map<String, ManagedUploadFile> managedUploadFiles;
 
     private final Map<String, Object> parameters;
 
@@ -115,7 +107,6 @@ public final class SessionImpl implements Session {
         this.contextId = contextId;
         this.login = login;
         parameters = new ConcurrentHashMap<String, Object>();
-        managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
     }
 
     /**
@@ -141,7 +132,6 @@ public final class SessionImpl implements Session {
             final Map.Entry<String, Serializable> entry = iter.next();
             parameters.put(entry.getKey(), entry.getValue());
         }
-        managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
     }
 
     /**
@@ -173,61 +163,12 @@ public final class SessionImpl implements Session {
         return sessionId;
     }
 
-    public ManagedUploadFile getUploadedFile(final String id) {
-        final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
-        if (null != uploadFile) {
-            uploadFile.touch();
-        }
-        return uploadFile;
-    }
-
     public int getUserID() {
         return userId;
     }
 
-    public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
-        managedUploadFiles.put(id, uploadFile);
-        uploadFile.startTimerTask(id, managedUploadFiles);
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=").append(id).append(
-                " added to session and timer task started").toString());
-        }
-    }
-
-    public ManagedUploadFile removeUploadedFile(final String id) {
-        final ManagedUploadFile uploadFile = managedUploadFiles.remove(id);
-        if (null != uploadFile) {
-            /*
-             * Cancel timer task
-             */
-            uploadFile.cancelTimerTask();
-            final File file = uploadFile.getFile();
-            if (file.exists() && !file.delete()) {
-                LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(file.getName()).append(
-                    "\" could not be deleted"));
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=").append(id).append(
-                    " removed from session and timer task canceled").toString());
-            }
-        }
-        return uploadFile;
-    }
-
-    public void removeUploadedFileOnly(final String id) {
-    }
-
     public void setParameter(final String name, final Object value) {
         parameters.put(name, value);
-    }
-
-    public boolean touchUploadedFile(final String id) {
-        final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
-        if (null != uploadFile) {
-            uploadFile.touch();
-            return true;
-        }
-        return false;
     }
 
     public void removeRandomToken() {

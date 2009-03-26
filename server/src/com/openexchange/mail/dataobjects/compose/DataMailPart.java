@@ -50,25 +50,18 @@
 package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
-import java.util.UUID;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.DataProperties;
-import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.groupware.upload.impl.AJAXUploadFile;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -76,9 +69,11 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -94,8 +89,6 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-    private static final String FILE_PREFIX = "openexchange";
-
     private static transient final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DataMailPart.class);
 
     private static final int MB = 1048576;
@@ -106,7 +99,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private transient DataSource dataSource;
 
-    private File file;
+    private ManagedFile file;
 
     private String fileId;
 
@@ -130,7 +123,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             } catch (final NumberFormatException e) {
                 size = 0;
             }
-            handleInputStream(inputStream, size, session);
+            handleInputStream(inputStream, size);
         } else if (data instanceof byte[]) {
             bytes = (byte[]) data;
         } else {
@@ -147,14 +140,14 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     private void applyFileContent(final String charset) throws MailException {
-        FileInputStream fis = null;
+        InputStream fis = null;
         try {
-            fis = new FileInputStream(file);
+            fis = file.getInputStream();
             cachedContent = readStream(fis, charset);
-        } catch (final FileNotFoundException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+        } catch (final ManagedFileException e) {
+            throw new MailException(e);
         } finally {
             if (fis != null) {
                 try {
@@ -177,37 +170,22 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         bytes = out.toByteArray();
     }
 
-    private void copy2File(final InputStream in, final Session session) throws IOException {
-        long totalBytes = 0;
-        {
-            final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(
-                ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
-            tmpFile.deleteOnExit();
-            OutputStream out = null;
-            try {
-                out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
-                final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-                int len;
-                while ((len = in.read(bbuf)) != -1) {
-                    out.write(bbuf, 0, len);
-                    totalBytes += len;
-                }
-                out.flush();
-            } finally {
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
-            }
-            file = tmpFile;
+    private void copy2File(final InputStream in) throws IOException {
+        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        if (null == mfm) {
+            throw new IOException("Missing file management");
         }
-        final ManagedUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
-        fileId = UUID.randomUUID().toString();
-        session.putUploadedFile(fileId, uploadFile);
-        setSize(totalBytes);
+        final ManagedFile mf;
+        try {
+            mf = mfm.createManagedFile(in);
+        } catch (final ManagedFileException e) {
+            final IOException ioerr = new IOException();
+            ioerr.initCause(e);
+            throw ioerr;
+        }
+        setSize(mf.getSize());
+        file = mf;
+        fileId = mf.getID();
     }
 
     @Override
@@ -264,7 +242,23 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                          */
                         contentType.setCharsetParameter(System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
                     }
-                    return (dataSource = new FileDataSource(file, contentType.toString()));
+                    final InputStreamProvider isp = new InputStreamProvider() {
+
+                        public InputStream getInputStream() throws IOException {
+                            try {
+                                return file.getInputStream();
+                            } catch (final ManagedFileException e) {
+                                final IOException err = new IOException();
+                                err.initCause(e);
+                                throw err;
+                            }
+                        }
+
+                        public String getName() {
+                            return null;
+                        }
+                    };
+                    return (dataSource = new StreamDataSource(isp, contentType.toString()));
                 }
                 throw new MailException(MailException.Code.NO_CONTENT);
             } catch (final MailConfigException e) {
@@ -292,11 +286,11 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                 return new UnsynchronizedByteArrayInputStream(bytes);
             }
             if (file != null) {
-                return new FileInputStream(file);
+                return file.getInputStream();
             }
             throw new MailException(MailException.Code.NO_CONTENT);
-        } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+        } catch (ManagedFileException e) {
+            throw new MailException(e);
         }
     }
 
@@ -304,20 +298,20 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         return ComposedPartType.DATA;
     }
 
-    private void handleInputStream(final InputStream inputStream, final long size, final Session session) throws MailException {
+    private void handleInputStream(final InputStream inputStream, final long size) throws MailException {
         try {
             if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
                 copy2ByteArr(inputStream);
                 return;
             }
-            copy2File(inputStream, session);
+            copy2File(inputStream);
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Data mail part exeeds ").append(
                 Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
-                "MB limit. A temporary disk copy has been created: ").append(file.getName()));
+                "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
         }
     }
 
