@@ -260,41 +260,42 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         File directory = null;
         do {
             directory = tmpDirReference.get();
-            OutputStream out = null;
-            long countedSize = 0;
             try {
-                if (null != tmpFile) {
+                if (null == tmpFile) {
+                    // Flush input stream's content via output stream to newly created file
+                    tmpFile = File.createTempFile(PREFIX, SUFFIX, directory);
+                    tmpFile.deleteOnExit();
+                    final OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
+                    try {
+                        final byte[] buf = new byte[8192];
+                        int len = -1;
+                        while ((len = inputStream.read(buf, 0, buf.length)) != -1) {
+                            out.write(buf, 0, len);
+                        }
+                        out.flush();
+                    } finally {
+                        try {
+                            out.close();
+                        } catch (final IOException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                } else {
+                    // Copy content of previous file to newly created file
                     final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
                     copyFile(tmpFile, tmp);
                     if (!tmpFile.delete()) {
                         LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
                     }
                     tmpFile = tmp;
-                } else {
-                    tmpFile = File.createTempFile(PREFIX, SUFFIX, directory);
+                    tmpFile.deleteOnExit();
                 }
-                tmpFile.deleteOnExit();
-                out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
-                final byte[] buf = new byte[8192];
-                int len = -1;
-                while ((len = inputStream.read(buf, 0, buf.length)) != -1) {
-                    out.write(buf, 0, len);
-                    countedSize += len;
-                }
-                out.flush();
             } catch (final IOException e) {
                 if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
                     LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
             } finally {
-                if (null != out) {
-                    try {
-                        out.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
                 if (closeStream) {
                     try {
                         inputStream.close();
@@ -304,7 +305,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 }
             }
             mf = new ManagedFileImpl(UUID.randomUUID().toString(), tmpFile);
-            mf.setSize(countedSize);
+            mf.setSize(tmpFile.length());
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
         return mf;
