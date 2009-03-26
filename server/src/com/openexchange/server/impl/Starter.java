@@ -55,6 +55,7 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.Initialization;
 
 /**
@@ -182,7 +183,21 @@ public class Starter implements Initialization {
     /**
      * Managed file initialization
      */
-    new com.openexchange.filemanagement.internal.ManagedFileInitialization() };
+    new com.openexchange.filemanagement.internal.ManagedFileInitialization(),
+    /**
+     * Release LoginPerformer instance on shut-down
+     */
+    new Initialization() {
+
+        public void start() throws AbstractOXException {
+            // Nothing to do
+        }
+
+        public void stop() throws AbstractOXException {
+            // Release LoginPerformer instance on shut-down
+            LoginPerformer.releaseInstance();
+        }
+    } };
 
     /**
      * This contains the components that must be started if the admin uses APIs of the server.
@@ -251,7 +266,21 @@ public class Starter implements Initialization {
     /**
      * Downgrade registry start-up
      */
-    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance() };
+    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
+    /**
+     * Release LoginPerformer instance on shut-down
+     */
+    new Initialization() {
+
+        public void start() throws AbstractOXException {
+            // Nothing to do
+        }
+
+        public void stop() throws AbstractOXException {
+            // Release LoginPerformer instance on shut-down
+            LoginPerformer.releaseInstance();
+        }
+    } };
 
     private static final Log LOG = LogFactory.getLog(Starter.class);
 
