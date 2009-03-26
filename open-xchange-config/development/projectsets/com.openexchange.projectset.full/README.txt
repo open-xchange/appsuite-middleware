@@ -22,7 +22,14 @@
  
    >>> Refresh (F5) project "open-xchange-development" <<<
    
-5. To finally start the Open-Xchange server in OSGi runtime launch the
+5. Launch the "openexchange-test-gui/build.xml" launcher file with ant.
+   Right click on file and select "Run as" and press first entry.
+   The build.xml performs necessary changes in ".classpath" file to resolve
+   compile errors.
+ 
+   >>> Refresh (F5) project "openexchange-test-gui" <<<
+   
+6. To finally start the Open-Xchange server in OSGi runtime launch the
    "com.openexchange.server/Open-Xchange Server Startup.launch" launcher file. Right click on file
    and select "Run as" and press first entry.
    

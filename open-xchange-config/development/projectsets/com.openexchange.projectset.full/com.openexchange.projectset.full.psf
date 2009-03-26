@@ -34,5 +34,6 @@
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-config/development,open-xchange-development"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/spellcheck,com.openexchange.spellcheck"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.spellcheck.servlet,com.openexchange.spellcheck.servlet"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,openexchange-test-gui,openexchange-test-gui"/>
 </provider>
 </psf>
