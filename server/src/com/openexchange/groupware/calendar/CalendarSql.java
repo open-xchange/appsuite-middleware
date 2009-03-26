@@ -57,10 +57,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -120,7 +118,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     /**
      * Initializes a new {@link CalendarSql}.
      * 
-     * @param session The seesion providing needed user data
+     * @param session The session providing needed user data
      */
     public CalendarSql(final Session session) {
         this.session = session;
