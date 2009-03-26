@@ -165,7 +165,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         int[] columns = FolderObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
-            if (col == DataObject.LAST_MODIFIED_UTC || col== DataObject.LAST_MODIFIED) {
+            if (col == DataObject.LAST_MODIFIED_UTC || col== DataObject.LAST_MODIFIED ) {
                 continue;
             }
             if (folder.contains(col)) {

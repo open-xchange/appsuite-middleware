@@ -1,4 +1,6 @@
-/*    OPEN-XCHANGE legal information
+/*
+ *
+ *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -45,67 +47,29 @@
  *
  */
 
+package com.openexchange.fitnesse.folders;
 
-package com.openexchange.ajax.kata.folders;
+import java.util.List;
+import com.openexchange.ajax.kata.Step;
+import com.openexchange.ajax.kata.folders.FolderMoveStep;
+import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 
-import java.util.Date;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.kata.AbstractStep;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.FolderTestManager;
+
 
 /**
+ * {@link MoveFolder}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ *
  */
-public class FolderCreateStep extends AbstractStep implements IdentitySource<FolderObject>{
+public class MoveFolder extends AbstractStepFixture {
 
-    private FolderObject entry;
-    private boolean inserted;
-    private FolderTestManager manager;
-    
-    public FolderCreateStep(FolderObject entry, String name, String expectedError) {
-        super(name, expectedError);
-        this.entry = entry;
-    }
-
-    public void cleanUp() throws Exception {
-        if( inserted ){
-            entry.setLastModified(new Date(Long.MAX_VALUE));
-            manager.deleteFolderOnServer(entry);
-        }
-    }
-
-    public void perform(AJAXClient client) throws Exception {
-        this.client = client;
-        this.manager = new FolderTestManager(client);
-             
-        InsertRequest insertRequest = new InsertRequest(entry, false);
-        CommonInsertResponse insertResponse = execute(insertRequest);
-        insertResponse.fillObject(entry);
-        inserted = !insertResponse.hasError();
-        checkError(insertResponse);        
-    }
-
-    public void assumeIdentity(FolderObject folder) {
-        folder.setObjectID( entry.getObjectID() );
-        folder.setParentFolderID( entry.getParentFolderID());
-        folder.setLastModified( entry.getLastModified());
-        folder.setPermissions(entry.getPermissions());
-    }
-
-    public void rememberIdentityValues(FolderObject folder) {
-        folder.setLastModified( entry.getLastModified());        
-    }
-
-    public void forgetIdentity(FolderObject entry) {
-        inserted = false;
-    }
-    
-    public Class<FolderObject> getType() {
-        return FolderObject.class;
+    @Override
+    protected Step createStep(FixtureDataWrapper data) throws Exception {
+        String destination = data.getDestination();
+        int folder = resolveFolder(destination);
+        return new FolderMoveStep(folder, data.getFixtureName(), data.getExpectedError());
     }
 
 }
