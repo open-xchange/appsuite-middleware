@@ -58,7 +58,7 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         if (isFailOnError()) {
             boolean oxCookieFound = false;
             for (final String newCookie : newCookies) {
-                if (newCookie.startsWith(Login.cookiePrefix)) {
+                if (newCookie.startsWith(Login.COOKIE_PREFIX)) {
                     oxCookieFound = true;
                     break;
                 }
@@ -97,12 +97,12 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         } else {
             retval.setJvmRoute(jvmRoute);
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
-            retval.setRandom(json.getString(Login._random));
+            retval.setRandom(json.getString(Login.PARAM_RANDOM));
         }
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());
             assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
-            assertTrue("Random is missing.", json.has(Login._random));
+            assertTrue("Random is missing.", json.has(Login.PARAM_RANDOM));
         }
         return retval;
     }

@@ -124,7 +124,7 @@ public class LoginTest extends AbstractAJAXTest {
         assertFalse(json.optString("error"), json.has("error"));
         assertTrue("Session ID is missing: " + body, json.has(
             Login.PARAMETER_SESSION));
-        assertTrue("Random is missing: " + body, json.has(Login._random));
+        assertTrue("Random is missing: " + body, json.has(Login.PARAM_RANDOM));
         return json;
     }
 

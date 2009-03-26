@@ -166,7 +166,7 @@ public final class BundleTestSMTP extends AbstractBundleTest {
              * Add cookie
              */
             final CookieJar cookieJar = new CookieJar();
-            cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+            cookieJar.putCookie(Login.COOKIE_PREFIX + sessionId, sessionId);
         }
 
         final PostMethodWebRequest postReq = new PostMethodWebRequest(PROTOCOL + hostname + MAIL_URL + parameter.getURLParameters(), true);

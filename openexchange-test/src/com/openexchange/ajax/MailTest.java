@@ -114,7 +114,7 @@ public class MailTest extends AbstractAJAXTest {
 			 * Add cookie
 			 */
 			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+			cookieJar.putCookie(Login.COOKIE_PREFIX + sessionId, sessionId);
 		}
 		
 		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + MAIL_URL + parameter.getURLParameters(), true);
@@ -152,7 +152,7 @@ public class MailTest extends AbstractAJAXTest {
 			 * Add cookie
 			 */
 			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+			cookieJar.putCookie(Login.COOKIE_PREFIX + sessionId, sessionId);
 		}
 		/*
 		 * Submit response
@@ -181,7 +181,7 @@ public class MailTest extends AbstractAJAXTest {
 		final PutMethodWebRequest putReq = new PutMethodWebRequest(hostname + MAIL_URL + parameter.getURLParameters(), bais, "text/javascript; charset=UTF-8");
 		if (addCookie) {
 			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+			cookieJar.putCookie(Login.COOKIE_PREFIX + sessionId, sessionId);
 		}
 		final WebResponse resp = conversation.getResponse(putReq);
 		final JSONObject jResponse = new JSONObject(resp.getText());
@@ -201,7 +201,7 @@ public class MailTest extends AbstractAJAXTest {
 			 * Set cookie cause a request has already been fired before with the same session id.
 			 */
 			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+			cookieJar.putCookie(Login.COOKIE_PREFIX + sessionId, sessionId);
 		}
 		getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
 		getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_ALL);
@@ -491,7 +491,7 @@ public class MailTest extends AbstractAJAXTest {
 		 * Set cookie cause a request has already been fired before with the same session id.
 		 */
 		final CookieJar cookieJar = new CookieJar();
-		cookieJar.putCookie(Login.cookiePrefix + getSessionId(), getSessionId());
+		cookieJar.putCookie(Login.COOKIE_PREFIX + getSessionId(), getSessionId());
 		getReq.setParameter(Mail.PARAMETER_SESSION, getSessionId());
 		getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_GET);
 		getReq.setParameter(Mail.PARAMETER_ID, mailidentifier);
