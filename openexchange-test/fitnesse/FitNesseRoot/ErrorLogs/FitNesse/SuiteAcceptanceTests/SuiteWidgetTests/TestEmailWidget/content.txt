@@ -1,5 +1,0 @@
-!3 !-slim-!
-|'''Date: '''|!-12:39:02 AM (CST) on Saturday, December 13, 2008-!|
-|'''Command: '''|!-java -cp classes:lib/fitlibrary.jar:fitnesse.jar:fitlibrary.jar fitnesse.slim.SlimService  8090-!|
-|'''Exit code: '''|!-0-!|
-|'''Time elapsed: '''|!-0.409 seconds-!|

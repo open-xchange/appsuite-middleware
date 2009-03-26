@@ -1,6 +1,0 @@
-!3 !-fit-!
-|'''Date: '''|!-1:15:33 PM (CST) on Thursday, January 22, 2009-!|
-|'''Test Page: '''|.FitNesse.SuiteAcceptanceTests.SuiteWikiImportTests.TestAutomaticUpdate|
-|'''Command: '''|!-java -cp classes:lib/fitlibrary.jar:fitnesse.jar fit.FitServer BobsMacbook.local 8080 5-!|
-|'''Exit code: '''|!-0-!|
-|'''Time elapsed: '''|!-1.87 seconds-!|

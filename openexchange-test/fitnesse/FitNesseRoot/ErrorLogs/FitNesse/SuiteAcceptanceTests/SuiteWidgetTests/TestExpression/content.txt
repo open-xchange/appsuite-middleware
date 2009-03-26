@@ -1,6 +1,0 @@
-!3 !-slim-!
-|'''Date: '''|!-3:52:14 PM (CST) on Wednesday, February 4, 2009-!|
-|'''Test Page: '''|.FitNesse.SuiteAcceptanceTests.SuiteWidgetTests.TestExpression|
-|'''Command: '''|!-java -cp classes:lib/fitlibrary.jar:fitnesse.jar fitnesse.slim.SlimService  8086-!|
-|'''Exit code: '''|!-0-!|
-|'''Time elapsed: '''|!-0.892 seconds-!|
