@@ -83,12 +83,17 @@ import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
+import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
@@ -498,12 +503,12 @@ public class LdapContactInterface implements ContactInterface {
         final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
         final LdapContext context;
         try {
-            context = LdapUtility.createContext(session.getLoginName(), session.getPassword(), folderprop);
+            context = LdapUtility.createContext(getLogin(), session.getPassword(), folderprop);
         } catch (final NamingException e1) {
             LOG.error(e1.getMessage(), e1);
             throw new LdapException(Code.INITIAL_LDAP_ERROR, e1.getMessage());
         }
-            // TODO Implement right check if server support pagedResults
+            // TODO Implement right check if server supports pagedResults
 //            final boolean pagedResultControlSupported = isPagedResultControlSupported(context);
 //            if (!pagedResultControlSupported) {
 //                System.out.println("Paged results are not supported");
@@ -561,6 +566,43 @@ public class LdapContactInterface implements ContactInterface {
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
         return arrayList;
+    }
+
+
+    private String getLogin() throws LdapException {
+        final User user = getUserObject();
+        final LoginSource userLoginSource = folderprop.getUserLoginSource();
+        switch (userLoginSource) {
+        case login:
+            final String imapLogin = user.getImapLogin();
+            if (null == imapLogin) {
+                throw new LdapException(Code.IMAP_LOGIN_NULL, user.getLoginInfo());
+            } else {
+                return imapLogin;
+            }
+        case mail:
+            final String mail = user.getMail();
+            if (null == mail) {
+                throw new LdapException(Code.PRIMARY_MAIL_NULL, user.getLoginInfo());
+            } else {
+                return mail;
+            }
+        case name:
+            return user.getLoginInfo();
+        default:
+            throw new LdapException(Code.GIVEN_USER_LOGIN_SOURCE_NOT_FOUND, userLoginSource);
+        }
+    }
+
+
+    private User getUserObject() throws LdapException {
+        final User user;
+        try {
+            user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+        } catch (final ContextException e) {
+            throw new LdapException(Code.ERROR_GETTING_USER_Object, e);
+        }
+        return user;
     }
 
 

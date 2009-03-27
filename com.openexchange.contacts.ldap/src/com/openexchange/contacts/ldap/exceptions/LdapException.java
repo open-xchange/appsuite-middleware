@@ -52,7 +52,6 @@ package com.openexchange.contacts.ldap.exceptions;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 
 /**
@@ -124,10 +123,30 @@ public class LdapException extends OXException {
         TOO_MANY_USER_RESULTS("The LDAP search for the user contains too many results", Category.CODE_ERROR, 11),
 
         /**
-         * The LDAP search for the user object contains no results
+         * The LDAP search for the user object "%s" contains no results
          */
-        NO_USER_RESULTS("The LDAP search for the user object contains no results", Category.CODE_ERROR, 12);
+        NO_USER_RESULTS("The LDAP search for the user object \"%s\" contained no results", Category.CODE_ERROR, 12),
 
+        /**
+         * An error occurred while trying to get the user object from the database
+         */
+        ERROR_GETTING_USER_Object("An error occurred while trying to get the user object from the database", Category.CODE_ERROR, 13),
+
+        /**
+         * The given userLoginSource is not possible: %s
+         */
+        GIVEN_USER_LOGIN_SOURCE_NOT_FOUND("The given userLoginSource is not possible: %s", Category.INTERNAL_ERROR, 14),
+
+        /**
+         * The imap login for user "%s" is null
+         */
+        IMAP_LOGIN_NULL("The imap login for user \"%s\" is null", Category.USER_CONFIGURATION, 15),
+        
+        /**
+         * The primary mail for user "%s" is null
+         */
+        PRIMARY_MAIL_NULL("The primary mail for user \"%s\" is null", Category.USER_CONFIGURATION, 16);
+        
         /**
          * Message of the exception.
          */

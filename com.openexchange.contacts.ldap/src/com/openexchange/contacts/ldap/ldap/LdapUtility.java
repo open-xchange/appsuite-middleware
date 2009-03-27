@@ -67,7 +67,7 @@ import com.openexchange.contacts.ldap.property.FolderProperties.SearchScope;
 /**
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public final class LdapUtility {
+public class LdapUtility {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapUtility.class);
 
@@ -173,7 +173,7 @@ public final class LdapUtility {
                     MAPPINGTABLE_USERNAME_LDAPBIND.put(username, userdn);
                     return userdn;
                 } else {
-                    throw new LdapException(Code.NO_USER_RESULTS);
+                    throw new LdapException(Code.NO_USER_RESULTS, username);
                 }
             } finally {
                 retval.close();
