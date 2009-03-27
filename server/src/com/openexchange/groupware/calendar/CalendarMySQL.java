@@ -631,7 +631,7 @@ class CalendarMySQL implements CalendarSqlImp {
                             }
                         } else {
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Integer.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
+                                LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
                             }
                         }
                     } catch (final OXException x) {
