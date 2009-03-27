@@ -266,7 +266,7 @@ public final class Init {
 	    ParticipantConfig.getInstance().initialize(config);
 	}
 
-	private static void startAndInjectMonitoringBundle() throws Exception {
+	private static void startAndInjectMonitoringBundle() {
 		// First lookup services monitoring depends on and inject them
 	}
 
@@ -312,7 +312,7 @@ public final class Init {
 		ServerServiceRegistry.getInstance().addService(ContextService.class, cs);
 	}
 
-	private static void startAndInjectSessiondBundle() throws Exception {
+	private static void startAndInjectSessiondBundle() {
 		SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
 		SessiondServiceRegistry.getServiceRegistry().addService(Timer.class, services.get(Timer.class));
 		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
@@ -372,7 +372,7 @@ public final class Init {
 		ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
 	}
 
-    public static void stopServer() throws AbstractOXException {
+    public static void stopServer() {
         // This causes NPEs everywhere in the tests.
 //        for (final Initialization init: started) {
 //            init.stop();
