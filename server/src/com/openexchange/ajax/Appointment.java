@@ -65,15 +65,10 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 public class Appointment extends DataServlet {
 	
@@ -86,7 +81,7 @@ public class Appointment extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -96,8 +91,7 @@ public class Appointment extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-			final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, ctx);
+			final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
 			final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
 			response.setTimestamp(appointmentRequest.getTimestamp());
 			response.setData(responseObj);
@@ -129,9 +123,6 @@ public class Appointment extends DataServlet {
 		} catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
         }
 		
 		writeResponse(response, httpServletResponse);
@@ -142,7 +133,7 @@ public class Appointment extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest).trim();
 			if (data.length() > 0) {
@@ -157,8 +148,7 @@ public class Appointment extends DataServlet {
 		            writeResponse(response, httpServletResponse);
 		            return;
 				}
-                final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-                appointmentRequest = new AppointmentRequest(sessionObj, ctx);
+                appointmentRequest = new AppointmentRequest(session);
 				if (data.charAt(0) == '[') {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
@@ -204,21 +194,13 @@ public class Appointment extends DataServlet {
         } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-		}
+        }
 		
 		writeResponse(response, httpServletResponse);
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-        try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(sessionObj.getUserId(), ctx).hasCalendar();
-        } catch (final UserConfigurationException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
-        }
+	protected boolean hasModulePermission(final ServerSession session) {
+        return session.getUserConfiguration().hasCalendar();
 	}
 }

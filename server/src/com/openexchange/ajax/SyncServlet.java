@@ -83,6 +83,7 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SyncServlet} - The AJAX servlet to serve SyncML requests
@@ -117,8 +118,8 @@ public class SyncServlet extends PermissionServlet {
 	}
 
 	@Override
-	protected boolean hasModulePermission(final Session session, final Context ctx) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasSyncML();
+	protected boolean hasModulePermission(final ServerSession session) {
+		return session.getUserConfiguration().hasSyncML();
 	}
 
 	@Override

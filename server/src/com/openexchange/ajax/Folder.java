@@ -92,13 +92,11 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
@@ -108,7 +106,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -116,6 +113,7 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Folder} - The folder servlet.
@@ -255,7 +253,7 @@ public class Folder extends SessionServlet {
     /**
      * Performs the GET request to send back root folders
      */
-    public void actionGetRoot(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionGetRoot(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionGetRoot(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
     }
 
@@ -268,7 +266,7 @@ public class Folder extends SessionServlet {
     /**
      * Performs the GET request to send back root folders
      */
-    private final Response actionGetRoot(final Session session, final ParamContainer paramContainer) throws JSONException {
+    private final Response actionGetRoot(final ServerSession session, final ParamContainer paramContainer) throws JSONException {
         /*
          * Some variables
          */
@@ -283,7 +281,7 @@ public class Folder extends SessionServlet {
             /*
              * Read in parameters
              */
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
@@ -299,9 +297,7 @@ public class Folder extends SessionServlet {
                      * Ignore 'system' and 'ox folder' folder
                      */
                     continue NextRootFolder;
-                } else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                    session.getUserId(),
-                    ctx).hasFullSharedFolderAccess()) {
+                } else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID && !session.getUserConfiguration().hasFullSharedFolderAccess()) {
                     /*
                      * User does not hold READ_CREATE_SHARED_FOLDERS in user configuration; mark system shared folder to have no subfolders
                      */
@@ -315,7 +311,7 @@ public class Folder extends SessionServlet {
                     for (final FolderFieldWriter ffw : writers) {
                         ffw.writeField(jsonWriter, rootFolder, false, FolderObject.getFolderString(
                             rootFolder.getObjectID(),
-                            UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()), hasSubfolder);
+                            session.getUser().getLocale()), hasSubfolder);
                     }
                 } finally {
                     jsonWriter.endArray();
@@ -349,7 +345,7 @@ public class Folder extends SessionServlet {
      * @param requestObj
      * @throws JSONException
      */
-    public void actionGetSubfolders(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionGetSubfolders(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
     }
 
@@ -363,7 +359,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionGetSubfolders(final Session session, final ParamContainer paramContainer) throws JSONException {
+    private final Response actionGetSubfolders(final ServerSession session, final ParamContainer paramContainer) throws JSONException {
         /*
          * Some variables
          */
@@ -375,8 +371,8 @@ public class Folder extends SessionServlet {
          */
         jsonWriter.array();
         try {
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+            final Context ctx = session.getContext();
+            final Locale locale = session.getUser().getLocale();
             final StringHelper strHelper = new StringHelper(locale);
             /*
              * Read in parameters
@@ -483,10 +479,12 @@ public class Folder extends SessionServlet {
                         }
                     }
                 } else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-                    if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasInfostore()) {
-                        throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(session, UserStorage.getStorageUser(
-                            session.getUserId(),
-                            ctx)), folderModule2String(FolderObject.INFOSTORE), Integer.valueOf(ctx.getContextId()));
+                    if (!session.getUserConfiguration().hasInfostore()) {
+                        throw new OXFolderException(
+                            FolderCode.NO_MODULE_ACCESS,
+                            getUserName(session),
+                            folderModule2String(FolderObject.INFOSTORE),
+                            Integer.valueOf(ctx.getContextId()));
                     }
                     /*
                      * Get subfolders' iterator
@@ -522,9 +520,7 @@ public class Folder extends SessionServlet {
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, fo, false, FolderObject.getFolderString(
-                                    fo.getObjectID(),
-                                    UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()), -1);
+                                writers[j].writeField(jsonWriter, fo, false, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -539,15 +535,11 @@ public class Folder extends SessionServlet {
                         if (it.hasNext()) {
                             final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
                                 FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
-                                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, UserStorage.getStorageUser(
-                                    session.getUserId(),
-                                    ctx).getLocale()),
+                                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, locale),
                                 FolderObject.INFOSTORE,
                                 true,
                                 FolderObject.SYSTEM_TYPE);
-                            folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage.getStorageUser(
-                                session.getUserId(),
-                                ctx).getLocale());
+                            folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                         }
                     } finally {
                         if (it != null) {
@@ -613,7 +605,7 @@ public class Folder extends SessionServlet {
                         /*
                          * Append mail inbox to system 'private' folder
                          */
-                        if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail() && !ignoreMailfolder) {
+                        if (session.getUserConfiguration().hasWebMail() && !ignoreMailfolder) {
                             MailServletInterface mailInterface = null;
                             SearchIterator<?> it = null;
                             try {
@@ -664,7 +656,7 @@ public class Folder extends SessionServlet {
                             final FolderObject internalUsers = foldersqlinterface.getFolderById(FolderObject.SYSTEM_LDAP_FOLDER_ID);
                             folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject.getFolderString(
                                 internalUsers.getObjectID(),
-                                UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()), -1);
+                                locale), -1);
                         } catch (final OXException e) {
                             /*
                              * Internal users folder not visible to current user
@@ -697,18 +689,14 @@ public class Folder extends SessionServlet {
                             if ((it = foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).hasNext()) {
                                 final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
                                     FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, UserStorage.getStorageUser(
-                                        session.getUserId(),
-                                        ctx).getLocale()),
+                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, locale),
                                     FolderObject.SYSTEM_MODULE,
                                     true,
                                     FolderObject.SYSTEM_TYPE);
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
-                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage.getStorageUser(
-                                    session.getUserId(),
-                                    ctx).getLocale());
+                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
                             if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
@@ -731,18 +719,14 @@ public class Folder extends SessionServlet {
                             if ((it = foldersqlinterface.getNonTreeVisiblePublicContactFolders()).hasNext()) {
                                 final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
                                     FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
-                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, UserStorage.getStorageUser(
-                                        session.getUserId(),
-                                        ctx).getLocale()),
+                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, locale),
                                     FolderObject.SYSTEM_MODULE,
                                     true,
                                     FolderObject.SYSTEM_TYPE);
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
-                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage.getStorageUser(
-                                    session.getUserId(),
-                                    ctx).getLocale());
+                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
                             if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
@@ -765,18 +749,14 @@ public class Folder extends SessionServlet {
                             if ((it = foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).hasNext()) {
                                 final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
                                     FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
-                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, UserStorage.getStorageUser(
-                                        session.getUserId(),
-                                        ctx).getLocale()),
+                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, locale),
                                     FolderObject.SYSTEM_MODULE,
                                     true,
                                     FolderObject.SYSTEM_TYPE);
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
-                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage.getStorageUser(
-                                    session.getUserId(),
-                                    ctx).getLocale());
+                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
                             if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
@@ -905,7 +885,7 @@ public class Folder extends SessionServlet {
      * 
      * @throws JSONException
      */
-    public void actionGetPath(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionGetPath(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionGetPath(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
     }
 
@@ -919,7 +899,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionGetPath(final Session session, final ParamContainer paramContainer) throws JSONException {
+    private final Response actionGetPath(final ServerSession session, final ParamContainer paramContainer) throws JSONException {
         /*
          * Some variables
          */
@@ -934,7 +914,7 @@ public class Folder extends SessionServlet {
             /*
              * Read in parameters
              */
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
@@ -1045,7 +1025,7 @@ public class Folder extends SessionServlet {
                     }
                     folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
                         FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                        UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()), -1);
+                        session.getUser().getLocale()), -1);
                 } finally {
                     if (it != null) {
                         it.close();
@@ -1089,7 +1069,7 @@ public class Folder extends SessionServlet {
      * @param requestObj
      * @throws JSONException
      */
-    public void actionGetUpdatedFolders(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionGetUpdatedFolders(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
     }
 
@@ -1105,7 +1085,7 @@ public class Folder extends SessionServlet {
 
     private static final Date DATE_0 = new Date(0);
 
-    private final Response actionGetUpdatedFolders(final Session session, final ParamContainer paramContainer) throws JSONException {
+    private final Response actionGetUpdatedFolders(final ServerSession session, final ParamContainer paramContainer) throws JSONException {
         /*
          * Some variables
          */
@@ -1121,7 +1101,7 @@ public class Folder extends SessionServlet {
             /*
              * Read in parameters
              */
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
             final Date timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
@@ -1137,7 +1117,7 @@ public class Folder extends SessionServlet {
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
             final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
-            final UserConfiguration userConf = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+            final UserConfiguration userConf = session.getUserConfiguration();
             boolean addSystemSharedFolder = false;
             boolean checkVirtualListFolders = false;
             int size = q.size();
@@ -1199,9 +1179,7 @@ public class Folder extends SessionServlet {
              */
             if (addSystemSharedFolder) {
                 final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-                sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, UserStorage.getStorageUser(
-                    session.getUserId(),
-                    ctx).getLocale()));
+                sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, session.getUser().getLocale()));
                 updatedQueue.add(sharedFolder);
             }
             /*
@@ -1318,7 +1296,7 @@ public class Folder extends SessionServlet {
         return response;
     }
 
-    public void actionGetFolder(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionGetFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionGetFolder(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
     }
 
@@ -1332,7 +1310,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionGetFolder(final Session session, final ParamContainer paramContainer) throws JSONException {
+    private final Response actionGetFolder(final ServerSession session, final ParamContainer paramContainer) throws JSONException {
         /*
          * Some variables
          */
@@ -1343,7 +1321,7 @@ public class Folder extends SessionServlet {
          * Start response
          */
         try {
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             int folderId = -1;
@@ -1352,9 +1330,7 @@ public class Folder extends SessionServlet {
                 final FolderObject fo = foldersqlinterface.getFolderById(folderId);
                 lastModifiedDate = fo.getLastModified();
                 jsonWriter = new OXJSONWriter();
-                new FolderWriter(jsonWriter, session, ctx).writeOXFolderFieldsAsObject(columns, fo, UserStorage.getStorageUser(
-                    session.getUserId(),
-                    ctx).getLocale());
+                new FolderWriter(jsonWriter, session, ctx).writeOXFolderFieldsAsObject(columns, fo, session.getUser().getLocale());
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 int userId = -1;
                 try {
@@ -1408,7 +1384,7 @@ public class Folder extends SessionServlet {
         return response;
     }
 
-    public void actionPutUpdateFolder(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionPutUpdateFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutUpdateFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
             EnumComponent.FOLDER)), w);
@@ -1425,7 +1401,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionPutUpdateFolder(final Session session, final String body, final ParamContainer paramContainer) {
+    private final Response actionPutUpdateFolder(final ServerSession session, final String body, final ParamContainer paramContainer) {
         /*
          * Some variables
          */
@@ -1436,7 +1412,7 @@ public class Folder extends SessionServlet {
          * Start response
          */
         try {
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             Date timestamp = null;
             final JSONObject jsonObj = new JSONObject(body);
@@ -1445,16 +1421,14 @@ public class Folder extends SessionServlet {
                 timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
                 FolderObject fo = new FolderObject(updateFolderId);
-                new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)).parse(
-                    fo,
-                    jsonObj);
+                new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, timestamp);
                 retval = String.valueOf(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 throw new OXFolderException(
                     OXFolderException.FolderCode.NO_ADMIN_ACCESS,
-                    getUserName(session.getUserId(), ctx),
+                    getUserName(session),
                     folderIdentifier,
                     Integer.valueOf(ctx.getContextId()));
             } else {
@@ -1496,7 +1470,7 @@ public class Folder extends SessionServlet {
         return response;
     }
 
-    public void actionPutInsertFolder(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionPutInsertFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutInsertFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
             EnumComponent.FOLDER)), w);
@@ -1513,7 +1487,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionPutInsertFolder(final Session session, final String body, final ParamContainer paramContainer) {
+    private final Response actionPutInsertFolder(final ServerSession session, final String body, final ParamContainer paramContainer) {
         /*
          * Some variables
          */
@@ -1524,7 +1498,7 @@ public class Folder extends SessionServlet {
          * Start response
          */
         try {
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             final String parentFolder = paramContainer.checkStringParam(FolderFields.FOLDER_ID);
             final JSONObject jsonObj = new JSONObject(body);
             int parentFolderId = -1;
@@ -1532,16 +1506,16 @@ public class Folder extends SessionServlet {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
                 FolderObject fo = new FolderObject();
                 fo.setParentFolderID(parentFolderId);
-                new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)).parse(
-                    fo,
-                    jsonObj);
+                new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, null);
                 retval = String.valueOf(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (parentFolder.startsWith(FolderObject.SHARED_PREFIX)) {
-                throw new OXFolderException(OXFolderException.FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, getUserName(
-                    session.getContextId(),
-                    ctx), parentFolder, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.NO_CREATE_SUBFOLDER_PERMISSION,
+                    getUserName(session),
+                    parentFolder,
+                    Integer.valueOf(ctx.getContextId()));
             } else {
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
@@ -1579,7 +1553,7 @@ public class Folder extends SessionServlet {
         return response;
     }
 
-    public void actionPutDeleteFolder(final Session session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
+    public void actionPutDeleteFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutDeleteFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
             EnumComponent.FOLDER)), w);
@@ -1596,7 +1570,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionPutDeleteFolder(final Session session, final String body, final ParamContainer paramContainer) throws JSONException {
+    private final Response actionPutDeleteFolder(final ServerSession session, final String body, final ParamContainer paramContainer) throws JSONException {
         /*
          * Some variables
          */
@@ -1615,7 +1589,7 @@ public class Folder extends SessionServlet {
             try {
                 long lastModified = 0;
                 final int arrayLength = jsonArr.length();
-                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+                final Context ctx = session.getContext();
                 final OXFolderAccess access = new OXFolderAccess(ctx);
                 NextId: for (int i = 0; i < arrayLength; i++) {
                     final String deleteIdentifier = jsonArr.getString(i);
@@ -1645,11 +1619,11 @@ public class Folder extends SessionServlet {
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                         throw new OXFolderException(
                             OXFolderException.FolderCode.NO_ADMIN_ACCESS,
-                            getUserName(session.getUserId(), ctx),
+                            getUserName(session),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
                     } else {
-                        if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
+                        if (session.getUserConfiguration().hasWebMail()) {
                             if (mailInterface == null) {
                                 mailInterface = MailServletInterface.getInstance(session);
                             }
@@ -1693,7 +1667,7 @@ public class Folder extends SessionServlet {
          * Some variables
          */
         final OXJSONWriter jsonWriter = new OXJSONWriter();
-        final Session session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         final long lastModified = 0;
         String error = null;
         /*
@@ -1704,7 +1678,7 @@ public class Folder extends SessionServlet {
         try {
             final int[] delids = checkIntArrayParam(req, "del_ids");
             final OXFolderManager oxma = OXFolderManager.getInstance(session);
-            oxma.cleanUpTestFolders(delids, ContextStorage.getStorageContext(session.getContextId()));
+            oxma.cleanUpTestFolders(delids, session.getContext());
             dataObj = "OK";
         } catch (final Exception e) {
             LOG.error("actionPutRemoveTestFolder", e);

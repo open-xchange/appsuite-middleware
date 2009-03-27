@@ -81,20 +81,16 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 public class TaskRequest {
 
@@ -130,11 +126,7 @@ public class TaskRequest {
 		Task.COLOR_LABEL
 	};
 	
-	private final Session sessionObj;
-
-	private final Context ctx;
-
-	private final User userObj;
+	private final ServerSession session;
 	
 	private Date timestamp;
 	
@@ -142,12 +134,10 @@ public class TaskRequest {
 	
 	private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 	
-	public TaskRequest(final Session sessionObj, final Context ctx) {
-		this.sessionObj = sessionObj;
-		this.ctx = ctx;
-		userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+	public TaskRequest(final ServerSession session) {
+		this.session = session;
 		
-		final String sTimeZone = userObj.getTimeZone();
+		final String sTimeZone = session.getUser().getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
 		if (LOG.isDebugEnabled()) {
@@ -161,8 +151,7 @@ public class TaskRequest {
 	}
 
 	public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				ctx).hasTask()) {
+		if (!session.getUserConfiguration().hasTask()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
 		}
 		
@@ -199,7 +188,7 @@ public class TaskRequest {
 		final TaskParser taskParser = new TaskParser(timeZone);
 		taskParser.parse(task, jsonobject);
 
-		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
+		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
 		sqlinterface.insertTaskObject(task);
         timestamp = task.getLastModified();
 
@@ -223,7 +212,7 @@ public class TaskRequest {
 		
 		task.setObjectID(id);
 		
-		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
+		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
 		sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();
 		
@@ -258,7 +247,7 @@ public class TaskRequest {
 			System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
 			internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 			
-			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
+			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
 			final TaskWriter taskWriter = new TaskWriter(timeZone);
 			
 			it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
@@ -304,7 +293,7 @@ public class TaskRequest {
 		final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		
-		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
+		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
 		sqlinterface.deleteTaskObject(id, inFolder, timestamp);
 		
 		return new JSONArray();
@@ -335,7 +324,7 @@ public class TaskRequest {
 		final JSONArray jsonResponseArray = new JSONArray();
 		
 		try {
-			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
+			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
 			final TaskWriter taskwriter = new TaskWriter(timeZone);
 			it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 			
@@ -383,7 +372,7 @@ public class TaskRequest {
 			
 			final TaskWriter taskwriter = new TaskWriter(timeZone);
 
-			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
+			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
 			if (leftHandLimit == 0) {
 				it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, orderDir, internalColumns);
 			} else {
@@ -415,7 +404,7 @@ public class TaskRequest {
 		
 		timestamp = new Date(0);
 
-		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
+		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
 		final Task task = sqlinterface.getTaskById(id, inFolder);
 		final TaskWriter taskWriter = new TaskWriter(timeZone);
 		
@@ -434,8 +423,8 @@ public class TaskRequest {
 		final TaskParser taskParser = new TaskParser(timeZone);
 		taskParser.parse(taskObj, jData);
 		
-		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessionObj);
-		timestamp = taskSql.setUserConfirmation(taskObj.getObjectID(), userObj.getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
+		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
+		timestamp = taskSql.setUserConfirmation(taskObj.getObjectID(), session.getUserId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
 
 		return new JSONObject();
 	}
@@ -504,7 +493,7 @@ public class TaskRequest {
 		try {
 			final TaskWriter taskWriter = new TaskWriter(timeZone);
 
-			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
+			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
 			it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
@@ -532,7 +521,7 @@ public class TaskRequest {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 		
-		final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+		final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(session);
 		final Task taskObj = taskInterface.getTaskById(id, inFolder);
 		taskObj.removeObjectID();
 		taskObj.setParentFolderID(folderId);

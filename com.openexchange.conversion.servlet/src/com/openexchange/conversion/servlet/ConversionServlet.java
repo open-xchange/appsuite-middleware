@@ -57,14 +57,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.PermissionServlet;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
@@ -74,7 +73,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConversionServlet extends PermissionServlet {
+public final class ConversionServlet extends SessionServlet {
 
     private static final long serialVersionUID = 2192713156202101696L;
 
@@ -95,13 +94,6 @@ public final class ConversionServlet extends PermissionServlet {
      */
     public ConversionServlet() {
         super();
-    }
-
-    @Override
-    protected boolean hasModulePermission(final Session session, final Context ctx) {
-        // TODO Check if allowed to use conversion service. Maybe use permission
-        // bundle.
-        return true;
     }
 
     @Override

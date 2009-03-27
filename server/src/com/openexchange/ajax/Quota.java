@@ -51,22 +51,17 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.Writer;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Quota extends SessionServlet {
 
@@ -93,13 +88,7 @@ public class Quota extends SessionServlet {
 			return;
 		}
 
-        final ServerSession session;
-        try {
-            session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (final ContextException e) {
-            handle(res, e);
-            return;
-        }
+        final ServerSession session = getSessionObject(req);
 
 
         final OXJSONWriter writer = new OXJSONWriter();

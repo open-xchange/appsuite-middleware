@@ -81,9 +81,6 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
@@ -91,10 +88,10 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * AJAXFile
@@ -321,11 +318,11 @@ public final class AJAXFile extends PermissionServlet {
                 if (fileTypeFilter == null) {
                     throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_TYPE);
                 }
-                final Session sessionObj = getSessionObject(req);
+                final ServerSession sessionObj = getSessionObject(req);
                 final UploadQuotaChecker checker = UploadQuotaChecker.getUploadQuotaChecker(
                     getModuleInteger(moduleParam),
                     sessionObj,
-                    ContextStorage.getStorageContext(sessionObj.getContextId()));
+                    sessionObj.getContext());
                 upload.setSizeMax(checker.getQuotaMax());
                 upload.setFileSizeMax(checker.getFileQuotaMax());
                 /*
@@ -414,21 +411,6 @@ public final class AJAXFile extends PermissionServlet {
                 responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
                 JS_FRAGMENT_ACTION,
                 action == null ? STR_NULL : action), e.getMessage(), e);
-        } catch (final ContextException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
-            JSONObject responseObj = null;
-            try {
-                final Response response = new Response();
-                response.setException(oje);
-                responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
-            }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                action == null ? STR_NULL : action), e.getMessage(), e);
         }
     }
 
@@ -479,7 +461,7 @@ public final class AJAXFile extends PermissionServlet {
      * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
      */
     @Override
-    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true;
     }
 

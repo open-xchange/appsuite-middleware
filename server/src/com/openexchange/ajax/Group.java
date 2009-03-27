@@ -62,10 +62,8 @@ import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Servlet implementing group requests.
@@ -88,7 +86,7 @@ public class Group extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session session = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
 
 			try {
@@ -99,8 +97,7 @@ public class Group extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-			final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-			final GroupRequest groupRequest = new GroupRequest(session, ctx);
+			final GroupRequest groupRequest = new GroupRequest(session);
 			final JSONValue responseObj = groupRequest.action(action, jsonObj);
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
@@ -123,7 +120,7 @@ public class Group extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session session = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
@@ -136,8 +133,7 @@ public class Group extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-			final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-			final GroupRequest groupRequest = new GroupRequest(session, ctx);
+			final GroupRequest groupRequest = new GroupRequest(session);
 			
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
@@ -177,7 +173,7 @@ public class Group extends DataServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+	protected boolean hasModulePermission(final ServerSession session) {
 		return true;
 	}
 }

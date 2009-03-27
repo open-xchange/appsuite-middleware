@@ -60,10 +60,8 @@ import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Resource} - The servlet handling requests to "/ajax/resource"
@@ -87,7 +85,7 @@ public class Resource extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			JSONObject jsonObj = null;
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -98,8 +96,7 @@ public class Resource extends DataServlet {
 				return;
 			}
 
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
+			final ResourceRequest resourceRequest = new ResourceRequest(session);
 			final JSONValue responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
@@ -122,7 +119,7 @@ public class Resource extends DataServlet {
 
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 
 			final String data = getBody(httpServletRequest);
 			if (data.charAt(0) == '[') {
@@ -148,8 +145,7 @@ public class Resource extends DataServlet {
 
 				jsonObj.put(PARAMETER_DATA, jData);
 
-				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
+				final ResourceRequest resourceRequest = new ResourceRequest(session);
 				final JSONValue responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
@@ -168,8 +164,7 @@ public class Resource extends DataServlet {
 
 				jsonObj.put(PARAMETER_DATA, jData);
 
-				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
+				final ResourceRequest resourceRequest = new ResourceRequest(session);
 				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
@@ -187,7 +182,7 @@ public class Resource extends DataServlet {
 	}
 
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+	protected boolean hasModulePermission(final ServerSession session) {
 		return true;
 	}
 }

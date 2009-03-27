@@ -52,28 +52,23 @@ package com.openexchange.ajax.request;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.session.ServerSession;
 
 public class FolderRequest {
 	
-	private final Session session;
+	private final ServerSession session;
 
-	private final Context ctx;
-	
 	private final JSONWriter pw;
 	
 	private static final Folder FOLDER_SERVLET = new Folder();
 
-	public FolderRequest(final Session session, final Context ctx, final JSONWriter pw) {
+	public FolderRequest(final ServerSession session, final JSONWriter pw) {
 		super();
 		this.session = session;
-		this.ctx = ctx;
 		this.pw = pw;
 	}
 	

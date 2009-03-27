@@ -72,6 +72,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OXFolderUtility} - Provides utility methods for folder operations.
@@ -656,6 +657,21 @@ public final class OXFolderUtility {
             return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(userId).append(')').toString();
         }
         return new StringBuilder().append(u.getDisplayName()).append(" (").append(userId).append(')').toString();
+    }
+
+    /**
+     * Gets the user name for logging/messaging purpose.
+     * 
+     * @param session The server session
+     * @return The user name for logging/messaging purpose.
+     */
+    public static String getUserName(final ServerSession session) {
+        final User u = session.getUser();
+        if (u.getDisplayName() == null) {
+            return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(u.getId()).append(
+                ')').toString();
+        }
+        return new StringBuilder().append(u.getDisplayName()).append(" (").append(u.getId()).append(')').toString();
     }
 
     /**

@@ -61,16 +61,13 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.session.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * FIXME replace QuotaFileStorage FileStorage
@@ -85,21 +82,17 @@ public class QuotaRequest extends CommonRequest {
 
 	private final ServerSession session;
 
-	public QuotaRequest(final Session session, final Context ctx, final JSONWriter w) {
-		this(new ServerSessionAdapter(session, ctx), w);
-	}
-
-	public QuotaRequest(final ServerSession sessionObj, final JSONWriter w) {
+	public QuotaRequest(final ServerSession session, final JSONWriter w) {
 		super(w);
 		try {
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			final Context ctx = session.getContext();
 			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
 					new DBPoolProvider());
 		} catch (final AbstractOXException e) {
 			this.fsException = e;
 		}
 
-		this.session = sessionObj;
+		this.session = session;
 	}
 
 	public boolean action(final String action) {

@@ -50,15 +50,10 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
 
@@ -89,30 +84,18 @@ public abstract class PermissionServlet extends SessionServlet {
 	 *         valid.
 	 * @throws IOException
 	 */
-
 	@Override
-	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		// FIXME this needs a major rewrite. Executing everything before
-		// checking permissions isn't useful.
-		super.service(req, resp);
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // FIXME this needs a major rewrite. Executing everything before
+        // checking permissions isn't useful.
+        super.service(req, resp);
 
-		final Session sessionObj = getSessionObject(req);
-		if (null != sessionObj) {
-			final Context ctx;
-			try {
-				ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			} catch (final ContextException exc) {
-				resp.sendError(HttpServletResponse.SC_CONFLICT, "Conflict");
-				return;
-			}
-
-			if (!hasModulePermission(sessionObj, ctx)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
-				return;
-			}
-		}
-	}
+        final ServerSession session = getSessionObject(req);
+        if (null != session && !hasModulePermission(session)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
+            return;
+        }
+    }
 
 	/**
 	 * Indicates if incoming request is allowed to being performed due to
@@ -120,10 +103,8 @@ public abstract class PermissionServlet extends SessionServlet {
 	 * 
 	 * @param session
 	 *            The session providing needed user data
-	 * @param ctx
-	 *            The associated context
 	 * @return <code>true</code> if request is allowed to being performed due to
 	 *         permission settings; otherwise <code>false</code>
 	 */
-	protected abstract boolean hasModulePermission(final Session session, final Context ctx);
+	protected abstract boolean hasModulePermission(final ServerSession session);
 }

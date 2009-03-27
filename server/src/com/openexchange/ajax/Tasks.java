@@ -67,16 +67,11 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Tasks
@@ -94,7 +89,7 @@ public class Tasks extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			final JSONObject jsonObj;
 			try {			
 				 jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -104,9 +99,7 @@ public class Tasks extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-            final Context ctx = ContextStorage.getInstance().getContext(
-                sessionObj.getContextId());
-			final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
+			final TaskRequest taskRequest = new TaskRequest(session);
 			final JSONValue responseObj = taskRequest.action(action, jsonObj);
 			response.setTimestamp(taskRequest.getTimestamp());
 			response.setData(responseObj);
@@ -139,10 +132,7 @@ public class Tasks extends DataServlet {
 		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-		} catch (final OXException e) {
+        } catch (final OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
@@ -159,13 +149,11 @@ public class Tasks extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
-                final Context ctx = ContextStorage.getInstance().getContext(
-                    sessionObj.getContextId());
-				final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
+				final TaskRequest taskRequest = new TaskRequest(session);
 				final JSONObject jsonObj;
 
 				try {
@@ -211,10 +199,7 @@ public class Tasks extends DataServlet {
 		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-		} catch (final OXException e) {
+        } catch (final OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
@@ -226,13 +211,7 @@ public class Tasks extends DataServlet {
 	}
 	
 	@Override
-    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-        try {
-    		return UserConfigurationStorage.getInstance().getUserConfiguration(
-                sessionObj.getUserId(), ctx).hasTask();
-        } catch (final UserConfigurationException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
-        }
-	}
+    protected boolean hasModulePermission(final ServerSession session) {
+        return session.getUserConfiguration().hasTask();
+    }
 }

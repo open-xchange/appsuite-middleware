@@ -68,10 +68,9 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.PermissionServlet;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.session.Session;
@@ -86,7 +85,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SpellCheckServlet extends PermissionServlet {
+public final class SpellCheckServlet extends SessionServlet {
 
     private static final String PARAM_LANG = "lang";
 
@@ -374,15 +373,6 @@ public final class SpellCheckServlet extends PermissionServlet {
         Response.write(response, resp.getWriter());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.session.Session)
-     */
-    @Override
-    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-        return true;
-    }
-
     private static String checkStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckServletException {
         final String paramVal = req.getParameter(paramName);
         if ((paramVal == null) || (paramVal.length() == 0) || "null".equals(paramVal)) {
@@ -438,6 +428,7 @@ public final class SpellCheckServlet extends PermissionServlet {
 
     /**
      * <pre>
+     * 
      * 
      * private static String optStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckException {
      *     final String paramVal = req.getParameter(paramName);

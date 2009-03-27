@@ -42,11 +42,12 @@ public class ServerSessionAdapter implements ServerSession {
      * @throws ContextException If context look-up fails
      */
     public ServerSessionAdapter(final Session session) throws ContextException {
+        super();
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
             this.session = session;
-            ctx = ContextStorage.getStorageContext(getContextId());
+            ctx = ContextStorage.getStorageContext(session.getContextId());
         }
     }
 
@@ -57,6 +58,7 @@ public class ServerSessionAdapter implements ServerSession {
      * @param ctx The session's context object
      */
     public ServerSessionAdapter(final Session session, final Context ctx) {
+        super();
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -73,6 +75,7 @@ public class ServerSessionAdapter implements ServerSession {
      * @param user The session's user object
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
+        super();
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {

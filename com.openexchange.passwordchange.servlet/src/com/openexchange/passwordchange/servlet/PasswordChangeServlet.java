@@ -58,12 +58,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.PermissionServlet;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceException;
@@ -75,7 +74,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PasswordChangeServlet extends PermissionServlet {
+public final class PasswordChangeServlet extends SessionServlet {
 
     private static final long serialVersionUID = 3129607149739575803L;
 
@@ -221,15 +220,6 @@ public final class PasswordChangeServlet extends PermissionServlet {
         response.setData(JSONObject.NULL);
         response.setTimestamp(null);
         ResponseWriter.write(response, resp.getWriter());
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange .session.Session)
-     */
-    @Override
-    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-        return true;
     }
 
     private static String checkStringParam(final HttpServletRequest req, final String paramName) throws PasswordChangeServletException {

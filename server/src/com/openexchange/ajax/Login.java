@@ -81,6 +81,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Login extends AJAXServlet {
 
@@ -135,7 +136,7 @@ public class Login extends AJAXServlet {
             try {
                 loginResult = LoginPerformer.getInstance().doLogin(name, password, req.getRemoteAddr());
                 session = loginResult.getSession();
-            } catch (LoginException e) {
+            } catch (final LoginException e) {
                 if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
                     LOG.debug(e.getMessage(), e);
                 } else {
@@ -144,7 +145,7 @@ public class Login extends AJAXServlet {
                 response.setException(e);
             }
             if (null != loginResult && null != loginResult.getError()) {
-                LoginException e = loginResult.getError();
+                final LoginException e = loginResult.getError();
                 if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
                     LOG.debug(e.getMessage(), e);
                 } else {
@@ -154,7 +155,12 @@ public class Login extends AJAXServlet {
             /*
              * Store associated session
              */
-            SessionServlet.rememberSession(req, session);
+            try {
+                SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
+            } catch (final ContextException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(e);
+            }
             // Write response
             JSONObject login = null;
             if (!response.hasError()) {

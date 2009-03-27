@@ -81,6 +81,8 @@ import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Overridden service method that checks if a valid session can be found for the
@@ -129,25 +131,23 @@ public abstract class SessionServlet extends AJAXServlet {
 			IOException {
 		Tools.disableCaching(resp);
 		try {
-			final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-					SessiondService.class);
-			if (sessiondService == null) {
-				throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-						SessiondService.class.getName()));
-			}
-			final Session session = getSession(req, resp, getCookieId(req), sessiondService);
-			final String sessionId = session.getSessionID();
-			checkIP(session.getLocalIp(), req.getRemoteAddr());
-			rememberSession(req, session);
-			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-			if (!ctx.isEnabled()) {
-				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-						SessiondService.class);
-				sessiondCon.removeSession(sessionId);
-				throw EXCEPTION.create(4);
-			}
-			super.service(req, resp);
-		} catch (final SessiondException e) {
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (sessiondService == null) {
+                throw new SessiondException(
+                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+            }
+            final Session session = getSession(req, resp, getCookieId(req), sessiondService);
+            final String sessionId = session.getSessionID();
+            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            if (!ctx.isEnabled()) {
+                final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                sessiondCon.removeSession(sessionId);
+                throw EXCEPTION.create(4);
+            }
+            checkIP(session.getLocalIp(), req.getRemoteAddr());
+            rememberSession(req, new ServerSessionAdapter(session, ctx));
+            super.service(req, resp);
+        } catch (final SessiondException e) {
 			LOG.debug(e.getMessage(), e);
 			final Response response = new Response();
 			response.setException(e);
@@ -387,7 +387,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	 * @param session
 	 *            session to remember.
 	 */
-	public static void rememberSession(final ServletRequest req, final Session session) {
+	public static void rememberSession(final ServletRequest req, final ServerSession session) {
 		req.setAttribute(SESSION_KEY, session);
 	}
 
@@ -398,7 +398,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	 *            servlet request.
 	 * @return the remembered session.
 	 */
-	protected static Session getSessionObject(final ServletRequest req) {
-		return (Session) req.getAttribute(SESSION_KEY);
+	protected static ServerSession getSessionObject(final ServletRequest req) {
+		return (ServerSession) req.getAttribute(SESSION_KEY);
 	}
 }

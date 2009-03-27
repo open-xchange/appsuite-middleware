@@ -59,14 +59,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Infostore;
@@ -91,24 +89,20 @@ import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class InfostoreRequest extends CommonRequest {
 
 	private static final InfostoreParser PARSER = new InfostoreParser();
 
-	private final ServerSession sessionObj;
+	private final ServerSession session;
 
     private final Context ctx;
 
@@ -123,16 +117,10 @@ public class InfostoreRequest extends CommonRequest {
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);
         this.ctx = session.getContext();
-        this.sessionObj = session;
-		userConfiguration = UserConfigurationStorage.getInstance()
-				.getUserConfigurationSafe(sessionObj.getUserId(), ctx);
-		user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        this.session = session;
+		userConfiguration = session.getUserConfiguration();
+		user = session.getUser();
     }
-
-    public InfostoreRequest(final Session sessionObj, final Context ctx, final JSONWriter w) {
-		this(new ServerSessionAdapter(sessionObj, ctx),w);
-
-	}
 
 	public static boolean hasPermission(final UserConfiguration userConfig) {
 		return userConfig.hasInfostore();
@@ -143,7 +131,7 @@ public class InfostoreRequest extends CommonRequest {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
 		}
 		try {
-		    ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
+		    ThreadLocalSessionHolder.getInstance().setSession(session);
 			if (action.equals(AJAXServlet.ACTION_ALL)) {
 
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS)) {
@@ -563,7 +551,7 @@ public class InfostoreRequest extends CommonRequest {
 			for (final int version : versions) {
 				versionsArray[index++] = version;
 			}
-			infostore.removeVersion(id, versionsArray, sessionObj);
+			infostore.removeVersion(id, versionsArray, session);
 			timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
 					user, userConfiguration).getSequenceNumber();
 			infostore.commit();
@@ -713,7 +701,7 @@ public class InfostoreRequest extends CommonRequest {
 				infostore.startTransaction();
 				searchEngine.startTransaction();
 
-				notDeleted = infostore.removeDocument(ids, timestamp, sessionObj);
+				notDeleted = infostore.removeDocument(ids, timestamp, session);
 
 				final Set<Integer> notDeletedSet = new HashSet<Integer>();
 				for (final int nd : notDeleted) {
@@ -783,7 +771,7 @@ public class InfostoreRequest extends CommonRequest {
 				infostore.startTransaction();
 				searchEngine.startTransaction();
 
-				notDetached = infostore.removeVersion(objectId, ids, sessionObj);
+				notDetached = infostore.removeVersion(objectId, ids, session);
 
                 final DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
                         user, userConfiguration);
@@ -836,7 +824,7 @@ public class InfostoreRequest extends CommonRequest {
 			infostore.startTransaction();
 			searchEngine.startTransaction();
 
-			infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), sessionObj);
+			infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), session);
 			infostore.commit();
 			// System.out.println("DONE SAVING: "+System.currentTimeMillis());
 			searchEngine.index(newDocument, ctx, user, userConfiguration);
@@ -907,7 +895,7 @@ public class InfostoreRequest extends CommonRequest {
 			newDocument.setId(InfostoreFacade.NEW);
 			in = attachmentBase.getAttachedFile(folderId, attachedId, moduleId, attachment, ctx,
 					user, userConfiguration);
-			infostore.saveDocument(newDocument, in, System.currentTimeMillis(), sessionObj); // FIXME
+			infostore.saveDocument(newDocument, in, System.currentTimeMillis(), session); // FIXME
 																								// violates
 																								// encapsulation
 
@@ -969,7 +957,7 @@ public class InfostoreRequest extends CommonRequest {
 				updated.setVersion(InfostoreFacade.CURRENT_VERSION);
 			}
 
-			infostore.saveDocumentMetadata(updated, timestamp, presentFields, sessionObj);
+			infostore.saveDocumentMetadata(updated, timestamp, presentFields, session);
 
 			infostore.commit();
 			searchEngine.commit();
@@ -1029,9 +1017,9 @@ public class InfostoreRequest extends CommonRequest {
 
 			if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
 				infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx,
-						user, userConfiguration), metadata.getSequenceNumber(), sessionObj);
+						user, userConfiguration), metadata.getSequenceNumber(), session);
 			} else {
-				infostore.saveDocumentMetadata(metadata, timestamp, sessionObj);
+				infostore.saveDocumentMetadata(metadata, timestamp, session);
 			}
 			searchEngine.index(metadata, ctx, user, userConfiguration);
 
@@ -1071,7 +1059,7 @@ public class InfostoreRequest extends CommonRequest {
 		try {
 			infostore.startTransaction();
 
-			infostore.lock(id, diff, sessionObj);
+			infostore.lock(id, diff, session);
 
 			infostore.commit();
 
@@ -1111,7 +1099,7 @@ public class InfostoreRequest extends CommonRequest {
 
 			/* DocumentMetadata m = */new DocumentMetadataImpl();
 
-			infostore.unlock(id, sessionObj);
+			infostore.unlock(id, session);
 
 			infostore.commit();
 

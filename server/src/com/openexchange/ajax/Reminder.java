@@ -65,12 +65,10 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 public class Reminder extends DataServlet {
 	
@@ -86,7 +84,7 @@ public class Reminder extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
 			
 			try {
@@ -98,8 +96,7 @@ public class Reminder extends DataServlet {
 	            return;
 			}
 
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
+			final ReminderRequest reminderRequest = new ReminderRequest(session);
 			final JSONValue responseObj = reminderRequest.action(action, jsonObj);
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
@@ -139,7 +136,7 @@ public class Reminder extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
@@ -153,8 +150,7 @@ public class Reminder extends DataServlet {
 	            return;
 			}
 
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
+			final ReminderRequest reminderRequest = new ReminderRequest(session);
 
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
@@ -202,7 +198,7 @@ public class Reminder extends DataServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+	protected boolean hasModulePermission(final ServerSession session) {
 		return true;
 	}
 }

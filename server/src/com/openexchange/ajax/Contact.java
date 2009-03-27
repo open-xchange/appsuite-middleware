@@ -73,21 +73,17 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactServices;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 public class Contact extends DataServlet {
 	
@@ -103,7 +99,7 @@ public class Contact extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			
 			JSONObject jsonObj = null;
 			try {
@@ -122,19 +118,14 @@ public class Contact extends DataServlet {
 				OutputStream os = null;
 				
 				
-				Context ctx = null;
-				try {
-					ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				} catch (final ContextException ct) {
-					throw new ContactException(ct);
-				}
+				final Context ctx = session.getContext();
 				
 				ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
 				//ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder);
 				if (contactInterface == null) {
-					contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+					contactInterface = new RdbContactSQLInterface(session, ctx);
 				}
-				contactInterface.setSession(sessionObj);
+				contactInterface.setSession(session);
 				
 				try {
 					final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
@@ -166,9 +157,7 @@ public class Contact extends DataServlet {
 				return;
 			}
 			
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			
-			final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
+			final ContactRequest contactRequest = new ContactRequest(session);
 			final JSONValue responseObj = contactRequest.action(action, jsonObj);
 			response.setTimestamp(contactRequest.getTimestamp());
 			response.setData(responseObj);
@@ -191,7 +180,7 @@ public class Contact extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final ServerSession session = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
@@ -205,10 +194,8 @@ public class Contact extends DataServlet {
 					writeResponse(response, httpServletResponse);
 					return;
 				}
-				
-				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				
-				final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
+
+				final ContactRequest contactRequest = new ContactRequest(session);
 				
 				if (data.charAt(0) == '[') {
 					final JSONArray jsonDataArray = new JSONArray(data);
@@ -254,7 +241,7 @@ public class Contact extends DataServlet {
         final Response response = new Response();
         String action = ACTION_ERROR;
         try {
-            final Session sessionObj = getSessionObject(httpServletRequest);
+            final ServerSession session = getSessionObject(httpServletRequest);
             action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
             if (action.equals(ACTION_NEW)) {
                 UploadEvent upload = null;
@@ -274,7 +261,7 @@ public class Contact extends DataServlet {
                     final ContactObject contactobject = new ContactObject();
                     final JSONObject jsonobject = new JSONObject(obj);
 
-                    final ContactParser contactparser = new ContactParser(sessionObj);
+                    final ContactParser contactparser = new ContactParser(session);
                     contactparser.parse(contactobject, jsonobject);
 
                     if (!contactobject.containsParentFolderID()) {
@@ -296,7 +283,7 @@ public class Contact extends DataServlet {
                     }
                     contactobject.setImageContentType(uploadFile.getContentType());
 
-                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
                     contactsql.insertContactObject(contactobject);
 
                     final JSONObject jData = new JSONObject();
@@ -326,7 +313,7 @@ public class Contact extends DataServlet {
                     final ContactObject contactobject = new ContactObject();
                     final JSONObject jsonobject = new JSONObject(obj);
 
-                    final ContactParser contactparser = new ContactParser(sessionObj);
+                    final ContactParser contactparser = new ContactParser(session);
                     contactparser.parse(contactobject, jsonobject);
 
                     contactobject.setObjectID(id);
@@ -350,7 +337,7 @@ public class Contact extends DataServlet {
                         contactobject.setImageContentType(uploadFile.getContentType());
                     }
 
-                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
                     contactsql.updateContactObject(contactobject, inFolder, timestamp);
                 } finally {
                     if (upload != null) {
@@ -386,8 +373,7 @@ public class Contact extends DataServlet {
     }
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				ctx).hasContact();
+	protected boolean hasModulePermission(final ServerSession session) {
+		return session.getUserConfiguration().hasContact();
 	}
 }

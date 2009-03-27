@@ -61,7 +61,6 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceException;
@@ -69,11 +68,11 @@ import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ResourceRequest} - Executes a resource request
+ * {@link ResourceRequest} - Executes a resource request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -83,24 +82,19 @@ public class ResourceRequest {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ResourceRequest.class);
 
-	private final Session session;
-
-	private final Context ctx;
+	private final ServerSession session;
 
 	private Date timestamp;
 
 	/**
-	 * Initializes a new {@link ResourceRequest}
+	 * Initializes a new {@link ResourceRequest}.
 	 * 
 	 * @param session
 	 *            The session providing needed user data
-	 * @param ctx
-	 *            The context
 	 */
-	public ResourceRequest(final Session session, final Context ctx) {
+	public ResourceRequest(final ServerSession session) {
 		super();
 		this.session = session;
-		this.ctx = ctx;
 	}
 
 	private static final String MODULE_RESOURCE = "resource";
@@ -108,13 +102,13 @@ public class ResourceRequest {
 	public JSONValue action(final String action, final JSONObject jsonObject) throws AbstractOXException,
 			JSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			return actionList(jsonObject, ctx);
+			return actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			return actionGet(jsonObject, ctx);
+			return actionGet(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-			return actionSearch(jsonObject, ctx);
+			return actionSearch(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-			return actionAll(ctx);
+			return actionAll();
 		} else {
 			/*
 			 * Look-up manage request
@@ -130,13 +124,13 @@ public class ResourceRequest {
 			/*
 			 * ... and delegate to manage request
 			 */
-			final AJAXRequestResult result = handler.performAction(action, jsonObject, session, ctx);
+			final AJAXRequestResult result = handler.performAction(action, jsonObject, session, session.getContext());
 			timestamp = result.getTimestamp();
 			return result.getResultObject();
 		}
 	}
 
-	private JSONArray actionList(final JSONObject jsonObj, final Context ctx) throws AbstractOXException, JSONException {
+	private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
 		UserStorage userStorage = null;
@@ -151,7 +145,7 @@ public class ResourceRequest {
 				com.openexchange.resource.Resource r = null;
 
 				try {
-					r = ResourceServiceImpl.getInstance().getResource(id, ctx);
+					r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
 				} catch (final ResourceException exc) {
 					LOG.debug("resource not found try to find id in user table", exc);
 				}
@@ -161,7 +155,7 @@ public class ResourceRequest {
 						userStorage = UserStorage.getInstance();
 					}
 
-					final User u = userStorage.getUser(id, ctx);
+					final User u = userStorage.getUser(id, session.getContext());
 
 					r = new com.openexchange.resource.Resource();
 					r.setIdentifier(u.getId());
@@ -183,17 +177,17 @@ public class ResourceRequest {
 		return jsonResponseArray;
 	}
 
-	private JSONObject actionGet(final JSONObject jsonObj, final Context ctx) throws AbstractOXException, JSONException {
+	private JSONObject actionGet(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		com.openexchange.resource.Resource r = null;
 		try {
-			r = ResourceServiceImpl.getInstance().getResource(id, ctx);
+			r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
 		} catch (final ResourceException exc) {
 			LOG.debug("resource not found try to find id in user table", exc);
 		}
 
 		if (r == null) {
-			final User u = UserStorage.getInstance().getUser(id, ctx);
+			final User u = UserStorage.getInstance().getUser(id, session.getContext());
 
 			r = new com.openexchange.resource.Resource();
 			r.setIdentifier(u.getId());
@@ -205,7 +199,7 @@ public class ResourceRequest {
 		return com.openexchange.resource.json.ResourceWriter.writeResource(r);
 	}
 
-	private JSONArray actionSearch(final JSONObject jsonObj, final Context ctx) throws AbstractOXException,
+	private JSONArray actionSearch(final JSONObject jsonObj) throws AbstractOXException,
 			JSONException {
 		final ResourceService resourceService = ResourceServiceImpl.getInstance();
 		if (null == resourceService) {
@@ -223,10 +217,10 @@ public class ResourceRequest {
 				LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
 						"\" in JSON data. Searching for all as fallback"));
 			}
-			return actionAll(ctx);
+			return actionAll();
 		}
 
-		final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, ctx);
+		final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, session.getContext());
 		if (resources.length > 0) {
 			long lastModified = Long.MIN_VALUE;
 			for (final com.openexchange.resource.Resource resource : resources) {
@@ -252,11 +246,11 @@ public class ResourceRequest {
 	 * @throws AbstractOXException
 	 *             If all resources cannot be retrieved from resource storage
 	 */
-	private JSONArray actionAll(final Context ctx) throws AbstractOXException {
+	private JSONArray actionAll() throws AbstractOXException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
 		final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
-				STR_ALL, ctx);
+				STR_ALL, session.getContext());
 		if (resources.length > 0) {
 			long lastModified = Long.MIN_VALUE;
 			for (final com.openexchange.resource.Resource resource : resources) {

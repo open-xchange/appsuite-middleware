@@ -60,17 +60,14 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.exceptions.Exception2Message;
 import com.openexchange.ajax.exceptions.InfostoreException2Message;
@@ -107,7 +104,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -157,14 +153,8 @@ public class Attachment extends PermissionServlet {
     private long maxUploadSize = -2;
 	
 	@Override
-	protected boolean hasModulePermission(final Session session, final Context ctx) {
-        try {
-            final ServerSession sessionObj = new ServerSessionAdapter(session);
-            return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
-        }
+	protected boolean hasModulePermission(final ServerSession session) {
+        return AttachmentRequest.hasPermission(session.getUserConfiguration());
 	}
 	
 	

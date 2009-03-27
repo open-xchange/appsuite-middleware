@@ -76,21 +76,18 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReminderRequest} - Handles request to reminder servlet.
@@ -99,9 +96,7 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 public final class ReminderRequest {
 
-    private final Session sessionObj;
-
-    private final Context ctx;
+    private final ServerSession session;
 
     private final User userObj;
 
@@ -122,13 +117,11 @@ public final class ReminderRequest {
      * Initializes a new {@link ReminderRequest}.
      * 
      * @param session The session
-     * @param ctx The context
      */
-    public ReminderRequest(final Session session, final Context ctx) {
+    public ReminderRequest(final ServerSession session) {
         super();
-        this.sessionObj = session;
-        this.ctx = ctx;
-        userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
+        this.session = session;
+        userObj = session.getUser();
     }
 
     /**
@@ -162,8 +155,7 @@ public final class ReminderRequest {
         final TimeZone tz = TimeZone.getTimeZone(userObj.getTimeZone());
         final JSONArray jsonArray = new JSONArray();
         try {
-            final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-            final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
+            final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
 
             final ReminderObject reminder = reminderSql.loadReminder(id);
             final ReminderDeleteInterface reminderDeleteInterface;
@@ -181,7 +173,7 @@ public final class ReminderRequest {
             reminderSql.setReminderDeleteInterface(reminderDeleteInterface);
 
             if (reminder.isRecurrenceAppointment()) {
-                final ReminderObject nextReminder = getNextRecurringReminder(sessionObj, tz, reminder);
+                final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
                 if (nextReminder != null) {
                     reminderSql.updateReminder(nextReminder);
                     jsonArray.put(nextReminder.getObjectId());
@@ -208,11 +200,10 @@ public final class ReminderRequest {
         timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
 
         final JSONArray jsonResponseArray = new JSONArray();
-        SearchIterator it = null;
+        SearchIterator<?> it = null;
 
         try {
-            final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-            final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
+            final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
             it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
 
             while (it.hasNext()) {
@@ -256,9 +247,7 @@ public final class ReminderRequest {
         final TimeZone tz = TimeZone.getTimeZone(userObj.getTimeZone());
         final ReminderWriter reminderWriter = new ReminderWriter(tz);
         try {
-            final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-
-            final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
+            final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
             final JSONArray jsonResponseArray = new JSONArray();
             final SearchIterator<ReminderObject> it = reminderSql.listReminder(userObj.getId(), end);
             try {
@@ -266,8 +255,8 @@ public final class ReminderRequest {
                     final ReminderObject reminder = it.next();
                     if (reminder.isRecurrenceAppointment()) {
                         try {
-                            if (!getLatestRecurringReminder(sessionObj, tz, end, reminder)) {
-                                final ReminderObject nextReminder = getNextRecurringReminder(sessionObj, tz, reminder);
+                            if (!getLatestRecurringReminder(session, tz, end, reminder)) {
+                                final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
                                 if (nextReminder != null) {
                                     reminderSql.updateReminder(nextReminder);
                                 } else {
@@ -280,7 +269,7 @@ public final class ReminderRequest {
                             reminderSql.deleteReminder(reminder.getTargetId(), userObj.getId(), reminder.getModule());
                         } catch (final OXException e) {
                             LOG.error(
-                                "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + sessionObj.getContextId(),
+                                "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + session.getContextId(),
                                 e);
                         }
                     }
@@ -302,9 +291,9 @@ public final class ReminderRequest {
     protected boolean hasModulePermission(final ReminderObject reminderObj) {
         switch (reminderObj.getModule()) {
         case Types.APPOINTMENT:
-            return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasCalendar();
+            return session.getUserConfiguration().hasCalendar();
         case Types.TASK:
-            return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasTask();
+            return session.getUserConfiguration().hasTask();
         default:
             return true;
         }

@@ -80,7 +80,6 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactServices;
 import com.openexchange.groupware.container.ContactObject;
@@ -89,14 +88,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -104,6 +100,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
 
 public class ContactRequest {
 
@@ -111,9 +108,7 @@ public class ContactRequest {
 
     public static final String ACTION_LIST_USER = "listuser";
 
-    final Session sessionObj;
-
-    final Context ctx;
+    final ServerSession session;
 
     final TimeZone timeZone;
 
@@ -125,11 +120,15 @@ public class ContactRequest {
         return timestamp;
     }
 
-    public ContactRequest(final Session sessionObj, final Context ctx) {
-        this.sessionObj = sessionObj;
-        this.ctx = ctx;
+    /**
+     * Initializes a new {@link ContactRequest}.
+     * 
+     * @param session The session
+     */
+    public ContactRequest(final ServerSession session) {
+        this.session = session;
 
-        final String sTimeZone = UserStorage.getStorageUser(sessionObj.getUserId(), ctx).getTimeZone();
+        final String sTimeZone = session.getUser().getTimeZone();
 
         timeZone = TimeZone.getTimeZone(sTimeZone);
         if (LOG.isDebugEnabled()) {
@@ -141,7 +140,7 @@ public class ContactRequest {
     public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException,
             JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException,
             OXJSONException {
-        if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasContact()) {
+        if (!session.getUserConfiguration().hasContact()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
         }
 
@@ -178,29 +177,24 @@ public class ContactRequest {
         final ContactObject contactObj = new ContactObject();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-        final ContactParser contactparser = new ContactParser(sessionObj);
+        final ContactParser contactparser = new ContactParser(session);
         contactparser.parse(contactObj, jData);
 
         if (!contactObj.containsParentFolderID()) {
             throw new OXMandatoryFieldException("missing folder");
         }
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         ContactInterface contactInterface = ContactServices.getInstance().getService(contactObj.getParentFolderID(),
-                ctx.getContextId());
+                session.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService
         // (contactObj.getParentFolderID());
         if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        contactInterface.setSession(sessionObj);
+        contactInterface.setSession(session);
         contactInterface.insertContactObject(contactObj);
         timestamp = contactObj.getLastModified();
         final JSONObject jsonResponseObject = new JSONObject();
@@ -218,25 +212,20 @@ public class ContactRequest {
         final ContactObject contactobject = new ContactObject();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-        final ContactParser contactparser = new ContactParser(sessionObj);
+        final ContactParser contactparser = new ContactParser(session);
         contactparser.parse(contactobject, jData);
 
         contactobject.setObjectID(id);
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService(inFolder);
         if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        contactInterface.setSession(sessionObj);
+        contactInterface.setSession(session);
         contactInterface.updateContactObject(contactobject, inFolder, timestamp);
         timestamp = contactobject.getLastModified();
         return new JSONObject();
@@ -271,21 +260,16 @@ public class ContactRequest {
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
-            Context ctx = null;
-            try {
-                ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-            } catch (final ContextException ct) {
-                throw new ContactException(ct);
-            }
+            final Context ctx = session.getContext();
 
             final ContactWriter contactWriter = new ContactWriter(timeZone);
             ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
             // ContactInterface contactInterface =
             // ContactServices.getInstance().getService(folderId);
             if (contactInterface == null) {
-                contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+                contactInterface = new RdbContactSQLInterface(session, ctx);
             }
-            contactInterface.setSession(sessionObj);
+            contactInterface.setSession(session);
 
             it = contactInterface.getModifiedContactsInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
@@ -328,20 +312,15 @@ public class ContactRequest {
         final int objectId = DataParser.checkInt(jData, DataFields.ID);
         final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService(inFolder);
         if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        contactInterface.setSession(sessionObj);
+        contactInterface.setSession(session);
         contactInterface.deleteContactObject(objectId, inFolder, timestamp);
 
         return new JSONArray();
@@ -380,12 +359,7 @@ public class ContactRequest {
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
-            Context ctx = null;
-            try {
-                ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-            } catch (final ContextException ct) {
-                throw new ContactException(ct);
-            }
+            final Context ctx = session.getContext();
 
             try {
                 // check if the int array has everytime the same folder id
@@ -395,9 +369,9 @@ public class ContactRequest {
                     // ContactInterface contactInterface =
                     // ContactServices.getInstance().getService(oldfolderId);
                     if (contactInterface == null) {
-                        contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+                        contactInterface = new RdbContactSQLInterface(session, ctx);
                     }
-                    contactInterface.setSession(sessionObj);
+                    contactInterface.setSession(session);
 
                     final ContactWriter contactwriter = new ContactWriter(timeZone);
 
@@ -423,9 +397,9 @@ public class ContactRequest {
                         // ContactServices.getInstance
                         // ().getService(objectIdAndFolderId[a][1]);
                         if (contactInterface == null) {
-                            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+                            contactInterface = new RdbContactSQLInterface(session, ctx);
                         }
-                        contactInterface.setSession(sessionObj);
+                        contactInterface.setSession(session);
                         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
                         final int[][] newObjectIdAndFolderId = { { objectIdAndFolderId[a][0], objectIdAndFolderId[a][1] } };
@@ -473,15 +447,10 @@ public class ContactRequest {
             userIdArray[a] = jData.getInt(a);
         }
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         try {
-            final ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
             final ContactWriter contactwriter = new ContactWriter(timeZone);
 
             for (int a = 0; a < userIdArray.length; a++) {
@@ -521,20 +490,15 @@ public class ContactRequest {
         try {
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
-            Context ctx = null;
-            try {
-                ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-            } catch (final ContextException ct) {
-                throw new ContactException(ct);
-            }
+            final Context ctx = session.getContext();
 
             ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
             // ContactInterface contactInterface =
             // ContactServices.getInstance().getService(folderId);
             if (contactInterface == null) {
-                contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+                contactInterface = new RdbContactSQLInterface(session, ctx);
             }
-            contactInterface.setSession(sessionObj);
+            contactInterface.setSession(session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
             if (rightHandLimit == 0) {
@@ -579,20 +543,15 @@ public class ContactRequest {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService(inFolder);
         if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        contactInterface.setSession(sessionObj);
+        contactInterface.setSession(session);
 
         timestamp = new Date(0);
 
@@ -611,14 +570,9 @@ public class ContactRequest {
             OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+        final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
 
         timestamp = new Date(0);
 
@@ -685,18 +639,13 @@ public class ContactRequest {
 
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         ContactInterface contactInterface = ContactServices.getInstance().getService(searchObj.getFolder(), ctx.getContextId());
         if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        contactInterface.setSession(sessionObj);
+        contactInterface.setSession(session);
 
         final SearchIterator<ContactObject> it =  contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
         final JSONArray jsonResponseArray = new JSONArray();
@@ -729,20 +678,15 @@ public class ContactRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 
-        Context ctx = null;
-        try {
-            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
+        final Context ctx = session.getContext();
 
         ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService(folderId);
         if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+            contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        contactInterface.setSession(sessionObj);
+        contactInterface.setSession(session);
 
         final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
         final int origObjectId = contactObj.getObjectID();
@@ -758,9 +702,8 @@ public class ContactRequest {
 
         contactInterface.insertContactObject(contactObj);
 
-        final User user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
-        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfiguration(
-                sessionObj.getUserId(), ctx);
+        final User user = session.getUser();
+        final UserConfiguration uc = session.getUserConfiguration();
         /*
          * Check attachments
          */
@@ -768,7 +711,7 @@ public class ContactRequest {
         /*
          * Check links
          */
-        copyLinks(folderId, sessionObj, ctx, contactObj, origObjectId, origFolderId, user);
+        copyLinks(folderId, session, ctx, contactObj, origObjectId, origFolderId, user);
 
         final JSONObject jsonResponseObject = new JSONObject();
         jsonResponseObject.put(DataFields.ID, contactObj.getObjectID());

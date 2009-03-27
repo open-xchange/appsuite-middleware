@@ -51,15 +51,12 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.StringWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.LinkRequest;
 import com.openexchange.api.OXConflictException;
@@ -67,11 +64,11 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Link} - The servlet serving requests to link module
@@ -213,8 +210,7 @@ public class Link extends DataServlet {
 	}
 
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx)
-				.hasContact();
+	protected boolean hasModulePermission(final ServerSession session) {
+		return session.getUserConfiguration().hasContact();
 	}
 }

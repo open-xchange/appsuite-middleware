@@ -57,21 +57,16 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
-
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.InfostoreParser;
@@ -84,7 +79,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.SearchEngine;
@@ -98,7 +92,6 @@ import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -106,17 +99,14 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Infostore extends PermissionServlet {
 
@@ -157,27 +147,20 @@ public class Infostore extends PermissionServlet {
 	// TODO: Better error handling
 
 	@Override
-	protected boolean hasModulePermission(final Session session, final Context ctx) {
-        final ServerSession sessionObj = new ServerSessionAdapter(session, ctx);
-        return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+	protected boolean hasModulePermission(final ServerSession session) {
+        return InfostoreRequest.hasPermission(session.getUserConfiguration());
 	}
 
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
 
-        final ServerSession sessionObj;
-        try {
-            sessionObj = new ServerSessionAdapter(getSessionObject(req));
-            ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
-        } catch (final ContextException e) {
-            handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
-            return;
-        }
+        final ServerSession session = getSessionObject(req);
+        ThreadLocalSessionHolder.getInstance().setSession(session);
 
-        final Context ctx = sessionObj.getContext();
-		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
-		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+        final Context ctx = session.getContext();
+		final User user = session.getUser();
+		final UserConfiguration userConfig = session.getUserConfiguration();
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
@@ -219,7 +202,7 @@ public class Infostore extends PermissionServlet {
 			return;
 		}
 		final OXJSONWriter writer = new OXJSONWriter();
-		final InfostoreRequest request = new InfostoreRequest(sessionObj, writer);
+		final InfostoreRequest request = new InfostoreRequest(session, writer);
 		try {
 			if (!request.action(action, new ServletRequestAdapter(req, res))) {
 				unknownAction("GET", action, res, false);
@@ -247,14 +230,8 @@ public class Infostore extends PermissionServlet {
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
-		final ServerSession sessionObj;
-        try {
-            sessionObj = new ServerSessionAdapter(getSessionObject(req));
-            ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
-        } catch (final ContextException e) {
-            handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
-            return;
-        }
+		final ServerSession session = getSessionObject(req);
+        ThreadLocalSessionHolder.getInstance().setSession(session);
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
@@ -262,7 +239,7 @@ public class Infostore extends PermissionServlet {
 			return;
 		}
 		final OXJSONWriter writer = new OXJSONWriter();
-		final InfostoreRequest request = new InfostoreRequest(sessionObj, writer);
+		final InfostoreRequest request = new InfostoreRequest(session, writer);
 		try {
 			if (!request.action(action, new ServletRequestAdapter(req, res))) {
 				unknownAction("PUT", action, res, false);
@@ -295,18 +272,12 @@ public class Infostore extends PermissionServlet {
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
 
-		final ServerSession sessionObj;
-        try {
-            sessionObj = new ServerSessionAdapter(getSessionObject(req));
-            ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
-        } catch (final ContextException e) {
-            handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
-            return;
-        }
+		final ServerSession session = getSessionObject(req);
+        ThreadLocalSessionHolder.getInstance().setSession(session);
 
-		final Context ctx = sessionObj.getContext();
-		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
-		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		final Context ctx = session.getContext();
+		final User user = session.getUser();
+		final UserConfiguration userConfig = session.getUserConfiguration();
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
@@ -316,7 +287,7 @@ public class Infostore extends PermissionServlet {
 
 		try {
 			checkSize(req.getContentLength(), UserSettingMailStorage.getInstance().getUserSettingMail(
-					sessionObj.getUserId(), sessionObj.getContext()));
+					session.getUserId(), session.getContext()));
 			if (action.equals(ACTION_NEW) || action.equals(ACTION_UPDATE) || action.equals(ACTION_COPY)) {
 				UploadEvent upload = null;
 				try {
@@ -324,7 +295,7 @@ public class Infostore extends PermissionServlet {
 					final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
 					if (null != uploadFile) {
 						checkSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
-								sessionObj.getUserId(), sessionObj.getContext()));
+								session.getUserId(), session.getContext()));
 					}
 					final String obj = upload.getFormField(STR_JSON);
 					if (obj == null) {
@@ -334,7 +305,7 @@ public class Infostore extends PermissionServlet {
 
 					final DocumentMetadata metadata = PARSER.getDocumentMetadata(obj);
 					if (action.equals(ACTION_NEW)) {
-						newDocument(metadata, res, uploadFile, ctx, user, userConfig, sessionObj);
+						newDocument(metadata, res, uploadFile, ctx, user, userConfig, session);
 					} else {
 						if (!checkRequired(req, res, true, action, PARAMETER_ID, PARAMETER_TIMESTAMP)) {
 							return;
@@ -354,10 +325,10 @@ public class Infostore extends PermissionServlet {
 
 						if (action.equals(ACTION_UPDATE)) {
 							update(res, id, metadata, timestamp, presentFields, uploadFile, ctx, user, userConfig,
-									sessionObj);
+									session);
 						} else {
 							copy(res, id, metadata, timestamp, presentFields, uploadFile, ctx, user, userConfig,
-									sessionObj);
+									session);
 						}
 					}
 				} finally {
@@ -408,7 +379,7 @@ public class Infostore extends PermissionServlet {
 	// Handlers
 	protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res,
 			final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig,
-			final ServerSession sessionObj) {
+			final ServerSession session) {
 		// System.out.println("------> "+newDocument.getFolderId());
 		res.setContentType(MIME_TEXT_HTML);
 
@@ -421,11 +392,11 @@ public class Infostore extends PermissionServlet {
 			searchEngine.startTransaction();
 
 			if (! looksLikeFileUpload(upload, newDocument)) {
-				infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), sessionObj);
+				infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), session);
 			} else {
 				initMetadata(newDocument, upload);
 				infostore.saveDocument(newDocument, in = new FileInputStream(upload.getTmpFile()), System
-						.currentTimeMillis(), sessionObj);
+						.currentTimeMillis(), session);
 			}
 			// System.out.println("DONE SAVING: "+System.currentTimeMillis());
 			searchEngine.index(newDocument, ctx, user, userConfig);
@@ -478,7 +449,7 @@ public class Infostore extends PermissionServlet {
 
     protected void update(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp,
 			final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user,
-			final UserConfiguration userConfig, final ServerSession sessionObj) {
+			final UserConfiguration userConfig, final ServerSession session) {
 
 		boolean version = false;
 		for (final Metadata m : presentFields) {
@@ -502,11 +473,11 @@ public class Infostore extends PermissionServlet {
 			searchEngine.startTransaction();
 
 			if ( ! looksLikeFileUpload(upload, updated)) {
-				infostore.saveDocumentMetadata(updated, timestamp, presentFields, sessionObj);
+				infostore.saveDocumentMetadata(updated, timestamp, presentFields, session);
 			} else {
 				initMetadata(updated, upload);
 				infostore.saveDocument(updated, new FileInputStream(upload.getTmpFile()), timestamp, presentFields,
-						sessionObj);
+						session);
 			}
 			infostore.commit();
 			searchEngine.commit();
@@ -539,7 +510,7 @@ public class Infostore extends PermissionServlet {
 
 	protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated,
 			final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx,
-			final User user, final UserConfiguration userConfig, final ServerSession sessionObj) {
+			final User user, final UserConfiguration userConfig, final ServerSession session) {
 
 		res.setContentType(MIME_TEXT_HTML);
 
@@ -568,13 +539,13 @@ public class Infostore extends PermissionServlet {
 			if (upload == null) {
 				if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
 					infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx,
-							user, userConfig), metadata.getSequenceNumber(), sessionObj);
+							user, userConfig), metadata.getSequenceNumber(), session);
 				} else {
-					infostore.saveDocumentMetadata(metadata, timestamp, sessionObj);
+					infostore.saveDocumentMetadata(metadata, timestamp, session);
 				}
 			} else {
 				initMetadata(metadata, upload);
-				infostore.saveDocument(metadata, new FileInputStream(upload.getTmpFile()), timestamp, sessionObj);
+				infostore.saveDocument(metadata, new FileInputStream(upload.getTmpFile()), timestamp, session);
 			}
 			searchEngine.index(metadata, ctx, user, userConfig);
 
