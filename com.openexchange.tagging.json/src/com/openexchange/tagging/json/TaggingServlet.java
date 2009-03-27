@@ -65,11 +65,11 @@ import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tagging.Tagged;
 import com.openexchange.tagging.TaggingService;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -92,10 +92,6 @@ public class TaggingServlet extends PermissionServlet {
     private static final String SAVE_TAGS = "saveTags";
     
     
-    @Override
-    protected boolean hasModulePermission(Session session, Context ctx) {
-        return true;
-    }
     
     private static TaggingService taggingService = null;
     
@@ -233,6 +229,15 @@ public class TaggingServlet extends PermissionServlet {
         for(String tag : tags) {
             taggingService.removeTag(new Tagged(contextId, objectId, folderId, tag));
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.tools.session.ServerSession)
+     */
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }
