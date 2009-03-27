@@ -65,11 +65,13 @@ import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.SieveParser;
 
+import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.IfStructureCommand;
 import com.openexchange.jsieve.commands.RequireCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
@@ -468,7 +470,7 @@ public final class SieveTextFilter {
             if (command instanceof IfStructureCommand) {
                 i += 2;
                 final IfStructureCommand ifstructure = (IfStructureCommand) command;
-                i += ifstructure.getActioncommands().size();
+                i += getActionCommandSize(ifstructure.getActioncommands());
                 i++;
             } else {
                 i++;
@@ -503,6 +505,24 @@ public final class SieveTextFilter {
         for (int o = 0; o < i; o++) {
             retval.add("");
         }
+    }
+
+    private int getActionCommandSize(List<ActionCommand> actioncommands) {
+        int size = 0;
+        for (final ActionCommand actionCommand : actioncommands) {
+            if (Commands.VACATION.equals(actionCommand.getCommand())) {
+                // The text arguments for vacation is the last one in the list
+                final ArrayList<Object> arguments = actionCommand.getArguments();
+                final int size2 = arguments.size();
+                if (0 < size2) {
+                    final ArrayList<String> object =  (ArrayList<String>) arguments.get(size2 - 1);
+                    size += countlines(object.get(0)) + 1;
+                }
+            } else {
+                size++;
+            }
+        }
+        return size;
     }
 
     private int getPosDif(final int i) {

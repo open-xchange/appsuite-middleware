@@ -1,3 +1,7 @@
+* 2009-03-27 - dennis.sieben@open-xchange.com
+
+ - Bugfix #13442: Correctly parsing multi line sieve rules.
+
 * 2009-03-25 - thorben.betten@open-xchange.com
 
  - Bugfix #13343: Proper last-accessed check when deciding whether to send an AJP KEEP-ALIVE or not
