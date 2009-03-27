@@ -14,9 +14,19 @@ public class FolderProperties {
         user;
     }
     
-    public enum UserAuthType {
-        AdminDN,
-        anonymous;
+    public enum LoginSource {
+        /**
+         * Login is taken from user.imapLogin kept in storage; e.g. <code>test</code>
+         */
+        login,
+        /**
+         * Login is taken from user.mail kept in storage; e.g. <code>test@foo.bar</code>
+         */
+        mail,
+        /**
+         * Login is user's name; e.g. <code>test</code>
+         */
+        name
     }
     
     public enum SearchScope {
@@ -24,10 +34,15 @@ public class FolderProperties {
         one,
         sub;
     }
-
+    
     public enum Sorting {
         groupware,
         server;
+    }
+
+    public enum UserAuthType {
+        AdminDN,
+        anonymous;
     }
 
     
@@ -44,12 +59,13 @@ public class FolderProperties {
         searchScope("searchScope"),
         sorting("sorting"),
         uri("uri"),
-        userSearchFilter("userSearchFilter"),
+        userAdminBindPW("userAdminBindPW"),
+        userAdminDN("userAdminDN"),
+        userAuthType("userAuthType"),
+        userLoginSource("userLoginSource"),
         userSearchAttribute("userSearchAttribute"),
         userSearchBaseDN("userSearchBaseDN"),
-        userAuthType("userAuthType"),
-        userAdminDN("userAdminDN"),
-        userAdminBindPW("userAdminBindPW"),
+        userSearchFilter("userSearchFilter"),
         userSearchScope("userSearchScope");
 
         
@@ -88,19 +104,21 @@ public class FolderProperties {
 
     private String uri;
 
-    private String userSearchFilter;
+    private String userAdminBindPW;
+
+    private String userAdminDN;
+
+    private UserAuthType userAuthType;
+
+    private LoginSource userLoginSource;
 
     private String userSearchAttribute;
 
     private String userSearchBaseDN;
 
+    private String userSearchFilter;
+
     private SearchScope userSearchScope;
-
-    private UserAuthType userAuthType;
-
-    private String userAdminDN;
-
-    private String userAdminBindPW;
 
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -163,6 +181,14 @@ public class FolderProperties {
             logBuilder.append("\tsorting: ").append(retval.getSorting()).append('\n');
         } catch (final IllegalArgumentException e) {
             throw new LdapConfigurationException(Code.SORTING_WRONG, authstring);
+        }
+        
+        final String userLoginSourceString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userLoginSource.getName(), name);
+        try {
+            retval.setUserLoginSource(LoginSource.valueOf(userLoginSourceString));
+            logBuilder.append("\tuserLoginSource: ").append(retval.getUserLoginSource()).append('\n');
+        } catch (final IllegalArgumentException e) {
+            throw new LdapConfigurationException(Code.USER_LOGIN_SOURCE_WRONG, userLoginSourceString);
         }
         
         retval.setUserSearchFilter(PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchFilter.getName(), name));
@@ -239,117 +265,6 @@ public class FolderProperties {
         return retval;
     }
 
-    /**
-     * @param userAdminBindPW
-     */
-    private void setUserAdminBindPW(String userAdminBindPW) {
-        this.userAdminBindPW = userAdminBindPW;
-    }
-
-    /**
-     * Gets the userAdminBindPW
-     *
-     * @return The userAdminBindPW
-     */
-    public String getUserAdminBindPW() {
-        return userAdminBindPW;
-    }
-
-    /**
-     * @param userAdminDN
-     */
-    private void setUserAdminDN(String userAdminDN) {
-        this.userAdminDN = userAdminDN;
-    }
-
-    /**
-     * Gets the userAdminDN
-     *
-     * @return The userAdminDN
-     */
-    public String getUserAdminDN() {
-        return userAdminDN;
-    }
-
-    /**
-     * @param userAuthType
-     */
-    private void setUserAuthType(UserAuthType userAuthType) {
-        this.userAuthType = userAuthType;
-    }
-    
-    /**
-     * Gets the userAuthType
-     *
-     * @return The userAuthType
-     */
-    public UserAuthType getUserAuthType() {
-        return userAuthType;
-    }
-
-    /**
-     * @return
-     */
-    public SearchScope getUserSearchScope() {
-        return this.userSearchScope;
-    }
-
-    /**
-     * @param userSearchScope
-     */
-    private void setUserSearchScope(final SearchScope userSearchScope) {
-        this.userSearchScope = userSearchScope;
-    }
-
-    /**
-     * @return
-     */
-    public String getUserSearchBaseDN() {
-        return this.userSearchBaseDN;
-    }
-
-    /**
-     * @param userSearchBaseDN
-     */
-    private void setUserSearchBaseDN(final String userSearchBaseDN) {
-        this.userSearchBaseDN = userSearchBaseDN;
-    }
-
-    /**
-     * @param userSearchAttribute
-     */
-    private void setUserSearchAttribute(final String userSearchAttribute) {
-        this.userSearchAttribute = userSearchAttribute;
-    }
-
-    /**
-     * @param userSearchFilter
-     */
-    private void setUserSearchFilter(final String userSearchFilter) {
-        this.userSearchFilter = userSearchFilter;
-    }
-
-    
-    
-    /**
-     * Gets the userSearchFilter
-     *
-     * @return The userSearchFilter
-     */
-    public String getUserSearchFilter() {
-        return userSearchFilter;
-    }
-
-    
-    /**
-     * Gets the userSearchAttribute
-     *
-     * @return The userSearchAttribute
-     */
-    public String getUserSearchAttribute() {
-        return userSearchAttribute;
-    }
-
     public String getAdminBindPW() {
         return adminBindPW;
     }
@@ -377,7 +292,7 @@ public class FolderProperties {
     public int getPagesize() {
         return pagesize;
     }
-
+    
     public String getSearchfilter() {
         return searchfilter;
     }
@@ -394,38 +309,109 @@ public class FolderProperties {
         return uri;
     }
 
+    /**
+     * Gets the userAdminBindPW
+     *
+     * @return The userAdminBindPW
+     */
+    public String getUserAdminBindPW() {
+        return userAdminBindPW;
+    }
+
+    /**
+     * Gets the userAdminDN
+     *
+     * @return The userAdminDN
+     */
+    public String getUserAdminDN() {
+        return userAdminDN;
+    }
+
+    /**
+     * Gets the userAuthType
+     *
+     * @return The userAuthType
+     */
+    public UserAuthType getUserAuthType() {
+        return userAuthType;
+    }
+
+    
+    
+    /**
+     * Gets the userLoginSource
+     *
+     * @return The userLoginSource
+     */
+    public LoginSource getUserLoginSource() {
+        return userLoginSource;
+    }
+
+    
+    /**
+     * Gets the userSearchAttribute
+     *
+     * @return The userSearchAttribute
+     */
+    public String getUserSearchAttribute() {
+        return userSearchAttribute;
+    }
+
+    /**
+     * @return
+     */
+    public String getUserSearchBaseDN() {
+        return this.userSearchBaseDN;
+    }
+
+    /**
+     * Gets the userSearchFilter
+     *
+     * @return The userSearchFilter
+     */
+    public String getUserSearchFilter() {
+        return userSearchFilter;
+    }
+
+    /**
+     * @return
+     */
+    public SearchScope getUserSearchScope() {
+        return this.userSearchScope;
+    }
+
     public boolean isMemorymapping() {
         return memorymapping;
     }
-    
+
     private void setAdminBindPW(final String adminBindPW) {
         this.adminBindPW = adminBindPW;
     }
-    
+
     private void setAdminDN(final String adminDN) {
         this.adminDN = adminDN;
     }
-    
+
     private void setAuthtype(final AuthType authtype) {
         this.authtype = authtype;
     }
-    
+
     private void setBaseDN(final String baseDN) {
         this.baseDN = baseDN;
     }
-    
+
     private void setFoldername(final String foldername) {
         this.foldername = foldername;
     }
-    
+
     private void setMappings(final Mappings mappings) {
         this.mappings = mappings;
     }
-    
+
     private void setMemorymapping(final boolean memorymapping) {
         this.memorymapping = memorymapping;
     }
-    
+
     private void setPagesize(final int pagesize) {
         this.pagesize = pagesize;
     }
@@ -437,13 +423,69 @@ public class FolderProperties {
     private void setSearchScope(final SearchScope searchScope) {
         this.searchScope = searchScope;
     }
-
+    
     private void setSorting(final Sorting sorting) {
         this.sorting = sorting;
     }
-
+    
     private void setUri(final String uri) {
         this.uri = uri;
+    }
+    
+    /**
+     * @param userAdminBindPW
+     */
+    private void setUserAdminBindPW(final String userAdminBindPW) {
+        this.userAdminBindPW = userAdminBindPW;
+    }
+    
+    /**
+     * @param userAdminDN
+     */
+    private void setUserAdminDN(String userAdminDN) {
+        this.userAdminDN = userAdminDN;
+    }
+    
+    /**
+     * @param userAuthType
+     */
+    private void setUserAuthType(UserAuthType userAuthType) {
+        this.userAuthType = userAuthType;
+    }
+    
+    /**
+     * @param userLoginSource
+     */
+    private void setUserLoginSource(final LoginSource userLoginSource) {
+        this.userLoginSource = userLoginSource;
+    }
+    
+    /**
+     * @param userSearchAttribute
+     */
+    private void setUserSearchAttribute(final String userSearchAttribute) {
+        this.userSearchAttribute = userSearchAttribute;
+    }
+    
+    /**
+     * @param userSearchBaseDN
+     */
+    private void setUserSearchBaseDN(final String userSearchBaseDN) {
+        this.userSearchBaseDN = userSearchBaseDN;
+    }
+
+    /**
+     * @param userSearchFilter
+     */
+    private void setUserSearchFilter(final String userSearchFilter) {
+        this.userSearchFilter = userSearchFilter;
+    }
+
+    /**
+     * @param userSearchScope
+     */
+    private void setUserSearchScope(final SearchScope userSearchScope) {
+        this.userSearchScope = userSearchScope;
     }
 
 }

@@ -104,8 +104,13 @@ public class LdapConfigurationException extends OXException {
         /**
          * The given value for userSearchScope "%s" is not a possible one
          */
-        USER_SEARCH_SCOPE_WRONG("The given value for userSearchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 9);
+        USER_SEARCH_SCOPE_WRONG("The given value for userSearchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 9),
 
+        /**
+         * The given value for userLoginSource "%s" is not a possible one
+         */
+        USER_LOGIN_SOURCE_WRONG("The given value for userLoginSource \"%s\" is not a possible one", Category.SETUP_ERROR, 10);
+        
         /**
          * Message of the exception.
          */

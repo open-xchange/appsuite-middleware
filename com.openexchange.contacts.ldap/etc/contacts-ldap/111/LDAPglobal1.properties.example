@@ -1,14 +1,12 @@
 # A property file for the context with id 111
 
 # Specify the uri of the LDAP server here e.g. ldap://localhost
-com.openexchange.contacts.ldap.context111.LDAPglobal1.uri=ldap://10.10.10.80
+com.openexchange.contacts.ldap.context111.LDAPglobal1.uri=ldap://localhost
 
 # Specify the baseDN here
-#com.openexchange.contacts.ldap.baseDN=dc=oxnbg,dc=int
 com.openexchange.contacts.ldap.context111.LDAPglobal1.baseDN=cn=users,DC=exchange,DC=local
 
 # Specify the bindDN here (optional)
-#com.openexchange.contacts.ldap.AdminDN=cn=Administrator,dc=oxnbg,dc=int
 com.openexchange.contacts.ldap.context111.LDAPglobal1.AdminDN=cn=administrator,cn=users,DC=exchange,DC=local
 
 # Specify the bindPW here (optional)
@@ -24,7 +22,15 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.authtype=user
 # Possible values are "server", "groupware"
 com.openexchange.contacts.ldap.context111.LDAPglobal1.sorting=groupware
 
-# Specify the user search filter here (optional). This is the first part which can be chosse freely
+# Set the login source if user auth is enabled; meaning which source is taken
+# to determine a users login for LDAP. If 'login' is set, then user's individual
+# mail login as defined in user storage is taken. If 'mail' is set, then user's
+# individual primary email address is taken. If 'name' is set, then user's
+# individual system's user name is taken.
+# Possible values are: login, mail, and name
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userLoginSource=name
+
+# Specify the user search filter here (optional). This is the first part which can be chose freely
 com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchFilter=(objectclass=person)
 
 # Specify the user search scope here (optional). Possible value are sub, base and one. If this

@@ -22,7 +22,15 @@ com.openexchange.contacts.ldap.context111.LDAPglobal.authtype=AdminDN
 # Possible values are "server", "groupware"
 com.openexchange.contacts.ldap.context111.LDAPglobal.sorting=groupware
 
-# Specify the user search filter here (optional). This is the first part which can be chosse freely
+# Set the login source if user auth is enabled; meaning which source is taken
+# to determine a users login for LDAP. If 'login' is set, then user's individual
+# mail login as defined in user storage is taken. If 'mail' is set, then user's
+# individual primary email address is taken. If 'name' is set, then user's
+# individual system's user name is taken.
+# Possible values are: login, mail, and name
+com.openexchange.contacts.ldap.context111.LDAPglobal.userLoginSource=name
+
+# Specify the user search filter here (optional). This is the first part which can be chose freely
 com.openexchange.contacts.ldap.context111.LDAPglobal.userSearchFilter=(objectclass=posixaccount)
 
 # Specify the user search scope here (optional). Possible value are sub, base and one. If this
