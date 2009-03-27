@@ -76,7 +76,7 @@ public abstract class AbstractFitnesseJUnitTest extends TestCase {
             helper = new JUnitHelper(new TestRunner(
                 initRepository( getWithDefault("fitnesseWikiLocation","/Users/development/workspace/openexchange-test/fitnesse/") ),
                 initEngine( getWithDefault("fitnesseEngine","slim") ),
-                initOutputPath( getWithDefault("ftinesseOutputPath","/tmp") ) ));
+                initOutputPath( getWithDefault("fitnesseOutputPath","/tmp") ) ));
 
         } catch (IOException e) {
             fail("Instantiation failed: " + e.getMessage());
