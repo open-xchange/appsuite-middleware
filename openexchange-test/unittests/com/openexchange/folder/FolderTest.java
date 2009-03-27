@@ -6,9 +6,7 @@ package com.openexchange.folder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -36,6 +34,7 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -1105,7 +1104,7 @@ public class FolderTest extends TestCase {
 
     public void testGetSubfolders() {
         try {
-            final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session, ctx);
+            final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
             SearchIterator<?> it = null;
             try {
                 it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, null);
@@ -1141,7 +1140,7 @@ public class FolderTest extends TestCase {
             uc.setCalendar(false);
             saveUserConfiguration(uc);
             try {
-                final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
                 final SearchIterator<?> it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
                         null);
                 try {
