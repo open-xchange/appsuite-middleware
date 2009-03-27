@@ -58,7 +58,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.ExternalSubscription;
 import com.openexchange.subscribe.ExternalSubscriptionHandler;
@@ -148,10 +147,6 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler implements E
             throw new UnsupportedOperationException();
         }
 
-        public ManagedUploadFile getUploadedFile(String id) {
-            throw new UnsupportedOperationException();
-        }
-
         public int getUserId() {
             return subscription.getUserId();
         }
@@ -160,27 +155,11 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler implements E
             throw new UnsupportedOperationException();
         }
 
-        public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
-            throw new UnsupportedOperationException();
-        }
-
         public void removeRandomToken() {
             throw new UnsupportedOperationException();
         }
 
-        public ManagedUploadFile removeUploadedFile(String id) {
-            throw new UnsupportedOperationException();
-        }
-
-        public void removeUploadedFileOnly(String id) {
-            throw new UnsupportedOperationException();
-        }
-
         public void setParameter(String name, Object value) {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean touchUploadedFile(String id) {
             throw new UnsupportedOperationException();
         }
     }

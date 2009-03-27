@@ -82,6 +82,7 @@ import com.openexchange.subscribe.ExternalSubscriptionService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -134,11 +135,6 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
     public static void setExternalSubscriptionHandler(ExternalSubscriptionHandler service) {
         SubscribeJSONServlet.externalSubscriptionHandler = service;
-    }
-
-    @Override
-    protected boolean hasModulePermission(final Session session, final Context ctx) {
-        return true;
     }
 
     @Override
@@ -360,6 +356,12 @@ public class SubscribeJSONServlet extends PermissionServlet {
         } catch (Exception x) {
             return "";
         }
+    }
+
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

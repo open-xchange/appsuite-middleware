@@ -22,6 +22,7 @@ import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.Site;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -48,11 +49,6 @@ public class PublishJSONServlet extends PermissionServlet {
 
     public static void setPublicationService(PublicationService service) {
         publicationService = service;
-    }
-    
-    @Override
-    protected boolean hasModulePermission(Session session, Context ctx) {
-        return true;
     }
 
     protected void doPost(HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -181,5 +177,11 @@ public class PublishJSONServlet extends PermissionServlet {
             site.setFolderId(siteToPublish.getInt("folder"));
         }
         return site;
+    }
+
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
