@@ -59,6 +59,8 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
+import com.openexchange.timer.Timer;
+import com.openexchange.timer.internal.TimerImpl;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
@@ -199,6 +201,7 @@ public final class Init {
 		// we'll have to do the service wiring differently.
 		// This method duplicates statically what the OSGi container
 		// handles dynamically
+	    startAndInjectTimerBundle();
 		startAndInjectConfigBundle();
 		startAndInjectConfiguration();
 		startAndInjectCache();
@@ -240,6 +243,12 @@ public final class Init {
 			e.printStackTrace();
 		}
 	}
+
+    private static void startAndInjectTimerBundle() {
+        final Timer timer = new TimerImpl();
+        services.put(Timer.class, timer);
+        ServerServiceRegistry.getInstance().addService(Timer.class, timer);
+    }
 
 	private static void startAndInjectConfigBundle() {
 		final ConfigurationService config = new ConfigurationImpl();
