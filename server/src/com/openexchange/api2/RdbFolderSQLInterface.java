@@ -146,20 +146,20 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     private final OXFolderAccess oxfolderAccess;
 
     /**
-     * @param sessionObj
+     * @param session
      */
-    public RdbFolderSQLInterface(final ServerSession sessionObj) {
-        this(sessionObj, null);
+    public RdbFolderSQLInterface(final ServerSession session) {
+        this(session, null);
     }
 
-    public RdbFolderSQLInterface(final ServerSession sessionObj, final OXFolderAccess oxfolderAccess) {
-        this.session = sessionObj;
-        this.ctx = sessionObj.getContext();
-        userConfiguration = sessionObj.getUserConfiguration();
-        user = sessionObj.getUser();
+    public RdbFolderSQLInterface(final ServerSession session, final OXFolderAccess oxfolderAccess) {
+        this.session = session;
+        this.ctx = session.getContext();
+        userConfiguration = session.getUserConfiguration();
+        user = session.getUser();
         this.userId = user.getId();
         this.groups = user.getGroups();
-        this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(sessionObj.getContext()) : oxfolderAccess;
+        this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(session.getContext()) : oxfolderAccess;
     }
 
     /*
