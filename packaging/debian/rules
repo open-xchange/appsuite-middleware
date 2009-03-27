@@ -59,7 +59,6 @@ install: build
 
 	# Add here commands to install the package into debian/open-xchange-admin.
 	ant -Dprefix=$(oxprefix) -Ddestdir=$(adminroot) doc install
-	rm -r $(adminroot)/$(oxprefix)/bundles
 	ant -Dprefix=$(oxprefix) -Ddestdir=$(clientroot) install-client
 	ant -Dprefix=$(oxprefix) -Ddestdir=$(libroot) install-bundle
 	mv doc javadoc
