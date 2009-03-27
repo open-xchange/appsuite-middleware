@@ -245,7 +245,8 @@ public final class Init {
 	}
 
     private static void startAndInjectTimerBundle() {
-        final Timer timer = new TimerImpl();
+        final TimerImpl timer = new TimerImpl();
+        timer.start();
         services.put(Timer.class, timer);
         ServerServiceRegistry.getInstance().addService(Timer.class, timer);
     }
