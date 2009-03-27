@@ -313,11 +313,8 @@ public final class Init {
 	}
 
 	private static void startAndInjectSessiondBundle() throws Exception {
-		// ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
-		// SessiondService.getInstance().setService(new
-		// SessiondConnectorImpl());
 		SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
-		//SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+		SessiondServiceRegistry.getServiceRegistry().addService(Timer.class, services.get(Timer.class));
 		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
 	}
 
