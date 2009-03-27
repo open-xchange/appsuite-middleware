@@ -104,40 +104,6 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
 
     /**
      * {@inheritDoc}
-     */
-    public int getNumberOfTasks(final int folderId) throws OXException {
-        final Context ctx;
-        final int userId = session.getUserId();
-        final User user;
-        final UserConfiguration configuration;
-        final FolderObject folder;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            configuration = Tools.getUserConfiguration(ctx, userId);
-            folder = Tools.getFolder(ctx, folderId);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        }
-        boolean onlyOwn;
-        try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        }
-        final boolean noPrivate = Tools.isFolderShared(folder, user);
-        final int count;
-        try {
-            count = TaskStorage.getInstance().countTasks(ctx, userId, folderId,
-                onlyOwn, noPrivate);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        }
-        return count;
-    }
-
-    /**
-     * {@inheritDoc}
      * TODO eliminate duplicate columns
      */
     public SearchIterator<Task> getTaskList(final int folderId, final int from,

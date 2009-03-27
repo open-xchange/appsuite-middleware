@@ -51,147 +51,117 @@ package com.openexchange.api2;
 
 import java.util.Date;
 
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
- * TasksSQLInterface
+ * API interface for tasks.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface TasksSQLInterface extends SQLInterface {
-	
-	/**
-	 * Determines the number of ative tasks for a certain user in a certain
-	 * private or public folder.
-	 * 
-	 * @param folderId -
-	 *            The Folder ID
-	 * @param readCon -
-	 *            The Readable Connection To DB
-	 * @return Amount Of Active Tasks as an <code>int</code>
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */
-    public int getNumberOfTasks(int folderId) throws OXException;
-	
-	/**
-	 * Lists tasks in a folder from given parameter to given parameter
-	 * @param folderId
-	 * The Folder ID
-	 * @param from
-	 * Start position in list
-	 * @param to 
-	 * End position in list
-	 * @param orderBy
-	 * Column id to sort. 0 means no order by
-	 * @param orderDir
-	 * Order direction (asc or desc)
-	 * @param cols
-	 * The columns filled to the dataobject
-	 * @return A SearchIterator contains Task objects
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	 
-	public SearchIterator<Task> getTaskList(int folderId, int from,
-			int to, int orderBy, String orderDir, int cols[]) throws OXException;
-	
-	/**
-	 * Lists all tasks that match the given search
-	 * @param searchObject
-	 * The SearchObject
-	 * @param cols
-	 * fields that will be added to the data object
-	 * @return A SearchIterator contains Task
-	 * @throws OXException
-	 */
-	public SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
+    
+    /**
+     * Lists tasks in a folder from given parameter to given parameter
+     * 
+     * @param folderId The Folder ID
+     * @param from Start position in list
+     * @param to End position in list
+     * @param orderBy Column id to sort. 0 means no order by
+     * @param orderDir Order direction (asc or desc)
+     * @param cols The columns filled to the dataobject
+     * @return A SearchIterator contains Task objects
+     * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+     */     
+    SearchIterator<Task> getTaskList(int folderId, int from, int to, int orderBy, String orderDir, int cols[]) throws OXException;
+    
+    /**
+     * Lists all tasks that match the given search
+     * 
+     * @param searchObject The SearchObject
+     * @param cols fields that will be added to the data object
+     * @return A SearchIterator contains Task
+     * @throws OXException
+     */
+    SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
 
-	/**
-	 * Loads one tasks by the given ID
-	 * @param objectId
-	 * The Object ID
-	 * @return 
-	 * return the task object
-	 * @throws OXException, OXPermissionException
-	 */
-	public Task getTaskById(int objectId, int inFolder) throws OXException;
-	
-	
-	/**
-	 * Lists all modified objects in a folder
-	 * @param folderID
-	 * The Folder ID
-	 * @param since
-	 * all modification >= since
-	 * @return A SearchIterator contains Task objects
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	 
-	public SearchIterator<Task> getModifiedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
-	
-	/**
-	 * Lists all deleted objects in a folder
-	 * @param folderID
-	 * The Folder ID
-	 * @param since
-	 * all modification >= since
-	 * @return A SearchIterator contains Task objects
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	
-	public SearchIterator<Task> getDeletedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
-	
-	/**
-	 * Loads a range of tasks by the given IDs
-	 * @param objectIdAndInFolder[]
-	 * array with two dimensions. First dimension contains a seond array with two values.
-	 * 1. value is object_id
-	 * 2. value if folder_id
-	 * @param cols
-	 * The columns filled to the dataobject
-	 * @return A SearchIterator contains Task objects
-	 * @throws OXException
-	 */	
-	public SearchIterator<Task> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
-	
-	/**
-	 * Insert the task
-     * The lastModified attribute is empty, it will be filled with the actual
-     * timestamp.
-	 * @param taskobject
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
-	 */
-	
-	public void insertTaskObject(Task taskobject) throws OXException ;
+    /**
+     * Loads one tasks by the given ID
+     * 
+     * @param objectId The Object ID
+     * @return return the task object
+     * @throws OXException, OXPermissionException
+     */
+    Task getTaskById(int objectId, int inFolder) throws OXException;
+    
+    /**
+     * Lists all modified objects in a folder
+     * 
+     * @param folderID The Folder ID
+     * @param since all modification >= since
+     * @return A SearchIterator contains Task objects
+     * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+     */     
+    SearchIterator<Task> getModifiedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
+    
+    /**
+     * Lists all deleted objects in a folder
+     * 
+     * @param folderID The Folder ID
+     * @param since all modification >= since
+     * @return A SearchIterator contains Task objects
+     * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+     */    
+    SearchIterator<Task> getDeletedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
 
-	/**
-	 * update the Task
-     * the lastModified attribute is empty, it will be filled with the actual
-     * timestamp.
-	 * @param taskobject
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
-	 */
-	public void updateTaskObject(Task taskobject, int inFolder, Date clientLastModified) throws OXException ;
-	
-	/**
-	 * deletes the Task
-	 * The objectId is a mandatory field in the task object 
-	 * @param taskId the unique identifier of the task to delete.
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
-	 */
-	public void deleteTaskObject(int taskId, int inFolder, Date clientLastModified) throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException ;
+    /**
+     * Loads a range of tasks by the given IDs
+     * 
+     * @param objectIdAndInFolder[] array with two dimensions. First dimension contains a seond array with two values. 1. value is object_id
+     *            2. value if folder_id
+     * @param cols The columns filled to the dataobject
+     * @return A SearchIterator contains Task objects
+     * @throws OXException
+     */    
+    SearchIterator<Task> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
+    
+    /**
+     * Insert the task The lastModified attribute is empty, it will be filled with the actual timestamp.
+     * 
+     * @param taskobject
+     * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException,
+     *             OXObjectNotFoundException
+     */
+    void insertTaskObject(Task taskobject) throws OXException;
 
-	/**
-	 * set the confirmation of the user
-	 * @param objectId The object ID
-	 * @param userId The user ID
-	 * @param confirm The confirm status
-	 * @param confirmMessage The confirm message
-	 * @throws OXException if setting the confirmation fails.
-	 */
-	public Date setUserConfirmation(int objectId, int userId, int confirm, String confirmMessage) throws OXException;
+    /**
+     * update the Task the lastModified attribute is empty, it will be filled with the actual timestamp.
+     * 
+     * @param taskobject
+     * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException,
+     *             OXObjectNotFoundException
+     */
+    void updateTaskObject(Task taskobject, int inFolder, Date clientLastModified) throws OXException;
+    
+    /**
+     * deletes the Task The objectId is a mandatory field in the task object
+     * 
+     * @param taskId the unique identifier of the task to delete.
+     * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException,
+     *             OXObjectNotFoundException
+     */
+    void deleteTaskObject(int taskId, int inFolder, Date clientLastModified) throws OXException;
+
+    /**
+     * set the confirmation of the user
+     * 
+     * @param objectId The object ID
+     * @param userId The user ID
+     * @param confirm The confirm status
+     * @param confirmMessage The confirm message
+     * @throws OXException if setting the confirmation fails.
+     */
+    Date setUserConfirmation(int objectId, int userId, int confirm, String confirmMessage) throws OXException;
 }
