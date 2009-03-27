@@ -1,5 +1,6 @@
 package com.openexchange.fitnesse.wrappers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,5 +64,29 @@ public class FitnesseResult {
     
     public void set(int pos, String value){
         values.set(pos, value);
+    }
+    
+    public static String green(String value) {
+        return PASS+":"+value;
+    }
+    
+    public static List<String> green(List<String> values) {
+        List<String> appended = new ArrayList<String>(values.size());
+        for(String orig : values) {
+            appended.add(green(orig));
+        }
+        return appended;
+    }
+    
+    public static String yellow(String value) {
+        return ERROR+value;
+    }
+    
+    public static List<String> yellow(List<String> values) {
+        List<String> appended = new ArrayList<String>(values.size());
+        for(String orig : values) {
+            appended.add(yellow(orig));
+        }
+        return appended;
     }
 }

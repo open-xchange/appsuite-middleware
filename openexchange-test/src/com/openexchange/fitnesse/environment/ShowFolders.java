@@ -47,47 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.group;
+package com.openexchange.fitnesse.environment;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.group.actions.ListRequest;
-import com.openexchange.ajax.group.actions.ListResponse;
-import com.openexchange.ajax.group.actions.SearchRequest;
-import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import java.util.List;
+import com.openexchange.ajax.folder.tree.FolderNode;
+import com.openexchange.ajax.folder.tree.FolderNodeVisitor;
+import com.openexchange.ajax.folder.tree.RegularFolderNode;
+import com.openexchange.ajax.folder.tree.RootNode;
+import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.SlimTableTable;
+import com.openexchange.fitnesse.folders.FolderResolver;
 
-
+import static com.openexchange.fitnesse.wrappers.FitnesseResult.green;
+import static fitnesse.util.ListUtility.list;
 /**
- * {@link GroupResolver}
+ * {@link ShowFolders}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class GroupResolver {
-    private AJAXClient client;
+public class ShowFolders implements SlimTableTable {
 
-    public GroupResolver(AJAXClient client) {
-        this.client = client;
-    }
-    
-    public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        SearchRequest req = new SearchRequest(pattern, false);
-        SearchResponse response = client.execute(req);
-        return response.getGroups();
-    }
-    
-    public Group[] loadGroups(int...groupIds) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        if(groupIds == null) {
-            return new Group[0];
+    public List doTable(List<List<String>> table) throws Exception {
+        FitnesseEnvironment env = FitnesseEnvironment.getInstance();
+            
+        if (table.size() > 0) {
+            FolderResolver resolver = new FolderResolver(env.getClient(), env);
+            int folderId = resolver.getFolderId(table.get(0).get(0));
+            return list(list(green(dump(new RegularFolderNode(folderId, env.getClient())))));
+        } else {
+            return list(list(green(dump(new RootNode(env.getClient())))));
         }
-        ListRequest req = new ListRequest(groupIds, true);
-        ListResponse response = client.execute(req);
-        return response.getGroups();
     }
+
+    private String dump(FolderNode node) {
+        final StringBuilder b = new StringBuilder();
+        node.recurse(new FolderNodeVisitor() {
+
+            public void visit(int depth, FolderNode folder) {
+                for(int i = 0; i < depth; i++) {
+                    b.append("-");
+                }
+                if(folder.isRoot()) {
+                    b.append("ROOT");
+                } else if(null != folder.getFolder()){
+                    b.append(folder.getFolder().getFolderName());
+                }
+                b.append("<br></br>");
+            }
+            
+        });
+        return b.toString();
+    }
+
 }

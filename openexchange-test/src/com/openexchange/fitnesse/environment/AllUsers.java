@@ -47,47 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.group;
+package com.openexchange.fitnesse.environment;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.group.actions.ListRequest;
-import com.openexchange.ajax.group.actions.ListResponse;
-import com.openexchange.ajax.group.actions.SearchRequest;
-import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import static fitnesse.util.ListUtility.list;
+import java.util.List;
 
 
 /**
- * {@link GroupResolver}
+ * {@link AllUsers}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class GroupResolver {
-    private AJAXClient client;
-
-    public GroupResolver(AJAXClient client) {
-        this.client = client;
+public class AllUsers extends SearchUsers {
+    
+    protected boolean addPatternToOutput() {
+        return false;
     }
     
-    public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        SearchRequest req = new SearchRequest(pattern, false);
-        SearchResponse response = client.execute(req);
-        return response.getGroups();
+    protected String getPattern(List<List<String>> table) {
+        return "*";
     }
     
-    public Group[] loadGroups(int...groupIds) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        if(groupIds == null) {
-            return new Group[0];
+    protected List<String> getFields(List<List<String>> table) {
+        if(table.size() > 0) {
+            return table.get(0);
+        } else {
+            return list ("display_name", "given_name", "sur_name", "mail");
         }
-        ListRequest req = new ListRequest(groupIds, true);
-        ListResponse response = client.execute(req);
-        return response.getGroups();
     }
+
 }

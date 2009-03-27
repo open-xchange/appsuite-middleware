@@ -51,6 +51,7 @@ package com.openexchange.ajax.user.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonSearchResponse;
@@ -65,7 +66,10 @@ public final class SearchResponse extends CommonSearchResponse {
 
     private final int[] userImplAttributes = new int[] {
         ContactObject.INTERNAL_USERID,
-        ContactObject.EMAIL1
+        ContactObject.EMAIL1,
+        ContactObject.DISPLAY_NAME,
+        ContactObject.GIVEN_NAME,
+        ContactObject.SUR_NAME
     };
     
     /**
@@ -83,10 +87,26 @@ public final class SearchResponse extends CommonSearchResponse {
                 final Object value = data[getColumnPos(attribute)];
                 switch (attribute) {
                 case ContactObject.INTERNAL_USERID:
+                    if(JSONObject.NULL == value) {
+                        break;
+                    }
                     user.setId(((Integer) value).intValue());
                     break;
                 case ContactObject.EMAIL1:
+                    if(JSONObject.NULL == value) {
+                        user.setMail(null);
+                        break;
+                    }
                     user.setMail((String) value);
+                    break;
+                case ContactObject.DISPLAY_NAME:
+                    user.setDisplayName((value == JSONObject.NULL) ? null : (String) value);
+                    break;
+                case ContactObject.GIVEN_NAME:
+                    user.setGivenName((value == JSONObject.NULL) ? null : (String) value);
+                    break;
+                case ContactObject.SUR_NAME:
+                    user.setSurname((value == JSONObject.NULL) ? null : (String) value);
                     break;
                 }
             }

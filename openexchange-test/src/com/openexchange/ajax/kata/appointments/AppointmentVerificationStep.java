@@ -52,8 +52,11 @@ package com.openexchange.ajax.kata.appointments;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
@@ -73,7 +76,10 @@ import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -210,6 +216,24 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         int[] columns = AppointmentObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
+            
+            if (col == CalendarObject.PARTICIPANTS && appointment.containsParticipants()) {
+                Participant[] expected = appointment.getParticipants();
+                Participant[] actual = loaded.getParticipants();
+                if (!compareArrays(expected, actual)) {
+                    throw new ParticipantComparisonFailure("", expected, actual);
+                }
+                continue;
+            }
+            if (col == CalendarObject.USERS && appointment.containsUserParticipants()) {
+                UserParticipant[] expected = appointment.getUsers();
+                UserParticipant[] actual = loaded.getUsers();
+                if (!compareArrays(expected, actual)) {
+                    throw new UserParticipantComparisonFailure("", expected, actual);
+                }
+                continue;
+            }
+            
             if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
                 continue;
             }
@@ -241,6 +265,23 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
                 continue;
             }
+            if (column == CalendarObject.PARTICIPANTS) {
+                Participant[] expected = appointment.getParticipants();
+                Participant[] actual = (Participant[]) transform(column, row[i]);
+                if (!compareArrays(expected, actual)) {
+                    throw new ParticipantComparisonFailure("", expected, actual);
+                }
+                continue;
+            }
+            if (column == CalendarObject.USERS) {
+                UserParticipant[] expected = appointment.getUsers();
+                UserParticipant[] actual = (UserParticipant[]) transform(column, row[i]);
+                if (!compareArrays(expected, actual)) {
+                    throw new UserParticipantComparisonFailure("", expected, actual);
+                }
+                continue;
+            }
+            
             if (appointment.contains(column)) {
                 Object expected = appointment.get(column);
                 Object actual = row[i];
@@ -249,6 +290,22 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             }
         }
     }
+    
+    // TODO: Use helper
+    private <T> boolean compareArrays(T[] expected, T[] actual) {
+        if (expected == null && actual == null)
+            return true;
+        System.out.println("Expected: " + expected);
+        System.out.println("Actual: " + actual);
+        Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
+        Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
+        if (expectedParticipants.size() != actualParticipants.size())
+            return false;
+        if (!expectedParticipants.containsAll(actualParticipants))
+            return false;
+        return true;
+    }
+
 
     private void checkInList(AppointmentObject appointment, List<AppointmentObject> appointments) {
         for (AppointmentObject appointmentFromList : appointments) {

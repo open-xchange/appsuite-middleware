@@ -78,6 +78,9 @@ public class UserTest extends AbstractAJAXTest {
         DataObject.OBJECT_ID,
         ContactObject.INTERNAL_USERID,
         ContactObject.EMAIL1,
+        ContactObject.GIVEN_NAME,
+        ContactObject.SUR_NAME,
+        ContactObject.DISPLAY_NAME
     };
 
     public UserTest(final String name) {

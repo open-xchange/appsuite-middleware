@@ -46,13 +46,13 @@ public class UserImpl4Test implements User {
 	
 	private final String mailDomain = null;
 	
-	private final String givenName = null;
+	private String givenName = null;
 	
-	private final String surName = null;
+	private String surName = null;
 	
 	private String mail = null;
 	
-	private final String displayName = null;
+	private String displayName = null;
 	
 	private final String timezone = null;
 	
@@ -165,4 +165,25 @@ public class UserImpl4Test implements User {
 	public void setLocale(final Locale locale) {
 		this.locale = locale;
 	}
+
+    /**
+     * @param string
+     */
+    public void setDisplayName(String displayName) {
+       this.displayName = displayName;
+    }
+
+    /**
+     * @param string
+     */
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+
+    /**
+     * @param string
+     */
+    public void setSurname(String surname) {
+        this.surName = surname;
+    }
 }

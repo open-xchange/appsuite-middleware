@@ -47,47 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.group;
+package com.openexchange.ajax.kata.appointments;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.group.actions.ListRequest;
-import com.openexchange.ajax.group.actions.ListResponse;
-import com.openexchange.ajax.group.actions.SearchRequest;
-import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.groupware.container.UserParticipant;
 
 
 /**
- * {@link GroupResolver}
+ * {@link UserParticipantComparisonFailure}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class GroupResolver {
-    private AJAXClient client;
+public class UserParticipantComparisonFailure extends ParticipantComparisonFailure {
 
-    public GroupResolver(AJAXClient client) {
-        this.client = client;
+    /**
+     * Initializes a new {@link UserParticipantComparisonFailure}.
+     * @param message
+     * @param expected
+     * @param actual
+     */
+    public UserParticipantComparisonFailure(String message, UserParticipant[] expected, UserParticipant[] actual) {
+        super(message, expected, actual);
     }
     
-    public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        SearchRequest req = new SearchRequest(pattern, false);
-        SearchResponse response = client.execute(req);
-        return response.getGroups();
+    @Override
+    public UserParticipant[] getExpectedParticipants() {
+        return (UserParticipant[]) super.getExpectedParticipants();
     }
     
-    public Group[] loadGroups(int...groupIds) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        if(groupIds == null) {
-            return new Group[0];
-        }
-        ListRequest req = new ListRequest(groupIds, true);
-        ListResponse response = client.execute(req);
-        return response.getGroups();
+    @Override
+    public UserParticipant[] getActualParticipants() {
+        return (UserParticipant[]) super.getActualParticipants();
     }
+
 }

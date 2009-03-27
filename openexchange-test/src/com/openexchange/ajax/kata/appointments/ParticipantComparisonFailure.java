@@ -47,47 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.group;
+package com.openexchange.ajax.kata.appointments;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.group.actions.ListRequest;
-import com.openexchange.ajax.group.actions.ListResponse;
-import com.openexchange.ajax.group.actions.SearchRequest;
-import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import org.junit.ComparisonFailure;
+import com.openexchange.groupware.container.Participant;
 
 
 /**
- * {@link GroupResolver}
+ * {@link ParticipantComparisonFailure}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class GroupResolver {
-    private AJAXClient client;
+public class ParticipantComparisonFailure extends ComparisonFailure {
 
-    public GroupResolver(AJAXClient client) {
-        this.client = client;
+    private Participant[] actualParticipants;
+    private Participant[] expectedParticipants;
+
+    /**
+     * Initializes a new {@link ParticipantComparisonFailure}.
+     * @param message
+     * @param expected
+     * @param actual
+     */
+    public ParticipantComparisonFailure(String message, Participant[] expected, Participant[] actual) {
+        super(message, expected.toString(), actual.toString());
+        this.expectedParticipants = expected;
+        this.actualParticipants = actual;
+    }
+
+    
+    public Participant[] getActualParticipants() {
+        return actualParticipants;
+    }
+
+    
+    public Participant[] getExpectedParticipants() {
+        return expectedParticipants;
     }
     
-    public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        SearchRequest req = new SearchRequest(pattern, false);
-        SearchResponse response = client.execute(req);
-        return response.getGroups();
-    }
     
-    public Group[] loadGroups(int...groupIds) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        if(groupIds == null) {
-            return new Group[0];
-        }
-        ListRequest req = new ListRequest(groupIds, true);
-        ListResponse response = client.execute(req);
-        return response.getGroups();
-    }
+
 }

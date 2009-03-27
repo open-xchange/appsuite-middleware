@@ -50,13 +50,18 @@
 package com.openexchange.fitnesse.appointments;
 
 import java.io.IOException;
+import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.kata.Step;
+import com.openexchange.ajax.kata.appointments.ParticipantComparisonFailure;
+import com.openexchange.ajax.kata.appointments.UserParticipantComparisonFailure;
 import com.openexchange.fitnesse.AbstractStepFixture;
+import com.openexchange.fitnesse.environment.PrincipalResolver;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.test.fixtures.AppointmentFixtureFactory;
 import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
@@ -87,13 +92,37 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
      */
     public AppointmentObject createAppointment(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException{
         AppointmentFixtureFactory appointmentFixtureFactory = new AppointmentFixtureFactory(null, null);
-        Fixtures<AppointmentObject> fixtures = appointmentFixtureFactory.createFixture(fixtureName, data.asFixtureMap("appointment"));
+        Map<String, Map<String, String>> fixtureMap = data.asFixtureMap("appointment");
+        String participants = fixtureMap.get("appointment").remove("participants");
+        Fixtures<AppointmentObject> fixtures = appointmentFixtureFactory.createFixture(fixtureName, fixtureMap);
         Fixture<AppointmentObject> entry = fixtures.getEntry("appointment");
+        resolveParticipants(entry, participants);
         int folderId = getClient().getValues().getPrivateAppointmentFolder();
         return (AppointmentObject) addFolder(entry.getEntry(), data, folderId);
     }
    
 
+    private void resolveParticipants(Fixture<AppointmentObject> entry, String participants) throws FitnesseException {
+        String[] participantsList = participants.split("\\s*,\\s*");
+        PrincipalResolver resolver = new PrincipalResolver( environment.getClient() );
+        for(String participant: participantsList){
+            Participant resolvedParticipant = resolver.resolveEntity(participant);
+            entry.getEntry().addParticipant(resolvedParticipant);
+        }
+        
+    }
+
     protected abstract Step createStep(AppointmentObject appointment, String fixtureName, String expectedError);
+
+    
+    public int findFailedFieldPosition(String expectedValue, Throwable t) {
+        if(UserParticipantComparisonFailure.class.isInstance(t)) {
+            return data.getHeader().indexOf("users");
+        }
+        if(ParticipantComparisonFailure.class.isInstance(t)) {
+            return data.getHeader().indexOf("participants");
+        }
+        return super.findFailedFieldPosition(expectedValue, t);
+    }
 
 }

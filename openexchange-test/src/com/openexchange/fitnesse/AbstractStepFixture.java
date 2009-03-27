@@ -93,16 +93,8 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
         }
         
         FitnesseResult returnValues = new FitnesseResult(data, FitnesseResult.PASS);
-        try {
-            step.perform(environment.getClient());
-        } catch (ComparisonFailure failure) {
-            int pos = findFailedFieldPosition(failure.getExpected());
-            returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());
-            failure.printStackTrace();
-        } catch (AssertionFailedError e) {
-            returnValues.set(0, FitnesseResult.ERROR + e.getMessage());
-            e.printStackTrace();
-        }
+        
+        perform(step, returnValues);
 
         environment.registerStep(step);
 
@@ -113,7 +105,20 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
         return returnValues.toResult();
     }
 
-    public int findFailedFieldPosition(String expectedValue) {
+    protected void perform(Step step, FitnesseResult returnValues) throws Exception {
+        try {
+            step.perform(environment.getClient());
+        } catch (ComparisonFailure failure) {
+            int pos = findFailedFieldPosition(failure.getExpected(), failure);
+            returnValues.set(pos, FitnesseResult.ERROR + " expected: " + failure.getExpected() + ", actual: " + failure.getActual());
+            failure.printStackTrace();
+        } catch (AssertionFailedError e) {
+            returnValues.set(0, FitnesseResult.ERROR + e.getMessage());
+            e.printStackTrace();
+        }        
+    }
+
+    public int findFailedFieldPosition(String expectedValue, Throwable t) {
         for (int i = 0; i < data.size(); i++) {
             if (expectedValue.equals(data.get(i)))
                 return i;
