@@ -246,19 +246,6 @@
 		<antcall target="compile-console"></antcall>
     </target>
 
-
-    <target name="compile_libs">
-        <mkdir dir="classes"/>
-        <javac failonerror="true" srcdir="src/com/openexchange/admin/rmi" debug="true" destdir="classes">
-            <exclude name="*ResourceGroup*"/>
-            <include name="**.java"/>
-        	<classpath>
-                <path refid="project.classpath"/>
-            </classpath>
-        </javac>
-    </target>
-
-
     <target name="jar" depends="compile,manifest">
         <mkdir dir="jar"/>
         <jar update="true" jarfile="jar/${bundle.name}"
@@ -269,7 +256,7 @@
     </target>
 
 
-    <target name="client" depends="compile_libs">
+    <target name="client" depends="compile">
         <mkdir dir="jar"/>
         <jar update="true" jarfile="jar/${client.jar}"
          includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/,com/openexchange/admin/plugins/"
@@ -388,8 +375,6 @@
     	<mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-
-    	<antcall target="install-jar"></antcall>
 
     	<antcall target="install-plugins"></antcall>
 		<antcall target="install-console"></antcall>
