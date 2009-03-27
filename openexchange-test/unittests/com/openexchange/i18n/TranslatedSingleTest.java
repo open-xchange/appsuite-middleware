@@ -81,7 +81,9 @@ public class TranslatedSingleTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        Init.startServer();
+        Init.injectProperty();
+        Init.startAndInjectConfigBundle();
+        Init.startAndInjectI18NBundle();
     }
 
     /**

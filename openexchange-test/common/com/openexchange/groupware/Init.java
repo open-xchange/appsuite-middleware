@@ -182,12 +182,16 @@ public final class Init {
 
     new GroupInit()};
 
+	public static void injectProperty() {
+        System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
+	}
+
 	public static void startServer() throws Exception {
 		if (running) {
 			return;
 		}
 		running = true;
-		System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
+		injectProperty();
 
 		injectTestServices();
 		for (final Initialization init : inits) {
@@ -227,7 +231,7 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
     }
 
-    private static void startAndInjectI18NBundle() throws FileNotFoundException {
+    public static void startAndInjectI18NBundle() throws FileNotFoundException {
 		final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
 		final String directory_name = config.getProperty("i18n.language.path");
 		final File dir = new File(directory_name);
@@ -251,7 +255,7 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(Timer.class, timer);
     }
 
-	private static void startAndInjectConfigBundle() {
+	public static void startAndInjectConfigBundle() {
 		final ConfigurationService config = new ConfigurationImpl();
 		services.put(ConfigurationService.class, config);
 		ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
