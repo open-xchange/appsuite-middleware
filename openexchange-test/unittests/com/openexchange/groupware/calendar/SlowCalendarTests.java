@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -144,7 +145,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             final String COLS_STRING = cols.toString();
 
             // ALL
-            final AppointmentRequest req = new AppointmentRequest(session, ctx);
+            final AppointmentRequest req = new AppointmentRequest(new ServerSessionAdapter(session));
             JSONObject requestData = json(
                 AJAXServlet.PARAMETER_COLUMNS,
                 COLS_STRING,
