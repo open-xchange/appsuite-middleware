@@ -54,14 +54,11 @@ package com.openexchange.webdav.xml;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.FolderSQLInterface;
@@ -72,6 +69,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * FolderWriter
@@ -104,7 +102,7 @@ public class FolderWriter extends FolderChildWriter {
 	}
 	
 	public void startWriter(final int objectId,  final OutputStream os) throws Exception {
-		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj, ctx);
+		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
 		
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
@@ -121,7 +119,7 @@ public class FolderWriter extends FolderChildWriter {
 	}
 	
 	public void startWriter(final boolean modified, final boolean deleted, final boolean bList, Date lastsync, final OutputStream os) throws Exception {
-		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj, ctx);
+		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
 		
 		final XMLOutputter xo = new XMLOutputter();
 		

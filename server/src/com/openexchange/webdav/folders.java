@@ -52,7 +52,6 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.Queue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -75,6 +74,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.tasks.QueuedTask;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.FolderParser;
@@ -176,8 +176,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     @Override
     protected void performActions(final OutputStream os, final Session session,
             final PendingInvocations<FolderSQLInterface> pendingInvocations) throws IOException, AbstractOXException {
-        final FolderSQLInterface foldersql = new RdbFolderSQLInterface(session, ContextStorage.getInstance()
-                .getContext(session.getContextId()));
+        final FolderSQLInterface foldersql = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
         while (!pendingInvocations.isEmpty()) {
             final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
             if (null != qfld) {
@@ -262,7 +261,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                     }
 
                     /* folderObject = */
-                    Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
+                    final Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, lastModified);
                     foldersSQL.saveFolderObject(folderObject, currentLastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, folderObject.getLastModified());

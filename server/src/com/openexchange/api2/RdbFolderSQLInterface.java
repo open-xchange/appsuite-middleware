@@ -153,6 +153,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     }
 
     public RdbFolderSQLInterface(final ServerSession session, final OXFolderAccess oxfolderAccess) {
+        super();
         this.session = session;
         this.ctx = session.getContext();
         userConfiguration = session.getUserConfiguration();

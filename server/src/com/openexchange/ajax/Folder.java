@@ -283,7 +283,7 @@ public class Folder extends SessionServlet {
              */
             final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-            final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+            final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
             final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
             final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getRootFolderForUser()).asQueue();
@@ -389,7 +389,7 @@ public class Folder extends SessionServlet {
             if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
                 // TODO: DELEGATE TO getRootFolder() if parentId is "0"
                 long lastModified = 0;
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
                 /*
                  * Write requested child folders
@@ -783,7 +783,7 @@ public class Folder extends SessionServlet {
                  * Client requests shared folders
                  */
                 long lastModified = 0;
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 int sharedOwner;
                 try {
                     sharedOwner = Integer.parseInt(parentIdentifier.substring(2));
@@ -920,7 +920,7 @@ public class Folder extends SessionServlet {
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
             int folderId = -1;
             if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 /*
                  * Pre-Select field writers
                  */
@@ -1108,7 +1108,7 @@ public class Folder extends SessionServlet {
             final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
             final boolean ignoreDeleted = STRING_DELETED.equalsIgnoreCase(paramContainer.getStringParam(PARAMETER_IGNORE));
             lastModified = Math.max(timestamp.getTime(), lastModified);
-            final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+            final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
             final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
             /*
              * Get all updated OX folders
@@ -1326,7 +1326,7 @@ public class Folder extends SessionServlet {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             int folderId = -1;
             if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 final FolderObject fo = foldersqlinterface.getFolderById(folderId);
                 lastModifiedDate = fo.getLastModified();
                 jsonWriter = new OXJSONWriter();
@@ -1419,7 +1419,7 @@ public class Folder extends SessionServlet {
             int updateFolderId = -1;
             if ((updateFolderId = getUnsignedInteger(folderIdentifier)) >= 0) {
                 timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 FolderObject fo = new FolderObject(updateFolderId);
                 new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, timestamp);
@@ -1503,7 +1503,7 @@ public class Folder extends SessionServlet {
             final JSONObject jsonObj = new JSONObject(body);
             int parentFolderId = -1;
             if ((parentFolderId = getUnsignedInteger(parentFolder)) >= 0) {
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 FolderObject fo = new FolderObject();
                 fo.setParentFolderID(parentFolderId);
                 new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
@@ -1599,7 +1599,7 @@ public class Folder extends SessionServlet {
                             timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
                         }
                         if (foldersqlinterface == null) {
-                            foldersqlinterface = new RdbFolderSQLInterface(session, ctx, access);
+                            foldersqlinterface = new RdbFolderSQLInterface(session, access);
                         }
                         FolderObject delFolderObj;
                         try {
