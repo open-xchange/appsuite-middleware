@@ -53,7 +53,7 @@ public class GroupwareTests extends AJAXTest {
         }
         assertFalse(json.optString("error"), json.has("error"));
         assertTrue("Session ID is missing: " + body, json.has(Login.PARAMETER_SESSION));
-        assertTrue("Random is missing: " + body, json.has(Login._random));
+        assertTrue("Random is missing: " + body, json.has(Login.PARAM_RANDOM));
         System.out.println(json);
         return new WebconversationAndSessionID(conversation, (String)json.get(Login.PARAMETER_SESSION));
     }
