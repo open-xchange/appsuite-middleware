@@ -75,4 +75,8 @@ final class WrappingScheduledTimerTask implements ScheduledTimerTask {
         return scheduledFuture.cancel(mayInterruptIfRunning);
     }
 
+    public boolean cancel() {
+        return scheduledFuture.cancel(false);
+    }
+
 }

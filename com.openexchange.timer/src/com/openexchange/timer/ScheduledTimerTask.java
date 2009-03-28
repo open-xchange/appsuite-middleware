@@ -72,4 +72,15 @@ public interface ScheduledTimerTask {
      */
     boolean cancel(boolean mayInterruptIfRunning);
 
+    /**
+     * A convenience method that invokes {@link #cancel(boolean)} with argument set to <code>false</code>. Thus in-progress tasks are
+     * allowed to complete prior to attempting to cancel execution of this task. This attempt will return <code>false</code> if the task has
+     * already completed or already been canceled.
+     * <p>
+     * If successful, and this task has not started when <tt>cancel()</tt> is called, this task should never run.
+     * 
+     * @return <code>false</code> if the task could not be canceled, typically because it has already completed normally; <code>true</code>
+     *         otherwise
+     */
+    boolean cancel();
 }
