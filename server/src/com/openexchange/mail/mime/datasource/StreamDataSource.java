@@ -125,6 +125,10 @@ public final class StreamDataSource implements DataSource {
 
         /**
          * Gets a newly allocated input stream.
+         * <p>
+         * This method returns an InputStream representing the data and throws the appropriate exception if it can not do so.<br>
+         * <small><b>NOTE:</b></small> A new InputStream object must be returned each time this method is called, and the stream must be
+         * positioned at the beginning of the data.
          * 
          * @throws IOException If an I/O error occurs when allocating a new input stream.
          * @return A newly allocated input stream
