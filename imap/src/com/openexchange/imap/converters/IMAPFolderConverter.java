@@ -60,6 +60,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.imap.ACLPermission;
+import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.NamespaceFolder;
 import com.openexchange.imap.acl.ACLExtension;
@@ -81,6 +82,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
@@ -337,9 +339,25 @@ public final class IMAPFolderConverter {
             }
             final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
             if (selectable && aclExtension.canRead(ownRights)) {
-                mailFolder.setMessageCount(imapFolder.getMessageCount());
-                mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
-                mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
+                try {
+                    mailFolder.setMessageCount(imapFolder.getMessageCount());
+                    mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
+                    mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
+                } catch (final MessagingException e) {
+                    final Exception nested = e.getNextException();
+                    if (nested instanceof ParsingException && nested.getMessage().indexOf("STATUS") != -1) {
+                        /*
+                         * Parsing of STATUS response failed
+                         */
+                        final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
+                        mailFolder.setMessageCount(status[0]);
+                        mailFolder.setMessageCount(status[1]);
+                        mailFolder.setMessageCount(status[2]);
+                    } else {
+                        // Re-throw
+                        throw e;
+                    }
+                }
                 mailFolder.setDeletedMessageCount(imapFolder.getDeletedMessageCount());
             } else {
                 mailFolder.setMessageCount(-1);
@@ -386,8 +404,7 @@ public final class IMAPFolderConverter {
         final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append(
-                    '%').toString();
+                final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
                 if (checkSubscribed) {
                     return protocol.lsub("", pattern);
                 }

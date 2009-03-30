@@ -1,3 +1,7 @@
+* 2009-03-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #13451: Retry parsing IMAP server's STATUS response in a more tolerant way if a parsing error occurs
+
 * 2009-03-27 - dennis.sieben@open-xchange.com
 
  - Bugfix #13442: Correctly parsing multi line sieve rules.

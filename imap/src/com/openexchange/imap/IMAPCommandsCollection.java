@@ -252,6 +252,107 @@ public final class IMAPCommandsCollection {
         })).booleanValue();
     }
 
+    public static int[] getStatus(final IMAPFolder imapFolder) throws MessagingException {
+        return (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
+                    /*
+                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
+                     */
+                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
+                }
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final Argument args = new Argument();
+                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                /*
+                 * Item arguments
+                 */
+                final Argument itemArgs = new Argument();
+                final String[] items = { "MESSAGES", "RECENT", "UNSEEN" };
+                for (int i = 0, len = items.length; i < len; i++) {
+                    itemArgs.writeAtom(items[i]);
+                }
+                args.writeArgument(itemArgs);
+                /*
+                 * Perform command
+                 */
+                final Response[] r = protocol.command("STATUS", args);
+                final Response response = r[r.length - 1];
+                /*
+                 * Look for STATUS responses
+                 */
+                int total = -1;
+                int recent = -1;
+                int unseen = -1;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("STATUS")) {
+                            final int[] status = parseStatusResponse(ir);
+                            if (status[0] != -1) {
+                                total = status[0];
+                            }
+                            if (status[1] != -1) {
+                                recent = status[1];
+                            }
+                            if (status[2] != -1) {
+                                unseen = status[2];
+                            }
+                            r[i] = null;
+                        }
+                    }
+                }
+                return new int[] { total, recent, unseen };
+            }
+        });
+    }
+
+    /**
+     * Parses number of total, recent and unread messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
+     * .
+     * 
+     * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
+     * @return An array of <code>int</code> with length of <code>3</code> containing number of total (index <code>0</code>), recent (index
+     *         <code>1</code>) and unread (index <code>2</code>) messages
+     * @throws ParsingException If parsing STATUS response fails
+     */
+    static int[] parseStatusResponse(final Response statusResponse) throws ParsingException {
+        /*
+         * Read until opening parenthesis or EOF
+         */
+        byte b = 0;
+        do {
+            b = statusResponse.readByte();
+        } while (b != 0 && b != '(');
+        if (0 == b) {
+            // EOF
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
+        /*
+         * Parse parenthesized list
+         */
+        int total = -1;
+        int recent = -1;
+        int unseen = -1;
+        do {
+            final String attr = statusResponse.readAtom();
+            if (attr.equalsIgnoreCase("MESSAGES")) {
+                total = statusResponse.readNumber();
+            } else if (attr.equalsIgnoreCase("RECENT")) {
+                recent = statusResponse.readNumber();
+            } else if (attr.equalsIgnoreCase("UNSEEN")) {
+                unseen = statusResponse.readNumber();
+            }
+        } while (statusResponse.readByte() != ')');
+        return new int[] { total, recent, unseen };
+    }
+
     /**
      * Get the quotas for the quota-root associated with given IMAP folder. Note that many folders may have the same quota-root. Quotas are
      * controlled on the basis of a quota-root, not (necessarily) a folder. The relationship between folders and quota-roots depends on the
