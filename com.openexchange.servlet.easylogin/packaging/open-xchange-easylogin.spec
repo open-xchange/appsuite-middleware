@@ -39,7 +39,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange Password Change Servlet
+Summary:        The Open-Xchange Easylogin Servlet
 Requires:       open-xchange-common open-xchange-global open-xchange-server
 #
 
