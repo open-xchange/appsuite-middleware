@@ -308,6 +308,11 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
+                /*
+                 * Dispatch remaining untagged responses
+                 */
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
                 return new int[] { total, recent, unseen };
             }
         });
