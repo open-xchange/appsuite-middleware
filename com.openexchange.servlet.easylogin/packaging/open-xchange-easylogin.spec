@@ -1,13 +1,17 @@
 
 # norootforbuild
 
-Name:           open-xchange-holgi
+Name:           open-xchange-easylogin
 BuildArch:	noarch
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
-BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
+BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
+BuildRequires:  java-1_5_0-ibm-devel >= 1.5.0_sr9
+BuildRequires:  java-1_5_0-ibm-alsa >= 1.5.0_sr9
+BuildRequires:  update-alternatives
 %endif
 %if %{?suse_version} >= 1100
 BuildRequires:  java-sdk-openjdk
@@ -28,19 +32,19 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:        6.5.0
-Release:        2
+Version:	6.9.0.0
+Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange Holgi Bundle
+Summary:        The Open-Xchange Password Change Servlet
 Requires:       open-xchange-common open-xchange-global open-xchange-server
 #
 
 %description
-The Open-Xchange Server Holgi Bundle
+The Open-Xchange Easylogin Servlet
 
 Authors:
 --------
@@ -53,6 +57,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
@@ -61,7 +66,10 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/etc/groupware
 %dir /opt/open-xchange/bundles
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
+/opt/open-xchange/etc/groupware/*.properties
+

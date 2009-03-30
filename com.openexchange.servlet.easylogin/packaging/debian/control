@@ -2,12 +2,12 @@ Source: open-xchange-easylogin
 Section: unknown
 Priority: optional
 Maintainer: Holger Achtziger <info@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.6.0), open-xchange-global (>=6.6.0), open-xchange-server (>=6.6.0)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.9.0.0), open-xchange-global (>=6.9.0.0), open-xchange-server (>=6.9.0.0)
 Standards-Version: 3.6.1
 
 Package: open-xchange-easylogin
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.6.0), open-xchange-global (>=6.6.0), open-xchange-server (>=6.6.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.9.0.0), open-xchange-global (>=6.9.0.0), open-xchange-server (>=6.9.0.0)
 Provides: open-xchange-easylogin
 Conflicts: open-xchange-easylogin
 Replaces: open-xchange-easylogin
