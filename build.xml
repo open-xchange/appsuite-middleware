@@ -344,7 +344,6 @@
     <target name="install" depends="replacer">
         <mkdir dir="${destdir}/var/log/open-xchange"/>
         <mkdir dir="${destdir}/${prefix}/libexec"/>
-        <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
 		<chmod perm="700" dir="${destdir}/var/log/open-xchange"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
@@ -353,12 +352,6 @@
 	    <!-- grrr, unable to exclude a directory, so remove it manually -->
     	<delete dir="${destdir}/${prefix}/${oxconfdir}/etc/mysql/database-changes"/>
 		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
-        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
-        </copy>
-    	<chmod perm="755">
-            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
-        </chmod>
     	<mkdir dir="${destdir}/etc/init.d"/>
 		<!-- copy all dist specific files from below system/ to $prefix/ -->
     	<copy todir="${destdir}/" overwrite="true">
@@ -390,8 +383,15 @@
     </target>
 	
 	<target name="install-client" depends="client">
+        <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
+        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
+            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
+        </copy>
+    	<chmod perm="755">
+            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
+        </chmod>
     </target>
 	
     <target name="install-doc" depends="doc">

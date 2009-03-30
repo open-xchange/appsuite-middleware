@@ -208,11 +208,9 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/sbin
 %dir /opt/open-xchange/etc/admindaemon
 %dir /opt/open-xchange/etc/admindaemon/osgi
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
-/opt/open-xchange/sbin/*
 /etc/init.d/*
 /sbin/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/*.properties
@@ -227,7 +225,9 @@ fi
 %files -n open-xchange-admin-client
 %defattr(-,root,root)
 %dir /opt/open-xchange/lib/
+%dir /opt/open-xchange/sbin
 /opt/open-xchange/lib/*
+/opt/open-xchange/sbin/*
 
 %files -n open-xchange-admin-lib
 %defattr(-,root,root)
