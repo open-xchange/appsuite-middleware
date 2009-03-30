@@ -54,10 +54,13 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -78,6 +81,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
@@ -237,6 +242,10 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
                 continue;
             }
+            if (appointment.containsParentFolderID()) {
+                assertEquals(name+" : Column " + col + " differs!", expectedFolderId, loaded.getParentFolderID());
+                continue;
+            }
             if (appointment.contains(col)) {
                 assertEquals(name + ": Column " + col + " differs!", appointment.get(col), loaded.get(col));
             }
@@ -295,8 +304,9 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
     private <T> boolean compareArrays(T[] expected, T[] actual) {
         if (expected == null && actual == null)
             return true;
-        System.out.println("Expected: " + expected);
-        System.out.println("Actual: " + actual);
+        Thread.dumpStack();
+        System.err.println("Expected: " + Arrays.asList(expected));
+        System.err.println("Actual: " + Arrays.asList(actual));
         Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
         Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
         if (expectedParticipants.size() != actualParticipants.size())
@@ -334,6 +344,28 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         case AppointmentObject.END_DATE:
             int offset = getTimeZone().getOffset(((Long) actual).longValue());
             return new Date(((Long) actual).longValue() - offset);
+        case AppointmentObject.PARTICIPANTS:
+        case AppointmentObject.USERS:
+            JSONArray participantArr = (JSONArray) actual;
+            List<Participant> participants = new LinkedList<Participant>();
+            for (int i = 0, size = participantArr.length(); i < size; i++) {
+                JSONObject participantObj = participantArr.getJSONObject(i);
+                System.out.println(participantObj);
+                int type = participantObj.getInt("type");
+                switch (type) {
+                case Participant.USER:
+                    participants.add(new UserParticipant(participantObj.getInt("id")));
+                    break;
+                case Participant.GROUP:
+                    participants.add(new GroupParticipant(participantObj.getInt("id")));
+                    break;
+                case Participant.EXTERNAL_USER:
+                    participants.add(new ExternalUserParticipant(participantObj.getString("mail")));
+                    break;
+                // TODO: Resources
+                }
+                return participants.toArray(AppointmentObject.PARTICIPANTS == column ? new Participant[participants.size()] : new UserParticipant[participants.size()]);
+            }
         }
 
         return actual;

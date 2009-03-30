@@ -59,6 +59,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -193,6 +194,29 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         }
     }
 
+    public void testParticipantsAgreeViaDifferentLoadMethods() throws OXException, SQLException, SearchIteratorException {
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
+        appointments.save(appointment);
+        clean.add(appointment);
+        
+        AppointmentSQLInterface appointmentSql = appointments.getCurrentAppointmentSQLInterface();
+        
+        SearchIterator<CalendarDataObject> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
+        AppointmentObject loadedViaFolderListing = null;
+        while(appointmentsBetweenInFolder.hasNext()) {
+            CalendarDataObject temp = appointmentsBetweenInFolder.next();
+            if(temp.getObjectID() == appointment.getObjectID()) {
+                loadedViaFolderListing = temp;
+            }
+        }
+        
+        CalendarDataObject loadedViaID = appointments.reload(appointment);
+        
+        System.out.println(Arrays.asList(loadedViaFolderListing.getParticipants()));
+        System.out.println(Arrays.asList(loadedViaID.getParticipants()));
+          
+    }
+    
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {

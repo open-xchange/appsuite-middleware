@@ -1,0 +1,13 @@
+!include CommonSetup
+
+|Table: who am I|
+
+|Table:create appointment|
+|title| start_date | end_date |
+|Appointment with Participants | Tomorrow at 10 am | Tomorrow at 11 am |
+
+|Table:verify appointment|
+|title| start_date | end_date | participants |
+|Appointment with Participants | Tomorrow at 10 am | Tomorrow at 11 am | thorben |
+
+!include CommonTearDown

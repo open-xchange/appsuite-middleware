@@ -47,69 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.user;
+package com.openexchange.fitnesse.environment;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.UserTest;
-import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.user.actions.GetRequest;
-import com.openexchange.ajax.user.actions.SearchRequest;
-import com.openexchange.ajax.user.actions.SearchResponse;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.tools.servlet.AjaxException;
+import static com.openexchange.fitnesse.wrappers.FitnesseResult.green;
+import static fitnesse.util.ListUtility.list;
+
+import java.util.List;
+import com.openexchange.ajax.user.UserResolver;
+import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.SlimTableTable;
 
 
 /**
- * {@link UserResolver}
+ * {@link WhoAmI}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UserResolver {
-    private AJAXClient client;
+public class WhoAmI implements SlimTableTable {
 
-    public UserResolver(AJAXClient client) {
-        this.client = client;
-    }
-    
-    public User[] resolveUser(String searchPattern) throws AjaxException, IOException, SAXException, JSONException {
-        final ContactSearchObject search = new ContactSearchObject();
-        search.setPattern(searchPattern);
-        search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-        final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
-        final SearchResponse response = client.execute(request);
-        return response.getUser();
-    }
-
-    /**
-     * @param identifier
-     * @return
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws AjaxException 
-     * @throws OXException 
+    /* (non-Javadoc)
+     * @see com.openexchange.fitnesse.SlimTableTable#doTable(java.util.List)
      */
-    public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException {
-        GetRequest request = new GetRequest(identifier);
-        GetResponse response = client.execute(request);
-        ContactObject contact = response.getContact();
-        UserImpl4Test user = new UserImpl4Test();
-        
-        user.setDisplayName(contact.getDisplayName());
-        user.setGivenName(contact.getGivenName());
-        user.setSurname(contact.getSurName());
-        user.setId(identifier);
-        user.setMail(contact.getEmail1());
-        return user;
+    public List doTable(List<List<String>> table) throws Exception {
+        FitnesseEnvironment env = FitnesseEnvironment.getInstance();
+        UserResolver userResolver = new UserResolver(env.getClient());
+        String displayName = userResolver.loadUser( env.getClient().getValues().getUserId() ).getDisplayName();
+        return list(list(green(displayName)));
     }
+
 }

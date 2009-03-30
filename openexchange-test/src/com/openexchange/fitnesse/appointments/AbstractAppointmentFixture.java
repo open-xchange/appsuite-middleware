@@ -50,30 +50,41 @@
 package com.openexchange.fitnesse.appointments;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.ComparisonFailure;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.group.GroupResolver;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.ajax.kata.appointments.ParticipantComparisonFailure;
 import com.openexchange.ajax.kata.appointments.UserParticipantComparisonFailure;
+import com.openexchange.ajax.user.UserResolver;
+import com.openexchange.api2.OXException;
 import com.openexchange.fitnesse.AbstractStepFixture;
 import com.openexchange.fitnesse.environment.PrincipalResolver;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
+import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
+import com.openexchange.group.Group;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.test.fixtures.AppointmentFixtureFactory;
 import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.Fixtures;
 import com.openexchange.tools.servlet.AjaxException;
-
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * {@link AbstractAppointmentFixture}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
 
@@ -81,16 +92,17 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
     protected Step createStep(FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException {
         String fixtureName = data.getFixtureName();
         AppointmentObject appointment = createAppointment(fixtureName, data);
-        
+
         Step step = createStep(appointment, fixtureName, data.getExpectedError());
         return step;
     }
-    
+
     /**
      * Creates an appointment via AppointmentFixtureFactory
-     * @throws FitnesseException 
+     * 
+     * @throws FitnesseException
      */
-    public AppointmentObject createAppointment(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException{
+    public AppointmentObject createAppointment(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException {
         AppointmentFixtureFactory appointmentFixtureFactory = new AppointmentFixtureFactory(null, null);
         Map<String, Map<String, String>> fixtureMap = data.asFixtureMap("appointment");
         String participants = fixtureMap.get("appointment").remove("participants");
@@ -100,29 +112,96 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
         int folderId = getClient().getValues().getPrivateAppointmentFolder();
         return (AppointmentObject) addFolder(entry.getEntry(), data, folderId);
     }
-   
 
     private void resolveParticipants(Fixture<AppointmentObject> entry, String participants) throws FitnesseException {
+        if(participants == null)
+            return;
         String[] participantsList = participants.split("\\s*,\\s*");
-        PrincipalResolver resolver = new PrincipalResolver( environment.getClient() );
-        for(String participant: participantsList){
+        PrincipalResolver resolver = new PrincipalResolver(environment.getClient());
+        for (String participant : participantsList) {
             Participant resolvedParticipant = resolver.resolveEntity(participant);
             entry.getEntry().addParticipant(resolvedParticipant);
         }
-        
+
     }
 
     protected abstract Step createStep(AppointmentObject appointment, String fixtureName, String expectedError);
 
-    
     public int findFailedFieldPosition(String expectedValue, Throwable t) {
-        if(UserParticipantComparisonFailure.class.isInstance(t)) {
+        if (UserParticipantComparisonFailure.class.isInstance(t)) {
             return data.getHeader().indexOf("users");
         }
-        if(ParticipantComparisonFailure.class.isInstance(t)) {
+        if (ParticipantComparisonFailure.class.isInstance(t)) {
             return data.getHeader().indexOf("participants");
         }
         return super.findFailedFieldPosition(expectedValue, t);
+    }
+
+    @Override
+    protected String createErrorColumn(ComparisonFailure failure) throws FitnesseException {
+        if (UserParticipantComparisonFailure.class.isInstance(failure)) {
+            UserParticipantComparisonFailure participantFailure = (UserParticipantComparisonFailure) failure;
+            UserParticipant[] actualParticipants = participantFailure.getActualParticipants();
+            UserParticipant[] expectedParticipants = participantFailure.getExpectedParticipants();
+            try {
+                String actualNames = translateToNames(actualParticipants);
+                String expectedNames = translateToNames(expectedParticipants);
+                return FitnesseResult.ERROR + " expected: " + expectedNames + ", actual: " + actualNames;
+            } catch ( Exception e ) {
+                throw new FitnesseException(e);
+            }
+        }
+        if (ParticipantComparisonFailure.class.isInstance(failure)) {
+            ParticipantComparisonFailure participantFailure = (ParticipantComparisonFailure) failure;
+            Participant[] actualParticipants = participantFailure.getActualParticipants();
+            Participant[] expectedParticipants = participantFailure.getExpectedParticipants();
+            try {
+                String actualNames = translateToNames(actualParticipants);
+                String expectedNames = translateToNames(expectedParticipants);
+                return FitnesseResult.ERROR + " expected: " + expectedNames + ", actual: " + actualNames;
+            } catch (Exception e) {
+                throw new FitnesseException(e);
+            }
+        }
+        return super.createErrorColumn(failure);
+    }
+
+    /**
+     * @param actualParticipants
+     * @throws JSONException
+     * @throws SAXException
+     * @throws IOException
+     * @throws OXException
+     * @throws AjaxException
+     * @throws OXJSONException 
+     */
+    protected String translateToNames(Participant[] participants) throws AjaxException, OXException, IOException, SAXException, JSONException, OXJSONException {
+        StringBuilder bob = new StringBuilder();
+        List<String> names = new LinkedList<String>();
+        UserResolver userResolver = new UserResolver(getClient());
+        GroupResolver groupResolver = new GroupResolver(getClient());
+        
+        for (Participant participant : participants) {
+            switch(participant.getType()) {
+            case Participant.USER:
+                User user = userResolver.loadUser(participant.getIdentifier());
+                names.add(user.getDisplayName());
+                break;
+            case Participant.GROUP:
+                Group group = groupResolver.loadGroups(participant.getIdentifier())[0];
+                names.add( group.getDisplayName() );
+                break;
+            case Participant.EXTERNAL_USER:
+                ExternalUserParticipant external = (ExternalUserParticipant) participant;
+                names.add( external.getEmailAddress() );
+                break;
+            }
+        }
+        Collections.sort(names);
+        for (String name : names) {
+            bob.append(name).append(", ");
+        }
+        return bob.substring(0, bob.length() - 2);
     }
 
 }

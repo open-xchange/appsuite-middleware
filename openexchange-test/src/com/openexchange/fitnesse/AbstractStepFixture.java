@@ -110,12 +110,16 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
             step.perform(environment.getClient());
         } catch (ComparisonFailure failure) {
             int pos = findFailedFieldPosition(failure.getExpected(), failure);
-            returnValues.set(pos, FitnesseResult.ERROR + " expected: " + failure.getExpected() + ", actual: " + failure.getActual());
+            returnValues.set(pos, createErrorColumn(failure));
             failure.printStackTrace();
         } catch (AssertionFailedError e) {
             returnValues.set(0, FitnesseResult.ERROR + e.getMessage());
             e.printStackTrace();
         }        
+    }
+
+    protected String createErrorColumn(ComparisonFailure failure) throws FitnesseException {
+        return FitnesseResult.ERROR + " expected: " + failure.getExpected() + ", actual: " + failure.getActual();
     }
 
     public int findFailedFieldPosition(String expectedValue, Throwable t) {
