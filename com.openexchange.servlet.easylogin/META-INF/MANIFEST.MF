@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: easylogin servlet implementation
+Bundle-SymbolicName: com.openexchange.easylogin
+Bundle-Version: 6.8.1
+Bundle-Activator: com.openexchange.easylogin.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.fields,
+ com.openexchange.ajax.parser,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.configuration,
+ com.openexchange.groupware.ldap,
+ com.openexchange.json,
+ com.openexchange.resource,
+ com.openexchange.resource.json,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.servlet.http,
+ com.openexchange.user,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging;version="1.0.4",
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.http

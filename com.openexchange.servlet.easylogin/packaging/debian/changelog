@@ -1,0 +1,5 @@
+open-xchange-easylogin (6.8.1-0) unstable; urgency=low
+
+  * Initial SP5U1 release. (Closes: #XXXXXX)
+
+ -- Holger Achtziger <holger.achtziger@open-xchange.com>  Thu, 30 Mar 2009 16:31:44 +0100
