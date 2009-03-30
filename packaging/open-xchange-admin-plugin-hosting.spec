@@ -115,16 +115,16 @@ mv doc javadoc
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
-%dir /opt/open-xchange/sbin
 %dir /opt/open-xchange/etc/admindaemon/plugin
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
-/opt/open-xchange/sbin/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %files -n open-xchange-admin-plugin-hosting-client
 %defattr(-,root,root)
 %dir /opt/open-xchange/lib/
+%dir /opt/open-xchange/sbin
 /opt/open-xchange/lib/*
+/opt/open-xchange/sbin/*
 
 %files -n open-xchange-admin-plugin-hosting-lib
 %defattr(-,root,root)
