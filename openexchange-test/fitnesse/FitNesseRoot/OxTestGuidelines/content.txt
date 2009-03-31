@@ -1,5 +1,6 @@
+!2 Structuring test suites
 Test suites depend on hierarchies. So a suite can only call other suites if these are sorted below it.
-This wiki is not very flexible to move test suites around. '''So please use the given hierarchies for test suites'''. If you add another suite, make it fit in the hierarchy. Usually, that means adding a link to it on the page of the super-suite and prefix that link with ">".
+This wiki is not very flexible to move test suites around. '''So please use the given hierarchies for test suites'''. If you add another suite, make it fits in the hierarchy. Usually, that means adding a link to it on the page of the super-suite and prefix that link with ">".
 
 The basic idea how test suites are structured:
  * All tests
@@ -10,6 +11,11 @@ The basic idea how test suites are structured:
    * Folders
    * Tasks
 
-
+!2 Organizing tests
 Tests themselves do not have to be in a hierarchy to be executed by a suite. They might be in more than one test suite, too.
 Referencing them if they are very deep in a hierarchy can be a pain in the butt. '''So please do not nest tests in hierarchies'''. Just put them on the root level. That means prefixing them with ".", because normal links on a page are put into the hierarchy one step below where they are linked, not at root level, as one might expect.
+
+Also make sure that '''one test only tests one condition'''.
+
+!2 Naming
+A name is the prime identifier of a test. So please '''use descriptive names'''. "TaskTest" isn't. "TaskWithStartDateBeforeEndDate" is. Don't be afraid to use long names for tests.
