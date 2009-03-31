@@ -49,7 +49,6 @@
 
 package com.openexchange.fitnesse;
 
-import java.util.Collections;
 import java.util.List;
 import junit.framework.AssertionFailedError;
 import org.junit.ComparisonFailure;
@@ -59,12 +58,12 @@ import com.openexchange.ajax.kata.Step;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
-import com.openexchange.test.fixtures.FixtureException;
 
 /**
  * {@link AbstractStepFixture}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractStepFixture extends AbstractTableTable {
 
