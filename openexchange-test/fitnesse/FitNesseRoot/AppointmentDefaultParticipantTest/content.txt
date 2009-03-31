@@ -1,13 +1,23 @@
 !include CommonSetup
 
+
+Human-readable information: As which user is this test executed?
+
 |Table: who am I|
+
+
+Create an appointment as default user.
 
 |Table:create appointment|
 |title| start_date | end_date |
 |Appointment with Participants | Tomorrow at 10 am | Tomorrow at 11 am |
 
+
+Verify that the creator is participant of this appointment
+
 |Table:verify appointment|
 |title| start_date | end_date | participants |
 |Appointment with Participants | Tomorrow at 10 am | Tomorrow at 11 am | thorben |
+
 
 !include CommonTearDown
