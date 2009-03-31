@@ -274,7 +274,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if (column == CalendarObject.PARTICIPANTS) {
+            if (column == CalendarObject.PARTICIPANTS && appointment.containsParticipants()) {
                 Participant[] expected = appointment.getParticipants();
                 Participant[] actual = (Participant[]) transform(column, row[i]);
                 if (!compareArrays(expected, actual)) {
@@ -282,7 +282,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 }
                 continue;
             }
-            if (column == CalendarObject.USERS) {
+            if (column == CalendarObject.USERS && appointment.containsUserParticipants()) {
                 UserParticipant[] expected = appointment.getUsers();
                 UserParticipant[] actual = (UserParticipant[]) transform(column, row[i]);
                 if (!compareArrays(expected, actual)) {
@@ -290,7 +290,10 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 }
                 continue;
             }
-
+            if( column == CalendarObject.FOLDER_ID){
+                assertEquals(name + " Column: " + column, Integer.valueOf(expectedFolderId), (Integer) row[i]);
+                continue;
+            }
             if (appointment.contains(column)) {
                 Object expected = appointment.get(column);
                 Object actual = row[i];
@@ -302,15 +305,23 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
     // TODO: Use helper
     private <T> boolean compareArrays(T[] expected, T[] actual) {
-        if (expected == null && actual == null)
+        if (expected == null && actual == null){
             return true;
-        Thread.dumpStack();
+        }
+        if (expected == null && actual != null){
+            return false;
+        }
+        if (expected != null && actual == null){
+            return false;
+        }
         Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
         Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
-        if (expectedParticipants.size() != actualParticipants.size())
+        if (expectedParticipants.size() != actualParticipants.size()){
             return false;
-        if (!expectedParticipants.containsAll(actualParticipants))
+        }
+        if (!expectedParticipants.containsAll(actualParticipants)){
             return false;
+        }
         return true;
     }
 
@@ -361,7 +372,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                     break;
                 }
             }
-            return participants.toArray(AppointmentObject.PARTICIPANTS == column ? new Participant[participants.size()] : new UserParticipant[participants.size()]);
+            return participants.toArray(new Participant[participants.size()]);
 
         case AppointmentObject.USERS:
             JSONArray userParticipantArr = (JSONArray) actual;
@@ -370,7 +381,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 JSONObject participantObj = userParticipantArr.getJSONObject(i);
                 userParticipants.add(new UserParticipant(participantObj.getInt("id")));
             }
-            return userParticipants.toArray(AppointmentObject.PARTICIPANTS == column ? new Participant[userParticipants.size()] : new UserParticipant[userParticipants.size()]);
+            return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
         }
 
         return actual;
