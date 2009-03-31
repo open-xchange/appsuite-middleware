@@ -72,25 +72,25 @@ public class EMailFlagsTransformator implements Transformator {
     }
 	
 	private int getFlag(final String flag) {
-        if ("FLAG_ANSWERED".equalsIgnoreCase(flag)) {
+        if ("FLAG_ANSWERED".equalsIgnoreCase(flag) || "ANSWERED".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_ANSWERED;
-        } else if ("FLAG_DELETED".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_DELETED".equalsIgnoreCase(flag) || "DELETED".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_DELETED;
-        } else if ("FLAG_DRAFT".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_DRAFT".equalsIgnoreCase(flag) || "DRAFT".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_DRAFT;
-        } else if ("FLAG_FLAGGED".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_FLAGGED".equalsIgnoreCase(flag) || "FLAGGED".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_FLAGGED;
-        } else if ("FLAG_RECENT".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_RECENT".equalsIgnoreCase(flag) || "RECENT".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_RECENT;
-        } else if ("FLAG_SEEN".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_SEEN".equalsIgnoreCase(flag) || "SEEN".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_SEEN;
-        } else if ("FLAG_USER".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_USER".equalsIgnoreCase(flag) || "USER".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_USER;
-        } else if ("FLAG_SPAM".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_SPAM".equalsIgnoreCase(flag) || "SPAM".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_SPAM;
-        } else if ("FLAG_FORWARDED".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_FORWARDED".equalsIgnoreCase(flag) || "FORWARDED".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_FORWARDED;
-        } else if ("FLAG_READ_ACK".equalsIgnoreCase(flag)) {
+        } else if ("FLAG_READ_ACK".equalsIgnoreCase(flag) || "READ_ACK".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_READ_ACK;
         } else {
         	return 0;

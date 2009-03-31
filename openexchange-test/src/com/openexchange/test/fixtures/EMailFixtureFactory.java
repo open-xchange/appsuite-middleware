@@ -115,7 +115,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             final Map<String, String> values = entries.get(entryName);
 
             if(values == null) {
-                throw new FixtureException("Entry with name "+entryName+" not found");
+                throw new FixtureException("Entry with name " + entryName + " not found");
             }
             
             if (false == values.containsKey("eml")) {
