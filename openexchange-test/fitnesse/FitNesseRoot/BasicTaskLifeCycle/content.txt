@@ -35,8 +35,8 @@ Then we '''check if the server got all data'''. Again, the requests and response
 
 !|Table:VerifyTask|
 | Demo fixture    |
-| title     | start_date | end_date | note |
-| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+| title     | start_date | end_date | note | estimated_duration |
+| Nice Task | 08:30 AM   | 10:30 AM | Nice note | null |
 
 Now we '''update the task''' by changing its title:
 
@@ -52,14 +52,20 @@ After that, we '''check if our update made it to the server''' by verifying the 
 | title          | start_date | end_date | note |
 | Very nice Task | 08:30 AM   | 10:30 AM | Nice note |
 
-Afterwards, we '''delete the task'''. Not because this is necessary (the cleanup fixture takes care of that), but because we want to show that deleting is also possible via this test environment:
+Afterwards, we '''delete the task'''. Not because this is necessary (the cleanup fixture takes care of that), but because we want to show that deleting is also possible via this test environment. Also, this is a nice way to demonstrate that the fixture name can be either the second line of a table or it can be treated as another field with the title "fixturename".
 
 !|Table:DeleteTask|
 | fixturename |
 | Demo fixture|
 
-After all of this, we call '''the clean-up fixture which removes any left-overs'''. Our life-cycle does not leave any artifacts, since we delete in the last step. But in case the delete step was broken or forgot, we use this fixture to make sure. In this particular case, it is boring to use, but let's not forget it is a demo. It is more useful in case you created more than one object, like when testing appointments with tons of participants.
+You know, '''deleting it twice''' does not work, though. So if we try, '''we can simply expect an error'''. That is accomplished by adding another field to our table which is named expectedError. Besides the fact that this is not a field that tasks usually have (like fixturename), it behaves like all the other fields we either set or checked during our test run.
 
-This step is usually moved to CommonTearDown so it hides from view. As you can see, we use the whole name this time, including the package name. This is necessary because the clean-up fixture is the same for all kind of !-OXObjects-! and therefore in a different package. (Yes, we could have added that package to the Import-Statement in the beginning, but we wanted to show that it is not necessary.)
+!|Table:DeleteTask|
+| fixturename     | expectedError |
+| Demo fixture    | TSK-0019      |
+
+After all of this, we call '''the clean-up fixture which removes any left-overs'''. Our life-cycle does not leave any artifacts, since we delete in the last step. But in case the delete step was broken or forgot, we use this fixture to make sure. In this particular case, it is boring to use, but let's not forget it is a demo. It is more useful in case you created more than one object, like when testing appointments with tons of participants. You don't want to write deletes for all of them, right?
+
+This step is usually moved to CommonTearDown so it hides from view (like the setup with CommonSetUp). As you can see, we use the whole name this time, including the package name. This is necessary because the clean-up fixture is the same for all kind of !-OXObjects-! and therefore in a different package than our task classes, for example. (Yes, we could have added that package to the Import-Statement in the beginning, but we wanted to show that it is not necessary.)
 
 !|Table:com.openexchange.fitnesse.EnvironmentCleanup|
