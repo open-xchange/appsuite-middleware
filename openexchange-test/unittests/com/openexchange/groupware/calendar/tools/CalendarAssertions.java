@@ -58,6 +58,7 @@ import java.util.Set;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -108,7 +109,7 @@ public class CalendarAssertions {
 
 
     public static void assertInPrivateFolder(final CommonAppointments appointments , final CalendarDataObject appointment) throws OXException {
-        for(final CalendarDataObject currentAppointment : appointments.getPrivateAppointments()) {
+        for(final AppointmentObject currentAppointment : appointments.getPrivateAppointments()) {
             if(appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;
             }

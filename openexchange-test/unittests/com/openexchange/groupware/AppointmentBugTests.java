@@ -101,8 +101,8 @@ public class AppointmentBugTests extends TestCase {
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     // Override these in setup
-    private static int userid;
-    public static int contextid;
+    private static int userid = 11; // bishoph
+    public static int contextid = 1;
 
     @Override
     protected void setUp() throws Exception {
@@ -146,10 +146,10 @@ public class AppointmentBugTests extends TestCase {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);
-        final SearchIterator<CalendarDataObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        final SearchIterator<AppointmentObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
-            final CalendarDataObject cdao = si.next();
-            testDelete(cdao);
+            final AppointmentObject cdao = si.next();
+            CalendarTest.testDelete(cdao);
         }
         si.close();
         DBPool.push(context, readcon);
@@ -200,29 +200,6 @@ public class AppointmentBugTests extends TestCase {
             CalendarCommonCollection.closePreparedStatement(stmt);
         }
     }
-
-    private void testDelete(final CalendarDataObject cdao) throws Exception {
-        final Connection writecon = DBPool.pickupWriteable(getContext());
-        final Context context = new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
-        final CalendarSql csql = new CalendarSql(so);
-        final CalendarDataObject deleteit = new CalendarDataObject();
-        deleteit.setContext(cdao.getContext());
-        deleteit.setObjectID(cdao.getObjectID());
-        final int fid = cdao.getEffectiveFolderId();
-        try {
-            if (fid == 0) {
-                final int x = 0;
-            }
-            csql.deleteAppointmentObject(deleteit, fid, new Date());
-        } catch(final Exception e) {
-            e.printStackTrace();
-        }
-        DBPool.pushWrite(context, writecon);
-    }
-
-
-    /* ------------------------------------- */
 
     public static int getPrivateFolder(final int userid) throws Exception {
         int privatefolder = 0;

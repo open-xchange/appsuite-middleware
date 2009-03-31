@@ -201,10 +201,10 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         
         AppointmentSQLInterface appointmentSql = appointments.getCurrentAppointmentSQLInterface();
         
-        SearchIterator<CalendarDataObject> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
+        SearchIterator<AppointmentObject> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
         AppointmentObject loadedViaFolderListing = null;
         while(appointmentsBetweenInFolder.hasNext()) {
-            CalendarDataObject temp = appointmentsBetweenInFolder.next();
+            AppointmentObject temp = appointmentsBetweenInFolder.next();
             if(temp.getObjectID() == appointment.getObjectID()) {
                 loadedViaFolderListing = temp;
             }
@@ -1120,7 +1120,7 @@ public class CalendarSqlTest extends AbstractCalendarTest {
             final Date octQueryStart = new Date(1222819200000L);
             // 1. November 2008 00:00:00 UTC
             final Date octQueryEnd = new Date(1225497600000L);
-            final SearchIterator<CalendarDataObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
+            final SearchIterator<AppointmentObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
                 appointments.getPrivateFolder(),
                 ACTION_ALL_FIELDS,
                 octQueryStart,
@@ -1145,7 +1145,7 @@ public class CalendarSqlTest extends AbstractCalendarTest {
             final Date novQueryStart = new Date(1225497600000L);
             // 1. December 2008 00:00:00 UTC
             final Date novQueryEnd = new Date(1228089600000L);
-            final SearchIterator<CalendarDataObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
+            final SearchIterator<AppointmentObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
                 appointments.getPrivateFolder(),
                 ACTION_ALL_FIELDS,
                 novQueryStart,
@@ -1509,9 +1509,9 @@ public class CalendarSqlTest extends AbstractCalendarTest {
 
             {
                 // Check that whole series is gone for second participant
-                final List<CalendarDataObject> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
+                final List<AppointmentObject> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
                 boolean occurred = false;
-                for (final CalendarDataObject cdao : list) {
+                for (final AppointmentObject cdao : list) {
                     final int cur = cdao.getObjectID();
                     if (cur > 0 && (cur == objectId || cur == changeId)) {
                         occurred = true;
@@ -1524,9 +1524,9 @@ public class CalendarSqlTest extends AbstractCalendarTest {
             {
                 // Check whole series still exists for owner
                 appointments.switchUser(user);
-                final List<CalendarDataObject> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
+                final List<AppointmentObject> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
                 int occurred = 0;
-                for (final CalendarDataObject cdao : list) {
+                for (final AppointmentObject cdao : list) {
                     final int cur = cdao.getObjectID();
                     if (cur > 0) {
                         if (cur == objectId) {
@@ -1577,7 +1577,7 @@ public class CalendarSqlTest extends AbstractCalendarTest {
                 final Date queryStart = new Date(1230508800000L);
                 final Date queryEnd = new Date(1233532800000L);
 
-                final SearchIterator<CalendarDataObject> listIterator = appointmentsql.getAppointmentsBetweenInFolder(
+                final SearchIterator<AppointmentObject> listIterator = appointmentsql.getAppointmentsBetweenInFolder(
                     appointments.getPrivateFolder(),
                     ACTION_ALL_FIELDS,
                     queryStart,

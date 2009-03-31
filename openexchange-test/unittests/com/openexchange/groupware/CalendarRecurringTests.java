@@ -717,11 +717,11 @@ public class CalendarRecurringTests extends TestCase {
         
         final int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
         
-        SearchIterator<CalendarDataObject> si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
+        SearchIterator<AppointmentObject> si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         
         boolean found_exception = false;
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = si.next();
+            final AppointmentObject tcdao = si.next();
             if (tcdao.getRecurrenceID() == object_id && tcdao.getObjectID() != object_id) {
                 // found the single exception we have just created
                 found_exception = true;
@@ -748,7 +748,7 @@ public class CalendarRecurringTests extends TestCase {
         
         si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = si.next();
+            final AppointmentObject tcdao = si.next();
             assertFalse("Object should not exists anymore ", tcdao.getRecurrenceID() == object_id);
         }
         

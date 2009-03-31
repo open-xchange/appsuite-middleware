@@ -7,7 +7,6 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 import com.openexchange.event.impl.EventConfigImpl;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -79,37 +78,14 @@ public class AppointmentDeleteNoCommit extends TestCase {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);        
-        final SearchIterator<CalendarDataObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        final SearchIterator<AppointmentObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
-            final CalendarDataObject cdao = si.next();
-            testDelete(cdao);
+            final AppointmentObject cdao = si.next();
+            CalendarTest.testDelete(cdao);
         }
         si.close();
         DBPool.push(context, readcon);                
     }    
-    
-    private void testDelete(final CalendarDataObject cdao) throws Exception {        
-        final Connection writecon = DBPool.pickupWriteable(getContext());
-        final Context context = new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
-        final CalendarSql csql = new CalendarSql(so);
-        final CalendarDataObject deleteit = new CalendarDataObject();
-        deleteit.setContext(cdao.getContext());
-        deleteit.setObjectID(cdao.getObjectID());
-        final int fid = cdao.getEffectiveFolderId();
-        try {
-            if (fid == 0) {
-                final int x = 0;
-            }
-            csql.deleteAppointmentObject(deleteit, fid, new Date(SUPER_END));
-        } catch(final Exception e) { 
-            e.printStackTrace();
-        }
-        DBPool.pushWrite(context, writecon);
-    }
-    
-    
-    /* ------------------------------------- */
     
     public static int getPrivateFolder(final int userid) throws Exception {
         int privatefolder = 0;
