@@ -96,7 +96,7 @@ public class Activator implements BundleActivator {
             final Dictionary<Object, Object> headers = context.getBundle().getHeaders();
             log.info("Version: " + headers.get("Bundle-Version"));
             log.info("Name: " + headers.get("Bundle-SymbolicName"));
-            log.info("Build: " + headers.get("Build"));
+            log.info("Build: " + headers.get("OXVersion") + " Rev" + headers.get("OXRevision"));
         }
         log.info("Admindaemon successfully started.");
 
