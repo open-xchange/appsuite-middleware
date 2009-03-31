@@ -101,8 +101,8 @@ public class AppointmentBugTests extends TestCase {
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     // Override these in setup
-    private static int userid = 11; // bishoph
-    public static int contextid = 1;
+    private static int userid;
+    public static int contextid;
 
     @Override
     protected void setUp() throws Exception {
@@ -111,7 +111,7 @@ public class AppointmentBugTests extends TestCase {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
 
-        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
+        contextid = ContextStorage.getInstance().getContextId("premium");
         userid = getUserId();
     }
 
@@ -2186,6 +2186,8 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTimezone(TIMEZONE);
         // Full day appointment must be inserted with UTC times. Otherwise day is wrong.
         Calendar calendar = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));
+        // Conflicts are only found in the future.
+        calendar.add(Calendar.DATE, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         // full time appointment is on tomorrow.
         cdao.setStartDate(calendar.getTime());
@@ -2205,6 +2207,8 @@ public class AppointmentBugTests extends TestCase {
         cdao2.setTimezone(TIMEZONE);
         // Normal time based appointments must be inserted with local time zone.
         calendar = TimeTools.createCalendar(TimeZone.getTimeZone(TIMEZONE));
+        // Conflicts are only found in the future.
+        calendar.add(Calendar.DATE, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 30);
         cdao2.setStartDate(calendar.getTime());
