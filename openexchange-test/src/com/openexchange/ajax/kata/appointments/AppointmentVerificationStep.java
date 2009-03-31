@@ -221,7 +221,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         int[] columns = AppointmentObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
-            
+
             if (col == CalendarObject.PARTICIPANTS && appointment.containsParticipants()) {
                 Participant[] expected = appointment.getParticipants();
                 Participant[] actual = loaded.getParticipants();
@@ -238,12 +238,12 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 }
                 continue;
             }
-            
+
             if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
                 continue;
             }
             if (appointment.containsParentFolderID()) {
-                assertEquals(name+" : Column " + col + " differs!", expectedFolderId, loaded.getParentFolderID());
+                assertEquals(name + " : Column " + col + " differs!", expectedFolderId, loaded.getParentFolderID());
                 continue;
             }
             if (appointment.contains(col)) {
@@ -290,7 +290,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 }
                 continue;
             }
-            
+
             if (appointment.contains(column)) {
                 Object expected = appointment.get(column);
                 Object actual = row[i];
@@ -299,14 +299,12 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             }
         }
     }
-    
+
     // TODO: Use helper
     private <T> boolean compareArrays(T[] expected, T[] actual) {
         if (expected == null && actual == null)
             return true;
         Thread.dumpStack();
-        System.err.println("Expected: " + Arrays.asList(expected));
-        System.err.println("Actual: " + Arrays.asList(actual));
         Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
         Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
         if (expectedParticipants.size() != actualParticipants.size())
@@ -315,7 +313,6 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             return false;
         return true;
     }
-
 
     private void checkInList(AppointmentObject appointment, List<AppointmentObject> appointments) {
         for (AppointmentObject appointmentFromList : appointments) {
@@ -340,17 +337,17 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
     private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
         switch (column) {
+
         case AppointmentObject.START_DATE:
         case AppointmentObject.END_DATE:
             int offset = getTimeZone().getOffset(((Long) actual).longValue());
             return new Date(((Long) actual).longValue() - offset);
+
         case AppointmentObject.PARTICIPANTS:
-        case AppointmentObject.USERS:
             JSONArray participantArr = (JSONArray) actual;
             List<Participant> participants = new LinkedList<Participant>();
             for (int i = 0, size = participantArr.length(); i < size; i++) {
                 JSONObject participantObj = participantArr.getJSONObject(i);
-                System.out.println(participantObj);
                 int type = participantObj.getInt("type");
                 switch (type) {
                 case Participant.USER:
@@ -362,10 +359,18 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 case Participant.EXTERNAL_USER:
                     participants.add(new ExternalUserParticipant(participantObj.getString("mail")));
                     break;
-                // TODO: Resources
                 }
-                return participants.toArray(AppointmentObject.PARTICIPANTS == column ? new Participant[participants.size()] : new UserParticipant[participants.size()]);
             }
+            return participants.toArray(AppointmentObject.PARTICIPANTS == column ? new Participant[participants.size()] : new UserParticipant[participants.size()]);
+
+        case AppointmentObject.USERS:
+            JSONArray userParticipantArr = (JSONArray) actual;
+            List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
+            for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
+                JSONObject participantObj = userParticipantArr.getJSONObject(i);
+                userParticipants.add(new UserParticipant(participantObj.getInt("id")));
+            }
+            return userParticipants.toArray(AppointmentObject.PARTICIPANTS == column ? new Participant[userParticipants.size()] : new UserParticipant[userParticipants.size()]);
         }
 
         return actual;
