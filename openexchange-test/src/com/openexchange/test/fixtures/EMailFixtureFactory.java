@@ -105,6 +105,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             addTransformator(new JChronicDateTransformator(fixtureLoader), "sent_date");
             addTransformator(new EMailFlagsTransformator(), "flags");
             addTransformator(new BooleanTransformator(), "append_v_card");
+            addTransformator(new BooleanTransformator(), "prev_seen");
         }
 
         public Fixture<MailMessage> getEntry(final String entryName) throws FixtureException {
