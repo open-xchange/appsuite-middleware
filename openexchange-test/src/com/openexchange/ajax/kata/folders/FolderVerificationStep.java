@@ -49,23 +49,17 @@ package com.openexchange.ajax.kata.folders;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -103,9 +97,8 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
     private void checkWithReadMethods(FolderObject folder) throws OXException, JSONException, AjaxException, IOException, SAXException {
         checkViaGet(folder);
-        checkViaAll(folder);
         checkViaList(folder);
-        checkViaUpdates(folder);
+        //checkViaUpdates(folder);
     }
 
     private void checkViaGet(FolderObject folder) throws OXException, JSONException {
@@ -113,19 +106,15 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         compare(folder, loaded);
     }
 
-    private void checkViaAll(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        Object[][] rows = getViaAll(folder);
-
-        checkInList(folder, rows, FolderObject.ALL_COLUMNS, "all-");
-    }
 
     private void checkViaList(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        ListRequest listRequest = new ListRequest(Integer.toString(folder.getParentFolderID()));
+        int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID}; 
+        ListRequest listRequest = new ListRequest( Integer.toString( folder.getParentFolderID() ), requestedFields, true );
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
 
-        checkInList(folder, rows, FolderObject.ALL_COLUMNS, "list-");
+        checkInList(folder, rows, requestedFields, "list-");
     }
 
     private void checkViaUpdates(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
@@ -155,11 +144,6 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         fail("Object not found in " +typeOfAction+ "response. " + name);
     }
 
-    private Object[][] getViaAll(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        CommonAllRequest all = new CommonAllRequest("/ajax/folders", folder.getParentFolderID(), FolderObject.ALL_COLUMNS, 0, null, true);
-        CommonAllResponse response = client.execute(all);
-        return response.getArray();
-    }
 
     private void compare(FolderObject folder, FolderObject loaded) {
         int[] columns = FolderObject.ALL_COLUMNS;
@@ -168,12 +152,31 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
             if (col == DataObject.LAST_MODIFIED_UTC || col== DataObject.LAST_MODIFIED ) {
                 continue;
             }
+            if( isIgnoredColumn(col)){
+                continue;
+            }
             if (folder.contains(col)) {
                 assertEquals(name + ": Column " + col + " differs!", folder.get(col), loaded.get(col));
             }
         }
     }
     
+    private boolean isIgnoredColumn(int col) {
+        return col == FolderObject.SUBFOLDERS
+        || col == FolderObject.OWN_RIGHTS
+        || col == FolderObject.PERMISSIONS_BITS
+        || col == FolderObject.SUMMARY
+        || col == FolderObject.STANDARD_FOLDER 
+        || col == FolderObject.TOTAL
+        || col == FolderObject.NEW
+        || col == FolderObject.UNREAD
+        || col == FolderObject.DELETED
+        || col == FolderObject.CAPABILITIES
+        || col == FolderObject.SUBSCRIBED
+        || col == FolderObject.SUBSCR_SUBFLDS
+        ;
+    }
+
     private void compare(FolderObject folder, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         assertEquals("Result should contain same number of elements as the request", Integer.valueOf(row.length), Integer.valueOf(columns.length));
         for (int i = 0; i < columns.length; i++) {
