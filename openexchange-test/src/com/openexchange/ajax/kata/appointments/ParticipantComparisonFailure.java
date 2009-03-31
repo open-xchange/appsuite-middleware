@@ -61,8 +61,8 @@ import com.openexchange.groupware.container.Participant;
  */
 public class ParticipantComparisonFailure extends ComparisonFailure {
 
-    private Participant[] actualParticipants;
-    private Participant[] expectedParticipants;
+    private Participant[] actualParticipants = new Participant[0];
+    private Participant[] expectedParticipants = new Participant[0];
 
     /**
      * Initializes a new {@link ParticipantComparisonFailure}.
@@ -71,9 +71,16 @@ public class ParticipantComparisonFailure extends ComparisonFailure {
      * @param actual
      */
     public ParticipantComparisonFailure(String message, Participant[] expected, Participant[] actual) {
-        super(message, expected.toString(), actual.toString());
-        this.expectedParticipants = expected;
-        this.actualParticipants = actual;
+        super(
+            message, 
+            expected == null ? null : expected.toString(), 
+            actual == null ? null : expected.toString()
+        );
+        if(expected != null)
+            this.expectedParticipants = expected;
+        if(actual != null)
+            this.actualParticipants = actual;
+
     }
 
     

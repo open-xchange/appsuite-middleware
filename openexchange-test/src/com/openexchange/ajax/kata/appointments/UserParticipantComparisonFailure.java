@@ -67,7 +67,11 @@ public class UserParticipantComparisonFailure extends ParticipantComparisonFailu
      * @param actual
      */
     public UserParticipantComparisonFailure(String message, UserParticipant[] expected, UserParticipant[] actual) {
-        super(message, expected, actual);
+        super(
+            message, 
+            expected == null ? new UserParticipant[0] : expected,
+            actual == null ? new UserParticipant[0]: actual
+        );
     }
     
     @Override
