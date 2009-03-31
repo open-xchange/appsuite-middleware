@@ -53,6 +53,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
@@ -160,10 +161,9 @@ public final class IMAPSessionProperties {
 		 */
 		imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
 		if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailConfig
-					.getDefaultMimeCharset());
+			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
 			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-					MailConfig.getDefaultMimeCharset());
+					MailProperties.getInstance().getDefaultMimeCharset());
 		}
 		if (IMAPConfig.getImapTimeout() > 0) {
 			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(IMAPConfig
@@ -173,12 +173,12 @@ public final class IMAPSessionProperties {
 			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT, String
 					.valueOf(IMAPConfig.getImapConnectionTimeout()));
 		}
-		if (MailConfig.getJavaMailProperties() != null) {
+		if (MailProperties.getInstance().getJavaMailProperties() != null) {
 			/*
 			 * Overwrite current JavaMail-Specific properties with the ones
 			 * defined in javamail.properties
 			 */
-			imapSessionProperties.putAll(MailConfig.getJavaMailProperties());
+			imapSessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
 		}
 	}
 }

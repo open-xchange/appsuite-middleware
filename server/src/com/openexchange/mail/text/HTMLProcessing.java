@@ -72,6 +72,7 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.text.parser.HTMLParser;
@@ -792,7 +793,7 @@ public final class HTMLProcessing {
      * @return The color for given <code>quotelevel</code>
      */
     private static String getLevelColor(final int quotelevel) {
-        final String[] colors = MailConfig.getQuoteLineColors();
+        final String[] colors = MailProperties.getInstance().getQuoteLineColors();
         return (colors != null) && (colors.length > 0) ? (quotelevel >= colors.length ? colors[colors.length - 1] : colors[quotelevel]) : DEFAULT_COLOR;
     }
 

@@ -74,6 +74,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -795,7 +796,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
             try {
-                msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailConfig.getDefaultMimeCharset());
+                msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailProperties.getInstance().getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
                 logger.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());

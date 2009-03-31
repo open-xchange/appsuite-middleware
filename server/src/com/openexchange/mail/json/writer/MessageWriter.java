@@ -71,6 +71,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -407,7 +408,7 @@ public final class MessageWriter {
             public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int user, final int cid) throws MailException {
                 try {
                     final int colorLabel;
-                    if (MailConfig.isUserFlagsEnabled() && mail.containsColorLabel()) {
+                    if (MailProperties.getInstance().isUserFlagsEnabled() && mail.containsColorLabel()) {
                         colorLabel = mail.getColorLabel();
                     } else {
                         colorLabel = 0;

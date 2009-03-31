@@ -58,6 +58,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
@@ -104,7 +105,7 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
             final String charset = contentType.getCharsetParameter();
             if (charset == null) {
-                properties.put(DataProperties.PROPERTY_CHARSET, MailConfig.getDefaultMimeCharset());
+                properties.put(DataProperties.PROPERTY_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
             } else {
                 properties.put(DataProperties.PROPERTY_CHARSET, charset);
             }

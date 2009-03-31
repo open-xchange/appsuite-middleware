@@ -65,6 +65,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -197,7 +198,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             if (bytes != null) {
                 String charset = getContentType().getCharsetParameter();
                 if (null == charset) {
-                    charset = MailConfig.getDefaultMimeCharset();
+                    charset = MailProperties.getInstance().getDefaultMimeCharset();
                 }
                 applyByteContent(charset);
                 return cachedContent;
@@ -205,7 +206,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             if (file != null) {
                 String charset = getContentType().getCharsetParameter();
                 if (null == charset) {
-                    charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
+                    charset = System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset());
                 }
                 applyFileContent(charset);
                 return cachedContent;
@@ -231,7 +232,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                         /*
                          * Add default mail charset
                          */
-                        contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                        contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                     return (dataSource = new MessageDataSource(bytes, contentType.toString()));
                 }
@@ -240,7 +241,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                         /*
                          * Add system charset
                          */
-                        contentType.setCharsetParameter(System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
+                        contentType.setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
                     final InputStreamProvider isp = new InputStreamProvider() {
 

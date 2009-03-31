@@ -70,6 +70,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
@@ -119,7 +120,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             final String docMIMEType = docMeta.getFileMIMEType();
             setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MIMETypes.MIME_APPL_OCTET : docMeta.getFileMIMEType());
             try {
-                setFileName(MimeUtility.encodeText(docMeta.getFileName(), MailConfig.getDefaultMimeCharset(), "Q"));
+                setFileName(MimeUtility.encodeText(docMeta.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
             } catch (final UnsupportedEncodingException e) {
                 setFileName(docMeta.getFileName());
             }

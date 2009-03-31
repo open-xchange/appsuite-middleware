@@ -77,6 +77,7 @@ import com.openexchange.imap.entity2acl.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -365,7 +366,7 @@ public final class IMAPFolderConverter {
                 mailFolder.setUnreadMessageCount(-1);
                 mailFolder.setDeletedMessageCount(-1);
             }
-            mailFolder.setSubscribed(MailConfig.isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : imapFolder.isSubscribed()) : true);
+            mailFolder.setSubscribed(MailProperties.getInstance().isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : imapFolder.isSubscribed()) : true);
             if (imapConfig.isSupportsACLs()) {
                 // Check if ACLs can be read; meaning GETACL is allowed
                 if (selectable && exists && !isRoot && aclExtension.canGetACL(ownRights)) {
@@ -384,7 +385,7 @@ public final class IMAPFolderConverter {
             } else {
                 addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
             }
-            if (MailConfig.isUserFlagsEnabled() && exists && selectable && aclExtension.canRead(ownRights) && UserFlagsCache.supportsUserFlags(
+            if (MailProperties.getInstance().isUserFlagsEnabled() && exists && selectable && aclExtension.canRead(ownRights) && UserFlagsCache.supportsUserFlags(
                 imapFolder,
                 true,
                 session)) {

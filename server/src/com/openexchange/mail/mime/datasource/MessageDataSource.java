@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -123,7 +124,7 @@ public final class MessageDataSource implements DataSource {
     public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException, MailException {
         final ContentType ct = new ContentType(contentType);
         if (!ct.containsCharsetParameter()) {
-            ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+            ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
         }
         this.data = data.getBytes(ct.getCharsetParameter());
         this.contentType = ct.toString();
@@ -139,7 +140,7 @@ public final class MessageDataSource implements DataSource {
         } else {
             ct = new ContentType();
             ct.setContentType(contentType);
-            ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+            ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
         }
         this.data = data.getBytes(ct.getCharsetParameter());
         this.contentType = ct.toString();

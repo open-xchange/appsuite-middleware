@@ -60,6 +60,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
@@ -98,7 +99,7 @@ public class PhishingHeaders implements PreferencesItemService {
 
 			public void getValue(final Session session, final Context ctx, final User user,
 					final UserConfiguration userConfig, final Setting setting) throws SettingException {
-				final String[] phishingHeaders = MailConfig.getPhishingHeaders();
+				final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders();
 				if (null == phishingHeaders || phishingHeaders.length == 0) {
 					setting.setSingleValue("null");
 				} else {

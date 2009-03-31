@@ -86,6 +86,7 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailFolderStorage;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -216,7 +217,7 @@ public final class MimeReply {
                 final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility.decodeText(rawSubject));
                 final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(
                     subjectPrefix).append(decodedSubject).toString();
-                replyMsg.setSubject(newSubject, MailConfig.getDefaultMimeCharset());
+                replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -366,11 +367,11 @@ public final class MimeReply {
                 /*
                  * Add empty text content as message's body
                  */
-                replyMsg.setText("", MailConfig.getDefaultMimeCharset(), "plain");
+                replyMsg.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
                     "#CS#",
-                    MailConfig.getDefaultMimeCharset()));
+                    MailProperties.getInstance().getDefaultMimeCharset()));
                 final MailMessage replyMail = MIMEMessageConverter.convertMessage(replyMsg);
                 if (null != msgRefStr) {
                     replyMail.setMsgref(new MailPath(msgRefStr));
@@ -397,7 +398,7 @@ public final class MimeReply {
                     final String cs = retvalContentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
                         // Missing or non-unicode charset
-                        retvalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                        retvalContentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
                 replyText = replyTextBuilder.toString();

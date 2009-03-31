@@ -65,6 +65,7 @@ import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
@@ -184,10 +185,10 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         /*
          * Check if a new connection may be established
          */
-        if ((MailConfig.getMaxNumOfConnections() > 0) && (COUNTER.get() > MailConfig.getMaxNumOfConnections())) {
+        if ((MailProperties.getInstance().getMaxNumOfConnections() > 0) && (COUNTER.get() > MailProperties.getInstance().getMaxNumOfConnections())) {
             LOCK_CON.lock();
             try {
-                while (COUNTER.get() > MailConfig.getMaxNumOfConnections()) {
+                while (COUNTER.get() > MailProperties.getInstance().getMaxNumOfConnections()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Too many mail connections currently established. Going asleep.");
                     }
@@ -431,7 +432,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * Signals an available connection.
      */
     private void signalAvailableConnection() {
-        if (MailConfig.getMaxNumOfConnections() > 0) {
+        if (MailProperties.getInstance().getMaxNumOfConnections() > 0) {
             LOCK_CON.lock();
             try {
                 LOCK_CON_CONDITION.signalAll();
@@ -462,7 +463,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * @throws MailException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
      */
     private static final void checkAdminLogin(final Session session) throws MailException {
-        if (!MailConfig.isAdminMailLoginEnabled()) {
+        if (!MailProperties.getInstance().isAdminMailLoginEnabled()) {
             /*
              * Admin mail login is not permitted per configuration
              */

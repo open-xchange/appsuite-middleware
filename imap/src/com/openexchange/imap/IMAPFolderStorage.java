@@ -87,6 +87,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailFolderStorage;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -205,7 +206,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             IMAPFolder parent;
             if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
                 parent = (IMAPFolder) imapStore.getDefaultFolder();
-                final boolean subscribed = (!MailConfig.isIgnoreSubscription() && !all);
+                final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
                 /*
                  * Request subfolders the usual way
                  */
@@ -298,7 +299,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, MailException {
         final Folder[] subfolders;
-        if (MailConfig.isIgnoreSubscription() || all) {
+        if (MailProperties.getInstance().isIgnoreSubscription() || all) {
             subfolders = parent.list(PATTERN_ALL);
         } else {
             subfolders = parent.listSubscribed(PATTERN_ALL);
@@ -453,7 +454,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         setSeparator(personalNamespaces[0].getSeparator());
                         final String persPrefix = personalNamespaces[0].getFullName();
                         if ((persPrefix.length() == 0)) {
-                            if (MailConfig.isAllowNestedDefaultFolderOnAltNamespace() && IMAPCommandsCollection.canCreateSubfolder(
+                            if (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace() && IMAPCommandsCollection.canCreateSubfolder(
                                 persPrefix,
                                 (IMAPFolder) inboxFolder)) {
                                 /*
@@ -474,7 +475,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         /*
                          * Determine where to create default folders and store as a prefix for folder fullname
                          */
-                        if (!noInferiors && (MailConfig.isAllowNestedDefaultFolderOnAltNamespace())) {
+                        if (!noInferiors && (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace())) {
                             /*
                              * Only allow default folder below INBOX if inferiors are permitted nested default folder are explicitly allowed
                              */
@@ -660,7 +661,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             /*
              * Subscribe
              */
-            if (!MailConfig.isSupportSubscription()) {
+            if (!MailProperties.getInstance().isSupportSubscription()) {
                 IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
             } else if (toCreate.containsSubscribed()) {
                 IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), toCreate.isSubscribed());
@@ -1043,7 +1044,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                 }
             }
-            if (!MailConfig.isIgnoreSubscription() && toUpdate.containsSubscribed()) {
+            if (!MailProperties.getInstance().isIgnoreSubscription() && toUpdate.containsSubscribed()) {
                 updateMe.setSubscribed(toUpdate.isSubscribed());
                 IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), toUpdate.isSubscribed());
             }

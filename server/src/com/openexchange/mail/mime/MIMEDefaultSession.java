@@ -52,6 +52,7 @@ package com.openexchange.mail.mime;
 import java.util.Properties;
 import javax.mail.Session;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link MIMEDefaultSession} - Provides access to default instance of {@link Session}
@@ -95,7 +96,7 @@ public final class MIMEDefaultSession {
                     System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
                     System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
                     System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-                    final String defaultMimeCharset = MailConfig.getDefaultMimeCharset();
+                    final String defaultMimeCharset = MailProperties.getInstance().getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Missing default MIME charset in mail configuration. " + "Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
@@ -104,11 +105,11 @@ public final class MIMEDefaultSession {
                     } else {
                         System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
                     }
-                    if (MailConfig.getJavaMailProperties() != null) {
+                    if (MailProperties.getInstance().getJavaMailProperties() != null) {
                         /*
                          * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
                          */
-                        System.getProperties().putAll(MailConfig.getJavaMailProperties());
+                        System.getProperties().putAll(MailProperties.getInstance().getJavaMailProperties());
                     }
                     instance = tmp = Session.getInstance(((Properties) (System.getProperties().clone())), null);
                 }

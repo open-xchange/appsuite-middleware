@@ -71,6 +71,7 @@ import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -532,7 +533,7 @@ public final class MIMEMessageUtility {
         final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(unfold(addresslist)), strict);
         try {
             for (int i = 0; i < addrs.length; i++) {
-                addrs[i].setPersonal(addrs[i].getPersonal(), MailConfig.getDefaultMimeCharset());
+                addrs[i].setPersonal(addrs[i].getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
             }
         } catch (final UnsupportedEncodingException e) {
             /*

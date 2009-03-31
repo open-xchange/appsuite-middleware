@@ -56,6 +56,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
@@ -96,7 +97,7 @@ public abstract class TransportConfig extends MailConfig {
         fillLoginAndPassword(transportConfig, session.getPassword(), user);
         String serverURL = TransportConfig.getTransportServerURL(user);
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
                 throw new MailConfigException(
                     new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append(
                         "\" not set in mail properties").toString());
@@ -124,8 +125,8 @@ public abstract class TransportConfig extends MailConfig {
      * @return The appropriate transport server URL or <code>null</code>
      */
     public static String getTransportServerURL(final User user) {
-        if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
-            return MailConfig.getTransportServer();
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
+            return MailProperties.getInstance().getTransportServer();
         }
         return user.getSmtpServer();
     }

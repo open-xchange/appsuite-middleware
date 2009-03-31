@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -475,7 +476,7 @@ public final class FolderWriter {
             public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final Object boolVal;
-                    if (MailConfig.isIgnoreSubscription()) {
+                    if (MailProperties.getInstance().isIgnoreSubscription()) {
                         boolVal = Boolean.TRUE;
                     } else {
                         boolVal = folder.containsSubscribed() ? Boolean.valueOf(folder.isSubscribed()) : JSONObject.NULL;
@@ -499,7 +500,7 @@ public final class FolderWriter {
             public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final Object boolVal;
-                    if (MailConfig.isIgnoreSubscription()) {
+                    if (MailProperties.getInstance().isIgnoreSubscription()) {
                         boolVal = hasSubfolders == -1 ? Boolean.valueOf(folder.hasSubfolders()) : Boolean.valueOf(hasSubfolders > 0);
                     } else if (hasSubfolders == -1) {
                         boolVal = folder.hasSubfolders() ? Boolean.valueOf(folder.hasSubscribedSubfolders()) : Boolean.FALSE;

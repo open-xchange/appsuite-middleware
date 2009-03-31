@@ -74,6 +74,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -138,7 +139,7 @@ public final class IMAPSort {
          * exceeds limit.
          */
         if (imapConfig.isImapSort()
-                || (imapConfig.getCapabilities().hasSort() && (size >= MailConfig.getMailFetchLimit()))) {
+                || (imapConfig.getCapabilities().hasSort() && (size >= MailProperties.getInstance().getMailFetchLimit()))) {
             try {
                 final int[] seqNums;
                 {

@@ -75,6 +75,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -681,7 +682,7 @@ public final class MailMessageParser {
                 if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
                 } else {
-                    cs = MailConfig.getDefaultMimeCharset();
+                    cs = MailProperties.getInstance().getDefaultMimeCharset();
                 }
             }
             charset = cs;
@@ -689,7 +690,7 @@ public final class MailMessageParser {
             if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
                 charset = CharsetDetector.detectCharset(mailPart.getInputStream());
             } else {
-                charset = MailConfig.getDefaultMimeCharset();
+                charset = MailProperties.getInstance().getDefaultMimeCharset();
             }
         }
         return charset;

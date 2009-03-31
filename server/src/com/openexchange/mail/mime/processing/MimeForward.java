@@ -77,6 +77,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -191,7 +192,7 @@ public final class MimeForward {
                 final String subjectPrefix = PREFIX_FWD;
                 String origSubject = originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null);
                 if (origSubject == null) {
-                    forwardMsg.setSubject(subjectPrefix, MailConfig.getDefaultMimeCharset());
+                    forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
                 } else {
                     origSubject = MIMEMessageUtility.unfold(origSubject);
                     final String subject = MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
@@ -201,7 +202,7 @@ public final class MimeForward {
                         0,
                         subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
                         subjectPrefix).append(origSubject).toString());
-                    forwardMsg.setSubject(subject, MailConfig.getDefaultMimeCharset());
+                    forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
                 }
             }
             /*
@@ -253,7 +254,7 @@ public final class MimeForward {
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
-                        contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                        contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
                 /*
@@ -318,13 +319,13 @@ public final class MimeForward {
              */
             {
                 final ContentType contentType = new ContentType(MIMETypes.MIME_TEXT_PLAIN);
-                contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(generateForwardText(
                     "",
                     UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
                     originalMsg,
-                    false), MailConfig.getDefaultMimeCharset(), "plain");
+                    false), MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, contentType.toString()));
                 multipart.addBodyPart(textPart);
@@ -383,11 +384,11 @@ public final class MimeForward {
              * Add empty text content as message's body
              */
             final MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setText("", MailConfig.getDefaultMimeCharset(), "plain");
+            textPart.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
             textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
                 "#CS#",
-                MailConfig.getDefaultMimeCharset()));
+                MailProperties.getInstance().getDefaultMimeCharset()));
             multipart.addBodyPart(textPart);
         }
         /*

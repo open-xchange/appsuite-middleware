@@ -58,6 +58,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -281,7 +282,7 @@ public final class IMAPConfig extends MailConfig {
                     imapCaps.setNamespace(imapStore.hasCapability(IMAPCapabilities.CAP_NAMESPACE));
                     imapCaps.setIdle(imapStore.hasCapability(IMAPCapabilities.CAP_IDLE));
                     imapCaps.setChildren(imapStore.hasCapability(IMAPCapabilities.CAP_CHILDREN));
-                    imapCaps.setHasSubscription(!MailConfig.isIgnoreSubscription());
+                    imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
                     imapCapabilities = imapCaps;
                 } catch (final MessagingException e) {
                     throw new MailConfigException(e);

@@ -79,6 +79,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -305,7 +306,7 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Compose body
              */
-            final String defaultMimeCS = MailConfig.getDefaultMimeCharset();
+            final String defaultMimeCS = MailProperties.getInstance().getDefaultMimeCharset();
             final ContentType ct = new ContentType(CT_TEXT_PLAIN.replaceFirst("#CS#", defaultMimeCS));
             final Multipart mixedMultipart = new MimeMultipart(MULTI_SUBTYPE_REPORT);
             /*

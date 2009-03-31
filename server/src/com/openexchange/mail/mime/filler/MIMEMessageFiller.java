@@ -95,6 +95,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -260,7 +261,7 @@ public class MIMEMessageFiller {
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                     final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(
                         c.getCompany(),
-                        MailConfig.getDefaultMimeCharset(),
+                        MailProperties.getInstance().getDefaultMimeCharset(),
                         null));
                     session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, encoded);
                     mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
@@ -346,7 +347,7 @@ public class MIMEMessageFiller {
                 try {
                     mimeMessage.setHeader(MessageHeaders.HDR_REPLY_TO, MimeUtility.encodeWord(
                         usm.getReplyToAddr(),
-                        MailConfig.getDefaultMimeCharset(),
+                        MailProperties.getInstance().getDefaultMimeCharset(),
                         "Q"));
                 } catch (final UnsupportedEncodingException e1) {
                     /*
@@ -360,7 +361,7 @@ public class MIMEMessageFiller {
          * Set subject
          */
         if (mail.containsSubject()) {
-            mimeMessage.setSubject(mail.getSubject(), MailConfig.getDefaultMimeCharset());
+            mimeMessage.setSubject(mail.getSubject(), MailProperties.getInstance().getDefaultMimeCharset());
         }
         /*
          * Set sent date
@@ -662,7 +663,7 @@ public class MIMEMessageFiller {
                 final String fileName = MimeUtility.encodeText(
                     new StringBuilder(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll(" +", "")).append(
                         ".vcf").toString(),
-                    MailConfig.getDefaultMimeCharset(),
+                    MailProperties.getInstance().getDefaultMimeCharset(),
                     "Q");
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
@@ -677,7 +678,7 @@ public class MIMEMessageFiller {
                     primaryMultipart = new MimeMultipart();
                 }
                 try {
-                    final String userVCard = getUserVCard(MailConfig.getDefaultMimeCharset());
+                    final String userVCard = getUserVCard(MailProperties.getInstance().getDefaultMimeCharset());
                     /*
                      * Create a body part for vcard
                      */
@@ -686,7 +687,7 @@ public class MIMEMessageFiller {
                      * Define content
                      */
                     final ContentType ct = new ContentType(MIMETypes.MIME_TEXT_X_VCARD);
-                    ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                    ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, ct)));
                     if (fileName != null && !ct.containsNameParameter()) {
                         ct.setNameParameter(fileName);
@@ -746,7 +747,7 @@ public class MIMEMessageFiller {
         if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             final boolean isPlainText = mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN);
             if (mail.getContentType().getCharsetParameter() == null) {
-                mail.getContentType().setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                mail.getContentType().setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
             }
             if (primaryMultipart == null) {
                 final String mailText;
@@ -755,7 +756,7 @@ public class MIMEMessageFiller {
                      * Convert html content to regular text
                      */
                     HTMLParser.parse(
-                        getConformHTML((String) mail.getContent(), MailConfig.getDefaultMimeCharset()),
+                        getConformHTML((String) mail.getContent(), MailProperties.getInstance().getDefaultMimeCharset()),
                         getHTML2TextHandler().reset());
                     mailText = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
                     // mailText =
@@ -783,7 +784,7 @@ public class MIMEMessageFiller {
                 mp = primaryMultipart;
             }
             final MimeBodyPart msgBodyPart = new MimeBodyPart();
-            msgBodyPart.setText("", MailConfig.getDefaultMimeCharset());
+            msgBodyPart.setText("", MailProperties.getInstance().getDefaultMimeCharset());
             final String disposition = msgBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
             if (disposition == null) {
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
@@ -841,7 +842,7 @@ public class MIMEMessageFiller {
                 final VersitObject versitObj = converter.convertContact(contactObj, "2.1");
                 final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
                 final VersitDefinition def = Versit.getDefinition(MIMETypes.MIME_TEXT_X_VCARD);
-                final VersitDefinition.Writer w = def.getWriter(os, MailConfig.getDefaultMimeCharset());
+                final VersitDefinition.Writer w = def.getWriter(os, MailProperties.getInstance().getDefaultMimeCharset());
                 def.write(w, versitObj);
                 w.flush();
                 os.flush();
@@ -1128,15 +1129,15 @@ public class MIMEMessageFiller {
         if (htmlContent == null || htmlContent.length() == 0) {
             textContent = "";
         } else {
-            HTMLParser.parse(getConformHTML(htmlContent, MailConfig.getDefaultMimeCharset()), getHTML2TextHandler().reset());
+            HTMLParser.parse(getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()), getHTML2TextHandler().reset());
             textContent = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
         }
-        text.setText(textContent, MailConfig.getDefaultMimeCharset());
+        text.setText(textContent, MailProperties.getInstance().getDefaultMimeCharset());
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailConfig.getDefaultMimeCharset()));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         return text;
     }
 
@@ -1151,7 +1152,7 @@ public class MIMEMessageFiller {
      * @throws MailException If an I/O error occurs
      */
     protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException {
-        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailConfig.getDefaultMimeCharset()));
+        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
         if (htmlContent == null || htmlContent.length() == 0) {
             html.setContent(getConformHTML(HTML_SPACE, htmlCT).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
@@ -1239,7 +1240,7 @@ public class MIMEMessageFiller {
          */
         String fileName;
         try {
-            fileName = MimeUtility.encodeText(uploadFile.getFileName(), MailConfig.getDefaultMimeCharset(), "Q");
+            fileName = MimeUtility.encodeText(uploadFile.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q");
         } catch (final UnsupportedEncodingException e) {
             fileName = uploadFile.getFileName();
         }

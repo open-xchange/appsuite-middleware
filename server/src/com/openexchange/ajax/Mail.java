@@ -121,6 +121,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -1261,7 +1262,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         VersitUtility.saveVCard(
                             versitPart.getInputStream(),
                             versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailConfig.getDefaultMimeCharset(),
+                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
                             retvalList,
                             session,
                             ctx);
@@ -1273,7 +1274,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         VersitUtility.saveICal(
                             versitPart.getInputStream(),
                             versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailConfig.getDefaultMimeCharset(),
+                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
                             retvalList,
                             session,
                             ctx);
@@ -1371,7 +1372,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                          * Apply filter
                          */
                         final ContentType contentType = mailPart.getContentType();
-                        final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailConfig.getDefaultMimeCharset();
+                        final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                         final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                         final HTMLFilterHandler filterHandler = new HTMLFilterHandler(htmlContent.length());
                         HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, contentType), filterHandler);

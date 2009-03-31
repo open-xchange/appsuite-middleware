@@ -64,6 +64,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -104,7 +105,7 @@ public final class IMAPSearch {
             final IMAPCapabilities imapCapabilities = (IMAPCapabilities) imapConfig.getCapabilities();
             hasSearchCapability = imapCapabilities.hasIMAP4() || imapCapabilities.hasIMAP4rev1();
         }
-        if (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailConfig.getMailFetchLimit()))) {
+        if (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit()))) {
             try {
                 final int[] matchSeqNums;
                 if (searchTerm.containsWildcard()) {

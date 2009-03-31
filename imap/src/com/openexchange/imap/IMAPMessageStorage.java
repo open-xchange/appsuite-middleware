@@ -84,6 +84,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -1018,7 +1019,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     @Override
     public void updateMessageColorLabel(final String fullname, final long[] msgUIDs, final int colorLabel) throws MailException {
         try {
-            if (!MailConfig.isUserFlagsEnabled()) {
+            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
                 /*
                  * User flags are disabled
                  */

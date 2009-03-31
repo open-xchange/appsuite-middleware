@@ -50,6 +50,7 @@
 package com.openexchange.mail.utils;
 
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
@@ -113,7 +114,7 @@ public final class MailFolderUtility {
         } else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return fullname;
         }
-        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailConfig.getDefaultSeparator()).append(fullname).toString();
+        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
     }
 
     /**

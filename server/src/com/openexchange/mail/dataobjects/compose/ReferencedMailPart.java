@@ -66,6 +66,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
@@ -256,7 +257,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                         /*
                          * Add default mail charset
                          */
-                        getContentType().setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                        getContentType().setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                     return (dataSource = new MessageDataSource(data, getContentType().toString()));
                 }
@@ -265,7 +266,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                         /*
                          * Add system charset
                          */
-                        getContentType().setCharsetParameter(System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
+                        getContentType().setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
                     final InputStreamProvider isp = new InputStreamProvider() {
 
@@ -303,7 +304,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             if (data != null) {
                 String charset = getContentType().getCharsetParameter();
                 if (null == charset) {
-                    charset = MailConfig.getDefaultMimeCharset();
+                    charset = MailProperties.getInstance().getDefaultMimeCharset();
                 }
                 applyByteContent(charset);
                 return cachedContent;
@@ -311,7 +312,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             if (file != null) {
                 String charset = getContentType().getCharsetParameter();
                 if (null == charset) {
-                    charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
+                    charset = System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset());
                 }
                 applyFileContent(charset);
                 return cachedContent;

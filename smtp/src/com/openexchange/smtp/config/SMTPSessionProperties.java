@@ -53,6 +53,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
@@ -140,9 +141,9 @@ public final class SMTPSessionProperties {
 			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
 		}
 		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailConfig.getDefaultMimeCharset());
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
 			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-					MailConfig.getDefaultMimeCharset());
+					MailProperties.getInstance().getDefaultMimeCharset());
 		}
 		if (SMTPConfig.getSmtpLocalhost() != null) {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_SMTPLOCALHOST, SMTPConfig.getSmtpLocalhost());
@@ -157,12 +158,12 @@ public final class SMTPSessionProperties {
 		}
 		sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_AUTH, SMTPConfig.isSmtpAuth() ? STR_TRUE
 				: STR_FALSE);
-		if (MailConfig.getJavaMailProperties() != null) {
+		if (MailProperties.getInstance().getJavaMailProperties() != null) {
 			/*
 			 * Overwrite current JavaMail-Specific properties with the ones
 			 * defined in javamail.properties
 			 */
-			sessionProperties.putAll(MailConfig.getJavaMailProperties());
+			sessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
 		}
 	}
 }

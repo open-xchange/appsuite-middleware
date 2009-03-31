@@ -75,6 +75,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -367,7 +368,7 @@ public class MailObject {
                 /*
                  * Ensure a charset is set
                  */
-                ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
             }
             /*
              * Set subject

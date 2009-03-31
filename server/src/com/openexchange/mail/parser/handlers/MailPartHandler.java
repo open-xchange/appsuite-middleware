@@ -64,6 +64,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
@@ -103,7 +104,7 @@ public final class MailPartHandler implements MailMessageHandler {
             this.text = text;
             setSize(text.length());
             if (contentType.getCharsetParameter() == null) {
-                contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
             }
             setContentType(contentType);
         }

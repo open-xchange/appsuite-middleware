@@ -275,7 +275,7 @@ public abstract class MailConfig {
         fillLoginAndPassword(mailConfig, session.getPassword(), user);
         String serverURL = MailConfig.getMailServerURL(user);
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(getMailServerSource())) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw new MailConfigException(
                     new StringBuilder(128).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
@@ -310,8 +310,8 @@ public abstract class MailConfig {
      * @return The appropriate mail server URL or <code>null</code>
      */
     public static final String getMailServerURL(final User user) {
-        if (ServerSource.GLOBAL.equals(getMailServerSource())) {
-            return MailConfig.getMailServer();
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+            return MailProperties.getInstance().getMailServer();
         }
         return user.getImapServer();
     }
@@ -333,7 +333,7 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      */
     public static final String getMailLogin(final User user) {
-        final LoginSource loginSource = getLoginSource();
+        final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
         if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
             return user.getImapLogin();
         }
@@ -352,7 +352,7 @@ public abstract class MailConfig {
      * @throws AbstractOXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final Context ctx) throws AbstractOXException {
-        final LoginSource loginSource = getLoginSource();
+        final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
         if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
             /*
              * Find user name by user's imap login
@@ -376,7 +376,7 @@ public abstract class MailConfig {
         // Assign login
         mailConfig.login = getMailLogin(user);
         // Assign password
-        if (PasswordSource.GLOBAL.equals(getPasswordSource())) {
+        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
             final String masterPw = MailProperties.getInstance().getMasterPassword();
             if (masterPw == null) {
                 throw new MailConfigException(
