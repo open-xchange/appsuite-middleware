@@ -111,7 +111,7 @@ public class AppointmentBugTests extends TestCase {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
 
-        contextid = ContextStorage.getInstance().getContextId("premium");
+        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
         userid = getUserId();
     }
 
