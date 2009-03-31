@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -103,7 +104,7 @@ public final class MailMessageTest extends AbstractMailTest {
 				}
 
 				assertTrue("No not all messages returned!", msgs.length == inboxFolder.getMessageCount());
-				final boolean cached = (msgs.length < MailConfig.getMailFetchLimit());
+				final boolean cached = (msgs.length < MailProperties.getInstance().getMailFetchLimit());
 
 				long[] uids = null;
 				{

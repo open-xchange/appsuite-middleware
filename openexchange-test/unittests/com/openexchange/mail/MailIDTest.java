@@ -54,6 +54,7 @@ import javax.mail.MessagingException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -159,7 +160,7 @@ public final class MailIDTest extends AbstractMailTest {
 						assertTrue("Missing unread message count", mf.containsUnreadMessageCount());
 						if (fullname.equals(mf.getFullname())) {
 							found = true;
-							assertFalse("Subscribed, but shouldn't be", MailConfig.isSupportSubscription() ? mf
+							assertFalse("Subscribed, but shouldn't be", MailProperties.getInstance().isSupportSubscription() ? mf
 									.isSubscribed() : false);
 						}
 					}

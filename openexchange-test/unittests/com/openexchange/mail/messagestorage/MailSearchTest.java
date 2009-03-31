@@ -62,6 +62,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -510,7 +511,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					 * Fill until fetch limit exceeded
 					 */
 					final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-					final int breakEven = MailConfig.getMailFetchLimit();
+					final int breakEven = MailProperties.getInstance().getMailFetchLimit();
 					final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 					int count = mails.length;
 					while (count < breakEven) {

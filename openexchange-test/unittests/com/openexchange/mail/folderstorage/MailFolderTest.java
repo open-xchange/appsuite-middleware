@@ -66,6 +66,7 @@ import com.openexchange.mail.Quota;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -311,13 +312,13 @@ public final class MailFolderTest extends AbstractMailTest {
 					assertTrue("Missing unread message count", mf.containsUnreadMessageCount());
 					if (fullname.equals(mf.getFullname())) {
 						found = true;
-						assertFalse("Subscribed, but shouldn't be", MailConfig.isSupportSubscription() ? mf
+						assertFalse("Subscribed, but shouldn't be", MailProperties.getInstance().isSupportSubscription() ? mf
 								.isSubscribed() : false);
 					}
 				}
 				assertTrue("Newly created subfolder not found!", found);
 
-				if (MailConfig.isSupportSubscription()) {
+				if (MailProperties.getInstance().isSupportSubscription()) {
 					found = false;
 					folders = mailAccess.getFolderStorage().getSubfolders(parentFullname, false);
 					for (final MailFolder mailFolder : folders) {
@@ -424,7 +425,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
 
-				if (MailConfig.isSupportSubscription()) {
+				if (MailProperties.getInstance().isSupportSubscription()) {
 					final MailFolderDescription mfd = new MailFolderDescription();
 					mfd.setSubscribed(true);
 					mailAccess.getFolderStorage().updateFolder(fullname, mfd);
