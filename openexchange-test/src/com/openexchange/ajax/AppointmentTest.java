@@ -101,6 +101,13 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 
+/**
+ * 
+ * {@link AppointmentTest}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added parseUserParticipants
+ *
+ */
 public class AppointmentTest extends AbstractAJAXTest {
 	
 	public AppointmentTest(final String name) {
@@ -1064,6 +1071,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj.setParticipants(parseParticipants(jsonArray
 						.getJSONArray(pos)));
 				break;
+			case AppointmentObject.USERS:
+			    appointmentObj.setUsers(
+			        parseUserParticipants(jsonArray.getJSONArray(pos))
+			    );
+			    
+			    break;
 			case AppointmentObject.CHANGE_EXCEPTIONS:
 				if (!jsonArray.isNull(pos)) {
 					final JSONArray changeExceptions = jsonArray.getJSONArray(pos);
@@ -1079,7 +1092,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		}
 	}
 	
-	private static Date[] parseExceptions(final JSONArray jsonArray)
+
+
+    private static Date[] parseExceptions(final JSONArray jsonArray)
 	throws JSONException {	
 		final Date[] exceptions = new Date[jsonArray.length()];
 		for (int i = 0; i < jsonArray.length(); i++) {	
@@ -1088,7 +1103,15 @@ public class AppointmentTest extends AbstractAJAXTest {
 		return exceptions;
 	}
 	
-	
+    private static UserParticipant[] parseUserParticipants(JSONArray userParticipantArr) throws JSONException {
+        List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
+        for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
+            JSONObject participantObj = userParticipantArr.getJSONObject(i);
+            userParticipants.add(new UserParticipant(participantObj.getInt("id")));
+        }
+        return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
+    }
+    
 	private static Participant[] parseParticipants(final JSONArray jsonArray)
 	throws JSONException, OXConflictException {
 		final Participant[] participant = new Participant[jsonArray.length()];
