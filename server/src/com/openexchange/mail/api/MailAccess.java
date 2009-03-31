@@ -325,13 +325,13 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * <p>
      * An already closed access is not going to be put into cache and is treated as a no-op.
      * 
-     * @param put2CacheArg <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
+     * @param put2Cache <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
      */
-    public final void close(final boolean put2CacheArg) {
+    public final void close(final boolean put2Cache) {
         if (!isConnectedUnsafe()) {
             return;
         }
-        boolean put2Cache = put2CacheArg;
+        boolean put = put2Cache;
         try {
             try {
                 /*
@@ -343,14 +343,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
                  * Dropping
                  */
                 LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
-                put2Cache = false;
+                put = false;
             }
             // resetFields();
             try {
                 /*
                  * Cache connection if desired/possible anymore
                  */
-                if (put2Cache && MailAccessCache.getInstance().putMailAccess(session, this)) {
+                if (put && MailAccessCache.getInstance().putMailAccess(session, this)) {
                     /*
                      * Successfully cached: signal & return
                      */
