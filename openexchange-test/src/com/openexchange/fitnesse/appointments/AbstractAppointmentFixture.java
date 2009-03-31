@@ -106,11 +106,28 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
         AppointmentFixtureFactory appointmentFixtureFactory = new AppointmentFixtureFactory(null, null);
         Map<String, Map<String, String>> fixtureMap = data.asFixtureMap("appointment");
         String participants = fixtureMap.get("appointment").remove("participants");
+        String userParticipants = fixtureMap.get("appointment").remove("users");
         Fixtures<AppointmentObject> fixtures = appointmentFixtureFactory.createFixture(fixtureName, fixtureMap);
         Fixture<AppointmentObject> entry = fixtures.getEntry("appointment");
         resolveParticipants(entry, participants);
+        resolveUserParticipants(entry, userParticipants);
+
         int folderId = getClient().getValues().getPrivateAppointmentFolder();
         return (AppointmentObject) addFolder(entry.getEntry(), data, folderId);
+    }
+
+    private void resolveUserParticipants(Fixture<AppointmentObject> entry, String userParticipants) throws FitnesseException {
+        if(userParticipants == null)
+            return;
+        String[] participantsList = userParticipants.split("\\s*,\\s*");
+        PrincipalResolver resolver = new PrincipalResolver(environment.getClient());
+        
+        List<UserParticipant> users = new LinkedList<UserParticipant>();
+        for (String participant : participantsList) {
+            UserParticipant resolvedParticipant = (UserParticipant) resolver.resolveEntity(participant);
+            users.add(resolvedParticipant);
+        }
+        entry.getEntry().setUsers(users);
     }
 
     private void resolveParticipants(Fixture<AppointmentObject> entry, String participants) throws FitnesseException {
@@ -176,6 +193,8 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
      * @throws OXJSONException 
      */
     protected String translateToNames(Participant[] participants) throws AjaxException, OXException, IOException, SAXException, JSONException, OXJSONException {
+        if(participants.length == 0)
+            return "";
         StringBuilder bob = new StringBuilder();
         List<String> names = new LinkedList<String>();
         UserResolver userResolver = new UserResolver(getClient());
