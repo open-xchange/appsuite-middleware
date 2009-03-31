@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -320,7 +321,7 @@ public interface AppointmentSQLInterface extends SQLInterface {
      * true = attach, false = detach
      * @throws OXException
      */
-        public long attachmentAction(int objectId, int uid, Context c, boolean action) throws OXException;
+    long attachmentAction(int objectId, int uid, Context c, boolean action) throws OXException;
 
 
     /**
@@ -339,17 +340,15 @@ public interface AppointmentSQLInterface extends SQLInterface {
     public SearchIterator<CalendarDataObject> getFreeBusyInformation(int id, int type, Date start, Date end) throws OXException;
 
     /**
-     * Lists of all appointments where the user will participate between start and end
-     * @param user_id
-     * The user_id
-     * @param start
-     * The given start date
-     * @param end
-     * The given end date
+     * Lists of all appointments where the user will participate between start and end.
+     * 
+     * @param user_id The user_id
+     * @param start The given start date
+     * @param end The given end date
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException
      */
-        public SearchIterator<CalendarDataObject> getActiveAppointments(int user_uid, Date start, Date end, int cols[]) throws OXException;
+    SearchIterator<AppointmentObject> getActiveAppointments(int user_uid, Date start, Date end, int cols[]) throws OXException;
 
     /**
      * Lists of all appointments in all folders where the user will participate between start and end
