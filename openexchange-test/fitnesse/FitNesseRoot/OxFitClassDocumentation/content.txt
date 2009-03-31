@@ -1,0 +1,40 @@
+These is an overview over all test fixtures/tables that have been written to test the OX.
+Note that as of now, all of these are actually SLIM !-TableTables-!, not FIT !-DoFixtures-!.
+
+!2 Operations on appointments
+ * !-CreateAppointment-! - creates an appointment.
+ * !-VerifyAppointment-! - checks an appointment as much as possible by using the following requests: get, all, list, updates, search, has.
+ * !-UpdateAppointment-! - changes the values of an appointment.
+ * !-MoveAppointment-! - moves an appointment from one folder to another.
+ * !-DeleteAppointment-! - removes an appointment.
+
+!2 Operations on contacts
+ * !-CreateContact-! -  creates a contact.
+ * !-VerifyContact-! - checks a contact by using the following requests: get, all, list, updates, search.
+ * !-UpdateContact-! - changes fields of a contact.
+ * !-MoveContact-! - moves a contact from one folder to the other.
+ * !-DeleteContact-! - removes a contact.
+
+!2 Operations on tasks
+ * !-CreateTask-! - creates a task.
+ * !-VerifyTask-! - checks a task by using the following requests: get, all, list, updates, search.
+ * !-UpdateTask-! - changes the values of a task.
+ * !-MoveTask-! - moves a task from one folder to another.
+ * !-DeleteTask-! - removes a task.
+
+!2 Operations on folders
+ * !-CreateFolder-! - creates a new folder (hopefully with permissions from !-DefinePermissions-!, see below).
+ * !-DefinePermissions-! - defines sets of permissions for existing (and loaded) users.
+ * !-VerifyFolder-! - checks a folder by using the following requests: get, lists.
+ * !-UpdateFolder-! - changes the settings of a folder.
+ * !-MoveFolder-! - moves a folder to a different position in the directory tree.
+ * !-DeleteFolder-! - deletes a folder and its contents.
+
+!2 Miscellaneous operations
+ * !-SwitchUser-! - switches to another user that was defined by !-DefineUsers-! before.
+ * !-DefineUsers-! - tells the testing environment which users already exist on the test system.
+ * !-ConfigureEnvironment-! - tells the testing environment which server to connect to.
+ * !-EnvironmentCleanup-! - tells the testing environment to clean up all elements that were created during the test.
+
+!2 Helpers
+ * !-SearchUsers-! - takes a user name and field names and returns the values of these fields.

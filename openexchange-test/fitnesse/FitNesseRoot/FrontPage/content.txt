@@ -6,6 +6,8 @@
 | [[All acceptance test suites][OpenXchangeTestSuites.AcceptanceTestSuites]]|''If you're a customer or just want to write an acceptance test, you should start here.''|
 | [[Example tests][TestExamples]]|''An set of example tests to get you started''|
 | [[Guidelines][OxTestGuidelines]]|''How to organize tests in this system''|
+| [[Fixture documentation][OxFitClassDocumentation]]|''What kind of test fixtures exist for testing an OX''|
+| [[Field documentation][OxClassFieldDocumentation]]|''What classes and fields exist on the OX that can be tested here''|
 
 
 | '''To Learn More about !-FitNesse-!'''|
