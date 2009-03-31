@@ -60,7 +60,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface FolderSQLInterface extends SQLInterface {
+public interface FolderSQLInterface {
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all

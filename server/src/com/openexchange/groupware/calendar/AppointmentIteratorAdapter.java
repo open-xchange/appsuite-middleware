@@ -57,7 +57,8 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This is a delegating iterator for converting the {@link SearchIterator} specialized for {@link CalendarDataObject}s into a
- * {@link SearchIterator} for {@link AppointmentObject}s.
+ * {@link SearchIterator} for {@link AppointmentObject}s. This delegating {@link SearchIterator} is necessary to seperate internal calendar
+ * module iterators from external ones. 
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

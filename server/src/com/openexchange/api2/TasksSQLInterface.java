@@ -61,7 +61,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface TasksSQLInterface extends SQLInterface {
+public interface TasksSQLInterface {
     
     /**
      * Lists tasks in a folder from given parameter to given parameter

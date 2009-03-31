@@ -78,7 +78,6 @@ import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -203,12 +202,12 @@ public final class ical extends PermissionServlet {
             final List<ConversionError> errors = new ArrayList<ConversionError>();
 
             final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
-            SearchIterator<CalendarDataObject> itApp = null;
+            SearchIterator<AppointmentObject> iter = null;
             try {
                 final Map<Integer, SeriesUIDPatcher> patchers = new HashMap<Integer, SeriesUIDPatcher>();
-                itApp = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0), true);
-                while (itApp.hasNext()) {
-                    final AppointmentObject appointment = itApp.next();
+                iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0), true);
+                while (iter.hasNext()) {
+                    final AppointmentObject appointment = iter.next();
                     if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
                         if (!appointment.containsTimezone()) {
                             appointment.setTimezone(user.getTimeZone());
@@ -250,9 +249,9 @@ public final class ical extends PermissionServlet {
             } catch (final ConversionError e) {
                 LOG.error(e.getMessage(), e);
             } finally {
-                if (null != itApp) {
+                if (null != iter) {
                     try {
-                        itApp.close();
+                        iter.close();
                     } catch (final SearchIteratorException e) {
                         LOG.error(e.getMessage(), e);
                     }

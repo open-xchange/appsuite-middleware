@@ -52,7 +52,6 @@ package com.openexchange.webdav;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
-import com.openexchange.api2.SQLInterface;
 
 /**
  * {@link PendingInvocations} - Meta object for handling pending invocations and considering last modified changes during a "transaction".
@@ -60,7 +59,7 @@ import com.openexchange.api2.SQLInterface;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @param <I>
  */
-public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedAction<I>> {
+public class PendingInvocations<I> implements Queue<QueuedAction<I>> {
 
     private final Queue<QueuedAction<I>> pendingInvocations;
 

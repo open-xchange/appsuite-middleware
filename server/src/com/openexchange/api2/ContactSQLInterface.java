@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.ContactObject;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface ContactSQLInterface extends ContactInterface, SQLInterface {
+public interface ContactSQLInterface extends ContactInterface {
 	
 	/**
 	 * insert the contact

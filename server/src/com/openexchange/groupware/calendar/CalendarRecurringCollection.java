@@ -86,27 +86,27 @@ public final class CalendarRecurringCollection {
      * @deprecated use {@link Constants#MILLI_HOUR}.
      */
     @Deprecated
-	public static final long MILLI_HOUR = Constants.MILLI_HOUR;
+    public static final long MILLI_HOUR = Constants.MILLI_HOUR;
     /**
      * @deprecated use {@link Constants#MILLI_DAY}.
      */
     @Deprecated
-	public static final long MILLI_DAY = Constants.MILLI_DAY;
+    public static final long MILLI_DAY = Constants.MILLI_DAY;
     /**
      * @deprecated use {@link Constants#MILLI_WEEK}.
      */
     @Deprecated
-	public static final long MILLI_WEEK = Constants.MILLI_WEEK;
+    public static final long MILLI_WEEK = Constants.MILLI_WEEK;
     /**
      * @deprecated use {@link Constants#MILLI_MONTH}.
      */
     @Deprecated
-	public static final long MILLI_MONTH = Constants.MILLI_MONTH;
+    public static final long MILLI_MONTH = Constants.MILLI_MONTH;
     /**
      * @deprecated use {@link Constants#MILLI_YEAR}.
      */
     @Deprecated
-	public static final long MILLI_YEAR = Constants.MILLI_YEAR;
+    public static final long MILLI_YEAR = Constants.MILLI_YEAR;
 
     /**
      * Constant to indicate that no recurring action was detected
@@ -226,8 +226,8 @@ public final class CalendarRecurringCollection {
                     encodeNameValuePair(name, value, cdao);
                     break;
                 }
-				value = ds.substring(s, f);
-				encodeNameValuePair(name, value, cdao);
+                value = ds.substring(s, f);
+                encodeNameValuePair(name, value, cdao);
                 s = f+1;
             }
         }
@@ -235,25 +235,25 @@ public final class CalendarRecurringCollection {
     }
     
     private static void checkAndCorrectErrors(final CalendarDataObject cdao) {
-    	if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {
-			final OXCalendarException exc = new OXCalendarException(
-					OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
-							.valueOf(CalendarRecurringCollection.MAXTC));
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
-			}
-			cdao.setInterval(CalendarRecurringCollection.MAXTC);
-		}
-		if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
-			final OXCalendarException exc = new OXCalendarException(
-					OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
-							.valueOf(CalendarRecurringCollection.MAXTC));
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
-			}
-			cdao.setOccurrence(CalendarRecurringCollection.MAXTC);
-		}
-    	if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
+        if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {
+            final OXCalendarException exc = new OXCalendarException(
+                    OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
+                            .valueOf(CalendarRecurringCollection.MAXTC));
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+            }
+            cdao.setInterval(CalendarRecurringCollection.MAXTC);
+        }
+        if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
+            final OXCalendarException exc = new OXCalendarException(
+                    OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
+                            .valueOf(CalendarRecurringCollection.MAXTC));
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+            }
+            cdao.setOccurrence(CalendarRecurringCollection.MAXTC);
+        }
+        if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Auto correction (daily), set interval to 1, the given interval was: "+cdao.getInterval());
@@ -307,64 +307,64 @@ public final class CalendarRecurringCollection {
     }
     
     /**
-	 * Applies the given name-value-pair to specified calendar object
-	 * 
-	 * @param name
-	 *            The name identifier
-	 * @param value
-	 *            The value
-	 * @param cdao
-	 *            The calendar object
-	 * @throws OXCalendarException
-	 *             If an unknown name-value-pair occurs
-	 */
-	private static void encodeNameValuePair(final char name, final String value, final CalendarDataObject cdao)
-			throws OXCalendarException {
-		if (name == 't') {
-			int t = Integer.parseInt(value);
-			if (t == 5) {
-				t = 3;
-			} else if (t == 6) {
-				t = 4;
-			}
-			cdao.setRecurrenceType(t);
-		} else if (name == 'i') {
-			cdao.setInterval(Integer.parseInt(value));
-		} else if (name == 'a') {
-			cdao.setDays(Integer.parseInt(value));
-		} else if (name == 'b') {
-			cdao.setDayInMonth(Integer.parseInt(value));
-		} else if (name == 'c') {
-			cdao.setMonth(Integer.parseInt(value));
-		} else if (name == 'e') {
-			final long u = Long.parseLong(value);
-			cdao.setUntil(new java.util.Date(u));
-		} else if (name == 's') {
-			final long s = Long.parseLong(value);
-			cdao.setRecurringStart(s);
-		} else if (name == 'o') {
-			cdao.setOccurrence(Integer.parseInt(value));
-		} else {
-			throw new OXCalendarException(OXCalendarException.Code.UNKNOWN_NVP_IN_REC_STR, Character.valueOf(name),
-					value);
-		}
+     * Applies the given name-value-pair to specified calendar object
+     * 
+     * @param name
+     *            The name identifier
+     * @param value
+     *            The value
+     * @param cdao
+     *            The calendar object
+     * @throws OXCalendarException
+     *             If an unknown name-value-pair occurs
+     */
+    private static void encodeNameValuePair(final char name, final String value, final CalendarDataObject cdao)
+            throws OXCalendarException {
+        if (name == 't') {
+            int t = Integer.parseInt(value);
+            if (t == 5) {
+                t = 3;
+            } else if (t == 6) {
+                t = 4;
+            }
+            cdao.setRecurrenceType(t);
+        } else if (name == 'i') {
+            cdao.setInterval(Integer.parseInt(value));
+        } else if (name == 'a') {
+            cdao.setDays(Integer.parseInt(value));
+        } else if (name == 'b') {
+            cdao.setDayInMonth(Integer.parseInt(value));
+        } else if (name == 'c') {
+            cdao.setMonth(Integer.parseInt(value));
+        } else if (name == 'e') {
+            final long u = Long.parseLong(value);
+            cdao.setUntil(new java.util.Date(u));
+        } else if (name == 's') {
+            final long s = Long.parseLong(value);
+            cdao.setRecurringStart(s);
+        } else if (name == 'o') {
+            cdao.setOccurrence(Integer.parseInt(value));
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.UNKNOWN_NVP_IN_REC_STR, Character.valueOf(name),
+                    value);
+        }
     }
 
-	/**
-	 * Checks if given calendar data object denotes a recurring master.
-	 * 
-	 * @param edao
-	 *            The calendar data object to check
-	 * @return <code>true</code> if given calendar data object denotes a
-	 *         recurring master; otherwise <code>false</code>
-	 */
-	public static boolean isRecurringMaster(final CalendarDataObject edao) {
-		if (edao == null) {
-			return false;
-		}
-		return (edao.containsRecurrenceID() && edao.containsObjectID() && (edao.getRecurrenceID() > 0)
-				&& (edao.getObjectID() > 0) && (edao.getRecurrenceID() == edao.getObjectID()));
-	}
+    /**
+     * Checks if given calendar data object denotes a recurring master.
+     * 
+     * @param edao
+     *            The calendar data object to check
+     * @return <code>true</code> if given calendar data object denotes a
+     *         recurring master; otherwise <code>false</code>
+     */
+    public static boolean isRecurringMaster(final CalendarDataObject edao) {
+        if (edao == null) {
+            return false;
+        }
+        return (edao.containsRecurrenceID() && edao.containsObjectID() && (edao.getRecurrenceID() > 0)
+                && (edao.getObjectID() > 0) && (edao.getRecurrenceID() == edao.getObjectID()));
+    }
     
     /**
      * <code>getRecurringAppointmentDeleteAction</code> detects and returns
@@ -408,21 +408,21 @@ public final class CalendarRecurringCollection {
          * Check if edao denotes the main recurring appointment
          */
         if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao.getObjectID()) {
-			/*
-			 * Check if cdao denotes a change exception of a recurring appointment
-			 */
-			if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
-				rada = RECURRING_CREATE_EXCEPTION;
-			} else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
-				rada = RECURRING_CREATE_EXCEPTION;
-			}
-			if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {
-				if (CalendarCommonCollection.checkIfArrayKeyExistInArray(cdao.getDeleteException(), edao
-						.getChangeException())) {
-					rada = RECURRING_EXCEPTION_DELETE_EXISTING;
-				}
-			}
-		}
+            /*
+             * Check if cdao denotes a change exception of a recurring appointment
+             */
+            if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
+                rada = RECURRING_CREATE_EXCEPTION;
+            } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
+                rada = RECURRING_CREATE_EXCEPTION;
+            }
+            if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {
+                if (CalendarCommonCollection.checkIfArrayKeyExistInArray(cdao.getDeleteException(), edao
+                        .getChangeException())) {
+                    rada = RECURRING_EXCEPTION_DELETE_EXISTING;
+                }
+            }
+        }
         return rada;
     }
     
@@ -492,85 +492,85 @@ public final class CalendarRecurringCollection {
         throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
     }
 
-	/**
-	 * Removes hours and minutes for the given date.
-	 * 
-	 * @param millis
-	 *            milliseconds since January 1, 1970, 00:00:00 GMT not to exceed
-	 *            the milliseconds representation for the year 8099. A negative
-	 *            number indicates the number of milliseconds before January 1,
-	 *            1970, 00:00:00 GMT.
-	 * @return The normalized <code>long</code> value
-	 */
-	public static long normalizeLong(final long millis) {
-		return millis - (millis % Constants.MILLI_DAY);
-	}
-
-	/**
-	 * Checks if specified UTC date increases day in month if adding given time
-	 * zone's offset.
-	 * 
-	 * @param millis
-	 *            The time millis
-	 * @param timeZoneID
-	 *            The time zone ID
-	 * @return <code>true</code> if specified date in increases day in month if
-	 *         adding given time zone's offset; otherwise <code>false</code>
-	 */
-	public static boolean exceedsHourOfDay(final long millis, final String timeZoneID) {
-		return exceedsHourOfDay(millis, Tools.getTimeZone(timeZoneID));
-	}
-
-	/**
-	 * Checks if specified UTC date increases day in month if adding given time
-	 * zone's offset.
-	 * 
-	 * @param millis
-	 *            The time millis
-	 * @param zone
-	 *            The time zone
-	 * @return <code>true</code> if specified date in increases day in month if
-	 *         adding given time zone's offset; otherwise <code>false</code>
-	 */
-	public static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
-		final Calendar cal = GregorianCalendar.getInstance(CalendarRecurringCollection.ZONE_UTC);
-		cal.setTimeInMillis(millis);
-		long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR);
-		return hours >= 24 || hours < 0;
-	}
+    /**
+     * Removes hours and minutes for the given date.
+     * 
+     * @param millis
+     *            milliseconds since January 1, 1970, 00:00:00 GMT not to exceed
+     *            the milliseconds representation for the year 8099. A negative
+     *            number indicates the number of milliseconds before January 1,
+     *            1970, 00:00:00 GMT.
+     * @return The normalized <code>long</code> value
+     */
+    public static long normalizeLong(final long millis) {
+        return millis - (millis % Constants.MILLI_DAY);
+    }
 
     /**
-	 * Creates the recurring pattern for given (possibly recurring) appointment
-	 * if needed and fills its recurring information according to generated
-	 * pattern.
-	 * 
-	 * @param cdao
-	 *            The (possibly recurring) appointment
-	 * @return <code>true</code> if specified appointment denotes a proper
-	 *         recurring appointment whose recurring information could be
-	 *         successfully filled; otherwise <code>false</code> to indicate a failure
-	 */
-	public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
-		if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMITER_PIPE) == -1) {
-			if (cdao.getRecurrenceType() == 0) {
-				// No recurring appointment
-				return false;
-			}
-			if ((cdao.getInterval() == 0 && cdao.getMonth() == 0) || cdao.getStartDate() == null
-					|| cdao.getEndDate() == null) {
-				// Insufficient information
-				return false;
-			}
-			cdao.setRecurrence(createDSString(cdao));
-		}
-		try {
-			convertDSString(cdao);
-			return true;
-		} catch (final OXCalendarException e) {
-			LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
-		}
-		return false;
-	}
+     * Checks if specified UTC date increases day in month if adding given time
+     * zone's offset.
+     * 
+     * @param millis
+     *            The time millis
+     * @param timeZoneID
+     *            The time zone ID
+     * @return <code>true</code> if specified date in increases day in month if
+     *         adding given time zone's offset; otherwise <code>false</code>
+     */
+    public static boolean exceedsHourOfDay(final long millis, final String timeZoneID) {
+        return exceedsHourOfDay(millis, Tools.getTimeZone(timeZoneID));
+    }
+
+    /**
+     * Checks if specified UTC date increases day in month if adding given time
+     * zone's offset.
+     * 
+     * @param millis
+     *            The time millis
+     * @param zone
+     *            The time zone
+     * @return <code>true</code> if specified date in increases day in month if
+     *         adding given time zone's offset; otherwise <code>false</code>
+     */
+    public static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
+        final Calendar cal = GregorianCalendar.getInstance(CalendarRecurringCollection.ZONE_UTC);
+        cal.setTimeInMillis(millis);
+        long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR);
+        return hours >= 24 || hours < 0;
+    }
+
+    /**
+     * Creates the recurring pattern for given (possibly recurring) appointment
+     * if needed and fills its recurring information according to generated
+     * pattern.
+     * 
+     * @param cdao
+     *            The (possibly recurring) appointment
+     * @return <code>true</code> if specified appointment denotes a proper
+     *         recurring appointment whose recurring information could be
+     *         successfully filled; otherwise <code>false</code> to indicate a failure
+     */
+    public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
+        if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMITER_PIPE) == -1) {
+            if (cdao.getRecurrenceType() == 0) {
+                // No recurring appointment
+                return false;
+            }
+            if ((cdao.getInterval() == 0 && cdao.getMonth() == 0) || cdao.getStartDate() == null
+                    || cdao.getEndDate() == null) {
+                // Insufficient information
+                return false;
+            }
+            cdao.setRecurrence(createDSString(cdao));
+        }
+        try {
+            convertDSString(cdao);
+            return true;
+        } catch (final OXCalendarException e) {
+            LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
+        }
+        return false;
+    }
 
     /**
      * Creates the recurring string for specified recurring appointment
@@ -585,24 +585,24 @@ public final class CalendarRecurringCollection {
             final StringBuilder recStrBuilder = new StringBuilder(64);
             final int recurrenceType = cdao.getRecurrenceType();
             int interval = cdao.getInterval(); // i
-			if (interval > MAXTC) {
-				final OXCalendarException exc = new OXCalendarException(Code
-				    .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(interval), Integer
-					.valueOf(MAXTC));
-				LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
-				interval = MAXTC;
-			}
+            if (interval > MAXTC) {
+                final OXCalendarException exc = new OXCalendarException(Code
+                    .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(interval), Integer
+                    .valueOf(MAXTC));
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
+                interval = MAXTC;
+            }
             final int weekdays = cdao.getDays();
             final int monthday = cdao.getDayInMonth();
             final int month = cdao.getMonth();
             int occurrences = cdao.getOccurrence();
             if (occurrences > MAXTC) {
-            	final OXCalendarException exc = new OXCalendarException(Code
-            	    .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(occurrences),
-					Integer.valueOf(MAXTC));
-            	LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
-				occurrences = MAXTC;
-			}
+                final OXCalendarException exc = new OXCalendarException(Code
+                    .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(occurrences),
+                    Integer.valueOf(MAXTC));
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
+                occurrences = MAXTC;
+            }
             if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
                 occurrences = -1;
             }
@@ -632,12 +632,12 @@ public final class CalendarRecurringCollection {
                     dsf(recStrBuilder, 'o', occurrences);
                 }
             } else if (recurrenceType == CalendarObject.MONTHLY) {
-            	if (monthday <= 0) {
-            		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(monthday));
+                if (monthday <= 0) {
+                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(monthday));
                 }
                 if (weekdays <= 0) {
-                	if (monthday > 31) {
-                		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(monthday));
+                    if (monthday > 31) {
+                        throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(monthday));
                     }
                     dsf(recStrBuilder, 3);
                     dsf(recStrBuilder, 'i', interval);
@@ -652,7 +652,7 @@ public final class CalendarRecurringCollection {
                         dsf(recStrBuilder, 'o', occurrences);
                     }
                 } else {
-                	if (monthday > 5) {
+                    if (monthday > 5) {
                         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY_2, Integer.valueOf(monthday));
                     }
                     dsf(recStrBuilder, 5);
@@ -671,8 +671,8 @@ public final class CalendarRecurringCollection {
                 }
             } else if (recurrenceType == CalendarObject.YEARLY) {
                 if (weekdays <= 0) {
-                	if (monthday <= 0 || monthday > 31) {
-                		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, Integer.valueOf(monthday));
+                    if (monthday <= 0 || monthday > 31) {
+                        throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, Integer.valueOf(monthday));
                     }
                     dsf(recStrBuilder, 4);
                     dsf(recStrBuilder, 'i', interval);
@@ -689,23 +689,23 @@ public final class CalendarRecurringCollection {
                     }
                 } else {
                     if (monthday < 1 || monthday > 5) {
-                    	throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, Integer.valueOf(monthday));
+                        throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, Integer.valueOf(monthday));
                     }
-					dsf(recStrBuilder, 6);
-					dsf(recStrBuilder, 'i', interval);
-					recStrBuilder.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
-					recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-					dsf(recStrBuilder, 'c', month);
-					dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-					cdao.setRecurringStart(cdao.getStartDate().getTime());
-					if (cdao.containsUntil() && cdao.getUntil() != null) {
-						dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-					} else if (occurrences > 0) {
-						cdao.setUntil(getOccurenceDate(cdao));
-						dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-						dsf(recStrBuilder, 'o', occurrences);
-					}
-				}
+                    dsf(recStrBuilder, 6);
+                    dsf(recStrBuilder, 'i', interval);
+                    recStrBuilder.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
+                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
+                    dsf(recStrBuilder, 'c', month);
+                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
+                    cdao.setRecurringStart(cdao.getStartDate().getTime());
+                    if (cdao.containsUntil() && cdao.getUntil() != null) {
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                    } else if (occurrences > 0) {
+                        cdao.setUntil(getOccurenceDate(cdao));
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'o', occurrences);
+                    }
+                }
             } else {
                 recStrBuilder.append(NO_DS);
             }
@@ -901,55 +901,55 @@ public final class CalendarRecurringCollection {
      */
     public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final boolean calc_until) throws OXException {
         String change_exceptions = null;
-		String delete_exceptions = null;
-		String calc_timezone = "UTC";
-		final long recurringStart;
-		if (cdao instanceof CalendarDataObject) {
-			final CalendarDataObject calDataObject = (CalendarDataObject) cdao;
-			if (!ignore_exceptions) {
-				change_exceptions = calDataObject.getExceptions();
-				delete_exceptions = calDataObject.getDelExceptions();
-			}
-			if (!calDataObject.getFullTime()) {
-				if (calDataObject.containsTimezone()) {
-					calc_timezone = calDataObject.getTimezone();
-				} else {
-					final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
-					LOG.warn(e.getMessage(), e);
-				}
-			}
-			recurringStart = calDataObject.getRecurringStart();
-		} else {
-			recurringStart = ((cdao.getStartDate().getTime() / Constants.MILLI_DAY) * Constants.MILLI_DAY);
-		}
+        String delete_exceptions = null;
+        String calc_timezone = "UTC";
+        final long recurringStart;
+        if (cdao instanceof CalendarDataObject) {
+            final CalendarDataObject calDataObject = (CalendarDataObject) cdao;
+            if (!ignore_exceptions) {
+                change_exceptions = calDataObject.getExceptions();
+                delete_exceptions = calDataObject.getDelExceptions();
+            }
+            if (!calDataObject.getFullTime()) {
+                if (calDataObject.containsTimezone()) {
+                    calc_timezone = calDataObject.getTimezone();
+                } else {
+                    final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+            recurringStart = calDataObject.getRecurringStart();
+        } else {
+            recurringStart = ((cdao.getStartDate().getTime() / Constants.MILLI_DAY) * Constants.MILLI_DAY);
+        }
 
-		final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao
-				.getRecurrenceCalculator());
-		rc.setCalculationTimeZone(calc_timezone);
-		rc.setCalculationPosition(pos);
-		rc.setRange(range_start, range_end);
-		rc.setMaxCalculation(PMAXTC);
-		rc.setMaxOperations(CalendarConfig.getMaxOperationsInRecurrenceCalculations());
-		rc.setExceptions(change_exceptions, delete_exceptions);
-		rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());
-		rc.setRecurringStart(recurringStart);
+        final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao
+                .getRecurrenceCalculator());
+        rc.setCalculationTimeZone(calc_timezone);
+        rc.setCalculationPosition(pos);
+        rc.setRange(range_start, range_end);
+        rc.setMaxCalculation(PMAXTC);
+        rc.setMaxOperations(CalendarConfig.getMaxOperationsInRecurrenceCalculations());
+        rc.setExceptions(change_exceptions, delete_exceptions);
+        rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());
+        rc.setRecurringStart(recurringStart);
 
-		if (cdao.containsUntil() && cdao.getUntil() != null) {
-			rc.setUntil(cdao.getUntil().getTime());
-		}
+        if (cdao.containsUntil() && cdao.getUntil() != null) {
+            rc.setUntil(cdao.getUntil().getTime());
+        }
 
-		if (cdao.containsOccurrence() && cdao.getOccurrence() > 0) {
-			rc.setOccurrence(cdao.getOccurrence());
-		}
-		if (cdao.containsDays()) {
-			rc.setDays(cdao.getDays());
-		}
-		if (cdao.containsDayInMonth()) {
-			rc.setDayInMonth(cdao.getDayInMonth());
-		}
-		if (cdao.containsMonth()) {
-			rc.setMonth(cdao.getMonth());
-		}
+        if (cdao.containsOccurrence() && cdao.getOccurrence() > 0) {
+            rc.setOccurrence(cdao.getOccurrence());
+        }
+        if (cdao.containsDays()) {
+            rc.setDays(cdao.getDays());
+        }
+        if (cdao.containsDayInMonth()) {
+            rc.setDayInMonth(cdao.getDayInMonth());
+        }
+        if (cdao.containsMonth()) {
+            rc.setMonth(cdao.getMonth());
+        }
         try {
             return rc.calculateRecurrence();
         } catch (final RecurringException re) {
@@ -972,7 +972,7 @@ public final class CalendarRecurringCollection {
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_TYPE) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.UNEXPECTED_ERROR) {
-            	throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, Integer.valueOf(re.getValue()));
+                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.UNKOWN_DAYS_VALUE) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_DAY, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.PATTERN_TOO_COMPLEX) {
@@ -987,41 +987,41 @@ public final class CalendarRecurringCollection {
     private static Map<Integer, Integer> DAY_MAP = new HashMap<Integer, Integer>(10);
 
     static {
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.SATURDAY), Integer.valueOf(Calendar.SATURDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.FRIDAY), Integer.valueOf(Calendar.FRIDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.THURSDAY), Integer.valueOf(Calendar.THURSDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.WEDNESDAY), Integer.valueOf(Calendar.WEDNESDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.TUESDAY), Integer.valueOf(Calendar.TUESDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.MONDAY), Integer.valueOf(Calendar.MONDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.SUNDAY), Integer.valueOf(Calendar.SUNDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.DAY), Integer.valueOf(CalendarObject.DAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.WEEKDAY), Integer.valueOf(CalendarObject.WEEKDAY));
-    	DAY_MAP.put(Integer.valueOf(CalendarObject.WEEKENDDAY), Integer.valueOf(CalendarObject.WEEKENDDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.SATURDAY), Integer.valueOf(Calendar.SATURDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.FRIDAY), Integer.valueOf(Calendar.FRIDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.THURSDAY), Integer.valueOf(Calendar.THURSDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.WEDNESDAY), Integer.valueOf(Calendar.WEDNESDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.TUESDAY), Integer.valueOf(Calendar.TUESDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.MONDAY), Integer.valueOf(Calendar.MONDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.SUNDAY), Integer.valueOf(Calendar.SUNDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.DAY), Integer.valueOf(CalendarObject.DAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.WEEKDAY), Integer.valueOf(CalendarObject.WEEKDAY));
+        DAY_MAP.put(Integer.valueOf(CalendarObject.WEEKENDDAY), Integer.valueOf(CalendarObject.WEEKENDDAY));
     }
 
-	/**
-	 * Maps given day constant from {@link CalendarObject} to the corresponding
-	 * day from {@link Calendar}.
-	 * 
-	 * @param cd
-	 *            The day constant from {@link CalendarObject}:
-	 *            {@link CalendarObject#SUNDAY}, {@link CalendarObject#MONDAY},
-	 *            {@link CalendarObject#TUESDAY},
-	 *            {@link CalendarObject#WEDNESDAY},
-	 *            {@link CalendarObject#THURSDAY},{@link CalendarObject#FRIDAY},
-	 *            {@link CalendarObject#SATURDAY},{@link CalendarObject#DAY},
-	 *            {@link CalendarObject#WEEKDAY}, or
-	 *            {@link CalendarObject#WEEKENDDAY}
-	 * @return The corresponding day from {@link Calendar} or <code>-1</code>.
-	 */
-	private static int getDay(final int cd) {
-		final Integer retval = DAY_MAP.get(Integer.valueOf(cd));
-		if (retval == null) {
-			LOG.error("Unusable getDay parameter (days) :" + cd, new Throwable());
-			return -1;
-		}
-		return retval.intValue();
-	}
+    /**
+     * Maps given day constant from {@link CalendarObject} to the corresponding
+     * day from {@link Calendar}.
+     * 
+     * @param cd
+     *            The day constant from {@link CalendarObject}:
+     *            {@link CalendarObject#SUNDAY}, {@link CalendarObject#MONDAY},
+     *            {@link CalendarObject#TUESDAY},
+     *            {@link CalendarObject#WEDNESDAY},
+     *            {@link CalendarObject#THURSDAY},{@link CalendarObject#FRIDAY},
+     *            {@link CalendarObject#SATURDAY},{@link CalendarObject#DAY},
+     *            {@link CalendarObject#WEEKDAY}, or
+     *            {@link CalendarObject#WEEKENDDAY}
+     * @return The corresponding day from {@link Calendar} or <code>-1</code>.
+     */
+    private static int getDay(final int cd) {
+        final Integer retval = DAY_MAP.get(Integer.valueOf(cd));
+        if (retval == null) {
+            LOG.error("Unusable getDay parameter (days) :" + cd, new Throwable());
+            return -1;
+        }
+        return retval.intValue();
+    }
     
     
     public static void fillMap(final RecurringResults rss, final long s, final long diff, final int d, final int counter) {
@@ -1197,14 +1197,14 @@ public final class CalendarRecurringCollection {
     }
     
     public static void checkRecurring(final CalendarObject cdao) throws OXException {
-    	if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {
-			throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
-					.getInterval()), Integer.valueOf(CalendarRecurringCollection.MAXTC));
-		}
-		if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
-			throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
-					.getOccurrence()), Integer.valueOf(CalendarRecurringCollection.MAXTC));
-		}
+        if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {
+            throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
+                    .getInterval()), Integer.valueOf(CalendarRecurringCollection.MAXTC));
+        }
+        if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
+            throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
+                    .getOccurrence()), Integer.valueOf(CalendarRecurringCollection.MAXTC));
+        }
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL, Integer.valueOf(cdao.getInterval()));
@@ -1272,32 +1272,32 @@ public final class CalendarRecurringCollection {
         }
         CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(clone);
         /*
-		 * Check that change exception's date is contained in recurring
-		 * appointment's range
-		 */
-		if (!CalendarCommonCollection.checkIfDateOccursInRecurrence(clone.getRecurrenceDatePosition(), edao)) {
-			throw new OXCalendarException(OXCalendarException.Code.FOREIGN_EXCEPTION_DATE);
-		}
-		{
-			final Date[] newChangeExcs = CalendarCommonCollection.addException(edao.getChangeException(), clone
-					.getRecurrenceDatePosition());
-			/*
-			 * Check that no other change exception exists on specified date;
-			 * meaning another user already created a change exception on this
-			 * date in the meantime
-			 */
-			if (Arrays.equals(edao.getChangeException(), newChangeExcs)) {
-				throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT,
-						OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
-			}
-			cdao.setChangeExceptions(newChangeExcs);
-		}
-		CalendarCommonCollection.fillObject(cdao, clone);
-		if (cdao.containsModifiedBy()) {
-			clone.setCreatedBy(cdao.getModifiedBy());
-		} else {
-			clone.setCreatedBy(sessionUser);
-		}
+         * Check that change exception's date is contained in recurring
+         * appointment's range
+         */
+        if (!CalendarCommonCollection.checkIfDateOccursInRecurrence(clone.getRecurrenceDatePosition(), edao)) {
+            throw new OXCalendarException(OXCalendarException.Code.FOREIGN_EXCEPTION_DATE);
+        }
+        {
+            final Date[] newChangeExcs = CalendarCommonCollection.addException(edao.getChangeException(), clone
+                    .getRecurrenceDatePosition());
+            /*
+             * Check that no other change exception exists on specified date;
+             * meaning another user already created a change exception on this
+             * date in the meantime
+             */
+            if (Arrays.equals(edao.getChangeException(), newChangeExcs)) {
+                throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT,
+                        OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+            }
+            cdao.setChangeExceptions(newChangeExcs);
+        }
+        CalendarCommonCollection.fillObject(cdao, clone);
+        if (cdao.containsModifiedBy()) {
+            clone.setCreatedBy(cdao.getModifiedBy());
+        } else {
+            clone.setCreatedBy(sessionUser);
+        }
         if (!cdao.containsUserParticipants() && checkForReconfirmation(cdao, edao)) {
             /*
              * Turn cloned appointment's confirmation information to initial
@@ -1325,9 +1325,9 @@ public final class CalendarRecurringCollection {
             if (rss == null) {
                 throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION);
             }
-			final RecurringResult rs = rss.getRecurringResult(0);
-			clone.setStartDate(new Date(rs.getStart()));
-			clone.setEndDate(new Date(rs.getEnd()));
+            final RecurringResult rs = rss.getRecurringResult(0);
+            clone.setStartDate(new Date(rs.getStart()));
+            clone.setEndDate(new Date(rs.getEnd()));
         }
         return clone;
     }

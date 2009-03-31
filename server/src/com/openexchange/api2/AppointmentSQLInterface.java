@@ -64,41 +64,33 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface AppointmentSQLInterface extends SQLInterface {
+public interface AppointmentSQLInterface {
 
     /**
-     * Lists all appointment that match the given search
-     * @param folderId
-     * The folder ID
-     * @param cols
-     * fields that will be added to the data object
-     * @param start
-     * The given start date
-     * @param end
-     * The given end date
+     * Lists all appointment that match the given search.
+     * 
+     * @param folderId The folder ID
+     * @param cols fields that will be added to the data object
+     * @param start The given start date
+     * @param end The given end date
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<AppointmentObject> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int orderBy, String orderDir) throws OXException, SQLException;
 
     /**
-     * Lists all appointment that match the given search
-     * @param folderId
-     * The folder ID
-     * @param cols
-     * fields that will be added to the data object
-     * @param start
-     * The given start date
-     * @param end
-     * The given end date
-     * @param from
-     * from
-     * @param to
-     * to
+     * Lists all appointment that match the given search.
+     * 
+     * @param folderId The folder ID
+     * @param cols fields that will be added to the data object
+     * @param start The given start date
+     * @param end The given end date
+     * @param from from
+     * @param to to
      * @return A SearchIterator contains AppointmentObjects
-     * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+     * @throws OXException , OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int from, int to, int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<AppointmentObject> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int from, int to, int orderBy, String orderDir) throws OXException, SQLException;
 
     /**
      * returns the days where the user has appointments
@@ -111,68 +103,56 @@ public interface AppointmentSQLInterface extends SQLInterface {
     public boolean[] hasAppointmentsBetween(Date start, Date end) throws OXException;
 
     /**
-     * Lists all modified objects in a folder
-     * @param folderID
-     * The Folder ID
-     * @param cols
-     * fields that will be added to the data object
-     * @param since
-     * all modification >= since
-     * @param includePrivateFlag
-     * <code>true</code> to include private-flag information, meaning to exclude private appointments when querying a shared folder; otherwise <code>false</code>
+     * Lists all modified objects in a folder.
+     * 
+     * @param folderID The Folder ID
+     * @param cols fields that will be added to the data object
+     * @param since all modification >= since
+     * @param includePrivateFlag <code>true</code> to include private-flag information, meaning to exclude private appointments when
+     *            querying a shared folder; otherwise <code>false</code>
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since, boolean includePrivateFlag) throws OXException;
+    SearchIterator<AppointmentObject> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since, boolean includePrivateFlag) throws OXException;
 
     /**
-     * Lists all modified objects where the user is participant
-     * @param userId
-     * The user ID
-     * @param start
-     * The start date
-     * @param end
-     * The end date
-     * @param cols
-     * fields that will be added to the data object
-     * @param since
-     * all modification >= since
+     * Lists all modified objects where the user is participant.
+     * 
+     * @param userId The user ID
+     * @param start The start date
+     * @param end The end date
+     * @param cols fields that will be added to the data object
+     * @param since all modification >= since
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsBetween(int userId, Date start, Date end, int[] cols, Date since, int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<AppointmentObject> getModifiedAppointmentsBetween(int userId, Date start, Date end, int[] cols, Date since, int orderBy, String orderDir) throws OXException, SQLException;
 
     /**
-     * Lists all modified objects in a folder
-     * @param folderID
-     * The Folder ID
-     * @param start
-     * The start date
-     * @param end
-     * The end date
-     * @param cols
-     * fields that will be added to the data object
-     * @param since
-     * all modification >= since
-     * @param includePrivateFlag
-     * <code>true</code> to include private-flag information, meaning to exclude private appointments when querying s shared folder; otherwise <code>false</code>
+     * Lists all modified objects in a folder.
+     * 
+     * @param folderID The Folder ID
+     * @param start The start date
+     * @param end The end date
+     * @param cols fields that will be added to the data object
+     * @param since all modification >= since
+     * @param includePrivateFlag <code>true</code> to include private-flag information, meaning to exclude private appointments when
+     *            querying s shared folder; otherwise <code>false</code>
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since, boolean includePrivateFlag) throws OXException, SQLException;
+    SearchIterator<AppointmentObject> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since, boolean includePrivateFlag) throws OXException, SQLException;
 
     /**
-     * Lists all deleted objects in a folder
-     * @param folderID
-     * The Folder ID
-     * @param cols
-     * fields that will be added to the data object
-     * @param since
-     * all modification >= since
+     * Lists all deleted objects in a folder.
+     * 
+     * @param folderID The Folder ID
+     * @param cols fields that will be added to the data object
+     * @param since all modification >= since
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getDeletedAppointmentsInFolder(int folderId, int cols[], Date since) throws OXException, SQLException;
+    SearchIterator<AppointmentObject> getDeletedAppointmentsInFolder(int folderId, int cols[], Date since) throws OXException, SQLException;
 
     /**
      * Lists all appointment that match the given search
@@ -351,17 +331,15 @@ public interface AppointmentSQLInterface extends SQLInterface {
     SearchIterator<AppointmentObject> getActiveAppointments(int user_uid, Date start, Date end, int cols[]) throws OXException;
 
     /**
-     * Lists of all appointments in all folders where the user will participate between start and end
-     * @param user_id
-     * The user_id
-     * @param start
-     * The given start date
-     * @param end
-     * The given end date
+     * Lists of all appointments in all folders where the user will participate between start and end.
+     * 
+     * @param user_id The user_id
+     * @param start The given start date
+     * @param end The given end date
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException
      * @throws SQLException
      */
-        public SearchIterator<CalendarDataObject> getAppointmentsBetween(int user_uid, Date start, Date end, int cols[], int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<AppointmentObject> getAppointmentsBetween(int user_uid, Date start, Date end, int cols[], int orderBy, String orderDir) throws OXException, SQLException;
 
 }

@@ -316,7 +316,8 @@ public class AppointmentRequest {
 
         final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
         final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
-        SearchIterator<CalendarDataObject> it = null;
+        final Context ctx = session.getContext();
+        SearchIterator<AppointmentObject> it = null;
         Date lastModified = null;
         try {
             if (!bIgnoreModified) {
@@ -344,7 +345,7 @@ public class AppointmentRequest {
                 }
 
                 while (it.hasNext()) {
-                    final CalendarDataObject appointmentObj = it.next();
+                    final AppointmentObject appointmentObj = it.next();
                     boolean written = false;
                     if (appointmentObj.getRecurrenceType() != CalendarObject.NONE && appointmentObj.getRecurrencePosition() == 0) {
                         if (bRecurrenceMaster) {
@@ -352,10 +353,8 @@ public class AppointmentRequest {
                             try {
                                 recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentObj);
                                 written = true;
-                            } catch (final OXException x) {
-                                LOG.error(
-                                    "Can not calculate recurrence " + appointmentObj.getObjectID() + ":" + appointmentObj.getContextID(),
-                                    x);
+                            } catch (final OXException e) {
+                                LOG.error("Can not calculate recurrence " + appointmentObj.getObjectID() + ':' + ctx.getContextId(), e);
                             }
                             if (recuResults != null && recuResults.size() != 1) {
                                 LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentObj.getRecurrenceType() + " / " + appointmentObj.getObjectID() + "\n\n\n");
@@ -366,7 +365,8 @@ public class AppointmentRequest {
                                 appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
                             }
                         } else {
-                            appointmentObj.calculateRecurrence();
+                            // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
+                            // appointmentObj.calculateRecurrence();
 
                             RecurringResults recuResults = null;
                             try {
@@ -381,10 +381,8 @@ public class AppointmentRequest {
                                         0);
                                     written = true;
                                 }
-                            } catch (final OXException x) {
-                                LOG.error(
-                                    "Can not calculate recurrence " + appointmentObj.getObjectID() + ":" + appointmentObj.getContextID(),
-                                    x);
+                            } catch (final OXException e) {
+                                LOG.error("Can not calculate recurrence " + appointmentObj.getObjectID() + ':' + ctx.getContextId(), e);
                             }
 
                             if (recuResults != null) {
@@ -642,7 +640,7 @@ public class AppointmentRequest {
     public JSONArray actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         timestamp = new Date(0);
 
-        SearchIterator<CalendarDataObject> it = null;
+        SearchIterator<AppointmentObject> it = null;
 
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -678,6 +676,7 @@ public class AppointmentRequest {
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
+            final Context ctx = session.getContext();
             if (showAppointmentInAllFolders) {
                 it = appointmentsql.getAppointmentsBetween(user.getId(), start, end, _appointmentFields, orderBy, orderDir);
             } else {
@@ -685,59 +684,52 @@ public class AppointmentRequest {
             }
             Date lastModified = new Date(0);
             while (it.hasNext()) {
-                final CalendarDataObject appointmentobject = it.next();
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+                final AppointmentObject appointment = it.next();
+                final AppointmentWriter writer = new AppointmentWriter(timeZone);
                 boolean written = false;
-                if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
+                if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
                     if (bRecurrenceMaster) {
                         RecurringResults recuResults = null;
                         try {
-                            recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentobject);
+                            recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointment);
                             written = true;
-                        } catch (final OXException x) {
-                            LOG.error(
-                                "Can not calculate recurrence " + appointmentobject.getObjectID() + ":" + appointmentobject.getContextID(),
-                                x);
+                        } catch (final OXException e) {
+                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ':' + ctx.getContextId(), e);
                         }
                         if (recuResults != null && recuResults.size() == 1) {
-                            appointmentobject.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
-                            appointmentobject.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
+                            appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
+                            appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                            appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+                            writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
                         } else {
-                            LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentobject.getRecurrenceType() + " / " + appointmentobject.getObjectID() + "\n\n\n");
+                            LOG.warn("cannot load first recurring appointment from appointment object: " + +appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
                         }
                     } else {
-                        appointmentobject.calculateRecurrence();
+                        // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
+                        // appointment.calculateRecurrence();
                         RecurringResults recuResults = null;
                         try {
-                            recuResults = CalendarRecurringCollection.calculateRecurring(
-                                appointmentobject,
-                                start.getTime(),
-                                end.getTime(),
-                                0);
+                            recuResults = CalendarRecurringCollection.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
                             written = true;
-                        } catch (final OXException x) {
-                            LOG.error(
-                                "Can not calculate recurrence " + appointmentobject.getObjectID() + ":" + appointmentobject.getContextID(),
-                                x);
+                        } catch (final OXException e) {
+                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ':' + ctx.getContextId(), e);
                         }
                         if (recuResults != null) {
                             for (int a = 0; a < recuResults.size(); a++) {
                                 final RecurringResult result = recuResults.getRecurringResult(a);
-                                appointmentobject.setStartDate(new Date(result.getStart()));
-                                appointmentobject.setEndDate(new Date(result.getEnd()));
-                                appointmentobject.setRecurrencePosition(result.getPosition());
+                                appointment.setStartDate(new Date(result.getStart()));
+                                appointment.setEndDate(new Date(result.getEnd()));
+                                appointment.setRecurrencePosition(result.getPosition());
 
                                 // add to order list
                                 if (listOrder) {
                                     final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(
                                         orderBy,
-                                        appointmentobject,
-                                        timeZone), appointmentobject.clone());
+                                        appointment,
+                                        timeZone), appointment.clone());
                                     objectList.add(dateOrderObject);
                                 } else {
-                                    appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+                                    writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
                                 }
                             }
                         }
@@ -748,15 +740,15 @@ public class AppointmentRequest {
                     // add to order list
                     if (listOrder) {
                         final DateOrderObject dateOrderObject = new DateOrderObject(
-                            getDateByFieldId(orderBy, appointmentobject, timeZone),
-                            appointmentobject.clone());
+                            getDateByFieldId(orderBy, appointment, timeZone),
+                            appointment.clone());
                         objectList.add(dateOrderObject);
                     } else {
-                        appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+                        writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
                     }
                 }
 
-                lastModified = appointmentobject.getLastModified();
+                lastModified = appointment.getLastModified();
 
                 if (timestamp.getTime() < lastModified.getTime()) {
                     timestamp = lastModified;

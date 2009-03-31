@@ -107,172 +107,172 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 @OXExceptionSource(
-		classId=ImportExportExceptionClasses.ICALEXPORTER,
-		component=EnumComponent.IMPORT_EXPORT)
+        classId=ImportExportExceptionClasses.ICALEXPORTER,
+        component=EnumComponent.IMPORT_EXPORT)
 @OXThrowsMultiple(
-		category={
-	Category.PERMISSION,
-	Category.SUBSYSTEM_OR_SERVICE_DOWN,
-	Category.USER_INPUT,
-	Category.CODE_ERROR,
-	Category.CODE_ERROR,
+        category={
+    Category.PERMISSION,
+    Category.SUBSYSTEM_OR_SERVICE_DOWN,
+    Category.USER_INPUT,
+    Category.CODE_ERROR,
+    Category.CODE_ERROR,
     Category.SETUP_ERROR},
-		desc={"","","","",""},
-		exceptionId={0,1,2,3,4,5},
-		msg={
-	"Could not import into the folder %s.",
-	"Could not import into folder %s",
-	"User input error %s",
-	"Could not import into folder %s",
-	"Could not load folder %s",
+        desc={"","","","",""},
+        exceptionId={0,1,2,3,4,5},
+        msg={
+    "Could not import into the folder %s.",
+    "Could not import into folder %s",
+    "User input error %s",
+    "Could not import into folder %s",
+    "Could not load folder %s",
     "Could not find ICalEmitter service. Has the service been exported?"})
-	
+    
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface; fixes)
  */
 public class ICalExporter implements Exporter {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ICalExporter.class);
-	
-	private static final Date DATE_ZERO = new Date(0);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(ICalExporter.class);
+    
+    private static final Date DATE_ZERO = new Date(0);
 
-	private final static int[] _appointmentFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		AppointmentObject.LOCATION,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
-		CalendarObject.RECURRENCE_CALCULATOR,
-		CalendarObject.RECURRENCE_ID,
-		CalendarObject.PARTICIPANTS,
-		CalendarObject.USERS,
-		AppointmentObject.SHOWN_AS,
-		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL,
-		CalendarDataObject.TIMEZONE
-	};
-	
-	protected final static int[] _taskFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
-		CalendarObject.PARTICIPANTS,
-		Task.ACTUAL_COSTS,
-		Task.ACTUAL_DURATION,
-		Task.ALARM,
-		Task.BILLING_INFORMATION,
-		Task.CATEGORIES,
-		Task.COMPANIES,
-		Task.CURRENCY,
-		Task.DATE_COMPLETED,
-		Task.IN_PROGRESS,
-		Task.PERCENT_COMPLETED,
-		Task.PRIORITY,
-		Task.STATUS,
-		Task.TARGET_COSTS,
-		Task.TARGET_DURATION,
-		Task.TRIP_METER,
-		Task.COLOR_LABEL
-	};
-	
-	private static final ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
-	
-	public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
-		if(! format.equals(Format.ICAL)){
-			return false;
-		}
-		final int folderId = Integer.parseInt(folder);
-		FolderObject fo;
-		try {
-			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
-		} catch (final OXException e) {
-			return false;
-		}
-		//check format of folder
-		final int module = fo.getModule(); 
-		if (module == FolderObject.CALENDAR) {
-			if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
-				return false;
-			}
-		} else if (module == FolderObject.TASK) {
-			if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
-				return false;
-			}
-		} else {
-			return false;
-		}
+    private final static int[] _appointmentFields = {
+        DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        CalendarObject.TITLE,
+        AppointmentObject.LOCATION,
+        CalendarObject.START_DATE,
+        CalendarObject.END_DATE,
+        CalendarObject.NOTE,
+        CalendarObject.RECURRENCE_TYPE,
+        CalendarObject.RECURRENCE_CALCULATOR,
+        CalendarObject.RECURRENCE_ID,
+        CalendarObject.PARTICIPANTS,
+        CalendarObject.USERS,
+        AppointmentObject.SHOWN_AS,
+        AppointmentObject.FULL_TIME,
+        AppointmentObject.COLOR_LABEL,
+        CalendarDataObject.TIMEZONE
+    };
+    
+    protected final static int[] _taskFields = {
+        DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        CalendarObject.TITLE,
+        CalendarObject.START_DATE,
+        CalendarObject.END_DATE,
+        CalendarObject.NOTE,
+        CalendarObject.RECURRENCE_TYPE,
+        CalendarObject.PARTICIPANTS,
+        Task.ACTUAL_COSTS,
+        Task.ACTUAL_DURATION,
+        Task.ALARM,
+        Task.BILLING_INFORMATION,
+        Task.CATEGORIES,
+        Task.COMPANIES,
+        Task.CURRENCY,
+        Task.DATE_COMPLETED,
+        Task.IN_PROGRESS,
+        Task.PERCENT_COMPLETED,
+        Task.PRIORITY,
+        Task.STATUS,
+        Task.TARGET_COSTS,
+        Task.TARGET_DURATION,
+        Task.TRIP_METER,
+        Task.COLOR_LABEL
+    };
+    
+    private static final ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
+    
+    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+        if(! format.equals(Format.ICAL)){
+            return false;
+        }
+        final int folderId = Integer.parseInt(folder);
+        FolderObject fo;
+        try {
+            fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
+        } catch (final OXException e) {
+            return false;
+        }
+        //check format of folder
+        final int module = fo.getModule(); 
+        if (module == FolderObject.CALENDAR) {
+            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
+                return false;
+            }
+        } else if (module == FolderObject.TASK) {
+            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
+                return false;
+            }
+        } else {
+            return false;
+        }
 
-		//check read access to folder
-		EffectivePermission perm;
-		try {
-			perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
-		} catch (final DBPoolingException e) {
-			throw importExportExceptionFactory.create(2, e, folder);
-		} catch (final SQLException e) {
-			throw importExportExceptionFactory.create(2, e, folder);
-		}
-		
-		if (perm.canReadAllObjects()) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
-	    final Context ctx;
-	    final User user;
-	    try {
-	        ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
-	        user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
-	    } catch (final ContextException e) {
-	        throw new ImportExportException(e);
+        //check read access to folder
+        EffectivePermission perm;
+        try {
+            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
+        } catch (final DBPoolingException e) {
+            throw importExportExceptionFactory.create(2, e, folder);
+        } catch (final SQLException e) {
+            throw importExportExceptionFactory.create(2, e, folder);
+        }
+        
+        if (perm.canReadAllObjects()) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+        final Context ctx;
+        final User user;
+        try {
+            ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
+            user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
+        } catch (final ContextException e) {
+            throw new ImportExportException(e);
         } catch (final LdapException e) {
             throw new ImportExportException(e);
-	    }
-		String icalText;
+        }
+        String icalText;
         try {
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if(null == emitter) {
                 throw importExportExceptionFactory.create(5);
             }
             final FolderObject fo;
-			try {
-				fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(Integer.parseInt(folder));
-			} catch (final OXException e) {
-				throw importExportExceptionFactory.create(4, e, folder);
-			}
-			if (fo.getModule() == FolderObject.CALENDAR) {
-				if (fieldsToBeExported == null) {
-					fieldsToBeExported = _appointmentFields;
-				}
-				
-				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-				final SearchIterator<CalendarDataObject> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
-				final List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
+            try {
+                fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(Integer.parseInt(folder));
+            } catch (final OXException e) {
+                throw importExportExceptionFactory.create(4, e, folder);
+            }
+            if (fo.getModule() == FolderObject.CALENDAR) {
+                if (fieldsToBeExported == null) {
+                    fieldsToBeExported = _appointmentFields;
+                }
+                
+                final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+                final SearchIterator<AppointmentObject> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
+                final List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
                 try {
-					while (searchIterator.hasNext()) {
+                    while (searchIterator.hasNext()) {
                         final AppointmentObject appointment = searchIterator.next();
                         if (AppointmentObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
                             if (!appointment.containsTimezone()) {
@@ -281,29 +281,29 @@ public class ICalExporter implements Exporter {
                             CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
                         }
                         appointments.add(appointment);
-				   	}
+                       }
                     final List<ConversionError> errors = new LinkedList<ConversionError>();
                     final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
                     icalText = emitter.writeAppointments(appointments, sessObj.getContext(), errors, warnings);
                     log(errors, warnings);
                 } finally {
                     try {
-						searchIterator.close();
-					} catch (final SearchIteratorException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
+                        searchIterator.close();
+                    } catch (final SearchIteratorException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
                 
             } else if (fo.getModule() == FolderObject.TASK) {
-				if (fieldsToBeExported == null) {
-					fieldsToBeExported = _taskFields;
-				}
-				
-				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
-				final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
+                if (fieldsToBeExported == null) {
+                    fieldsToBeExported = _taskFields;
+                }
+                
+                final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
+                final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
                 final List<Task> tasks = new LinkedList<Task>();
                 try {
-					while (searchIterator.hasNext()) {
+                    while (searchIterator.hasNext()) {
                         tasks.add(searchIterator.next());
                     }
                     final List<ConversionError> errors = new LinkedList<ConversionError>();
@@ -312,18 +312,18 @@ public class ICalExporter implements Exporter {
                     log(errors, warnings);
 
                 } finally {
-					try {
-						searchIterator.close();
-					} catch (final SearchIteratorException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-			} else {
-				throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
-			}
-		} catch (final Exception exc) {
-			throw importExportExceptionFactory.create(3, exc, folder);
-		}
+                    try {
+                        searchIterator.close();
+                    } catch (final SearchIteratorException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            } else {
+                throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
+            }
+        } catch (final Exception exc) {
+            throw importExportExceptionFactory.create(3, exc, folder);
+        }
         byte[] bytes = new byte[0];
         try {
             bytes = icalText.getBytes("UTF-8");
@@ -331,10 +331,10 @@ public class ICalExporter implements Exporter {
             LOG.error(e.getMessage(), e); // Impropable
         }
         return new SizedInputStream(
-				new UnsynchronizedByteArrayInputStream(bytes), 
-				bytes.length,
-				Format.ICAL);
-	}
+                new UnsynchronizedByteArrayInputStream(bytes), 
+                bytes.length,
+                Format.ICAL);
+    }
 
     private void log(final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         for(final ConversionError error : errors) {
@@ -347,77 +347,77 @@ public class ICalExporter implements Exporter {
     }
 
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
-		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-		try {
-			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-			final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
-			final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
-			versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-			final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
-			final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
-			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
-			
-			FolderObject fo;
-			try {
-				fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(Integer.parseInt(folder));
-			} catch (final OXException e) {
-				throw importExportExceptionFactory.create(4, e, folder);
-			}
-			if (fo.getModule() == FolderObject.CALENDAR) {
-				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-				final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, Integer.parseInt(folder));
-				try {
-					exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
-					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-				} finally {
-					closeVersitResources(oxContainerConverter, versitWriter);
-				}
-			} else if (fo.getModule() == FolderObject.TASK) {
-				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
-				final Task taskObj = taskSql.getTaskById(objectId, Integer.parseInt(folder));
-				try {
-					exportTask(oxContainerConverter, taskDef, versitWriter, taskObj);
-					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-				} finally {
-					closeVersitResources(oxContainerConverter, versitWriter);
-				}
-			} else {
-				throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
-			}
-			
-			versitWriter.flush();
-		} catch (final Exception exc) {
-			throw importExportExceptionFactory.create(4, exc, folder);
-		}
-		
-		return new SizedInputStream(
-				new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
-				byteArrayOutputStream.size(),
-				Format.ICAL);
-	}
-	
-	protected void exportAppointment(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final AppointmentObject appointmentObj) throws Exception {
-		final VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj);
-		versitDef.write(writer, versitObject);
-		writer.flush();
-	}
-	
-	protected void exportTask(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Task taskObj) throws Exception {
-		final VersitObject versitObject = oxContainerConverter.convertTask(taskObj);
-		versitDef.write(writer, versitObject);
-		writer.flush();
-	}
+        final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+        try {
+            final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
+            final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+            final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
+            versitDefinition.writeProperties(versitWriter, versitObjectContainer);
+            final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
+            final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
+            final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
+            
+            FolderObject fo;
+            try {
+                fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(Integer.parseInt(folder));
+            } catch (final OXException e) {
+                throw importExportExceptionFactory.create(4, e, folder);
+            }
+            if (fo.getModule() == FolderObject.CALENDAR) {
+                final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+                final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, Integer.parseInt(folder));
+                try {
+                    exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
+                    versitDefinition.writeEnd(versitWriter, versitObjectContainer);
+                } finally {
+                    closeVersitResources(oxContainerConverter, versitWriter);
+                }
+            } else if (fo.getModule() == FolderObject.TASK) {
+                final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
+                final Task taskObj = taskSql.getTaskById(objectId, Integer.parseInt(folder));
+                try {
+                    exportTask(oxContainerConverter, taskDef, versitWriter, taskObj);
+                    versitDefinition.writeEnd(versitWriter, versitObjectContainer);
+                } finally {
+                    closeVersitResources(oxContainerConverter, versitWriter);
+                }
+            } else {
+                throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
+            }
+            
+            versitWriter.flush();
+        } catch (final Exception exc) {
+            throw importExportExceptionFactory.create(4, exc, folder);
+        }
+        
+        return new SizedInputStream(
+                new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+                byteArrayOutputStream.size(),
+                Format.ICAL);
+    }
+    
+    protected void exportAppointment(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final AppointmentObject appointmentObj) throws Exception {
+        final VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj);
+        versitDef.write(writer, versitObject);
+        writer.flush();
+    }
+    
+    protected void exportTask(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Task taskObj) throws Exception {
+        final VersitObject versitObject = oxContainerConverter.convertTask(taskObj);
+        versitDef.write(writer, versitObject);
+        writer.flush();
+    }
 
-	private static void closeVersitResources(final OXContainerConverter oxContainerConverter, final VersitDefinition.Writer versitWriter) {
-		if (oxContainerConverter != null) {
-			oxContainerConverter.close();
-		}
-		if (versitWriter != null) {
-			try {
-				versitWriter.close();
-			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    private static void closeVersitResources(final OXContainerConverter oxContainerConverter, final VersitDefinition.Writer versitWriter) {
+        if (oxContainerConverter != null) {
+            oxContainerConverter.close();
+        }
+        if (versitWriter != null) {
+            try {
+                versitWriter.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 }
