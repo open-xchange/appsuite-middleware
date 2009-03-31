@@ -1,13 +1,18 @@
 !include CommonSetup
 
-|Table: who am I|
+
+Create an appointment with two users as participants
 
 |Table:create appointment|
 |title| start_date | end_date | participants |
 |Appointment with Participants | Tomorrow at 10 am | Tomorrow at 11 am | marcus, bond |
 
+
+Check whether those two users are both listed as participants and users. Also look for yourself in both lists.
+
 |Table:verify appointment|
 |title| start_date | end_date | participants | users |
 |Appointment with Participants | Tomorrow at 10 am | Tomorrow at 11 am | thorben, marcus, bond | thorben, marcus, bond |
+
 
 !include CommonTearDown
