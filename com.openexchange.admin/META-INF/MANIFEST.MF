@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange-admin Core Plug-in
 Bundle-SymbolicName: open_xchange_admin
 Bundle-Version: 6.9.0.0
-Build: 0
+OXVersion: 6.9.0
+OXRevision: 0
 Bundle-Activator: com.openexchange.admin.daemons.Activator
 Import-Package: com.mysql.jdbc,
  com.openexchange.api2,
