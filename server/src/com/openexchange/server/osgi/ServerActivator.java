@@ -235,7 +235,7 @@ public final class ServerActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
-        Version.buildnumber = (String) headers.get("Build");
+        Version.buildnumber = (String) headers.get("OXVersion") + " Rev" + (String) headers.get("OXRevision");
         Version.version = (String) headers.get("Bundle-Version");
         // (Re-)Initialize server service registry with available services
         {

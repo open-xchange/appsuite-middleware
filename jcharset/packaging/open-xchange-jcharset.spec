@@ -32,7 +32,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:        1.3.0
+Version:        @OXVERSION@
 Release:	17
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)

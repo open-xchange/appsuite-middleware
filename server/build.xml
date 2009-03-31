@@ -10,16 +10,12 @@
     <property name="prefix" location="/opt/open-xchange"/>
     <property name="log.install.dir" value="/var/log/open-xchange"/>
     <property name="distribution" value="debian"/>
-    <property file="VERSION"/>
-    <property file="PVERSION"/>
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf/groupware"/>
     <property name="bin.dir" value="sbin"/>
 	<property name="lib.dir" value="lib"/>
-
-    <property name="buildnumber" value="${pversion}"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -377,7 +373,6 @@
 	<target name="manifest">
 		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
 		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
-			    <attribute name="Build" value="${pversion}"/>
 			    <attribute name="Codename" value="${codename}"/>
 		</manifest>
 	</target>

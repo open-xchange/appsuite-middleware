@@ -2,10 +2,10 @@ Source: open-xchange-conversion
 Section: unknown
 Priority: optional
 Maintainer: thorben <thorben.betten@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-global (>=6.9.0.0), open-xchange-common (>= 6.9.0.0)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-global (>=@OXVERSION@), open-xchange-common (>= @OXVERSION@)
 Standards-Version: 3.6.1
 
 Package: open-xchange-conversion
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-global (>=6.9.0.0), open-xchange-common (>= 6.9.0.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-global (>=@OXVERSION@), open-xchange-common (>= @OXVERSION@)
 Description: The Open-Xchange Conversion Bundle
