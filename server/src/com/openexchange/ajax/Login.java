@@ -156,7 +156,9 @@ public class Login extends AJAXServlet {
              * Store associated session
              */
             try {
-                SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
+                if (null != session) {
+                    SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
+                }
             } catch (final ContextException e) {
                 LOG.error(e.getMessage(), e);
                 response.setException(e);
