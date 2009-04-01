@@ -12,5 +12,5 @@ Description: Open Xchange Admin Reseller Plugin
 
 Package: open-xchange-admin-plugin-reseller-soap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-plugin-reseller, open-xchange-admin-soap
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-plugin-reseller (>= @OXVERSION@), open-xchange-admin-soap (>= @OXVERSION@)
 Description: Open Xchange Admin Reseller Plugin

@@ -2,10 +2,10 @@ Source: open-xchange-sessiond
 Section: unknown
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-global (>= @OXVERSION@), open-xchange-common (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@), open-xchange-management (>= @OXVERSION@), open-xchange-timer
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-global (>= @OXVERSION@), open-xchange-common (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@), open-xchange-management (>= @OXVERSION@), open-xchange-timer (>= @OXVERSION@)
 Standards-Version: 3.6.1
 
 Package: open-xchange-sessiond
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-global, open-xchange-common (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@), open-xchange-management (>= @OXVERSION@), open-xchange-timer
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-global, open-xchange-common (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@), open-xchange-management (>= @OXVERSION@), open-xchange-timer (>= @OXVERSION@)
 Description: The Open-Xchange Server Session Daemon
