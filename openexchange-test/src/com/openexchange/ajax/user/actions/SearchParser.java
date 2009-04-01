@@ -71,6 +71,6 @@ public final class SearchParser extends AbstractSearchParser<SearchResponse> {
      */
     @Override
     protected SearchResponse instanciateResponse(final Response response) {
-        return new SearchResponse(response);
+        return new SearchResponse(response, getColumns());
     }
 }

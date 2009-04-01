@@ -64,19 +64,14 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public final class SearchResponse extends CommonSearchResponse {
 
-    private final int[] userImplAttributes = new int[] {
-        ContactObject.INTERNAL_USERID,
-        ContactObject.EMAIL1,
-        ContactObject.DISPLAY_NAME,
-        ContactObject.GIVEN_NAME,
-        ContactObject.SUR_NAME
-    };
+    private final int[] userImplAttributes;
     
     /**
      * @param response
      */
-    public SearchResponse(final Response response) {
+    public SearchResponse(final Response response, final int[] columns) {
         super(response);
+        this.userImplAttributes = columns;
     }
 
     public UserImpl4Test[] getUser() {

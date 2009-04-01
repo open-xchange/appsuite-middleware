@@ -94,4 +94,8 @@ public abstract class AbstractSearchParser<T extends CommonSearchResponse> exten
     }
 
     protected abstract T instanciateResponse(final Response response);
+
+    protected int[] getColumns() {
+        return columns;
+    }
 }
