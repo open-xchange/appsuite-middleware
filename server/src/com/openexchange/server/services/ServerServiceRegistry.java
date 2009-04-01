@@ -52,104 +52,124 @@ package com.openexchange.server.services;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.server.ServiceException;
 
 /**
  * {@link ServerServiceRegistry} - A registry for services needed by server
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ServerServiceRegistry {
 
-	private static final ServerServiceRegistry REGISTRY = new ServerServiceRegistry();
+    private static final ServerServiceRegistry REGISTRY = new ServerServiceRegistry();
 
-	/**
-	 * Gets the server's service registry
-	 * 
-	 * @return The server's service registry
-	 */
-	public static ServerServiceRegistry getInstance() {
-		return REGISTRY;
-	}
+    /**
+     * Gets the server's service registry
+     * 
+     * @return The server's service registry
+     */
+    public static ServerServiceRegistry getInstance() {
+        return REGISTRY;
+    }
 
-	private final Map<Class<?>, Object> services;
+    private final Map<Class<?>, Object> services;
 
-	/**
-	 * Initializes a new {@link ServerServiceRegistry}
-	 */
-	private ServerServiceRegistry() {
-		super();
-		services = new ConcurrentHashMap<Class<?>, Object>();
-	}
+    /**
+     * Initializes a new {@link ServerServiceRegistry}
+     */
+    private ServerServiceRegistry() {
+        super();
+        services = new ConcurrentHashMap<Class<?>, Object>();
+    }
 
-	/**
-	 * Clears the whole registry
-	 */
-	public void clearRegistry() {
-		services.clear();
-	}
+    /**
+     * Clears the whole registry
+     */
+    public void clearRegistry() {
+        services.clear();
+    }
 
-	/**
-	 * Removes a service bound to given class from this service registry
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 */
-	public void removeService(final Class<?> clazz) {
-		services.remove(clazz);
-	}
+    /**
+     * Removes a service bound to given class from this service registry
+     * 
+     * @param clazz The service's class
+     */
+    public void removeService(final Class<?> clazz) {
+        services.remove(clazz);
+    }
 
-	/**
-	 * Adds a service bound to given class to this service registry
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 * @param service
-	 *            The service itself
-	 */
-	public <S extends Object> void addService(final Class<? extends S> clazz, final S service) {
-		services.put(clazz, service);
-	}
+    /**
+     * Adds a service bound to given class to this service registry
+     * 
+     * @param clazz The service's class
+     * @param service The service itself
+     */
+    public <S extends Object> void addService(final Class<? extends S> clazz, final S service) {
+        services.put(clazz, service);
+    }
 
-	/**
-	 * Gets the service defined by given class
-	 * 
-	 * @param <S>
-	 *            The type of service's class
-	 * @param clazz
-	 *            The service's class
-	 * @return The service if found; otherwise <code>null</code>
-	 */
-	public <S extends Object> S getService(final Class<? extends S> clazz) {
-		final Object service = services.get(clazz);
-		if (null == service) {
-			/*
-			 * Service is not present
-			 */
-			return null;
-		}
-		return clazz.cast(service);
-	}
+    /**
+     * Gets the service defined by given class
+     * 
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @return The service if found; otherwise <code>null</code>
+     */
+    public <S extends Object> S getService(final Class<? extends S> clazz) {
+        final Object service = services.get(clazz);
+        if (null == service) {
+            /*
+             * Service is not present
+             */
+            return null;
+        }
+        return clazz.cast(service);
+    }
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(256);
-		sb.append("Server service registry:\n");
-		if (services.isEmpty()) {
-			sb.append("<empty>");
-		} else {
-			final Iterator<Map.Entry<Class<?>, Object>> iter = services.entrySet().iterator();
-			while (true) {
-				final Map.Entry<Class<?>, Object> e = iter.next();
-				sb.append(e.getKey().getName()).append(": ").append(e.getValue().toString());
-				if (iter.hasNext()) {
-					sb.append('\n');
-				} else {
-					break;
-				}
-			}
-		}
-		return sb.toString();
-	}
+    /**
+     * Gets the service defined by given class
+     * 
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @param failOnError <code>true</code> to throw an appropriate {@link ServiceException} if service is missing; otherwise
+     *            <code>false</code>
+     * @return The service if found; otherwise <code>null</code> or an appropriate {@link ServiceException} is thrown dependent on
+     *         <code>failOnError</code> parameter.
+     * @throws ServiceException If <code>failOnError</code> parameter is set to <code>true</code> and service is missing
+     */
+    public <S extends Object> S getService(final Class<? extends S> clazz, final boolean failOnError) throws ServiceException {
+        final Object service = services.get(clazz);
+        if (null == service) {
+            /*
+             * Service is not present
+             */
+            if (failOnError) {
+                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, clazz.getName());
+            }
+            return null;
+        }
+        return clazz.cast(service);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(256);
+        sb.append("Server service registry:\n");
+        if (services.isEmpty()) {
+            sb.append("<empty>");
+        } else {
+            final Iterator<Map.Entry<Class<?>, Object>> iter = services.entrySet().iterator();
+            while (true) {
+                final Map.Entry<Class<?>, Object> e = iter.next();
+                sb.append(e.getKey().getName()).append(": ").append(e.getValue().toString());
+                if (iter.hasNext()) {
+                    sb.append('\n');
+                } else {
+                    break;
+                }
+            }
+        }
+        return sb.toString();
+    }
 
 }
