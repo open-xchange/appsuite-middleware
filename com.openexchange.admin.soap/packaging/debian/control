@@ -2,10 +2,10 @@ Source: open-xchange-admin-soap
 Section: net
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-admin-client (>= @OXVERSION@-0), open-xchange-admin-plugin-hosting-client (>= @OXVERSION@-0), open-xchange-common, perl
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting-client (>= @OXVERSION@), open-xchange-common, perl
 Standards-Version: 3.6.1
 
 Package: open-xchange-admin-soap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-admin-client (>= @OXVERSION@-0), open-xchange-admin-plugin-hosting-client (>= @OXVERSION@-0), open-xchange-axis2
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting-client (>= @OXVERSION@), open-xchange-axis2 (>= @OXVERSION@)
 Description: Open Xchange Admin SOAP API
