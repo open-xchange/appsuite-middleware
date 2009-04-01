@@ -67,10 +67,10 @@ public class ContactSearchJSONWriter {
         throws JSONException {
         final JSONObject json = new JSONObject();
         int[] folders = search.getFolders();
-        if(folders != null && folders.length > 0) {
+        if (folders != null && folders.length > 0) {
             json.put(AJAXServlet.PARAMETER_INFOLDER, folders[0]);
-        }
-        if (ContactSearchObject.NO_FOLDER != search.getFolder()) {
+        } else if (ContactSearchObject.NO_FOLDER != search.getFolder()) {
+            json.put(AJAXServlet.PARAMETER_INFOLDER, search.getFolder());
         }
         if (ContactSearchObject.NO_PATTERN != search.getPattern()) {
             json.put("pattern", search.getPattern());

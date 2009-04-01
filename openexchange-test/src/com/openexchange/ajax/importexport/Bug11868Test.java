@@ -91,7 +91,7 @@ public final class Bug11868Test extends AbstractAJAXSession {
         {
             final ContactSearchObject search = new ContactSearchObject();
             search.setPattern("*");
-            search.setFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
             final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
             final SearchResponse response = Executor.execute(client, request);
             final User[] user = response.getUser();
