@@ -1029,11 +1029,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         return new CalendarOperation();
     }
 
-    public SearchIterator<CalendarDataObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, final int cols[]) throws OXException, SQLException {
+    public SearchIterator<AppointmentObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, final int cols[]) throws OXException, SQLException {
         return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols, 0, 0);
     }
 
-    private SearchIterator<CalendarDataObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException, SQLException {
+    private SearchIterator<AppointmentObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException, SQLException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1080,7 +1080,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             rs = cimp.getResultSet(prep);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
             close_connection = false;
-            return new CachedCalendarIterator(co, ctx, session.getUserId());
+            return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
         } catch(final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch(final DBPoolingException dbpe) {
@@ -1104,7 +1104,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<CalendarDataObject> searchAppointments(final String searchpattern, final int fid, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<AppointmentObject> searchAppointments(final String searchpattern, final int fid, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final AppointmentSearchObject searchobject = new AppointmentSearchObject();
         searchobject.setPattern(searchpattern);
         searchobject.setFolder(fid);

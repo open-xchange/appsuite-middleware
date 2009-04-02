@@ -163,7 +163,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, String orderDir, int cols[]) throws OXException, SQLException;
+    public SearchIterator<AppointmentObject> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, String orderDir, int cols[]) throws OXException, SQLException;
 
     /**
      * Lists all apointments where the titlematch the given searchpattern
@@ -176,7 +176,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<CalendarDataObject> searchAppointments(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<AppointmentObject> searchAppointments(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
 
     /**
      * Loads one appointment by the given ID
