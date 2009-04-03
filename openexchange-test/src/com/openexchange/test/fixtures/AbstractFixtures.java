@@ -103,20 +103,6 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
             if(attributes.containsKey(o) && null != attributes.get(o)){
             	value = attributes.get(o).toString();
             }
-//            Method setter = discoverSetter(o.toString());
-//
-//            Object param = value.toString();
-//            if(!setter.getParameterTypes()[0].equals(String.class)) {
-//                param = getTransformator(setter.getParameterTypes()[0], o.toString()).transform(value);
-//            } 
-//
-//            try {
-//                setter.invoke(bean, param);
-//            } catch (IllegalAccessException e) {
-//                throw new FixtureException(e);
-//            } catch (InvocationTargetException e) {
-//                throw new FixtureException(e);
-//            }
 
             Object param = value;
             final Method[] setters = discoverSetters(o.toString());
