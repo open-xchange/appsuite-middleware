@@ -1,0 +1,16 @@
+To tests our classes, it is needed to set their fields to certain values. Duh. Here you can find a list of field names. Note that as of 4/2009, these are not exactly matching those used in the [[HTTP-API][http://www.open-xchange.com/wiki/index.php?title=HTTP_API]], but those that are used internally. We are currently busy unifying those names among all our APIs, but that may take a while.
+
+!2 Special fields
+But before we delve into those long lists, here are the "special" fields. "Special" means they can be used like any other field but they do not really belong to the object. They only make sense in a test context:
+
+ * expectedError: This field expects an error code, like TSK-0001. Use it if you're expecting a test to raise an error. This only makes sense during testing, right?
+ * fixturename: This is the name of the fixture. Usually, the second row of the table is used for defining the name, but some might think this way is more handy. This is also used only in tests to refer to other objects.
+ * destination: This field is used while moving objects. The field "folder" or "parent" (which we treat the same, you can use both, depending which you think sounds better) defines where the object resides currently, the "destination" field defines where it is to be moved. When performing a request, this is handled an additional parameter outside the object (well, actually, the original location is the additional parameter and the destination is stored in the "folder" field, but you catch my drift). 
+
+!2 Appointments
+
+!2 Contacts
+
+!2 Tasks
+
+!2 Folders
