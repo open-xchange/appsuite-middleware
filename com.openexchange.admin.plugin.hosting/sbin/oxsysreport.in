@@ -82,7 +82,7 @@ FILES_DIRS='
 /etc/*apache*
 '
 
-PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free'
+PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;oxreport --detail'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
