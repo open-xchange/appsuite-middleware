@@ -249,8 +249,8 @@ public abstract class AbstractCalendarTest extends TestCase {
             }
         }
 
-    protected List<CalendarDataObject> read(final SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
-        final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
+    protected List<AppointmentObject> read(final SearchIterator<AppointmentObject> si) throws OXException, SearchIteratorException {
+        final List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;
     }

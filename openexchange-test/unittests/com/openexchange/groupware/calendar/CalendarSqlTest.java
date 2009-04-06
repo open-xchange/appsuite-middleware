@@ -606,16 +606,16 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         try {
             appointments.switchUser(secondUser);
 
-            final SearchIterator<CalendarDataObject> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
+            final SearchIterator<AppointmentObject> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
                 userId,
                 Participant.USER,
                 D("23/02/1981 00:00"),
                 D("25/02/1981 00:00"));
 
-            final List<CalendarDataObject> appointments = read(freebusy);
+            final List<AppointmentObject> appointments = read(freebusy);
 
             assertEquals(1, appointments.size());
-            final CalendarDataObject result = appointments.get(0);
+            final AppointmentObject result = appointments.get(0);
             // Assert the title is visible
 
             assertEquals(appointment.getTitle(), result.getTitle());
@@ -823,7 +823,7 @@ public class CalendarSqlTest extends AbstractCalendarTest {
 
         // Ask for freebusy information in one week containing one ocurrence
 
-        final SearchIterator<CalendarDataObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
+        final SearchIterator<AppointmentObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
             userId,
             Participant.USER,
             D("18/02/2008 00:00"),
@@ -831,7 +831,7 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         // Verify only one ocurrence was returned
         try {
             assertTrue("Should find exactly one ocurrence. Found none.", iterator.hasNext());
-            final CalendarDataObject occurrence = iterator.next();
+            final AppointmentObject occurrence = iterator.next();
             assertFalse("Should find exactly one ocurrence. Found more than one", iterator.hasNext());
 
             assertEquals(D("20/02/2008 10:00"), occurrence.getStartDate());
