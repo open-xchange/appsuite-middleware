@@ -6,7 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -40,8 +39,8 @@ public class UpdatesTest extends AppointmentTest {
         AppointmentObject.SHOWN_AS,
 		AppointmentObject.FULL_TIME,
 		AppointmentObject.COLOR_LABEL,
-		CalendarDataObject.TIMEZONE,
-		CalendarDataObject.RECURRENCE_START
+		AppointmentObject.TIMEZONE,
+		AppointmentObject.RECURRENCE_START
 	};
 
 	private static final Log LOG = LogFactory.getLog(UpdatesTest.class);

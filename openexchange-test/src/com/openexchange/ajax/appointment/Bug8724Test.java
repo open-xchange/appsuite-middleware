@@ -6,7 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -36,7 +35,7 @@ public class Bug8724Test extends AppointmentTest {
 		AppointmentObject.SHOWN_AS,
 		AppointmentObject.FULL_TIME,
 		AppointmentObject.COLOR_LABEL,
-		CalendarDataObject.TIMEZONE
+		AppointmentObject.TIMEZONE
 	};
 
 	private static final Log LOG = LogFactory.getLog(Bug8724Test.class);

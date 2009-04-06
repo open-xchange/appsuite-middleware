@@ -15,6 +15,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -1076,7 +1077,7 @@ public class FolderTest extends TestCase {
         }
     }
 
-    private static final void fillDatesInDao(final CalendarDataObject cdao) {
+    private static final void fillDatesInDao(final AppointmentObject cdao) {
         long s = System.currentTimeMillis();
         long cals = s;
         final long calsmod = s % CalendarRecurringCollection.MILLI_DAY;

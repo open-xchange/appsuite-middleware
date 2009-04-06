@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -46,7 +45,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 		AppointmentObject.FULL_TIME,
 		AppointmentObject.COLOR_LABEL,
 		AppointmentObject.RECURRENCE_POSITION,
-		CalendarDataObject.TIMEZONE
+		AppointmentObject.TIMEZONE
 	};
 	
 	public AbstractRecurrenceTest(final String name) {

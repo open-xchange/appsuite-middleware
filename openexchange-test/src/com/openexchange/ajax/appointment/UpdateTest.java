@@ -14,7 +14,6 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.group.GroupTest;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -52,8 +51,8 @@ public class UpdateTest extends AppointmentTest {
 		AppointmentObject.SHOWN_AS,
 		AppointmentObject.FULL_TIME,
 		AppointmentObject.COLOR_LABEL,
-		CalendarDataObject.TIMEZONE,
-		CalendarDataObject.RECURRENCE_START
+		AppointmentObject.TIMEZONE,
+		AppointmentObject.RECURRENCE_START
 	};
 	
 	public UpdateTest(final String name) {
@@ -236,7 +235,7 @@ public class UpdateTest extends AppointmentTest {
         final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, utc, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);        
 
-        final AppointmentObject update = new CalendarDataObject();
+        final AppointmentObject update = new AppointmentObject();
         update.setObjectID(objectId);
         update.setParentFolderID(appointmentFolderId);
         update.setFullTime(true);
