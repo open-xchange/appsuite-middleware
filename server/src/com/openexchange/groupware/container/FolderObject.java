@@ -1323,7 +1323,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             setType( ((Integer) value).intValue());
             break;
         case SUBFOLDERS:
-            setSubfolderIds( (ArrayList<Integer>) value );
+            setSubfolderFlag( ( (Boolean) value ).booleanValue() );
             break;
         default:
             super.set(field, value);
@@ -1339,11 +1339,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         case TYPE:
             return Integer.valueOf(getType());
         case SUBFOLDERS:
-            try {
-                return getSubfolderIds();
-            } catch (OXFolderException e) {
-                return new LinkedList<Integer>();
-            }
+            return Boolean.valueOf( hasSubfolders() );
         default:
             return super.get(field);
         }
@@ -1358,7 +1354,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         case TYPE:
             return containsType();
         case SUBFOLDERS:
-            return containsSubfolderIds();
+            return containsSubfolderFlag();
         default:
             return super.contains(field);
         }
