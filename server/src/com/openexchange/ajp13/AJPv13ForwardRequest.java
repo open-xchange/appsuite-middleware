@@ -562,11 +562,17 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         if (null == cookieValue || cookieValue.length() == 0) {
             return cookieValue;
         }
-        final int mlen = cookieValue.length() - 1;
-        if ((cookieValue.charAt(0) == '"') && (cookieValue.charAt(mlen) == '"')) {
-            return cookieValue.substring(1, mlen);
+        String cv = cookieValue;
+        int mlen = cv.length() - 1;
+        if (cv.charAt(mlen) == ';') {
+            cv =  cv.substring(0, mlen);
+            mlen--;
         }
-        return cookieValue;
+        if ((cv.charAt(0) == '"') && (cv.charAt(mlen) == '"')) {
+            cv =  cv.substring(1, mlen);
+        }
+        
+        return cv;
     }
 
     private void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
