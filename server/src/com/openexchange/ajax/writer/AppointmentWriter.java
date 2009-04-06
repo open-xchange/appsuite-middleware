@@ -201,8 +201,7 @@ public class AppointmentWriter extends CalendarWriter {
             writeParameter(AppointmentFields.RECURRENCE_START, appointmentObject.getRecurringStart(), jsonObj);
         }
 
-        if (appointmentObject instanceof CalendarDataObject
-                && ((CalendarDataObject) appointmentObject).isHardConflict()) {
+        if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject) appointmentObject).isHardConflict()) {
             writeParameter(AppointmentFields.HARD_CONFLICT, true, jsonObj);
         }
     }

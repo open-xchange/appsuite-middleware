@@ -129,7 +129,7 @@ public class AppointmentRequest {
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
         CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION,
         CalendarObject.PARTICIPANTS, CalendarObject.USERS, AppointmentObject.SHOWN_AS, AppointmentObject.DELETE_EXCEPTIONS,
-        AppointmentObject.CHANGE_EXCEPTIONS, AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL, CalendarDataObject.TIMEZONE };
+        AppointmentObject.CHANGE_EXCEPTIONS, AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL, AppointmentObject.TIMEZONE };
 
     private final ServerSession session;
 
