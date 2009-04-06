@@ -108,7 +108,7 @@ public class CalendarAssertions {
     }
 
 
-    public static void assertInPrivateFolder(final CommonAppointments appointments , final CalendarDataObject appointment) throws OXException {
+    public static void assertInPrivateFolder(final CommonAppointments appointments , final AppointmentObject appointment) throws OXException {
         for(final AppointmentObject currentAppointment : appointments.getPrivateAppointments()) {
             if(appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;
