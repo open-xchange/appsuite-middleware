@@ -76,7 +76,8 @@ public class FolderModuleTransformator implements Transformator {
             return FolderObject.MAIL;
         if( value.equalsIgnoreCase(Folder.MODULE_TASK))
             return FolderObject.TASK;
-        
+        if( value.equalsIgnoreCase(Folder.MODULE_SYSTEM))
+            return FolderObject.SYSTEM_TYPE;
         return Integer.valueOf(value);
     }
 
