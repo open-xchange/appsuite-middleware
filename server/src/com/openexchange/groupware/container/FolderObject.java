@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -88,6 +89,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.bettens@open-xchange.org">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - fields for generic getters and setters
  */
 public class FolderObject extends FolderChildObject implements Cloneable, Serializable {
 
@@ -1312,13 +1314,16 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     public void set(int field, Object value) {
         switch (field) {
         case MODULE:
-            setModule((Integer) value);
+            setModule( ((Integer)value ).intValue());
             break;
         case FOLDER_NAME:
             setFolderName((String) value);
             break;
         case TYPE:
-            setType((Integer) value);
+            setType( ((Integer) value).intValue());
+            break;
+        case SUBFOLDERS:
+            setSubfolderIds( (ArrayList<Integer>) value );
             break;
         default:
             super.set(field, value);
@@ -1328,17 +1333,24 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     public Object get(int field) {
         switch (field) {
         case MODULE:
-            return getModule();
+            return Integer.valueOf(getModule());
         case FOLDER_NAME:
             return getFolderName();
         case TYPE:
-            return getType();
+            return Integer.valueOf(getType());
+        case SUBFOLDERS:
+            try {
+                return getSubfolderIds();
+            } catch (OXFolderException e) {
+                return new LinkedList<Integer>();
+            }
         default:
             return super.get(field);
         }
     }
 
     public boolean contains(int field) {
+        System.out.println("Contains method hit. SUBFOLDERS is " + SUBFOLDERS + ", containsSubFolderIds = " + containsSubfolderIds() + ", containsSubFolderFlag = " + containsSubfolderFlag());
         switch (field) {
         case MODULE:
             return containsModule();
@@ -1346,6 +1358,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             return containsFolderName();
         case TYPE:
             return containsType();
+        case SUBFOLDERS:
+            return containsSubfolderIds();
         default:
             return super.contains(field);
         }
@@ -1361,6 +1375,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             break;
         case TYPE:
             removeType();
+            break;
+        case SUBFOLDERS:
+            removeSubfolderIds();
             break;
         default:
             super.remove(field);
@@ -1379,15 +1396,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
         if ((!containsFolderName() && other.containsFolderName()) || (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
             other.getFolderName())))) {
-            differingFields.add(FOLDER_NAME);
+            differingFields.add(Integer.valueOf(FOLDER_NAME));
         }
 
         if ((!containsModule() && other.containsModule()) || (containsModule() && other.containsModule() && getModule() != other.getModule())) {
-            differingFields.add(MODULE);
+            differingFields.add(Integer.valueOf(MODULE));
         }
 
         if ((!containsType() && other.containsType()) || (containsType() && other.containsType() && getType() != other.getType())) {
-            differingFields.add(TYPE);
+            differingFields.add(Integer.valueOf(TYPE));
         }
 
         return differingFields;
