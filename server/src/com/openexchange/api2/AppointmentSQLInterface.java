@@ -209,7 +209,7 @@ public interface AppointmentSQLInterface {
      * @param AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
      */
-    public CalendarDataObject[] insertAppointmentObject(CalendarDataObject cdao) throws OXException;
+    public AppointmentObject[] insertAppointmentObject(CalendarDataObject cdao) throws OXException;
 
     /**
      * update the AppointmentObject

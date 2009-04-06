@@ -215,7 +215,7 @@ public class AppointmentRequest {
         }
 
         final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
-        final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
+        final AppointmentObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
         final JSONObject jsonResponseObj = new JSONObject();
 
@@ -801,13 +801,14 @@ public class AppointmentRequest {
 
         final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
         try {
-            final CalendarDataObject appointmentobject = appointmentSql.getObjectById(id, inFolder);
+            final AppointmentObject appointmentobject = appointmentSql.getObjectById(id, inFolder);
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
             final JSONObject jsonResponseObj = new JSONObject();
 
             if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
-                appointmentobject.calculateRecurrence();
+                // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls extractRecurringInformation()
+                // appointmentobject.calculateRecurrence();
                 final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(
                     appointmentobject,
                     0,
@@ -1240,7 +1241,7 @@ public class AppointmentRequest {
         appointmentObj.removeObjectID();
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(ignoreConflicts);
-        final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
+        final AppointmentObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
         final JSONObject jsonResponseObj = new JSONObject();
 
