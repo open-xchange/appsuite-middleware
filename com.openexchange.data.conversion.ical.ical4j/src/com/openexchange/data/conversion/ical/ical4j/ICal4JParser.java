@@ -49,7 +49,6 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -58,6 +57,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -125,12 +125,11 @@ public class ICal4JParser implements ICalParser {
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
-        return new LinkedList<CalendarDataObject>();
+        return Collections.emptyList();
     }
 
     public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
-        final boolean cont = true;
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
