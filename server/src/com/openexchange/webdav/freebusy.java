@@ -62,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -182,7 +181,7 @@ public class freebusy extends HttpServlet {
     }
 
     private void writeVCalendar(final int contextId, final Date start, final Date end, final String mailPrefix, final String mailSuffix, final String remoteHost, final PrintWriter printWriter, final SimpleDateFormat outputFormat) throws Exception {
-        SearchIterator<CalendarDataObject> it = null;
+        SearchIterator<AppointmentObject> it = null;
 
         printWriter.println("BEGIN:VCALENDAR");
         printWriter.println("PRODID:-//www.open-xchange.org//");

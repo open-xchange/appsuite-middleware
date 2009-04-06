@@ -317,7 +317,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException
      */
-    public SearchIterator<CalendarDataObject> getFreeBusyInformation(int id, int type, Date start, Date end) throws OXException;
+    public SearchIterator<AppointmentObject> getFreeBusyInformation(int id, int type, Date start, Date end) throws OXException;
 
     /**
      * Lists of all appointments where the user will participate between start and end.

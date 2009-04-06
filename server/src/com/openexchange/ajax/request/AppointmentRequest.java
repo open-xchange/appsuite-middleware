@@ -1190,7 +1190,7 @@ public class AppointmentRequest {
 
         timestamp = new Date(0);
 
-        SearchIterator<CalendarDataObject> it = null;
+        SearchIterator<AppointmentObject> it = null;
 
         final JSONArray jsonResponseArray = new JSONArray();
 

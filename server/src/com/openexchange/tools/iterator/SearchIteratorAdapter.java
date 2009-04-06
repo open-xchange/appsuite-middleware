@@ -53,6 +53,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
@@ -67,7 +69,7 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SearchIteratorAdapter.class);
+    private static final Log LOG = LogFactory.getLog(SearchIteratorAdapter.class);
 
     private final Iterator<T> delegate;
 
@@ -123,14 +125,14 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return !warnings.isEmpty();
     }
 
-    public static SearchIterator<?> createEmptyIterator() {
-        return new SearchIterator<Object>() {
+    public static <T> SearchIterator<T> createEmptyIterator() {
+        return new SearchIterator<T>() {
 
             public boolean hasNext() {
                 return false;
             }
 
-            public Object next() throws SearchIteratorException, OXException {
+            public T next() throws SearchIteratorException, OXException {
                 return null;
             }
 
@@ -160,7 +162,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     public static SearchIterator<?> createArrayIterator(final Object array) {
         if (null == array) {
-            return EMPTY_ITERATOR;
+            return createEmptyIterator();
         }
         /*
          * Tiny iterator implementation for arrays

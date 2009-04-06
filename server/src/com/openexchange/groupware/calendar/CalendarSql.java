@@ -1120,7 +1120,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.attachmentAction(oid, uid, c, action);
     }
 
-    public SearchIterator<CalendarDataObject> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
+    public SearchIterator<AppointmentObject> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1135,7 +1135,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         PreparedStatement private_folder_information = null;
         try {
             if (!userConfig.hasFreeBusy()) {
-                return new CalendarOperation();
+                return SearchIteratorAdapter.createEmptyIterator();
             }
             readcon = DBPool.pickup(ctx);
             switch(type) {

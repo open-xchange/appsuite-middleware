@@ -60,6 +60,10 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface SearchIterator<T> {
 
+    /**
+     * @deprecated use {@link SearchIteratorAdapter#createEmptyIterator()}.
+     */
+    @Deprecated
     SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
 
         public boolean hasNext() {
