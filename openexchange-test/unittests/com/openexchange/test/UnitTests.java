@@ -67,7 +67,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.protocol.WebdavPathTest.class);
         tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
         tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
- 
+        tests.addTestSuite(com.openexchange.webdav.protocol.util.UtilsTest.class);
         tests.addTestSuite(com.openexchange.groupware.results.AbstractTimedResultTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
