@@ -201,7 +201,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException
      */
-    public SearchIterator<CalendarDataObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
+    public SearchIterator<AppointmentObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
 
     /**
      * insert the AppointmentObject

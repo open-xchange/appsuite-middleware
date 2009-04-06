@@ -85,6 +85,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
@@ -986,7 +987,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.setUserConfirmation(oid, uid, confirm, confirm_message, session, ctx);
     }
 
-    public SearchIterator<CalendarDataObject> getObjectsById(final int[][] oids, int[] cols) throws OXException {
+    public SearchIterator<AppointmentObject> getObjectsById(final int[][] oids, int[] cols) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1005,7 +1006,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 co.setOIDS(true, oids);
                 co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                 close_connection = false;
-                return new CachedCalendarIterator(co, ctx, session.getUserId(), oids);
+                return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId(), oids));
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
             } catch(final DBPoolingException dbpe) {
@@ -1026,7 +1027,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
         }
-        return new CalendarOperation();
+        return SearchIteratorAdapter.createEmptyIterator();
     }
 
     public SearchIterator<AppointmentObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, final int cols[]) throws OXException, SQLException {
