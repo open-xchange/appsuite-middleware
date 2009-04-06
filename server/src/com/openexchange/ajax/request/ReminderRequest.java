@@ -69,13 +69,13 @@ import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarReminderDelete;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
@@ -307,7 +307,7 @@ public final class ReminderRequest {
      */
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
-        final CalendarDataObject calendarDataObject;
+        final AppointmentObject calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
@@ -338,7 +338,7 @@ public final class ReminderRequest {
 
     private static final ReminderObject getNextRecurringReminder(final Session sessionObj, final TimeZone tz, final ReminderObject reminder) throws OXException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
-        final CalendarDataObject calendarDataObject;
+        final AppointmentObject calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {

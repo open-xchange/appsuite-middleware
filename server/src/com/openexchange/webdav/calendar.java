@@ -177,7 +177,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     }
 
     // Sets default values as needed
-    private void sanitize(final CalendarDataObject appointmentobject) {
+    private void sanitize(final AppointmentObject appointmentobject) {
         if (!appointmentobject.getAlarmFlag()) {
             appointmentobject.setAlarm(-1);
         }
@@ -191,7 +191,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
         }
     }
 
-    private boolean isLimitedSeries(final CalendarDataObject appointmentobject) {
+    private boolean isLimitedSeries(final AppointmentObject appointmentobject) {
         return appointmentobject.containsOccurrence() || appointmentobject.containsUntil();
     }
 

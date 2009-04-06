@@ -72,7 +72,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -104,7 +103,7 @@ public class AppointmentWriter extends CalendarWriter {
             CalendarObject.PARTICIPANTS, CalendarObject.USERS, AppointmentObject.SHOWN_AS, AppointmentObject.FULL_TIME,
             AppointmentObject.COLOR_LABEL, AppointmentObject.NUMBER_OF_ATTACHMENTS,
             AppointmentObject.CHANGE_EXCEPTIONS, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.RECURRENCE_ID,
-            AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_CALCULATOR, CalendarDataObject.TIMEZONE };
+            AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_CALCULATOR, AppointmentObject.TIMEZONE };
 
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED,
             AppointmentObject.RECURRENCE_ID };
