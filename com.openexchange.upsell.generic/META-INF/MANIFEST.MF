@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Generic upselll layer bundle
+Bundle-SymbolicName: com.openexchange.upsell.generic
+Bundle-Version: 6.8.1
+Bundle-Vendor: Open-Xchange Inc.

@@ -1,0 +1,12 @@
+Source: open-xchange-upsell-generic
+Section: unknown
+Priority: optional
+Maintainer: Benjamin Otterbach <benjamin.otterbach@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.8.0), open-xchange-global (>=6.8.0), open-xchange-configread (>=6.8.0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-upsell-generic
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.8.0), open-xchange-global (>=6.8.0), open-xchange-configread (>=6.8.0)
+Provides: open-xchange-configjump
+Description: The generic Open-Xchange upsell layer bundle
