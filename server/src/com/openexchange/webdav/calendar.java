@@ -71,6 +71,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -283,7 +284,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
             try {
                 boolean hasConflicts = false;
-                CalendarDataObject[] conflicts = null;
+                AppointmentObject[] conflicts = null;
                 switch (action) {
                 case DataParser.SAVE:
                     if (appointmentobject.containsObjectID()) {

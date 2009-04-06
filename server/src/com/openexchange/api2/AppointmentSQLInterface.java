@@ -216,7 +216,7 @@ public interface AppointmentSQLInterface {
      * @param AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
      */
-    public CalendarDataObject[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified) throws OXException;
+    public AppointmentObject[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified) throws OXException;
 
     /**
      * deletes the AppointmentObject

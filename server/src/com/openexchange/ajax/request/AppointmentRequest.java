@@ -252,7 +252,7 @@ public class AppointmentRequest {
         appointmentObj.setObjectID(objectId);
 
         final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
-        final CalendarDataObject[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
+        final AppointmentObject[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
 
         final JSONObject jsonResponseObj = new JSONObject();
 

@@ -77,6 +77,7 @@ import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.AbstractImporter;
@@ -280,7 +281,7 @@ public class ICalImporter extends AbstractImporter {
                     // Check for possible full-time appointment
                     check4FullTime(appointmentObj);
                     try {
-                        final CalendarDataObject[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
+                        final AppointmentObject[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
                         if (conflicts == null || conflicts.length == 0) {
                             importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
                             importResult.setDate(appointmentObj.getLastModified());
