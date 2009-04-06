@@ -496,7 +496,7 @@ public class ICalImporter extends AbstractImporter {
      * 
      * @param appointmentObj The appointment to check
      */
-    private void check4FullTime(final CalendarDataObject appointmentObj) {
+    private void check4FullTime(final AppointmentObject appointmentObj) {
         final long start = appointmentObj.getStartDate().getTime();
         final long end = appointmentObj.getEndDate().getTime();
         if (Constants.MILLI_DAY == (end - start)) {

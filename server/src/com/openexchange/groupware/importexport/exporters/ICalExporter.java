@@ -68,7 +68,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -160,7 +159,7 @@ public class ICalExporter implements Exporter {
         AppointmentObject.SHOWN_AS,
         AppointmentObject.FULL_TIME,
         AppointmentObject.COLOR_LABEL,
-        CalendarDataObject.TIMEZONE
+        AppointmentObject.TIMEZONE
     };
     
     protected final static int[] _taskFields = {
