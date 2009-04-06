@@ -46,14 +46,15 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.links;
 
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.AbstractCalendarListener;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.api2.LinkSQLInterface;
@@ -69,7 +70,7 @@ public class CopyLinksForChangeExceptions extends AbstractCalendarListener {
         this.links = links;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException,int inFolder, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(AppointmentObject master, AppointmentObject changeException,int inFolder, ServerSession session) throws AbstractOXException {
         int userId = session.getUserId();
         UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId,session.getContext());
         int[] groups = userConfig.getGroups();
