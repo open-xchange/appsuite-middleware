@@ -93,9 +93,7 @@ public class PasswordUtil {
 
             final byte[] outputBytes = cipher.doFinal(password.getBytes());
 
-            final String base64 = new String(Base64.encodeBase64(outputBytes), "US-ASCII");
-
-            return base64;
+            return new String(Base64.encodeBase64(outputBytes), "US-ASCII");
         } catch (final Exception e) {
             throw new RuntimeException("Failed to encrypt password", e);
         }
@@ -127,9 +125,8 @@ public class PasswordUtil {
             cipher.init(Cipher.DECRYPT_MODE, key);
 
             final byte[] outputBytes = cipher.doFinal(encrypted);
-            final String ret = new String(outputBytes);
 
-            return ret;
+            return new String(outputBytes);
         } catch (final Exception e) {
             throw new RuntimeException("Failed to decrypt password", e);
         }
