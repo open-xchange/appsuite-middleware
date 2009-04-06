@@ -1,3 +1,7 @@
+* 2009-04-06 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13465: Set timezone when writing creation date and last modified in webdav to UTC, as promised by the pattern.
+
 * 2009-04-06 - thorben.betten@open-xchange.com
 
  - Bugfix #13473: Fixed parsing cookies which contain an ending semicolon
