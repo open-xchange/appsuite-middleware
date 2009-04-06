@@ -1350,7 +1350,6 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     }
 
     public boolean contains(int field) {
-        System.out.println("Contains method hit. SUBFOLDERS is " + SUBFOLDERS + ", containsSubFolderIds = " + containsSubfolderIds() + ", containsSubFolderFlag = " + containsSubfolderFlag());
         switch (field) {
         case MODULE:
             return containsModule();
