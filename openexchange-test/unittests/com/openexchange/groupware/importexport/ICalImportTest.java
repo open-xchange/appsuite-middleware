@@ -198,7 +198,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7703", ctx, false);
 
         final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-        final CalendarDataObject app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
+        final AppointmentObject app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
             res.getFolder()).intValue());
         assertEquals("Comparing interval: ", Integer.valueOf(interval), Integer.valueOf(app.getInterval())); // ugly, but necessary to
                                                                                                              // bridge JUnit 3/4
@@ -338,7 +338,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7470", ctx, false);
         final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-        final CalendarDataObject app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
+        final AppointmentObject app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
             res.getFolder()).intValue());
         final Participant[] participants = app.getParticipants();
         assertEquals("Two participants?", Integer.valueOf(2), Integer.valueOf(participants.length));
