@@ -60,6 +60,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 
@@ -125,7 +126,7 @@ public final class MailMoveTest extends AbstractMailTest {
 					mfd.setSeparator(inbox.getSeparator());
 					mfd.setName("TemporaryFolder");
 
-					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,

@@ -51,7 +51,6 @@ package com.openexchange.mail.messagestorage;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -60,6 +59,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
@@ -296,65 +296,75 @@ public final class MailRFC2231Test extends AbstractMailTest {
 
 	public void testRFC2231Part1() {
 		try {
-			final SessionObject session = getSession();
+            final SessionObject session = getSession();
 
-			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes("US-ASCII"));
-			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
-					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-							session.getContextId()));
-			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
-			final JSONObject jObject = messageHandler.getJSONObject();
-			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
-				final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-				final int len = jArray.length();
-				assertTrue("Missing attachments although existence indicated through 'hasAttachments()'", len > 0);
-				for (int i = 0; i < len; i++) {
-					final JSONObject attachObj = jArray.getJSONObject(i);
-					if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
-						final String filename = attachObj.getString(MailJSONField.ATTACHMENT_FILE_NAME.getKey());
-						assertTrue("Unexpected filename", "\uc11c\uc601\uc9c4.txt".equals(filename) || "test \u00e4\u00f6\u00fc.txt".equals(filename));
-					}
-				}
-			} else {
-				fail("Missing attachments although existence indicated through 'hasAttachments()'");
-			}
+            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes("US-ASCII"));
+            final JSONMessageHandler messageHandler = new JSONMessageHandler(
+                MailAccount.DEFAULT_ID,
+                null,
+                rfc2231Mail,
+                DisplayMode.DISPLAY,
+                session,
+                UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()));
+            new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
+            final JSONObject jObject = messageHandler.getJSONObject();
+            if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
+                final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+                final int len = jArray.length();
+                assertTrue("Missing attachments although existence indicated through 'hasAttachments()'", len > 0);
+                for (int i = 0; i < len; i++) {
+                    final JSONObject attachObj = jArray.getJSONObject(i);
+                    if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
+                        final String filename = attachObj.getString(MailJSONField.ATTACHMENT_FILE_NAME.getKey());
+                        assertTrue(
+                            "Unexpected filename",
+                            "\uc11c\uc601\uc9c4.txt".equals(filename) || "test \u00e4\u00f6\u00fc.txt".equals(filename));
+                    }
+                }
+            } else {
+                fail("Missing attachments although existence indicated through 'hasAttachments()'");
+            }
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	public void testRFC2231Part2() {
-		try {
-			final SessionObject session = getSession();
+    public void testRFC2231Part2() {
+        try {
+            final SessionObject session = getSession();
 
-			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes("US-ASCII"));
-			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
-					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-							session.getContextId()));
-			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
-			final JSONObject jObject = messageHandler.getJSONObject();
-			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
-				final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-				final int len = jArray.length();
-				assertTrue("Missing attachments although existence indicated through 'hasAttachments()'", len > 0);
-				for (int i = 0; i < len; i++) {
-					final JSONObject attachObj = jArray.getJSONObject(i);
-					if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
-						final String filename = attachObj.getString(MailJSONField.ATTACHMENT_FILE_NAME.getKey());
-						assertTrue("Missing filename", null != filename);
-						assertTrue("Unexpected filename", "Acc\u00ea\u00b4n\u0060t\u00ead File.doc".equals(filename));
-					}
-				}
-			} else {
-				fail("Missing attachments although existence indicated through 'hasAttachments()'");
-			}
+            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes("US-ASCII"));
+            final JSONMessageHandler messageHandler = new JSONMessageHandler(
+                MailAccount.DEFAULT_ID,
+                null,
+                rfc2231Mail,
+                DisplayMode.DISPLAY,
+                session,
+                UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()));
+            new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
+            final JSONObject jObject = messageHandler.getJSONObject();
+            if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
+                final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+                final int len = jArray.length();
+                assertTrue("Missing attachments although existence indicated through 'hasAttachments()'", len > 0);
+                for (int i = 0; i < len; i++) {
+                    final JSONObject attachObj = jArray.getJSONObject(i);
+                    if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
+                        final String filename = attachObj.getString(MailJSONField.ATTACHMENT_FILE_NAME.getKey());
+                        assertTrue("Missing filename", null != filename);
+                        assertTrue("Unexpected filename", "Acc\u00ea\u00b4n\u0060t\u00ead File.doc".equals(filename));
+                    }
+                }
+            } else {
+                fail("Missing attachments although existence indicated through 'hasAttachments()'");
+            }
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }

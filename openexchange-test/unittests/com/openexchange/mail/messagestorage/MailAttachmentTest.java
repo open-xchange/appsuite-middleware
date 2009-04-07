@@ -51,10 +51,8 @@ package com.openexchange.mail.messagestorage;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -67,6 +65,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -292,7 +291,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 					final MailPath mailPath = new MailPath(mail.getFolder(), mail.getMailId());
 
 					final SessionObject session = getSession();
-					final JSONMessageHandler messageHandler = new JSONMessageHandler(mailPath, mail,
+					final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
 							DisplayMode.DISPLAY, session, UserSettingMailStorage.getInstance().getUserSettingMail(
 									session.getUserId(), session.getContextId()));
 					new MailMessageParser().parseMailMessage(mail, messageHandler);
@@ -344,7 +343,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			session.setPassword(getPassword());
 
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231.getBytes("US-ASCII"));
-			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
+			final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, null, rfc2231Mail, DisplayMode.DISPLAY,
 					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 							session.getContextId()));
 			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);

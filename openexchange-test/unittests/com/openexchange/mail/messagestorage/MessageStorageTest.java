@@ -14,6 +14,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 
@@ -67,7 +68,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
      * @param firstvalueParsed Definies if the first mail message object comes out of the parser, this is essential because in this case
      *                         some part behave different. So e.g. the mailid is contained but null, same for the receive date
      */
-    protected void compareMailMessages(final MailMessage mail1, final MailMessage mail2, final MailField[] fields1, final MailField[] fields2, final String mail1name, final String mail2name, boolean firstvalueParsed) {
+    protected void compareMailMessages(final MailMessage mail1, final MailMessage mail2, final MailField[] fields1, final MailField[] fields2, final String mail1name, final String mail2name, final boolean firstvalueParsed) {
         // First check if all field of the two objects are set...
         final Set<MailField> set1 = EnumSet.copyOf(Arrays.asList(fields1));
         final Set<MailField> set2 = EnumSet.copyOf(Arrays.asList(fields2));
@@ -172,7 +173,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         mfd.setSeparator(inbox.getSeparator());
         mfd.setName("TemporaryFolder");
     
-        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
         .createNewMailPermission();
         p.setEntity(getUser());
         p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
@@ -186,12 +187,12 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     
     protected static MailField[][] generateVariations() {
         final MailField[] values = MailField.values();
-        int number = 1 << values.length ;
+        final int number = 1 << values.length ;
         final MailField[][] retval = new MailField[number][];
         int[] indices;
         int t = 0;
         for (int o = 1; o <= values.length; o++) {
-            CombinationGenerator x = new CombinationGenerator(values.length, o);
+            final CombinationGenerator x = new CombinationGenerator(values.length, o);
             while (x.hasMore()) {
                 indices = x.getNext();
                 retval[t] = new MailField[indices.length];
@@ -233,7 +234,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         assertTrue(string + " of " + mail1name + ":" + value1 + " is not equal with " + mail2name + ":" + value2, equalsCheckWithNull(value1, value2));
     }
     
-    private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, boolean parsed) {
+    private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, final boolean parsed) {
         final boolean full = set.contains(MailField.FULL);
         if (full || set.contains(MailField.ID)) {
             assertTrue("Missing mail ID in " + mailname, mail.getMailId() != -1);
@@ -375,7 +376,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         }
     }
     
-    private static long fac(long l) {
+    private static long fac(final long l) {
         long retval = 1;
         for (long i = 1; i < l; i++) {
             retval *= i;
@@ -383,7 +384,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return retval;
     }
 
-    private String getFullFolderName(final MailFolder inbox, String tempFolderName) {
+    private String getFullFolderName(final MailFolder inbox, final String tempFolderName) {
         return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
         		tempFolderName).toString();
     }

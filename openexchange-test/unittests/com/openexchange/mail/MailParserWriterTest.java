@@ -56,6 +56,7 @@ import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
@@ -95,7 +96,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 
 				for (final MailMessage mail : mails) {
 					if (mail.getContentType().isMimeType("multipart/mixed")) {
-						System.out.println(MessageWriter.writeMailMessage(mailConnection.getMessageStorage()
+						System.out.println(MessageWriter.writeMailMessage(MailAccount.DEFAULT_ID,mailConnection.getMessageStorage()
 								.getMessage("default.INBOX", mail.getMailId(), true), DisplayMode.DISPLAY, session,
 								UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 										session.getContextId())));
@@ -105,7 +106,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 
 				for (final MailMessage mail : mails) {
 					if (mail.getContentType().isMimeType("multipart/alternative")) {
-						System.out.println(MessageWriter.writeMailMessage(mailConnection.getMessageStorage()
+						System.out.println(MessageWriter.writeMailMessage(MailAccount.DEFAULT_ID,mailConnection.getMessageStorage()
 								.getMessage("default.INBOX", mail.getMailId(), true), DisplayMode.DISPLAY, session,
 								UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 										session.getContextId())));
@@ -140,7 +141,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 	}
 
 	private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection) throws MailException {
-		System.out.println(FolderWriter.writeMailFolder(f, mailConnection.getMailConfig()));
+		System.out.println(FolderWriter.writeMailFolder(MailAccount.DEFAULT_ID,f, mailConnection.getMailConfig()));
 		final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);
 		for (final MailFolder folder : flds) {
 			writeFolder(folder, mailConnection);

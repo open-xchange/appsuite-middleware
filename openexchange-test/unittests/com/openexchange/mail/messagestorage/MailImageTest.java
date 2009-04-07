@@ -51,10 +51,8 @@ package com.openexchange.mail.messagestorage;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.api.MailAccess;
@@ -65,6 +63,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
@@ -188,7 +187,7 @@ public final class MailImageTest extends AbstractMailTest {
 			try {
 				final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", uid, true);
 
-				final JSONMessageHandler messageHandler = new JSONMessageHandler(null, mail, DisplayMode.DISPLAY,
+				final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, null, mail, DisplayMode.DISPLAY,
 						session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 								session.getContextId()));
 				new MailMessageParser().parseMailMessage(mail, messageHandler);

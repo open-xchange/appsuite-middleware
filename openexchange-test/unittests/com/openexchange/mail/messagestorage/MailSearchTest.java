@@ -54,14 +54,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.mail.MessagingException;
-
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -80,6 +78,7 @@ import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.utils.DateUtils;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 
@@ -328,7 +327,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				mfd.setSubscribed(false);
 				mfd.setName(name);
 
-				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 						.createNewMailPermission();
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
@@ -495,7 +494,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				mfd.setSubscribed(false);
 				mfd.setName(name);
 
-				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 						.createNewMailPermission();
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
