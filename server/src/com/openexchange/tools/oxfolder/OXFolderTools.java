@@ -61,9 +61,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -83,6 +84,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.FolderObjectIterator;
@@ -1568,7 +1570,7 @@ public class OXFolderTools {
                     final Tasks tasks = Tasks.getInstance();
                     return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
                 case FolderObject.CALENDAR:
-                    final CalendarSql calSql = new CalendarSql(session);
+                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
                 case FolderObject.CONTACT:
                     return !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session);
@@ -1597,7 +1599,7 @@ public class OXFolderTools {
                     final Tasks tasks = Tasks.getInstance();
                     return tasks.isFolderEmpty(ctx, fo.getObjectID());
                 case FolderObject.CALENDAR:
-                    final CalendarSql calSql = new CalendarSql(session);
+                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return calSql.isFolderEmpty(userId, fo.getObjectID());
                 case FolderObject.CONTACT:
                     return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx);

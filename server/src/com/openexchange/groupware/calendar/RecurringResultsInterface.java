@@ -49,33 +49,51 @@
 
 package com.openexchange.groupware.calendar;
 
-/**
- * CalendarSqlImp
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
- */
-public class PrivateFolderInformationObject {
-    
-    private final int object_id;
-    private final int pfid;
-    private final int uid;
-    
-    public PrivateFolderInformationObject(final int object_id, final int pfid, final int uid) {
-        this.object_id = object_id;
-        this.pfid = pfid;
-        this.uid = uid;
-    }
-    
-    final boolean compareObjectId(final int oid) {
-        return oid == object_id;
-    }
-    
-    final int getPrivateFolder() {
-        return pfid;
-    }
-    
-    final int getParticipant() {
-        return uid;
-    }
-    
-    
+
+public interface RecurringResultsInterface {
+
+    /**
+     * Adds specified recurring result to this recurring results collection
+     * 
+     * @param rr The recurring result to add
+     */
+    public abstract void add(final RecurringResultInterface rr);
+
+    /**
+     * Gets the corresponding result by specified one-based recurrence position
+     * 
+     * @param recurrencePosition The one-based recurrence position
+     * @return The corresponding result by specified one-based recurrence
+     *         position or <code>null</code>
+     */
+    public abstract RecurringResultInterface getRecurringResultByPosition(final int recurrencePosition);
+
+    /**
+     * Gets the corresponding result by specified zero-based internal position
+     * 
+     * @param position The zero-based internal position
+     * @return The corresponding result by specified zero-based internal
+     *         position or <code>null</code>
+     */
+    public abstract RecurringResultInterface getRecurringResult(final int position);
+
+    /**
+     * Gets this recurring results collection's size
+     * 
+     * @return The recurring results collection's size
+     */
+    public abstract int size();
+
+    /**
+     * Gets the one-based internal position in recurring results by specified
+     * normalized time milliseconds
+     * 
+     * @param normalizedTime The normalized time milliseconds whose position
+     *            shall be determined
+     * @return The time's zero-based internal position in recurring results or
+     *         <code>-1</code> if time milliseconds a re not covered by this
+     *         recurring results
+     */
+    public abstract int getPositionByLong(final long normalizedTime);
+
 }

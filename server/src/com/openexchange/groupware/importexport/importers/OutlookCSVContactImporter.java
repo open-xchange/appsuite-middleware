@@ -58,7 +58,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
@@ -71,6 +71,7 @@ import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
@@ -166,13 +167,13 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 	
 	public static final SimpleDateFormat getGermanDateNotation(){
 		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
-		sdf.setTimeZone(Tools.getTimeZone("UTC"));
+		sdf.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
 		return sdf; 
 	}
 	
 	public static final SimpleDateFormat getAmericanDateNotation(){
 		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
-		sdf.setTimeZone(Tools.getTimeZone("UTC"));
+		sdf.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
 		return sdf; 
 	}
 

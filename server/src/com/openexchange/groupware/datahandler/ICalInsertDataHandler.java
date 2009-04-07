@@ -78,9 +78,9 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -167,7 +167,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 			/*
 			 * Get user time zone
 			 */
-			final TimeZone defaultZone = Tools.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
+			final TimeZone defaultZone = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
 					.getTimeZone());
 			/*
 			 * Errors and warnings
@@ -241,7 +241,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 	private void insertAppointments(final Session session, final int calendarFolder, final Context ctx,
 			final List<CalendarDataObject> appointments, final JSONArray folderAndIdArray) throws OXException,
 			JSONException {
-		final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
+		final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
 		for (final CalendarDataObject appointment : appointments) {
 			appointment.setParentFolderID(calendarFolder);
 			appointment.setContext(ctx);

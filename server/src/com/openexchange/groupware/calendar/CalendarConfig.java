@@ -77,6 +77,20 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     private static boolean check_and_remove_past_reminders = true;
     private static int max_operations_in_recurrence_calculations;
 
+    private static boolean CACHED_ITERATOR_FAST_FETCH = true;
+
+    
+    public static boolean isCACHED_ITERATOR_FAST_FETCH() {
+        return CACHED_ITERATOR_FAST_FETCH;
+    }
+
+    
+    public static int getMAX_PRE_FETCH() {
+        return MAX_PRE_FETCH;
+    }
+
+    private static int MAX_PRE_FETCH = 20;
+
     /**
      * Prevent instantiation.
      */
@@ -148,7 +162,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         if (check_cached_iterator_fast_fetch != null) {
             check_cached_iterator_fast_fetch = check_cached_iterator_fast_fetch.trim();
             if (check_cached_iterator_fast_fetch.equalsIgnoreCase("FALSE") || check_cached_iterator_fast_fetch.equalsIgnoreCase("0")) {
-                CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH = false;
+                CACHED_ITERATOR_FAST_FETCH = false;
             }
         }
         String check_max_pre_fetch_size = CalendarConfig.getProperty("MAX_PRE_FETCH");
@@ -157,7 +171,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
             try {
                 final int mfs = Integer.parseInt(check_max_pre_fetch_size);
                 if (mfs > 1 && mfs < 1000) {
-                    CachedCalendarIterator.MAX_PRE_FETCH = mfs;
+                    MAX_PRE_FETCH = mfs;
                 }
             } catch(final NumberFormatException nfe) {
                 LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);

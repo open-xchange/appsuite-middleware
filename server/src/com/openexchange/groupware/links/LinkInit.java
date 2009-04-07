@@ -50,8 +50,8 @@ package com.openexchange.groupware.links;
 
 import com.openexchange.server.Initialization;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
+import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.api2.RdbLinkSQLInterface;
 
 /**

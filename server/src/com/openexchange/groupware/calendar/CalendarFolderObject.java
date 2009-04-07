@@ -85,7 +85,7 @@ public class CalendarFolderObject implements Serializable {
 
     private final boolean fill_shared;
 
-    private static final transient Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
+    private static final transient Log LOG = LogFactory.getLog(CalendarFolderObject.class);
 
     public static final String IDENTIFIER = "CalendarFolderObject@";
 
@@ -125,7 +125,7 @@ public class CalendarFolderObject implements Serializable {
      * @param folderid The ID of the folder
      * @param type The folder type as per the type constants in the {@link FolderObject}
      */
-    void addFolder(final boolean readall, final boolean readown, final boolean shared, final int folderid, final int type) {
+    public void addFolder(final boolean readall, final boolean readown, final boolean shared, final int folderid, final int type) {
         final Integer folderID = Integer.valueOf(folderid);
         if (!shared) {
             if (type == FolderObject.PRIVATE) {

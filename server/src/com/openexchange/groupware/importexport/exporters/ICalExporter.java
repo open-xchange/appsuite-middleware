@@ -68,8 +68,9 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -267,7 +268,8 @@ public class ICalExporter implements Exporter {
                     fieldsToBeExported = _appointmentFields;
                 }
                 
-                final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+                final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessObj);
+                CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 final SearchIterator<AppointmentObject> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
                 final List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
                 try {
@@ -277,7 +279,7 @@ public class ICalExporter implements Exporter {
                             if (!appointment.containsTimezone()) {
                                 appointment.setTimezone(user.getTimeZone());
                             }
-                            CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
+                            recColl.replaceDatesWithFirstOccurence(appointment);
                         }
                         appointments.add(appointment);
                        }
@@ -363,7 +365,7 @@ public class ICalExporter implements Exporter {
                 throw importExportExceptionFactory.create(4, e, folder);
             }
             if (fo.getModule() == FolderObject.CALENDAR) {
-                final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+                final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessObj);
                 final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, Integer.parseInt(folder));
                 try {
                     exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);

@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
@@ -60,6 +61,7 @@ import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.StringCollection;
@@ -73,20 +75,23 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     private static final Log LOG = LogFactory.getLog(CalendarAttachments.class);
     
+    private static AppointmentSqlFactoryService appointmentSqlFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+    
     public long attached(final AttachmentEvent e) throws Exception {
-        final CalendarSql csql = new CalendarSql(null);
+        final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
         return csql.attachmentAction(e.getAttachedId(), e.getUser().getId(), e.getContext(), true);
     }
     
     public long detached(final AttachmentEvent e) throws Exception {
-        final CalendarSql csql = new CalendarSql(null);
+        final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
         return csql.attachmentAction(e.getAttachedId(), e.getUser().getId(), e.getContext(), false);
     }
     
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
-            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
-            if (!CalendarCommonCollection.getWritePermission(objectId, folderId, so, ctx)) {
+            CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
+            if (!collection.getWritePermission(objectId, folderId, so, ctx)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_ATTACH_DETACH);
             }
         } catch (final OXObjectNotFoundException oxonfe) {
@@ -107,8 +112,9 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
-            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
-            if (!CalendarCommonCollection.getReadPermission(objectId, folderId, so, ctx)) {
+            CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
+            if (!collection.getReadPermission(objectId, folderId, so, ctx)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ);
             }
         } catch (final OXObjectNotFoundException oxonfe) {

@@ -49,56 +49,53 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
+public interface RecurringResultInterface {
 
-/**
- * This is a delegating iterator for converting the {@link SearchIterator} specialized for {@link CalendarDataObject}s into a
- * {@link SearchIterator} for {@link AppointmentObject}s. This delegating {@link SearchIterator} is necessary to seperate internal calendar
- * module iterators from external ones. 
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public final class AppointmentIteratorAdapter implements SearchIterator<AppointmentObject> {
+    /**
+     * Gets the recurring result's start time in milliseconds which is the
+     * number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * 
+     * @return The recurring result's start time in milliseconds which is the
+     *         number of milliseconds since January 1, 1970, 00:00:00 GMT
+     */
+    public abstract long getStart();
 
-    private final SearchIterator<CalendarDataObject> delegate;
+    /**
+     * Gets the normalized recurring result's start time in milliseconds
+     * 
+     * @return The normalized recurring result's start time in milliseconds
+     * @see #getStart()
+     */
+    public abstract long getNormalized();
 
-    public AppointmentIteratorAdapter(SearchIterator<CalendarDataObject> retval) {
-        this.delegate = retval;
-    }
+    /**
+     * Gets the recurring result's end time in milliseconds which is the number
+     * of milliseconds since January 1, 1970, 00:00:00 GMT
+     * 
+     * @return The recurring result's end time in milliseconds which is the
+     *         number of milliseconds since January 1, 1970, 00:00:00 GMT
+     */
+    public abstract long getEnd();
 
-    public void addWarning(AbstractOXException warning) {
-        delegate.addWarning(warning);
-    }
+    /**
+     * Gets the result's duration in milliseconds
+     * 
+     * @return The result's duration in milliseconds
+     */
+    public abstract long getDiff();
 
-    public void close() throws SearchIteratorException {
-        delegate.close();
-    }
+    /**
+     * Gets the length offset (actually the duration in days)
+     * 
+     * @return The length offset (actually the duration in days)
+     */
+    public abstract int getOffset();
 
-    public AbstractOXException[] getWarnings() {
-        return getWarnings();
-    }
+    /**
+     * Gets the one-based position
+     * 
+     * @return The one-based position
+     */
+    public abstract int getPosition();
 
-    public boolean hasNext() {
-        return delegate.hasNext();
-    }
-
-    public boolean hasSize() {
-        return delegate.hasSize();
-    }
-
-    public boolean hasWarnings() {
-        return delegate.hasWarnings();
-    }
-
-    public AppointmentObject next() throws SearchIteratorException, OXException {
-        return delegate.next();
-    }
-
-    public int size() {
-        return delegate.size();
-    }
 }

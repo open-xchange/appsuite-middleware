@@ -64,17 +64,18 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarReminderDelete;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
@@ -82,6 +83,7 @@ import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -102,6 +104,8 @@ public final class ReminderRequest {
 
     private Date timestamp;
 
+    private AppointmentSqlFactoryService appointmentFactory;
+
     private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
 
     /**
@@ -121,6 +125,7 @@ public final class ReminderRequest {
     public ReminderRequest(final ServerSession session) {
         super();
         this.session = session;
+        appointmentFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
         userObj = session.getUser();
     }
 
@@ -162,7 +167,7 @@ public final class ReminderRequest {
             final int module = reminder.getModule();
             switch (module) {
             case Types.APPOINTMENT:
-                reminderDeleteInterface = new CalendarReminderDelete();
+                reminderDeleteInterface = ServerServiceRegistry.getInstance().getService(ReminderDeleteInterface.class);
                 break;
             case Types.TASK:
                 reminderDeleteInterface = new ModifyThroughDependant();
@@ -306,7 +311,8 @@ public final class ReminderRequest {
      * @return <code>true</code> if a latest reminder was found.
      */
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
-        final CalendarSql calendarSql = new CalendarSql(sessionObj);
+        final AppointmentSQLInterface calendarSql = appointmentFactory.createAppointmentSql(sessionObj);
+        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final AppointmentObject calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
@@ -317,14 +323,14 @@ public final class ReminderRequest {
         final Calendar calendar = Calendar.getInstance(tz);
         calendar.add(Calendar.MONTH, -3);
 
-        final RecurringResults recurringResults = CalendarRecurringCollection.calculateRecurring(
+        final RecurringResultsInterface recurringResults = recColl.calculateRecurring(
             calendarDataObject,
             calendar.getTimeInMillis(),
             endRange.getTime(),
             0);
         boolean retval = false;
         if (recurringResults != null && recurringResults.size() > 0) {
-            final RecurringResult recurringResult = recurringResults.getRecurringResult(recurringResults.size() - 1);
+            final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(recurringResults.size() - 1);
             calendar.setTimeInMillis(recurringResult.getStart());
             calendar.add(Calendar.MINUTE, -calendarDataObject.getAlarm());
             if (calendar.getTimeInMillis() >= reminder.getDate().getTime()) {
@@ -337,16 +343,17 @@ public final class ReminderRequest {
     }
 
     private static final ReminderObject getNextRecurringReminder(final Session sessionObj, final TimeZone tz, final ReminderObject reminder) throws OXException {
-        final CalendarSql calendarSql = new CalendarSql(sessionObj);
+        final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
+        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final AppointmentObject calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
         }
-        final RecurringResults recurringResults;
+        final RecurringResultsInterface recurringResults;
         try {
-            recurringResults = CalendarRecurringCollection.calculateRecurring(
+            recurringResults = recColl.calculateRecurring(
                 calendarDataObject,
                 reminder.getDate().getTime(),
                 calendarDataObject.getUntil().getTime(),
@@ -363,7 +370,7 @@ public final class ReminderRequest {
         ReminderObject nextReminder = null;
         final Date now = new Date();
         for (int i = 0; i < recurringResults.size(); i++) {
-            final RecurringResult recurringResult = recurringResults.getRecurringResult(i);
+            final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
             final Calendar calendar = Calendar.getInstance(tz);
             calendar.setTimeInMillis(recurringResult.getStart());
             calendar.add(Calendar.MINUTE, -calendarDataObject.getAlarm());

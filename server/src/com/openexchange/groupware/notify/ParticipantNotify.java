@@ -74,9 +74,9 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -123,6 +123,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -140,6 +141,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 
     public static ParticipantNotify messageSender = new ParticipantNotify();
+    
+    private static CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
 
     /**
      * Initializes a new {@link ParticipantNotify}
@@ -1258,7 +1261,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
-            tz = Tools.getTimeZone(user.getTimeZone());
+            tz = calColl.getTimeZone(user.getTimeZone());
         } catch (final LdapException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
@@ -1302,7 +1305,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 displayName = participant.getDisplayName();
             }
             groups = user.getGroups();
-            tz = Tools.getTimeZone(user.getTimeZone());
+            tz = calColl.getTimeZone(user.getTimeZone());
             if (participant instanceof UserParticipant) {
                 final UserParticipant userParticipant = (UserParticipant) participant;
                 folderId = userParticipant.getPersonalFolderId();
@@ -1666,7 +1669,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @return The first occurence's end time.
      */
     private static Date computeFirstOccurrenceEnd(final long startMillis, final long endMillis) {
-        final Calendar cal = GregorianCalendar.getInstance(Tools.getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar cal = GregorianCalendar.getInstance(calColl.getTimeZone("UTC"), Locale.ENGLISH);
         cal.setTimeInMillis(endMillis);
         final int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
         final int minutes = cal.get(Calendar.MINUTE);
@@ -1699,7 +1702,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return null;
         }
         try {
-            return Tools.getAppointmentTitle(recurrenceId, ctx);
+            return calColl.getAppointmentTitle(recurrenceId, ctx);
         } catch (final OXCalendarException e) {
             return null;
         }

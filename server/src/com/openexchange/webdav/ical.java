@@ -78,8 +78,8 @@ import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -201,7 +201,8 @@ public final class ical extends PermissionServlet {
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
             final List<ConversionError> errors = new ArrayList<ConversionError>();
 
-            final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+            final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
+            CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             SearchIterator<AppointmentObject> iter = null;
             try {
                 final Map<Integer, SeriesUIDPatcher> patchers = new HashMap<Integer, SeriesUIDPatcher>();
@@ -212,7 +213,7 @@ public final class ical extends PermissionServlet {
                         if (!appointment.containsTimezone()) {
                             appointment.setTimezone(user.getTimeZone());
                         }
-                        CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
+                        recColl.replaceDatesWithFirstOccurence(appointment);
                     }
                     final ICalItem item = emitter.writeAppointment(iSession, appointment, context, errors, warnings);
                     // // First check if the appointment has been synchronized before.

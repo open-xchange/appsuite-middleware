@@ -72,11 +72,11 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
-import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -216,7 +216,7 @@ public class ICalImporter extends AbstractImporter {
             if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
                 throw EXCEPTIONS.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar"));
             }
-            appointmentInterface = new CalendarSql(session);
+            appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         }
 
         TasksSQLInterface taskInterface = null;
@@ -503,7 +503,7 @@ public class ICalImporter extends AbstractImporter {
             // Appointment exactly lasts one day; assume a full-time appointment
             appointmentObj.setFullTime(true);
             // Adjust start/end to UTC date's zero time; e.g. "13. January 2009 00:00:00 UTC"
-            final TimeZone tz = Tools.getTimeZone(appointmentObj.getTimezone());
+            final TimeZone tz = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(appointmentObj.getTimezone());
             long offset = tz.getOffset(start);
             appointmentObj.setStartDate(new Date(start + offset));
             offset = tz.getOffset(end);

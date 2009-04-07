@@ -63,14 +63,15 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -94,6 +95,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
@@ -774,7 +776,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             final Tasks tasks = Tasks.getInstance();
             return readCon == null ? tasks.isFolderEmpty(ctx, folderId) : tasks.isFolderEmpty(ctx, readCon, folderId);
         } else if (module == FolderObject.CALENDAR) {
-            final CalendarSql calSql = new CalendarSql(session);
+            final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
             if (readCon == null) {
                 try {
                     return calSql.isFolderEmpty(user.getId(), folderId);
@@ -782,7 +784,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
                 }
             }
-            return calSql.isFolderEmpty(user.getId(), folderId, readCon);
+            try {
+                return calSql.isFolderEmpty(user.getId(), folderId, readCon);
+            } catch (SQLException e) {
+                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            }
         } else if (module == FolderObject.CONTACT) {
             return readCon == null ? !Contacts.containsAnyObjectInFolder(folderId, ctx) : !Contacts.containsAnyObjectInFolder(
                 folderId,
@@ -1461,7 +1467,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     private void deleteContainedAppointments(final int folderID) throws OXException {
-        final CalendarSql cSql = new CalendarSql(session);
+        final AppointmentSQLInterface cSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         try {
             if (null == writeCon) {
                 cSql.deleteAppointmentsInFolder(folderID);

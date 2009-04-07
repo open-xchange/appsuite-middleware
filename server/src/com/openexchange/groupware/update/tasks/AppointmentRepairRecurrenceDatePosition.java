@@ -67,11 +67,11 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Schema;
@@ -80,6 +80,7 @@ import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -279,20 +280,17 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         return retval;
     }
 
-    private static final void calculateRecurrenceDatePosition(
-        final CalendarDataObject appointment, final int recurrencePosition) throws OXException {
-        CalendarRecurringCollection.fillDAO(appointment);
-        final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(
-            appointment, 0, 0, recurrencePosition,
-            CalendarRecurringCollection.MAXTC, true);
+    private static final void calculateRecurrenceDatePosition(final CalendarDataObject appointment, final int recurrencePosition) throws OXException {
+        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(
+            CalendarCollectionService.class);
+        recColl.fillDAO(appointment);
+        final RecurringResultsInterface rrs = recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, recColl.MAXTC, true);
         if (null == rrs) {
-            throw new OXCalendarException(OXCalendarException.Code
-                .UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
         }
-        final RecurringResult rs = rrs.getRecurringResult(0);
+        final RecurringResultInterface rs = rrs.getRecurringResult(0);
         if (null == rs) {
-            throw new OXCalendarException(OXCalendarException.Code
-                .UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
         }
         appointment.setRecurrenceDatePosition(new Date(rs.getNormalized()));
     }

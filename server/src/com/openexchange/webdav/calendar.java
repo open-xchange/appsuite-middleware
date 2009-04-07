@@ -68,8 +68,8 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
@@ -79,6 +79,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.tasks.QueuedTask;
 import com.openexchange.webdav.xml.AppointmentParser;
@@ -198,7 +199,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     @Override
     protected void performActions(final OutputStream os, final Session session,
             final PendingInvocations<AppointmentSQLInterface> pendingInvocations) throws IOException {
-        final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
+        final AppointmentSQLInterface appointmentsSQL = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedAppointment qapp = (QueuedAppointment) pendingInvocations.poll();
             if (null != qapp) {

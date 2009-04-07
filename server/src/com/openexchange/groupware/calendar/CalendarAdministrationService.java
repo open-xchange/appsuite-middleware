@@ -46,64 +46,25 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.calendar.update;
+
+package com.openexchange.groupware.calendar;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.downgrade.DowngradeEvent;
+import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.groupware.downgrade.DowngradeListener;
 
-import com.openexchange.database.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
+public interface CalendarAdministrationService extends DeleteListener {
 
-/**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- */
-public class AlterDeleteExceptionFieldLength implements UpdateTask {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException;
 
-    private static final String UPDATE_PRG_DATES = "ALTER TABLE prg_dates CHANGE COLUMN field07 field07 TEXT";
-    private static final String UPDATE_DEL_DATES = "ALTER TABLE del_dates CHANGE COLUMN field07 field07 TEXT";
+    public void downgradePerformed(final DowngradeEvent downgradeEvent) throws DowngradeFailedException;
 
-    public int addedWithVersion() {
-        return 19;
-    }
+    public void initializeUpdateString();
 
-    public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
-    }
+    public DowngradeListener getDowngradeListener();
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        Connection writecon = null;
-        Statement stmt = null;
-        try {
-            writecon = Database.get(contextId, true);
-            try {
-                stmt = writecon.createStatement();
-            } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
-            }
-            if (stmt != null) {
-                try {
-                    stmt.executeUpdate(UPDATE_PRG_DATES);
-                } catch (final SQLException ex) {
-                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
-                }
-                try {
-                    stmt.executeUpdate(UPDATE_DEL_DATES);
-                } catch (final SQLException ex) {
-                   throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
-                }
-            }
-        } finally {
-            if (stmt != null) {
-                CalendarCommonCollection.closeStatement(stmt);
-            }
-            if (writecon != null) {
-                Database.back(contextId, true, writecon);
-            }
-        }
-    }
 }

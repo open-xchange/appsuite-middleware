@@ -73,10 +73,11 @@ import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -92,6 +93,7 @@ import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -405,7 +407,8 @@ public final class TaskLogic {
             occurrenceRemoved = true;
         }
         try {
-            CalendarRecurringCollection.checkRecurring(task);
+            CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            recColl.checkRecurring(task);
         } catch (final OXException e) {
             throw new TaskException(e);
         }
@@ -641,9 +644,9 @@ public final class TaskLogic {
         // Recurring calculation sets until date itself and may add some time
         // in some conditions cause an overflow if MAX_VALUE is set and no
         // new recurrence is calculated.
-        final RecurringResults rr = CalendarRecurringCollection
-            .calculateRecurring(task, 0, 0, 2);
-        final RecurringResult result = rr.getRecurringResult(0);
+        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        final RecurringResultsInterface rr = recColl.calculateRecurring(task, 0, 0, 2);
+        final RecurringResultInterface result = rr.getRecurringResult(0);
         final Date[] retval;
         if (null == result) {
             retval = new Date[0];

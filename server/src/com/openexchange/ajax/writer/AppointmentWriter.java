@@ -62,10 +62,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link AppointmentWriter} - Writer for appointments
@@ -78,6 +78,8 @@ public class AppointmentWriter extends CalendarWriter {
     private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 
     private final TimeZone utc;
+    
+    private CalendarCollectionService calColl;
 
     /**
      * Initializes a new {@link AppointmentWriter}
@@ -87,13 +89,14 @@ public class AppointmentWriter extends CalendarWriter {
      */
     public AppointmentWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = Tools.getTimeZone("utc");
+        utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
+        calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
     }
 
     public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart,
             final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
-            if (CalendarCommonCollection.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
+            if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
                     .getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
                 writeArray(appointmentObj, cols, jsonArray);
             }

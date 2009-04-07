@@ -53,6 +53,7 @@ import java.util.Date;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * CalendarDataObject
@@ -62,6 +63,8 @@ public class CalendarDataObject extends AppointmentObject {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
             .getLog(CalendarDataObject.class);
+    
+    private static CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
 
     private String rec_string;
 
@@ -86,8 +89,8 @@ public class CalendarDataObject extends AppointmentObject {
         if (until != null) {
             final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
-            	if (CalendarRecurringCollection.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
-					until.setTime((((until.getTime() - mod) + CalendarRecurringCollection.MILLI_DAY)));
+            	if (calColl.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
+					until.setTime((((until.getTime() - mod) + Constants.MILLI_DAY)));
 				} else {
 					until.setTime(until.getTime() - mod);
 				}
@@ -206,7 +209,7 @@ public class CalendarDataObject extends AppointmentObject {
 
     public final void setDelExceptions(final String delete_execptions) {
         if (delete_execptions != null) {
-            super.setDeleteExceptions(CalendarCommonCollection.convertString2Dates(delete_execptions));
+            super.setDeleteExceptions(calColl.convertString2Dates(delete_execptions));
         } else {
             setDeleteExceptions(null);
         }
@@ -214,14 +217,14 @@ public class CalendarDataObject extends AppointmentObject {
 
     public final String getDelExceptions() {
         if (containsDeleteExceptions()) {
-            return CalendarCommonCollection.convertDates2String(getDeleteException());
+            return calColl.convertDates2String(getDeleteException());
         }
         return null;
     }
 
     public final void setExceptions(final String change_exceptions) {
         if (change_exceptions != null) {
-            super.setChangeExceptions(CalendarCommonCollection.convertString2Dates(change_exceptions));
+            super.setChangeExceptions(calColl.convertString2Dates(change_exceptions));
         } else {
             setChangeExceptions(null);
         }
@@ -229,14 +232,14 @@ public class CalendarDataObject extends AppointmentObject {
 
     public final String getExceptions() {
         if (containsChangeExceptions()) {
-            return CalendarCommonCollection.convertDates2String(getChangeException());
+            return calColl.convertDates2String(getChangeException());
         }
         return null;
     }
 
     public final boolean calculateRecurrence() throws OXException {
         if (isSequence()) {
-            return CalendarRecurringCollection.fillDAO(this);
+            return calColl.fillDAO(this);
         }
         return false;
     }
@@ -247,7 +250,7 @@ public class CalendarDataObject extends AppointmentObject {
             /*
              * Determine max. end date
              */
-            return CalendarCommonCollection.getMaxUntilDate(this);
+            return calColl.getMaxUntilDate(this);
         }
         return super.getUntil();
     }
@@ -297,30 +300,30 @@ public class CalendarDataObject extends AppointmentObject {
         return is_hard_conflict;
     }
 
-    void setHardConflict() {
+    public void setHardConflict() {
         is_hard_conflict = true;
     }
 
-     void setFillParticipants() {
+     public void setFillParticipants() {
         fill_participants = true;
     }
 
-     boolean fillParticipants() {
+     public boolean fillParticipants() {
         return fill_participants;
     }
 
-     void setFillUserParticipants() {
+     public void setFillUserParticipants() {
         fill_user_participants = true;
     }
 
-     boolean fillUserParticipants() {
+     public boolean fillUserParticipants() {
         return fill_user_participants;
     }
-     void setFillFolderID() {
+     public void setFillFolderID() {
         fill_folder_id = true;
     }
 
-     boolean fillFolderID() {
+     public boolean fillFolderID() {
         return fill_folder_id;
     }
 

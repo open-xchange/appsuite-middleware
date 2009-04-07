@@ -59,7 +59,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
-import com.openexchange.groupware.calendar.CalendarAdministration;
+import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.contact.ContactDeleteListener;
 import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
@@ -69,6 +69,7 @@ import com.openexchange.image.internal.ImageRegistryDeleteListener;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 
@@ -117,7 +118,7 @@ public final class DeleteRegistry {
         registerDeleteListener(new TasksDelete());
         registerDeleteListener(new InfostoreDelete());
         registerDeleteListener(new ContactDeleteListener());
-        registerDeleteListener(new CalendarAdministration());
+        registerDeleteListener(ServerServiceRegistry.getInstance().getService(CalendarAdministrationService.class));
         /*
          * Delete user configuration & settings
          */

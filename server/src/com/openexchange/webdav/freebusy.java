@@ -62,14 +62,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -91,7 +93,7 @@ public class freebusy extends HttpServlet {
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
         final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
         final SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        outputFormat.setTimeZone(Tools.getTimeZone("UTC"));
+        outputFormat.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
 
         int contextid = -1;
         String mailPrefix = null;
@@ -195,7 +197,7 @@ public class freebusy extends HttpServlet {
             final User user = UserStorage.getInstance().searchUser(mailPrefix + '@' + mailSuffix, context);
             final Session sessionObj = SessionObjectWrapper.createSessionObject(user.getId(), context, "freebusysessionobject");
 
-            final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
+            final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
             it = appointmentInterface.getFreeBusyInformation(user.getId(), Participant.USER, start, end);
             while (it.hasNext()) {
                 writeFreeBusy(it.next(), printWriter, outputFormat);

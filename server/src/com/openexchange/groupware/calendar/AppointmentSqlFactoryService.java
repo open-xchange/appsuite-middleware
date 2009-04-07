@@ -47,60 +47,23 @@
  *
  */
 
-package com.openexchange.groupware.calendar.recurrence;
+package com.openexchange.groupware.calendar;
 
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.session.Session;
 
 /**
- *  OXCalendarException
- *  @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * Factory class for getting new Instances of the type AppointmentSQLInterface.
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-
-public class RecurringException extends Exception {
+public interface AppointmentSqlFactoryService {
     
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 6780786273935450790L;
-	private final int value;
-    private final Code code;    
-    
-    public static final Code UNKOWN_DAYS_VALUE = new Code("Unknown days", 1);
-    public static final Code RECURRING_MISSING_INTERVAL = new Code("Interval missing", 2);
-    public static final Code RECURRING_MISSING_MONTLY_INTERVAL = new Code("Missing day in month", 3);
-    public static final Code RECURRING_MISSING_MONTLY_INTERVAL_2 = new Code("Missing month", 4);
-    public static final Code RECURRING_MISSING_MONTLY_DAY = new Code("Got no day for montly calculation", 5);
-    public static final Code RECURRING_MISSING_MONTLY_DAY_2 = new Code("Missing day in month", 6);
-    public static final Code RECURRING_MISSING_YEARLY_INTERVAL = new Code("Missing day in month", 7);
-    public static final Code RECURRING_MISSING_YEARLY_DAY = new Code("Got no day for yearly calculation", 8);
-    public static final Code RECURRING_MISSING_YEARLY_TYPE = new Code("Missing day in month", 9);
-    public static final Code UNEXPECTED_ERROR = new Code("Unexpected exception.", 10);
-    public static final Code PATTERN_TOO_COMPLEX = new Code("Pattern is too complex, giving up", 11);
-    
-    static class Code {
-        private final String message;
-        
-        private final int id;
-        
-        private Code(final String message, final int id) {
-            this.message = message;
-            this.id = id;
-        }
-    }
-   
-   
-   
-    
-    public RecurringException(final Code code, final int value) {
-        this.code = code;
-        this.value = value;
-    }
-    
-    public Code getCode() {
-        return code;
-    }
-    
-    public int getValue() {
-        return value;
-    }
-    
+     * Facrory method for creating a new Instance.
+     * 
+     * @param session
+     * @return
+     */
+    public AppointmentSQLInterface createAppointmentSql(Session session);
 }

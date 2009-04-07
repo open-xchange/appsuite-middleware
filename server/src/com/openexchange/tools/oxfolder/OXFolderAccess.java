@@ -58,10 +58,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -77,6 +78,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -411,7 +413,7 @@ public class OXFolderAccess {
                     }
                     return !tasks.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
                 case FolderObject.CALENDAR:
-                    final CalendarSql calSql = new CalendarSql(session);
+                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return readCon == null ? !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID()) : !calSql.checkIfFolderContainsForeignObjects(
                         userId,
                         fo.getObjectID(),
@@ -450,7 +452,7 @@ public class OXFolderAccess {
                         readCon,
                         fo.getObjectID());
                 case FolderObject.CALENDAR:
-                    final CalendarSql calSql = new CalendarSql(session);
+                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
                         userId,
                         fo.getObjectID(),

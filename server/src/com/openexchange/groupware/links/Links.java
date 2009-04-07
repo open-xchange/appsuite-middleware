@@ -69,7 +69,7 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.Contacts;
@@ -85,6 +85,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -162,6 +163,7 @@ public class Links {
     static {
         modules = new HashMap<Integer, ModuleAccess>(4);
         modules.put(Integer.valueOf(Types.APPOINTMENT), new ModuleAccess() {
+            CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             public boolean supportsAccessByID() {
                 return true;
             }
@@ -173,7 +175,7 @@ public class Links {
                     return false;
                 }
                 try {
-                    return CalendarCommonCollection.getReadPermission(oid, fid, so, ct);
+                    return calColl.getReadPermission(oid, fid, so, ct);
                 } catch (final OXException ox) {
                     LOG.error("UNABLE TO CHECK CALENDAR READRIGHT FOR LINK", ox);
                     return false;
@@ -196,7 +198,7 @@ public class Links {
                 }
                 int fid = -1;
                 try {
-                    fid = com.openexchange.groupware.calendar.Tools.getAppointmentFolder(oid, user, ct);
+                    fid = calColl.getAppointmentFolder(oid, user, ct);
                 } catch (final OXObjectNotFoundException x) {
                     // may not read and is not participant
                     return false;
@@ -205,7 +207,7 @@ public class Links {
                     return false;
                 }
                 try {
-                    return CalendarCommonCollection.getReadPermission(oid,fid, so, ct);
+                    return calColl.getReadPermission(oid,fid, so, ct);
                 } catch (final OXException ox) {
                     LOG.error("UNABLE TO CHECK CALENDAR READRIGHT FOR LINK", ox);
                     return false;

@@ -78,9 +78,9 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -99,6 +99,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -1640,9 +1641,10 @@ public class OXContainerConverter {
 
     private static void modifyRecurring(final AppointmentObject app) throws ConverterException {
         if (app.getRecurrenceType() != CalendarObject.NONE) {
-            RecurringResults result;
+            RecurringResultsInterface result;
             try {
-                result = CalendarRecurringCollection.calculateFirstRecurring(app);
+                CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+                result = calColl.calculateFirstRecurring(app);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 throw new ConverterException(e);

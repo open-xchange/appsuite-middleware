@@ -58,7 +58,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link GroupWriter} - Writes a group object into a JSON.
@@ -73,7 +74,7 @@ public class GroupWriter extends DataWriter {
 
     public GroupWriter() {
 		super(null, null);
-		utc = Tools.getTimeZone("utc");
+		utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
 	}
 
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
