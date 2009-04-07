@@ -76,7 +76,15 @@ public final class UIDUtil {
     }
 
     public static String long2uid(final long uid) {
-
+        return "";
+    }
+    
+    public static String[] longs2uids(final long[] uids) {
+        final String[] retval = new String[uids.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = long2uid(uids[i]);
+        }
+        return retval;
     }
 
     public static void main(final String[] args) {

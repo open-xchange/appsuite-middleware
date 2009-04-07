@@ -54,8 +54,10 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -64,6 +66,7 @@ import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
+import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.IndexRange;
@@ -84,6 +87,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.config.POP3Config;
+import com.openexchange.pop3.uid.UIDUtil;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -91,6 +95,7 @@ import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -138,23 +143,42 @@ public final class POP3MessageStorage extends POP3FolderWorker {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
-        final boolean body;
-        {
+        final String[] ids = UIDUtil.longs2uids(mailIds);
+        // Only fetch items supported by POP3
+        final FetchProfile fetchProfile = getFetchProfile(fields, true);
+        if (!isSupported(fetchProfile)) {
             final MailFields fieldSet = new MailFields(fields);
             /*
              * Check for field FULL
              */
-            if (fieldSet.contains(MailField.FULL)) {
+            if (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY)) {
                 final MailMessage[] mails = new MailMessage[mailIds.length];
                 for (int j = 0; j < mails.length; j++) {
                     mails[j] = getMessage(fullname, mailIds[j], true);
                 }
                 return mails;
             }
-            body = fieldSet.contains(MailField.BODY) || fieldSet.contains(MailField.FULL);
         }
         try {
             pop3Folder = setAndOpenFolder(pop3Folder, fullname, Folder.READ_ONLY);
+            if (!isSelectable(pop3Folder)) {
+                throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+            }
+            // TODO: Map UIDs to sequence numbers
+            
+            final Message[] allmsgs = pop3Folder.getMessages();
+            pop3Folder.fetch(allmsgs, fetchProfile);
+            final Set<String> desiredUIDs = new HashSet<String>(Arrays.asList(ids));
+            final POP3Folder tmp = (POP3Folder) pop3Folder;
+            for (int i = 0; i < allmsgs.length; i++) {
+                final Message m = allmsgs[i];
+                if (desiredUIDs.contains(tmp.getUID(m))) {
+                    
+                }
+            }
+            
+            
+            
             /*
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
@@ -1381,4 +1405,42 @@ public final class POP3MessageStorage extends POP3FolderWorker {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     * Checks if specified folder is selectable; meaning to check if it is capable to hold messages.
+     * 
+     * @param folder The folder to check
+     * @return <code>true</code> if specified folder is selectable; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     */
+    private static boolean isSelectable(final Folder folder) throws MessagingException {
+        return (folder.getType() & Folder.HOLDS_MESSAGES) == Folder.HOLDS_MESSAGES;
+    }
+
+    /**
+     * Checks if specified fetch profile only contains items supported by POP3:
+     * <ul>
+     * <li>UID</li>
+     * <li>ENVELOPE</li>
+     * </ul>
+     * 
+     * @param fetchProfile The fetch profile to check
+     * @return <code>true</code> if specified fetch profile only contains items supported by POP3; otherwise <code>false</code>
+     */
+    private static boolean isSupported(final FetchProfile fetchProfile) {
+        if (fetchProfile.getHeaderNames().length > 0) {
+            return false;
+        }
+        final int itemSize = fetchProfile.getItems().length;
+        if (itemSize > 2) {
+            return false;
+        }
+        int c = 0;
+        if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+            c++;
+        }
+        if (fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            c++;
+        }
+        return c == itemSize;
+    }
 }
