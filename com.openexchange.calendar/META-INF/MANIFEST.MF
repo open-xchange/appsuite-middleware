@@ -6,13 +6,41 @@ Bundle-Version: 1.0.0
 Bundle-Activator: com.openexchange.calendar.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.caching,
+Import-Package: com.openexchange.ajax.fields,
+ com.openexchange.api,
+ com.openexchange.api2,
+ com.openexchange.cache.impl,
+ com.openexchange.caching,
+ com.openexchange.configuration,
+ com.openexchange.database,
+ com.openexchange.event,
+ com.openexchange.event.impl,
+ com.openexchange.group,
  com.openexchange.groupware,
+ com.openexchange.groupware.calendar,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.data,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.downgrade,
+ com.openexchange.groupware.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.reminder,
+ com.openexchange.groupware.search,
+ com.openexchange.groupware.update,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.search,
  com.openexchange.server,
+ com.openexchange.server.impl,
  com.openexchange.session,
+ com.openexchange.tools,
+ com.openexchange.tools.encoding,
+ com.openexchange.tools.exceptions,
+ com.openexchange.tools.iterator,
+ com.openexchange.tools.oxfolder,
+ com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.calendar
-Require-Bundle: com.openexchange.server;bundle-version="6.9.0"
