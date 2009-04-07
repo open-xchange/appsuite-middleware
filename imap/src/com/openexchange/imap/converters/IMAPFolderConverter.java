@@ -273,7 +273,7 @@ public final class IMAPFolderConverter {
                  * Properly handled in com.openexchange.mail.json.writer.FolderWriter
                  */
                 final ACLPermission ownPermission = new ACLPermission();
-                final int fp = RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.NO_PERMISSIONS;
+                final int fp = RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
                 ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 ownPermission.setFolderAdmin(false);
                 mailFolder.setOwnPermission(ownPermission);
