@@ -237,16 +237,31 @@ public final class IMAPFolderConverter {
             }
             if (isRoot) {
                 mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
+                mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
+                mailFolder.setParentFullname(null);
+                mailFolder.setDefaultFolder(false);
             } else {
                 mailFolder.setFullname(imapFullname);
-            }
-            mailFolder.setName(isRoot ? MailFolder.DEFAULT_FOLDER_NAME : imapFolder.getName());
-            {
+                mailFolder.setName(imapFolder.getName());
                 final Folder parent = imapFolder.getParent();
-                if (null == parent) {
-                    mailFolder.setParentFullname(null);
-                } else {
-                    mailFolder.setParentFullname(parent instanceof DefaultFolder ? MailFolder.DEFAULT_FOLDER_ID : parent.getFullName());
+                mailFolder.setParentFullname(parent instanceof DefaultFolder ? MailFolder.DEFAULT_FOLDER_ID : parent.getFullName());
+                /*
+                 * Default folder
+                 */
+                if ("INBOX".equals(imapFullname)) {
+                    mailFolder.setDefaultFolder(true);
+                } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
+                    final int len = UserSettingMailStorage.getInstance().getUserSettingMail(
+                        session.getUserId(),
+                        ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
+                    for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
+                        if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
+                            mailFolder.setDefaultFolder(true);
+                        }
+                    }
+                    if (!mailFolder.containsDefaultFolder()) {
+                        mailFolder.setDefaultFolder(false);
+                    }
                 }
             }
             /*
@@ -319,28 +334,6 @@ public final class IMAPFolderConverter {
                     ownPermission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
                 }
                 mailFolder.setOwnPermission(ownPermission);
-            }
-            if (isRoot) {
-                mailFolder.setDefaultFolder(false);
-            } else {
-                /*
-                 * Default folder
-                 */
-                if ("INBOX".equals(imapFullname)) {
-                    mailFolder.setDefaultFolder(true);
-                } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
-                    final int len = UserSettingMailStorage.getInstance().getUserSettingMail(
-                        session.getUserId(),
-                        ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
-                    for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
-                        if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
-                            mailFolder.setDefaultFolder(true);
-                        }
-                    }
-                    if (!mailFolder.containsDefaultFolder()) {
-                        mailFolder.setDefaultFolder(false);
-                    }
-                }
             }
             final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
             if (selectable && aclExtension.canRead(ownRights)) {
