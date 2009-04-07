@@ -205,13 +205,12 @@ public abstract class AbstractCalendarTest extends TestCase {
             public void verify(TestCalendarListener listener);
         }
 
-    protected static final class TestCalendarListener extends AbstractCalendarListener {
+    protected static final class TestCalendarListener implements CalendarListener {
             private String called;
             List<Object> args = new ArrayList<Object>();
             private Verifyer verifyer;
     
-            @Override
-    		public void createdChangeExceptionInRecurringAppointment(final CalendarDataObject master, final CalendarDataObject changeException,int inFolder, final ServerSession session) {
+            public void createdChangeExceptionInRecurringAppointment(final AppointmentObject master, final AppointmentObject changeException,int inFolder, final ServerSession session) {
                 this.called = "createdChangeExceptionInRecurringAppointment";
                 this.args.add(master);
                 this.args.add(changeException);
