@@ -10,9 +10,9 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-authentication-database-${version}" />
+    <property name="composite.name" value="open-xchange-authentication-database-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -21,15 +21,15 @@
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	<property name="globaljar" value="com.openexchange.global.jar" />
-	<property name="serverjar" value="com.openexchange.server.jar" />
+    <property name="globaljar" value="com.openexchange.global.jar" />
+    <property name="serverjar" value="com.openexchange.server.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		<pathelement location="${bundlesdir}/${globaljar}"/>
-		<pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${globaljar}"/>
+        <pathelement location="${bundlesdir}/${serverjar}"/>
     </path>
 
     <!-- Compile -->
@@ -41,7 +41,7 @@
     <target name="compile" depends="prepare">
         <javac srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath refid="project.classpath" />
+            <classpath refid="project.classpath"/>
         </javac>
     </target>
 
@@ -70,10 +70,10 @@
         </copy>
     </target>
 
-	<!-- Dist -->
-	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -84,10 +84,10 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
