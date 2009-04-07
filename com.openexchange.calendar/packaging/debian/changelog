@@ -1,0 +1,5 @@
+open-xchange-xml (6.9.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue,  7 Apr 2009 16:23:44 +0200
