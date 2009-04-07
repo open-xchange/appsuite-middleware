@@ -341,7 +341,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             stmt.setString(pos++, mailAccount.getLogin());
             stmt.setNull(pos++, Types.VARCHAR);
             stmt.setString(pos++, mailAccount.getPrimaryAddress());
-            stmt.setInt(pos++, 1);
+            stmt.setInt(pos++, 0);
             stmt.setString(pos++, mailAccount.getTrash());
             stmt.setString(pos++, mailAccount.getSent());
             stmt.setString(pos++, mailAccount.getDrafts());

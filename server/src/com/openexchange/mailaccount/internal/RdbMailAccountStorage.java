@@ -472,7 +472,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, encryptedPassword);
             }
             stmt.setString(pos++, mailAccount.getPrimaryAddress());
-            stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
+            stmt.setInt(pos++, 0);
             stmt.setString(pos++, mailAccount.getTrash());
             stmt.setString(pos++, mailAccount.getSent());
             stmt.setString(pos++, mailAccount.getDrafts());
@@ -502,7 +502,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, encryptedPassword);
             }
             stmt.setString(pos++, mailAccount.getPrimaryAddress());
-            stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
+            stmt.setInt(pos++, 0);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
