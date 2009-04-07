@@ -85,7 +85,7 @@ public final class POP3SessionProperties {
             synchronized (POP3SessionProperties.class) {
                 tmp = pop3SessionProperties;
                 if (null == tmp) {
-                    initializeIMAPProperties();
+                    initializePOP3Properties();
                     tmp = pop3SessionProperties;
                 }
             }
@@ -109,7 +109,7 @@ public final class POP3SessionProperties {
     /**
      * This method can only be exclusively accessed
      */
-    private static void initializeIMAPProperties() {
+    private static void initializePOP3Properties() {
         /*
          * Force initialization of default MIME session
          */
@@ -163,6 +163,10 @@ public final class POP3SessionProperties {
                 "mail.pop3.connectiontimeout",
                 String.valueOf(POP3Properties.getInstance().getPOP3ConnectionTimeout()));
         }
+        /*
+         * RSET before quit means any messages, that have been marked as deleted by the POP3 server, are unmarked.
+         */
+        pop3SessionProperties.put("mail.pop3.rsetbeforequit", "true");
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties

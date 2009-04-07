@@ -102,7 +102,7 @@ public abstract class POP3FolderWorker extends MailMessageStorage {
 
     protected final POP3Config pop3Config;
 
-    protected POP3Folder pop3Folder;
+    protected Folder pop3Folder;
 
     protected int holdsMessages = -1;
 
@@ -250,7 +250,6 @@ public abstract class POP3FolderWorker extends MailMessageStorage {
             isIdenticalFolder = (popFolder == null ? false : popFolder.getFullName().equals(fullname));
         }
         if (popFolder != null) {
-            POP3CommandsCollection.forceNoopCommand(popFolder);
             try {
                 /*
                  * This call also checks if folder is opened
@@ -260,8 +259,7 @@ public abstract class POP3FolderWorker extends MailMessageStorage {
                     /*
                      * Identical folder is already opened in an appropriate mode.
                      */
-                    // POP3CommandsCollection.updatePOP3Folder(popFolder,
-                    // mode);
+                    // POP3CommandsCollection.updatePOP3Folder(popFolder, mode);
                     return popFolder;
                 }
                 /*

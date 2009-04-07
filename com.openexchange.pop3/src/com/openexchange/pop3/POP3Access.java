@@ -249,18 +249,18 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Get properties
              */
-            final Properties imapProps = POP3SessionProperties.getDefaultSessionProperties();
+            final Properties pop3Props = POP3SessionProperties.getDefaultSessionProperties();
             if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
-                imapProps.putAll(getMailProperties());
+                pop3Props.putAll(getMailProperties());
             }
             /*
              * Check if a secure IMAP connection should be established
              */
             if (getMailConfig().isSecure()) {
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(getMailConfig().getPort()));
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, "false");
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, "true");
+                pop3Props.put("mail.pop3.socketFactory.class", CLASSNAME_SECURITY_FACTORY);
+                pop3Props.put("mail.pop3.socketFactory.port", String.valueOf(getMailConfig().getPort()));
+                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
+                pop3Props.put("mail.pop3.starttls.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4
                  */
@@ -269,7 +269,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Apply properties to IMAP session
              */
-            imapSession = javax.mail.Session.getInstance(imapProps, null);
+            imapSession = javax.mail.Session.getInstance(pop3Props, null);
             /*
              * Check if debug should be enabled
              */

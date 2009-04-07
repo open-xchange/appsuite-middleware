@@ -140,10 +140,9 @@ public final class POP3Exception extends MIMEMailException {
          */
         DUPLICATE_FOLDER(MailException.Code.DUPLICATE_FOLDER),
         /**
-         * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
-         * name)
+         * POP3 does not support mail folder creation
          */
-        FOLDER_CREATION_FAILED("Mail folder \"%1$s\" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder name)", Category.CODE_ERROR, 2015),
+        FOLDER_CREATION_FAILED("POP3 does not support mail folder creation", Category.CODE_ERROR, 2015),
         /**
          * The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by
          * POP3 server. However, the folder has been created.
@@ -286,9 +285,9 @@ public final class POP3Exception extends MIMEMailException {
          */
         CONNECT_ERROR(MIMEMailException.Code.CONNECT_ERROR),
         /**
-         * Mailbox' root folder must not be source or the destination fullname of a move operation.
+         * POP3 does not support to move folders.
          */
-        NO_ROOT_MOVE("Mailbox' root folder must not be source or the destination fullname of a move operation.", Category.CODE_ERROR, 2048),
+        MOVE_DENIED("POP3 does not support to move folders.", Category.CODE_ERROR, 2048),
         /**
          * Sort field %1$s is not supported via POP3 SORT command
          */
@@ -300,7 +299,19 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Parsing thread-sort string failed: %1$s.
          */
-        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", Category.CODE_ERROR, 2051);
+        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", Category.CODE_ERROR, 2051),
+        /**
+         * POP3 does not support to create folders.
+         */
+        CREATE_DENIED("POP3 does not support to create folders.", Category.CODE_ERROR, 2052),
+        /**
+         * POP3 does not support to delete folders.
+         */
+        DELETE_DENIED("POP3 does not support to delete folders.", Category.CODE_ERROR, 2053),
+        /**
+         * POP3 does not support to update folders.
+         */
+        UPDATE_DENIED("POP3 does not support to update folders.", Category.CODE_ERROR, 2054);
 
         private final String message;
 

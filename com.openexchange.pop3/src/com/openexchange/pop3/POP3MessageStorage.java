@@ -66,16 +66,6 @@ import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.cache.RightsCache;
-import com.openexchange.imap.cache.UserFlagsCache;
-import com.openexchange.imap.command.CopyIMAPCommand;
-import com.openexchange.imap.command.FetchIMAPCommand;
-import com.openexchange.imap.command.FlagsIMAPCommand;
-import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.search.IMAPSearch;
-import com.openexchange.imap.sort.IMAPSort;
-import com.openexchange.imap.threadsort.ThreadSortNode;
-import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -93,17 +83,18 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.pop3.POP3Store;
 
 /**
- * {@link POP3MessageStorage} - The IMAP implementation of message storage.
+ * {@link POP3MessageStorage} - The POP3 implementation of message storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -133,13 +124,13 @@ public final class POP3MessageStorage extends POP3FolderWorker {
     /**
      * Initializes a new {@link POP3MessageStorage}.
      * 
-     * @param imapStore The IMAP store
-     * @param imapAccess The IMAP access
+     * @param pop3Store The POP3 store
+     * @param pop3Access The POP3 access
      * @param session The session providing needed user data
      * @throws POP3Exception If context loading fails
      */
-    public POP3MessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws POP3Exception {
-        super(imapStore, imapAccess, session);
+    public POP3MessageStorage(final POP3Store pop3Store, final POP3Access pop3Access, final Session session) throws POP3Exception {
+        super(pop3Store, pop3Access, session);
     }
 
     @Override
@@ -612,7 +603,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
     @Override
     public long[] moveMessages(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(destFolder)) {
-            throw new POP3Exception(POP3Exception.Code.NO_ROOT_MOVE);
+            throw new POP3Exception(POP3Exception.Code.MOVE_DENIED);
         }
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);
     }
