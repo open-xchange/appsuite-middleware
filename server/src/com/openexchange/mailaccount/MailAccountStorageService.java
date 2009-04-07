@@ -108,9 +108,10 @@ public interface MailAccountStorageService {
      * @param user The user ID
      * @param ctx The context
      * @param sessionPassword The session password
+     * @return The ID of the newly created mail account
      * @throws MailAccountException If the mail account cannot be updated
      */
-    public void insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, String sessionPassword) throws MailAccountException;
+    public int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, String sessionPassword) throws MailAccountException;
 
     /**
      * Deletes the mail account identified by specified ID.

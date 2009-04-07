@@ -51,12 +51,9 @@ package com.openexchange.ajax;
 
 import java.util.Date;
 import java.util.Enumeration;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 
@@ -162,7 +159,7 @@ public abstract class DataServlet extends PermissionServlet {
 		throw new OXMandatoryFieldException(_missingField + name);
 	}
 
-	protected static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
+	public static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final Enumeration<?> e = httpServletRequest.getParameterNames();
 		final StringBuilder sb = new StringBuilder();

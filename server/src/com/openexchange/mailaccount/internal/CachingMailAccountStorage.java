@@ -191,8 +191,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         invalidateUser(mailAccount.getId(), user, cid);
     }
 
-    public void insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws MailAccountException {
-        delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws MailAccountException {
+        return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
     }
 
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {

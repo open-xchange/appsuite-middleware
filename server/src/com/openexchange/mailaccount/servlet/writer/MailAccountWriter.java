@@ -47,66 +47,49 @@
  *
  */
 
-package com.openexchange.mailaccount.internal;
+package com.openexchange.mailaccount.servlet.writer;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.servlet.ServletException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.servlet.MailAccountServlet;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.http.HttpServletManager;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 
 /**
- * {@link MailAccountStorageInit} - Initialization for mail account storage.
+ * {@link MailAccountWriter} - TODO Short description of this class' purpose.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountStorageInit implements Initialization {
+public final class MailAccountWriter {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountStorageInit.class);
-
-    private static final String ALIAS = "ajax/account";
-
-    private final AtomicBoolean started;
+    private MailAccountWriter() {
+        super();
+    }
 
     /**
-     * Initializes a new {@link MailAccountStorageInit}.
+     * Writes specified mail account to a JSON object.
+     * 
+     * @param account The mail account to written from mail account's data
+     * @return A JSON object filled with
+     * @throws JSONException If writing JSON fails
      */
-    public MailAccountStorageInit() {
-        super();
-        started = new AtomicBoolean();
-    }
+    public static JSONObject write(final MailAccount account) throws JSONException {
+        final JSONObject json = new JSONObject();
+        json.put(MailAccountFields.ID, account.getId());
+        json.put(MailAccountFields.LOGIN, account.getLogin());
+        // json.put(MailAccountFields.PASSWORD, account.getLogin());
+        json.put(MailAccountFields.MAIL_URL, account.getMailServerURL());
+        json.put(MailAccountFields.TRANSPORT_URL, account.getTransportServerURL());
+        json.put(MailAccountFields.NAME, account.getName());
+        json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
+        json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
+        // Folder
+        json.put(MailAccountFields.TRASH, account.getTrash());
+        json.put(MailAccountFields.SENT, account.getSent());
+        json.put(MailAccountFields.DRAFTS, account.getDrafts());
+        json.put(MailAccountFields.SPAM, account.getSpam());
+        json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
+        json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
-        // Simulate bundle start
-        ServerServiceRegistry.getInstance().addService(
-            MailAccountStorageService.class,
-            new CachingMailAccountStorage(new RdbMailAccountStorage()));
-        // Simulate servlet registration
-        try {
-            HttpServletManager.registerServlet(ALIAS, new MailAccountServlet(), null);
-            LOG.info("Mail account servlet successfully registered.");
-        } catch (final ServletException e) {
-            LOG.error("Mail account servlet could not be registered on server start-up.", e);
-        }
-        LOG.info("MailAccountStorageService successfully injected to server service registry");
+        return json;
     }
-
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        // Simulate servlet unregistration
-        HttpServletManager.unregisterServlet(ALIAS);
-        LOG.info("Mail account servlet successfully unregistered.");
-        // Simulate bundle stop
-        ServerServiceRegistry.getInstance().removeService(MailAccountStorageService.class);
-        LOG.info("MailAccountStorageService successfully removed from server service registry");
-    }
-
 }
