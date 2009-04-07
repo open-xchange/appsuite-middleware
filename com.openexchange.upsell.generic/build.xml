@@ -14,13 +14,6 @@
     
    	<property file="META-INF/MANIFEST.MF" />
 	<property file="build.properties" />
-
-	<!-- Compile -->
-	<target name="prepare" />
-
-	<target name="compile" depends="prepare" />
-
-	<target name="jar" depends="prepare,compile" />
     
     <!-- Install Constants -->
 	<property name="guipluginsdir" value="${guiprefix}/plugins" />
@@ -32,6 +25,13 @@
     <!-- Replacements -->
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+    
+	<!-- Compile -->
+	<target name="prepare" />
+
+	<target name="compile" depends="prepare" />
+
+	<target name="jar" depends="prepare,compile" />
     
     <!-- Install -->
 	<target name="installConfig">
