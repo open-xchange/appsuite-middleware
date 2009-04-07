@@ -127,8 +127,7 @@ public final class MailAccountRequest {
     }
 
     private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
-        final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
-        final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
+        final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
@@ -146,8 +145,7 @@ public final class MailAccountRequest {
     }
 
     private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
-        final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
-        final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
+        final int[] ids = DataParser.checkJSONIntArray(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final JSONArray jsonArray = new JSONArray();
         try {
@@ -155,9 +153,11 @@ public final class MailAccountRequest {
                 MailAccountStorageService.class,
                 true);
 
-            storageService.deleteMailAccount(id, session.getUserId(), session.getContextId());
+            for (int i = 0; i < ids.length; i++) {
+                storageService.deleteMailAccount(ids[i], session.getUserId(), session.getContextId());
 
-            jsonArray.put(id);
+                jsonArray.put(ids[i]);
+            }
         } catch (final AbstractOXException exc) {
             throw new OXException(exc);
         }
@@ -165,7 +165,7 @@ public final class MailAccountRequest {
     }
 
     private JSONObject actionNew(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
-        final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
+        final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();
@@ -193,7 +193,7 @@ public final class MailAccountRequest {
     }
 
     private JSONObject actionUpate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
-        final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
+        final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();
