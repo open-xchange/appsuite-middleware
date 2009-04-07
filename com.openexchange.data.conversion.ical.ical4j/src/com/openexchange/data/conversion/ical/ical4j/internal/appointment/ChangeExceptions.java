@@ -62,8 +62,8 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
@@ -76,6 +76,8 @@ import com.openexchange.groupware.contexts.Context;
 public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
 
     private static final Log LOG = LogFactory.getLog(ChangeExceptions.class);
+
+    private static CalendarCollectionService calendarCollection;
 
     public ChangeExceptions() {
         super();
@@ -94,7 +96,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
         if (CalendarDataObject.class.isAssignableFrom(appointment.getClass())) {
             final CalendarDataObject cloned = (CalendarDataObject) appointment.clone();
             try {
-                CalendarRecurringCollection.fillDAO(cloned);
+                calendarCollection.fillDAO(cloned);
                 cloned.setStartDate(parseSeriesStart(cloned.getRecurrence()));
                 date = EmitterTools.toDateTime(EmitterTools.calculateExactTime(cloned, changeException));
             } catch (final OXException e) {
@@ -131,5 +133,12 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
 
     public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         // Currently unimplemented. Series must be changed for change exceptions.
+    }
+
+    /**
+     * TODO Refactor this to add {@link ChangeExceptions} dynamically depending on service in AppointmentConverters.
+     */
+    public static void setCalendarCollection(CalendarCollectionService calendarCollection) {
+        ChangeExceptions.calendarCollection = calendarCollection;
     }
 }

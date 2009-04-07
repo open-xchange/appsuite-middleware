@@ -55,10 +55,10 @@ import net.fortuna.ical4j.util.TimeZones;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 
 /**
  *
@@ -67,6 +67,8 @@ import com.openexchange.groupware.calendar.RecurringResults;
 public final class EmitterTools {
 
     private static final Log LOG = LogFactory.getLog(EmitterTools.class);
+
+    private static CalendarCollectionService calendarCollection;
 
     /**
      * Prevent instantiation.
@@ -108,12 +110,12 @@ public final class EmitterTools {
     public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {
-            final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(
+            final RecurringResultsInterface rrs = calendarCollection.calculateRecurring(
                 appointment,
-                CalendarRecurringCollection.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
-                CalendarRecurringCollection.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
+                calendarCollection.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
+                calendarCollection.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
                 0,
-                CalendarRecurringCollection.MAXTC,
+                CalendarCollectionService.MAXTC,
                 true);
             final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
             if (recurrencePosition > 0) {
@@ -123,5 +125,9 @@ public final class EmitterTools {
             LOG.warn(e.getMessage(), e);
         }
         return retval;
+    }
+
+    public static void setCalendarCollection(CalendarCollectionService calendarCollection) {
+        EmitterTools.calendarCollection = calendarCollection;
     }
 }
