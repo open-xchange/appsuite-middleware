@@ -1,0 +1,464 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.calendar;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
+
+/**
+ * ConflictHandler
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
+public class ConflictHandler {
+    
+    private final CalendarDataObject cdao;
+    private final Session so;
+    private boolean action = true;
+    private int current_results;
+    
+    public static final int MAX_CONFLICT_RESULTS = 999;
+    
+    public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
+    
+    private static final Log LOG = LogFactory.getLog(ConflictHandler.class);
+    private CalendarDataObject edao;
+    private CalendarCollection recColl;
+
+    public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean action) {
+        this.cdao = cdao;
+        this.edao = edao;
+        this.so = so;
+        this.action = action;
+        this.recColl = new CalendarCollection();
+    }
+    
+    public CalendarDataObject[] getConflicts() throws OXException {
+        final Context ctx = Tools.getContext(so);
+        if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
+            return NO_CONFLICTS; // According to bug #5267 and modularisation concept
+        } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
+            }
+            return NO_CONFLICTS;
+        } else if (cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
+            return NO_CONFLICTS; // Past apps should never conflict
+        } else if (!action && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
+            //if (cdao.getShownAs() == CalendarDataObject.FREE) {
+            return NO_CONFLICTS; // According to bug #5267
+            //}
+        }
+        // So we'll make a conflict check for real. We'll need start and end time for that.
+        if(edao != null && ! cdao.containsStartDate() ) { cdao.setStartDate(edao.getStartDate()); }
+        if(edao != null && ! cdao.containsEndDate()) { cdao.setEndDate(edao.getEndDate()); }
+
+        if (!containsResources()) {
+        	if (cdao.getIgnoreConflicts()) {
+        		return NO_CONFLICTS;
+        	}
+            if (cdao.getRecurrenceType() == 0) {
+                return prepareResolving(true);
+            }
+            return NO_CONFLICTS;
+        }
+        final CalendarDataObject[] resources = prepareResolving( false );
+        if (resources.length > 0) {
+            return resources;
+        }
+        if (!cdao.getIgnoreConflicts()) {
+            return prepareResolving(true);
+        }
+        return NO_CONFLICTS;
+    }
+    
+    private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {
+        /*
+         * Using original method {@link #resolveResourceConflicts(Date, Date)}
+         * for non series appointments.
+         */
+        if (cdao.getRecurrenceType() == 0) {
+            if (action) {
+                if (request_participants) {
+                    return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
+                }
+                return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
+            }
+            if (request_participants) {
+                return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
+            }
+            return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
+        }
+        if (request_participants) {
+            return NO_CONFLICTS;
+        }
+        /*
+         * Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)}
+         * for series appointments.
+         */
+		final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
+		final Date resultStart = new Date(results.getRecurringResult(0).getStart());
+		final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
+	    final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
+	    // Results must be sorted afterwards because already existing series
+	    // appointments are returned in time reverse order by FreeBusyResults.
+	    // Because of 999 maximum number of conflicts the returned array may
+	    // contain a lot of appointments far in the future.
+	    Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
+            public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
+                return cdao1.getStartDate().compareTo(cdao2.getStartDate());
+            }
+	    });
+        return resultConflicts;
+	}
+    
+    private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
+        final String sql_in = recColl.getSQLInStringForParticipants(cdao.getUsers());
+        if (sql_in == null) {
+            return NO_CONFLICTS;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        Connection readcon = null;
+        SearchIterator<CalendarDataObject> si = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        PreparedStatement private_folder_information = null;
+        boolean close_connection = true;
+        final Context ctx = Tools.getContext(so);
+        final User user = Tools.getUser(so, ctx);
+        try {
+            readcon = DBPool.pickup(ctx);            
+            final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            if (whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_start+Constants.MILLI_DAY;
+            }
+            prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
+            private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
+            rs = calendarsqlimp.getResultSet(prep);
+            final long startTime = start.getTime();
+            final long endTime = end.getTime();
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getUsers(), private_folder_information, calendarsqlimp, startTime, endTime);
+            ArrayList<CalendarDataObject> li = null;
+            while (si.hasNext()) {
+                final CalendarDataObject conflict_dao = si.next();
+                if (conflict_dao != null && conflict_dao.containsStartDate() && conflict_dao.containsEndDate()) {
+                    if (li == null) {
+                        li = new ArrayList<CalendarDataObject>();
+                    }
+
+                    if ((action || cdao.getObjectID() != conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
+                        if (!conflict_dao.containsRecurrencePosition()) {
+                            if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                                li.add(conflict_dao);
+                                current_results++;
+                            }
+                        } else if (conflict_dao.getRecurrencePosition() > 0 && recColl.inBetween(startTime, endTime, conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
+                            if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                                li.add(conflict_dao);
+                                current_results++;
+                            }
+                        }
+                        if (current_results == MAX_CONFLICT_RESULTS) {
+                            break;
+                        }
+                    }
+                }
+            }
+            si.close();
+            close_connection = false;
+            if (li != null) {
+                final CalendarDataObject[] ret = new CalendarDataObject[li.size()];
+                li.toArray(ret);
+                return ret;
+            }
+            return NO_CONFLICTS;
+        } catch (final SearchIteratorException sie) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(12));
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (close_connection && si != null) {
+                try {
+                    si.close();
+                } catch (final SearchIteratorException sie) {
+                    LOG.error("Error closing SearchIterator" ,sie);
+                }
+                recColl.closeResultSet(rs);
+                recColl.closePreparedStatement(prep);
+                recColl.closePreparedStatement(private_folder_information);
+            }
+            if (close_connection && readcon != null) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
+    
+    private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end) throws OXException {
+        final String sql_in = recColl.getSQLInStringForResources(cdao.getParticipants());
+        if (sql_in == null) {
+            return NO_CONFLICTS;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        Connection readcon = null;
+        SearchIterator<?> si = null;
+        ResultSet rs = null;
+        PreparedStatement prep  = null;
+        PreparedStatement private_folder_information = null;
+        boolean close_connection = true;
+        final Context ctx = Tools.getContext(so);
+        final User user = Tools.getUser(so, ctx);
+        try {
+            readcon = DBPool.pickup(ctx);
+            final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            if (whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_start+Constants.MILLI_DAY;
+            }
+            prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            rs = calendarsqlimp.getResultSet(prep);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp);
+            ArrayList<CalendarDataObject> li = null;
+            while (si.hasNext()) {
+                final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
+                if (conflict_dao != null && conflict_dao.containsStartDate() && conflict_dao.containsEndDate()) {
+                    if (li == null) {
+                        li = new ArrayList<CalendarDataObject>();
+                    }
+                    
+                    if (!(!action && cdao.getObjectID() == conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
+                        if (!cdao.containsRecurrencePosition()) {
+                            if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                                if (!conflict_dao.containsRecurrencePosition()) {
+                                    conflict_dao.setHardConflict();
+                                    li.add(conflict_dao);
+                                    current_results++;
+                                } else if (conflict_dao.getRecurrencePosition() > 0 && recColl.inBetween(start.getTime(), end.getTime(), conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
+                                    if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                                        conflict_dao.setHardConflict();
+                                        li.add(conflict_dao);
+                                        current_results++;
+                                    }
+                                }
+                            }
+                        } else if (cdao.getRecurrencePosition() > 0 && recColl.inBetween(start.getTime(), end.getTime(), conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
+                            if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                                conflict_dao.setHardConflict();
+                                li.add(conflict_dao);
+                                current_results++;
+                            }
+                        }
+                        if (current_results == MAX_CONFLICT_RESULTS) {
+                            break;
+                        }
+                    }
+                }
+            }
+            si.close();
+            close_connection = false;
+            if (li != null) {
+                final CalendarDataObject[] ret = new CalendarDataObject[li.size()];
+                li.toArray(ret);
+                return ret;
+            }
+            return NO_CONFLICTS;
+        } catch (final SearchIteratorException sie) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(13));
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (close_connection && si != null) {
+                try {
+                    si.close();
+                } catch (final SearchIteratorException sie) {
+                    LOG.error("Error closing SearchIterator" ,sie);
+                }
+                recColl.closeResultSet(rs);
+                recColl.closePreparedStatement(prep);
+                recColl.closePreparedStatement(private_folder_information);
+            }
+            if (close_connection && readcon != null) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
+
+    /**
+     * This method searches for booking conflicts if a series appointment contains
+     * a resource. Start and end date must be the start and the end of the series.
+     * This method then fetches all appointments in that time frame that also book
+     * the resource. The occurrences of the series appointment are then iterated
+     * using the given RecurringResults for every possible conflict selected from
+     * the database. All recurring dates of the series are then checked against
+     * every possible conflict from the database and only conflicting time frames
+     * are returned as resource booking conflicts. This method is a lot faster
+     * that {@link #resolveResourceConflicts(Date, Date)}.
+     * @param start Start date of the first occurrence of the series appointment.
+     * @param end End date of the last occurence of the series apppointment.
+     * @param results Recurring results of the series appointment.
+     * @return Conflicting appointments that booked the resource in the same
+     * time frame.
+     * @throws OXException if some problem occurs.
+     */
+    private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end, final RecurringResultsInterface results) throws OXException {
+        final String sql_in = recColl.getSQLInStringForResources(cdao.getParticipants());
+        if (sql_in == null) {
+            return NO_CONFLICTS;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        Connection readcon = null;
+        SearchIterator<CalendarDataObject> si = null;
+        ResultSet rs = null;
+        PreparedStatement prep  = null;
+        PreparedStatement private_folder_information = null;
+        boolean close_connection = true;
+        final Context ctx = Tools.getContext(so);
+        final User user = Tools.getUser(so, ctx);
+        try {
+            readcon = DBPool.pickup(ctx);
+            final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            if (whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_start+Constants.MILLI_DAY;
+            }
+            prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            rs = calendarsqlimp.getResultSet(prep);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp);
+            final ArrayList<CalendarDataObject> li = new ArrayList<CalendarDataObject>();
+            while (si.hasNext()) {
+                final CalendarDataObject conflict_dao = si.next();
+                if (conflict_dao == null || !conflict_dao.containsStartDate() || !conflict_dao.containsEndDate()) {
+                    continue;
+                }
+                if (recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                    continue;
+                }
+                if (!action && cdao.getObjectID() == conflict_dao.getObjectID()) { // Same id should never conflict if we are running an update
+                    continue;
+                }
+                for (int i = 0; i < results.size() && current_results < MAX_CONFLICT_RESULTS; i++) {
+                    final RecurringResultInterface result = results.getRecurringResult(i);
+                    final long rStart = result.getStart();
+                    final long rEnd = result.getEnd();
+                    if (recColl.inBetween(rStart, rEnd, conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
+                        conflict_dao.setHardConflict();
+                        li.add(conflict_dao);
+                        current_results++;
+                    }
+                }
+                if (current_results >= MAX_CONFLICT_RESULTS) {
+                    break;
+                }
+            }
+            si.close();
+            close_connection = false;
+            if (0 != li.size()) {
+                final CalendarDataObject[] ret = new CalendarDataObject[li.size()];
+                li.toArray(ret);
+                return ret;
+            }
+            return NO_CONFLICTS;
+        } catch (final SearchIteratorException sie) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(13));
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (close_connection && si != null) {
+                try {
+                    si.close();
+                } catch (final SearchIteratorException sie) {
+                    LOG.error("Error closing SearchIterator" ,sie);
+                }
+                recColl.closeResultSet(rs);
+                recColl.closePreparedStatement(prep);
+                recColl.closePreparedStatement(private_folder_information);
+            }
+            if (close_connection && readcon != null) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
+    
+    private final boolean containsResources() {
+        return cdao.containsResources();
+    }
+}
