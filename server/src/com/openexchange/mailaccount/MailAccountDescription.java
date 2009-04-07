@@ -49,14 +49,16 @@
 
 package com.openexchange.mailaccount;
 
+import java.io.Serializable;
+
 /**
  * {@link MailAccountDescription} - Container object describing a mail account to insert/update.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountDescription {
+public final class MailAccountDescription implements Serializable {
 
-    private static final long serialVersionUID = -641194838598605274L;
+    private static final long serialVersionUID = -2443656355399068302L;
 
     private int id;
 
@@ -105,27 +107,27 @@ public final class MailAccountDescription {
     }
 
     /**
-     * Gets the 
+     * Gets the login.
      * 
-     * @return The 
+     * @return The login
      */
     public String getLogin() {
         return login;
     }
 
     /**
-     * Gets the 
+     * Gets the mail server URL.
      * 
-     * @return The 
+     * @return The mail server URL
      */
     public String getMailServerURL() {
         return mailServerURL;
     }
 
     /**
-     * Gets the 
+     * Gets the account name.
      * 
-     * @return The 
+     * @return The account name
      */
     public String getName() {
         return name;
@@ -141,143 +143,208 @@ public final class MailAccountDescription {
     }
 
     /**
-     * Gets the 
+     * Gets the primary email address.
      * 
-     * @return The 
+     * @return The primary email address
      */
     public String getPrimaryAddress() {
         return primaryAddress;
     }
 
     /**
-     * Gets the 
+     * Gets the transport server URL.
      * 
-     * @return The 
+     * @return The transport server URL
      */
     public String getTransportServerURL() {
         return transportServerURL;
     }
 
     /**
-     * Gets the 
+     * Gets the ID
      * 
-     * @return The 
+     * @return The ID
      */
     public void setId(final int id) {
         this.id = id;
     }
 
+    /**
+     * Sets the login.
+     * 
+     * @param login The login
+     */
     public void setLogin(final String login) {
         this.login = login;
     }
 
+    /**
+     * Sets the clear-text password (which is stored encrypted).
+     * 
+     * @param password The clear-text password
+     */
     public void setPassword(final String password) {
         this.password = password;
     }
 
+    /**
+     * Sets the mail server URL.
+     * 
+     * @param mailServerURL The mail server URL
+     */
     public void setMailServerURL(final String mailServerURL) {
         this.mailServerURL = mailServerURL;
     }
 
+    /**
+     * Sets the account name.
+     * 
+     * @param name The account name.
+     */
     public void setName(final String name) {
         this.name = name;
     }
 
+    /**
+     * Sets the primary email address.
+     * 
+     * @param primaryAddress The primary email address
+     */
     public void setPrimaryAddress(final String primaryAddress) {
         this.primaryAddress = primaryAddress;
     }
 
+    /**
+     * Sets the transport server URL.
+     * 
+     * @param transportServerURL The transport server URL
+     */
     public void setTransportServerURL(final String transportServerURL) {
         this.transportServerURL = transportServerURL;
     }
 
     /**
-     * Gets the 
+     * Gets the name for default drafts folder.
      * 
-     * @return The 
+     * @return The name for default drafts folder
      */
     public String getDrafts() {
         return drafts;
     }
 
     /**
-     * Gets the 
+     * Gets the name for default sent folder.
      * 
-     * @return The 
+     * @return The name for default sent folder
      */
     public String getSent() {
         return sent;
     }
 
     /**
-     * Gets the 
+     * Gets the name for default spam folder.
      * 
-     * @return The 
+     * @return The name for default spam folder
      */
     public String getSpam() {
         return spam;
     }
 
     /**
-     * Gets the 
+     * Gets the name for default trash folder.
      * 
-     * @return The 
+     * @return The name for default trash folder
      */
     public String getTrash() {
         return trash;
     }
 
     /**
-     * Gets the 
+     * Gets the name for default confirmed-ham folder.
      * 
-     * @return The 
+     * @return The name for default confirmed-ham folder
      */
     public String getConfirmedHam() {
         return confirmedHam;
     }
 
     /**
-     * Gets the 
+     * Gets the name for default confirmed-spam folder.
      * 
-     * @return The 
+     * @return The name for default confirmed-spam folder
      */
     public String getConfirmedSpam() {
         return confirmedSpam;
     }
 
     /**
-     * Gets the 
+     * Gets the spam handler name.
      * 
-     * @return The 
+     * @return The spam handler name
      */
     public String getSpamHandler() {
         return spamHandler;
     }
 
+    /**
+     * Sets the name for default trash folder.
+     * 
+     * @param trash The name for default trash folder
+     */
     public void setTrash(final String trash) {
         this.trash = trash;
     }
 
+    /**
+     * Sets the name for default sent folder.
+     * 
+     * @param sent The name for default sent folder
+     */
     public void setSent(final String sent) {
         this.sent = sent;
     }
 
+    /**
+     * Sets the name for default drafts folder.
+     * 
+     * @param drafts The name for default drafts folder
+     */
     public void setDrafts(final String drafts) {
         this.drafts = drafts;
     }
 
+    /**
+     * Sets the name for default spam folder.
+     * 
+     * @param spam The name for spam trash folder
+     */
     public void setSpam(final String spam) {
         this.spam = spam;
     }
 
+    /**
+     * Sets the name for default confirmed-spam folder.
+     * 
+     * @param confirmedSpam The name for default confirmed-spam folder
+     */
     public void setConfirmedSpam(final String confirmedSpam) {
         this.confirmedSpam = confirmedSpam;
     }
 
+    /**
+     * Sets the name for default confirmed-ham folder.
+     * 
+     * @param confirmedHam The name for default confirmed-ham folder
+     */
     public void setConfirmedHam(final String confirmedHam) {
         this.confirmedHam = confirmedHam;
     }
 
+    /**
+     * Sets the spam handler name.
+     * 
+     * @param spamHandler The spam handler name
+     */
     public void setSpamHandler(final String spamHandler) {
         this.spamHandler = spamHandler;
     }
