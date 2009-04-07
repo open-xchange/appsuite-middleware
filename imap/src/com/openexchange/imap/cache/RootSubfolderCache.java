@@ -51,9 +51,7 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.canCreateSubfolder;
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-
 import javax.mail.MessagingException;
-
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.mail.cache.SessionMailCache;
@@ -66,97 +64,87 @@ import com.sun.mail.imap.IMAPFolder;
  * {@link RootSubfolderCache}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class RootSubfolderCache {
 
-	/**
-	 * No instance
-	 */
-	private RootSubfolderCache() {
-		super();
-	}
+    /**
+     * No instance
+     */
+    private RootSubfolderCache() {
+        super();
+    }
 
-	/**
-	 * Gets cached <code>boolean</code> value if root folder allows subfolder
-	 * creation
-	 * 
-	 * @param f
-	 *            The IMAP root folder
-	 * @param load
-	 *            Whether subfolder creation shall be checked if no cache entry
-	 *            present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return The cached subfolder creation or <code>null</code>
-	 * @throws MessagingException
-	 *             If checking subfolder creation fails
-	 */
-	public static Boolean canCreateSubfolders(final DefaultFolder f, final boolean load, final Session session)
-			throws MessagingException {
-		final CreationCacheEntry entry = new CreationCacheEntry();
-		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
-		mailCache.get(entry);
-		if (load && (null == entry.getValue())) {
-			entry.setValue(Boolean.valueOf(canCreateSubfolder(f)));
-			mailCache.put(entry);
-		}
-		return entry.getValue();
-	}
+    /**
+     * Gets cached <code>boolean</code> value if root folder allows subfolder creation
+     * 
+     * @param f The IMAP root folder
+     * @param load Whether subfolder creation shall be checked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accontId The account ID
+     * @return The cached subfolder creation or <code>null</code>
+     * @throws MessagingException If checking subfolder creation fails
+     */
+    public static Boolean canCreateSubfolders(final DefaultFolder f, final boolean load, final Session session, final int accontId) throws MessagingException {
+        final CreationCacheEntry entry = new CreationCacheEntry();
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
+        mailCache.get(entry);
+        if (load && (null == entry.getValue())) {
+            entry.setValue(Boolean.valueOf(canCreateSubfolder(f)));
+            mailCache.put(entry);
+        }
+        return entry.getValue();
+    }
 
-	/**
-	 * Removes cached <code>boolean</code> value if root folder allows subfolder
-	 * creation
-	 * 
-	 * @param f
-	 *            The IMAP root folder
-	 * @param session
-	 *            The session providing the session-bound cache
-	 */
-	public static void removeCachedRights(final IMAPFolder f, final Session session) {
-		SessionMailCache.getInstance(session).remove(new CreationCacheEntry());
-	}
+    /**
+     * Removes cached <code>boolean</code> value if root folder allows subfolder creation
+     * 
+     * @param f The IMAP root folder
+     * @param session The session providing the session-bound cache
+     * @param accontId The account ID
+     */
+    public static void removeCachedRights(final IMAPFolder f, final Session session, final int accountId) {
+        SessionMailCache.getInstance(session, accountId).remove(new CreationCacheEntry());
+    }
 
-	private static final class CreationCacheEntry implements SessionMailCacheEntry<Boolean> {
+    private static final class CreationCacheEntry implements SessionMailCacheEntry<Boolean> {
 
-		private static final Integer DUMMY = Integer.valueOf(1);
+        private static final Integer DUMMY = Integer.valueOf(1);
 
-		private Boolean subfolderCreation;
+        private Boolean subfolderCreation;
 
-		private CacheKey key;
+        private CacheKey key;
 
-		public CreationCacheEntry() {
-			this(Boolean.FALSE);
-		}
+        public CreationCacheEntry() {
+            this(Boolean.FALSE);
+        }
 
-		public CreationCacheEntry(final Boolean subfolderCreation) {
-			super();
-			this.subfolderCreation = subfolderCreation;
-		}
+        public CreationCacheEntry(final Boolean subfolderCreation) {
+            super();
+            this.subfolderCreation = subfolderCreation;
+        }
 
-		private CacheKey getKeyInternal() {
-			if (null == key) {
-				key = getServiceRegistry().getService(CacheService.class).newCacheKey(
-						MailCacheCode.ROOT_SUBFOLDER.getCode(), DUMMY);
-			}
-			return key;
-		}
+        private CacheKey getKeyInternal() {
+            if (null == key) {
+                key = getServiceRegistry().getService(CacheService.class).newCacheKey(MailCacheCode.ROOT_SUBFOLDER.getCode(), DUMMY);
+            }
+            return key;
+        }
 
-		public CacheKey getKey() {
-			return getKeyInternal();
-		}
+        public CacheKey getKey() {
+            return getKeyInternal();
+        }
 
-		public Boolean getValue() {
-			return subfolderCreation;
-		}
+        public Boolean getValue() {
+            return subfolderCreation;
+        }
 
-		public void setValue(final Boolean value) {
-			this.subfolderCreation = value;
-		}
+        public void setValue(final Boolean value) {
+            this.subfolderCreation = value;
+        }
 
-		public Class<Boolean> getEntryClass() {
-			return Boolean.class;
-		}
-	}
+        public Class<Boolean> getEntryClass() {
+            return Boolean.class;
+        }
+    }
 
 }

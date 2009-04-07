@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -56,16 +57,19 @@ import java.util.Properties;
 import java.util.Random;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.PasswordUtil;
 
 /**
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
@@ -259,21 +263,34 @@ public abstract class MailConfig {
      * @param clazz The mail configuration type
      * @param mailConfig A newly created {@link MailConfig mail configuration}
      * @param session The session providing needed user data
+     * @param accountId The mail account ID
      * @return The user-specific mail configuration
      * @throws MailException If user-specific mail configuration cannot be determined
      */
-    public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig, final Session session) throws MailException {
+    public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig, final Session session, final int accountId) throws MailException {
         /*
-         * Fetch user object to determine server URL
+         * Fetch mail account
          */
-        final User user;
+        final MailAccount mailAccount;
         try {
-            user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e) {
+            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            if (accountId == MailAccount.DEFAULT_ID) {
+                mailAccount = storage.getDefaultMailAccount(session.getUserId(), session.getContextId());
+            } else {
+                mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            }
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
             throw new MailException(e);
         }
-        fillLoginAndPassword(mailConfig, session.getPassword(), user);
-        String serverURL = MailConfig.getMailServerURL(user);
+        mailConfig.accountId = accountId;
+        fillLoginAndPassword(
+            mailConfig,
+            session.getPassword(),
+            UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLoginInfo(),
+            mailAccount);
+        String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw new MailConfigException(
@@ -303,66 +320,108 @@ public abstract class MailConfig {
 
     protected String password;
 
+    protected int accountId;
+
     /**
      * Gets the mail server URL appropriate to configured mail server source.
      * 
-     * @param user The user
+     * @param mailAccount The user
      * @return The appropriate mail server URL or <code>null</code>
      */
-    public static final String getMailServerURL(final User user) {
+    public static final String getMailServerURL(final MailAccount mailAccount) {
+        if (!mailAccount.isDefaultAccount()) {
+            return mailAccount.getMailServerURL();
+        }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
             return MailProperties.getInstance().getMailServer();
         }
-        return user.getImapServer();
+        return mailAccount.getMailServerURL();
     }
 
     /**
-     * Gets the mail server URL appropriate to configured mail server source
+     * Gets the mail server URL appropriate to configured mail server source.
      * 
      * @param session The user session
+     * @param accountId The account ID
      * @return The appropriate mail server URL or <code>null</code>
+     * @throws MailException If mail server URL cannot be returned
      */
-    public static final String getMailServerURL(final Session session) {
-        return getMailServerURL(UserStorage.getStorageUser(session.getUserId(), session.getContextId()));
+    public static final String getMailServerURL(final Session session, final int accountId) throws MailException {
+        try {
+            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            return getMailServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
     }
 
     /**
-     * Gets the mail login of specified user appropriate to configured login source.
+     * Gets the mail login with respect to configured login source.
      * 
-     * @param user The user whose mail login shall be returned
+     * @param mailAccount The mail account used to determine the login
      * @return The mail login of specified user
      */
-    public static final String getMailLogin(final User user) {
+    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
+        if (!mailAccount.isDefaultAccount()) {
+            return mailAccount.getLogin();
+        }
         final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
         if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-            return user.getImapLogin();
+            return mailAccount.getLogin();
         }
         if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-            return user.getMail();
+            return mailAccount.getPrimaryAddress();
         }
-        return user.getLoginInfo();
+        return userLoginInfo;
     }
 
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
      * 
      * @param pattern The pattern
+     * @param server The server address
      * @param ctx The context
      * @return The user IDs from specified pattern dependent on configuration's setting for mail login source
      * @throws AbstractOXException If resolving user by specified pattern fails
      */
-    public static int[] getUserIDsByMailLogin(final String pattern, final Context ctx) throws AbstractOXException {
-        final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
-        if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-            /*
-             * Find user name by user's imap login
-             */
-            return UserStorage.getInstance().resolveIMAPLogin(pattern, ctx);
+    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws AbstractOXException {
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+            MailAccountStorageService.class,
+            true);
+        if (isDefaultAccount) {
+            final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
+            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+                /*
+                 * Find user name by user's imap login
+                 */
+                final MailAccount[] accounts = storageService.resolveLogin(pattern, server, ctx.getContextId());
+                final int[] retval = new int[accounts.length];
+                for (int i = 0; i < retval.length; i++) {
+                    retval[i] = accounts[i].getUserId();
+                }
+                return retval;
+            }
+            if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+                final MailAccount[] accounts = storageService.resolvePrimaryAddr(pattern, server, ctx.getContextId());
+                final int[] retval = new int[accounts.length];
+                for (int i = 0; i < retval.length; i++) {
+                    retval[i] = accounts[i].getUserId();
+                }
+                return retval;
+            }
+            return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
         }
-        if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-            return new int[] { UserStorage.getInstance().searchUser(pattern, ctx).getId() };
+        /*
+         * Find user name by user's imap login
+         */
+        final MailAccount[] accounts = storageService.resolveLogin(pattern, server, ctx.getContextId());
+        final int[] retval = new int[accounts.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = accounts[i].getUserId();
         }
-        return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
+        return retval;
     }
 
     /**
@@ -370,21 +429,27 @@ public abstract class MailConfig {
      * 
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
+     * @param mailAccount The mail account
      * @throws MailConfigException
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final String sessionPassword, final User user) throws MailConfigException {
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final String sessionPassword, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
         // Assign login
-        mailConfig.login = getMailLogin(user);
+        mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         // Assign password
-        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
-            final String masterPw = MailProperties.getInstance().getMasterPassword();
-            if (masterPw == null) {
-                throw new MailConfigException(
-                    new StringBuilder().append("Property \"").append("masterPassword").append("\" not set").toString());
+        if (mailAccount.isDefaultAccount()) {
+            final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+            if (PasswordSource.GLOBAL.equals(cur)) {
+                final String masterPw = MailProperties.getInstance().getMasterPassword();
+                if (masterPw == null) {
+                    throw new MailConfigException(
+                        new StringBuilder().append("Property \"").append("masterPassword").append("\" not set").toString());
+                }
+                mailConfig.password = masterPw;
+            } else {
+                mailConfig.password = sessionPassword;
             }
-            mailConfig.password = masterPw;
         } else {
-            mailConfig.password = sessionPassword;
+            mailConfig.password = PasswordUtil.decrypt(mailAccount.getPassword(), sessionPassword);
         }
     }
 
@@ -679,6 +744,24 @@ public abstract class MailConfig {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Gets the account ID.
+     * 
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Sets the account ID (externally).
+     * 
+     * @param accountId The account ID
+     */
+    public void setAccountId(final int accountId) {
+        this.accountId = accountId;
     }
 
     /**

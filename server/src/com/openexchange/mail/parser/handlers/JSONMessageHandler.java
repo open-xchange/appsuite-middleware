@@ -125,6 +125,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private final DisplayMode displayMode;
 
+    private final int accountId;
+
     private final MailPath mailPath;
 
     private final JSONObject jsonObject;
@@ -148,6 +150,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JSONMessageHandler}
      * 
+     * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param displayMode The display mode
      * @param session The session providing needed user data
@@ -155,15 +158,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
      *            it is ignored.
      * @throws MailException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm) throws MailException {
+    public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm) throws MailException {
         super();
+        this.accountId = accountId;
         modified = new boolean[1];
         this.session = session;
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
-            throw new MailException(e);
-        }
+        ctx = getContext(session);
         this.usm = usm;
         this.displayMode = displayMode;
         this.mailPath = new MailPath(mailPath);
@@ -173,6 +173,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JSONMessageHandler}
      * 
+     * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
      * @param displayMode The display mode
@@ -181,8 +182,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
      *            it is ignored.
      * @throws MailException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm) throws MailException {
-        this(mailPath, mail, displayMode, session, usm, getContext(session));
+    public JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm) throws MailException {
+        this(accountId, mailPath, mail, displayMode, session, usm, getContext(session));
     }
 
     private static Context getContext(final Session session) throws MailException {
@@ -196,8 +197,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JSONMessageHandler} for internal usage
      */
-    private JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx) throws MailException {
+    private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx) throws MailException {
         super();
+        this.accountId = accountId;
         modified = new boolean[1];
         this.session = session;
         this.ctx = ctx;
@@ -214,7 +216,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                  * Add missing fields
                  */
                 if (mail.containsFolder() && mail.getMailId() > 0) {
-                    jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(mail.getFolder()));
+                    jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
                     jsonObject.put(DataFields.ID, mail.getMailId());
                 }
                 jsonObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
@@ -253,7 +255,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
              * Add debugging information
              */
             if (jsonObject.hasAndNotNull(FolderChildFields.FOLDER_ID)) {
-                html2textHandler.setMailFolderPath(prepareMailFolderParam(jsonObject.optString(FolderChildFields.FOLDER_ID)));
+                html2textHandler.setMailFolderPath(prepareMailFolderParam(jsonObject.optString(FolderChildFields.FOLDER_ID)).getFullname());
             }
             if (jsonObject.hasAndNotNull(DataFields.ID)) {
                 html2textHandler.setMailId(jsonObject.optLong(DataFields.ID));
@@ -699,7 +701,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
                 return true;
             }
-            final JSONMessageHandler msgHandler = new JSONMessageHandler(null, null, displayMode, session, usm, ctx);
+            final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx);
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
             final JSONObject nestedObject = msgHandler.getJSONObject();
             /*

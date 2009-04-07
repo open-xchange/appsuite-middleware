@@ -112,6 +112,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -119,7 +120,6 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -142,6 +142,10 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -578,7 +582,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         } else {
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, mail.getThreadLevel(), false, session.getUserId(), session.getContextId());
+                                writer.writeField(
+                                    ja,
+                                    mail,
+                                    mail.getThreadLevel(),
+                                    false,
+                                    mailInterface.getAccountID(),
+                                    session.getUserId(),
+                                    session.getContextId());
                             }
                         }
                         jsonWriter.value(ja);
@@ -609,7 +620,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         } else {
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, 0, false, session.getUserId(), session.getContextId());
+                                writer.writeField(
+                                    ja,
+                                    mail,
+                                    0,
+                                    false,
+                                    mailInterface.getAccountID(),
+                                    session.getUserId(),
+                                    session.getContextId());
                             }
                         }
                         jsonWriter.value(ja);
@@ -714,11 +732,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                data = MessageWriter.writeMailMessage(
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave),
-                    DisplayMode.MODIFYABLE,
-                    session,
-                    usmNoSave);
+                data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getReplyMessageForDisplay(
+                    folderPath,
+                    uid,
+                    reply2all,
+                    usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -811,7 +829,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(
+                data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getForwardMessageForDisplay(
                     new String[] { folderPath },
                     new long[] { uid },
                     usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
@@ -997,6 +1015,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
                     data = MessageWriter.writeMailMessage(
+                        mailInterface.getAccountID(),
                         mail,
                         editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY,
                         session,
@@ -1163,7 +1182,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final MailMessage mail = (MailMessage) it.next();
                     final JSONArray ja = new JSONArray();
                     for (final MailFieldWriter writer : writers) {
-                        writer.writeField(ja, mail, 0, false, session.getUserId(), session.getContextId());
+                        writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), session.getUserId(), session.getContextId());
                     }
                     jsonWriter.value(ja);
                 }
@@ -1650,11 +1669,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                data = MessageWriter.writeMailMessage(
-                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
-                    DisplayMode.MODIFYABLE,
-                    session,
-                    usmNoSave);
+                data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getForwardMessageForDisplay(
+                    folders,
+                    ids,
+                    usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -1850,7 +1868,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Parse
                      */
-                    final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, (UploadEvent) null, session);
+                    // TODO: Proper account ID on autosave?!?!
+                    final ComposedMailMessage composedMail = MessageParser.parse(
+                        jsonMailObj,
+                        (UploadEvent) null,
+                        session,
+                        MailAccount.DEFAULT_ID);
                     if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                         LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
                         composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
@@ -2075,7 +2098,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final MailMessage mail = (MailMessage) it.next();
                             final JSONArray arr = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(arr, mail, 0, false, session.getUserId(), session.getContextId());
+                                writer.writeField(
+                                    arr,
+                                    mail,
+                                    0,
+                                    false,
+                                    mailInterface.getAccountID(),
+                                    session.getUserId(),
+                                    session.getContextId());
                             }
                             jsonWriter.value(arr);
                         }
@@ -2097,7 +2127,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final MailMessage mail = (MailMessage) it.next();
                             final JSONArray arr = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(arr, mail, 0, false, session.getUserId(), session.getContextId());
+                                writer.writeField(
+                                    arr,
+                                    mail,
+                                    0,
+                                    false,
+                                    mailInterface.getAccountID(),
+                                    session.getUserId(),
+                                    session.getContextId());
                             }
                             jsonWriter.value(arr);
                         }
@@ -2211,7 +2248,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                             if (mails[i] != null) {
                                 final JSONArray ja = new JSONArray();
                                 for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(ja, mails[i], 0, false, session.getUserId(), session.getContextId());
+                                    writers[j].writeField(
+                                        ja,
+                                        mails[i],
+                                        0,
+                                        false,
+                                        mailInterface.getAccountID(),
+                                        session.getUserId(),
+                                        session.getContextId());
                                 }
                                 jsonWriter.value(ja);
                             }
@@ -2519,37 +2563,18 @@ public class Mail extends PermissionServlet implements UploadListener {
             final byte[] rfc822 = body.getBytes("US-ASCII");
             final MailMessage m = MIMEMessageConverter.convertMessage(rfc822);
             /*
-             * Check for valid from address
-             */
-            try {
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new InternetAddress(usm.getSendAddr()));
-                }
-                final User user = session.getUser();
-                validAddrs.add(new InternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new InternetAddress(alias));
-                }
-                final List<InternetAddress> from = Arrays.asList(m.getFrom());
-                if (!validAddrs.containsAll(from)) {
-                    throw new MailException(
-                        MailException.Code.INVALID_SENDER,
-                        from.size() == 1 ? from.get(0).toString() : Arrays.toString(m.getFrom()));
-                }
-            } catch (final AddressException e) {
-                throw MIMEMailException.handleMessagingException(e);
-            }
-            /*
              * Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
              */
             if (folder == null) {
                 /*
-                 * Missing "folder" element indicates to send given message
+                 * Extract from out of RFC 822 bytes
                  */
-                final MailTransport transport = MailTransport.getInstance(session);
+                final InternetAddress from = m.getFrom()[0];
+                final int accountId = resolveFrom2Account(session, from);
+                /*
+                 * Missing "folder" element indicates to send given message via default mail account
+                 */
+                final MailTransport transport = MailTransport.getInstance(session, accountId);
                 try {
                     /*
                      * Send raw message source
@@ -2559,10 +2584,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Copy in sent folder allowed
                          */
-                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
                         mailAccess.connect();
                         try {
-                            final String sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder());
+                            final String sentFullname = MailFolderUtility.prepareMailFolderParam(
+                                mailAccess.getFolderStorage().getSentFolder()).getFullname();
                             final long[] uidArr;
                             try {
                                 /*
@@ -2577,6 +2603,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                      * Update cache
                                      */
                                     MailMessageCache.getInstance().removeFolderMessages(
+                                        accountId,
                                         sentFullname,
                                         session.getUserId(),
                                         session.getContext());
@@ -2599,7 +2626,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                              * Compose JSON object
                              */
                             responseData = new JSONObject();
-                            responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(sentFullname));
+                            responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(
+                                MailAccount.DEFAULT_ID,
+                                sentFullname));
                             responseData.put(DataFields.ID, uidArr[0]);
                         } finally {
                             mailAccess.close(true);
@@ -2610,9 +2639,34 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             } else {
                 /*
-                 * Append message to denoted folder
+                 * Check for valid from address
                  */
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+                try {
+                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                    final UserSettingMail usm = session.getUserSettingMail();
+                    if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                        validAddrs.add(new InternetAddress(usm.getSendAddr()));
+                    }
+                    final User user = session.getUser();
+                    validAddrs.add(new InternetAddress(user.getMail()));
+                    final String[] aliases = user.getAliases();
+                    for (final String alias : aliases) {
+                        validAddrs.add(new InternetAddress(alias));
+                    }
+                    final List<InternetAddress> from = Arrays.asList(m.getFrom());
+                    if (!validAddrs.containsAll(from)) {
+                        throw new MailException(
+                            MailException.Code.INVALID_SENDER,
+                            from.size() == 1 ? from.get(0).toString() : Arrays.toString(m.getFrom()));
+                    }
+                } catch (final AddressException e) {
+                    throw MIMEMailException.handleMessagingException(e);
+                }
+                /*
+                 * Append message to denoted folder in proper mail storage
+                 */
+                final FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder);
+                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fullnameArgument.getAccountId());
                 mailAccess.connect();
                 try {
                     if (flags != ParamContainer.NOT_FOUND) {
@@ -2621,9 +2675,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (mailAccess.getFolderStorage().getDraftsFolder().equals(folder)) {
                         m.setFlag(MailMessage.FLAG_DRAFT, true);
                     }
-                    final long id = mailAccess.getMessageStorage().appendMessages(
-                        MailFolderUtility.prepareMailFolderParam(folder),
-                        new MailMessage[] { m })[0];
+                    final long id = mailAccess.getMessageStorage().appendMessages(fullnameArgument.getFullname(), new MailMessage[] { m })[0];
                     responseData = new JSONObject();
                     responseData.put(FolderChildFields.FOLDER_ID, folder);
                     responseData.put(DataFields.ID, id);
@@ -3236,7 +3288,17 @@ public class Mail extends PermissionServlet implements UploadListener {
                          * Parse
                          */
                         final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
-                        final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session);
+                        /*
+                         * Resolve "From" to proper mail account to select right transport server
+                         */
+                        final InternetAddress from;
+                        try {
+                            from = MessageParser.getFromField(jsonMailObj)[0];
+                        } catch (final AddressException e) {
+                            throw MIMEMailException.handleMessagingException(e);
+                        }
+                        final int accountId = resolveFrom2Account(session, from);
+                        final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session, accountId);
                         if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
                             /*
                              * ... and save draft
@@ -3279,13 +3341,22 @@ public class Mail extends PermissionServlet implements UploadListener {
                     String msgIdentifier = null;
                     {
                         final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL));
+                        final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
+                        /*
+                         * Resolve "From" to proper mail account
+                         */
+                        final InternetAddress from;
+                        try {
+                            from = MessageParser.getFromField(jsonMailObj)[0];
+                        } catch (final AddressException e) {
+                            throw MIMEMailException.handleMessagingException(e);
+                        }
+                        final int accountId = resolveFrom2Account(session, from);
+
                         /*
                          * Parse
                          */
-                        final ComposedMailMessage composedMail = MessageParser.parse(
-                            jsonMailObj,
-                            uploadEvent,
-                            (Session) uploadEvent.getParameter(UPLOAD_PARAM_SESSION));
+                        final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session, accountId);
                         if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT && (composedMail.getMsgref() != null)) {
                             /*
                              * ... and edit draft
@@ -3342,6 +3413,43 @@ public class Mail extends PermissionServlet implements UploadListener {
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().hasWebMail();
+    }
+
+    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from) throws MailException, OXException {
+        /*
+         * Resolve "From" to proper mail account to select right transport server
+         */
+        int accountId;
+        try {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+            accountId = storageService.getByPrimaryAddress(from.getAddress(), session.getUserId(), session.getContextId());
+        } catch (final MailAccountException e) {
+            throw new OXException(e);
+        } catch (final ServiceException e) {
+            throw new OXException(e);
+        }
+        if (accountId == -1) {
+            /*
+             * Check aliases
+             */
+            try {
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                final User user = session.getUser();
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new InternetAddress(alias));
+                }
+                if (!validAddrs.contains(from)) {
+                    throw new MailException(MailException.Code.INVALID_SENDER, from.toString());
+                }
+            } catch (final AddressException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
+            accountId = MailAccount.DEFAULT_ID;
+        }
+        return accountId;
     }
 
     private static class SmartLongArray implements Cloneable {

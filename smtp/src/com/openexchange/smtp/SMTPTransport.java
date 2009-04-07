@@ -78,7 +78,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -92,6 +91,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
@@ -115,6 +115,8 @@ public final class SMTPTransport extends MailTransport {
 
     private volatile javax.mail.Session smtpSession;
 
+    private final int accountId;
+
     private final Session session;
 
     private final Context ctx;
@@ -125,6 +127,7 @@ public final class SMTPTransport extends MailTransport {
 
     protected SMTPTransport() {
         super();
+        accountId = MailAccount.DEFAULT_ID;
         smtpSession = null;
         session = null;
         ctx = null;
@@ -143,9 +146,21 @@ public final class SMTPTransport extends MailTransport {
      * @throws MailException If initialization fails
      */
     public SMTPTransport(final Session session) throws MailException {
+        this(session, MailAccount.DEFAULT_ID);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param session The session
+     * @param accountId The account ID
+     * @throws MailException If initialization fails
+     */
+    public SMTPTransport(final Session session, final int accountId) throws MailException {
         super();
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
         this.session = session;
+        this.accountId = accountId;
         if (session == null) {
             /*
              * Dummy instance
@@ -238,7 +253,7 @@ public final class SMTPTransport extends MailTransport {
         if (smtpConfig == null) {
             synchronized (this) {
                 if (smtpConfig == null) {
-                    smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session);
+                    smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
                 }
             }
         }

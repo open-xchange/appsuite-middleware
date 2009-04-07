@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.extractHeader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,8 +81,6 @@ public final class MIMEMultipartMailPart extends MailPart {
     private static final int BUFSIZE = 8192; // 8K
 
     private static final int SIZE = 32768; // 32K
-
-    private static final String STR_US_ASCII = "US-ASCII";
 
     private static final String STR_CONTENT_TYPE = "Content-Type";
 
@@ -486,101 +485,6 @@ public final class MIMEMultipartMailPart extends MailPart {
     /*-
      * ################ STATIC HELPERS ################
      */
-
-    /**
-     * Gets the matching header out of header input stream.
-     * 
-     * @param headerName The header name
-     * @param inputStream The input stream
-     * @param closeStream <code>true</code> to close the stream on finish; otherwise <code>false</code>
-     * @return The value of first appeared matching header
-     * @throws IOException If reading input stream fails
-     */
-    private static String extractHeader(final String headerName, final InputStream inputStream, final boolean closeStream) throws IOException {
-        boolean close = closeStream;
-        try {
-            /*
-             * Gather bytes until empty line, EOF or matching header found
-             */
-            final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
-            int start = 0;
-            int i = -1;
-            boolean firstColonFound = false;
-            boolean found = false;
-            while ((i = inputStream.read()) != -1) {
-                int count = 0;
-                while ((i == '\r') || (i == '\n')) {
-                    if (!found) {
-                        buffer.write(i);
-                    }
-                    if ((i == '\n')) {
-                        if (found) {
-                            i = inputStream.read();
-                            if ((i != ' ') && (i != '\t')) {
-                                /*
-                                 * All read
-                                 */
-                                return new String(buffer.toByteArray(), STR_US_ASCII);
-
-                            }
-                            /*
-                             * Write previously ignored CRLF
-                             */
-                            buffer.write('\r');
-                            buffer.write('\n');
-                            /*
-                             * Continue collecting header value
-                             */
-                            buffer.write(i);
-                        }
-                        if (++count >= 2) {
-                            /*
-                             * End of headers
-                             */
-                            return null;
-                        }
-                        i = inputStream.read();
-                        if ((i != ' ') && (i != '\t')) {
-                            /*
-                             * No header continuation; start of a new header
-                             */
-                            start = buffer.size();
-                            firstColonFound = false;
-                        }
-                        buffer.write(i);
-                    }
-                    i = inputStream.read();
-                }
-                buffer.write(i);
-                if (!firstColonFound && (i == ':')) {
-                    /*
-                     * Found the first delimiting colon in header line
-                     */
-                    firstColonFound = true;
-                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), STR_US_ASCII).equalsIgnoreCase(headerName))) {
-                        /*
-                         * Matching header
-                         */
-                        buffer.reset();
-                        found = true;
-                    }
-                }
-            }
-            return null;
-        } catch (final IOException e) {
-            // Close on error
-            close = true;
-            throw e;
-        } finally {
-            if (close) {
-                try {
-                    inputStream.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        }
-    }
 
     /**
      * Copies given input stream into a newly created byte array.

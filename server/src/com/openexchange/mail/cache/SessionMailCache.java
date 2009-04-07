@@ -68,12 +68,14 @@ public final class SessionMailCache {
      * Gets the session-bound mail cache.
      * 
      * @param session The session whose mail cache shall be returned
+     * @param accountId The account ID
      * @return The session-bound mail cache.
      */
-    public static SessionMailCache getInstance(final Session session) {
+    public static SessionMailCache getInstance(final Session session, final int accountId) {
+        final String key = MailSessionParameterNames.getParamMailCache(accountId);
         SessionMailCache mailCache = null;
         try {
-            mailCache = (SessionMailCache) session.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+            mailCache = (SessionMailCache) session.getParameter(key);
         } catch (final ClassCastException e) {
             /*
              * Class version does not match; just renew session cache.
@@ -82,10 +84,10 @@ public final class SessionMailCache {
         }
         if (null == mailCache) {
             synchronized (session) {
-                mailCache = (SessionMailCache) session.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+                mailCache = (SessionMailCache) session.getParameter(key);
                 if (null == mailCache) {
                     mailCache = new SessionMailCache();
-                    session.setParameter(MailSessionParameterNames.PARAM_MAIL_CACHE, mailCache);
+                    session.setParameter(key, mailCache);
                 }
             }
         }

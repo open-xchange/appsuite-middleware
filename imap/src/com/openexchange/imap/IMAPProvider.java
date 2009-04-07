@@ -94,6 +94,11 @@ public final class IMAPProvider extends MailProvider {
     }
 
     @Override
+    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) {
+        return new IMAPAccess(session, accountId);
+    }
+
+    @Override
     public MailPermission createNewMailPermission() {
         return new ACLPermission();
     }

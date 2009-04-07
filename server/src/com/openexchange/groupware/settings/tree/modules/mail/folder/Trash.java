@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -62,6 +61,7 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -103,7 +103,7 @@ public class Trash implements PreferencesItemService {
                 MailServletInterface mail = null;
                 try {
                     mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getTrashFolder());
+                    setting.setSingleValue(mail.getTrashFolder(MailAccount.DEFAULT_ID));
                 } catch (final MailException e) {
                     throw new SettingException(e);
                 } finally {

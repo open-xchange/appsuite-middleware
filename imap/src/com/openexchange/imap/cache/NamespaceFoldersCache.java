@@ -50,12 +50,9 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-
 import java.util.Arrays;
-
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.mail.cache.SessionMailCache;
@@ -67,246 +64,204 @@ import com.sun.mail.imap.IMAPStore;
  * {@link NamespaceFoldersCache}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class NamespaceFoldersCache {
 
-	private static final Integer NS_PERSONAL = Integer.valueOf(1);
+    private static final Integer NS_PERSONAL = Integer.valueOf(1);
 
-	private static final Integer NS_USER = Integer.valueOf(2);
+    private static final Integer NS_USER = Integer.valueOf(2);
 
-	private static final Integer NS_SHARED = Integer.valueOf(3);
+    private static final Integer NS_SHARED = Integer.valueOf(3);
 
-	private static final String[] EMPTY_ARR = new String[0];
+    private static final String[] EMPTY_ARR = new String[0];
 
-	/**
-	 * No instance
-	 */
-	private NamespaceFoldersCache() {
-		super();
-	}
+    /**
+     * No instance
+     */
+    private NamespaceFoldersCache() {
+        super();
+    }
 
-	/**
-	 * Gets cached personal namespaces when invoking <code>NAMESPACE</code>
-	 * command on given IMAP store
-	 * 
-	 * @param imapStore
-	 *            The IMAP store on which <code>NAMESPACE</code> command is
-	 *            invoked
-	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return The <b>binary-sorted</b> personal namespace folders
-	 * @throws MessagingException
-	 *             If <code>NAMESPACE</code> command fails
-	 */
-	public static String[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
-			throws MessagingException {
-		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
-		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
-		mailCache.get(entry);
-		if (load && (null == entry.getValue())) {
-			final Folder[] pns = imapStore.getPersonalNamespaces();
-			if ((pns == null) || (pns.length == 0)) {
-				entry.setValue(EMPTY_ARR);
-			} else {
-				final String[] fullnames = new String[pns.length];
-				for (int i = 0; i < pns.length; i++) {
-					fullnames[i] = pns[i].getFullName();
-				}
-				Arrays.sort(fullnames);
-				entry.setValue(fullnames);
-			}
-			mailCache.put(entry);
-		}
-		return entry.getValue();
-	}
+    /**
+     * Gets cached personal namespaces when invoking <code>NAMESPACE</code> command on given IMAP store
+     * 
+     * @param imapStore The IMAP store on which <code>NAMESPACE</code> command is invoked
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return The <b>binary-sorted</b> personal namespace folders
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static String[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
+        mailCache.get(entry);
+        if (load && (null == entry.getValue())) {
+            final Folder[] pns = imapStore.getPersonalNamespaces();
+            if ((pns == null) || (pns.length == 0)) {
+                entry.setValue(EMPTY_ARR);
+            } else {
+                final String[] fullnames = new String[pns.length];
+                for (int i = 0; i < pns.length; i++) {
+                    fullnames[i] = pns[i].getFullName();
+                }
+                Arrays.sort(fullnames);
+                entry.setValue(fullnames);
+            }
+            mailCache.put(entry);
+        }
+        return entry.getValue();
+    }
 
-	/**
-	 * Checks if personal namespaces contain the specified fullname
-	 * 
-	 * @param fullname
-	 *            The fullname to check
-	 * @param imapStore
-	 *            The IMAP store
-	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return <code>true</code> if personal namespaces contain the specified
-	 *         fullname; otherwise <code>false</code>
-	 * @throws MessagingException
-	 *             If <code>NAMESPACE</code> command fails
-	 */
-	public static boolean containedInPersonalNamespaces(final String fullname, final IMAPStore imapStore,
-			final boolean load, final Session session) throws MessagingException {
-		return Arrays.binarySearch(getPersonalNamespaces(imapStore, load, session), fullname) >= 0;
-	}
+    /**
+     * Checks if personal namespaces contain the specified fullname
+     * 
+     * @param fullname The fullname to check
+     * @param imapStore The IMAP store
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return <code>true</code> if personal namespaces contain the specified fullname; otherwise <code>false</code>
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static boolean containedInPersonalNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        return Arrays.binarySearch(getPersonalNamespaces(imapStore, load, session, accountId), fullname) >= 0;
+    }
 
-	/**
-	 * Gets cached user namespaces when invoking <code>NAMESPACE</code> command
-	 * on given IMAP store
-	 * 
-	 * @param imapStore
-	 *            The IMAP store on which <code>NAMESPACE</code> command is
-	 *            invoked
-	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return The <b>binary-sorted</b> user namespace folders
-	 * @throws MessagingException
-	 *             If <code>NAMESPACE</code> command fails
-	 */
-	public static String[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
-			throws MessagingException {
-		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
-		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
-		mailCache.get(entry);
-		if (load && (null == entry.getValue())) {
-			final Folder[] uns = imapStore.getUserNamespaces(null);
-			if ((uns == null) || (uns.length == 0)) {
-				entry.setValue(EMPTY_ARR);
-			} else {
-				final String[] fullnames = new String[uns.length];
-				for (int i = 0; i < uns.length; i++) {
-					fullnames[i] = uns[i].getFullName();
-				}
-				Arrays.sort(fullnames);
-				entry.setValue(fullnames);
-			}
-			mailCache.put(entry);
-		}
-		return entry.getValue();
-	}
+    /**
+     * Gets cached user namespaces when invoking <code>NAMESPACE</code> command on given IMAP store
+     * 
+     * @param imapStore The IMAP store on which <code>NAMESPACE</code> command is invoked
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return The <b>binary-sorted</b> user namespace folders
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static String[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
+        mailCache.get(entry);
+        if (load && (null == entry.getValue())) {
+            final Folder[] uns = imapStore.getUserNamespaces(null);
+            if ((uns == null) || (uns.length == 0)) {
+                entry.setValue(EMPTY_ARR);
+            } else {
+                final String[] fullnames = new String[uns.length];
+                for (int i = 0; i < uns.length; i++) {
+                    fullnames[i] = uns[i].getFullName();
+                }
+                Arrays.sort(fullnames);
+                entry.setValue(fullnames);
+            }
+            mailCache.put(entry);
+        }
+        return entry.getValue();
+    }
 
-	/**
-	 * Checks if user namespaces contain the specified fullname
-	 * 
-	 * @param fullname
-	 *            The fullname to check
-	 * @param imapStore
-	 *            The IMAP store
-	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return <code>true</code> if user namespaces contain the specified
-	 *         fullname; otherwise <code>false</code>
-	 * @throws MessagingException
-	 *             If <code>NAMESPACE</code> command fails
-	 */
-	public static boolean containedInUserNamespaces(final String fullname, final IMAPStore imapStore,
-			final boolean load, final Session session) throws MessagingException {
-		return Arrays.binarySearch(getUserNamespaces(imapStore, load, session), fullname) >= 0;
-	}
+    /**
+     * Checks if user namespaces contain the specified fullname
+     * 
+     * @param fullname The fullname to check
+     * @param imapStore The IMAP store
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return <code>true</code> if user namespaces contain the specified fullname; otherwise <code>false</code>
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static boolean containedInUserNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        return Arrays.binarySearch(getUserNamespaces(imapStore, load, session, accountId), fullname) >= 0;
+    }
 
-	/**
-	 * Gets cached shared namespaces when invoking <code>NAMESPACE</code>
-	 * command on given IMAP store
-	 * 
-	 * @param imapStore
-	 *            The IMAP store on which <code>NAMESPACE</code> command is
-	 *            invoked
-	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return The <b>binary-sorted</b> shared namespace folders
-	 * @throws MessagingException
-	 *             If <code>NAMESPACE</code> command fails
-	 */
-	public static String[] getSharedNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
-			throws MessagingException {
-		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
-		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
-		mailCache.get(entry);
-		if (load && (null == entry.getValue())) {
-			final Folder[] sns = imapStore.getSharedNamespaces();
-			if ((sns == null) || (sns.length == 0)) {
-				entry.setValue(EMPTY_ARR);
-			} else {
-				final String[] fullnames = new String[sns.length];
-				for (int i = 0; i < sns.length; i++) {
-					fullnames[i] = sns[i].getFullName();
-				}
-				Arrays.sort(fullnames);
-				entry.setValue(fullnames);
-			}
-			mailCache.put(entry);
-		}
-		return entry.getValue();
-	}
+    /**
+     * Gets cached shared namespaces when invoking <code>NAMESPACE</code> command on given IMAP store
+     * 
+     * @param imapStore The IMAP store on which <code>NAMESPACE</code> command is invoked
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return The <b>binary-sorted</b> shared namespace folders
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static String[] getSharedNamespaces(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
+        mailCache.get(entry);
+        if (load && (null == entry.getValue())) {
+            final Folder[] sns = imapStore.getSharedNamespaces();
+            if ((sns == null) || (sns.length == 0)) {
+                entry.setValue(EMPTY_ARR);
+            } else {
+                final String[] fullnames = new String[sns.length];
+                for (int i = 0; i < sns.length; i++) {
+                    fullnames[i] = sns[i].getFullName();
+                }
+                Arrays.sort(fullnames);
+                entry.setValue(fullnames);
+            }
+            mailCache.put(entry);
+        }
+        return entry.getValue();
+    }
 
-	/**
-	 * Checks if shared namespaces contain the specified fullname
-	 * 
-	 * @param fullname
-	 *            The fullname to check
-	 * @param imapStore
-	 *            The IMAP store
-	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return <code>true</code> if shared namespaces contain the specified
-	 *         fullname; otherwise <code>false</code>
-	 * @throws MessagingException
-	 *             If <code>NAMESPACE</code> command fails
-	 */
-	public static boolean containedInSharedNamespaces(final String fullname, final IMAPStore imapStore,
-			final boolean load, final Session session) throws MessagingException {
-		return Arrays.binarySearch(getSharedNamespaces(imapStore, load, session), fullname) >= 0;
-	}
+    /**
+     * Checks if shared namespaces contain the specified fullname
+     * 
+     * @param fullname The fullname to check
+     * @param imapStore The IMAP store
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return <code>true</code> if shared namespaces contain the specified fullname; otherwise <code>false</code>
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static boolean containedInSharedNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        return Arrays.binarySearch(getSharedNamespaces(imapStore, load, session, accountId), fullname) >= 0;
+    }
 
-	private static final class NamespaceFoldersCacheEntry implements SessionMailCacheEntry<String[]> {
+    private static final class NamespaceFoldersCacheEntry implements SessionMailCacheEntry<String[]> {
 
-		private final Integer namespaceKey;
+        private final Integer namespaceKey;
 
-		private String[] fullnames;
+        private String[] fullnames;
 
-		private CacheKey key;
+        private CacheKey key;
 
-		public NamespaceFoldersCacheEntry(final Integer namespaceKey) {
-			this(namespaceKey, null);
-		}
+        public NamespaceFoldersCacheEntry(final Integer namespaceKey) {
+            this(namespaceKey, null);
+        }
 
-		public NamespaceFoldersCacheEntry(final Integer namespaceKey, final String[] fullnames) {
-			super();
-			this.namespaceKey = namespaceKey;
-			this.fullnames = fullnames;
-		}
+        public NamespaceFoldersCacheEntry(final Integer namespaceKey, final String[] fullnames) {
+            super();
+            this.namespaceKey = namespaceKey;
+            this.fullnames = fullnames;
+        }
 
-		private CacheKey getKeyInternal() {
-			if (null == key) {
-				key = getServiceRegistry().getService(CacheService.class).newCacheKey(
-						MailCacheCode.NAMESPACE_FOLDERS.getCode(), namespaceKey);
-			}
-			return key;
-		}
+        private CacheKey getKeyInternal() {
+            if (null == key) {
+                key = getServiceRegistry().getService(CacheService.class).newCacheKey(
+                    MailCacheCode.NAMESPACE_FOLDERS.getCode(),
+                    namespaceKey);
+            }
+            return key;
+        }
 
-		public CacheKey getKey() {
-			return getKeyInternal();
-		}
+        public CacheKey getKey() {
+            return getKeyInternal();
+        }
 
-		public String[] getValue() {
-			return fullnames;
-		}
+        public String[] getValue() {
+            return fullnames;
+        }
 
-		public void setValue(final String[] value) {
-			this.fullnames = value;
-		}
+        public void setValue(final String[] value) {
+            this.fullnames = value;
+        }
 
-		public Class<String[]> getEntryClass() {
-			return String[].class;
-		}
+        public Class<String[]> getEntryClass() {
+            return String[].class;
+        }
 
-	}
+    }
 }

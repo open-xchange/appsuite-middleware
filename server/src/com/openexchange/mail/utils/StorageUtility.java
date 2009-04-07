@@ -181,45 +181,70 @@ public final class StorageUtility {
      * @throws MailConfigException If spam enablement/disablement cannot be determined
      */
     public static String[] getDefaultFolderNames(final UserSettingMail usm, final boolean isSpamEnabled) throws MailConfigException {
+        return getDefaultFolderNames(
+            usm.getStdTrashName(),
+            usm.getStdSentName(),
+            usm.getStdDraftsName(),
+            usm.getStdSpamName(),
+            usm.getConfirmedSpam(),
+            usm.getConfirmedHam(),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
+     * @param trash The trash name
+     * @param sent The sent name
+     * @param drafts The drafts name
+     * @param spam The spam name
+     * @param confirmedSpam The confirmed-spam name
+     * @param confirmedHam The confirmed-ham name
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     * @throws MailConfigException If spam enablement/disablement cannot be determined
+     */
+    public static String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) throws MailConfigException {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
-        if ((usm.getStdDraftsName() == null) || (usm.getStdDraftsName().length() == 0)) {
+        if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_DRAFTS);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
             }
             names[INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
         } else {
-            names[INDEX_DRAFTS] = usm.getStdDraftsName();
+            names[INDEX_DRAFTS] = drafts;
         }
-        if ((usm.getStdSentName() == null) || (usm.getStdSentName().length() == 0)) {
+        if ((sent == null) || (sent.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_SENT);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
             }
             names[INDEX_SENT] = UserSettingMail.STD_SENT;
         } else {
-            names[INDEX_SENT] = usm.getStdSentName();
+            names[INDEX_SENT] = sent;
         }
-        if ((usm.getStdSpamName() == null) || (usm.getStdSpamName().length() == 0)) {
+        if ((spam == null) || (spam.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_SPAM);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
             }
             names[INDEX_SPAM] = UserSettingMail.STD_SPAM;
         } else {
-            names[INDEX_SPAM] = usm.getStdSpamName();
+            names[INDEX_SPAM] = spam;
         }
-        if ((usm.getStdTrashName() == null) || (usm.getStdTrashName().length() == 0)) {
+        if ((trash == null) || (trash.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_TRASH);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
             }
             names[INDEX_TRASH] = UserSettingMail.STD_TRASH;
         } else {
-            names[INDEX_TRASH] = usm.getStdTrashName();
+            names[INDEX_TRASH] = trash;
         }
         if (isSpamEnabled) {
-            if ((usm.getConfirmedSpam() == null) || (usm.getConfirmedSpam().length() == 0)) {
+            if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
                     final MailException e = new MailException(
                         MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
@@ -228,9 +253,9 @@ public final class StorageUtility {
                 }
                 names[INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
             } else {
-                names[INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
+                names[INDEX_CONFIRMED_SPAM] = confirmedSpam;
             }
-            if ((usm.getConfirmedHam() == null) || (usm.getConfirmedHam().length() == 0)) {
+            if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
                     final MailException e = new MailException(
                         MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
@@ -239,7 +264,7 @@ public final class StorageUtility {
                 }
                 names[INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
             } else {
-                names[INDEX_CONFIRMED_HAM] = usm.getConfirmedHam();
+                names[INDEX_CONFIRMED_HAM] = confirmedHam;
             }
         }
         return names;

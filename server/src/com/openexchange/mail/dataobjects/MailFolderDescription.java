@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailFolderDescription} - A simple object for updating or creating a folder which holds user-modifiable folder attributes.
@@ -86,9 +87,13 @@ public class MailFolderDescription {
 
     private String fullname;
 
+    private int accountId;
+
     private String name;
 
     private String parentFullname;
+
+    private int parentAccountId;
 
     private List<MailPermission> permissions;
 
@@ -101,6 +106,8 @@ public class MailFolderDescription {
      */
     public MailFolderDescription() {
         super();
+        parentAccountId = MailAccount.DEFAULT_ID;
+        accountId = MailAccount.DEFAULT_ID;
     }
 
     /**
@@ -232,6 +239,15 @@ public class MailFolderDescription {
     }
 
     /**
+     * Gets the account ID belonging to fullname.
+     * 
+     * @return The account ID belonging to fullname.
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
      * Gets the name
      * 
      * @return the name
@@ -247,6 +263,15 @@ public class MailFolderDescription {
      */
     public String getParentFullname() {
         return parentFullname;
+    }
+
+    /**
+     * Gets the account ID belonging to parent.
+     * 
+     * @return The account ID belonging to parent.
+     */
+    public int getParentAccountId() {
+        return parentAccountId;
     }
 
     /**
@@ -365,6 +390,15 @@ public class MailFolderDescription {
     }
 
     /**
+     * Sets the account ID belonging to fullname.
+     * 
+     * @param accountId The account ID
+     */
+    public void setAccountId(final int accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
      * Sets the name
      * 
      * @param name the name to set
@@ -382,6 +416,15 @@ public class MailFolderDescription {
     public void setParentFullname(final String parentFullname) {
         this.parentFullname = parentFullname;
         b_parentFullname = true;
+    }
+
+    /**
+     * Sets the account ID belonging to parent.
+     * 
+     * @param parentAccountId The account ID belonging to parent.
+     */
+    public void setParentAccountId(final int parentAccountId) {
+        this.parentAccountId = parentAccountId;
     }
 
     /**

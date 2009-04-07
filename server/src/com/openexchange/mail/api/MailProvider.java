@@ -193,12 +193,21 @@ public abstract class MailProvider {
     }
 
     /**
-     * Gets a newly created {@link MailAccess mail access}.
+     * Gets a newly created {@link MailAccess mail access} with default account ID.
      * 
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @return The newly created {@link MailAccess mail access}.
      */
     public abstract MailAccess<?, ?> createNewMailAccess(Session session);
+
+    /**
+     * Gets a newly created {@link MailAccess mail access}.
+     * 
+     * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
+     * @param accountId The account ID
+     * @return The newly created {@link MailAccess mail access}.
+     */
+    public abstract MailAccess<?, ?> createNewMailAccess(Session session, int accountId);
 
     /**
      * Gets the protocol properties

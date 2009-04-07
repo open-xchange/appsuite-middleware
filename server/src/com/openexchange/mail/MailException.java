@@ -320,7 +320,15 @@ public class MailException extends AbstractOXException {
         /**
          * Invalid Content-Disposition value: %1$s
          */
-        INVALID_CONTENT_DISPOSITION("Invalid Content-Disposition value: %1$s", Category.CODE_ERROR, 62);
+        INVALID_CONTENT_DISPOSITION("Invalid Content-Disposition value: %1$s", Category.CODE_ERROR, 62),
+        /**
+         * A folder named %1$s already exists
+         */
+        DUPLICATE_FOLDER("A folder named %1$s already exists", Category.PERMISSION, 63),
+        /**
+         * No create access on mail folder %1$s
+         */
+        NO_CREATE_ACCESS("No create access on mail folder %1$s", Category.PERMISSION, 64);
 
         private final String message;
 

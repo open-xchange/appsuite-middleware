@@ -90,6 +90,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -205,6 +206,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
              * Return mail's JSON object
              */
             final JSONObject mailObject = MessageWriter.writeMailMessage(
+                MailAccount.DEFAULT_ID,
                 MIMEMessageConverter.convertMessage(mimeMessage),
                 DisplayMode.MODIFYABLE,
                 session,
@@ -256,7 +258,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (ManagedFileException e) {
+        } catch (final ManagedFileException e) {
             throw new DataException(e);
         }
     }

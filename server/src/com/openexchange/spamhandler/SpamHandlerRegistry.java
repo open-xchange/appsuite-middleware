@@ -51,11 +51,11 @@ package com.openexchange.spamhandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -96,34 +96,37 @@ public final class SpamHandlerRegistry {
      * of {@link NoSpamHandler}.
      * 
      * @param session The session providing user data
+     * @param accountId The account ID
      * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
      * @throws MailException If existence of a spam handler cannot be checked
      */
-    public static boolean hasSpamHandler(final Session session) throws MailException {
-        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(getSpamHandlerBySession(session).getSpamHandlerName());
+    public static boolean hasSpamHandler(final Session session, final int accountId) throws MailException {
+        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(getSpamHandlerBySession(session, accountId).getSpamHandlerName());
     }
 
     /**
-     * Checks if a spam handler is present for the denoted user.
+     * Checks if a spam handler is present for the denoted mail account.
      * 
-     * @param user The user
+     * @param mailAccount The mail account
      * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
      */
-    public static boolean hasSpamHandler(final User user) {
-        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(user)).getSpamHandler().getSpamHandlerName());
+    public static boolean hasSpamHandler(final MailAccount mailAccount) {
+        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(mailAccount)).getSpamHandler().getSpamHandlerName());
     }
 
     /**
      * Gets the spam handler appropriate for specified session.
      * 
      * @param session The session
+     * @param accountId The account ID
      * @return The appropriate spam handler
      * @throws MailException If no supporting spam handler can be found
      */
-    public static SpamHandler getSpamHandlerBySession(final Session session) throws MailException {
+    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId) throws MailException {
+        final String key = MailSessionParameterNames.getParamSpamHandler(accountId);
         SpamHandler handler;
         try {
-            handler = (SpamHandler) session.getParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER);
+            handler = (SpamHandler) session.getParameter(key);
         } catch (final ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
@@ -133,11 +136,11 @@ public final class SpamHandlerRegistry {
         if (null != handler) {
             return handler;
         }
-        handler = MailProviderRegistry.getMailProviderBySession(session).getSpamHandler();
+        handler = MailProviderRegistry.getMailProviderBySession(session, accountId).getSpamHandler();
         if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
             return handler;
         }
-        session.setParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER, handler);
+        session.setParameter(key, handler);
         return handler;
     }
 

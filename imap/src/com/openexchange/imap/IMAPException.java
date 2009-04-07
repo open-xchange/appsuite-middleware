@@ -114,7 +114,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * No create access on IMAP-Folder %1$s
          */
-        NO_CREATE_ACCESS("No create access to mail folder %1$s", Category.PERMISSION, 2008),
+        NO_CREATE_ACCESS(MailException.Code.NO_CREATE_ACCESS),
         /**
          * No administer access on IMAP-Folder %1$s
          */
@@ -138,7 +138,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * A folder named %1$s already exists
          */
-        DUPLICATE_FOLDER("A folder named %1$s already exists", Category.PERMISSION, 2014),
+        DUPLICATE_FOLDER(MailException.Code.DUPLICATE_FOLDER),
         /**
          * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
          * name)

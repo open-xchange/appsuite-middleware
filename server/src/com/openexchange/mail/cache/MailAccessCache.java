@@ -61,9 +61,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.ElementEventHandler;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.eventhandler.MailAccessEventHandler;
@@ -129,6 +126,7 @@ public final class MailAccessCache {
      * Singleton instance is created following the thread-safe lazy-initialization pattern:
      * 
      * <pre>
+     * 
      * 
      * // Works with acquire/release semantics for volatile
      * class Foo {
@@ -217,19 +215,15 @@ public final class MailAccessCache {
      * Removes and returns a mail access from cache
      * 
      * @param session The session
+     * @param accountId The account ID
      * @return An active instance of {@link MailAccess} or <code>null</code>
      * @throws CacheException If removing from cache fails
      */
-    public MailAccess<?, ?> removeMailAccess(final Session session) throws CacheException {
+    public MailAccess<?, ?> removeMailAccess(final Session session, final int accountId) throws CacheException {
         if (null == cache) {
             return null;
         }
-        final CacheKey key;
-        try {
-            key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e1) {
-            throw new CacheException(e1);
-        }
+        final CacheKey key = getUserKey(session.getUserId(), accountId, session.getContextId());
         final Lock readLock = getLock(key).readLock();
         readLock.lock();
         try {
@@ -274,20 +268,16 @@ public final class MailAccessCache {
      * Puts given mail access into cache if none user-bound connection is already contained in cache
      * 
      * @param session The session
+     * @param accountId The account ID
      * @param mailAccess The mail access to put into cache
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      * @throws CacheException If put into cache fails
      */
-    public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailAccess) throws CacheException {
+    public boolean putMailAccess(final Session session, final int accountId, final MailAccess<?, ?> mailAccess) throws CacheException {
         if (null == cache) {
             return false;
         }
-        final CacheKey key;
-        try {
-            key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e1) {
-            throw new CacheException(e1);
-        }
+        final CacheKey key = getUserKey(session.getUserId(), accountId, session.getContextId());
         final Lock readLock = getLock(key).readLock();
         readLock.lock();
         try {
@@ -328,22 +318,18 @@ public final class MailAccessCache {
     }
 
     /**
-     * Checks if cache already holds a user-bound mail access
+     * Checks if cache already holds a user-bound mail access for specified account.
      * 
      * @param session The session
+     * @param accountId The account ID
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      * @throws CacheException If context loading fails
      */
-    public boolean containsMailAccess(final Session session) throws CacheException {
+    public boolean containsMailAccess(final Session session, final int accountId) throws CacheException {
         if (null == cache) {
             return false;
         }
-        final CacheKey key;
-        try {
-            key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e) {
-            throw new CacheException(e);
-        }
+        final CacheKey key = getUserKey(session.getUserId(), accountId, session.getContextId());
         final Lock readLock = getLock(key).readLock();
         readLock.lock();
         try {
@@ -353,7 +339,7 @@ public final class MailAccessCache {
         }
     }
 
-    private CacheKey getUserKey(final int user, final Context ctx) {
-        return cache.newCacheKey(ctx.getContextId(), user);
+    private CacheKey getUserKey(final int user, final int accountId, final int cid) {
+        return cache.newCacheKey(cid, user ^ accountId);
     }
 }

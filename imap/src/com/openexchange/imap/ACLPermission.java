@@ -315,7 +315,12 @@ public final class ACLPermission extends MailPermission {
     public Object clone() {
         try {
             final ACLPermission clone = (ACLPermission) super.clone();
-            clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
+            //if (null == acl) {
+            //    clone.acl = null;
+            //} else {
+            //    clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
+            //}
+            clone.acl = null;
             return clone;
         } catch (final CloneNotSupportedException e) {
             LOG.error(e.getMessage(), e);

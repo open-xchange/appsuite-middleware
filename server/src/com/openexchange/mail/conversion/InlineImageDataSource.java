@@ -57,6 +57,7 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -92,10 +93,10 @@ public final class InlineImageDataSource implements DataSource {
         super();
     }
 
-    private MailPart getImagePart(final String fullname, final long mailId, final String cid, final Session session) throws DataException {
+    private MailPart getImagePart(final int accountId, final String fullname, final long mailId, final String cid, final Session session) throws DataException {
         final MailAccess<?, ?> mailAccess;
         try {
-            mailAccess = MailAccess.getInstance(session);
+            mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
         } catch (final MailException e) {
             throw new DataException(e);
@@ -133,7 +134,8 @@ public final class InlineImageDataSource implements DataSource {
         }
         final MailPart mailPart;
         {
-            final String fullname = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final String fullname = arg.getFullname();
             final long mailId;
             try {
                 mailId = Long.parseLong(dataArguments.get(ARGS[1]));
@@ -141,7 +143,7 @@ public final class InlineImageDataSource implements DataSource {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
             }
             final String cid = dataArguments.get(ARGS[2]);
-            mailPart = getImagePart(fullname, mailId, cid, session);
+            mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
             final ContentType contentType = mailPart.getContentType();
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");

@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.utils;
 
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailFolderUtility} - Provides utility methods for mail folders.
@@ -67,7 +69,11 @@ public final class MailFolderUtility {
         super();
     }
 
+    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
+
     /**
+     * Parses specified fullname argument to an appropriate instance of {@link FullnameArgument}.
+     * <p>
      * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder fullname argument only if
      * fullname argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
      * Example:
@@ -76,21 +82,52 @@ public final class MailFolderUtility {
      * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
      * </pre>
      * 
-     * @param folderStringArg The groupware's mail folder fullname
+     * @param fullnameArgument The groupware's mail folder fullname
      * @return The stripped mail folder fullname argument
      */
-    public static String prepareMailFolderParam(final String folderStringArg) {
-        if (folderStringArg == null) {
+    public static FullnameArgument prepareMailFolderParam(final String fullnameArgument) {
+        if (fullnameArgument == null) {
             return null;
-        } else if (MailFolder.DEFAULT_FOLDER_ID.equals(folderStringArg)) {
-            return folderStringArg;
-        } else if (folderStringArg.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-            /*
-             * Cut off prefix "default" plus separator character
-             */
-            return folderStringArg.substring(8);
         }
-        return folderStringArg;
+        if (!fullnameArgument.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return new FullnameArgument(fullnameArgument);
+        }
+        final int len = fullnameArgument.length();
+        final char separator = MailProperties.getInstance().getDefaultSeparator();
+        int index = LEN;
+        while (index < len && fullnameArgument.charAt(index) != separator) {
+            index++;
+        }
+        // Parse account ID
+        final int accountId;
+        try {
+            accountId = (index == LEN ? MailAccount.DEFAULT_ID : Integer.parseInt(fullnameArgument.substring(LEN, index)));
+        } catch (final NumberFormatException e) {
+            final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + fullnameArgument);
+            err.initCause(e);
+            throw err;
+        }
+        if (index >= len) {
+            return new FullnameArgument(accountId, MailFolder.DEFAULT_FOLDER_ID);
+        }
+        return new FullnameArgument(accountId, fullnameArgument.substring(index + 1));
+    }
+
+    /**
+     * Checks if specified fullname argument's real fullname equals given fullname.
+     * 
+     * @param fullnameArgument The fullname argument
+     * @param fullname The fullname to compare with
+     * @return <code>true</code> if specified fullname argument's real fullname equals given fullname; otherwise <code>false</code>
+     */
+    public static boolean equalsFullname(final String fullnameArgument, final String fullname) {
+        if (fullnameArgument == null) {
+            if (fullname == null) {
+                return true;
+            }
+            return false;
+        }
+        return prepareMailFolderParam(fullnameArgument).getFullname().equals(fullname);
     }
 
     /**
@@ -102,19 +139,22 @@ public final class MailFolderUtility {
      * &quot;INBOX&quot; -&gt; &quot;default/INBOX&quot;
      * </pre>
      * 
+     * @param accountId The account ID
      * @param fullname The folder fullname
      * @return The groupware's mail folder fullname
      */
-    public static String prepareFullname(final String fullname) {
+    public static String prepareFullname(final int accountId, final String fullname) {
         if (fullname == null) {
             return null;
         }
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (fullname.length() == 0)) {
-            return fullname;
-        } else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return new StringBuilder(fullname.length() + 4).append(fullname).append(accountId).toString();
+        }
+        if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return fullname;
         }
-        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
+        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
+            MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
     }
 
     /**

@@ -74,6 +74,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -162,7 +163,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      */
     private void handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException, IOException {
         final long size = referencedPart.getSize();
-        if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
+        if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
             if (isMail) {
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
                 referencedPart.writeTo(out);
@@ -188,7 +189,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
-                    Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
+                    Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
                     "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
             }
         }

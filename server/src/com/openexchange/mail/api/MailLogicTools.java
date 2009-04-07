@@ -64,18 +64,25 @@ import com.openexchange.session.Session;
 public class MailLogicTools {
 
     /**
-     * The session providing user data
+     * The session providing user data.
      */
     protected final Session session;
+
+    /**
+     * The account ID.
+     */
+    protected final int accountId;
 
     /**
      * Initializes a new {@link MailLogicTools}
      * 
      * @param session The session providing user data
+     * @param accountId The account ID
      */
-    public MailLogicTools(final Session session) {
+    public MailLogicTools(final Session session, final int accountId) {
         super();
         this.session = session;
+        this.accountId = accountId;
     }
 
     /**
@@ -91,7 +98,7 @@ public class MailLogicTools {
      * @throws MailException If reply message cannot be generated
      */
     public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
-        return MimeReply.getReplyMail(originalMail, replyAll, session);
+        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId);
     }
 
     /**
@@ -108,7 +115,7 @@ public class MailLogicTools {
      * @throws MailException If reply message cannot be generated
      */
     public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws MailException {
-        return MimeReply.getReplyMail(originalMail, replyAll, session, usm);
+        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm);
     }
 
     /**

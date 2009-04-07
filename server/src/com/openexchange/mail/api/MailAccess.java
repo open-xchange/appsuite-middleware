@@ -66,6 +66,7 @@ import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -91,7 +92,13 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 
     private static final transient Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
 
+    /*-
+     * ############### MEMBERS ###############
+     */
+
     protected final transient Session session;
+
+    protected final int accountId;
 
     private transient MailConfig mailConfig;
 
@@ -102,11 +109,24 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     private StackTraceElement[] trace;
 
     /**
-     * Friendly instantiation.
+     * Initializes a new {@link MailAccess} for session user's default mail account.
+     * 
+     * @param session The session
      */
     protected MailAccess(final Session session) {
+        this(session, MailAccount.DEFAULT_ID);
+    }
+
+    /**
+     * Initializes a new {@link MailAccess}.
+     * 
+     * @param session The session
+     * @param accountId The account ID
+     */
+    protected MailAccess(final Session session, final int accountId) {
         super();
         this.session = session;
+        this.accountId = accountId;
     }
 
     /**
@@ -139,13 +159,37 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Gets the proper instance of {@link MailAccess} parameterized with given session.
+     * Gets the proper instance of {@link MailAccess} for session user's default mail account.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
      * 
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session);
+     * mailAccess.connect();
+     * try {
+     *  // Do something
+     * } finally {
+     *  mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @param session The session
+     * @return A proper instance of {@link MailAccess}
+     * @throws MailException If instantiation fails or a caching error occurs
+     */
+    public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
+        return getInstance(session, MailAccount.DEFAULT_ID);
+    }
+
+    /**
+     * Gets the proper instance of {@link MailAccess} parameterized with given session and account ID.
+     * <p>
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
+     * On finished work the final {@link #close(boolean)} must be called:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
      * mailAccess.connect();
      * try {
      * 	// Do something
@@ -155,10 +199,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * </pre>
      * 
      * @param session The session
+     * @param accountId The account ID
      * @return A proper instance of {@link MailAccess}
      * @throws MailException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
+    public static final MailAccess<?, ?> getInstance(final Session session, final int accountId) throws MailException {
         /*
          * Check for proper initialization
          */
@@ -166,8 +211,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
             throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
         }
         try {
-            if (MailAccessCache.getInstance().containsMailAccess(session)) {
-                final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
+            if (MailAccessCache.getInstance().containsMailAccess(session, accountId)) {
+                final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
                 if (mailAccess != null) {
                     return mailAccess;
                 }
@@ -181,7 +226,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         /*
          * No cached connection available, check for admin login
          */
-        checkAdminLogin(session);
+        checkAdminLogin(session, accountId);
         /*
          * Check if a new connection may be established
          */
@@ -200,8 +245,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
                 /*
                  * Try to fetch from cache again
                  */
-                if (MailAccessCache.getInstance().containsMailAccess(session)) {
-                    final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
+                if (MailAccessCache.getInstance().containsMailAccess(session, accountId)) {
+                    final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
                     if (mailAccess != null) {
                         return mailAccess;
                     }
@@ -221,7 +266,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         /*
          * Create a new mail access through user's mail provider
          */
-        return MailProviderRegistry.getMailProviderBySession(session).createNewMailAccess(session);
+        return MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
     /**
@@ -350,7 +395,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
                 /*
                  * Cache connection if desired/possible anymore
                  */
-                if (put && MailAccessCache.getInstance().putMailAccess(session, this)) {
+                if (put && MailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
                     /*
                      * Successfully cached: signal & return
                      */
@@ -418,6 +463,15 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
+     * Gets this mail access' account ID.
+     * 
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
      * Creates a new user-specific mail configuration.
      * 
      * @return A new user-specific mail configuration
@@ -425,7 +479,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      */
     private final MailConfig createMailConfig() throws MailException {
         final MailConfig instance = createNewMailConfig();
-        return MailConfig.getConfig(instance.getClass(), instance, session);
+        return MailConfig.getConfig(instance.getClass(), instance, session, accountId);
     }
 
     /**
@@ -460,16 +514,17 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not.
      * 
      * @param session The session
+     * @param accountId The account ID
      * @throws MailException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
      */
-    private static final void checkAdminLogin(final Session session) throws MailException {
+    private static final void checkAdminLogin(final Session session, final int accountId) throws MailException {
         if (!MailProperties.getInstance().isAdminMailLoginEnabled()) {
             /*
              * Admin mail login is not permitted per configuration
              */
             Context ctx;
             try {
-                ctx = (Context) session.getParameter(MailSessionParameterNames.PARAM_CONTEXT);
+                ctx = (Context) session.getParameter(MailSessionParameterNames.getParamSessionContext(accountId));
             } catch (final ClassCastException e1) {
                 ctx = null;
             }

@@ -63,6 +63,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailProvider;
@@ -92,15 +93,18 @@ public final class FolderParser {
      * @param jsonObj The JSON object (source)
      * @param mailFolder The mail folder (target), which should be empty
      * @param session The session
+     * @param accountId The account ID
      * @throws MailException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session) throws MailException {
+    public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session, final int accountId) throws MailException {
         try {
             if (jsonObj.has(FolderFields.TITLE)) {
                 mailFolder.setName(jsonObj.getString(FolderFields.TITLE));
             }
             if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
-                mailFolder.setParentFullname(prepareMailFolderParam(jsonObj.getString(FolderChildFields.FOLDER_ID)));
+                final FullnameArgument arg = prepareMailFolderParam(jsonObj.getString(FolderChildFields.FOLDER_ID));
+                mailFolder.setParentFullname(arg.getFullname());
+                mailFolder.setParentAccountId(arg.getAccountId());
             }
             if (jsonObj.has(FolderFields.MODULE) && !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(AJAXServlet.MODULE_MAIL)) {
 
@@ -115,7 +119,7 @@ public final class FolderParser {
                 if (len > 0) {
                     final List<MailPermission> mailPerms = new ArrayList<MailPermission>(len);
                     final UserStorage us = UserStorage.getInstance();
-                    final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session);
+                    final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                     for (int i = 0; i < len; i++) {
                         final JSONObject elem = jsonArr.getJSONObject(i);
                         if (!elem.has(FolderFields.ENTITY)) {

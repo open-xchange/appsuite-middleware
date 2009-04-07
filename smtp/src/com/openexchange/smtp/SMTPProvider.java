@@ -110,6 +110,11 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
+    public MailTransport createNewMailTransport(final Session session, final int accountId) throws MailException {
+        return new SMTPTransport(session, accountId);
+    }
+
+    @Override
     public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws MailException {
         return new SMTPMailMessage(session, ctx);
     }

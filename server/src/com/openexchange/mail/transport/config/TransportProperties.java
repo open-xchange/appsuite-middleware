@@ -160,7 +160,7 @@ public final class TransportProperties {
      * 
      * @return the referencedPartLimit
      */
-    int getReferencedPartLimit() {
+    public int getReferencedPartLimit() {
         return referencedPartLimit;
     }
 
@@ -169,7 +169,7 @@ public final class TransportProperties {
      * 
      * @return The default transport provider
      */
-    String getDefaultTransportProvider() {
+    public String getDefaultTransportProvider() {
         return defaultTransportProvider;
     }
 }

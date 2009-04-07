@@ -104,6 +104,9 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionFactory;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
@@ -155,7 +158,8 @@ public final class ServerActivator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class, EventAdmin.class };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class, Timer.class };
+        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
+        Timer.class };
 
     private final List<ServiceRegistration> registrationList;
 
@@ -371,6 +375,11 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
+        // TODO: Register server's mail account storage here until its encapsulated in an own bundle
+        registrationList.add(context.registerService(
+            MailAccountStorageService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class),
+            null));
         /*
          * Register data sources
          */
@@ -421,6 +430,11 @@ public final class ServerActivator extends DeferredActivator {
             ManagedFileException.MANAGED_FILE_COMPONENT.getAbbreviation(),
             "com.openexchange.filemanagement",
             ManagedFileExceptionFactory.getInstance()));
+        componentRegistrationList.add(new ComponentRegistration(
+            context,
+            MailAccountException.MAIL_ACCOUNT_COMPONENT.getAbbreviation(),
+            "com.openexchange.mailaccount",
+            MailAccountExceptionFactory.getInstance()));
     }
 
     @Override

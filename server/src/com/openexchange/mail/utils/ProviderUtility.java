@@ -61,14 +61,14 @@ import com.openexchange.mail.api.MailConfig;
 public final class ProviderUtility {
 
     /**
-     * Initializes a new {@link ProviderUtility}
+     * Initializes a new {@link ProviderUtility}.
      */
     private ProviderUtility() {
         super();
     }
 
     /**
-     * Turns given server URL to an instance of {@link InetSocketAddress}
+     * Turns given server URL to an instance of {@link InetSocketAddress}.
      * 
      * @param serverUrl The server URL
      * @param defaultPort The default port to use if server URL does not specify a port

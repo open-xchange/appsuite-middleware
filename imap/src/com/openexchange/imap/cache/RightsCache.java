@@ -50,9 +50,7 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-
 import javax.mail.MessagingException;
-
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.mail.cache.SessionMailCache;
@@ -65,96 +63,88 @@ import com.sun.mail.imap.Rights;
  * {@link RightsCache}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class RightsCache {
 
-	/**
-	 * No instance
-	 */
-	private RightsCache() {
-		super();
-	}
+    /**
+     * No instance
+     */
+    private RightsCache() {
+        super();
+    }
 
-	/**
-	 * Gets cached <code>MYRIGHTS</code> command invoked on given IMAP folder
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @param load
-	 *            Whether <code>MYRIGHTS</code> command should be invoked if no
-	 *            cache entry present or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return The cached rights or <code>null</code>
-	 * @throws MessagingException
-	 *             If <code>MYRIGHTS</code> command fails
-	 */
-	public static Rights getCachedRights(final IMAPFolder f, final boolean load, final Session session)
-			throws MessagingException {
-		final RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
-		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
-		mailCache.get(entry);
-		if (load && (null == entry.getValue())) {
-			entry.setValue(f.myRights());
-			mailCache.put(entry);
-		}
-		return entry.getValue();
-	}
+    /**
+     * Gets cached <code>MYRIGHTS</code> command invoked on given IMAP folder
+     * 
+     * @param f The IMAP folder
+     * @param load Whether <code>MYRIGHTS</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accontId The account ID
+     * @return The cached rights or <code>null</code>
+     * @throws MessagingException If <code>MYRIGHTS</code> command fails
+     */
+    public static Rights getCachedRights(final IMAPFolder f, final boolean load, final Session session, final int accontId) throws MessagingException {
+        final RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
+        mailCache.get(entry);
+        if (load && (null == entry.getValue())) {
+            entry.setValue(f.myRights());
+            mailCache.put(entry);
+        }
+        return entry.getValue();
+    }
 
-	/**
-	 * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @param session
-	 *            The session providing the session-bound cache
-	 */
-	public static void removeCachedRights(final IMAPFolder f, final Session session) {
-		SessionMailCache.getInstance(session).remove(new RightsCacheEntry(f.getFullName()));
-	}
+    /**
+     * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
+     * 
+     * @param f The IMAP folder
+     * @param session The session providing the session-bound cache
+     * @param accontId The account ID
+     */
+    public static void removeCachedRights(final IMAPFolder f, final Session session, final int accontId) {
+        SessionMailCache.getInstance(session, accontId).remove(new RightsCacheEntry(f.getFullName()));
+    }
 
-	private static final class RightsCacheEntry implements SessionMailCacheEntry<Rights> {
+    private static final class RightsCacheEntry implements SessionMailCacheEntry<Rights> {
 
-		private final String fullname;
+        private final String fullname;
 
-		private Rights rights;
+        private Rights rights;
 
-		private CacheKey key;
+        private CacheKey key;
 
-		public RightsCacheEntry(final String fullname) {
-			this(fullname, null);
-		}
+        public RightsCacheEntry(final String fullname) {
+            this(fullname, null);
+        }
 
-		public RightsCacheEntry(final String fullname, final Rights rights) {
-			super();
-			this.fullname = fullname;
-			this.rights = rights;
-		}
+        public RightsCacheEntry(final String fullname, final Rights rights) {
+            super();
+            this.fullname = fullname;
+            this.rights = rights;
+        }
 
-		private CacheKey getKeyInternal() {
-			if (null == key) {
-				key = getServiceRegistry().getService(CacheService.class).newCacheKey(MailCacheCode.RIGHTS.getCode(),
-						fullname);
-			}
-			return key;
-		}
+        private CacheKey getKeyInternal() {
+            if (null == key) {
+                key = getServiceRegistry().getService(CacheService.class).newCacheKey(MailCacheCode.RIGHTS.getCode(), fullname);
+            }
+            return key;
+        }
 
-		public CacheKey getKey() {
-			return getKeyInternal();
-		}
+        public CacheKey getKey() {
+            return getKeyInternal();
+        }
 
-		public Rights getValue() {
-			return rights;
-		}
+        public Rights getValue() {
+            return rights;
+        }
 
-		public void setValue(final Rights value) {
-			this.rights = value;
-		}
+        public void setValue(final Rights value) {
+            this.rights = value;
+        }
 
-		public Class<Rights> getEntryClass() {
-			return Rights.class;
-		}
-	}
+        public Class<Rights> getEntryClass() {
+            return Rights.class;
+        }
+    }
 
 }

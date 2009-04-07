@@ -74,6 +74,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -301,7 +302,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private void handleInputStream(final InputStream inputStream, final long size) throws MailException {
         try {
-            if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
+            if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
                 copy2ByteArr(inputStream);
                 return;
             }
@@ -311,7 +312,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Data mail part exeeds ").append(
-                Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
+                Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
                 "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
         }
     }

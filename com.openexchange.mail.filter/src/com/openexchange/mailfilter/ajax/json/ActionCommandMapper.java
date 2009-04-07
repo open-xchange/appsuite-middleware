@@ -187,7 +187,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
             throw new JSONException("The parameter " + parameter + " is missing for action command " + 
                     command.getCommandname() + ".");
         }
-        return new ActionCommand(command, createArrayArray(MailFolderUtility.prepareMailFolderParam(stringparam)));
+        return new ActionCommand(command, createArrayArray(MailFolderUtility.prepareMailFolderParam(stringparam).getFullname()));
     }
 
     private ArrayList<Object> createArrayArray(final String string) {
@@ -260,7 +260,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
 
     private void createFileintoJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
-        tmp.put(field, MailFolderUtility.prepareFullname(((List<String>)arguments.get(0)).get(0)));
+        tmp.put(field, MailFolderUtility.prepareFullname(0, ((List<String>)arguments.get(0)).get(0)));
     }
 
     private String getString(final JSONObject jobj, final String value, final String component) throws OXJSONException {

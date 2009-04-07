@@ -55,6 +55,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.DataFields;
@@ -75,7 +76,7 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
- * {@link FolderWriter} - Writes {@link MailFolder} instances as JSON strings
+ * {@link FolderWriter} - Writes {@link MailFolder} instances as JSON strings.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -85,15 +86,15 @@ public final class FolderWriter {
 
     public static abstract class MailFolderFieldWriter {
 
-        public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey) throws MailException {
-            writeField(jsonContainer, folder, withKey, null, -1);
+        public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey) throws MailException {
+            writeField(jsonContainer, accountId, folder, withKey, null, -1);
         }
 
-        public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders) throws MailException {
-            writeField(jsonContainer, folder, withKey, name, hasSubfolders, null, -1, false);
+        public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders) throws MailException {
+            writeField(jsonContainer, accountId, folder, withKey, name, hasSubfolders, null, -1, false);
         }
 
-        public abstract void writeField(Object jsonContainer, MailFolder folder, boolean withKey, String name, int hasSubfolders, String fullName, int module, boolean all) throws MailException;
+        public abstract void writeField(JSONValue jsonContainer, int accountId, MailFolder folder, boolean withKey, String name, int hasSubfolders, String fullName, int module, boolean all) throws MailException;
     }
 
     private static abstract class ExtendedMailFolderFieldWriter extends MailFolderFieldWriter {
@@ -116,12 +117,14 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.OBJECT_ID), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.ID, prepareFullname(fullName == null ? folder.getFullname() : fullName));
+                        ((JSONObject) jsonContainer).put(DataFields.ID, prepareFullname(
+                            accountId,
+                            fullName == null ? folder.getFullname() : fullName));
                     } else {
-                        ((JSONArray) jsonContainer).put(prepareFullname(fullName == null ? folder.getFullname() : fullName));
+                        ((JSONArray) jsonContainer).put(prepareFullname(accountId, fullName == null ? folder.getFullname() : fullName));
                     }
                 } catch (final JSONException e) {
                     throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
@@ -131,7 +134,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.CREATED_BY), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(DataFields.CREATED_BY, -1);
@@ -146,7 +149,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.MODIFIED_BY), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(DataFields.MODIFIED_BY, -1);
@@ -161,7 +164,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.CREATION_DATE), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(DataFields.CREATION_DATE, 0);
@@ -176,7 +179,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.LAST_MODIFIED), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(DataFields.LAST_MODIFIED, 0);
@@ -191,13 +194,13 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderChildObject.FOLDER_ID), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final Object parent;
                     if (null == folder.getParentFullname()) {
                         parent = JSONObject.NULL;
                     } else {
-                        parent = prepareFullname(folder.getParentFullname());
+                        parent = prepareFullname(accountId, folder.getParentFullname());
                     }
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, parent);
@@ -212,7 +215,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderFields.TITLE, name == null ? folder.getName() : name);
@@ -227,7 +230,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderFields.MODULE, AJAXServlet.getModuleString(
@@ -244,7 +247,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.TYPE), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderFields.TYPE, FolderObject.MAIL);
@@ -259,7 +262,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBFOLDERS), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final boolean boolVal;
                     if (hasSubfolders == -1) {
@@ -283,7 +286,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.OWN_RIGHTS), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final MailPermission mp;
                     if (folder.isRootFolder()) {
@@ -332,7 +335,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.PERMISSIONS_BITS), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final JSONArray ja = new JSONArray();
                     final OCLPermission[] perms = folder.getPermissions();
@@ -361,7 +364,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     /*
                      * Put value
@@ -381,7 +384,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     /*
                      * Put value
@@ -401,7 +404,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     /*
                      * Put value
@@ -419,7 +422,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     /*
                      * Put value
@@ -437,7 +440,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     /*
                      * Put value
@@ -455,7 +458,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     /*
                      * Put value
@@ -473,7 +476,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final Object boolVal;
                     if (MailProperties.getInstance().isIgnoreSubscription()) {
@@ -497,7 +500,7 @@ public final class FolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     final Object boolVal;
                     if (MailProperties.getInstance().isIgnoreSubscription()) {
@@ -538,11 +541,11 @@ public final class FolderWriter {
      * @return The written JSON object
      * @throws MailException
      */
-    public static JSONObject writeMailFolder(final MailFolder folder, final MailConfig mailConfig) throws MailException {
+    public static JSONObject writeMailFolder(final int accountId, final MailFolder folder, final MailConfig mailConfig) throws MailException {
         final JSONObject jsonObject = new JSONObject();
         final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS, mailConfig);
         for (final MailFolderFieldWriter writer : writers) {
-            writer.writeField(jsonObject, folder, true);
+            writer.writeField(jsonObject, accountId, folder, true);
         }
         return jsonObject;
     }
@@ -567,7 +570,7 @@ public final class FolderWriter {
                     retval[i] = new ExtendedMailFolderFieldWriter(mailConfig) {
 
                         @Override
-                        public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+                        public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                             try {
                                 /*
                                  * Put value
@@ -589,7 +592,7 @@ public final class FolderWriter {
                     retval[i] = new MailFolderFieldWriter() {
 
                         @Override
-                        public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+                        public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                             try {
                                 if (withKey) {
                                     ((JSONObject) jsonContainer).put(STR_UNKNOWN_COLUMN, JSONObject.NULL);

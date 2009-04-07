@@ -56,8 +56,8 @@ import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -85,7 +85,8 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         }
         final MailPart mailPart;
         {
-            final String fullname = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final String fullname = arg.getFullname();
             final long mailId;
             try {
                 mailId = Long.parseLong(dataArguments.get(ARGS[1]));
@@ -93,7 +94,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
             }
             final String sequenceId = dataArguments.get(ARGS[2]);
-            mailPart = getMailPart(fullname, mailId, sequenceId, session);
+            mailPart = getMailPart(arg.getAccountId(), fullname, mailId, sequenceId, session);
             final ContentType contentType = mailPart.getContentType();
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");

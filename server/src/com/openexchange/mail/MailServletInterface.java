@@ -61,6 +61,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
+
 /**
  * {@link MailServletInterface} - The mail interface which invokes the mail layer methods.
  * <p>
@@ -274,11 +275,6 @@ public abstract class MailServletInterface {
     public abstract void updateMessageFlags(String folder, long[] msgUID, int flagBits, boolean flagVal) throws MailException;
 
     /**
-     * Checks if user-defines default folder exist
-     */
-    public abstract void checkDefaultFolders(String[] defaultFolderNames) throws MailException;
-
-    /**
      * Returns an instance of <code>SearchIterator</code> containing the mailbox's default folder
      */
     public abstract SearchIterator<?> getRootFolders() throws MailException;
@@ -318,40 +314,47 @@ public abstract class MailServletInterface {
     /**
      * Returns user-defined inbox folder
      */
-    public abstract String getInboxFolder() throws MailException;
+    public abstract String getInboxFolder(int accountId) throws MailException;
 
     /**
      * Returns user-defined drafts folder
      */
-    public abstract String getDraftsFolder() throws MailException;
+    public abstract String getDraftsFolder(int accountId) throws MailException;
 
     /**
      * Returns user-defined sent folder
      */
-    public abstract String getSentFolder() throws MailException;
+    public abstract String getSentFolder(int accountId) throws MailException;
 
     /**
      * Returns user-defined spam folder
      */
-    public abstract String getSpamFolder() throws MailException;
+    public abstract String getSpamFolder(int accountId) throws MailException;
 
     /**
      * Returns user-defined trash folder
      */
-    public abstract String getTrashFolder() throws MailException;
+    public abstract String getTrashFolder(int accountId) throws MailException;
 
     /**
      * Returns user-defined confirmed spam folder
      */
-    public abstract String getConfirmedSpamFolder() throws MailException;
+    public abstract String getConfirmedSpamFolder(int accountId) throws MailException;
 
     /**
      * Returns user-defined confirmed ham folder
      */
-    public abstract String getConfirmedHamFolder() throws MailException;
+    public abstract String getConfirmedHamFolder(int accountId) throws MailException;
 
     /**
      * Returns user-specific mail configuration
      */
     public abstract MailConfig getMailConfig() throws MailException;
+
+    /**
+     * Gets the account ID to which the (primary) mail access is connected
+     * 
+     * @return The account ID
+     */
+    public abstract int getAccountID();
 }

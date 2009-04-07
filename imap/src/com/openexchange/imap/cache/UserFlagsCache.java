@@ -51,11 +51,9 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.supportsUserDefinedFlags;
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.mail.cache.SessionMailCache;
@@ -67,96 +65,87 @@ import com.sun.mail.imap.IMAPFolder;
  * {@link UserFlagsCache}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UserFlagsCache {
 
-	/**
-	 * No instance
-	 */
-	private UserFlagsCache() {
-		super();
-	}
+    /**
+     * No instance
+     */
+    private UserFlagsCache() {
+        super();
+    }
 
-	/**
-	 * Determines if specified IMAP folder supports user flags
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @param load
-	 *            Whether the <code>SELECT</code> command should be invoked on
-	 *            IMAP folder or not
-	 * @param session
-	 *            The session providing the session-bound cache
-	 * @return <code>true</code> if user flags are supported; otherwise
-	 *         <code>false</code>
-	 * @throws MessagingException
-	 *             If <code>SELECT</code> command fails
-	 */
-	public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final Session session)
-			throws MessagingException {
-		final UserFlagCacheEntry entry = new UserFlagCacheEntry(f.getFullName());
-		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
-		mailCache.get(entry);
-		if (load && (null == entry.getValue())) {
-			if (f.isOpen() && (Folder.READ_WRITE == f.getMode())) {
-				entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
-			} else {
-				entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
-			}
-			mailCache.put(entry);
-		}
-		return entry.getValue() == null ? false : entry.getValue().booleanValue();
-	}
+    /**
+     * Determines if specified IMAP folder supports user flags
+     * 
+     * @param f The IMAP folder
+     * @param load Whether the <code>SELECT</code> command should be invoked on IMAP folder or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return <code>true</code> if user flags are supported; otherwise <code>false</code>
+     * @throws MessagingException If <code>SELECT</code> command fails
+     */
+    public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final Session session, final int accountId) throws MessagingException {
+        final UserFlagCacheEntry entry = new UserFlagCacheEntry(f.getFullName());
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
+        mailCache.get(entry);
+        if (load && (null == entry.getValue())) {
+            if (f.isOpen() && (Folder.READ_WRITE == f.getMode())) {
+                entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
+            } else {
+                entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
+            }
+            mailCache.put(entry);
+        }
+        return entry.getValue() == null ? false : entry.getValue().booleanValue();
+    }
 
-	/**
-	 * Removes cached information if given IMAP folder supports user flags
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @param session
-	 *            The session providing the session-bound cache
-	 */
-	public static void removeUserFlags(final IMAPFolder f, final Session session) {
-		SessionMailCache.getInstance(session).remove(new UserFlagCacheEntry(f.getFullName()));
-	}
+    /**
+     * Removes cached information if given IMAP folder supports user flags
+     * 
+     * @param f The IMAP folder
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     */
+    public static void removeUserFlags(final IMAPFolder f, final Session session, final int accountId) {
+        SessionMailCache.getInstance(session, accountId).remove(new UserFlagCacheEntry(f.getFullName()));
+    }
 
-	private static final class UserFlagCacheEntry implements SessionMailCacheEntry<Boolean> {
+    private static final class UserFlagCacheEntry implements SessionMailCacheEntry<Boolean> {
 
-		private final String fullname;
+        private final String fullname;
 
-		private Boolean value;
+        private Boolean value;
 
-		private CacheKey key;
+        private CacheKey key;
 
-		public UserFlagCacheEntry(final String fullname) {
-			super();
-			this.fullname = fullname;
-		}
+        public UserFlagCacheEntry(final String fullname) {
+            super();
+            this.fullname = fullname;
+        }
 
-		private CacheKey getKeyInternal() {
-			if (null == key) {
-				key = getServiceRegistry().getService(CacheService.class).newCacheKey(
-						MailCacheCode.USER_FLAGS.getCode(), fullname);
-			}
-			return key;
-		}
+        private CacheKey getKeyInternal() {
+            if (null == key) {
+                key = getServiceRegistry().getService(CacheService.class).newCacheKey(MailCacheCode.USER_FLAGS.getCode(), fullname);
+            }
+            return key;
+        }
 
-		public CacheKey getKey() {
-			return getKeyInternal();
-		}
+        public CacheKey getKey() {
+            return getKeyInternal();
+        }
 
-		public Boolean getValue() {
-			return value;
-		}
+        public Boolean getValue() {
+            return value;
+        }
 
-		public void setValue(final Boolean value) {
-			this.value = value;
-		}
+        public void setValue(final Boolean value) {
+            this.value = value;
+        }
 
-		public Class<Boolean> getEntryClass() {
-			return Boolean.class;
-		}
+        public Class<Boolean> getEntryClass() {
+            return Boolean.class;
+        }
 
-	}
+    }
 }

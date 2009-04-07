@@ -62,6 +62,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.passwordchange.mechs.SHACrypt;
 import com.openexchange.passwordchange.mechs.UnixCrypt;
 import com.openexchange.server.ServiceException;
@@ -184,10 +185,10 @@ public abstract class PasswordChangeService {
      */
     protected void propagate(final PasswordChangeEvent event) throws UserException {
         /*
-         * Remove possible session-bound cached mail access
+         * Remove possible session-bound cached default mail access
          */
         try {
-            MailAccessCache.getInstance().removeMailAccess(event.getSession());
+            MailAccessCache.getInstance().removeMailAccess(event.getSession(), MailAccount.DEFAULT_ID);
         } catch (final CacheException e) {
             LOG.error("Removing cached mail access failed", e);
             throw new UserException(e);

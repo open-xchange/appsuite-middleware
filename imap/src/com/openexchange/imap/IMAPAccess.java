@@ -110,12 +110,23 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private boolean decrement;
 
     /**
-     * Initializes a new {@link IMAPAccess IMAP access}.
+     * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.
      * 
      * @param session The session providing needed user data
      */
     protected IMAPAccess(final Session session) {
         super(session);
+        setMailProperties((Properties) System.getProperties().clone());
+    }
+
+    /**
+     * Initializes a new {@link IMAPAccess IMAP access}.
+     * 
+     * @param session The session providing needed user data
+     * @param accountId The account ID
+     */
+    protected IMAPAccess(final Session session, final int accountId) {
+        super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
     }
 
@@ -374,7 +385,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         connected = ((imapStore != null) && imapStore.isConnected());
         if (connected) {
             if (null == logicTools) {
-                logicTools = new MailLogicTools(session);
+                logicTools = new MailLogicTools(session, accountId);
             }
             return logicTools;
         }

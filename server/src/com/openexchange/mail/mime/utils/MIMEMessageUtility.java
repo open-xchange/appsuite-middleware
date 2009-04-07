@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -70,7 +71,6 @@ import javax.mail.internet.ParseException;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -80,6 +80,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
@@ -787,4 +788,102 @@ public final class MIMEMessageUtility {
     private static String unfoldEncodedWords(final String encodedWords) {
         return PAT_ENC_WORDS.matcher(encodedWords).replaceAll("$2");
     }
+
+    private static final int BUFSIZE = 8192; // 8K
+
+    /**
+     * Gets the matching header out of RFC 822 data input stream.
+     * 
+     * @param headerName The header name
+     * @param inputStream The input stream
+     * @param closeStream <code>true</code> to close the stream on finish; otherwise <code>false</code>
+     * @return The value of first appeared matching header
+     * @throws IOException If reading input stream fails
+     */
+    public static String extractHeader(final String headerName, final InputStream inputStream, final boolean closeStream) throws IOException {
+        boolean close = closeStream;
+        try {
+            /*
+             * Gather bytes until empty line, EOF or matching header found
+             */
+            final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
+            int start = 0;
+            int i = -1;
+            boolean firstColonFound = false;
+            boolean found = false;
+            while ((i = inputStream.read()) != -1) {
+                int count = 0;
+                while ((i == '\r') || (i == '\n')) {
+                    if (!found) {
+                        buffer.write(i);
+                    }
+                    if ((i == '\n')) {
+                        if (found) {
+                            i = inputStream.read();
+                            if ((i != ' ') && (i != '\t')) {
+                                /*
+                                 * All read
+                                 */
+                                return new String(buffer.toByteArray(), "US-ASCII");
+
+                            }
+                            /*
+                             * Write previously ignored CRLF
+                             */
+                            buffer.write('\r');
+                            buffer.write('\n');
+                            /*
+                             * Continue collecting header value
+                             */
+                            buffer.write(i);
+                        }
+                        if (++count >= 2) {
+                            /*
+                             * End of headers
+                             */
+                            return null;
+                        }
+                        i = inputStream.read();
+                        if ((i != ' ') && (i != '\t')) {
+                            /*
+                             * No header continuation; start of a new header
+                             */
+                            start = buffer.size();
+                            firstColonFound = false;
+                        }
+                        buffer.write(i);
+                    }
+                    i = inputStream.read();
+                }
+                buffer.write(i);
+                if (!firstColonFound && (i == ':')) {
+                    /*
+                     * Found the first delimiting colon in header line
+                     */
+                    firstColonFound = true;
+                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), "US-ASCII").equalsIgnoreCase(headerName))) {
+                        /*
+                         * Matching header
+                         */
+                        buffer.reset();
+                        found = true;
+                    }
+                }
+            }
+            return null;
+        } catch (final IOException e) {
+            // Close on error
+            close = true;
+            throw e;
+        } finally {
+            if (close) {
+                try {
+                    inputStream.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
 }

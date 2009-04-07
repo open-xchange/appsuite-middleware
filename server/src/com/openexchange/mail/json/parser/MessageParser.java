@@ -142,17 +142,18 @@ public final class MessageParser {
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
+     * @param accountId The account ID
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws MailException If parsing fails
      */
-    public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session) throws MailException {
+    public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws MailException {
         try {
-            final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session);
+            final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             final QuotaChecker quotaChecker = new QuotaChecker(session);
             /*
              * Parse transport message plus its text body
              */
-            final ComposedMailMessage composedMail = parse(jsonObj, session, provider, quotaChecker);
+            final ComposedMailMessage composedMail = parse(jsonObj, session, accountId, provider, quotaChecker);
             if (null != uploadEvent) {
                 /*
                  * Uploaded files
@@ -268,15 +269,16 @@ public final class MessageParser {
      * 
      * @param jsonObj The JSON object
      * @param session The session
+     * @param accountId The account ID
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws MailException If parsing fails
      */
-    public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
-        return parse(jsonObj, session, null, new QuotaChecker(session));
+    public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final int accountId) throws MailException {
+        return parse(jsonObj, session, accountId, null, new QuotaChecker(session));
     }
 
-    private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final TransportProvider provider, final QuotaChecker quotaChecker) throws MailException {
-        final TransportProvider tp = provider == null ? TransportProviderRegistry.getTransportProviderBySession(session) : provider;
+    private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final QuotaChecker quotaChecker) throws MailException {
+        final TransportProvider tp = provider == null ? TransportProviderRegistry.getTransportProviderBySession(session, accountId) : provider;
         final ComposedMailMessage transportMail;
         try {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -287,6 +289,7 @@ public final class MessageParser {
                 TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()),
                 tp,
                 session,
+                accountId,
                 quotaChecker);
         } catch (final ContextException e) {
             throw new MailException(e);
@@ -301,13 +304,14 @@ public final class MessageParser {
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
      * @param session The session
+     * @param accountId The account ID
      * @throws MailException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session) throws MailException {
+    public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws MailException {
         try {
             parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(
                 session.getUserId(),
-                ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), session);
+                ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), session, accountId);
         } catch (final ContextException e) {
             throw new MailException(e);
         }
@@ -321,13 +325,21 @@ public final class MessageParser {
      * @param mail The mail(target), which should be empty
      * @param timeZone The user time zone
      * @param session The session
+     * @param accountId The account ID
      * @throws MailException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final Session session) throws MailException {
-        parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session), session, new QuotaChecker(session));
+    public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final Session session, final int accountId) throws MailException {
+        parse(
+            jsonObj,
+            mail,
+            timeZone,
+            TransportProviderRegistry.getTransportProviderBySession(session, accountId),
+            session,
+            accountId,
+            new QuotaChecker(session));
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final QuotaChecker quotaChecker) throws MailException {
+    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final QuotaChecker quotaChecker) throws MailException {
         try {
             /*
              * System flags
@@ -478,7 +490,7 @@ public final class MessageParser {
                     /*
                      * Parse referenced parts
                      */
-                    parseReferencedParts(provider, session, transportMail, quotaChecker, attachmentArray);
+                    parseReferencedParts(provider, session, accountId, transportMail, quotaChecker, attachmentArray);
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
                     part.setContentType(MIMETypes.MIME_DEFAULT);
@@ -500,7 +512,7 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final QuotaChecker quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final ComposedMailMessage transportMail, final QuotaChecker quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
         final int len = attachmentArray.length();
         if (len <= 1) {
             /*
@@ -514,6 +526,7 @@ public final class MessageParser {
         final Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(
             provider,
             session,
+            accountId,
             transportMail.getMsgref(),
             attachmentArray);
         /*
@@ -582,7 +595,7 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath parentMsgRef, final JSONArray attachmentArray) throws MailException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -611,7 +624,7 @@ public final class MessageParser {
             return Collections.emptyMap();
         }
         final Map<String, ReferencedMailPart> retval = new HashMap<String, ReferencedMailPart>(len);
-        final MailAccess<?, ?> access = MailAccess.getInstance(session);
+        final MailAccess<?, ?> access = MailAccess.getInstance(session, accountId);
         access.connect();
         try {
             final MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getUid(), false);
@@ -635,7 +648,7 @@ public final class MessageParser {
         final ManagedFile managedFile;
         try {
             managedFile = management.getByID(seqId.substring(FILE_PREFIX.length()));
-        } catch (ManagedFileException e) {
+        } catch (final ManagedFileException e) {
             LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()), e);
             return;
         }
@@ -661,6 +674,18 @@ public final class MessageParser {
             return MIMETypes.MIME_TEXT_PLAIN;
         }
         return MIMETypes.MIME_TEXT_HTML;
+    }
+
+    /**
+     * Parses "From" field out of passed JSON object.
+     * 
+     * @param jo The JSON object
+     * @return The parsed "From" address
+     * @throws AddressException If parsing the address fails
+     * @throws JSONException If a JSON error occurred
+     */
+    public static InternetAddress[] getFromField(final JSONObject jo) throws AddressException, JSONException {
+        return parseAddressKey(MailJSONField.FROM.getKey(), jo);
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];

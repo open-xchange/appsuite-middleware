@@ -57,6 +57,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.session.Session;
 
 /**
@@ -84,10 +85,11 @@ public final class TransportProviderRegistry {
      * Gets the transport provider appropriate for specified session
      * 
      * @param session The session
+     * @param accountId The account ID
      * @return The appropriate transport provider
      * @throws MailException If no supporting transport provider can be found
      */
-    public static TransportProvider getTransportProviderBySession(final Session session) throws MailException {
+    public static TransportProvider getTransportProviderBySession(final Session session, final int accountId) throws MailException {
         TransportProvider provider;
         try {
             provider = (TransportProvider) session.getParameter(MailSessionParameterNames.PARAM_TRANSPORT_PROVIDER);
@@ -97,24 +99,26 @@ public final class TransportProviderRegistry {
              */
             provider = null;
         }
-        final String transportServerURL = TransportConfig.getTransportServerURL(session);
+        final String transportServerURL = TransportConfig.getTransportServerURL(session, accountId);
         final String protocol;
         if (transportServerURL == null) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder(128).append("Missing transport server URL. Transport server URL not set for user ").append(
                     session.getUserId()).append(" in context ").append(session.getContextId()).append(". Using fallback protocol ").append(
-                    TransportConfig.getDefaultTransportProvider()));
+                    TransportProperties.getInstance().getDefaultTransportProvider()));
             }
-            protocol = TransportConfig.getDefaultTransportProvider();
+            protocol = TransportProperties.getInstance().getDefaultTransportProvider();
         } else {
-            protocol = extractProtocol(transportServerURL, TransportConfig.getDefaultTransportProvider());
+            protocol = extractProtocol(transportServerURL, TransportProperties.getInstance().getDefaultTransportProvider());
         }
         if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
             return provider;
         }
         provider = getTransportProvider(protocol);
         if (null == provider || !provider.supportsProtocol(protocol)) {
-            throw new MailException(MailException.Code.UNKNOWN_TRANSPORT_PROTOCOL, TransportConfig.getTransportServerURL(session));
+            throw new MailException(
+                MailException.Code.UNKNOWN_TRANSPORT_PROTOCOL,
+                TransportConfig.getTransportServerURL(session, accountId));
         }
         session.setParameter(MailSessionParameterNames.PARAM_TRANSPORT_PROVIDER, provider);
         return provider;
@@ -138,7 +142,7 @@ public final class TransportProviderRegistry {
         /*
          * Get appropriate provider
          */
-        return getTransportProvider(extractProtocol(serverUrl, TransportConfig.getDefaultTransportProvider()));
+        return getTransportProvider(extractProtocol(serverUrl, TransportProperties.getInstance().getDefaultTransportProvider()));
     }
 
     /**

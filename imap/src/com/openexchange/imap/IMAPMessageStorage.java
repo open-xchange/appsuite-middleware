@@ -83,7 +83,6 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -245,7 +244,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 mail.setPrevSeen(false);
                 if (imapConfig.isSupportsACLs()) {
                     try {
-                        if (aclExtension.canKeepSeen(RightsCache.getCachedRights(imapFolder, true, session))) {
+                        if (aclExtension.canKeepSeen(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
                             /*
                              * User has \KEEP_SEEN right: Switch \Seen flag
                              */
@@ -475,7 +474,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (!holdsMessages()) {
                     throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
                 }
-                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(imapFolder, true, session))) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(
+                    imapFolder,
+                    true,
+                    session,
+                    accountId))) {
                     throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
@@ -631,7 +634,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (!holdsMessages()) {
                     throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
                 }
-                if (move && imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(imapFolder, true, session))) {
+                if (move && imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(
+                    imapFolder,
+                    true,
+                    session,
+                    accountId))) {
                     throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
@@ -656,7 +663,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     /*
                      * Check if COPY/APPEND is allowed on destination folder
                      */
-                    if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(destFolder, true, session))) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(
+                        destFolder,
+                        true,
+                        session,
+                        accountId))) {
                         throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, destFolder.getFullName());
                     }
                 } catch (final MessagingException e) {
@@ -847,7 +858,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (!holdsMessages()) {
                     throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
                 }
-                if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(imapFolder, true, session))) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
                     throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
@@ -860,7 +871,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Check if destination folder supports user flags
              */
-            final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session);
+            final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
             if (!supportsUserFlags) {
                 /*
                  * Remove all user flags from messages before appending to folder
@@ -927,7 +938,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Set new flags...
              */
-            final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session) : null;
+            final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session, accountId) : null;
             final Flags affectedFlags = new Flags();
             boolean applyFlags = false;
             if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
@@ -971,7 +982,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (((flags & MailMessage.FLAG_FORWARDED) == MailMessage.FLAG_FORWARDED) && UserFlagsCache.supportsUserFlags(
                 imapFolder,
                 true,
-                session)) {
+                session,
+                accountId)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
                     throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
                 }
@@ -984,7 +996,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (((flags & MailMessage.FLAG_READ_ACK) == MailMessage.FLAG_READ_ACK) && UserFlagsCache.supportsUserFlags(
                 imapFolder,
                 true,
-                session)) {
+                session,
+                accountId)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
                     throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
                 }
@@ -1033,13 +1046,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (!holdsMessages()) {
                     throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
                 }
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(RightsCache.getCachedRights(imapFolder, true, session))) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
                     throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
                 throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
             }
-            if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session)) {
+            if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
                 LOG.error(new StringBuilder().append("Folder \"").append(imapFolder.getFullName()).append(
                     "\" does not support user-defined flags. Update of color flag ignored."));
                 return;

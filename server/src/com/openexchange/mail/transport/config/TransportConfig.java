@@ -49,14 +49,16 @@
 
 package com.openexchange.mail.transport.config;
 
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -81,21 +83,34 @@ public abstract class TransportConfig extends MailConfig {
      * @param clazz The transport configuration type
      * @param transportConfig A newly created {@link TransportConfig transport configuration}
      * @param session The session providing needed user data
+     * @param accountId The mail account ID
      * @return The user-specific transport configuration
      * @throws MailException If user-specific transport configuration cannot be determined
      */
-    public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz, final C transportConfig, final Session session) throws MailException {
+    public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz, final C transportConfig, final Session session, final int accountId) throws MailException {
         /*
-         * Fetch user object to determine server URL
+         * Fetch mail account
          */
-        final User user;
+        final MailAccount mailAccount;
         try {
-            user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e) {
+            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            if (accountId == MailAccount.DEFAULT_ID) {
+                mailAccount = storage.getDefaultMailAccount(session.getUserId(), session.getContextId());
+            } else {
+                mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            }
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
             throw new MailException(e);
         }
-        fillLoginAndPassword(transportConfig, session.getPassword(), user);
-        String serverURL = TransportConfig.getTransportServerURL(user);
+        transportConfig.accountId = accountId;
+        fillLoginAndPassword(
+            transportConfig,
+            session.getPassword(),
+            UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLoginInfo(),
+            mailAccount);
+        String serverURL = TransportConfig.getTransportServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
                 throw new MailConfigException(
@@ -119,44 +134,38 @@ public abstract class TransportConfig extends MailConfig {
     }
 
     /**
-     * Gets the transport server URL appropriate to configured login type
+     * Gets the transport server URL appropriate to to configured transport server source.
      * 
-     * @param user The user
+     * @param mailAccount The mail account
      * @return The appropriate transport server URL or <code>null</code>
      */
-    public static String getTransportServerURL(final User user) {
+    public static String getTransportServerURL(final MailAccount mailAccount) {
+        if (!mailAccount.isDefaultAccount()) {
+            return mailAccount.getTransportServerURL();
+        }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
             return MailProperties.getInstance().getTransportServer();
         }
-        return user.getSmtpServer();
+        return mailAccount.getTransportServerURL();
     }
 
     /**
      * Gets the transport server URL appropriate to configured login type
      * 
      * @param session The user session
+     * @param accountId The account ID
      * @return The appropriate transport server URL or <code>null</code>
+     * @throws MailException If transport server URL cannot be returned
      */
-    public static String getTransportServerURL(final Session session) {
-        return getTransportServerURL(UserStorage.getStorageUser(session.getUserId(), session.getContextId()));
-    }
-
-    /**
-     * Gets the referencedPartLimit
-     * 
-     * @return The referencedPartLimit
-     */
-    public static int getReferencedPartLimit() {
-        return TransportProperties.getInstance().getReferencedPartLimit();
-    }
-
-    /**
-     * Gets the default transport provider
-     * 
-     * @return The default transport provider
-     */
-    public static String getDefaultTransportProvider() {
-        return TransportProperties.getInstance().getDefaultTransportProvider();
+    public static String getTransportServerURL(final Session session, final int accountId) throws MailException {
+        try {
+            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            return getTransportServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
     }
 
 }

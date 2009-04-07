@@ -55,6 +55,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -103,6 +104,28 @@ public abstract class MailTransport {
      * @throws MailException If instantiation fails
      */
     public static final MailTransport getInstance(final Session session) throws MailException {
+        return getInstance(session, MailAccount.DEFAULT_ID);
+    }
+
+    /**
+     * Gets the proper instance of {@link MailTransport mail transport} for session user's default transport account.
+     * <p>
+     * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
+     * 
+     * <pre>
+     * final MailTransport mailTransport = MailTransport.getInstance(session, accountId);
+     * try {
+     *     // Do something
+     * } finally {
+     *     mailTransport.close();
+     * }
+     * </pre>
+     * 
+     * @param session The session
+     * @return A proper instance of {@link MailTransport}
+     * @throws MailException If instantiation fails
+     */
+    public static final MailTransport getInstance(final Session session, final int accountId) throws MailException {
         /*
          * Check for proper initialization
          */
@@ -112,7 +135,7 @@ public abstract class MailTransport {
         /*
          * Create a new mail transport through user's transport provider
          */
-        return TransportProviderRegistry.getTransportProviderBySession(session).createNewMailTransport(session);
+        return TransportProviderRegistry.getTransportProviderBySession(session, accountId).createNewMailTransport(session, accountId);
     }
 
     /**

@@ -176,6 +176,16 @@ public abstract class TransportProvider {
     public abstract MailTransport createNewMailTransport(Session session) throws MailException;
 
     /**
+     * Gets a newly created {@link MailTransport mail transport}
+     * 
+     * @param session The session providing needed user data
+     * @param accountId The account ID
+     * @return A newly created {@link MailTransport mail transport}
+     * @throws MailException If instantiation fails
+     */
+    public abstract MailTransport createNewMailTransport(Session session, int accountId) throws MailException;
+
+    /**
      * Gets the protocol properties
      * 
      * @return The protocol properties

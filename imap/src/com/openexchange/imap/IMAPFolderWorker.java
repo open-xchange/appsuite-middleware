@@ -96,6 +96,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
 
     protected final Session session;
 
+    protected final int accountId;
+
     protected final Context ctx;
 
     protected final IMAPAccess imapAccess;
@@ -122,6 +124,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
+        this.accountId = imapAccess.getAccountId();
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -293,7 +296,11 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
                 try {
                     if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
                         throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-                    } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(imapFolder, true, session))) {
+                    } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(
+                        imapFolder,
+                        true,
+                        session,
+                        accountId))) {
                         throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, imapFolder.getFullName());
                     }
                 } catch (final MessagingException e) { // No access
@@ -323,7 +330,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
             throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, retval.getFullName());
         }
         try {
-            if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session))) {
+            if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
                 throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, retval.getFullName());
             }
         } catch (final MessagingException e) {

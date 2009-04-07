@@ -241,6 +241,10 @@ public final class HTML2TextHandler implements HTMLHandler {
             } else if (tag.equalsIgnoreCase(TAG_TD)) {
                 // Ending table column
                 textBuilder.append('\t');
+            } else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
+                // Ending list
+                textBuilder.append(CRLF);
+                quoteText();
             } else if (tag.equalsIgnoreCase(TAG_PRE)) {
                 textBuilder.append(CRLF);
                 quoteText();
