@@ -51,6 +51,7 @@ package com.openexchange.groupware.calendar;
 
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
  * A Calendar Listener provides callbacks for certain events in the calendar subsystem.
@@ -60,6 +61,6 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface CalendarListener {
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, int inFolder, ServerSession session) throws AbstractOXException;
+    public void createdChangeExceptionInRecurringAppointment(AppointmentObject master, AppointmentObject changeException, int inFolder, ServerSession session) throws AbstractOXException;
 
 }

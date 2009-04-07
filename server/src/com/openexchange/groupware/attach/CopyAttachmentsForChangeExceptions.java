@@ -48,8 +48,7 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.groupware.calendar.AbstractCalendarListener;
-import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -57,6 +56,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.session.ServerSession;
@@ -67,14 +67,14 @@ import java.io.InputStream;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CopyAttachmentsForChangeExceptions extends AbstractCalendarListener {
+public class CopyAttachmentsForChangeExceptions implements CalendarListener {
     private AttachmentBase attachmentBase;
 
     public CopyAttachmentsForChangeExceptions(AttachmentBase attachmentBase) {
         this.attachmentBase = attachmentBase;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject exception,int inFolder, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(AppointmentObject master, AppointmentObject exception,int inFolder, ServerSession session) throws AbstractOXException {
         try {
             attachmentBase.startTransaction();
             Context ctx = session.getContext();

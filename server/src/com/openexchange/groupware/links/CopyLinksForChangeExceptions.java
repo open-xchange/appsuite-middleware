@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.links;
 
-import com.openexchange.groupware.calendar.AbstractCalendarListener;
+import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -62,7 +62,7 @@ import com.openexchange.api2.LinkSQLInterface;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CopyLinksForChangeExceptions extends AbstractCalendarListener {
+public class CopyLinksForChangeExceptions implements CalendarListener {
 
     private LinkSQLInterface links;
 
