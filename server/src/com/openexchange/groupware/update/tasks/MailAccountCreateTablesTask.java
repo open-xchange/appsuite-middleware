@@ -85,7 +85,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
     }
 
     public int getPriority() {
-        return UpdateTaskPriority.HIGH.priority;
+        return UpdateTaskPriority.HIGHEST.priority;
     }
 
     private static final String getCreateMailAccount() {
