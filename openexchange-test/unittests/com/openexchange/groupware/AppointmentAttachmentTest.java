@@ -13,7 +13,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
