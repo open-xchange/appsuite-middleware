@@ -76,6 +76,9 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.calendar.CalendarAdministration;
+import com.openexchange.calendar.CalendarSql;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.Database;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
@@ -885,15 +888,15 @@ public class CalendarSqlTest extends AbstractCalendarTest {
      * @throws OXException If an OX error occurs
      */
     public void testShouldNotIndicateConflictingResources() throws OXException {
-        final long today = CalendarRecurringCollection.normalizeLong(System.currentTimeMillis());
+        final long today = getTools().normalizeLong(System.currentTimeMillis());
         final int weekDayOfToday;
         {
             final Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
             cal.setTimeInMillis(today);
             weekDayOfToday = cal.get(Calendar.DAY_OF_WEEK);
         }
-        Date start = new Date(today + (10 * CalendarRecurringCollection.MILLI_HOUR));
-        Date end = new Date(today + (11 * CalendarRecurringCollection.MILLI_HOUR));
+        Date start = new Date(today + (10 * Constants.MILLI_HOUR));
+        Date end = new Date(today + (11 * Constants.MILLI_HOUR));
         // Create Weekly recurrence
         final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
         appointment.setParentFolderID(appointments.getPrivateFolder());
@@ -911,8 +914,8 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         clean.add(appointment);
         // Now create a second weekly recurrence with demanding resource on
         // following day which should not indicate any conflicts
-        start = new Date(start.getTime() + CalendarRecurringCollection.MILLI_DAY);
-        end = new Date(end.getTime() + CalendarRecurringCollection.MILLI_DAY);
+        start = new Date(start.getTime() + Constants.MILLI_DAY);
+        end = new Date(end.getTime() + Constants.MILLI_DAY);
         final CalendarDataObject update = appointments.buildAppointmentWithResourceParticipants(resource1);
         update.setParentFolderID(appointments.getPrivateFolder());
         update.setIgnoreConflicts(true);
@@ -948,11 +951,11 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         appointments.save(appointment);
         clean.add(appointment);
         // Check for 2 occurrences
-        final RecurringResults results = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0);
+        final RecurringResultsInterface results = getTools().calculateRecurring(appointment, 0, 0, 0);
         assertEquals("Unexpected size in recurring results of weekly recurrence appointment", 2, results.size());
-        final RecurringResult firstResult = results.getRecurringResult(0);
+        final RecurringResultInterface firstResult = results.getRecurringResult(0);
         assertEquals("Unexpected first occurrence", D("05/09/2008 22:00"), new Date(firstResult.getStart()));
-        final RecurringResult secondResult = results.getRecurringResult(1);
+        final RecurringResultInterface secondResult = results.getRecurringResult(1);
         assertEquals("Unexpected second occurrence", D("08/09/2008 22:00"), new Date(secondResult.getStart()));
     }
 
@@ -977,7 +980,7 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         final long[] expectedLongs = new long[] {
             D("15/09/2008 22:00").getTime(), D("16/09/2008 22:00").getTime(), D("17/09/2008 22:00").getTime(),
             D("18/09/2008 22:00").getTime(), D("19/09/2008 22:00").getTime(), D("22/09/2008 22:00").getTime() };
-        final RecurringResults results = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0);
+        final RecurringResultsInterface results = getTools().calculateRecurring(appointment, 0, 0, 0);
         assertEquals("Unexpected size in recurring results of weekly recurrence appointment", expectedLongs.length, results.size());
         for (int i = 0; i < expectedLongs.length; i++) {
             assertEquals("Unexpected " + (i + 1) + " occurrence", new Date(expectedLongs[i]), new Date(
@@ -1195,17 +1198,17 @@ public class CalendarSqlTest extends AbstractCalendarTest {
             // Load first occurrence and verify
             final CalendarDataObject firstOccurrence = appointments.reload(fulltimeSeries);
             firstOccurrence.calculateRecurrence();
-            final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(
+            final RecurringResultsInterface recuResults = getTools().calculateRecurring(
                 firstOccurrence,
                 0,
                 0,
                 1,
-                CalendarRecurringCollection.MAXTC,
+                CalendarCollection.MAXTC,
                 true);
             if (recuResults.size() == 0) {
                 fail("No occurrence at position " + 1);
             }
-            final RecurringResult result = recuResults.getRecurringResult(0);
+            final RecurringResultInterface result = recuResults.getRecurringResult(0);
             firstOccurrence.setStartDate(new Date(result.getStart()));
             firstOccurrence.setEndDate(new Date(result.getEnd()));
             firstOccurrence.setRecurrencePosition(result.getPosition());
@@ -1358,14 +1361,14 @@ public class CalendarSqlTest extends AbstractCalendarTest {
                 // Reload appointment for calculation
                 final CalendarDataObject reloaded = appointments.reload(appointment);
                 // Perform calculation
-                final RecurringResults results = CalendarRecurringCollection.calculateRecurring(reloaded, 0, 0, 0);
+                final RecurringResultsInterface results = getTools().calculateRecurring(reloaded, 0, 0, 0);
                 final int size = results.size();
                 assertEquals("Unexpected number of recurring results", 10, size);
                 final Calendar checker = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
                 checker.setTimeInMillis(reloaded.getStartDate().getTime());
                 int year = checker.get(Calendar.YEAR);
                 for (int i = 0; i < size; i++) {
-                    final RecurringResult result = results.getRecurringResult(i);
+                    final RecurringResultInterface result = results.getRecurringResult(i);
                     checker.setTimeInMillis(result.getStart());
                     assertEquals("Unexpected day-of-month in " + (i + 1) + ". occurrence", 1, checker.get(Calendar.DAY_OF_MONTH));
                     assertEquals("Unexpected month in " + (i + 1) + ". occurrence", Calendar.NOVEMBER, checker.get(Calendar.MONTH));
@@ -1388,14 +1391,14 @@ public class CalendarSqlTest extends AbstractCalendarTest {
                 // Reload appointment for calculation
                 final CalendarDataObject reloaded = appointments.reload(appointment);
                 // Perform calculation
-                final RecurringResults results = CalendarRecurringCollection.calculateRecurring(reloaded, 0, 0, 0);
+                final RecurringResultsInterface results = getTools().calculateRecurring(reloaded, 0, 0, 0);
                 final int size = results.size();
                 assertEquals("Unexpected number of recurring results", 10, size);
                 final Calendar checker = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
                 checker.setTimeInMillis(reloaded.getStartDate().getTime());
                 int year = checker.get(Calendar.YEAR);
                 for (int i = 0; i < size; i++) {
-                    final RecurringResult result = results.getRecurringResult(i);
+                    final RecurringResultInterface result = results.getRecurringResult(i);
                     checker.setTimeInMillis(result.getStart());
                     assertEquals(
                         "Unexpected day-of-week in " + (i + 1) + ". occurrence",

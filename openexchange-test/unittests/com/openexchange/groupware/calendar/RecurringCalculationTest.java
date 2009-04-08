@@ -57,8 +57,8 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
-import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
-import com.openexchange.groupware.calendar.recurrence.RecurringException;
+import com.openexchange.calendar.recurrence.RecurringCalculation;
+import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -82,7 +82,7 @@ public class RecurringCalculationTest extends TestCase {
         calc.setMonth(1);
         calc.setDayInMonth(5);
 
-        final RecurringResult recurringResult = calc.calculateRecurrence().getRecurringResult(2);
+        final RecurringResultInterface recurringResult = calc.calculateRecurrence().getRecurringResult(2);
 
         final Date startExpected = recalculate(D("05/02/1983 19:00"), utc, ny);
         final Date endExpected = recalculate(D("05/02/1983 23:00"), utc, ny);
@@ -104,7 +104,7 @@ public class RecurringCalculationTest extends TestCase {
         calc.setDayInMonth(3);
         calc.setOccurrence(5);
 
-        final RecurringResults results = calc.calculateRecurrence();
+        final RecurringResultsInterface results = calc.calculateRecurrence();
 
         final Date[] days = {
                 D("05/12/2007 10:00"),
@@ -133,7 +133,7 @@ public class RecurringCalculationTest extends TestCase {
         calc.setDayInMonth(2);
         calc.setOccurrence(5);
 
-        final RecurringResults results = calc.calculateRecurrence();
+        final RecurringResultsInterface results = calc.calculateRecurrence();
 
         final Date[] days = {
                 D("02/12/2007 10:00"),
@@ -158,9 +158,9 @@ public class RecurringCalculationTest extends TestCase {
         calc.setDayInMonth(11);
         calc.setMonth(4);
 
-        final RecurringResults results = calc.calculateRecurrence();
+        final RecurringResultsInterface results = calc.calculateRecurrence();
 
-        final long threshold = start.getTime() + 40 * CalendarRecurringCollection.MILLI_DAY;
+        final long threshold = start.getTime() + 40 * Constants.MILLI_DAY;
         for(int i = 0, size = results.size(); i < size; i++) {
             if(threshold < results.getRecurringResult(i).getStart()) {
                 return;

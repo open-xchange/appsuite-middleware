@@ -12,8 +12,9 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -1080,7 +1081,7 @@ public class FolderTest extends TestCase {
     private static final void fillDatesInDao(final AppointmentObject cdao) {
         long s = System.currentTimeMillis();
         long cals = s;
-        final long calsmod = s % CalendarRecurringCollection.MILLI_DAY;
+        final long calsmod = s % Constants.MILLI_DAY;
         cals = cals - calsmod;
         final long endcalc = 3600000;
         long mod = s % 3600000;
@@ -1088,8 +1089,8 @@ public class FolderTest extends TestCase {
         final long saves = s;
         final long e = s + endcalc;
         final long savee = e;
-        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
-        mod = u % CalendarRecurringCollection.MILLI_DAY;
+        long u = s + (Constants.MILLI_DAY * 10);
+        mod = u % Constants.MILLI_DAY;
         u = u - mod;
 
         cdao.setStartDate(new Date(s));

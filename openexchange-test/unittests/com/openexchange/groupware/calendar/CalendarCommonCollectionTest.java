@@ -1,5 +1,6 @@
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 
@@ -19,13 +20,14 @@ public class CalendarCommonCollectionTest extends TestCase{
         c = new Participant[]{one, three};
         d = new Participant[]{one, two, three};
         
-        assertFalse(CalendarCommonCollection.checkParticipants(a, a));
-        assertFalse(CalendarCommonCollection.checkParticipants(a, b));
-        assertTrue(CalendarCommonCollection.checkParticipants(a, c));
-        assertTrue(CalendarCommonCollection.checkParticipants(a, d));
-        assertTrue(CalendarCommonCollection.checkParticipants(null, a));
-        assertTrue(CalendarCommonCollection.checkParticipants(a, null));
-        assertFalse(CalendarCommonCollection.checkParticipants(null, null));
+        CalendarCollection tools = new CalendarCollection();
+        assertFalse(tools.checkParticipants(a, a));
+        assertFalse(tools.checkParticipants(a, b));
+        assertTrue(tools.checkParticipants(a, c));
+        assertTrue(tools.checkParticipants(a, d));
+        assertTrue(tools.checkParticipants(null, a));
+        assertTrue(tools.checkParticipants(a, null));
+        assertFalse(tools.checkParticipants(null, null));
     }
     
 }

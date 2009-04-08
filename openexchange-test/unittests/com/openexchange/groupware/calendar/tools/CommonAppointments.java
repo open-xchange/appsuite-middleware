@@ -64,7 +64,7 @@ import java.util.TimeZone;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;

@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
@@ -260,6 +261,10 @@ public abstract class AbstractCalendarTest extends TestCase {
 
     public AbstractCalendarTest(String name) {
         super(name);
+    }
+    
+    protected CalendarCollection getTools() {
+        return new CalendarCollection();
     }
 
 }
