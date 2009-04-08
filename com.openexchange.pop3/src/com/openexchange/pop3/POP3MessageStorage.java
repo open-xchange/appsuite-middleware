@@ -51,15 +51,17 @@ package com.openexchange.pop3;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertMessages;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.mail.mime.converters.MIMEMessageConverter.parseMimeFlags;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -74,6 +76,7 @@ import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.IndexRange;
@@ -92,10 +95,15 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.config.POP3Config;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
+import com.openexchange.pop3.sort.MailMessageComparator;
+import com.openexchange.pop3.util.UIDUtil;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
@@ -150,146 +158,48 @@ public final class POP3MessageStorage extends POP3FolderWorker {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
-        // Only fetch items supported by POP3
-        final FetchProfile fetchProfile = getFetchProfile(fields, true);
-        if (!isSupported(fetchProfile)) {
+        final boolean body;
+        {
             final MailFields fieldSet = new MailFields(fields);
-            /*
-             * Check for field FULL
-             */
-            if (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY)) {
+            if (fieldSet.contains(MailField.FULL)) {
                 final MailMessage[] mails = new MailMessage[mailIds.length];
                 for (int j = 0; j < mails.length; j++) {
                     mails[j] = getMessage(fullname, mailIds[j], true);
                 }
                 return mails;
             }
+            body = (fieldSet.contains(MailField.BODY));
         }
-        sss
         try {
             pop3Folder = setAndOpenFolder(pop3Folder, fullname, Folder.READ_ONLY);
             if (!isSelectable(pop3Folder)) {
                 throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
             }
-            // TODO: Map UIDs to sequence numbers
-            
-            final Message[] allmsgs = pop3Folder.getMessages();
-            pop3Folder.fetch(allmsgs, fetchProfile);
-            final Set<String> desiredUIDs = new HashSet<String>(Arrays.asList(ids));
-            final POP3Folder tmp = (POP3Folder) pop3Folder;
-            for (int i = 0; i < allmsgs.length; i++) {
-                final Message m = allmsgs[i];
-                if (desiredUIDs.contains(tmp.getUID(m))) {
-                    
-                }
-            }
-            
-            
-            
-            /*
-             * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
-             * ignore the order of UIDs provided in a "UID FETCH" command.
-             */
-            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(pop3Folder, mailIds);
-            final Message[] messages = new Message[seqNums.length];
-            final FetchProfile fetchProfile = getFetchProfile(fields, POP3Config.isFastFetch());
-            final boolean isRev1 = pop3Config.getPOP3Capabilities().hasIMAP4rev1();
-            int lastPos = 0;
-            int pos = 0;
-            while (pos < seqNums.length) {
-                if (seqNums[pos] <= 0) {
-                    final int len = pos - lastPos;
-                    if (len > 0) {
-                        fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
-                    }
-                    // Determine next valid position
-                    pos++;
-                    while (pos < seqNums.length && -1 == seqNums[pos]) {
-                        pos++;
-                    }
-                    lastPos = pos;
-                } else {
-                    pos++;
-                }
-            }
-            if (lastPos < pos) {
-                fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
-            }
-            return MIMEMessageConverter.convertMessages(messages, pop3Folder, fields, body);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
-        }
-    }
-
-    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MessagingException {
-        final int[] subarr = new int[len];
-        System.arraycopy(seqNums, lastPos, subarr, 0, len);
-        final long start = System.currentTimeMillis();
-        final Message[] submessages = new FetchIMAPCommand(pop3Folder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
-        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(
-                (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
-        }
-        System.arraycopy(submessages, 0, messages, lastPos, submessages.length);
-    }
-
-    @Override
-    public MailMessage getMessage(final String fullname, final long msgUID, final boolean markSeen) throws MailException {
-        try {
-            pop3Folder = setAndOpenFolder(pop3Folder, fullname, Folder.READ_WRITE);
-            final IMAPMessage msg;
+            final POP3Folder pop3Fld = (POP3Folder) pop3Folder;
+            // Get matching messages by UID
+            final Message[] msgs;
             {
-                final long start = System.currentTimeMillis();
-                msg = (IMAPMessage) pop3Folder.getMessageByUID(msgUID);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            }
-            if (msg == null) {
-                // throw new MailException(MailException.Code.MAIL_NOT_FOUND,
-                // String.valueOf(msgUID), imapFolder
-                // .toString());
-                return null;
-            }
-            final MailMessage mail;
-            try {
-                mail = MIMEMessageConverter.convertMessage(msg);
-            } catch (final MIMEMailException e) {
-                if (MIMEMailException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
-                    /*
-                     * Obviously message was removed in the meantime
-                     */
-                    return null;
-                }
-                throw e;
-            }
-            if (!mail.isSeen() && markSeen) {
-                mail.setPrevSeen(false);
-                if (pop3Config.isSupportsACLs()) {
-                    try {
-                        if (aclExtension.canKeepSeen(RightsCache.getCachedRights(pop3Folder, true, session, accountId))) {
-                            /*
-                             * User has \KEEP_SEEN right: Switch \Seen flag
-                             */
-                            msg.setFlags(FLAGS_SEEN, true);
-                            mail.setFlag(MailMessage.FLAG_SEEN, true);
-                            mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
-                        }
-                    } catch (final MessagingException e) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(new StringBuilder("/SEEN flag could not be set on message #").append(mail.getMailId()).append(
-                                " in folder ").append(mail.getFolder()).toString(), e);
+                final Message[] allmsgs = pop3Folder.getMessages();
+                pop3Folder.fetch(allmsgs, MIMEStorageUtility.getUIDFetchProfile());
+                msgs = new Message[mailIds.length];
+                for (int i = 0; i < mailIds.length; i++) {
+                    final String mailId = mailIds[i];
+                    if (mailId == null) {
+                        msgs[i] = null;
+                    } else {
+                        for (int j = 0; j < allmsgs.length && msgs[i] == null; j++) {
+                            final Message m = allmsgs[j];
+                            if (mailId.equals(pop3Fld.getUID(m))) {
+                                msgs[i] = m;
+                            }
                         }
                     }
-                } else {
-                    /*
-                     * Switch \Seen flag
-                     */
-                    msg.setFlags(FLAGS_SEEN, true);
-                    mail.setFlag(MailMessage.FLAG_SEEN, true);
-                    mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
                 }
             }
-            return mail;
+            // Fetch messages
+            final FetchProfile fetchProfile = getFetchProfile(fields, true);
+            final MailMessage[] mails = fetch(fetchProfile, msgs, body);
+            return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
@@ -299,37 +209,44 @@ public final class POP3MessageStorage extends POP3FolderWorker {
     public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         try {
             pop3Folder = setAndOpenFolder(pop3Folder, fullname, Folder.READ_ONLY);
-            if (pop3Folder.getMessageCount() == 0) {
+            if (!isSelectable(pop3Folder)) {
+                throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+            }
+            final POP3Folder pop3Fld = (POP3Folder) pop3Folder;
+            if (pop3Fld.getMessageCount() == 0) {
                 return EMPTY_RETVAL;
             }
-            /*
-             * Shall a search be performed?
-             */
-            final int[] filter;
-            if (null == searchTerm) {
-                /*
-                 * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
-                 */
-                if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
-                    return performAllFetch(fullname, order, indexRange);
-                }
-                /*
-                 * Proceed with common handling
-                 */
-                filter = null;
-            } else {
-                /*
-                 * Preselect message list according to given search pattern
-                 */
-                filter = IMAPSearch.searchMessages(pop3Folder, searchTerm, pop3Config);
-                if ((filter == null) || (filter.length == 0)) {
-                    return EMPTY_RETVAL;
+            final FetchProfile fetchProfile;
+            {
+                final Set<MailField> searchFields = new HashSet<MailField>();
+                searchTerm.addMailField(searchFields);
+                fetchProfile = getFetchProfile(
+                    fields,
+                    searchFields.toArray(new MailField[searchFields.size()]),
+                    MailField.toField(sortField.getListField()),
+                    true);
+            }
+            // Prefetch all messages
+            final MailFields fieldSet = new MailFields(fields);
+            final boolean body = (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY));
+            final MailMessage[] mails = fetch(fetchProfile, pop3Fld.getMessages(), body);
+            // Filter them
+            final List<MailMessage> filteredMails = new ArrayList<MailMessage>(mails.length);
+            for (int i = 0; i < mails.length; i++) {
+                final MailMessage mail = mails[i];
+                if (searchTerm.matches(mail)) {
+                    filteredMails.add(mail);
                 }
             }
-            final MailFields usedFields = new MailFields();
-            Message[] msgs = IMAPSort.sortMessages(pop3Folder, filter, fields, sortField, order, UserStorage.getStorageUser(
-                session.getUserId(),
-                ctx).getLocale(), usedFields, pop3Config);
+            // Sort them
+            {
+                final ContextService contextService = POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+                final UserService userService = POP3ServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+                Collections.sort(filteredMails, new MailMessageComparator(OrderDirection.DESC.equals(order), userService.getUser(
+                    session.getUserId(),
+                    contextService.getContext(session.getContextId())).getLocale()));
+            }
+            MailMessage[] msgs = filteredMails.toArray(new MailMessage[filteredMails.size()]);
             if (indexRange != null) {
                 final int fromIndex = indexRange.start;
                 int toIndex = indexRange.end;
@@ -348,15 +265,12 @@ public final class POP3MessageStorage extends POP3FolderWorker {
                 if (toIndex >= msgs.length) {
                     toIndex = msgs.length;
                 }
-                final Message[] tmp = msgs;
+                final MailMessage[] tmp = msgs;
                 final int retvalLength = toIndex - fromIndex;
-                msgs = new Message[retvalLength];
+                msgs = new MailMessage[retvalLength];
                 System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
             }
-            return MIMEMessageConverter.convertMessages(
-                msgs,
-                usedFields.toArray(),
-                usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
+            return msgs;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
@@ -1460,22 +1374,48 @@ public final class POP3MessageStorage extends POP3FolderWorker {
         }
     }
 
-    private MailMessage[] fetch(final FetchProfile fetchProfile, final Message[] messages, final POP3Folder pop3Folder) throws MailException {
+    private MailMessage[] fetch(final FetchProfile fetchProfile, final Message[] messages, final boolean body) throws MailException {
+        prepareFetchProfile(fetchProfile);
         // Fetches UID, all HEADERS, and SIZE
-        pop3Folder.fetch(messages, fetchProfile);
-        
+        {
+            final long start = System.currentTimeMillis();
+            pop3Folder.fetch(messages, fetchProfile);
+            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        }
+        final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
+        /*
+         * Folder is always set
+         */
+        set.add(MailField.FOLDER_ID);
+        if (fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            /*
+             * From, To, Cc, Bcc, ReplyTo, Subject and Date
+             */
+            set.add(MailField.FROM);
+            set.add(MailField.TO);
+            set.add(MailField.CC);
+            set.add(MailField.BCC);
+            set.add(MailField.SUBJECT);
+            set.add(MailField.RECEIVED_DATE);
+            set.add(MailField.SENT_DATE);
+            set.add(MailField.SIZE);
+        }
+        if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+            set.add(MailField.ID);
+        }
+        // Convert with fields prefetched through previous POP3 fetch
+        final MailMessage[] mails = convertMessages(messages, pop3Folder, set.toArray(new MailField[set.size()]), body);
         // Check for flags
         if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
-            
-            for (int i = 0; i < messages.length; i++) {
-                
+            for (int i = 0; i < mails.length; i++) {
+                final MailMessage mm = mails[i];
+                prefillFlags(mails[i], UIDUtil.uid2long(mm.getMailId()), session.getContextId(), session.getUserId());
             }
-
         }
     }
 
     private static final String SELECT_FLAGS = "SELECT flags, color_flag FROM user_pop3_data WHERE cid = ? AND user = ? AND uid = ?";
-    
+
     private static final String SELECT_USER_FLAGS = "SELECT user_flag FROM user_pop3_user_flag WHERE cid = ? AND user = ? AND uid = ?";
 
     private static void prefillFlags(final MailMessage message, final long uid, final int cid, final int user) {
@@ -1495,10 +1435,8 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             stmt.setLong(pos++, uid);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                final int flags = rs.getInt(1);
-                final int colorFlag = rs.getInt(2);
-                message.setFlags(flags);
-                message.setColorLabel(colorFlag);
+                message.setFlags(rs.getInt(1));
+                message.setColorLabel(rs.getInt(2));
             }
             rs.close();
             stmt.close();
@@ -1508,9 +1446,8 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             stmt.setLong(pos++, user);
             stmt.setLong(pos++, uid);
             rs = stmt.executeQuery();
-            final List<String> list = new ArrayList<String>();
             while (rs.next()) {
-                list.add(rs.getString(1));
+                message.addUserFlag(rs.getString(1));
             }
         } finally {
             closeSQLStuff(rs, stmt);
