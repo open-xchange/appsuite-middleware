@@ -52,52 +52,52 @@ package com.openexchange.groupware.contact;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ContactServices {
-	
-	private final ConcurrentHashMap<Integer, ContactInterface> services = new ConcurrentHashMap<Integer, ContactInterface>();
-	
-	private static final ContactServices instance = new ContactServices();
-	
+
+    private final ConcurrentHashMap<Integer, ContactInterface> services = new ConcurrentHashMap<Integer, ContactInterface>();
+
+    private static final ContactServices instance = new ContactServices();
+
     private ContactServices() {
         super();
     }
 
     public int addService(final int folderId, final ContactInterface contactInterface) {
         services.put(folderId, contactInterface);
-    	return services.size();
+        return services.size();
     }
 
     public int removeService(final int folderId, final ContactInterface contactInterface) {
         services.remove(folderId, contactInterface);
-    	return services.size();
+        return services.size();
 
     }
-    
-	public static ContactServices getInstance() {
-		return instance;
-	}
 
-	public int getNumberOfServices(){
-		if (null != services){
-			return services.size();
-		}
-		return 0;
-	}
-	/*
-	public ContactInterface getService(int folderId){
-		ContactInterface contactInterface = services.get(folderId);
-		return contactInterface;
+    public static ContactServices getInstance() {
+        return instance;
+    }
 
-	}
-	*/
-	
-	public ContactInterface getService(final int folderId, final int context_id){
-		final ContactInterface contactInterface = services.get(folderId);
-			if (null == contactInterface || context_id != contactInterface.getLdapServer().getContext()) {
-				return null;
-			} else {
-				return contactInterface;
-			}
+    public int getNumberOfServices(){
+        if (null != services){
+            return services.size();
+        }
+        return 0;
+    }
+    /*
+    public ContactInterface getService(int folderId){
+        ContactInterface contactInterface = services.get(folderId);
+        return contactInterface;
 
-	}
-	
+    }
+    */
+
+    public ContactInterface getService(final int folderId, final int context_id){
+        final ContactInterface contactInterface = services.get(folderId);
+            if (null == contactInterface || context_id != contactInterface.getLdapServer().getContext()) {
+                return null;
+            } else {
+                return contactInterface;
+            }
+
+    }
+
 }
