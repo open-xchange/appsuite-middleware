@@ -65,15 +65,17 @@ import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarOperation;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.calendar.CalendarSqlImp;
-import com.openexchange.groupware.calendar.ConflictHandler;
+import com.openexchange.calendar.CalendarOperation;
+import com.openexchange.calendar.CalendarSql;
+import com.openexchange.calendar.CalendarSqlImp;
+import com.openexchange.calendar.ConflictHandler;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.calendar.RecurringResult;
+import com.openexchange.calendar.RecurringResults;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -263,7 +265,7 @@ public class CalendarTest extends TestCase {
         assertFalse("Checking for update", co.prepareUpdateAction(cdao, cdao, 1, privatefolder, "Europe/Berlin"));
         final long realstart = 1149724800000L;
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
-        assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
+        assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+Constants.MILLI_DAY);
         DBPool.push(context, readcon);
         
     }
@@ -317,8 +319,8 @@ public class CalendarTest extends TestCase {
         cdao.setGlobalFolderID(fid);
         fillDatesInDao(cdao);
         cdao.removeUntil();
-        final long start_date_long = CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime());
-        final long end_date_long = (start_date_long + (CalendarRecurringCollection.MILLI_DAY * wanted_length));
+        final long start_date_long = new CalendarCollection().normalizeLong(cdao.getStartDate().getTime());
+        final long end_date_long = (start_date_long + (Constants.MILLI_DAY * wanted_length));
         final Date start_date = new Date(start_date_long);
         final Date end_date = new Date(end_date_long);
         cdao.setStartDate(start_date);
@@ -1241,7 +1243,7 @@ public class CalendarTest extends TestCase {
         csql.insertAppointmentObject(cdao);        
         final int object_id = cdao.getObjectID();
         
-        RecurringResults m = null;
+        RecurringResultsInterface m = null;
         final CalendarDataObject cdao2 = new CalendarDataObject();
         cdao2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao2.setParentFolderID(fid);
@@ -1269,27 +1271,27 @@ public class CalendarTest extends TestCase {
         c.set(Calendar.MONTH, month);
         c.set(Calendar.YEAR, year);
         
-        final long range_start = CalendarRecurringCollection.normalizeLong(c.getTimeInMillis());
+        final long range_start = new CalendarCollection().normalizeLong(c.getTimeInMillis());
         
         final int calc_length = c.getMaximum(Calendar.DAY_OF_MONTH);
         
         c.add(Calendar.DAY_OF_MONTH, calc_length);
         
-        final long range_end = CalendarRecurringCollection.normalizeLong(c.getTimeInMillis());
+        final long range_end = new CalendarCollection().normalizeLong(c.getTimeInMillis());
         
         final boolean check_array[] = new boolean[calc_length];
         
-        int pos = (int)((cdao.getStartDate().getTime()-range_start)/CalendarRecurringCollection.MILLI_DAY);
-        int len = (int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY);
+        int pos = (int)((cdao.getStartDate().getTime()-range_start)/Constants.MILLI_DAY);
+        int len = (int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY);
         for (int a = pos; a <= pos+len; a++) {
             check_array[a] = true;
         }
         
-        m = CalendarRecurringCollection.calculateRecurring(cdao2, 0, 0, 0);
+        m = new CalendarCollection().calculateRecurring(cdao2, 0, 0, 0);
         for (int a  = 0; a < m.size(); a++) {
-            final RecurringResult rr = m.getRecurringResult(a);
-            pos = (int)((rr.getStart()-range_start)/CalendarRecurringCollection.MILLI_DAY);
-            len = (int)((rr.getEnd()-rr.getStart())/CalendarRecurringCollection.MILLI_DAY);
+            final RecurringResultInterface rr = m.getRecurringResult(a);
+            pos = (int)((rr.getStart()-range_start)/Constants.MILLI_DAY);
+            len = (int)((rr.getEnd()-rr.getStart())/Constants.MILLI_DAY);
             for (int b = pos; b <= pos+len; b++) {
                 if (b < check_array.length) {
                     check_array[b] = true;
