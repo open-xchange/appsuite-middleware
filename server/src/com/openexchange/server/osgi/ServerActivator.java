@@ -86,11 +86,15 @@ import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarAdministrationService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
@@ -159,7 +163,7 @@ public final class ServerActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
-        Timer.class };
+        Timer.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, ReminderDeleteInterface.class };
 
     private final List<ServiceRegistration> registrationList;
 

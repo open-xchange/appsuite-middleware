@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.calendar.update;
+package com.openexchange.groupware.calendar.update;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,10 +58,11 @@ import java.util.ArrayList;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -102,7 +103,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         ResultSet rs2 = null;
         ResultSet rs3 = null;
         ResultSet rs4 = null;
-        CalendarCollection collection = new CalendarCollection();
+        CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         
         try {
             writecon = Database.get(contextId, true);

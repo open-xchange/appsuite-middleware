@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.calendar.update;
+package com.openexchange.groupware.calendar.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -55,28 +55,30 @@ import java.sql.Statement;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * AlterCreatingDate
+ * AlterMailAddressLength
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 
-public class AlterCreatingDate implements UpdateTask {
+public class AlterMailAddressLength implements UpdateTask {
     
-    private static final String UPDATE_PRG_DATES = "alter table prg_dates change column creating_date creating_date timestamp DEFAULT CURRENT_TIMESTAMP";
+    private static final String UPDATE_DEL_DATE_RIGHTS = "alter table del_date_rights change column ma ma VARCHAR(286)";
+    private static final String UPDATE_PRG_DATE_RIGHTS = "alter table prg_date_rights change column ma ma VARCHAR(286)";
  
     
     public int addedWithVersion() {
-        return 6;
+        return 2;
     }
     
     public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        return 3;
     }
     
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
@@ -87,18 +89,23 @@ public class AlterCreatingDate implements UpdateTask {
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
             }
             if (stmt != null) {
                 try {
-                    stmt.executeUpdate(UPDATE_PRG_DATES);
+                    stmt.executeUpdate(UPDATE_PRG_DATE_RIGHTS);
                 } catch (final SQLException ex) {
-                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
+                }
+                try {
+                    stmt.executeUpdate(UPDATE_DEL_DATE_RIGHTS);
+                } catch (final SQLException ex) {
+                   throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
                 }
             }
         } finally {
             if (stmt != null) {
-                new CalendarCollection().closeStatement(stmt);
+                ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).closeStatement(stmt);
             }
             if (writecon != null) {
                 Database.back(contextId, true, writecon);

@@ -8,6 +8,7 @@ import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 
@@ -25,7 +26,7 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 	    appointmentSqlFactoryRegistration = context.registerService(AppointmentSqlFactoryService.class.getName(), new AppointmentSqlFactory(), null);
 	    calendarCollectionRegistration = context.registerService(CalendarCollectionService.class.getName(), new CalendarCollection(), null);
-	    calendarAdministrationRegistration = context.registerService(CalendarAdministration.class.getName(), new CalendarAdministration(), null);
+	    calendarAdministrationRegistration = context.registerService(CalendarAdministrationService.class.getName(), new CalendarAdministration(), null);
 	    calendarReminderDeleteRegistration = context.registerService(ReminderDeleteInterface.class.getName(), new CalendarReminderDelete(), null);
 	}
 
