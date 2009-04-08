@@ -34,3 +34,17 @@ CREATE TABLE `user_transport_account` (
     INDEX (cid, user),
     FOREIGN KEY (cid, user) REFERENCES user (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `user_pop3_data` (
+    cid INT4 unsigned NOT NULL,
+    user INT4 unsigned NOT NULL,
+    uid INT4 unsigned NOT NULL,
+    uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+    flags TINYINT unsigned NOT NULL default 0,
+    color_flag TINYINT unsigned NOT NULL default 0,
+    received_date BIGINT(64) NOT NULL,
+    INDEX (cid, user),
+    INDEX (cid, user, uidl),
+    PRIMARY KEY (cid, user, uid),
+    FOREIGN KEY (cid, user) REFERENCES user (cid, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
