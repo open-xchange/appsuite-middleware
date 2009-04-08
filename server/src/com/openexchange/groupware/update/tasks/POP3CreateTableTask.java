@@ -88,7 +88,7 @@ public class POP3CreateTableTask implements UpdateTask {
         return UpdateTaskPriority.HIGHEST.priority;
     }
 
-    private static final String getCreateMailAccount() {
+    private static final String getCreatePOP3Data() {
         return "CREATE TABLE user_pop3_data (" + 
         		"cid INT4 unsigned NOT NULL," + 
         		"user INT4 unsigned NOT NULL," + 
@@ -103,9 +103,22 @@ public class POP3CreateTableTask implements UpdateTask {
         		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
+    private static final String getCreatePOP3UserFlags() {
+        return "CREATE TABLE user_pop3_user_flag (" + 
+        		"cid INT4 unsigned NOT NULL," + 
+        		"user INT4 unsigned NOT NULL," + 
+        		"uid INT4 unsigned NOT NULL," + 
+        		"user_flag VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        		"INDEX (cid, user, uid)," + 
+        		"PRIMARY KEY (cid, user, uid, user_flag)," + 
+        		" FOREIGN KEY (cid, user, uid) REFERENCES user_pop3_data (cid, user, uid)" + 
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    }
+
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        createTable("user_pop3_data", getCreateMailAccount(), contextId);
+        createTable("user_pop3_data", getCreatePOP3Data(), contextId);
+        createTable("user_pop3_user_flag", getCreatePOP3Data(), contextId);
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'POP3CreateTableTask' successfully performed!");
         }
