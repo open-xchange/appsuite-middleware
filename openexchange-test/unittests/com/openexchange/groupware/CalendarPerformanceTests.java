@@ -22,10 +22,10 @@ import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -158,8 +158,8 @@ public class CalendarPerformanceTests extends TestCase {
     	        cdao.setRecurrence(recstring);
     	        cdao.setStartDate(sdate);
     	        cdao.setEndDate(edate);
-    	        CalendarRecurringCollection.fillDAO(cdao);
-    	        final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0L, 5709135600000L, 0);    	        
+    	        new CalendarCollection().fillDAO(cdao);
+    	        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0L, 5709135600000L, 0);    	        
     	        final long end = System.currentTimeMillis();
     	        final long duration = end-start;
     	        all = all + duration;

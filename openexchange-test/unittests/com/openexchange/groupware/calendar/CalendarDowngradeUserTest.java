@@ -61,6 +61,8 @@ import junit.framework.TestCase;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.CalendarAdministration;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;

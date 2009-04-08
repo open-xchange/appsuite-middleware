@@ -58,6 +58,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.ConflictHandler;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
