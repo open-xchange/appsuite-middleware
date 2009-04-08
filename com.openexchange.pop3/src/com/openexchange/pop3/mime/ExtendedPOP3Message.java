@@ -47,51 +47,33 @@
  *
  */
 
-package com.openexchange.pop3.uid;
+package com.openexchange.pop3.mime;
 
-import com.planetj.math.rabinhash.RabinHashFunction64;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import com.sun.mail.pop3.POP3Folder;
+import com.sun.mail.pop3.POP3Message;
 
 /**
- * {@link UIDUtil} - UID utility class for POP3 bundle.
+ * {@link ExtendedPOP3Message} - TODO Short description of this class' purpose.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UIDUtil {
+public final class ExtendedPOP3Message extends POP3Message {
+
+    private final POP3Folder pop3Folder;
 
     /**
-     * Initializes a new {@link UIDUtil}.
-     */
-    private UIDUtil() {
-        super();
-    }
-
-    /**
-     * Computes the Rabin hash value of specified UID string.
+     * Initializes a new {@link ExtendedPOP3Message}.
      * 
-     * @param uid The UID string
-     * @return The Rabin hash value
+     * @param folder The folder
+     * @param msgno The message's sequence number
+     * @throws MessagingException If a messaging error occurs
      */
-    public static long uid2long(final String uid) {
-        return RabinHashFunction64.DEFAULT_HASH_FUNCTION.hash(uid);
+    public ExtendedPOP3Message(final Folder folder, final int msgno) throws MessagingException {
+        super(folder, msgno);
+        this.pop3Folder = (POP3Folder) folder;
     }
 
-    public static String long2uid(final long uid) {
-        return "";
-    }
     
-    public static String[] longs2uids(final long[] uids) {
-        final String[] retval = new String[uids.length];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = long2uid(uids[i]);
-        }
-        return retval;
-    }
-
-    public static void main(final String[] args) {
-        System.out.println(uid2long("ab"));
-        System.out.println(uid2long("aba"));
-
-        System.out.println(uid2long("a"));
-        System.out.println(uid2long("z"));
-    }
 }

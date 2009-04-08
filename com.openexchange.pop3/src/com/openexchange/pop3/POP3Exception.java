@@ -311,7 +311,11 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * POP3 does not support to update folders.
          */
-        UPDATE_DENIED("POP3 does not support to update folders.", Category.CODE_ERROR, 2054);
+        UPDATE_DENIED("POP3 does not support to update folders.", Category.CODE_ERROR, 2054),
+        /**
+         * A SQL error occurred: %1$s.
+         */
+        SQL_ERROR("A SQL error occurred: %1$s.", Category.CODE_ERROR, 2055);
 
         private final String message;
 

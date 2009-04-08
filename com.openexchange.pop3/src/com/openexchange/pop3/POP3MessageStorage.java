@@ -52,7 +52,13 @@ package com.openexchange.pop3;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.mail.mime.converters.MIMEMessageConverter.parseMimeFlags;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,6 +74,7 @@ import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
@@ -87,7 +94,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.config.POP3Config;
-import com.openexchange.pop3.uid.UIDUtil;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -139,11 +146,10 @@ public final class POP3MessageStorage extends POP3FolderWorker {
     }
 
     @Override
-    public MailMessage[] getMessages(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessages(final String fullname, final String[] mailIds, final MailField[] fields) throws MailException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
-        final String[] ids = UIDUtil.longs2uids(mailIds);
         // Only fetch items supported by POP3
         final FetchProfile fetchProfile = getFetchProfile(fields, true);
         if (!isSupported(fetchProfile)) {
@@ -159,6 +165,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
                 return mails;
             }
         }
+        sss
         try {
             pop3Folder = setAndOpenFolder(pop3Folder, fullname, Folder.READ_ONLY);
             if (!isSelectable(pop3Folder)) {
@@ -208,7 +215,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             if (lastPos < pos) {
                 fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
             }
-            return MIMEMessageConverter.convertMessages(messages, fields, body);
+            return MIMEMessageConverter.convertMessages(messages, pop3Folder, fields, body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
@@ -1442,5 +1449,72 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             c++;
         }
         return c == itemSize;
+    }
+
+    private static void prepareFetchProfile(final FetchProfile fetchProfile) {
+        final boolean containsEnvelope = fetchProfile.contains(FetchProfile.Item.ENVELOPE);
+        // Check if ENVELOPE fetch item needs to be added
+        final String[] headerNames = fetchProfile.getHeaderNames();
+        if ((headerNames.length > 0 || fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) && !containsEnvelope) {
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
+    }
+
+    private MailMessage[] fetch(final FetchProfile fetchProfile, final Message[] messages, final POP3Folder pop3Folder) throws MailException {
+        // Fetches UID, all HEADERS, and SIZE
+        pop3Folder.fetch(messages, fetchProfile);
+        
+        // Check for flags
+        if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
+            
+            for (int i = 0; i < messages.length; i++) {
+                
+            }
+
+        }
+    }
+
+    private static final String SELECT_FLAGS = "SELECT flags, color_flag FROM user_pop3_data WHERE cid = ? AND user = ? AND uid = ?";
+    
+    private static final String SELECT_USER_FLAGS = "SELECT user_flag FROM user_pop3_user_flag WHERE cid = ? AND user = ? AND uid = ?";
+
+    private static void prefillFlags(final MailMessage message, final long uid, final int cid, final int user) {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SELECT_FLAGS);
+            int pos = 1;
+            stmt.setLong(pos++, cid);
+            stmt.setLong(pos++, user);
+            stmt.setLong(pos++, uid);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                final int flags = rs.getInt(1);
+                final int colorFlag = rs.getInt(2);
+                message.setFlags(flags);
+                message.setColorLabel(colorFlag);
+            }
+            rs.close();
+            stmt.close();
+            stmt = con.prepareStatement(SELECT_USER_FLAGS);
+            pos = 1;
+            stmt.setLong(pos++, cid);
+            stmt.setLong(pos++, user);
+            stmt.setLong(pos++, uid);
+            rs = stmt.executeQuery();
+            final List<String> list = new ArrayList<String>();
+            while (rs.next()) {
+                list.add(rs.getString(1));
+            }
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
     }
 }
