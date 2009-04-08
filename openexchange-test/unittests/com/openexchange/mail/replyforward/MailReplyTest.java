@@ -57,10 +57,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -445,7 +443,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			long uid = -1;
+			String uid = null;
 			try {
 				uid = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[] { sourceMail })[0];
 				sourceMail = mailAccess.getMessageStorage().getMessage("INBOX", uid, false);
@@ -498,8 +496,8 @@ public final class MailReplyTest extends AbstractMailTest {
 
 			} finally {
 
-				if (uid != -1) {
-					final long[] uids = new long[] { uid };
+				if (uid != null) {
+					final String[] uids = new String[] { uid };
 					mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 				}
 

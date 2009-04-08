@@ -262,18 +262,18 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			final MailAccess<?, ?> mailAccess = getMailAccess();
 			
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
+					assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
 				}
 
-				final Set<Long> hasAttachmentSet = new HashSet<Long>(uids.length);
+				final Set<String> hasAttachmentSet = new HashSet<String>(uids.length);
 				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
 					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
@@ -282,12 +282,12 @@ public final class MailAttachmentTest extends MessageStorageTest {
 						assertFalse("Content is null", fetchedMails[i].getContent() == null);
 					}
 					if (fetchedMails[i].hasAttachment()) {
-						hasAttachmentSet.add(Long.valueOf(fetchedMails[i].getMailId()));
+						hasAttachmentSet.add(fetchedMails[i].getMailId());
 					}
 				}
 
-				for (final Long id : hasAttachmentSet) {
-					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id.longValue(), true);
+				for (final String id : hasAttachmentSet) {
+					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id, true);
 					final MailPath mailPath = new MailPath(mail.getFolder(), mail.getMailId());
 
 					final SessionObject session = getSession();
@@ -303,7 +303,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 								len > 0);
 						for (int i = 0; i < len; i++) {
 							final String sequenceId = jArray.getJSONObject(i).getString(MailListField.ID.getKey());
-							final MailPart part = mailAccess.getMessageStorage().getAttachment("INBOX", id.longValue(),
+							final MailPart part = mailAccess.getMessageStorage().getAttachment("INBOX", id,
 									sequenceId);
 							assertFalse("No mail part found for sequence ID: " + sequenceId, null == part);
 						}

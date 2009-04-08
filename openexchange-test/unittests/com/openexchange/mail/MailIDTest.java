@@ -168,7 +168,7 @@ public final class MailIDTest extends AbstractMailTest {
 					/*
 					 * Append mails to new folder
 					 */
-					final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+					final String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 					try {
 						/*
 						 * All UIDs should differ
@@ -190,7 +190,7 @@ public final class MailIDTest extends AbstractMailTest {
 					/*
 					 * Append again
 					 */
-					final long[] uids2 = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+					final String[] uids2 = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 					try {
 						/*
 						 * All UIDs should differ

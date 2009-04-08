@@ -86,12 +86,12 @@ public final class MailFlagsTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
 				try {
 					mailAccess.getMessageStorage().updateMessageFlags("INBOX",
-							new long[] { System.currentTimeMillis() }, MailMessage.FLAG_SEEN, true);
+							new String[] { String.valueOf(System.currentTimeMillis()) }, MailMessage.FLAG_SEEN, true);
 				} catch (final Exception e) {
 					fail("No Exception should be thrown here but was " + e.getMessage());
 				}
@@ -138,7 +138,7 @@ public final class MailFlagsTest extends AbstractMailTest {
 				return;
 			}
 
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
 				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_FORWARDED, true);

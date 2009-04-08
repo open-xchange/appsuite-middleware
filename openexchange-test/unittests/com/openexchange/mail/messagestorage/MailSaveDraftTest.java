@@ -50,7 +50,6 @@
 package com.openexchange.mail.messagestorage;
 
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
@@ -98,8 +97,8 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 
 			final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
 
-			long prevUid = -1;
-			long uid = -1;
+			String prevUid = null;
+			String uid = null;
 			try {
 				MailMessage mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
 				uid = mail.getMailId();
@@ -128,7 +127,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				try {
 					tmp = mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
 				} catch (final MailException e) {
-					prevUid = -1;
+					prevUid = null;
 					exc = e;
 				}
 				assertTrue("Former draft version still available", exc != null || tmp == null);
@@ -157,11 +156,11 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 					assertTrue(sb.toString(), false);
 				}
 			} finally {
-				if (prevUid != -1) {
-					mailAccess.getMessageStorage().deleteMessages(draftFullname, new long[] { prevUid }, true);
+				if (prevUid != null) {
+					mailAccess.getMessageStorage().deleteMessages(draftFullname, new String[] { prevUid }, true);
 				}
-				if (uid != -1) {
-					mailAccess.getMessageStorage().deleteMessages(draftFullname, new long[] { uid }, true);
+				if (uid != null) {
+					mailAccess.getMessageStorage().deleteMessages(draftFullname, new String[] { uid }, true);
 				}
 				/*
 				 * close

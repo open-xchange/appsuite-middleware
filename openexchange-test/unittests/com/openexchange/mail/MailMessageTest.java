@@ -49,14 +49,14 @@
 
 package com.openexchange.mail;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.tools.Collections.SmartLongArray;
 
 /**
  * MailMessageTest
@@ -106,12 +106,12 @@ public final class MailMessageTest extends AbstractMailTest {
 				assertTrue("No not all messages returned!", msgs.length == inboxFolder.getMessageCount());
 				final boolean cached = (msgs.length < MailProperties.getInstance().getMailFetchLimit());
 
-				long[] uids = null;
+				String[] uids = null;
 				{
-					final SmartLongArray sla = new SmartLongArray(msgs.length);
+					final List<String> sla = new ArrayList<String>(msgs.length);
 					for (int i = 0; i < msgs.length; i++) {
-						assertTrue("Missing UID", msgs[i].getMailId() > 0);
-						sla.append(msgs[i].getMailId());
+						assertTrue("Missing UID", msgs[i].getMailId() != null);
+						sla.add(msgs[i].getMailId());
 						assertTrue("Missing Subject", msgs[i].containsSubject());
 						assertTrue("Missing Priority", msgs[i].containsPriority());
 						assertTrue("Missing To", msgs[i].containsTo());
@@ -121,7 +121,7 @@ public final class MailMessageTest extends AbstractMailTest {
 							assertFalse("Non-Requested field size is present", msgs[i].containsSize());
 						}
 					}
-					uids = sla.toArray();
+					uids = sla.toArray(new String[sla.size()]);
 				}
 
 				if (cached) {
@@ -136,7 +136,7 @@ public final class MailMessageTest extends AbstractMailTest {
 					/*
 					 * Test cache update functionality
 					 */
-					final long[] newUids = new long[50];
+					final String[] newUids = new String[50];
 					System.arraycopy(uids, 0, newUids, 0, newUids.length);
 					mailConnection.getMessageStorage()
 							.updateMessageFlags(inboxFolder.getFullname(), newUids, 32, false);
@@ -198,7 +198,7 @@ public final class MailMessageTest extends AbstractMailTest {
 		assertTrue("No not all messages returned!", msgs.length == folder.getMessageCount());
 
 		for (int i = 0; i < msgs.length; i++) {
-			assertTrue(String.format(TEMPL, "UID", Long.valueOf(-1), folder.getFullname()), msgs[i].getMailId() > 0);
+			assertTrue(String.format(TEMPL, "UID", Long.valueOf(-1), folder.getFullname()), msgs[i].getMailId() != null);
 			assertTrue(String.format(TEMPL, "Subject", Long.valueOf(msgs[i].getMailId()), folder.getFullname()),
 					msgs[i].containsSubject());
 			assertTrue(String.format(TEMPL, "Priority", Long.valueOf(msgs[i].getMailId()), folder.getFullname()),

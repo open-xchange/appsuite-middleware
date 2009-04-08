@@ -97,10 +97,10 @@ public final class MailGetTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 				try {
-					mailAccess.getMessageStorage().getMessage("INBOX", System.currentTimeMillis(), true);	
+					mailAccess.getMessageStorage().getMessage("INBOX", String.valueOf(System.currentTimeMillis()), true);	
 				} catch (final MailException e) {
 					assertEquals("Wrong Error Code in Exception", "MSG-0032", e.getErrorCode());
 				} catch (final Exception e) {
@@ -109,12 +109,12 @@ public final class MailGetTest extends AbstractMailTest {
 				
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
+					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == null);
 				}
 
 				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
 					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
@@ -126,7 +126,7 @@ public final class MailGetTest extends AbstractMailTest {
 
 				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_EVEN_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
 					assertTrue("Missing From", fetchedMails[i].containsFrom());
@@ -147,7 +147,7 @@ public final class MailGetTest extends AbstractMailTest {
 
 				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_FULL);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
 					assertTrue("Missing From", fetchedMails[i].containsFrom());

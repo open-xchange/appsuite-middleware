@@ -52,7 +52,6 @@ package com.openexchange.mail.messagestorage;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -104,8 +103,8 @@ public final class MailDeleteTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
-			long[] trashedIDs = null;
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			String[] trashedIDs = null;
 			try {
 
 				final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
@@ -123,7 +122,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 				 * Delete none existing mail
 				 */
 				try {
-					mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { System.currentTimeMillis() }, false);		
+					mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(System.currentTimeMillis()) }, false);		
 				} catch (final Exception e) {
 					fail("No Exception should be thrown here. Exception was " + e.getMessage());
 				}
@@ -131,7 +130,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
 				
 				try{
-					mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { System.currentTimeMillis() }, false);
+					mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(System.currentTimeMillis()) }, false);
 				} catch (final Exception e) {
 					fail(e.getMessage());
 				}
@@ -143,18 +142,18 @@ public final class MailDeleteTest extends AbstractMailTest {
 				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
 						MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
 				assertTrue("Size mismatch: " + trashed.length + " but should be " + trash.getMessageCount(), trashed.length == trash.getMessageCount());
-				final Set<Long> ids = new HashSet<Long>(trash.getMessageCount());
+				final Set<String> ids = new HashSet<String>(trash.getMessageCount());
 				for (final MailMessage mail : trashed) {
-					ids.add(Long.valueOf(mail.getMailId()));
+					ids.add(mail.getMailId());
 				}
 				ids.removeAll(prevIds);
 				assertTrue("Size mismatch: " + ids.size() + " but should be " + uids.length, ids.size() == uids.length);
 				
-				trashedIDs = new long[uids.length];
+				trashedIDs = new String[uids.length];
 				{
 					int k = 0;
-					for (final Long id : ids) {
-						trashedIDs[k++] = id.longValue();
+					for (final String id : ids) {
+						trashedIDs[k++] = id;
 					}
 				}
 
@@ -163,7 +162,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 						+ (null == trashed ? "null" : String.valueOf(trashed.length)) + " IDs: "
 						+ Arrays.toString(trashedIDs), trashed != null && trashed.length == uids.length);
 				for (int i = 0; i < trashed.length; i++) {
-					assertFalse("Missing mail ID", trashed[i].getMailId() == -1);
+					assertFalse("Missing mail ID", trashed[i].getMailId() == null);
 					assertTrue("Missing content type", trashed[i].containsContentType());
 					assertTrue("Missing flags", trashed[i].containsFlags());
 					assertTrue("Missing From", trashed[i].containsFrom());

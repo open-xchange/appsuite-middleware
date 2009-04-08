@@ -137,7 +137,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                 /*
                  * Touch folder by message storage
                  */
-                final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
+                final String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
                 /*
                  * This copy operation on the same folder causes inconsistencies in java mail
                  */
@@ -184,7 +184,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
             mailAccess.connect();
 
             String fullname = null;
-            long[] trashedIds = null;
+            String[] trashedIds = null;
             try {
                 String parentFullname = null;
                 {
@@ -216,7 +216,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     mfd.addPermission(p);
                     mailAccess.getFolderStorage().createFolder(mfd);
                 }
-                final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
+                final String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
 
                 /*
                  * Touch trash folder by message storage
@@ -258,17 +258,17 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                         "Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
                         trashed.length == expectedMsgCount);
 
-                    final Set<Long> newIds = new HashSet<Long>(numTrashedMails);
+                    final Set<String> newIds = new HashSet<String>(numTrashedMails);
                     for (int i = 0; i < trashed.length; i++) {
-                        newIds.add(Long.valueOf(trashed[i].getMailId()));
+                        newIds.add(trashed[i].getMailId());
                     }
                     newIds.removeAll(oldIds);
 
-                    trashedIds = new long[newIds.size()];
+                    trashedIds = new String[newIds.size()];
                     assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
                     int i = 0;
-                    for (final Long id : newIds) {
-                        trashedIds[i++] = id.longValue();
+                    for (final String id : newIds) {
+                        trashedIds[i++] = id;
                     }
                 }
 
@@ -330,7 +330,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     mailAccess.getFolderStorage().createFolder(mfd);
                 }
                 final MailMessage appendMe = getMessages(getTestMailDir(), 1)[0];
-                final long uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { appendMe })[0];
+                final String uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { appendMe })[0];
 
                 // Check that UID is valid
                 assertNotSame(

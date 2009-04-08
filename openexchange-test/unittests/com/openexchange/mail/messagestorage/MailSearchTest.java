@@ -122,7 +122,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
 				SearchTerm<?> term = new HeaderTerm(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
@@ -130,7 +130,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL,
 						null, null, term, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
+					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == null);
 				}
 
 				term = new FlagTerm(MailMessage.FLAG_SEEN, false);
@@ -138,7 +138,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
 					assertTrue("Message contains flag \\Seen although only unseen messages should have been returned",
@@ -153,7 +153,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_EVEN_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
 					assertTrue("Missing From", fetchedMails[i].containsFrom());
@@ -167,18 +167,18 @@ public final class MailSearchTest extends AbstractMailTest {
 					assertTrue("Missing priority", fetchedMails[i].containsPriority());
 				}
 
-				final Map<Long, String> map = new HashMap<Long, String>(fetchedMails.length);
+				final Map<String, String> map = new HashMap<String, String>(fetchedMails.length);
 				for (int i = 0; i < fetchedMails.length && i < 100; i++) {
 					final String messageId = fetchedMails[i].getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
 					if (null != messageId && messageId.length() > 0 && !"null".equalsIgnoreCase(messageId)) {
-						map.put(Long.valueOf(fetchedMails[i].getMailId()), messageId);
+						map.put(fetchedMails[i].getMailId(), messageId);
 					}
 				}
 
 				final int size = map.size();
-				final Iterator<Map.Entry<Long, String>> iter = map.entrySet().iterator();
+				final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
 				for (int i = 0; i < size; i++) {
-					final Map.Entry<Long, String> e = iter.next();
+					final Map.Entry<String, String> e = iter.next();
 					term = new HeaderTerm(MessageHeaders.HDR_MESSAGE_ID, e.getValue());
 					start = System.currentTimeMillis();
 					final MailMessage[] searchedMails = mailAccess.getMessageStorage().searchMessages("INBOX",
@@ -190,7 +190,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						final String messageId = searchedMails[j].getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
 						assertTrue("Missing Message-Id", null != messageId);
 						assertTrue("Non-matching Message-Id", messageId.equals(e.getValue()));
-						found = e.getKey().longValue() == searchedMails[j].getMailId();
+						found = e.getKey().equals(searchedMails[j].getMailId());
 					}
 					assertTrue("Non-matching mail ID", found);
 				}
@@ -343,7 +343,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				 */
 				mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
 
-				final long uid;
+				final String uid;
 				{
 					final MailMessage mail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
 					assertEquals("Unexpected or missing Message-ID header: ",
@@ -511,7 +511,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					 */
 					final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 					final int breakEven = MailProperties.getInstance().getMailFetchLimit();
-					final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+					final String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 					int count = mails.length;
 					while (count < breakEven) {
 						mailAccess.getMessageStorage().copyMessages(fullname, fullname, uids, true);
@@ -523,7 +523,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					mailAccess.getMessageStorage().appendMessages(fullname, mails);
 				}
 
-				final long uid;
+				final String uid;
 				{
 					final MailMessage mail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
 					uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { mail })[0];

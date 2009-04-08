@@ -806,7 +806,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			mailAccess.connect();
 
 			String fullname = null;
-			long[] trashedIDs = null;
+			String[] trashedIDs = null;
 			String trashFullname = null;
 			try {
 				final String name = TEMPORARY_FOLDER;
@@ -842,7 +842,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				}
 
 				final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-				long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+				String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 
 				MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
 				assertTrue("Messages not completely appended to mail folder " + fullname,
@@ -865,19 +865,19 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Mails not completely backuped", mailAccess.getFolderStorage().getFolder(trashFullname)
 						.getMessageCount() == expectedMsgCount);
 
-				final Set<Long> newIds = new HashSet<Long>(expectedMsgCount);
+				final Set<String> newIds = new HashSet<String>(expectedMsgCount);
 				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
 						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
 						trashed.length == expectedMsgCount);
 				for (int i = 0; i < trashed.length; i++) {
-					newIds.add(Long.valueOf(trashed[i].getMailId()));
+					newIds.add(trashed[i].getMailId());
 				}
 				newIds.removeAll(ids);
-				trashedIDs = new long[newIds.size()];
+				trashedIDs = new String[newIds.size()];
 				int i = 0;
-				for (final Long id : newIds) {
-					trashedIDs[i++] = id.longValue();
+				for (final String id : newIds) {
+					trashedIDs[i++] = id;
 				}
 				mailAccess.getMessageStorage().deleteMessages(trashFullname, trashedIDs, true);
 				trashedIDs = null;

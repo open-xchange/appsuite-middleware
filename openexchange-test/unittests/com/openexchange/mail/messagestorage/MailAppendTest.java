@@ -66,7 +66,7 @@ public final class MailAppendTest extends MessageStorageTest {
 
     private static final String INBOX = "INBOX";
     
-    private long[] uids = null;
+    private String[] uids = null;
     
     private static MailField[][] variations = null;
     

@@ -215,7 +215,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 						MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
 				int count = 0;
 				for (int i = 0; i < mails.length; i++) {
-					if (mails[i].getMailId() != 11611L) {
+					if (!"11611".equals(mails[i].getMailId())) {
 						continue;
 					}
 					final DumperMessageHandler msgHandler1 = new DumperMessageHandler(true);

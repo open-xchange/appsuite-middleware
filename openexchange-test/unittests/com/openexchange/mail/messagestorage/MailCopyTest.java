@@ -90,27 +90,27 @@ public final class MailCopyTest extends MessageStorageTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 			    final String fullname = createTemporaryFolder(session, mailAccess);
 
 				try {
-					final long[] copied = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, uids, false);
+					final String[] copied = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, uids, false);
 					assertTrue("Missing copied mail IDs", copied != null);
 					assertTrue("Number of copied messages does not match", copied.length == uids.length);
 					for (int i = 0; i < copied.length; i++) {
-						assertTrue("Invalid mail ID", copied[i] != -1);
+						assertTrue("Invalid mail ID", copied[i] != null);
 					}
 
 					MailMessage[] fetchedMails = mailAccess.getMessageStorage()
 							.getMessages(fullname, copied, FIELDS_ID);
 					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
+						assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
 					}
 
 					fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_MORE);
 					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 						assertTrue("Missing content type", fetchedMails[i].containsContentType());
 						assertTrue("Missing flags", fetchedMails[i].containsFlags());
 						if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
@@ -122,7 +122,7 @@ public final class MailCopyTest extends MessageStorageTest {
 
 					fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_EVEN_MORE);
 					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 						assertTrue("Missing content type", fetchedMails[i].containsContentType());
 						assertTrue("Missing flags", fetchedMails[i].containsFlags());
 						assertTrue("Missing From", fetchedMails[i].containsFrom());
@@ -144,7 +144,7 @@ public final class MailCopyTest extends MessageStorageTest {
 
 					fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_FULL);
 					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 						assertTrue("Missing content type", fetchedMails[i].containsContentType());
 						assertTrue("Missing flags", fetchedMails[i].containsFlags());
 						assertTrue("Missing From", fetchedMails[i].containsFrom());

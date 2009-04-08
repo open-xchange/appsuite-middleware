@@ -179,7 +179,7 @@ public final class MailImageTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 
-			final long uid = mailAccess.getMessageStorage()
+			final String uid = mailAccess.getMessageStorage()
 					.appendMessages(
 							"INBOX",
 							new MailMessage[] { MIMEMessageConverter.convertMessage(MSG_WITH_INLINE_IMG
@@ -215,7 +215,7 @@ public final class MailImageTest extends AbstractMailTest {
 				}
 
 			} finally {
-				mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { uid }, true);
+				mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { uid }, true);
 				/*
 				 * close
 				 */

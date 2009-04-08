@@ -83,11 +83,11 @@ public final class MailColorLabelTest extends MessageStorageTest {
 				return;
 			}
 
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 			    for (int i = 0; i < 11; i++) {
 			        mailAccess.getMessageStorage().updateMessageColorLabel("INBOX", uids, i);
-			        MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
+			        final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
 			                FIELDS_ID_AND_COLORLABEL);
 			        for (int o = 0; o < fetchedMails.length; o++) {
 			            assertTrue("Missing color label", fetchedMails[o].containsColorLabel());

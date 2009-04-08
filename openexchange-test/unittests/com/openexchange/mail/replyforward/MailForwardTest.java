@@ -464,7 +464,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			long[] uids = null;
+			String[] uids = null;
 			try {
 				{
 					final MailMessage[] mails = new MailMessage[2];

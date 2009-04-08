@@ -125,7 +125,7 @@ public final class MailBugfixTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			try {
-				final long[] uids = mailAccess.getMessageStorage().appendMessages(INBOX, new MailMessage[] { mail });
+				final String[] uids = mailAccess.getMessageStorage().appendMessages(INBOX, new MailMessage[] { mail });
 				try {
 					/*
 					 * Obtain forward mail with "inlined" original mail.

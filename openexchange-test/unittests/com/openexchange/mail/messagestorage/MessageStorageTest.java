@@ -237,9 +237,9 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, final boolean parsed) {
         final boolean full = set.contains(MailField.FULL);
         if (full || set.contains(MailField.ID)) {
-            assertTrue("Missing mail ID in " + mailname, mail.getMailId() != -1);
+            assertTrue("Missing mail ID in " + mailname, mail.getMailId() != null);
         } else {
-            assertTrue("Mail ID set in " + mailname + " although not requested", mail.getMailId() == -1);
+            assertTrue("Mail ID set in " + mailname + " although not requested", mail.getMailId() == null);
         }
         if (full || set.contains(MailField.FLAGS)) {
             assertTrue("Missing flags in " + mailname, mail.containsFlags());
