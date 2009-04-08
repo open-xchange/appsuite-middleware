@@ -76,7 +76,7 @@ public final class StringCollection {
 
     static final byte[] DAPR = "\\'".getBytes();
 
-    private static final Class<? extends CalendarCollectionService> CalendarCollectionService = null;
+    private static final Class<? extends CalendarCollectionService> CalendarCollectionService = CalendarCollectionService.class;
 
     private StringCollection() {
         super();

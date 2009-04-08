@@ -103,7 +103,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class CalendarSql implements AppointmentSQLInterface {
 
-    public static final String default_class = "com.openexchange.groupware.calendar.CalendarMySQL";
+    public static final String default_class = "com.openexchange.calendar.CalendarMySQL";
 
     public static final String ERROR_PUSHING_DATABASE = "error pushing readable connection";
 
