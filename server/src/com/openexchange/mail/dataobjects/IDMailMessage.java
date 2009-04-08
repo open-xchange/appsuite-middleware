@@ -62,19 +62,19 @@ public final class IDMailMessage extends MailMessage {
 
     private static final long serialVersionUID = -8945006270321242506L;
 
-    private long mailId;
+    private String mailId;
 
     /**
      * Initializes a new {@link IDMailMessage}
      */
-    public IDMailMessage(final long mailId, final String folder) {
+    public IDMailMessage(final String mailId, final String folder) {
         super();
         this.mailId = mailId;
         setFolder(folder);
     }
 
     @Override
-    public long getMailId() {
+    public String getMailId() {
         return mailId;
     }
 
@@ -84,7 +84,7 @@ public final class IDMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMailId(final long id) {
+    public void setMailId(final String id) {
         mailId = id;
     }
 

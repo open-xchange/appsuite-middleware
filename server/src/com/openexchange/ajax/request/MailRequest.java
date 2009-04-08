@@ -271,7 +271,7 @@ public final class MailRequest {
 
         protected final Mail mailServlet;
 
-        protected final List<Long> mailIDs;
+        protected final List<String> mailIDs;
 
         /**
          * Initializes a new {@link CollectObject}
@@ -280,7 +280,7 @@ public final class MailRequest {
          */
         protected CollectObject(final Mail mailServlet) {
             super();
-            this.mailIDs = new ArrayList<Long>();
+            this.mailIDs = new ArrayList<String>();
             this.mailServlet = mailServlet;
         }
 
@@ -319,7 +319,7 @@ public final class MailRequest {
          * @throws JSONException If a JSON error occurs
          */
         public final void addCollectable(final JSONObject jsonObject) throws JSONException {
-            mailIDs.add(Long.valueOf(jsonObject.getLong(AJAXServlet.PARAMETER_ID)));
+            mailIDs.add(jsonObject.getString(AJAXServlet.PARAMETER_ID));
         }
 
         /**
@@ -327,13 +327,8 @@ public final class MailRequest {
          * 
          * @return A newly created array of long containing this object's mail IDs.
          */
-        protected final long[] getMailIDs() {
-            final int size = mailIDs.size();
-            final long[] longs = new long[size];
-            for (int i = 0; i < size; i++) {
-                longs[i] = mailIDs.get(i).longValue();
-            }
-            return longs;
+        protected final String[] getMailIDs() {
+            return mailIDs.toArray(new String[mailIDs.size()]);
         }
     }
 

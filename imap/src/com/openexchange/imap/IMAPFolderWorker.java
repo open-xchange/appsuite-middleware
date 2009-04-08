@@ -63,6 +63,7 @@ import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -79,7 +80,7 @@ import com.sun.mail.imap.Rights.Right;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class IMAPFolderWorker extends MailMessageStorage {
+public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderWorker.class);
 

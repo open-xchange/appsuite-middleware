@@ -51,9 +51,7 @@ package com.openexchange.smtp.dataobjects;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-
 import javax.activation.DataHandler;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -74,7 +72,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	private SMTPBodyPart mailPart;
 
-	private long uid = -1L;
+	private String uid;
 
 	private final ArrayList<MailPart> enclosedParts;
 
@@ -178,12 +176,12 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	}
 
 	@Override
-	public long getMailId() {
+	public String getMailId() {
 		return uid;
 	}
 
 	@Override
-	public void setMailId(final long id) {
+	public void setMailId(final String id) {
 		this.uid = id;
 	}
 

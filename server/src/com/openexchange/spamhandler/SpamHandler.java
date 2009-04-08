@@ -159,7 +159,7 @@ public abstract class SpamHandler {
      * @param session The session providing needed user data
      * @throws MailException If handling spam fails
      */
-    public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleSpam(final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
         /*
          * Copy to confirmed spam folder
          */
@@ -202,6 +202,6 @@ public abstract class SpamHandler {
      * @param session The session providing needed user data
      * @throws MailException If handling ham fails
      */
-    public abstract void handleHam(String spamFullname, long[] mailIDs, boolean move, Session session) throws MailException;
+    public abstract void handleHam(String spamFullname, String[] mailIDs, boolean move, Session session) throws MailException;
 
 }

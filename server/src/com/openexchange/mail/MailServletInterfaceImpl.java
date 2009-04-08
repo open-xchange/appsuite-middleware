@@ -232,7 +232,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final int SPAM_SPAM = 1;
 
     @Override
-    public long[] copyMessages(final String sourceFolder, final String destFolder, final long[] msgUIDs, final boolean move) throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] msgUIDs, final boolean move) throws MailException {
         final FullnameArgument source = prepareMailFolderParam(sourceFolder);
         final FullnameArgument dest = prepareMailFolderParam(destFolder);
         final String sourceFullname = source.getFullname();
@@ -264,7 +264,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 }
             }
-            final long[] maildIds;
+            final String[] maildIds;
             if (move) {
                 maildIds = mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, msgUIDs, false);
             } else {
@@ -316,7 +316,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 msgUIDs,
                 new MailField[] { MailField.FULL });
             // Append them to destination folder
-            final long[] maildIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
+            final String[] maildIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
             // Delete source messages if a move shall be performed
             if (move) {
                 mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
@@ -360,7 +360,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public boolean deleteMessages(final String folder, final long[] msgUIDs, final boolean hardDelete) throws MailException {
+    public boolean deleteMessages(final String folder, final String[] msgUIDs, final boolean hardDelete) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         initConnection(argument.getAccountId());
         final String fullname = argument.getFullname();
@@ -500,7 +500,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs, final UserSettingMail usm) throws MailException {
+    public MailMessage getForwardMessageForDisplay(final String[] folders, final String[] fowardMsgUIDs, final UserSettingMail usm) throws MailException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -561,7 +561,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final transient Object[] ARGS_FLAG_SEEN_UNSET = new Object[] { Integer.valueOf(-1 * MailMessage.FLAG_SEEN) };
 
     @Override
-    public MailMessage getMessage(final String folder, final long msgUID) throws MailException {
+    public MailMessage getMessage(final String folder, final String msgUID) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -580,7 +580,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Update cache entry
                      */
                     MailMessageCache.getInstance().updateCachedMessages(
-                        new long[] { mail.getMailId() },
+                        new String[] { mail.getMailId() },
                         accountId,
                         fullname,
                         session.getUserId(),
@@ -597,7 +597,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailPart getMessageAttachment(final String folder, final long msgUID, final String attachmentPosition, final boolean displayVersion) throws MailException {
+    public MailPart getMessageAttachment(final String folder, final String msgUID, final String attachmentPosition, final boolean displayVersion) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -615,7 +615,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailPart getMessageImage(final String folder, final long msgUID, final String cid) throws MailException {
+    public MailPart getMessageImage(final String folder, final String msgUID, final String cid) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -624,7 +624,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] getMessageList(final String folder, final long[] uids, final int[] fields) throws MailException {
+    public MailMessage[] getMessageList(final String folder, final String[] uids, final int[] fields) throws MailException {
         /*
          * Although message cache is only used within mail implementation, we have to examine if cache already holds desired messages. If
          * the cache holds the desired messages no connection has to be fetched/established. This avoids a lot of overhead.
@@ -703,7 +703,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Extract IDs
              */
-            final long[] mailIds = new long[mails.length];
+            final String[] mailIds = new String[mails.length];
             for (int i = 0; i < mailIds.length; i++) {
                 mailIds[i] = mails[i].getMailId();
             }
@@ -829,7 +829,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(final String folder, final long replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws MailException {
+    public MailMessage getReplyMessageForDisplay(final String folder, final String replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -899,7 +899,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Extract IDs
              */
-            final long[] mailIds = new long[mails.length];
+            final String[] mailIds = new String[mails.length];
             for (int i = 0; i < mailIds.length; i++) {
                 mailIds[i] = mails[i].getMailId();
             }
@@ -1029,7 +1029,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         }
-        final long uid;
+        final String uid;
         {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
             filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
@@ -1043,7 +1043,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         if (origMail != null) {
             if (origMail.isDraft()) {
-                deleteMessages(origMail.getFolder(), new long[] { origMail.getMailId() }, true);
+                deleteMessages(origMail.getFolder(), new String[] { origMail.getMailId() }, true);
             }
             draftMail.setMsgref(null);
         }
@@ -1260,7 +1260,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Mark referenced mail as answered
                      */
                     final String fullname = path.getFolder();
-                    final long[] uids = new long[] { path.getUid() };
+                    final String[] uids = new String[] { path.getUid() };
                     mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(
@@ -1288,7 +1288,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final MailPath supPath = composedMail.getMsgref();
                 if (null == supPath) {
                     final int count = composedMail.getEnclosedCount();
-                    final long[] ids = new long[1];
+                    final String[] ids = new String[1];
                     for (int i = 0; i < count; i++) {
                         final MailPart part = composedMail.getEnclosedMailPart(i);
                         final MailPath path = part.getMsgref();
@@ -1326,7 +1326,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Mark referenced mail as forwarded
                      */
                     final String fullname = supPath.getFolder();
-                    final long[] uids = new long[] { supPath.getUid() };
+                    final String[] uids = new String[] { supPath.getUid() };
                     mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(
@@ -1362,7 +1362,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             final long start = System.currentTimeMillis();
             final String sentFullname = mailAccess.getFolderStorage().getSentFolder();
-            final long[] uidArr;
+            final String[] uidArr;
             try {
                 uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname, new MailMessage[] { sentMail });
                 try {
@@ -1379,7 +1379,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
             }
-            if ((uidArr != null) && (uidArr[0] != -1)) {
+            if ((uidArr != null) && (uidArr[0] != null)) {
                 /*
                  * Mark appended sent mail as seen
                  */
@@ -1397,7 +1397,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public void sendReceiptAck(final String folder, final long msgUID, final String fromAddr) throws MailException {
+    public void sendReceiptAck(final String folder, final String msgUID, final String fromAddr) throws MailException {
         /*
          * Check for valid from address
          */
@@ -1430,13 +1430,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } finally {
             transport.close();
         }
-        mailAccess.getMessageStorage().updateMessageFlags(fullname, new long[] { msgUID }, MailMessage.FLAG_READ_ACK, true);
+        mailAccess.getMessageStorage().updateMessageFlags(fullname, new String[] { msgUID }, MailMessage.FLAG_READ_ACK, true);
     }
 
     private static final MailListField[] FIELDS_COLOR_LABEL = new MailListField[] { MailListField.COLOR_LABEL };
 
     @Override
-    public void updateMessageColorLabel(final String folder, final long[] msgUID, final int newColorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] msgUID, final int newColorLabel) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1462,7 +1462,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public void updateMessageFlags(final String folder, final long[] msgUID, final int flagBits, final boolean flagVal) throws MailException {
+    public void updateMessageFlags(final String folder, final String[] msgUID, final int flagBits, final boolean flagVal) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1563,11 +1563,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private static long[] messages2ids(final MailMessage[] messages) {
+    private static String[] messages2ids(final MailMessage[] messages) {
         if (null == messages) {
             return null;
         }
-        final long[] retval = new long[messages.length];
+        final String[] retval = new String[messages.length];
         for (int i = 0; i < messages.length; i++) {
             retval[i] = messages[i].getMailId();
         }

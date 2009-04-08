@@ -143,7 +143,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] getMessages(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessagesLong(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
@@ -156,7 +156,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (fieldSet.contains(MailField.FULL)) {
                 final MailMessage[] mails = new MailMessage[mailIds.length];
                 for (int j = 0; j < mails.length; j++) {
-                    mails[j] = getMessage(fullname, mailIds[j], true);
+                    mails[j] = getMessageLong(fullname, mailIds[j], true);
                 }
                 return mails;
             }
@@ -213,7 +213,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage getMessage(final String fullname, final long msgUID, final boolean markSeen) throws MailException {
+    public MailMessage getMessageLong(final String fullname, final long msgUID, final boolean markSeen) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
             final IMAPMessage msg;
@@ -467,7 +467,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public void deleteMessages(final String fullname, final long[] msgUIDs, final boolean hardDelete) throws MailException {
+    public void deleteMessagesLong(final String fullname, final long[] msgUIDs, final boolean hardDelete) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
             try {
@@ -605,12 +605,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public long[] copyMessages(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
+    public long[] copyMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, false, fast);
     }
 
     @Override
-    public long[] moveMessages(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
+    public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(destFolder)) {
             throw new IMAPException(IMAPException.Code.NO_ROOT_MOVE);
         }
@@ -845,7 +845,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public long[] appendMessages(final String destFullname, final MailMessage[] mailMessages) throws MailException {
+    public long[] appendMessagesLong(final String destFullname, final MailMessage[] mailMessages) throws MailException {
         if (null == mailMessages || mailMessages.length == 0) {
             return new long[0];
         }
@@ -922,7 +922,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public void updateMessageFlags(final String fullname, final long[] msgUIDs, final int flagsArg, final boolean set) throws MailException {
+    public void updateMessageFlagsLong(final String fullname, final long[] msgUIDs, final int flagsArg, final boolean set) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
             /*
@@ -1030,7 +1030,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public void updateMessageColorLabel(final String fullname, final long[] msgUIDs, final int colorLabel) throws MailException {
+    public void updateMessageColorLabelLong(final String fullname, final long[] msgUIDs, final int colorLabel) throws MailException {
         try {
             if (!MailProperties.getInstance().isUserFlagsEnabled()) {
                 /*
@@ -1112,7 +1112,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Append message to draft folder
                  */
-                uid = appendMessages(draftFullname, new MailMessage[] { MIMEMessageConverter.convertMessage(mimeMessage) })[0];
+                uid = appendMessagesLong(draftFullname, new MailMessage[] { MIMEMessageConverter.convertMessage(mimeMessage) })[0];
             } finally {
                 composedMail.cleanUp();
             }
@@ -1121,7 +1121,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final MailPath msgref = composedMail.getMsgref();
             if (msgref != null) {
-                deleteMessages(msgref.getFolder(), new long[] { msgref.getUid() }, true);
+                deleteMessagesLong(msgref.getFolder(), new long[] { Long.parseLong(msgref.getUid()) }, true);
                 composedMail.setMsgref(null);
             }
             /*
@@ -1131,7 +1131,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Return draft mail
              */
-            return getMessage(draftFullname, uid, true);
+            return getMessageLong(draftFullname, uid, true);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         } catch (final IOException e) {
@@ -1300,7 +1300,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Handle spam
                  */
                 try {
-                    IMAPProvider.getInstance().getSpamHandler().handleSpam(imapFolder.getFullName(), msgUIDs, move, session);
+                    IMAPProvider.getInstance().getSpamHandler().handleSpam(imapFolder.getFullName(), longs2uids(msgUIDs), move, session);
                     /*
                      * Close and reopen to force internal message cache update
                      */
@@ -1321,7 +1321,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Handle ham.
              */
             try {
-                IMAPProvider.getInstance().getSpamHandler().handleHam(imapFolder.getFullName(), msgUIDs, move, session);
+                IMAPProvider.getInstance().getSpamHandler().handleHam(imapFolder.getFullName(), longs2uids(msgUIDs), move, session);
                 /*
                  * Close and reopen to force internal message cache update
                  */

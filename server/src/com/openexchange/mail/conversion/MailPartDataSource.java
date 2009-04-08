@@ -83,7 +83,7 @@ public abstract class MailPartDataSource implements DataSource {
         super();
     }
 
-    protected final MailPart getMailPart(final int accountId, final String fullname, final long mailId, final String sequenceId, final Session session) throws DataException {
+    protected final MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session) throws DataException {
         final MailAccess<?, ?> mailAccess;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);

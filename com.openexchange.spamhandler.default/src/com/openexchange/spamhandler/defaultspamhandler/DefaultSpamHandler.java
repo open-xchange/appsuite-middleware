@@ -88,7 +88,7 @@ public final class DefaultSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleHam(final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
         /*
          * Copy to confirmed ham
          */

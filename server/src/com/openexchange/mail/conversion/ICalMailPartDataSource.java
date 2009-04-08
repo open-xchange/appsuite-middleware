@@ -87,12 +87,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         {
             final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
             final String fullname = arg.getFullname();
-            final long mailId;
-            try {
-                mailId = Long.parseLong(dataArguments.get(ARGS[1]));
-            } catch (final NumberFormatException e) {
-                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
-            }
+            final String mailId = dataArguments.get(ARGS[1]);
             final String sequenceId = dataArguments.get(ARGS[2]);
             mailPart = getMailPart(arg.getAccountId(), fullname, mailId, sequenceId, session);
             final ContentType contentType = mailPart.getContentType();

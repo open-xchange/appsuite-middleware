@@ -86,7 +86,7 @@ public final class MailPath implements Cloneable, Serializable {
      */
     public static final char SEPERATOR = '/';
 
-    private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(16).append("(.+)(").append(SEPERATOR).append(")([0-9]+)").toString());
+    private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(16).append("(\\p{Print}+)(").append(SEPERATOR).append(")(\\p{Print}+)").toString());
 
     /**
      * Gets the mail path corresponding to given folder fullname and message UID
@@ -95,7 +95,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @param uid The message UID
      * @return The mail path as {@link String}
      */
-    public static String getMailPath(final String folder, final long uid) {
+    public static String getMailPath(final String folder, final String uid) {
         return new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
     }
 
@@ -133,8 +133,8 @@ public final class MailPath implements Cloneable, Serializable {
      * @param mailPaths The mail IDs
      * @return The extracted UIDs
      */
-    public static long[] getUIDs(final MailPath[] mailPaths) {
-        final long[] retval = new long[mailPaths.length];
+    public static String[] getUIDs(final MailPath[] mailPaths) {
+        final String[] retval = new String[mailPaths.length];
         for (int i = 0; i < mailPaths.length; i++) {
             retval[i] = mailPaths[i].uid;
         }
@@ -148,7 +148,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     private String str;
 
-    private long uid;
+    private String uid;
 
     /**
      * Default constructor
@@ -169,7 +169,7 @@ public final class MailPath implements Cloneable, Serializable {
         if (!m.matches()) {
             throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
         }
-        uid = Long.parseLong(m.group(3));
+        uid = m.group(3);
         folder = m.group(1);
         str = mailPathStr;
     }
@@ -180,7 +180,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @param folder Folder fullname
      * @param uid The mail's unique ID
      */
-    public MailPath(final String folder, final long uid) {
+    public MailPath(final String folder, final String uid) {
         this.folder = folder;
         this.uid = uid;
         str = new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
@@ -191,7 +191,7 @@ public final class MailPath implements Cloneable, Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-        result = prime * result + (int) (uid ^ (uid >>> 32));
+        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
         return result;
     }
 
@@ -214,7 +214,11 @@ public final class MailPath implements Cloneable, Serializable {
         } else if (!folder.equals(other.folder)) {
             return false;
         }
-        if (uid != other.uid) {
+        if (uid == null) {
+            if (other.uid != null) {
+                return false;
+            }
+        } else if (!uid.equals(other.uid)) {
             return false;
         }
         return true;
@@ -240,7 +244,7 @@ public final class MailPath implements Cloneable, Serializable {
         return str;
     }
 
-    public long getUid() {
+    public String getUid() {
         return uid;
     }
 
@@ -257,7 +261,7 @@ public final class MailPath implements Cloneable, Serializable {
         if (!m.matches()) {
             throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
         }
-        uid = Long.parseLong(m.group(3));
+        uid = m.group(3);
         folder = m.group(1);
         str = mailPathStr;
         return this;

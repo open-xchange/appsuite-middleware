@@ -215,7 +215,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 /*
                  * Add missing fields
                  */
-                if (mail.containsFolder() && mail.getMailId() > 0) {
+                if (mail.containsFolder() && mail.getMailId() != null) {
                     jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
                     jsonObject.put(DataFields.ID, mail.getMailId());
                 }

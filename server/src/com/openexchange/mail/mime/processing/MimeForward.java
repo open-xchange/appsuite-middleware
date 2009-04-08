@@ -76,7 +76,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -148,7 +147,7 @@ public final class MimeForward {
             for (int i = 0; i < mimeMessages.length; i++) {
                 final MailMessage cur = originalMails[i];
                 mimeMessages[i] = (MimeMessage) MIMEMessageConverter.convertMailMessage(cur);
-                if (cur.getMailId() != -1 && cur.getFolder() != null) {
+                if (cur.getMailId() != null && cur.getFolder() != null) {
                     /*
                      * Temporary store message reference in MIME message's headers
                      */

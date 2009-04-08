@@ -701,7 +701,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
@@ -798,7 +798,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
@@ -831,7 +831,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getForwardMessageForDisplay(
                     new String[] { folderPath },
-                    new long[] { uid },
+                    new String[] { uid },
                     usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
@@ -894,7 +894,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = paramContainer.getStringParam(PARAMETER_SHOW_SRC);
             final boolean showMessageSource = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = paramContainer.getStringParam(PARAMETER_EDIT_DRAFT);
@@ -963,7 +963,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Leave mail as unseen
                          */
-                        mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
+                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                     } else if (wasUnseen) {
                         triggerContactCollector(session, mail);
                     }
@@ -980,7 +980,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Leave mail as unseen
                          */
-                        mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
+                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                     } else if (wasUnseen) {
                         triggerContactCollector(session, mail);
                     }
@@ -1024,7 +1024,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Leave mail as unseen
                          */
-                        mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
+                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                     } else if (wasUnseen) {
                         triggerContactCollector(session, mail);
                     }
@@ -1251,7 +1251,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             // final String msgUID =
             // paramContainer.checkStringParam(PARAMETER_ID);
             final String partIdentifier = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
@@ -1358,7 +1358,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = checkStringParam(req, PARAMETER_FOLDERID);
-            final long uid = Long.parseLong(checkStringParam(req, PARAMETER_ID));
+            final String uid = checkStringParam(req, PARAMETER_ID);
             final String sequenceId = req.getParameter(PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(PARAMETER_MAILCID);
             {
@@ -1633,11 +1633,11 @@ public class Mail extends PermissionServlet implements UploadListener {
              */
             final JSONArray paths = new JSONArray(body);
             final String[] folders = new String[paths.length()];
-            final long[] ids = new long[paths.length()];
+            final String[] ids = new String[paths.length()];
             for (int i = 0; i < folders.length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
                 folders[i] = folderAndID.getString(PARAMETER_FOLDERID);
-                ids[i] = Long.parseLong(folderAndID.get(PARAMETER_ID).toString());
+                ids[i] = folderAndID.getString(PARAMETER_ID);
             }
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
@@ -2214,7 +2214,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Pre-Select field writers
                  */
                 final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-                final Map<String, SmartLongArray> idMap = new HashMap<String, SmartLongArray>(4);
+                final Map<String, List<String>> idMap = new HashMap<String, List<String>>(4);
                 fillMapByArray(idMap, jsonIDs, length);
                 final int size = idMap.size();
                 if (size == 0) {
@@ -2237,13 +2237,17 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface = MailServletInterface.getInstance(session);
                         closeMailInterface = true;
                     }
-                    final Iterator<Map.Entry<String, SmartLongArray>> iter = idMap.entrySet().iterator();
+                    final Iterator<Map.Entry<String, List<String>>> iter = idMap.entrySet().iterator();
                     for (int k = 0; k < size; k++) {
-                        final Map.Entry<String, SmartLongArray> entry = iter.next();
+                        final Map.Entry<String, List<String>> entry = iter.next();
                         /*
                          * Get message list
                          */
-                        final MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), entry.getValue().toArray(), columns);
+                        final List<String> list = entry.getValue();
+                        final MailMessage[] mails = mailInterface.getMessageList(
+                            entry.getKey(),
+                            list.toArray(new String[list.size()]),
+                            columns);
                         for (int i = 0; i < mails.length; i++) {
                             if (mails[i] != null) {
                                 final JSONArray ja = new JSONArray();
@@ -2287,23 +2291,23 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static final void fillMapByArray(final Map<String, SmartLongArray> idMap, final JSONArray idArray, final int length) throws JSONException {
+    private static final void fillMapByArray(final Map<String, List<String>> idMap, final JSONArray idArray, final int length) throws JSONException {
         String folder = null;
-        SmartLongArray sla = null;
+        List<String> list = null;
         for (int i = 0; i < length; i++) {
             final JSONObject idObject = idArray.getJSONObject(i);
             final String fld = idObject.getString(PARAMETER_FOLDERID);
             if (folder == null || !folder.equals(fld)) {
                 folder = fld;
-                final SmartLongArray tmp = idMap.get(folder);
+                final List<String> tmp = idMap.get(folder);
                 if (tmp == null) {
-                    sla = new SmartLongArray(length);
-                    idMap.put(folder, sla);
+                    list = new ArrayList<String>(length);
+                    idMap.put(folder, list);
                 } else {
-                    sla = tmp;
+                    list = tmp;
                 }
             }
-            sla.append(Long.parseLong(idObject.getString(PARAMETER_ID)));
+            list.add(idObject.getString(PARAMETER_ID));
         }
     }
 
@@ -2358,26 +2362,26 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final List<MailPath> l = new ArrayList<MailPath>(length);
                     for (int i = 0; i < length; i++) {
                         final JSONObject obj = jsonIDs.getJSONObject(i);
-                        l.add(new MailPath(obj.getString(PARAMETER_FOLDERID), obj.getLong(PARAMETER_ID)));
+                        l.add(new MailPath(obj.getString(PARAMETER_FOLDERID), obj.getString(PARAMETER_ID)));
                     }
                     Collections.sort(l, MailPath.COMPARATOR);
                     String lastFld = l.get(0).getFolder();
-                    final SmartLongArray arr = new SmartLongArray(length);
+                    final List<String> arr = new ArrayList<String>(length);
                     for (int i = 0; i < length; i++) {
                         final MailPath current = l.get(i);
                         if (!lastFld.equals(current.getFolder())) {
                             /*
                              * Delete all collected UIDs til here and reset
                              */
-                            final long[] uids = arr.toArray();
+                            final String[] uids = arr.toArray(new String[arr.size()]);
                             mailInterface.deleteMessages(lastFld, uids, hardDelete);
-                            arr.reset();
+                            arr.clear();
                             lastFld = current.getFolder();
                         }
-                        arr.append(current.getUid());
+                        arr.add(current.getUid());
                     }
                     if (arr.size() > 0) {
-                        final long[] uids = arr.toArray();
+                        final String[] uids = arr.toArray(new String[arr.size()]);
                         mailInterface.deleteMessages(lastFld, uids, hardDelete);
                     }
                 }
@@ -2443,7 +2447,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         jsonWriter.object();
         try {
-            final long uid = paramContainer.checkIntParam(PARAMETER_ID);
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final JSONObject bodyObj = new JSONObject(body);
             final String destFolder = bodyObj.has(FolderFields.FOLDER_ID) && !bodyObj.isNull(FolderFields.FOLDER_ID) ? bodyObj.getString(FolderFields.FOLDER_ID) : null;
@@ -2467,7 +2471,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Perform move operation
                      */
-                    final long id = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, true)[0];
+                    final String id = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, true)[0];
                     jsonWriter.key(FolderChildFields.FOLDER_ID).value(destFolder);
                     jsonWriter.key(DataFields.ID).value(id);
                 }
@@ -2475,7 +2479,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Update color label
                      */
-                    mailInterface.updateMessageColorLabel(sourceFolder, new long[] { uid }, colorLabel.intValue());
+                    mailInterface.updateMessageColorLabel(sourceFolder, new String[] { uid }, colorLabel.intValue());
                     jsonWriter.key(FolderChildFields.FOLDER_ID).value(sourceFolder);
                     jsonWriter.key(DataFields.ID).value(uid);
                 }
@@ -2483,7 +2487,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Update system flags which are allowed to be altered by client
                      */
-                    mailInterface.updateMessageFlags(sourceFolder, new long[] { uid }, flagBits.intValue(), flagVal);
+                    mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, flagBits.intValue(), flagVal);
                     jsonWriter.key(FolderChildFields.FOLDER_ID).value(sourceFolder);
                     jsonWriter.key(DataFields.ID).value(uid);
                 }
@@ -2589,7 +2593,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         try {
                             final String sentFullname = MailFolderUtility.prepareMailFolderParam(
                                 mailAccess.getFolderStorage().getSentFolder()).getFullname();
-                            final long[] uidArr;
+                            final String[] uidArr;
                             try {
                                 /*
                                  * Append to default "sent" folder
@@ -2616,7 +2620,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 }
                                 throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
                             }
-                            if ((uidArr != null) && (uidArr[0] != -1)) {
+                            if ((uidArr != null) && (uidArr[0] != null)) {
                                 /*
                                  * Mark appended sent mail as seen
                                  */
@@ -2675,7 +2679,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (mailAccess.getFolderStorage().getDraftsFolder().equals(folder)) {
                         m.setFlag(MailMessage.FLAG_DRAFT, true);
                     }
-                    final long id = mailAccess.getMessageStorage().appendMessages(fullnameArgument.getFullname(), new MailMessage[] { m })[0];
+                    final String id = mailAccess.getMessageStorage().appendMessages(fullnameArgument.getFullname(), new MailMessage[] { m })[0];
                     responseData = new JSONObject();
                     responseData.put(FolderChildFields.FOLDER_ID, folder);
                     responseData.put(DataFields.ID, id);
@@ -2739,7 +2743,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         jsonWriter.object();
         try {
-            final long uid = paramContainer.checkIntParam(PARAMETER_ID);
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final String destFolder = new JSONObject(body).getString(FolderFields.FOLDER_ID);
             MailServletInterface mailInterface = mailInterfaceArg;
@@ -2749,7 +2753,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                final long msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, false)[0];
+                final String msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, false)[0];
                 jsonWriter.key(FolderChildFields.FOLDER_ID).value(destFolder);
                 jsonWriter.key(DataFields.ID).value(msgUID);
             } finally {
@@ -2777,15 +2781,15 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    public final void actionPutMoveMailMultiple(final ServerSession session, final JSONWriter writer, final long[] mailIDs, final String sourceFolder, final String destFolder, final MailServletInterface mailInteface) throws JSONException {
+    public final void actionPutMoveMailMultiple(final ServerSession session, final JSONWriter writer, final String[] mailIDs, final String sourceFolder, final String destFolder, final MailServletInterface mailInteface) throws JSONException {
         actionPutMailMultiple(session, writer, mailIDs, sourceFolder, destFolder, true, mailInteface);
     }
 
-    public final void actionPutCopyMailMultiple(final ServerSession session, final JSONWriter writer, final long[] mailIDs, final String srcFolder, final String destFolder, final MailServletInterface mailInterface) throws JSONException {
+    public final void actionPutCopyMailMultiple(final ServerSession session, final JSONWriter writer, final String[] mailIDs, final String srcFolder, final String destFolder, final MailServletInterface mailInterface) throws JSONException {
         actionPutMailMultiple(session, writer, mailIDs, srcFolder, destFolder, false, mailInterface);
     }
 
-    public final void actionPutMailMultiple(final ServerSession session, final JSONWriter writer, final long[] mailIDs, final String srcFolder, final String destFolder, final boolean move, final MailServletInterface mailInterfaceArg) throws JSONException {
+    public final void actionPutMailMultiple(final ServerSession session, final JSONWriter writer, final String[] mailIDs, final String srcFolder, final String destFolder, final boolean move, final MailServletInterface mailInterfaceArg) throws JSONException {
         try {
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
@@ -2794,7 +2798,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                final long[] msgUIDs = mailInterface.copyMessages(srcFolder, destFolder, mailIDs, move);
+                final String[] msgUIDs = mailInterface.copyMessages(srcFolder, destFolder, mailIDs, move);
                 if (msgUIDs.length > 0) {
                     final Response response = new Response();
                     for (int k = 0; k < msgUIDs.length; k++) {
@@ -2842,7 +2846,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    public void actionPutStoreFlagsMultiple(final ServerSession session, final JSONWriter writer, final long[] mailIDs, final String folder, final int flagsBits, final boolean flagValue, final MailServletInterface mailInterfaceArg) throws JSONException {
+    public void actionPutStoreFlagsMultiple(final ServerSession session, final JSONWriter writer, final String[] mailIDs, final String folder, final int flagsBits, final boolean flagValue, final MailServletInterface mailInterfaceArg) throws JSONException {
         try {
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
@@ -2892,7 +2896,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    public void actionPutColorLabelMultiple(final ServerSession session, final JSONWriter writer, final long[] mailIDs, final String folder, final int colorLabel, final MailServletInterface mailInterfaceArg) throws JSONException {
+    public void actionPutColorLabelMultiple(final ServerSession session, final JSONWriter writer, final String[] mailIDs, final String folder, final int colorLabel, final MailServletInterface mailInterfaceArg) throws JSONException {
         try {
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
@@ -2980,7 +2984,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         jsonWriter.array();
         try {
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String sequenceId = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
             final String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
             MailServletInterface mailInterface = mailInterfaceArg;
@@ -3119,8 +3123,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (null == folderPath) {
                 throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_FOLDERID);
             }
-            final long uid = bodyObj.has(PARAMETER_ID) ? Long.parseLong(bodyObj.getString(PARAMETER_ID)) : -1L;
-            if (-1 == uid) {
+            final String uid = bodyObj.has(PARAMETER_ID) ? bodyObj.getString(PARAMETER_ID) : null;
+            if (null == uid) {
                 throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_ID);
             }
             final String fromAddr = bodyObj.has(MailJSONField.FROM.getKey()) && !bodyObj.isNull(MailJSONField.FROM.getKey()) ? bodyObj.getString(MailJSONField.FROM.getKey()) : null;

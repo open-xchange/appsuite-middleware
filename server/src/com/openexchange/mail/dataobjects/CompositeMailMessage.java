@@ -281,12 +281,12 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public long getMailId() {
+    public String getMailId() {
         return delegate.getMailId();
     }
 
     @Override
-    public void setMailId(final long id) {
+    public void setMailId(final String id) {
         delegate.setMailId(id);
     }
 

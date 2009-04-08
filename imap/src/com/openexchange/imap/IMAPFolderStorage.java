@@ -1751,7 +1751,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             } finally {
                 toMove.close(false);
             }
-            imapAccess.getMessageStorage().copyMessages(moveFullname, newFullname, uids, true);
+            imapAccess.getMessageStorage().copyMessagesLong(moveFullname, newFullname, uids, true);
         }
         /*
          * Iterate subfolders

@@ -1548,7 +1548,7 @@ public final class IMAPCommandsCollection {
                         for (int j = 0; j < len; j++) {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
-                                final MailMessage m = new IDMailMessage(getItemOf(UID.class, fr, STR_UID).uid, fullname);
+                                final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, STR_UID).uid), fullname);
                                 m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, "INTERNALDATE").getDate());
                                 l.add(m);
                                 r[j] = null;

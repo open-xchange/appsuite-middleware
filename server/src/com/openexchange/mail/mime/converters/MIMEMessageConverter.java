@@ -98,6 +98,7 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.sun.mail.pop3.POP3Folder;
 
 /**
  * {@link MIMEMessageConverter} - Provides several methods to convert instances of {@link MimeMessage} to {@link MailMessage} in vice versa.
@@ -579,7 +580,7 @@ public final class MIMEMessageConverter {
         FILLER_MAP_EXT.put(MailField.ID, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                mailMessage.setMailId(((ExtendedMimeMessage) msg).getUid());
+                mailMessage.setMailId(String.valueOf(((ExtendedMimeMessage) msg).getUid()));
             }
         });
         FILLER_MAP_EXT.put(MailField.FOLDER_ID, new MailMessageFieldFiller() {
@@ -1086,7 +1087,11 @@ public final class MIMEMessageConverter {
                     fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                            mailMessage.setMailId(((UIDFolder) folder).getUID(msg));
+                            if (folder instanceof FullnameFolder) {
+                                mailMessage.setMailId(((FullnameFolder) folder).getUID(msg));
+                            } else {
+                                mailMessage.setMailId(String.valueOf(((UIDFolder) folder).getUID(msg)));
+                            }
                         }
                     };
                 } else if (MailField.FOLDER_ID.equals(fields[i])) {
@@ -1153,14 +1158,22 @@ public final class MIMEMessageConverter {
             /*
              * Set folder data
              */
-            if (msg.getFolder() != null) {
-                /*
-                 * No nested message
-                 */
+            {
                 final Folder f = msg.getFolder();
-                mail.setFolder(f.getFullName());
-                mail.setMailId(((UIDFolder) f).getUID(msg));
-                mail.setUnreadMessages(f.getUnreadMessageCount());
+                if (f != null) {
+                    /*
+                     * No nested message
+                     */
+                    mail.setFolder(f.getFullName());
+                    if (f instanceof UIDFolder) {
+                        mail.setMailId(String.valueOf(((UIDFolder) f).getUID(msg)));
+                    } else if (f instanceof FullnameFolder) {
+                        mail.setMailId(((FullnameFolder) f).getUID(msg));
+                    } else if (f instanceof POP3Folder) {
+                        mail.setMailId(((POP3Folder) f).getUID(msg));
+                    }
+                    mail.setUnreadMessages(f.getUnreadMessageCount());
+                }
             }
             setHeaders(msg, mail);
             try {
@@ -1323,7 +1336,7 @@ public final class MIMEMessageConverter {
      * @return An instance of {@link MailMessage} filled with desired fields
      * @throws MailException If conversion fails
      */
-    public static MailMessage convertMessage(final byte[] asciiBytes, final long uid, final String fullname, final char separator, final MailField[] fields) throws MailException {
+    public static MailMessage convertMessage(final byte[] asciiBytes, final String uid, final String fullname, final char separator, final MailField[] fields) throws MailException {
         try {
             return convertMessage(new MimeMessage(
                 MIMEDefaultSession.getDefaultSession(),
@@ -1337,14 +1350,14 @@ public final class MIMEMessageConverter {
      * Creates a message data object from given MIME message filled with desired fields.
      * 
      * @param msg The MIME message
-     * @param uid The UID or <code>-1</code>
+     * @param uid The UID or <code>null</code>
      * @param fullname The folder fullname
      * @param separator The folder separator character
      * @param fields The desired fields to fill
      * @return An instance of {@link MailMessage} filled with desired fields
      * @throws MailException If conversion fails
      */
-    public static MailMessage convertMessage(final MimeMessage msg, final long uid, final String fullname, final char separator, final MailField[] fields) throws MailException {
+    public static MailMessage convertMessage(final MimeMessage msg, final String uid, final String fullname, final char separator, final MailField[] fields) throws MailException {
         final MailFields set = new MailFields(fields);
         if (set.contains(MailField.FULL)) {
             final MailMessage mail = convertMessage(msg);

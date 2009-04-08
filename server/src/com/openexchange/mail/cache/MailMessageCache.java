@@ -497,7 +497,7 @@ public final class MailMessageCache {
     }
 
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void updateCachedMessages(final long[] uids, final int accountId, final String fullname, final int userId, final Context ctx, final MailListField[] changedFields, final Object[] newValues) {
+    public void updateCachedMessages(final String[] uids, final int accountId, final String fullname, final int userId, final Context ctx, final MailListField[] changedFields, final Object[] newValues) {
         if (null == cache) {
             return;
         }
@@ -505,11 +505,11 @@ public final class MailMessageCache {
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final DoubleKeyMap<CacheKey, Long, MailMessage> map = (DoubleKeyMap<CacheKey, Long, MailMessage>) cache.get(mapKey);
+            final DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
-            final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname), getLongObjArr(uids));
+            final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname), uids);
             if ((mails != null) && (mails.length > 0)) {
                 final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
                 for (final MailMessage mail : mails) {
@@ -554,7 +554,7 @@ public final class MailMessageCache {
             return false;
         }
         final CacheKey mapKey = getMapKey(userId, ctx);
-        final DoubleKeyMap<CacheKey, Long, MailMessage> map = (DoubleKeyMap<CacheKey, Long, MailMessage>) cache.get(mapKey);
+        final DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
         if (map == null) {
             return false;
         }
@@ -603,7 +603,7 @@ public final class MailMessageCache {
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final DoubleKeyMap<CacheKey, Long, MailMessage> map = (DoubleKeyMap<CacheKey, Long, MailMessage>) cache.get(mapKey);
+            final DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
@@ -623,7 +623,7 @@ public final class MailMessageCache {
      * @param ctx The context
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void removeMessages(final long[] uids, final int accountId, final String fullname, final int userId, final Context ctx) {
+    public void removeMessages(final String[] uids, final int accountId, final String fullname, final int userId, final Context ctx) {
         if (null == cache) {
             return;
         }
@@ -631,11 +631,11 @@ public final class MailMessageCache {
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final DoubleKeyMap<CacheKey, Long, MailMessage> map = (DoubleKeyMap<CacheKey, Long, MailMessage>) cache.get(mapKey);
+            final DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
-            map.removeValues(getEntryKey(accountId, fullname), getLongObjArr(uids));
+            map.removeValues(getEntryKey(accountId, fullname), uids);
         } finally {
             writeLock.unlock();
         }
@@ -653,7 +653,7 @@ public final class MailMessageCache {
      * @return An array of {@link MailMessage} containing the fetched messages or <code>null</code>
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public MailMessage[] getMessages(final long[] uids, final int accountId, final String fullname, final int userId, final Context ctx) {
+    public MailMessage[] getMessages(final String[] uids, final int accountId, final String fullname, final int userId, final Context ctx) {
         if (null == cache) {
             return null;
         }
@@ -661,7 +661,7 @@ public final class MailMessageCache {
         final Lock readLock = getLock(mapKey).readLock();
         readLock.lock();
         try {
-            final DoubleKeyMap<CacheKey, Long, MailMessage> map = (DoubleKeyMap<CacheKey, Long, MailMessage>) cache.get(mapKey);
+            final DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (null == map) {
                 return null;
             }
@@ -674,7 +674,7 @@ public final class MailMessageCache {
                 /*
                  * TODO: Return cloned version ???
                  */
-                retval[i] = map.getValue(entryKey, Long.valueOf(uids[i]));
+                retval[i] = map.getValue(entryKey, uids[i]);
                 if (retval[i] == null) {
                     /*
                      * Not all desired messages can be served from cache
@@ -709,9 +709,9 @@ public final class MailMessageCache {
             final Lock writeLock = getLock(mapKey).writeLock();
             writeLock.lock();
             try {
-                DoubleKeyMap<CacheKey, Long, MailMessage> map = (DoubleKeyMap<CacheKey, Long, MailMessage>) cache.get(mapKey);
+                DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
                 if (null == map) {
-                    map = new DoubleKeyMap<CacheKey, Long, MailMessage>(MailMessage.class);
+                    map = new DoubleKeyMap<CacheKey, String, MailMessage>(MailMessage.class);
                     cache.put(mapKey, map);
                 }
                 for (final MailMessage mail : mails) {
@@ -720,7 +720,7 @@ public final class MailMessageCache {
                         /*
                          * TODO: Put cloned version into cache ???
                          */
-                        map.putValue(getEntryKey(accountId, mail.getFolder()), Long.valueOf(mail.getMailId()), mail);
+                        map.putValue(getEntryKey(accountId, mail.getFolder()), mail.getMailId(), mail);
                     }
                 }
             } finally {
@@ -729,14 +729,6 @@ public final class MailMessageCache {
         } catch (final CacheException e) {
             throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, EMPTY_ARGS);
         }
-    }
-
-    private static Long[] getLongObjArr(final long[] arr) {
-        final Long[] retval = new Long[arr.length];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = Long.valueOf(arr[i]);
-        }
-        return retval;
     }
 
     private CacheKey getMapKey(final int userId, final Context ctx) {

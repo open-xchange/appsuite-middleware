@@ -54,7 +54,6 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.UIDFolder;
 
 /**
  * {@link FullnameFolder} - A {@link Folder} implementation whose only purpose is to provide fullname, separator character and UIDs.
@@ -63,7 +62,7 @@ import javax.mail.UIDFolder;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FullnameFolder extends Folder implements UIDFolder {
+public final class FullnameFolder extends Folder {
 
     private final char separator;
 
@@ -71,7 +70,7 @@ public final class FullnameFolder extends Folder implements UIDFolder {
 
     private final boolean hasAll;
 
-    private final long[] uids;
+    private final String[] uids;
 
     /**
      * Initializes a new {@link FullnameFolder}
@@ -80,7 +79,7 @@ public final class FullnameFolder extends Folder implements UIDFolder {
      * @param separator The folder's separator character
      * @param uids The UIDs corresponding to appropriate message numbers such that uids[0] is the UID of message numbered with 1 and so on.
      */
-    public FullnameFolder(final String fullname, final char separator, final long[] uids) {
+    public FullnameFolder(final String fullname, final char separator, final String[] uids) {
         super(null);
         if (null == uids) {
             throw new IllegalArgumentException("uids is null");
@@ -98,14 +97,14 @@ public final class FullnameFolder extends Folder implements UIDFolder {
      * @param separator The folder's separator character
      * @param uid The UID corresponding to appropriate message.
      */
-    public FullnameFolder(final String fullname, final char separator, final long uid) {
+    public FullnameFolder(final String fullname, final char separator, final String uid) {
         super(null);
-        if (-1 == uid) {
+        if (null == uid) {
             throw new IllegalArgumentException("uid is invalid");
         }
         this.fullname = fullname;
         this.separator = separator;
-        uids = new long[] { uid };
+        uids = new String[] { uid };
         hasAll = false;
     }
 
@@ -293,19 +292,7 @@ public final class FullnameFolder extends Folder implements UIDFolder {
         throw new UnsupportedOperationException("FullnameFolder.renameTo()");
     }
 
-    public Message getMessageByUID(final long uid) throws MessagingException {
-        throw new UnsupportedOperationException("FullnameFolder.getMessageByUID()");
-    }
-
-    public Message[] getMessagesByUID(final long[] uids) throws MessagingException {
-        throw new UnsupportedOperationException("FullnameFolder.getMessagesByUID()");
-    }
-
-    public Message[] getMessagesByUID(final long start, final long end) throws MessagingException {
-        throw new UnsupportedOperationException("FullnameFolder.getMessagesByUID()");
-    }
-
-    public long getUID(final Message message) throws MessagingException {
+    public String getUID(final Message message) {
         if (hasAll) {
             if (uids.length < message.getMessageNumber()) {
                 throw new NoSuchElementException("Message does not belong to folder");
@@ -313,10 +300,6 @@ public final class FullnameFolder extends Folder implements UIDFolder {
             return uids[message.getMessageNumber() - 1];
         }
         return uids[0];
-    }
-
-    public long getUIDValidity() throws MessagingException {
-        throw new UnsupportedOperationException("FullnameFolder.getUIDValidity()");
     }
 
 }

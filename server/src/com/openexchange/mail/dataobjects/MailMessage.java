@@ -1321,7 +1321,7 @@ public abstract class MailMessage extends MailPart {
      * 
      * @return The ID of this mail or <code>-1</code> if not available.
      */
-    public abstract long getMailId();
+    public abstract String getMailId();
 
     /**
      * Sets the implementation-specific unique mail ID of this mail in its mail folder. The ID returned by this method is used in storages
@@ -1331,7 +1331,7 @@ public abstract class MailMessage extends MailPart {
      * 
      * @param id The mail ID or <code>-1</code> to indicate its absence
      */
-    public abstract void setMailId(long id);
+    public abstract void setMailId(String id);
 
     /**
      * Gets the number of unread messages

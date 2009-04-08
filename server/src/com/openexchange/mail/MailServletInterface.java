@@ -184,7 +184,7 @@ public abstract class MailServletInterface {
      * Returns the an array of messages located in given folder. If <code>fromToUID</code> is not <code>null</code> only messages fitting
      * into uid range will be returned.
      */
-    public abstract MailMessage[] getMessageList(String folder, long[] uids, int[] fields) throws MailException;
+    public abstract MailMessage[] getMessageList(String folder, String[] uids, int[] fields) throws MailException;
 
     /**
      * Gets the mail identified through given ID from store located in given folder.
@@ -194,7 +194,7 @@ public abstract class MailServletInterface {
      * @return The mail identified through given ID from store located in given folder.
      * @throws MailException If mail cannot be fetched from store
      */
-    public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
+    public abstract MailMessage getMessage(String folder, String msgUID) throws MailException;
 
     /**
      * Returns a message's attachment located at given <code>attachmentPosition</code> wrapped by an instance of
@@ -202,13 +202,13 @@ public abstract class MailServletInterface {
      * 
      * @param displayVersion <code>true</code> if returned object is for display purpose; otherwise <code>false</code>
      */
-    public abstract MailPart getMessageAttachment(String folder, long msgUID, String attachmentPosition, boolean displayVersion) throws MailException;
+    public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws MailException;
 
     /**
      * Returns a message's inline image located identified with given <code>cid</code> wrapped by an instance of
      * <code>JSONMessageAttachmentObject</code> for a convenient access to its attributes and content.
      */
-    public abstract MailPart getMessageImage(String folder, long msgUID, String cid) throws MailException;
+    public abstract MailPart getMessageImage(String folder, String msgUID, String cid) throws MailException;
 
     /**
      * Saves specified draft mail.
@@ -226,7 +226,7 @@ public abstract class MailServletInterface {
     /**
      * Sends a read acknowledgement to given message
      */
-    public abstract void sendReceiptAck(String folder, long msgUID, String fromAddr) throws MailException;
+    public abstract void sendReceiptAck(String folder, String msgUID, String fromAddr) throws MailException;
 
     /**
      * Sends a message described through given instance of <code>msgObj</code> and its possible file attachments contained in given instance
@@ -239,19 +239,19 @@ public abstract class MailServletInterface {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, long replyMsgUID, boolean replyToAll, UserSettingMail usm) throws MailException;
+    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm) throws MailException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
      * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
      * the forward.
      */
-    public abstract MailMessage getForwardMessageForDisplay(String[] folders, long[] fowardMsgUIDs, UserSettingMail usm) throws MailException;
+    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm) throws MailException;
 
     /**
      * Deletes the message located in given folder corresponding to given <code>msgUID</code>
      */
-    public abstract boolean deleteMessages(String folder, long[] msgUIDs, boolean hardDelete) throws MailException;
+    public abstract boolean deleteMessages(String folder, String[] msgUIDs, boolean hardDelete) throws MailException;
 
     /**
      * Clears all messages out of given folder. <b>NOTE</b> this is a hard delete, thus no copies are created
@@ -261,18 +261,18 @@ public abstract class MailServletInterface {
     /**
      * Copies or moves (if <code>move</code> is set) the defined message from source folder to destination folder.
      */
-    public abstract long[] copyMessages(String sourceFolder, String destFolder, long[] msgUIDs, boolean move) throws MailException;
+    public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] msgUIDs, boolean move) throws MailException;
 
     /**
      * Updates the color label stored in message's user flags
      */
-    public abstract void updateMessageColorLabel(String folder, long[] msgUID, int newColorLabel) throws MailException;
+    public abstract void updateMessageColorLabel(String folder, String[] msgUID, int newColorLabel) throws MailException;
 
     /**
      * Updates message's client-alterable system flags (e.g. //SEEN or //ANSWERED). <code>flagVal</code> determines whether the affected
      * flags are set (<code>true</code>) or unset (<code>false</code>).
      */
-    public abstract void updateMessageFlags(String folder, long[] msgUID, int flagBits, boolean flagVal) throws MailException;
+    public abstract void updateMessageFlags(String folder, String[] msgUID, int flagBits, boolean flagVal) throws MailException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing the mailbox's default folder

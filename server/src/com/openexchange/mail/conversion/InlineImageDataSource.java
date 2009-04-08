@@ -93,7 +93,7 @@ public final class InlineImageDataSource implements DataSource {
         super();
     }
 
-    private MailPart getImagePart(final int accountId, final String fullname, final long mailId, final String cid, final Session session) throws DataException {
+    private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session) throws DataException {
         final MailAccess<?, ?> mailAccess;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -136,12 +136,7 @@ public final class InlineImageDataSource implements DataSource {
         {
             final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
             final String fullname = arg.getFullname();
-            final long mailId;
-            try {
-                mailId = Long.parseLong(dataArguments.get(ARGS[1]));
-            } catch (final NumberFormatException e) {
-                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
-            }
+            final String mailId = dataArguments.get(ARGS[1]);
             final String cid = dataArguments.get(ARGS[2]);
             mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
             final ContentType contentType = mailPart.getContentType();

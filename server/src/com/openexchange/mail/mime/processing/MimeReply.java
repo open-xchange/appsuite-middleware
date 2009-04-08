@@ -154,7 +154,7 @@ public final class MimeReply {
         final MimeMessage mimeMessage = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail);
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
-        if (originalMail.getMailId() != -1 && originalMailFolder != null) {
+        if (originalMail.getMailId() != null && originalMailFolder != null) {
             try {
                 /*
                  * Temporary store message reference in MIME message's headers

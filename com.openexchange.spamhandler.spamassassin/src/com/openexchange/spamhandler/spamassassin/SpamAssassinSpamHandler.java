@@ -100,7 +100,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleHam(final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
         final MailService mailService = MailServiceSupplier.getInstance().getMailService();
         if (null == mailService) {
             return;
@@ -117,17 +117,17 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             /*
              * Separate the plain from the nested messages inside spam folder
              */
-            SmartLongArray plainIDs = new SmartLongArray(mailIDs.length);
-            SmartLongArray extractIDs = new SmartLongArray(mailIDs.length);
+            List<String> plainIDs = new ArrayList<String>(mailIDs.length);
+            List<String> extractIDs = new ArrayList<String>(mailIDs.length);
             for (int i = 0; i < mails.length; i++) {
                 final String spamHdr = mails[i].getFirstHeader(MessageHeaders.HDR_X_SPAM_FLAG);
                 final String spamChecker = mails[i].getFirstHeader("X-Spam-Checker-Version");
                 final ContentType contentType = mails[i].getContentType();
                 if (spamHdr != null && "yes".regionMatches(true, 0, spamHdr, 0, 3) && contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (spamChecker == null ? true : spamChecker.toLowerCase(
                     Locale.ENGLISH).indexOf("spamassassin") != -1)) {
-                    extractIDs.append(mailIDs[i]);
+                    extractIDs.add(mailIDs[i]);
                 } else {
-                    plainIDs.append(mailIDs[i]);
+                    plainIDs.add(mailIDs[i]);
                 }
             }
             final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
@@ -135,7 +135,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                 /*
                  * Copy plain messages to confirmed ham and INBOX
                  */
-                final long[] plainIDsArr = plainIDs.toArray();
+                final String[] plainIDsArr = plainIDs.toArray(new String[plainIDs.size()]);
                 plainIDs = null;
                 mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, plainIDsArr, true);
                 if (move) {
@@ -145,10 +145,10 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             /*
              * Handle spam assassin messages
              */
-            final long[] spamArr = extractIDs.toArray();
+            final String[] spamArr = extractIDs.toArray(new String[extractIDs.size()]);
             final List<MailMessage> nestedMails = new ArrayList<MailMessage>(spamArr.length);
             extractIDs = null;
-            final long[] exc = new long[1];
+            final String[] exc = new String[1];
             for (int i = 0; i < spamArr.length; i++) {
                 final MailPart wrapped = mailAccess.getMessageStorage().getAttachment(spamFullname, spamArr[i], "2");
                 wrapped.loadContent();
@@ -171,7 +171,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                     nestedMails.add(tmp);
                 }
             }
-            final long[] ids = mailAccess.getMessageStorage().appendMessages(
+            final String[] ids = mailAccess.getMessageStorage().appendMessages(
                 confirmedHamFullname,
                 nestedMails.toArray(new MailMessage[nestedMails.size()]));
             if (move) {
