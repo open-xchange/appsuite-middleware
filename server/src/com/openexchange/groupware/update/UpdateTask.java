@@ -53,52 +53,48 @@ import com.openexchange.groupware.AbstractOXException;
 
 /**
  * A single update task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface UpdateTask {
-	
-	/**
-     * Priorities for update tasks.
-     * TODO remove the int value. this isn't used anywhere. enum itself have an
-     * internal order.
-	 */
-    public static enum UpdateTaskPriority {
-		HIGHEST(0),
-		HIGH(1),
-		NORMAL(3),
-		LOW(4),
-		LOWEST(5);
-		
-		public final int priority;
-		
-		private UpdateTaskPriority(final int priority) {
-			this.priority = priority;
-		}
-	}
 
     /**
-     * Returns the database schema version with that this update task was
-     * introduced. This version is compared with the schema version of the
-     * database. This update will only be applied if the database schema version
-     * is lower than this version. Remember to register your update task in the
-     * configuration file for update tasks.
-     * @return the schema version with that this update task was introduced.
+     * Priorities for update tasks.
+     * TODO remove the int value. this isn't used anywhere. enum itself have an internal order.
+     */
+    public static enum UpdateTaskPriority {
+        HIGHEST(0), HIGH(1), NORMAL(3), LOW(4), LOWEST(5);
+
+        public final int priority;
+
+        private UpdateTaskPriority(final int priority) {
+            this.priority = priority;
+        }
+    }
+
+    /**
+     * Returns the database schema version with that this update task was introduced. This version is compared with the schema version of
+     * the database. This update will only be applied if the database schema version is lower than this version. Remember to register your
+     * update task in the configuration file for update tasks.
+     * 
+     * @return The schema version with that this update task was introduced.
      */
     int addedWithVersion();
-    
+
     /**
-     * @return this update task's priority
+     * Gets this update task's priority.
+     * 
+     * @return The update task's priority
      */
     int getPriority();
 
     /**
-     * This method is called to apply the changes to the schema of the database.
-     * Write the schema changing code in this method that it doesn't destroy any
-     * information in the database if this changings already have been applied.
-     * This ensures that update tasks can be executed twice if a task failed.
-     * @param schema schema meta data
-     * @param contextId this context identifier is used to fetch database
-     * connections from the pool.
+     * This method is called to apply the changes to the schema of the database. Write the schema changing code in this method that it
+     * doesn't destroy any information in the database if changes already have been applied. This ensures that update tasks can be executed
+     * twice if a task failed.
+     * 
+     * @param schema The schema meta data
+     * @param contextId The context ID which is used to fetch database connections from the pool.
      * @throws AbstractOXException if applying the changes fails.
      */
     void perform(Schema schema, int contextId) throws AbstractOXException;
