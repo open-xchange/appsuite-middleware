@@ -55,6 +55,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -146,7 +148,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class ServerActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServerActivator.class);
+    private static final Log LOG = LogFactory.getLog(ServerActivator.class);
 
     /**
      * Bundle ID of admin.<br>
@@ -159,7 +161,7 @@ public final class ServerActivator extends DeferredActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class, EventAdmin.class };
+    private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class, EventAdmin.class, CalendarAdministrationService.class };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
