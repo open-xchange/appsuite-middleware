@@ -143,7 +143,6 @@ public class PropertyHandler {
         return retString; 
     }
     
-    @SuppressWarnings("unchecked")
     public String getGroupProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
@@ -174,7 +173,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public boolean getGroupProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
@@ -205,7 +203,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public boolean getUserProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
@@ -237,7 +234,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public String getUserProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
@@ -271,7 +267,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public boolean getResourceProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
@@ -303,7 +298,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public int getRmiProp( final String key, final int fallBack ) {
         int retInt = fallBack;
         
@@ -340,7 +334,6 @@ public class PropertyHandler {
         }
     }
     
-    @SuppressWarnings("unchecked")
     protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
         final Properties configprops  = new Properties();
         configprops.load( new FileInputStream(file) );
@@ -412,7 +405,6 @@ public class PropertyHandler {
         return source;
     }
 
-    @SuppressWarnings("unchecked")
     public String getResourceProp(final String key, final String fallback) {
         String retval = fallback;
         if ( this.resPropValues == null ) {
@@ -441,7 +433,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public String getSqlProp(final String key, final String fallBack) {
         String retString = fallBack;
 

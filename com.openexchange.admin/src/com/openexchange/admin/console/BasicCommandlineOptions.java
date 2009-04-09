@@ -628,7 +628,6 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected final void printExtensionsError(final ExtendableDataObject obj) {
         //+ loop through extensions and check for errors       
         if (obj != null && obj.getAllExtensionsAsHash() != null) {

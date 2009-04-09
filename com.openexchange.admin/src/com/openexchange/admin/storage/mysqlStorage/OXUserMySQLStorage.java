@@ -88,6 +88,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
@@ -1670,7 +1671,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") via OX API...");
                 }
                 final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
-                AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
+                DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from login2user...");
                 }

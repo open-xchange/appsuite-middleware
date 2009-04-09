@@ -185,7 +185,6 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected final String maptostring(final Map<?,?> map) {
         if (null != map && map.size() > 0) {
             HashMap<String, String> hashMap = (HashMap<String,String>)map;

@@ -623,7 +623,6 @@ public class CmdLineParser {
         this.options.remove("--" + option.longForm());
     }
 
-    @SuppressWarnings("unchecked")
     private void addValue(Option opt, Object value) {
         String lf = opt.longForm();
 
