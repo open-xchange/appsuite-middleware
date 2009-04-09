@@ -152,7 +152,7 @@ public final class ServerActivator extends DeferredActivator {
      * Bundle ID of admin.<br>
      * TODO: Maybe this should be read by config.ini
      */
-    private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
+    private static final String BUNDLE_ID_ADMIN = "com.openexchange.admin";
 
     /**
      * Constant for string: "identifier"
