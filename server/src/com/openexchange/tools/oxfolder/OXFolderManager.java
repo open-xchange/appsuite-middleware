@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -73,6 +74,20 @@ public abstract class OXFolderManager {
         return new OXFolderManagerImpl(session);
     }
 
+    /**
+     * Gets an appropriate instance of {@link OXFolderManager} with AppointmentSQLInterface for testing purposes.
+     * 
+     * @param session The session
+     * @param appSql AppointemtSQLInterface
+     * @return An appropriate instance of {@link OXFolderManager}.
+     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     */
+    public static final OXFolderManager getInstance(final Session session, AppointmentSQLInterface appSql) throws OXFolderException {
+        OXFolderManagerImpl retVal = new OXFolderManagerImpl(session);
+        retVal.setCSql(appSql);
+        return retVal;
+    }
+    
     /**
      * Gets an appropriate instance of {@link OXFolderManager}.
      * 

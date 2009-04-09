@@ -130,6 +130,24 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     private OXFolderAccess oxfolderAccess;
 
+    private AppointmentSQLInterface cSql;
+
+    /**
+     * Getter for testing purposes.
+     * @return
+     */
+    public AppointmentSQLInterface getCSql() {
+        return cSql;
+    }
+
+    /**
+     * Setter for testing purposes.
+     * @param sql
+     */
+    public void setCSql(AppointmentSQLInterface sql) {
+        cSql = sql;
+    }
+
     /**
      * Constructor which only uses <code>Session</code>. Optional connections are going to be set to <code>null</code>.
      * 
@@ -165,7 +183,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * 
      * @throws OXFolderException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXFolderException {
+    OXFolderManagerImpl(Session session, OXFolderAccess oxfolderAccess, Connection readCon, Connection writeCon) throws OXFolderException {
         super();
         this.session = session;
         try {
@@ -178,6 +196,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
         this.readCon = readCon;
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
+        AppointmentSqlFactoryService factory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+        if (factory != null) {
+            this.cSql = factory.createAppointmentSql(session);
+        } else {
+            this.cSql = null;
+        }
     }
 
     private OXFolderAccess getOXFolderAccess() {
@@ -1467,7 +1491,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     private void deleteContainedAppointments(final int folderID) throws OXException {
-        final AppointmentSQLInterface cSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         try {
             if (null == writeCon) {
                 cSql.deleteAppointmentsInFolder(folderID);
