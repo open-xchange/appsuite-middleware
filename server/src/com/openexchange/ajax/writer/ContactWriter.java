@@ -52,21 +52,17 @@ package com.openexchange.ajax.writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.image.internal.ImageRegistry;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ContactWriter} - The writer for contacts
@@ -88,7 +84,7 @@ public class ContactWriter extends CommonWriter {
 	 */
 	public ContactWriter(final TimeZone timeZone) {
 		super(timeZone, null);
-		utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
+		utc = TimeZone.getTimeZone("utc");
 	}
 
 	public void writeArray(final ContactObject contactobject, final int cols[], final JSONArray jsonArray)
