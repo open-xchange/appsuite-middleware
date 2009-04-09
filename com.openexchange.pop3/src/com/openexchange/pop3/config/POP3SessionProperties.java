@@ -75,9 +75,9 @@ public final class POP3SessionProperties {
     }
 
     /**
-     * Creates a <b>cloned</b> version of default IMAP session properties
+     * Creates a <b>cloned</b> version of default POP3 session properties
      * 
-     * @return a cloned version of default IMAP session properties
+     * @return a cloned version of default POP3 session properties
      */
     public static Properties getDefaultSessionProperties() {
         Properties tmp = pop3SessionProperties;
@@ -94,7 +94,7 @@ public final class POP3SessionProperties {
     }
 
     /**
-     * Resets the default IMAP session properties
+     * Resets the default POP3 session properties
      */
     public static void resetDefaultSessionProperties() {
         if (pop3SessionProperties != null) {
@@ -115,7 +115,7 @@ public final class POP3SessionProperties {
          */
         MIMEDefaultSession.getDefaultSession();
         /*
-         * Define imap session properties
+         * Define POP3 session properties
          */
         pop3SessionProperties = ((Properties) (System.getProperties().clone()));
         /*
@@ -138,14 +138,14 @@ public final class POP3SessionProperties {
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
         }
         /*
-         * A connected IMAPStore maintains a pool of IMAP protocol objects for use in communicating with the IMAP server. The IMAPStore will
-         * create the initial AUTHENTICATED connection and seed the pool with this connection. As folders are opened and new IMAP protocol
-         * objects are needed, the IMAPStore will provide them from the connection pool, or create them if none are available. When a folder
-         * is closed, its IMAP protocol object is returned to the connection pool if the pool is not over capacity.
+         * A connected POP3Store maintains a pool of POP3 protocol objects for use in communicating with the POP3 server. The POP3Store will
+         * create the initial AUTHENTICATED connection and seed the pool with this connection. As folders are opened and new POP3 protocol
+         * objects are needed, the POP3Store will provide them from the connection pool, or create them if none are available. When a folder
+         * is closed, its POP3 protocol object is returned to the connection pool if the pool is not over capacity.
          */
         pop3SessionProperties.put("mail.pop3.connectionpoolsize", "1");
         /*
-         * A mechanism is provided for timing out idle connection pool IMAP protocol objects. Timed out connections are closed and removed
+         * A mechanism is provided for timing out idle connection pool POP3 protocol objects. Timed out connections are closed and removed
          * (pruned) from the connection pool.
          */
         pop3SessionProperties.put("mail.pop3.connectionpooltimeout", "1000");

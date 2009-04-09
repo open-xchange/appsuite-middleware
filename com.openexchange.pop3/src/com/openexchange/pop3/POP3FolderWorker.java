@@ -54,9 +54,9 @@ import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -64,6 +64,8 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.pop3.config.POP3Config;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.DefaultFolder;
 import com.sun.mail.pop3.POP3Folder;
@@ -121,8 +123,11 @@ public abstract class POP3FolderWorker extends MailMessageStorage {
         this.accountId = popAccess.getAccountId();
         this.session = session;
         try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
+            final ContextService contextService = POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            ctx = contextService.getContext(session.getContextId());
         } catch (final ContextException e) {
+            throw new POP3Exception(e);
+        } catch (final ServiceException e) {
             throw new POP3Exception(e);
         }
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);

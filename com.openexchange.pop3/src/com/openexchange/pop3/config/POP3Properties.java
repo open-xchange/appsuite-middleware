@@ -51,11 +51,8 @@ package com.openexchange.pop3.config;
 
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
 import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
-import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.spamhandler.SpamHandler;
 
@@ -82,31 +79,16 @@ public final class POP3Properties extends AbstractProtocolProperties {
     /*
      * Fields for global properties
      */
-    private boolean imapSort;
 
-    private boolean imapSearch;
+    private int pop3Timeout;
 
-    private boolean fastFetch;
+    private int pop3ConnectionTimeout;
 
-    private BoolCapVal supportsACLs;
+    private int pop3ConnectionIdleTime;
 
-    private int imapTimeout;
+    private int pop3TemporaryDown;
 
-    private int imapConnectionTimeout;
-
-    private int imapConnectionIdleTime;
-
-    private int imapTemporaryDown;
-
-    private String imapAuthEnc;
-
-    private String entity2AclImpl;
-
-    private boolean mboxEnabled;
-
-    private int blockSize;
-
-    private final Map<String, Boolean> newACLExtMap;
+    private String pop3AuthEnc;
 
     private String spamHandlerName;
 
@@ -115,7 +97,6 @@ public final class POP3Properties extends AbstractProtocolProperties {
      */
     private POP3Properties() {
         super();
-        newACLExtMap = new ConcurrentHashMap<String, Boolean>();
     }
 
     /*
@@ -128,120 +109,70 @@ public final class POP3Properties extends AbstractProtocolProperties {
         logBuilder.append("\nLoading global POP3 properties...\n");
 
         final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
-        {
-            final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application").trim();
-            imapSort = "imap".equalsIgnoreCase(imapSortStr);
-            logBuilder.append("\tIMAP-Sort: ").append(imapSort).append('\n');
-        }
 
         {
-            final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
-            imapSearch = "imap".equalsIgnoreCase(imapSearchStr);
-            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append('\n');
-        }
-
-        {
-            final String fastFetchStr = configuration.getProperty("com.openexchange.imap.imapFastFetch", STR_TRUE).trim();
-            fastFetch = Boolean.parseBoolean(fastFetchStr);
-            logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
-        }
-
-        {
-            final String supportsACLsStr = configuration.getProperty("com.openexchange.imap.imapSupportsACL", STR_FALSE).trim();
-            supportsACLs = BoolCapVal.parseBoolCapVal(supportsACLsStr);
-            logBuilder.append("\tSupport ACLs: ").append(supportsACLs).append('\n');
-        }
-
-        {
-            final String imapTimeoutStr = configuration.getProperty("com.openexchange.imap.imapTimeout", "0").trim();
+            final String pop3TimeoutStr = configuration.getProperty("com.openexchange.pop3.pop3Timeout", "0").trim();
             try {
-                imapTimeout = Integer.parseInt(imapTimeoutStr);
-                logBuilder.append("\tIMAP Timeout: ").append(imapTimeout).append('\n');
+                pop3Timeout = Integer.parseInt(pop3TimeoutStr);
+                logBuilder.append("\tPOP3 Timeout: ").append(pop3Timeout).append('\n');
             } catch (final NumberFormatException e) {
-                imapTimeout = 0;
-                logBuilder.append("\tIMAP Timeout: Invalid value \"").append(imapTimeoutStr).append("\". Setting to fallback: ").append(
-                    imapTimeout).append('\n');
+                pop3Timeout = 0;
+                logBuilder.append("\tPOP3 Timeout: Invalid value \"").append(pop3TimeoutStr).append("\". Setting to fallback: ").append(
+                    pop3Timeout).append('\n');
             }
         }
 
         {
-            final String imapConTimeoutStr = configuration.getProperty("com.openexchange.imap.imapConnectionTimeout", "0").trim();
+            final String pop3ConTimeoutStr = configuration.getProperty("com.openexchange.pop3.pop3ConnectionTimeout", "0").trim();
             try {
-                imapConnectionTimeout = Integer.parseInt(imapConTimeoutStr);
-                logBuilder.append("\tIMAP Connection Timeout: ").append(imapConnectionTimeout).append('\n');
+                pop3ConnectionTimeout = Integer.parseInt(pop3ConTimeoutStr);
+                logBuilder.append("\tPOP3 Connection Timeout: ").append(pop3ConnectionTimeout).append('\n');
             } catch (final NumberFormatException e) {
-                imapConnectionTimeout = 0;
-                logBuilder.append("\tIMAP Connection Timeout: Invalid value \"").append(imapConTimeoutStr).append(
-                    "\". Setting to fallback: ").append(imapConnectionTimeout).append('\n');
+                pop3ConnectionTimeout = 0;
+                logBuilder.append("\tPOP3 Connection Timeout: Invalid value \"").append(pop3ConTimeoutStr).append(
+                    "\". Setting to fallback: ").append(pop3ConnectionTimeout).append('\n');
             }
         }
 
         {
-            final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0").trim();
+            final String pop3TempDownStr = configuration.getProperty("com.openexchange.pop3.pop3TemporaryDown", "0").trim();
             try {
-                imapTemporaryDown = Integer.parseInt(imapTempDownStr);
-                logBuilder.append("\tIMAP Temporary Down: ").append(imapTemporaryDown).append('\n');
+                pop3TemporaryDown = Integer.parseInt(pop3TempDownStr);
+                logBuilder.append("\tPOP3 Temporary Down: ").append(pop3TemporaryDown).append('\n');
             } catch (final NumberFormatException e) {
-                imapTemporaryDown = 0;
-                logBuilder.append("\tIMAP Temporary Down: Invalid value \"").append(imapTempDownStr).append("\". Setting to fallback: ").append(
-                    imapTemporaryDown).append('\n');
+                pop3TemporaryDown = 0;
+                logBuilder.append("\tPOP3 Temporary Down: Invalid value \"").append(pop3TempDownStr).append("\". Setting to fallback: ").append(
+                    pop3TemporaryDown).append('\n');
             }
         }
 
         {
-            final String maxConIdleTime = configuration.getProperty("com.openexchange.imap.maxIMAPConnectionIdleTime", "60000").trim();
+            final String maxConIdleTime = configuration.getProperty("com.openexchange.pop3.maxPOP3ConnectionIdleTime", "60000").trim();
             try {
-                imapConnectionIdleTime = Integer.parseInt(maxConIdleTime);
-                logBuilder.append("\tMax IMAP Connection Idle Time: ").append(imapConnectionIdleTime).append('\n');
+                pop3ConnectionIdleTime = Integer.parseInt(maxConIdleTime);
+                logBuilder.append("\tMax POP3 Connection Idle Time: ").append(pop3ConnectionIdleTime).append('\n');
             } catch (final NumberFormatException e) {
-                imapConnectionIdleTime = 60000;
-                logBuilder.append("\tMax IMAP Connection Idle Time: Invalid value \"").append(maxConIdleTime).append(
-                    "\". Setting to fallback: ").append(imapConnectionIdleTime).append('\n');
+                pop3ConnectionIdleTime = 60000;
+                logBuilder.append("\tMax POP3 Connection Idle Time: Invalid value \"").append(maxConIdleTime).append(
+                    "\". Setting to fallback: ").append(pop3ConnectionIdleTime).append('\n');
             }
         }
 
         {
-            final String imapAuthEncStr = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
-            if (Charset.isSupported(imapAuthEncStr)) {
-                imapAuthEnc = imapAuthEncStr;
-                logBuilder.append("\tAuthentication Encoding: ").append(imapAuthEnc).append('\n');
+            final String pop3AuthEncStr = configuration.getProperty("com.openexchange.pop3.pop3AuthEnc", "UTF-8").trim();
+            if (Charset.isSupported(pop3AuthEncStr)) {
+                pop3AuthEnc = pop3AuthEncStr;
+                logBuilder.append("\tAuthentication Encoding: ").append(pop3AuthEnc).append('\n');
             } else {
-                imapAuthEnc = "UTF-8";
-                logBuilder.append("\tAuthentication Encoding: Unsupported charset \"").append(imapAuthEncStr).append(
-                    "\". Setting to fallback: ").append(imapAuthEnc).append('\n');
+                pop3AuthEnc = "UTF-8";
+                logBuilder.append("\tAuthentication Encoding: Unsupported charset \"").append(pop3AuthEncStr).append(
+                    "\". Setting to fallback: ").append(pop3AuthEnc).append('\n');
             }
         }
-
-        {
-            entity2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
-            if (null == entity2AclImpl) {
-                throw new MailConfigException("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
-            }
-            entity2AclImpl = entity2AclImpl.trim();
-        }
-
-        {
-            final String mboxEnabledStr = configuration.getProperty("com.openexchange.imap.mboxEnabled", STR_FALSE).trim();
-            mboxEnabled = Boolean.parseBoolean(mboxEnabledStr);
-            logBuilder.append("\tMBox Enabled: ").append(mboxEnabled).append('\n');
-        }
-
-        {
-            final String blockSizeStr = configuration.getProperty("com.openexchange.imap.blockSize", "1000").trim();
-            try {
-                blockSize = Integer.parseInt(blockSizeStr);
-                logBuilder.append("\tBlock Size: ").append(blockSize).append('\n');
-            } catch (final NumberFormatException e) {
-                blockSize = 1000;
-                logBuilder.append("\tBlock Size: Invalid value \"").append(blockSizeStr).append("\". Setting to fallback: ").append(
-                    blockSize).append('\n');
-            }
-        }
-
-        spamHandlerName = configuration.getProperty("com.openexchange.imap.spamHandler", SpamHandler.SPAM_HANDLER_FALLBACK).trim();
+        spamHandlerName = configuration.getProperty("com.openexchange.pop3.spamHandler", SpamHandler.SPAM_HANDLER_FALLBACK).trim();
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
-        logBuilder.append("Global IMAP properties successfully loaded!");
+        logBuilder.append("Global POP3 properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
         }
@@ -253,136 +184,57 @@ public final class POP3Properties extends AbstractProtocolProperties {
      */
     @Override
     protected void resetFields() {
-        imapSort = false;
-        imapSearch = false;
-        fastFetch = false;
-        supportsACLs = null;
-        imapTimeout = 0;
-        imapConnectionTimeout = 0;
-        imapConnectionIdleTime = 0;
-        imapTemporaryDown = 0;
-        imapAuthEnc = null;
-        entity2AclImpl = null;
-        mboxEnabled = false;
-        blockSize = 0;
+        pop3Timeout = 0;
+        pop3ConnectionTimeout = 0;
+        pop3ConnectionIdleTime = 0;
+        pop3TemporaryDown = 0;
+        pop3AuthEnc = null;
         spamHandlerName = null;
     }
 
     /**
-     * Gets the fastFetch
+     * Gets the POP3 authentication encoding.
      * 
-     * @return the fastFetch
+     * @return The POP3 authentication encoding
      */
-    public boolean isFastFetch() {
-        return fastFetch;
+    public String getPOP3AuthEnc() {
+        return pop3AuthEnc;
     }
 
     /**
-     * Gets the imapAuthEnc
+     * Gets the POP3 connection idle time.
      * 
-     * @return the imapAuthEnc
-     */
-    public String getImapAuthEnc() {
-        return imapAuthEnc;
-    }
-
-    /**
-     * Gets the imapConnectionIdleTime
-     * 
-     * @return the imapConnectionIdleTime
+     * @return The POP3 connection idle time
      */
     public int getImapConnectionIdleTime() {
-        return imapConnectionIdleTime;
+        return pop3ConnectionIdleTime;
     }
 
     /**
-     * Gets the imapConnectionTimeout
+     * Gets the POP3 connection timeout.
      * 
-     * @return the imapConnectionTimeout
+     * @return The POP3 connection timeout
      */
     public int getPOP3ConnectionTimeout() {
-        return imapConnectionTimeout;
+        return pop3ConnectionTimeout;
     }
 
     /**
-     * Gets the imapTemporaryDown
+     * Gets the POP3 temporary down
      * 
-     * @return the imapTemporaryDown
+     * @return The POP3 temporary down
      */
-    public int getImapTemporaryDown() {
-        return imapTemporaryDown;
+    public int getPOP3TemporaryDown() {
+        return pop3TemporaryDown;
     }
 
     /**
-     * Gets the imapSearch
+     * Gets the POP3 timeout
      * 
-     * @return the imapSearch
-     */
-    public boolean isImapSearch() {
-        return imapSearch;
-    }
-
-    /**
-     * Gets the imapSort
-     * 
-     * @return the imapSort
-     */
-    public boolean isImapSort() {
-        return imapSort;
-    }
-
-    /**
-     * Gets the imapTimeout
-     * 
-     * @return the imapTimeout
+     * @return The POP3 timeout
      */
     public int getPOP3Timeout() {
-        return imapTimeout;
-    }
-
-    /**
-     * Gets the supportsACLs
-     * 
-     * @return the supportsACLs
-     */
-    public BoolCapVal getSupportsACLs() {
-        return supportsACLs;
-    }
-
-    /**
-     * Gets the entity2AclImpl
-     * 
-     * @return the entity2AclImpl
-     */
-    public String getEntity2AclImpl() {
-        return entity2AclImpl;
-    }
-
-    /**
-     * Gets the mboxEnabled
-     * 
-     * @return The mboxEnabled
-     */
-    public boolean isMBoxEnabled() {
-        return mboxEnabled;
-    }
-
-    /**
-     * Gets the block size in which large IMAP commands' UIDs/sequence numbers arguments get splitted
-     * 
-     * @return The block size
-     */
-    public int getBlockSize() {
-        return blockSize;
-    }
-
-    /**
-     * Gets the newACLExtMap
-     * 
-     * @return the newACLExtMap
-     */
-    public Map<String, Boolean> getNewACLExtMap() {
-        return newACLExtMap;
+        return pop3Timeout;
     }
 
     /**

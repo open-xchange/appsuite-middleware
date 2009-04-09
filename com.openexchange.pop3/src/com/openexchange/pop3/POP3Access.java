@@ -58,7 +58,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
@@ -101,14 +100,14 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private transient POP3Store pop3Store;
 
-    private transient javax.mail.Session imapSession;
+    private transient javax.mail.Session pop3Session;
 
     private boolean connected;
 
     private boolean decrement;
 
     /**
-     * Initializes a new {@link POP3Access IMAP access} for default IMAP account.
+     * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
      * 
      * @param session The session providing needed user data
      */
@@ -118,7 +117,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     /**
-     * Initializes a new {@link POP3Access IMAP access}.
+     * Initializes a new {@link POP3Access POP3 access}.
      * 
      * @param session The session providing needed user data
      * @param accountId The account ID
@@ -134,7 +133,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         messageStorage = null;
         logicTools = null;
         pop3Store = null;
-        imapSession = null;
+        pop3Session = null;
         connected = false;
         decrement = false;
     }
@@ -145,7 +144,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 folderStorage.releaseResources();
             } catch (final MailException e) {
-                LOG.error(new StringBuilder("Error while closing IMAP folder storage: ").append(e.getMessage()).toString(), e);
+                LOG.error(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
             }
@@ -154,7 +153,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 messageStorage.releaseResources();
             } catch (final MailException e) {
-                LOG.error(new StringBuilder("Error while closing IMAP message storage: ").append(e.getMessage()).toString(), e);
+                LOG.error(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
 
@@ -172,7 +171,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 try {
                     pop3Store.close();
                 } catch (final MessagingException e) {
-                    LOG.error("Error while closing IMAPStore", e);
+                    LOG.error("Error while closing POP3Store", e);
                 }
                 pop3Store = null;
             }
@@ -226,17 +225,17 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             return;
         }
         try {
-            final boolean tmpDownEnabled = (POP3Properties.getInstance().getImapTemporaryDown() > 0);
+            final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
                 /*
-                 * Check if IMAP server is marked as being (temporary) down since connecting to it failed before
+                 * Check if POP3 server is marked as being (temporary) down since connecting to it failed before
                  */
                 checkTemporaryDown();
             }
             String tmpPass = getMailConfig().getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getImapAuthEnc()), CHARENC_ISO8859);
+                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), CHARENC_ISO8859);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -269,18 +268,18 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Apply properties to IMAP session
              */
-            imapSession = javax.mail.Session.getInstance(pop3Props, null);
+            pop3Session = javax.mail.Session.getInstance(pop3Props, null);
             /*
              * Check if debug should be enabled
              */
-            if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
-                imapSession.setDebug(true);
-                imapSession.setDebugOut(System.err);
+            if (Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+                pop3Session.setDebug(true);
+                pop3Session.setDebugOut(System.err);
             }
             /*
              * Get store
              */
-            pop3Store = (POP3Store) imapSession.getStore(POP3Provider.PROTOCOL_POP3.getName());
+            pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
             /*
              * ... and connect
              */
@@ -300,7 +299,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException()) && ((SocketTimeoutException) e.getNextException()).getMessage().toLowerCase(
                     Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
                     /*
-                     * Remember a timed-out IMAP server on connect attempt
+                     * Remember a timed-out POP3 server on connect attempt
                      */
                     timedOutServers.put(
                         new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort()),
@@ -328,7 +327,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final LoginAndPass key = new LoginAndPass(login, pass);
         final Long range = failedAuths.get(key);
         if (range != null) {
-            // TODO: Put time-out to imap.properties
+            // TODO: Put time-out to pop3.properties
             if (System.currentTimeMillis() - range.longValue() <= 10000) {
                 throw new AuthenticationFailedException("Login failed: authentication failure");
             }
@@ -340,7 +339,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
         final Long range = timedOutServers.get(key);
         if (range != null) {
-            if (System.currentTimeMillis() - range.longValue() <= POP3Properties.getInstance().getImapTemporaryDown()) {
+            if (System.currentTimeMillis() - range.longValue() <= POP3Properties.getInstance().getPOP3TemporaryDown()) {
                 /*
                  * Still treated as being temporary broken
                  */
@@ -405,47 +404,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * @return The IMAP session
      */
     public javax.mail.Session getSession() {
-        return imapSession;
+        return pop3Session;
     }
 
     @Override
     protected void startup() throws MailException {
-        try {
-            ACLExtensionInit.getInstance().start();
-        } catch (final MailException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new MailException(e);
-        }
-        try {
-            Entity2ACLInit.getInstance().start();
-        } catch (final Entity2ACLException e) {
-            throw new MailException(e);
-        } catch (final MailException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new MailException(e);
-        }
+        // Nothing to start
     }
 
     @Override
     protected void shutdown() throws MailException {
-        try {
-            Entity2ACLInit.getInstance().stop();
-        } catch (final Entity2ACLException e) {
-            throw new MailException(e);
-        } catch (final MailException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new MailException(e);
-        }
-        try {
-            ACLExtensionInit.getInstance().stop();
-        } catch (final MailException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new MailException(e);
-        }
         POP3SessionProperties.resetDefaultSessionProperties();
     }
 

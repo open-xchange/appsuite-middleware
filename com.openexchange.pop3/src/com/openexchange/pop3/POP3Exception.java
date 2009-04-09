@@ -315,7 +315,23 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * A SQL error occurred: %1$s.
          */
-        SQL_ERROR("A SQL error occurred: %1$s.", Category.CODE_ERROR, 2055);
+        SQL_ERROR("A SQL error occurred: %1$s.", Category.CODE_ERROR, 2055),
+        /**
+         * POP3 does not support to move messages.
+         */
+        MOVE_MSGS_DENIED("POP3 does not support to move messages.", Category.CODE_ERROR, 2056),
+        /**
+         * POP3 does not support to copy messages.
+         */
+        COPY_MSGS_DENIED("POP3 does not support to copy messages.", Category.CODE_ERROR, 2057),
+        /**
+         * POP3 does not support to append messages.
+         */
+        APPEND_MSGS_DENIED("POP3 does not support to append messages.", Category.CODE_ERROR, 2058),
+        /**
+         * POP3 does not support draft messages.
+         */
+        DRAFTS_NOT_SUPPORTED("POP3 does not support draft messages.", Category.CODE_ERROR, 2059);
 
         private final String message;
 

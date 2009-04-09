@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Store;
 
 /**
- * {@link POP3FolderStorage} - The IMAP folder storage implementation.
+ * {@link POP3FolderStorage} - The POP3 folder storage implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -89,7 +89,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
 
     private final POP3Store pop3Store;
 
-    private final POP3Access imapAccess;
+    private final POP3Access pop3Access;
 
     private final int accountId;
 
@@ -97,30 +97,30 @@ public final class POP3FolderStorage extends MailFolderStorage {
 
     private final Context ctx;
 
-    private final POP3Config imapConfig;
+    private final POP3Config pop3Config;
 
     private Character separator;
 
     /**
      * Initializes a new {@link POP3FolderStorage}
      * 
-     * @param imapStore The IMAP store
-     * @param imapAccess The IMAP access
+     * @param pop3Store The POP3 store
+     * @param pop3Access The POP3 access
      * @param session The session providing needed user data
      * @throws POP3Exception If context loading fails
      */
-    public POP3FolderStorage(final POP3Store imapStore, final POP3Access imapAccess, final Session session) throws POP3Exception {
+    public POP3FolderStorage(final POP3Store pop3Store, final POP3Access pop3Access, final Session session) throws POP3Exception {
         super();
-        this.pop3Store = imapStore;
-        this.imapAccess = imapAccess;
-        this.accountId = imapAccess.getAccountId();
+        this.pop3Store = pop3Store;
+        this.pop3Access = pop3Access;
+        this.accountId = pop3Access.getAccountId();
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
         } catch (final ContextException e) {
             throw new POP3Exception(e);
         }
-        imapConfig = imapAccess.getPOP3Config();
+        pop3Config = pop3Access.getPOP3Config();
     }
 
     private char getSeparator() throws MessagingException {
@@ -138,7 +138,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
             }
             return pop3Store.getFolder(fullname).exists();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
     }
 
@@ -154,7 +154,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
             }
             throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
     }
 
@@ -208,7 +208,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
             }
             return EMPTY_PATH;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
     }
 
@@ -234,7 +234,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
         try {
             return POP3FolderConverter.convertFolder(pop3Store.getDefaultFolder(), session, ctx);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
     }
 
@@ -305,7 +305,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
             if (!f.exists()) {
                 throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
             }
-            imapAccess.getMessageStorage().notifyPOP3FolderModification(fullname);
+            pop3Access.getMessageStorage().notifyPOP3FolderModification(fullname);
             if (!isSelectable(f)) {
                 throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, f.getFullName());
             }
@@ -345,7 +345,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
                 }
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
         } catch (final AbstractOXException e) {
             throw new POP3Exception(e);
         }
@@ -369,7 +369,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
             }
             return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
     }
 

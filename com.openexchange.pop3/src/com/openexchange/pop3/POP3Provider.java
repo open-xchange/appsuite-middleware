@@ -66,7 +66,7 @@ public final class POP3Provider extends MailProvider {
     /**
      * POP3 protocol.
      */
-    public static final Protocol PROTOCOL_POP3 = new Protocol("pop", "pops");
+    public static final Protocol PROTOCOL_POP3 = new Protocol("pop3", "pop3s");
 
     private static final POP3Provider instance = new POP3Provider();
 
