@@ -218,21 +218,25 @@ public final class MailAccountMigrationTask implements UpdateTask {
     private static MailAccountDescription createAccountDescription(final User user, final FolderNameProvider folderNameProvdider) {
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
-        account.setConfirmedHam(folderNameProvdider.getConfirmedHam());
-        account.setConfirmedSpam(folderNameProvdider.getConfirmedSpam());
-        account.setDrafts(folderNameProvdider.getDrafts());
+        account.setConfirmedHam(prepareNonNullString(folderNameProvdider.getConfirmedHam()));
+        account.setConfirmedSpam(prepareNonNullString(folderNameProvdider.getConfirmedSpam()));
+        account.setDrafts(prepareNonNullString(folderNameProvdider.getDrafts()));
         account.setId(MailAccount.DEFAULT_ID);
-        account.setLogin(user.getImapLogin());
-        account.setMailServerURL(user.getImapServer());
+        account.setLogin(prepareNonNullString(user.getImapLogin()));
+        account.setMailServerURL(prepareNonNullString(user.getImapServer()));
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
         account.setPassword(null);
-        account.setPrimaryAddress(user.getMail());
-        account.setSent(folderNameProvdider.getSent());
-        account.setSpam(folderNameProvdider.getSpam());
+        account.setPrimaryAddress(prepareNonNullString(user.getMail()));
+        account.setSent(prepareNonNullString(folderNameProvdider.getSent()));
+        account.setSpam(prepareNonNullString(folderNameProvdider.getSpam()));
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK); // TODO: Obtain spam handler
-        account.setTransportServerURL(user.getSmtpServer());
-        account.setTrash(folderNameProvdider.getTrash());
+        account.setTransportServerURL(prepareNonNullString(user.getSmtpServer()));
+        account.setTrash(prepareNonNullString(folderNameProvdider.getTrash()));
         return account;
+    }
+
+    private static String prepareNonNullString(final String string) {
+        return null == string ? "" : string;
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." })
