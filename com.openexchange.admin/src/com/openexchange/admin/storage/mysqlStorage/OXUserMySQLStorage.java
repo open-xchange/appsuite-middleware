@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.mysqlStorage;
 
 import java.io.UnsupportedEncodingException;
@@ -75,10 +76,12 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.api2.OXException;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -94,8 +97,14 @@ import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -147,6 +156,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost";
 
     public OXUserMySQLStorage() {
+        super();
     }
 
     @Override
@@ -721,7 +731,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException {
         PreparedStatement ps = null;
-        PreparedStatement return_db_id = null;
         final String LOGINSHELL = "/bin/bash";
 
         try {
@@ -763,7 +772,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 // language cannot be null, that's checked in checkCreateUserData()
-		final String lang = usrdata.getLanguage();
+                final String lang = usrdata.getLanguage();
                 stmt.setString(8, lang);
 
                 // mailenabled
@@ -954,12 +963,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setNull(index, java.sql.Types.VARCHAR);
                         }
                     }
-
-                    // TODO: d7 rewrite log
-                    // log.debug("******************* " +
-                    // user_data.get(CONTACT_FIELDS[f]).toString() + " / " +
-                    // Contacts.mapping[cfield].getDBFieldName() + " / " +
-                    // cfield);
                 }
 
                 stmt.executeUpdate();
@@ -1076,42 +1079,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } finally {
                 closePreparedStatement(stmt);
             }
-
+            // Write primary mail account.
+            createPrimaryMailAccount(ctx, usrdata, internal_user_id);
             // Write GUI configuration to database.
-            final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), internal_user_id);
-            final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
-            if( guiPreferences != null ) {
-                final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-                while (iter.hasNext()) {
-                    final Entry<String, String> entry = iter.next();
-                    final String key = entry.getKey();
-                    final String value = entry.getValue();
-                    if (null != key && null != value) {
-                        try {
-                            final Setting setting = ConfigTree.getSettingByPath(key);
-                            setting.setSingleValue(value);
-                            settStor.save(write_ox_con, setting);
-                        } catch (final SettingException e) {
-                            log.error("Problem while storing GUI preferences.", e);
-                        }
-                    }
-                }
-            }
-
-            // return the client the id to work with the user in the system
-            return_db_id = write_ox_con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
-            return_db_id.setInt(1, ctx.getId());
-            return_db_id.setString(2, usrdata.getName());
-            rs = return_db_id.executeQuery();
-            int id_for_client = -1;
-            if (rs.next()) {
-                id_for_client = rs.getInt("id");
-            }
+            storeUISettings(ctx, write_ox_con, usrdata, internal_user_id);
             if (log.isInfoEnabled()) {
-                log.info("User " + id_for_client + " created!");
+                log.info("User " + internal_user_id + " created!");
             }
-
-            return id_for_client;
+            return internal_user_id;
+        } catch (ServiceException e) {
+            log.error("Required service not found.", e);
+            throw new StorageException(e.toString());
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -1144,8 +1122,68 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            closePreparedStatement(return_db_id);
             closePreparedStatement(ps);
+        }
+    }
+
+    private void createPrimaryMailAccount(Context ctx, User user, int userId) throws ServiceException, StorageException {
+        ContextService contextS = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
+        final com.openexchange.groupware.contexts.Context context;
+        try {
+            context = contextS.getContext(ctx.getId().intValue());
+        } catch (ContextException e) {
+            log.error("Problem loading context.", e);
+            throw new StorageException(e.toString());
+        }
+        MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        MailAccountDescription account = new MailAccountDescription();
+        account.setDefaultFlag(true);
+        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        account.setMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ':' + user.getImapPort());
+        account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
+        account.setPrimaryAddress(user.getPrimaryEmail());
+        String lang = user.getLanguage();
+        String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
+        account.setDrafts(null == user.getMail_folder_drafts_name() ? defaultName : user.getMail_folder_drafts_name());
+        defaultName = prop.getUserProp("SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
+        account.setSent(null == user.getMail_folder_sent_name() ? defaultName : user.getMail_folder_sent_name());
+        defaultName = prop.getUserProp("SPAM_MAILFOLDER_" + lang.toUpperCase(), "Spam");
+        account.setSpam(null == user.getMail_folder_spam_name() ? defaultName : user.getMail_folder_spam_name());
+        defaultName = prop.getUserProp("TRASH_MAILFOLDER_" + lang.toUpperCase(), "Trash");
+        account.setTrash(null == user.getMail_folder_trash_name() ? defaultName : user.getMail_folder_trash_name());
+        defaultName = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
+        account.setConfirmedHam(null == user.getMail_folder_confirmed_ham_name() ? defaultName : user.getMail_folder_confirmed_ham_name());
+        defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
+        account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
+        account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
+        account.setTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
+        try {
+            mass.insertMailAccount(account, userId, context, null);
+        } catch (MailAccountException e) {
+            log.error("Problem storing the primary mail account.", e);
+            throw new StorageException(e.toString());
+        }
+    }
+
+    private void storeUISettings(Context ctx, Connection con, User user, int userId) {
+        final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), userId);
+        final Map<String, String> guiPreferences = user.getGuiPreferences();
+        if (guiPreferences != null) {
+            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
+            while (iter.hasNext()) {
+                final Entry<String, String> entry = iter.next();
+                final String key = entry.getKey();
+                final String value = entry.getValue();
+                if (null != key && null != value) {
+                    try {
+                        final Setting setting = ConfigTree.getSettingByPath(key);
+                        setting.setSingleValue(value);
+                        settStor.save(con, setting);
+                    } catch (final SettingException e) {
+                        log.error("Problem while storing GUI preferences.", e);
+                    }
+                }
+            }
         }
     }
 
@@ -1958,7 +1996,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException {
+    public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException {
         PreparedStatement prep_edit_user = null;
         try {
             prep_edit_user = write_ox_con.prepareStatement("UPDATE prg_contacts SET changing_date=? WHERE cid=? AND userid=?;");
@@ -1982,7 +2020,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException {
+    public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException {
         // move user to del_user table if table is ready
         PreparedStatement del_st = null;
         ResultSet rs = null;
@@ -2131,7 +2169,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
+    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
@@ -2153,7 +2191,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException {
+    public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException {
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
