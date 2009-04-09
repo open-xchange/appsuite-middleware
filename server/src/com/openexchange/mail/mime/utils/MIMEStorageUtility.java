@@ -58,6 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.mail.FetchProfile;
 import javax.mail.UIDFolder;
+import javax.mail.FetchProfile.Item;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
@@ -97,6 +98,25 @@ public final class MIMEStorageUtility {
     }
 
     /**
+     * Clones specified fetch profile:
+     * 
+     * @param toClone The fetch profile to clone
+     * @return The clone fetch profile
+     */
+    public static FetchProfile cloneFetchProfile(final FetchProfile toClone) {
+        final FetchProfile clone = new FetchProfile();
+        final Item[] items = toClone.getItems();
+        for (final Item item : items) {
+            clone.add(item);
+        }
+        final String[] headerNames = toClone.getHeaderNames();
+        for (final String headerName : headerNames) {
+            clone.add(headerName);
+        }
+        return clone;
+    }
+
+    /**
      * The corresponding fields to fetch profile obtained by {@link #getCacheFetchProfile()}
      * 
      * @return The corresponding fields to the fetch profile obtained by {@link #getCacheFetchProfile()}
@@ -125,7 +145,7 @@ public final class MIMEStorageUtility {
     }
 
     /**
-     * @return An instance of {@link FetchProfile} which only prefills messages with their UIDs
+     * @return A new instance of {@link FetchProfile} which only prefills messages with their UIDs
      */
     public static FetchProfile getUIDFetchProfile() {
         final FetchProfile fp = new FetchProfile();
@@ -134,7 +154,7 @@ public final class MIMEStorageUtility {
     }
 
     /**
-     * @return An instance of {@link FetchProfile} which only prefills messages with their flags
+     * @return A new instance of {@link FetchProfile} which only prefills messages with their flags
      */
     public static FetchProfile getFlagsFetchProfile() {
         final FetchProfile fp = new FetchProfile();
