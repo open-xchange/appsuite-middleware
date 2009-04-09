@@ -188,11 +188,9 @@ public class Starter implements Initialization {
      * Release LoginPerformer instance on shut-down
      */
     new Initialization() {
-
         public void start() throws AbstractOXException {
             // Nothing to do
         }
-
         public void stop() throws AbstractOXException {
             // Release LoginPerformer instance on shut-down
             LoginPerformer.releaseInstance();
@@ -274,16 +272,15 @@ public class Starter implements Initialization {
      * Release LoginPerformer instance on shut-down
      */
     new Initialization() {
-
         public void start() throws AbstractOXException {
             // Nothing to do
         }
-
         public void stop() throws AbstractOXException {
             // Release LoginPerformer instance on shut-down
             LoginPerformer.releaseInstance();
         }
-    } };
+    },
+    new com.openexchange.mailaccount.internal.MailAccountStorageInit() };
 
     private static final Log LOG = LogFactory.getLog(Starter.class);
 
