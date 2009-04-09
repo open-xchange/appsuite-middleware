@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -161,7 +162,7 @@ public class CalendarFolderToolkit {
     public void removeAll(final Session session, final List<FolderObject> cleanFolders) {
         final OXFolderManager oxma;
         try {
-            oxma = OXFolderManager.getInstance(session);
+            oxma = OXFolderManager.getInstance(session, new CalendarSql(session));
             for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder, true, System.currentTimeMillis());
             }
