@@ -84,7 +84,7 @@ public class TaskWriter extends CalendarWriter {
      */
     public TaskWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
+        utc = TimeZone.getTimeZone("utc");
     }
 
     public void writeArray(final Task taskObject, final int cols[], final JSONArray jsonArray) throws JSONException {
