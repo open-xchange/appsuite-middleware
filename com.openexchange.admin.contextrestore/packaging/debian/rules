@@ -12,7 +12,7 @@
 pkgname=open-xchange-admin-plugin-contextrestore
 pkgroot=$(CURDIR)/debian/$(pkgname)
 oxprefix=/opt/open-xchange
-adminbundle=open_xchange_admin.jar
+adminbundle=com.openexchange.admin.jar
 adminhostingbundle=open_xchange_admin_plugin_hosting.jar
 
 CFLAGS = -Wall -g
