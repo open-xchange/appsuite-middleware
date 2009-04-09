@@ -60,7 +60,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-%define adminbundle	open_xchange_admin.jar
+%define adminbundle	com.openexchange.admin.jar
 %define oxprefix	/opt/open-xchange
 %define adminhostingbundle open_xchange_admin_plugin_hosting.jar
 
