@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import junit.framework.TestCase;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -30,6 +30,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
@@ -102,6 +103,10 @@ public class FolderTest extends TestCase {
             Init.stopServer();
         }
         super.tearDown();
+    }
+    
+    public AppointmentSQLInterface getAppointmentHandler(){
+        return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
     }
 
     public void testFolderInsertSuccess() throws Throwable {
@@ -1049,7 +1054,7 @@ public class FolderTest extends TestCase {
 
                 fillDatesInDao(cdao);
 
-                final CalendarSql csql = new CalendarSql(session);
+                AppointmentSQLInterface csql = getAppointmentHandler();
                 csql.insertAppointmentObject(cdao);
                 final int object_id = cdao.getObjectID();
                 final CalendarDataObject testobject = csql.getObjectById(object_id, fuid);
