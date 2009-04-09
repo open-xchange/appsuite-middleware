@@ -14,7 +14,7 @@ pkgroot=$(CURDIR)/debian/$(pkgname)
 libroot=$(CURDIR)/debian/$(pkgname)-lib
 clientroot=$(CURDIR)/debian/$(pkgname)-client
 oxprefix=/opt/open-xchange
-adminbundle=open_xchange_admin.jar
+adminbundle=com.openexchange.admin.jar
 
 CFLAGS = -Wall -g
 
