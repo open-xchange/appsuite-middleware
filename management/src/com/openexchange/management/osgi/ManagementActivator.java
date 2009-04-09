@@ -50,6 +50,8 @@
 package com.openexchange.management.osgi;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -68,9 +70,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public final class ManagementActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagementActivator.class);
+    private static final Log LOG = LogFactory.getLog(ManagementActivator.class);
 
-    private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
+    private static final String BUNDLE_ID_ADMIN = "com.openexchange.admin";
 
     private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
