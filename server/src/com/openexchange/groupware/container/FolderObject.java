@@ -88,8 +88,9 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * {@link FolderObject} - Represents a folder.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- * @author <a href="mailto:thorben.bettens@open-xchange.org">Thorben Betten</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - fields for generic getters and setters
+ * @author <a href="mailto:thorben.betten@open-xchange.org">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - generic methods
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added fields to generic methods
  */
 public class FolderObject extends FolderChildObject implements Cloneable, Serializable {
 
@@ -1325,6 +1326,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         case SUBFOLDERS:
             setSubfolderFlag( ( (Boolean) value ).booleanValue() );
             break;
+        case PERMISSIONS_BITS:
+            if( value.getClass().isInstance( new OCLPermission[0]) ){
+                setPermissionsAsArray( (OCLPermission[]) value );
+            } else {
+                setPermissions( (List<OCLPermission>) value );
+            }
+            break;
         default:
             super.set(field, value);
         }
@@ -1340,6 +1348,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             return Integer.valueOf(getType());
         case SUBFOLDERS:
             return Boolean.valueOf( hasSubfolders() );
+        case PERMISSIONS_BITS:
+            return getPermissions();
         default:
             return super.get(field);
         }
@@ -1355,6 +1365,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             return containsType();
         case SUBFOLDERS:
             return containsSubfolderFlag();
+        case PERMISSIONS_BITS:
+            return containsPermissions();
         default:
             return super.contains(field);
         }
@@ -1373,6 +1385,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             break;
         case SUBFOLDERS:
             removeSubfolderIds();
+            removeSubfolderFlag();
+            break;
+        case PERMISSIONS_BITS:
+            removePermissions();
             break;
         default:
             super.remove(field);
