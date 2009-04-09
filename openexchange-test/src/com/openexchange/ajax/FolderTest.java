@@ -72,6 +72,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -1414,7 +1415,18 @@ public class FolderTest extends AbstractAJAXTest {
             -1,
             null,
             new Date(0));
-        final AbstractAJAXResponse response = Executor.execute(client, updatesRequest);
+//        final AbstractAJAXResponse response = Executor.execute(client, updatesRequest);
+//
+//        final JSONArray arr = (JSONArray) response.getData();
+//        final int size = arr.length();
+//        assertTrue(size > 0);
+//        for (int i = 0; i < size; i++) {
+//            final JSONArray row = arr.optJSONArray(i);
+//            assertNotNull(row);
+//            assertTrue(row.length() == 1);
+//            assertNotNull(row.get(0));
+//        }
+        final FolderUpdatesResponse response = Executor.execute(client, updatesRequest);
 
         final JSONArray arr = (JSONArray) response.getData();
         final int size = arr.length();
