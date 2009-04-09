@@ -63,7 +63,7 @@ import com.openexchange.groupware.search.Order;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonUpdatesRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class CommonUpdatesRequest<T extends CommonUpdatesResponse> implements AJAXRequest<T> {
 
     private final String servletPath;
 
@@ -137,7 +137,7 @@ public class CommonUpdatesRequest<T extends AbstractAJAXResponse> implements AJA
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
             .ACTION_UPDATES));
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, getColumns()));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
@@ -151,8 +151,16 @@ public class CommonUpdatesRequest<T extends AbstractAJAXResponse> implements AJA
     /**
      * {@inheritDoc}
      */
-    public CommonUpdatesParser getParser() {
-        return new CommonUpdatesParser(failOnError, columns);
+    public CommonUpdatesParser<T> getParser() {
+        return new CommonUpdatesParser<T>(isFailOnError(), getColumns());
+    }
+
+    public int[] getColumns() {
+        return columns;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
     }
 
     public enum Ignore {

@@ -57,6 +57,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.junit.ComparisonFailure;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.group.GroupResolver;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.ajax.kata.appointments.ParticipantComparisonFailure;
@@ -112,7 +113,8 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
         resolveParticipants(entry, participants);
         resolveUserParticipants(entry, userParticipants);
 
-        int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        UserValues values = getClient().getValues();
+        int folderId = values.getPrivateAppointmentFolder();
         return (AppointmentObject) addFolder(entry.getEntry(), data, folderId);
     }
 

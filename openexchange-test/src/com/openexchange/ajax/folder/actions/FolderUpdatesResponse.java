@@ -72,7 +72,11 @@ public class FolderUpdatesResponse extends CommonUpdatesResponse {
         this.folders = folders;
     }
     
+    public void addFolder(FolderObject folder){
+        this.folders.add(folder);
+    }
+    
     public List<FolderObject> getFolders() {
-        return folders;
+        return this.folders;
     }
 }

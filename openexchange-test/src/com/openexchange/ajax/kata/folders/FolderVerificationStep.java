@@ -70,6 +70,7 @@ import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
@@ -98,7 +99,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     private void checkWithReadMethods(FolderObject folder) throws OXException, JSONException, AjaxException, IOException, SAXException {
         checkViaGet(folder);
         checkViaList(folder);
-        //checkViaUpdates(folder);
+        checkViaUpdates(folder);
     }
 
     private void checkViaGet(FolderObject folder) throws OXException, JSONException {
@@ -121,11 +122,10 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         UpdatesRequest updates = new UpdatesRequest(
             folder.getParentFolderID(),
             FolderObject.ALL_COLUMNS,
-            FolderObject.OBJECT_ID,
+            -1,
             Order.ASCENDING,
             new Date(0));
         FolderUpdatesResponse response = (FolderUpdatesResponse) client.execute(updates);
-        // TODO: write FolderUpdatesParser
         List<FolderObject> folders = response.getFolders();
         checkInList(folder, folders, "updates-");
     }
@@ -162,8 +162,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
     
     private boolean isIgnoredColumn(int col) {
-        return col == FolderObject.SUBFOLDERS
-        || col == FolderObject.OWN_RIGHTS
+        return col == FolderObject.OWN_RIGHTS
         || col == FolderObject.PERMISSIONS_BITS
         || col == FolderObject.SUMMARY
         || col == FolderObject.STANDARD_FOLDER 
@@ -182,6 +181,9 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
+                continue;
+            }
+            if( isIgnoredColumn(column)){
                 continue;
             }
             if (folder.contains(column)) {
@@ -210,11 +212,10 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
                 return;
             }
         }
-        fail("Object not found in response. " + name);
+        fail("Object not found in response: (" + folder.getObjectID() + ") " + name);
     }
     
     private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
-
         return actual;
     }
 

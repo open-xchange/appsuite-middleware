@@ -50,13 +50,14 @@ package com.openexchange.ajax.folder.actions;
 
 import java.util.Date;
 
+import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class UpdatesRequest extends CommonUpdatesRequest {
+public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> {
 
     /**
      * @param folderId
@@ -76,4 +77,11 @@ public class UpdatesRequest extends CommonUpdatesRequest {
         super(AbstractFolderRequest.FOLDER_URL, folderId, columns, sort, order,
             lastModified, ignore, true);
     }
+
+    @Override
+    public CommonUpdatesParser<FolderUpdatesResponse> getParser() {
+        return new FolderUpdatesParser(isFailOnError(), getColumns());
+    }
+    
+    
 }

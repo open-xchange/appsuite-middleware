@@ -76,7 +76,7 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
     @Override
     protected T createResponse(final Response response) throws JSONException {
         final T retval = instanciateResponse(response);
-        retval.setColumns(columns);
+        retval.setColumns(getColumns());
         if (isFailOnError()) {
             final JSONArray array = (JSONArray) retval.getData();
             final Object[][] values = new Object[array.length()][];
@@ -106,5 +106,9 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
     protected T instanciateResponse(final Response response) {
         // I don't quite get this.
         return (T) new CommonUpdatesResponse(response);
+    }
+
+    public int[] getColumns() {
+        return columns;
     }
 }

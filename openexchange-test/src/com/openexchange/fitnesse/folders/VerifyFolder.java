@@ -64,7 +64,6 @@ public class VerifyFolder extends AbstractFolderFixture {
 	@Override
 	protected Step createStep(FolderObject folder, String fixtureName,
 			String expectedError) throws Exception {
-		// TODO Auto-generated method stub
 		return new FolderVerificationStep(folder, data.getFixtureName());
 	}
 
