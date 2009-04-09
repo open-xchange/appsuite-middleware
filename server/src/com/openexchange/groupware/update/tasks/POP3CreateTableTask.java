@@ -118,7 +118,7 @@ public class POP3CreateTableTask implements UpdateTask {
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         createTable("user_pop3_data", getCreatePOP3Data(), contextId);
-        createTable("user_pop3_user_flag", getCreatePOP3Data(), contextId);
+        createTable("user_pop3_user_flag", getCreatePOP3UserFlags(), contextId);
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'POP3CreateTableTask' successfully performed!");
         }
