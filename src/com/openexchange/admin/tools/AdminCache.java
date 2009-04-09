@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.tools;
 
 import java.io.BufferedReader;
@@ -90,10 +91,10 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
-import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
+
     private static final String DATABASE_INIT_SCRIPTS_ERROR_MESSAGE = "An error occured while reading the database initialization scripts.";
 
     public final static String DATA_TRUNCATION_ERROR_MSG = "Data too long for column(s)";
@@ -117,8 +118,6 @@ public class AdminCache {
      * togle auth when a context based method authentication is need like create user in a context
      */
     private boolean contextAuthenticationDisabled = false;
-
-    public static DeleteRegistry delreg = null;
 
     // sql filenames order and directory
     protected boolean log_parsed_sql_queries = false;
@@ -150,8 +149,8 @@ public class AdminCache {
     /**
      * @throws ClassNotFoundException
      * @throws OXGenericException
-     * 
-     * 
+     *
+     *
      */
     public void initCache() {
 
@@ -168,7 +167,7 @@ public class AdminCache {
 
     /**
      * return default {@link UserModuleAccess} if not specified upon creation
-     * 
+     *
      * @return
      */
     public UserModuleAccess getDefaultUserModuleAccess() {
@@ -178,11 +177,11 @@ public class AdminCache {
         ret.setContacts(true);
         return ret;
     }
-    
+
     public HashMap<String, UserModuleAccess> getAccessCombinationNames() {
         return named_access_combinations;
     }
-    
+
     public UserModuleAccess getNamedAccessCombination(String name) {
         return named_access_combinations.get(name);
     }
@@ -190,45 +189,45 @@ public class AdminCache {
     public boolean existsNamedAccessCombination(String name) {
         return named_access_combinations.containsKey(name);
     }
-    
+
     public String getNameForAccessCombination(UserModuleAccess access_combination) {
         if(named_access_combinations.containsValue(access_combination)){
-        	Iterator<String> names = named_access_combinations.keySet().iterator();
-        	String retval = null;
-        	while(names.hasNext()){
-        		String combi_name = (String)names.next();
-        		if(named_access_combinations.get(combi_name).equals(access_combination)){
-        			retval =  combi_name;
-        			break;
-        		}
-        	}
-        	return retval;
+            Iterator<String> names = named_access_combinations.keySet().iterator();
+            String retval = null;
+            while(names.hasNext()){
+                String combi_name = (String)names.next();
+                if(named_access_combinations.get(combi_name).equals(access_combination)){
+                    retval =  combi_name;
+                    break;
+                }
+            }
+            return retval;
         }else{
-        	return null;
+            return null;
         }
     }
 
     public void initAccessCombinations() throws ClassNotFoundException, OXGenericException  {
-    	if (named_access_combinations == null) {
-			try {
-				log.info("Processing access combinations...");			
-				named_access_combinations = getAccessCombinations(loadValidAccessModules(), loadAccessCombinations());
-				log.info("Access combinations processed!");
-			} catch (ClassNotFoundException e) {
-				log.error("Error loading access modules and methods!", e);
-				throw e;
-			} catch (OXGenericException e) {
-				log.error("Error processing access combinations config file!!",e);
-				throw e;
-			}
-		}
-    	
+        if (named_access_combinations == null) {
+            try {
+                log.info("Processing access combinations...");
+                named_access_combinations = getAccessCombinations(loadValidAccessModules(), loadAccessCombinations());
+                log.info("Access combinations processed!");
+            } catch (ClassNotFoundException e) {
+                log.error("Error loading access modules and methods!", e);
+                throw e;
+            } catch (OXGenericException e) {
+                log.error("Error processing access combinations config file!!",e);
+                throw e;
+            }
+        }
+
     }
 
     private HashMap<String, UserModuleAccess> getAccessCombinations(HashMap<String, Method> module_method_mapping, Properties access_props) throws OXGenericException {
         HashMap<String, UserModuleAccess> combis = new HashMap<String, UserModuleAccess>();
         // Now check if predefined combinations are valid
-        Enumeration predefined_access_combinations = access_props.keys();
+        Enumeration<Object> predefined_access_combinations = access_props.keys();
         while (predefined_access_combinations.hasMoreElements()) {
             String predefined_combination_name = (String) predefined_access_combinations.nextElement();
             String predefined_modules = (String) access_props.get(predefined_combination_name);
@@ -278,7 +277,7 @@ public class AdminCache {
 
             // Load the available combinations directly from the
             // usermoduleaccess object
-            Class tmp = Class.forName(UserModuleAccess.class.getCanonicalName());
+            Class<?> tmp = Class.forName(UserModuleAccess.class.getCanonicalName());
             Method methlist[] = tmp.getDeclaredMethods();
             HashMap<String, Method> module_method_mapping = new HashMap<String, Method>();
 
@@ -562,7 +561,7 @@ public class AdminCache {
      * in <code>passwordMech</code>.
      * If <code>passwordMech</code> is <code>null</code>, the default mechanism as configured
      * in <code>User.properties</code> is used and set in the {@link PasswordMechObject} instance.
-     *  
+     *
      * @param user
      * @return the encrypted password
      * @throws StorageException
