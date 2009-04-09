@@ -83,19 +83,15 @@ public final class MIMEStorageUtility {
 
     private static final MailField[] CACHE_FIELDS_ARR;
 
-    private static final FetchProfile UID_FETCH_PROFILE = new FetchProfile();
-
-    private static final FetchProfile FLAGS_FETCH_PROFILE = new FetchProfile();
-
     static {
+        // Cache fetch profile
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.ENVELOPE);
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.FLAGS);
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.CONTENT_INFO);
         CACHE_FETCH_PROFILE.add(UIDFolder.FetchProfileItem.UID);
         CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.SIZE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_X_PRIORITY);
-        UID_FETCH_PROFILE.add(UIDFolder.FetchProfileItem.UID);
-        FLAGS_FETCH_PROFILE.add(FetchProfile.Item.FLAGS);
+        // Cache fields
         CACHE_FIELDS = fetchProfile2MailListFields(CACHE_FETCH_PROFILE);
         CACHE_FIELDS_ARR = CACHE_FIELDS.toArray(new MailField[CACHE_FIELDS.size()]);
     }
@@ -132,14 +128,18 @@ public final class MIMEStorageUtility {
      * @return An instance of {@link FetchProfile} which only prefills messages with their UIDs
      */
     public static FetchProfile getUIDFetchProfile() {
-        return UID_FETCH_PROFILE;
+        final FetchProfile fp = new FetchProfile();
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        return fp;
     }
 
     /**
      * @return An instance of {@link FetchProfile} which only prefills messages with their flags
      */
     public static FetchProfile getFlagsFetchProfile() {
-        return FLAGS_FETCH_PROFILE;
+        final FetchProfile fp = new FetchProfile();
+        fp.add(FetchProfile.Item.FLAGS);
+        return fp;
     }
 
     /**
