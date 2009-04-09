@@ -72,7 +72,7 @@ Requires:  java-1.5.0-sun
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts and configuration
 Prereq:		/usr/sbin/useradd
-Requires:	open-xchange-authentication open-xchange-charset open-xchange-conversion-engine open-xchange-conversion-servlet open-xchange-contactcollector open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-push-udp open-xchange-server open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler, mysql >= 5.0.0
+Requires:	open-xchange-authentication open-xchange-charset open-xchange-conversion-engine open-xchange-conversion-servlet open-xchange-contactcollector open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-push-udp open-xchange-server open-xchange-calendar open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler, mysql >= 5.0.0
 
 
 %description -n open-xchange

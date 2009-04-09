@@ -15,7 +15,7 @@ Description: The Open-Xchange Server Bundle
 
 Package: open-xchange
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-server, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-server, open-xchange-calendar, adduser
 Suggests: open-xchange-authentication, open-xchange-cache, open-xchange-charset, open-xchange-configjump, open-xchange-configread, open-xchange-control, open-xchange-global, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-contactcollector, open-xchange-i18n, open-xchange-mailstore, open-xchange-jcharset, open-xchange-management, open-xchange-monitoring, open-xchange-push-udp, open-xchange-sessiond, open-xchange-smtp, open-xchange-spamhandler, open-xchange-spellcheck, open-xchange-settings-extensions
 Description: Open-Xchange server scripts and configuration
 Provides: open-xchange-config
