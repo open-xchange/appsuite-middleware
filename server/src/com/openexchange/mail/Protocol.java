@@ -67,7 +67,7 @@ public final class Protocol implements Component, Serializable {
      */
     private static final long serialVersionUID = -4384010555880806765L;
 
-    private static final Pattern PAT_PROT = Pattern.compile("([a-z]+)(?:((?:_[a-z]+)*))?");
+    private static final Pattern PAT_PROT = Pattern.compile("([a-z0-9]+)(?:((?:_[a-z0-9]+)*))?");
 
     /**
      * Parses specified protocol string whose syntax match pattern:<br>
