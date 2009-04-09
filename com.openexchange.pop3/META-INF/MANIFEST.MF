@@ -50,3 +50,4 @@ Import-Package: com.openexchange.api2,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .,
  lib/rabin-hash-function-2.0.jar
+Bundle-Activator: com.openexchange.pop3.osgi.POP3Activator

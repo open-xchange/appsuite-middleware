@@ -85,6 +85,7 @@ import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.sort.MailMessageComparator;
+import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.pop3.util.UIDUtil;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPoolingException;
@@ -177,8 +178,11 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             // Get matching messages by UID
             final Message[] msgs;
             {
-                final Message[] allmsgs = pop3Folder.getMessages();
-                pop3Folder.fetch(allmsgs, MIMEStorageUtility.getUIDFetchProfile());
+                final Message[] allmsgs = pop3Fld.getMessages();
+                final long start = System.currentTimeMillis();
+                pop3Fld.fetch(allmsgs, MIMEStorageUtility.getUIDFetchProfile());
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                syncMessages(allmsgs, pop3Fld);
                 msgs = new Message[mailIds.length];
                 for (int i = 0; i < mailIds.length; i++) {
                     final String mailId = mailIds[i];
@@ -196,7 +200,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             }
             // Fetch messages
             final FetchProfile fetchProfile = MIMEStorageUtility.getFetchProfile(fields, true);
-            final MailMessage[] mails = fetch(fetchProfile, msgs, body);
+            final MailMessage[] mails = fetch(fetchProfile, msgs, body, false);
             return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
@@ -227,7 +231,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             // Prefetch all messages
             final MailFields fieldSet = new MailFields(fields);
             final boolean body = (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY));
-            final MailMessage[] mails = fetch(fetchProfile, pop3Fld.getMessages(), body);
+            final MailMessage[] mails = fetch(fetchProfile, pop3Fld.getMessages(), body, true);
             // Filter and sort them
             MailMessage[] msgs = null;
             {
@@ -287,12 +291,17 @@ public final class POP3MessageStorage extends POP3FolderWorker {
                 /*
                  * Get UIDs of unread messages
                  */
+                long start = System.currentTimeMillis();
                 final Message[] allMsgs = pop3Fld.getMessages();
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 final Set<String> unreadUIDs = getUnreadMessages(allMsgs.length);
                 /*
                  * Prefetch their UIDLs
                  */
+                start = System.currentTimeMillis();
                 pop3Fld.fetch(allMsgs, MIMEStorageUtility.getUIDFetchProfile());
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                syncMessages(allMsgs, pop3Fld);
                 /*
                  * Check which occur in unread UIDLs
                  */
@@ -309,7 +318,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             final boolean body = (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY));
             // Fetch messages
             final FetchProfile fetchProfile = MIMEStorageUtility.getFetchProfile(fields, true);
-            final MailMessage[] mails = fetch(fetchProfile, msgs, body);
+            final MailMessage[] mails = fetch(fetchProfile, msgs, body, false);
             return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
@@ -328,7 +337,10 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             /*
              * Prefetch their UIDLs
              */
+            long start = System.currentTimeMillis();
             pop3Fld.fetch(allMsgs, MIMEStorageUtility.getUIDFetchProfile());
+            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            syncMessages(allMsgs, pop3Fld);
             final Set<String> uidls = new HashSet<String>(Arrays.asList(msgUIDs));
             for (int i = 0; i < allMsgs.length; i++) {
                 final Message cur = allMsgs[i];
@@ -336,9 +348,11 @@ public final class POP3MessageStorage extends POP3FolderWorker {
                     cur.setFlags(FLAGS_DELETED, true);
                 }
             }
+            start = System.currentTimeMillis();
             pop3Fld.close(true);
+            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             resetPOP3Folder();
-            deleteMessagesFromTables(uidls);
+            POP3StorageUtil.deleteMessagesFromTables(uidls, session.getUserId(), session.getContextId());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
         }
@@ -370,10 +384,12 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             // Fetch messages
             final MailMessage[] msgs;
             {
+                final long start = System.currentTimeMillis();
                 final Message[] allMsgs = pop3Fld.getMessages();
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 final FetchProfile fetchProfile = MIMEStorageUtility.getFlagsFetchProfile();
                 fetchProfile.add(UIDFolder.FetchProfileItem.UID);
-                final MailMessage[] mails = fetch(fetchProfile, allMsgs, false);
+                final MailMessage[] mails = fetch(fetchProfile, allMsgs, false, true);
                 msgs = new MailMessage[mailIds.length];
                 for (int i = 0; i < mailIds.length; i++) {
                     final String mailId = mailIds[i];
@@ -438,10 +454,12 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             // Fetch messages
             final MailMessage[] msgs;
             {
+                final long start = System.currentTimeMillis();
                 final Message[] allMsgs = pop3Fld.getMessages();
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 final FetchProfile fetchProfile = MIMEStorageUtility.getFlagsFetchProfile();
                 fetchProfile.add(UIDFolder.FetchProfileItem.UID);
-                final MailMessage[] mails = fetch(fetchProfile, allMsgs, false);
+                final MailMessage[] mails = fetch(fetchProfile, allMsgs, false, true);
                 msgs = new MailMessage[mailIds.length];
                 for (int i = 0; i < mailIds.length; i++) {
                     final String mailId = mailIds[i];
@@ -477,24 +495,29 @@ public final class POP3MessageStorage extends POP3FolderWorker {
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static void prepareFetchProfile(final FetchProfile fetchProfile) {
-        final boolean containsEnvelope = fetchProfile.contains(FetchProfile.Item.ENVELOPE);
+    private static void prepareFetchProfile(final FetchProfile fetchProfile, final boolean sync) {
         // Check if ENVELOPE fetch item needs to be added
-        final String[] headerNames = fetchProfile.getHeaderNames();
-        if ((headerNames.length > 0 || fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) && !containsEnvelope) {
+        if ((fetchProfile.getHeaderNames().length > 0 || fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) && !fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
             fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
+        if (sync && !fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+            fetchProfile.add(UIDFolder.FetchProfileItem.UID);
         }
     }
 
-    private MailMessage[] fetch(final FetchProfile fetchProfile, final Message[] messages, final boolean body) throws MailException {
-        prepareFetchProfile(fetchProfile);
+    private MailMessage[] fetch(final FetchProfile fetchProfile, final Message[] messages, final boolean body, final boolean sync) throws MailException {
+        prepareFetchProfile(fetchProfile, sync);
         // Fetches UID, all HEADERS, and SIZE
+        final POP3Folder pop3Fld = (POP3Folder) pop3Folder;
         try {
             final long start = System.currentTimeMillis();
-            pop3Folder.fetch(messages, fetchProfile);
+            pop3Fld.fetch(messages, fetchProfile);
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config);
+        }
+        if (sync) {
+            syncMessages(messages, pop3Fld);
         }
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         /*
@@ -522,8 +545,8 @@ public final class POP3MessageStorage extends POP3FolderWorker {
         if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
             set.add(MailField.ID);
         }
-        // Convert with fields prefetched through previous POP3 fetch
-        final MailMessage[] mails = convertMessages(messages, pop3Folder, set.toArray(new MailField[set.size()]), body);
+        // Convert with fields pre-fetched through previous POP3 fetch
+        final MailMessage[] mails = convertMessages(messages, pop3Fld, set.toArray(new MailField[set.size()]), body);
         // Check for flags
         if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
             for (int i = 0; i < mails.length; i++) {
@@ -538,7 +561,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
 
     private static final String SELECT_USER_FLAGS = "SELECT user_flag FROM user_pop3_user_flag WHERE cid = ? AND user = ? AND uid = ?";
 
-    private static void prefillFlags(final MailMessage message, final long uid, final int cid, final int user) throws MailException {
+    private static void prefillFlags(final MailMessage message, final long uid, final int cid, final int user) throws POP3Exception {
         final Connection con;
         try {
             con = Database.get(cid, false);
@@ -579,7 +602,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
 
     private static final String SQL_SELECT_UNREAD = "SELECT uidl FROM user_pop3_data WHERE cid = ? AND user = ? AND (flags & ?) = ?";
 
-    private Set<String> getUnreadMessages(final int initialSize) throws MailException {
+    private Set<String> getUnreadMessages(final int initialSize) throws POP3Exception {
         final int cid = session.getContextId();
         final Connection con;
         try {
@@ -610,37 +633,9 @@ public final class POP3MessageStorage extends POP3FolderWorker {
         return uidls;
     }
 
-    private static final String SQL_DELETE_MSGS = "DELETE user_pop3_data, user_pop3_user_flag FROM user_pop3_data, user_pop3_user_flag WHERE user_pop3_data.uid = user_pop3_user_flag.uid AND user_pop3_data.cid = ? AND user_pop3_data.user = ? AND user_pop3_data.uidl = ?";
-
-    private void deleteMessagesFromTables(final Set<String> uidls) throws MailException {
-        final int cid = session.getContextId();
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_DELETE_MSGS);
-            for (final String uidl : uidls) {
-                stmt.setInt(1, cid);
-                stmt.setInt(2, session.getUserId());
-                stmt.setString(3, uidl);
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
-        }
-    }
-
     private static final String SQL_UPDATE_FLAGS = "UPDATE user_pop3_data SET flags = ? WHERE cid = ? AND user = ? AND uidl = ?";
 
-    private void updateSystemFlags(final String uidl, final int newFlags) throws MailException {
+    private void updateSystemFlags(final String uidl, final int newFlags) throws POP3Exception {
         final int cid = session.getContextId();
         final Connection con;
         try {
@@ -666,7 +661,7 @@ public final class POP3MessageStorage extends POP3FolderWorker {
 
     private static final String SQL_UPDATE_COLOR_FLAGS = "UPDATE user_pop3_data SET color_flag = ? WHERE cid = ? AND user = ? AND uidl = ?";
 
-    private void updateColorFlag(final String uidl, final int colorFlag) throws MailException {
+    private void updateColorFlag(final String uidl, final int colorFlag) throws POP3Exception {
         final int cid = session.getContextId();
         final Connection con;
         try {
@@ -688,5 +683,21 @@ public final class POP3MessageStorage extends POP3FolderWorker {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
         }
+    }
+
+    private void syncMessages(final Message[] allMsgs, final POP3Folder pop3Fld) throws MailException {
+        try {
+            final String[] uidls = new String[allMsgs.length];
+            for (int i = 0; i < uidls.length; i++) {
+                uidls[i] = pop3Fld.getUID(allMsgs[i]);
+            }
+            syncMessages(uidls);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, pop3Config);
+        }
+    }
+
+    private void syncMessages(final String[] uidls) throws POP3Exception {
+        POP3StorageUtil.syncDBEntries(uidls, session.getUserId(), session.getContextId());
     }
 }

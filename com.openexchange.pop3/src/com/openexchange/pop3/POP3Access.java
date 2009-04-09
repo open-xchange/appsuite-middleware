@@ -139,6 +139,12 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
+    public int getCacheIdleSeconds() {
+        // TODO Get from configuration
+        return 120;
+    }
+
+    @Override
     protected void releaseResources() {
         if (folderStorage != null) {
             try {
@@ -253,7 +259,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 pop3Props.putAll(getMailProperties());
             }
             /*
-             * Check if a secure IMAP connection should be established
+             * Check if a secure POP3 connection should be established
              */
             if (getMailConfig().isSecure()) {
                 pop3Props.put("mail.pop3.socketFactory.class", CLASSNAME_SECURITY_FACTORY);
@@ -272,9 +278,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Check if debug should be enabled
              */
-            if (Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (true || Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 pop3Session.setDebug(true);
-                pop3Session.setDebugOut(System.err);
+                pop3Session.setDebugOut(System.out);
             }
             /*
              * Get store
