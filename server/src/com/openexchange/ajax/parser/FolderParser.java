@@ -156,53 +156,58 @@ public class FolderParser {
 			fo.setDefaultFolder(jsonObj.getBoolean(FolderFields.STANDARD_FOLDER));
 		}
 		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
-			final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
-			final int arrayLength = jsonArr.length();
-			final OCLPermission[] perms = new OCLPermission[arrayLength];
-			for (int i = 0; i < arrayLength; i++) {
-				final JSONObject elem = jsonArr.getJSONObject(i);
-				if (!elem.has(FolderFields.ENTITY)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.ENTITY);
-				}
-				int entity;
-				try {
-					entity = elem.getInt(FolderFields.ENTITY);
-				} catch (final JSONException e) {
-				    if (null == userConfig) {
-				        throw e;
-				    }
-					try {
-						final String entityStr = elem.getString(FolderFields.ENTITY);
-						entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
-					} catch (final LdapException e1) {
-						LOG.error(e.getMessage(), e);
-						throw new OXException(e1);
-					}
-				}
-				final OCLPermission oclPerm = new OCLPermission();
-				oclPerm.setEntity(entity);
-				if (fo.containsObjectID()) {
-					oclPerm.setFuid(fo.getObjectID());
-				}
-				if (!elem.has(FolderFields.BITS)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.BITS);
-				}
-				final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
-				if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
-						permissionBits[3])) {
-					throw new OXFolderException(FolderCode.INVALID_PERMISSION, Integer.valueOf(permissionBits[0]), Integer.valueOf(permissionBits[1]),
-							Integer.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
-				}
-				oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
-				if (!elem.has(FolderFields.GROUP)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.GROUP);
-				}
-				oclPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
-				perms[i] = oclPerm;
-			}
+	        final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
+			final OCLPermission[] perms = parseOCLPermission(jsonArr, fo.containsObjectID() ? Integer.valueOf(fo.getObjectID()) : null);
 			fo.setPermissionsAsArray(perms);
 		}
 	}
+
+    public OCLPermission[] parseOCLPermission(final JSONArray permissionsAsJSON, Integer objectID) throws JSONException, OXFolderException, OXException {
+        final int numberOfPermissions = permissionsAsJSON.length();
+        final OCLPermission[] perms = new OCLPermission[numberOfPermissions];
+        for (int i = 0; i < numberOfPermissions; i++) {
+        	final JSONObject elem = permissionsAsJSON.getJSONObject(i);
+        	if (!elem.has(FolderFields.ENTITY)) {
+        		throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.ENTITY);
+        	}
+        	int entity;
+        	try {
+        		entity = elem.getInt(FolderFields.ENTITY);
+        	} catch (final JSONException e) {
+        	    if (null == userConfig) {
+        	        throw e;
+        	    }
+        		try {
+        			final String entityStr = elem.getString(FolderFields.ENTITY);
+        			entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
+        		} catch (final LdapException e1) {
+        			LOG.error(e.getMessage(), e);
+        			throw new OXException(e1);
+        		}
+        	}
+        	final OCLPermission oclPerm = new OCLPermission();
+        	oclPerm.setEntity(entity);
+        	if (objectID != null) {
+        		oclPerm.setFuid(objectID.intValue());
+        	}
+        	if (!elem.has(FolderFields.BITS)) {
+        		throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.BITS);
+        	}
+        	final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
+        	if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
+        			permissionBits[3])) {
+        		throw new OXFolderException(FolderCode.INVALID_PERMISSION, Integer.valueOf(permissionBits[0]), Integer.valueOf(permissionBits[1]),
+        				Integer.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
+        	}
+        	oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
+        	if (!elem.has(FolderFields.GROUP)) {
+        		throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.GROUP);
+        	}
+        	oclPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
+        	perms[i] = oclPerm;
+        }
+        return perms;
+    }
 
 	private static final int[] parsePermissionBits(final int bitsArg) {
 		int bits = bitsArg;
