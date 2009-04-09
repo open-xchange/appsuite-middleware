@@ -100,6 +100,7 @@ public class POP3CreateTableTask implements UpdateTask {
         		"INDEX (cid, user)," + 
         		"INDEX (cid, user, uidl)," + 
         		"PRIMARY KEY (cid, user, uid)," + 
+        		"UNIQUE (cid, user, uidl)," + 
         		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }

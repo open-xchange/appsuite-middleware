@@ -90,6 +90,8 @@ public final class MailAccessCache {
      */
     private Cache cache;
 
+    private long defaultIdleSeconds;
+
     /**
      * Prevent instantiation
      * 
@@ -126,6 +128,10 @@ public final class MailAccessCache {
      * Singleton instance is created following the thread-safe lazy-initialization pattern:
      * 
      * <pre>
+     * 
+     * 
+     * 
+     * 
      * 
      * 
      * // Works with acquire/release semantics for volatile
@@ -196,6 +202,7 @@ public final class MailAccessCache {
         final ElementAttributes attributes = cache.getDefaultElementAttributes();
         attributes.addElementEventHandler(eventHandler);
         cache.setDefaultElementAttributes(attributes);
+        defaultIdleSeconds = attributes.getIdleTime();
     }
 
     /**
@@ -209,6 +216,7 @@ public final class MailAccessCache {
         }
         cache.clear();
         cache = null;
+        defaultIdleSeconds = 0;
     }
 
     /**
@@ -283,7 +291,7 @@ public final class MailAccessCache {
         try {
             if (cache.get(key) != null) {
                 /*
-                 * Key is already in use and therefore an IMAP connection is already in cache for current user
+                 * Key is already in use and therefore an mail connection is already in cache for current user
                  */
                 return false;
             }
@@ -300,7 +308,14 @@ public final class MailAccessCache {
                 if (cache.get(key) != null) {
                     return false;
                 }
-                cache.put(key, mailAccess);
+                final int idleTime = mailAccess.getCacheIdleSeconds();
+                if (idleTime <= 0 || defaultIdleSeconds == idleTime) {
+                    cache.put(key, mailAccess);
+                } else {
+                    final ElementAttributes attributes = cache.getDefaultElementAttributes();
+                    attributes.setIdleTime(idleTime);
+                    cache.put(key, mailAccess, attributes);
+                }
                 return true;
             } finally {
                 /*

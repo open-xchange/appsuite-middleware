@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -427,12 +428,34 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (isDefaultFoldersChecked(accountId)) {
             names = getSortedDefaultMailFolders(accountId);
         } else {
-            names = new String[] {
-                prepareMailFolderParam(getInboxFolder(accountId)).getFullname(),
-                prepareMailFolderParam(getDraftsFolder(accountId)).getFullname(),
-                prepareMailFolderParam(getSentFolder(accountId)).getFullname(),
-                prepareMailFolderParam(getSpamFolder(accountId)).getFullname(),
-                prepareMailFolderParam(getTrashFolder(accountId)).getFullname() };
+            final List<String> tmp = new ArrayList<String>();
+
+            FullnameArgument fa = prepareMailFolderParam(getInboxFolder(accountId));
+            if (null != fa) {
+                tmp.add(fa.getFullname());
+            }
+
+            fa = prepareMailFolderParam(getDraftsFolder(accountId));
+            if (null != fa) {
+                tmp.add(fa.getFullname());
+            }
+
+            fa = prepareMailFolderParam(getSentFolder(accountId));
+            if (null != fa) {
+                tmp.add(fa.getFullname());
+            }
+
+            fa = prepareMailFolderParam(getSpamFolder(accountId));
+            if (null != fa) {
+                tmp.add(fa.getFullname());
+            }
+
+            fa = prepareMailFolderParam(getTrashFolder(accountId));
+            if (null != fa) {
+                tmp.add(fa.getFullname());
+            }
+
+            names = tmp.toArray(new String[tmp.size()]);
         }
         /*
          * Sort them

@@ -309,7 +309,14 @@ public final class MIMEMessageConverter {
         }
     }
 
-    private static void parseMimeFlags(final int flags, final MimeMessage msg) throws MessagingException {
+    /**
+     * Parses specified flags to given message.
+     * 
+     * @param flags The flags to parse
+     * @param msg The message to fill
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static void parseMimeFlags(final int flags, final Message msg) throws MessagingException {
         final Flags flagsObj = new Flags();
         if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
             flagsObj.add(Flags.Flag.ANSWERED);
@@ -397,10 +404,11 @@ public final class MIMEMessageConverter {
      * @param msgs The source messages
      * @param folder The folder containing source messages
      * @param fields The fields to fill
+     * @param includeBody <code>true</code> to include body; otherwise <code>false</code>
      * @return The converted array of {@link Message} instances
      * @throws MailException If conversion fails
      */
-    public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields) throws MailException {
+    public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields, final boolean includeBody) throws MailException {
         try {
             final MailMessageFieldFiller[] fillers = createFieldFillers(folder, fields);
             final MailMessage[] mails = new MIMEMailMessage[msgs.length];
@@ -409,7 +417,7 @@ public final class MIMEMessageConverter {
                     /*
                      * Create with no reference to content
                      */
-                    mails[i] = new MIMEMailMessage();
+                    mails[i] = includeBody ? new MIMEMailMessage((MimeMessage) msgs[i]) : new MIMEMailMessage();
                     fillMessage(fillers, mails[i], msgs[i]);
                 }
             }
