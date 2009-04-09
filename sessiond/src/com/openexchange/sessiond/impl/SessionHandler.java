@@ -306,6 +306,7 @@ public final class SessionHandler {
                     return true;
                 }
                 LOG.info("Session timed out. ID: " + sessionid);
+                LOG.info("Session timestamp " + sessionControl.getTimestamp() + ", lifeTime: " + sessionControl.getLifetime());
                 sessionContainer.removeSessionById(sessionid);
 
                 return false;
@@ -375,6 +376,7 @@ public final class SessionHandler {
                     return;
                 }
                 LOG.info("Session timed out. ID: " + sessionid);
+                LOG.info("Session timestamp " + sessionControl.getTimestamp() + ", lifeTime: " + sessionControl.getLifetime());
                 sessionContainer.removeSessionById(sessionid);
                 throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
             }
