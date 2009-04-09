@@ -89,14 +89,24 @@ public class AppointmentWriter extends CalendarWriter {
      */
     public AppointmentWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
-        calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        utc = TimeZone.getTimeZone("utc");
+    }
+    
+    public CalendarCollectionService getCalendarCollectionService(){
+        if ( null == calColl ) {
+            calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        }
+        return calColl;
+    }
+    
+    public void setCalendarCollectionService(CalendarCollectionService calColl){
+        this.calColl = calColl;
     }
 
     public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart,
             final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
-            if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
+            if (getCalendarCollectionService().inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
                     .getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
                 writeArray(appointmentObj, cols, jsonArray);
             }
