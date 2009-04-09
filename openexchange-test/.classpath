@@ -47,5 +47,6 @@
 	<classpathentry kind="lib" path="lib/fitnesserunner-1.0.5.jar"/>
 	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.timer"/>
+	<classpathentry kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
