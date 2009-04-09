@@ -1,14 +1,17 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange-admin Core Plug-in
-Bundle-SymbolicName: open_xchange_admin
+Bundle-Name: Open-Xchange Administration
+Bundle-SymbolicName: com.openexchange.admin
 Bundle-Version: 6.9.0.0
 OXVersion: 6.9.0
 OXRevision: 0
-Bundle-Activator: com.openexchange.admin.daemons.Activator
+Bundle-Activator: com.openexchange.admin.osgi.Activator
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc,
  com.openexchange.api2,
  com.openexchange.caching,
+ com.openexchange.context,
  com.openexchange.database,
  com.openexchange.groupware,
  com.openexchange.groupware.contact,
@@ -22,17 +25,22 @@ Import-Package: com.mysql.jdbc,
  com.openexchange.groupware.update,
  com.openexchange.groupware.update.exception,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.mail.dataobjects,
  com.openexchange.mail.usersetting,
+ com.openexchange.mailaccount,
+ com.openexchange.server,
  com.openexchange.server.impl,
+ com.openexchange.spamhandler,
+ com.openexchange.tools.encoding,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.sql,
- com.openexchange.tools.encoding,
  com.sun.mail.smtp,
  javax.mail,
  javax.mail.internet,
  org.apache.commons.io,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker
 Export-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.group,
  com.openexchange.admin.console.resource,

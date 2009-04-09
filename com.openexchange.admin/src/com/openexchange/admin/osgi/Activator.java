@@ -46,10 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.daemons;
+
+package com.openexchange.admin.osgi;
 
 import java.security.Permission;
 import java.util.Dictionary;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,42 +60,53 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.context.ContextService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 
 public class Activator implements BundleActivator {
 
     private static Log log = LogFactory.getLog(AdminDaemon.class);
 
     private AdminDaemon daemon = null;
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+
+    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+
+    /**
+     * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public void start(BundleContext context) throws Exception {
         if (null == System.getSecurityManager()) {
             System.setSecurityManager(new SecurityManager() {
                 public void checkPermission(Permission perm) {
                 }
-
                 public void checkPermission(Permission perm, Object context) {
                 }
             });
         }
 
-        this.daemon = new AdminDaemon();
+        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
+        trackers.push(new ServiceTracker(context, MailAccountStorageService.class.getName(), new AdminServiceRegisterer(
+            MailAccountStorageService.class,
+            context)));
+        for (int i = trackers.size() - 1; i >= 0; i--) {
+            trackers.get(i).open();
+        }
+
         log.info("Starting Admindaemon...");
+        this.daemon = new AdminDaemon();
         this.daemon.getCurrentBundleStatus(context);
         this.daemon.registerBundleListener(context);
         this.daemon.initCache(context);
-        this.daemon.initAccessCombinationsInCache(); // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
+        // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
+        this.daemon.initAccessCombinationsInCache();
         this.daemon.initRMI(context);
+
         if (log.isInfoEnabled()) {
-            final Dictionary<Object, Object> headers = context.getBundle().getHeaders();
+            final Dictionary<?, ?> headers = context.getBundle().getHeaders();
             log.info("Version: " + headers.get("Bundle-Version"));
             log.info("Name: " + headers.get("Bundle-SymbolicName"));
             log.info("Build: " + headers.get("OXVersion") + " Rev" + headers.get("OXRevision"));
@@ -103,51 +116,39 @@ public class Activator implements BundleActivator {
         // The listener which is called if a new plugin is registered
         ServiceListener sl = new ServiceListener() {
             public void serviceChanged(ServiceEvent ev) {
-                if(log.isInfoEnabled()){
-                log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
+                if (log.isInfoEnabled()) {
+                    log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
                 }
-
                 switch (ev.getType()) {
-                    case ServiceEvent.REGISTERED: {
-                        // At first we call our own methods inside the new registered plugin...
+                    case ServiceEvent.REGISTERED:
                         if(log.isInfoEnabled()){
-                        log.info(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
+                            log.info(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
                         }
-                        // Code which is executed if a new plugin is registered
-//                        TestClass test = (TestClass) context.getService(sr);
-//                        test.testmethod();
-                    }
                         break;
                     default:
                         break;
                 }
             }
-
         };
-
         String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
-
         try {
             context.addServiceListener(sl, filter);
-//            ServiceReference[] srl = context.getServiceReferences(null, filter);
-//            for (int i = 0; srl != null && i < srl.length; i++) {
-//                sl.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, srl[i]));
-//            }
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+    /**
+     * {@inheritDoc}
      */
     public void stop(BundleContext context) throws Exception {
+        while (!trackers.isEmpty()) {
+            ServiceTracker tracker = trackers.pop();
+            tracker.close();
+        }
         log.info("Stopping RMI...");
         this.daemon.unregisterRMI();
         log.info("Thanks for using Open-Xchange AdminDaemon");
     }
-
 }
