@@ -542,6 +542,16 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
+     * Gets the number of seconds this mail access is allowed to remain idle in {@link MailAccessCache cache} before being removed and
+     * closed. If the default value shall be used for this mail access, return <code>-1</code>.
+     * 
+     * @return The number of allowed idle seconds or <code>-1</code> to signal using default value.
+     */
+    public int getCacheIdleSeconds() {
+        return -1;
+    }
+
+    /**
      * Gets a implementation-specific new instance of {@link MailConfig}.
      * 
      * @return A implementation-specific new instance of {@link MailConfig}
@@ -619,4 +629,5 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * @throws MailException If shutdown actions fail
      */
     protected abstract void shutdown() throws MailException;
+
 }
