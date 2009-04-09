@@ -78,6 +78,8 @@ public class FolderModuleTransformator implements Transformator {
             return FolderObject.TASK;
         if( value.equalsIgnoreCase(Folder.MODULE_SYSTEM))
             return FolderObject.SYSTEM_TYPE;
+        if( value.equalsIgnoreCase(Folder.MODULE_PROJECT))
+            return FolderObject.PROJECT;
         return Integer.valueOf(value);
     }
 
