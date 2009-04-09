@@ -104,6 +104,9 @@ public final class MIMEStorageUtility {
      * @return The clone fetch profile
      */
     public static FetchProfile cloneFetchProfile(final FetchProfile toClone) {
+        if (null == toClone) {
+            return null;
+        }
         final FetchProfile clone = new FetchProfile();
         final Item[] items = toClone.getItems();
         for (final Item item : items) {
