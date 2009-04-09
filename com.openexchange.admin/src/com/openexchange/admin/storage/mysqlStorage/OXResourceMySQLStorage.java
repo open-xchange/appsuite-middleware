@@ -68,6 +68,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 
 /**
@@ -296,7 +297,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con.setAutoCommit(false);
 
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
-            AdminCache.delreg.fireDeleteEvent(delev, con, con);
+            DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
 
             createRecoveryData(resource_id, ctx, con);
 
@@ -351,7 +352,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con.setAutoCommit(false);
             
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
-            AdminCache.delreg.fireDeleteEvent(delev, con, con);
+            DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
             
             createRecoveryData(resource_id, ctx, con);
             

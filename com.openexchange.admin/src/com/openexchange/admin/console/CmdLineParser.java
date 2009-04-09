@@ -62,7 +62,7 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see args.examples.gnu.OptionTest
  */
 public class CmdLineParser {
@@ -623,7 +623,6 @@ public class CmdLineParser {
         this.options.remove("--" + option.longForm());
     }
 
-    @SuppressWarnings("unchecked")
     private void addValue(Option opt, Object value) {
         String lf = opt.longForm();
 

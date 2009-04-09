@@ -70,6 +70,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
@@ -432,7 +433,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
                 
                 final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id);
-                AdminCache.delreg.fireDeleteEvent(delev, con, con);
+                DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
 
                 prep_del_members = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
                 prep_del_members.setInt(1, context_id);

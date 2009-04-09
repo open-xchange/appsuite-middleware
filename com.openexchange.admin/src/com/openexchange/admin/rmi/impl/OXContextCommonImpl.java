@@ -178,7 +178,6 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      * @param args All required args of that method
      * @throws StorageException
      */
-    @SuppressWarnings("unchecked")
     protected Object callPluginMethod(final String method, final Object... args) throws StorageException {
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {

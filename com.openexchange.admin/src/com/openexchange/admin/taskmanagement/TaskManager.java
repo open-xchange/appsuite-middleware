@@ -87,7 +87,6 @@ public class TaskManager {
 
     // TODO: Find out how to invoke super with generic types
     private class Extended<V> extends ExtendedFutureTask<V> {
-        @SuppressWarnings("unchecked")
         public Extended(final Callable callable, final String typeofjob, final String furtherinformation, final int id) { super(callable, typeofjob, furtherinformation, id); }
         @Override
         protected void done() {
@@ -114,7 +113,6 @@ public class TaskManager {
         return JobManagerSingletonHolder.instance;
     }
 
-    @SuppressWarnings("unchecked")
     public int addJob(final Callable<?> jobcall, final String typeofjob, final String furtherinformation) {
         final Extended<?> job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID);
         this.jobs.put(this.lastID, job);

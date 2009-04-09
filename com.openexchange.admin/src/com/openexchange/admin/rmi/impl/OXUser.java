@@ -144,7 +144,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * @throws StorageException 
      *
      */
-    @SuppressWarnings("unused")
     private OXUser() throws StorageException {
         super();
         this.cache = ClientAdminThread.cache;
