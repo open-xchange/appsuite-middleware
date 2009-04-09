@@ -160,7 +160,6 @@ public class AdminCache {
         cacheSqlScripts();
         readMasterCredentials();
         configureAuthentication(); // disabling authentication mechs
-        initOXProccess();
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
@@ -656,17 +655,6 @@ public class AdminCache {
     private final void checkDatabaseLocked() throws PoolException {
         if (this.isLockdb()) {
             throw new PoolException(new DatabaseLockedException("The database is locked due to an update"));
-        }
-    }
-
-    private void initOXProccess() {
-        try {
-            this.log.info("OX init starting...");
-    
-            delreg = DeleteRegistry.getInstance();
-            this.log.info("...OX init done!");
-        } catch (final Exception ecp) {
-            this.log.fatal("Error while init OX Process!", ecp);
         }
     }
 
