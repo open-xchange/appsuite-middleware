@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -69,6 +70,7 @@ import com.openexchange.image.internal.ImageRegistryDeleteListener;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
@@ -79,12 +81,12 @@ import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteRegistry {
+public final class DeleteRegistry implements Initialization {
 
     /**
      * The singleton instance
      */
-    private static volatile DeleteRegistry instance;
+    private static final DeleteRegistry instance = new DeleteRegistry();
 
     /**
      * The class-set to detect duplicate listeners.
@@ -147,18 +149,7 @@ public final class DeleteRegistry {
      * @return The singleton instance of {@link DeleteRegistry}.
      */
     public static DeleteRegistry getInstance() {
-        DeleteRegistry tmp = instance;
-        if (tmp == null) {
-            synchronized (DeleteRegistry.class) {
-                tmp = instance;
-                if (tmp == null) {
-                    tmp = new DeleteRegistry();
-                    tmp.init();
-                    instance = tmp;
-                }
-            }
-        }
-        return tmp;
+        return instance;
     }
 
     /**
@@ -220,4 +211,12 @@ public final class DeleteRegistry {
         }
     }
 
+    public void start() throws AbstractOXException {
+        init();
+    }
+
+    public void stop() throws AbstractOXException {
+        classes.clear();
+        listeners.clear();
+    }
 }
