@@ -620,11 +620,13 @@ public class Folder extends SessionServlet {
                             final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                             for (final MailAccount mailAccount : accounts) {
                                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                                mailAccess.connect();
-                                final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                    columns,
-                                    mailAccess.getMailConfig());
+                                boolean close = false;
                                 try {
+                                    mailAccess.connect();
+                                    close = true;
+                                    final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                        columns,
+                                        mailAccess.getMailConfig());
                                     final MailFolder rootFolder = mailAccess.getFolderStorage().getRootFolder();
                                     final JSONArray ja = new JSONArray();
                                     if (mailAccount.isDefaultAccount()) {
@@ -655,8 +657,12 @@ public class Folder extends SessionServlet {
                                         }
                                     }
                                     jsonWriter.value(ja);
+                                } catch (final MailException e) {
+                                    LOG.error(e.getMessage(), e);
                                 } finally {
-                                    mailAccess.close(true);
+                                    if (close) {
+                                        mailAccess.close(true);
+                                    }
                                 }
                             }
                         }
@@ -1252,11 +1258,13 @@ public class Folder extends SessionServlet {
                      * Add root folders
                      */
                     final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                    mailAccess.connect();
-                    final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                        columns,
-                        mailAccess.getMailConfig());
+                    boolean close = false;
                     try {
+                        mailAccess.connect();
+                        close = true;
+                        final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                            columns,
+                            mailAccess.getMailConfig());
                         final MailFolder rootFolder = mailAccess.getFolderStorage().getRootFolder();
                         final JSONArray ja = new JSONArray();
                         if (mailAccount.isDefaultAccount()) {
@@ -1287,8 +1295,12 @@ public class Folder extends SessionServlet {
                             }
                         }
                         jsonWriter.value(ja);
+                    } catch (final MailException e) {
+                        LOG.error(e.getMessage(), e);
                     } finally {
-                        mailAccess.close(true);
+                        if (close) {
+                            mailAccess.close(true);
+                        }
                     }
                 }
             }
