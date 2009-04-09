@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailaccount.internal;
+package com.openexchange.mailaccount.servlet;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
@@ -61,42 +61,42 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
- * {@link MailAccountStorageInit} - Initialization for mail account storage.
+ * Registers the mail account servlet.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountStorageInit implements Initialization {
+public final class MailAccountServletInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(MailAccountStorageInit.class);
+    private static final Log LOG = LogFactory.getLog(MailAccountServletInit.class);
 
-    private final AtomicBoolean started;
+    private static final String ALIAS = "ajax/account";
+
+    private final AtomicBoolean started = new AtomicBoolean();
 
     /**
-     * Initializes a new {@link MailAccountStorageInit}.
+     * Initializes a new {@link MailAccountServletInit}.
      */
-    public MailAccountStorageInit() {
+    public MailAccountServletInit() {
         super();
-        started = new AtomicBoolean();
     }
 
     public void start() throws AbstractOXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
-        // Simulate bundle start
-        ServerServiceRegistry.getInstance().addService(
-            MailAccountStorageService.class,
-            new CachingMailAccountStorage(new RdbMailAccountStorage()));
-        LOG.info("MailAccountStorageService successfully injected to server service registry");
+        try {
+            HttpServletManager.registerServlet(ALIAS, new MailAccountServlet(), null);
+            LOG.info("Mail account servlet successfully registered.");
+        } catch (final ServletException e) {
+            LOG.error("Mail account servlet could not be registered on server start-up.", e);
+        }
     }
 
     public void stop() throws AbstractOXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }
-        // Simulate bundle stop
-        ServerServiceRegistry.getInstance().removeService(MailAccountStorageService.class);
-        LOG.info("MailAccountStorageService successfully removed from server service registry");
+        HttpServletManager.unregisterServlet(ALIAS);
+        LOG.info("Mail account servlet successfully unregistered.");
     }
-
 }

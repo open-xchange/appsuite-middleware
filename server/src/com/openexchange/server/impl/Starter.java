@@ -196,7 +196,8 @@ public class Starter implements Initialization {
             LoginPerformer.releaseInstance();
         }
     },
-    new com.openexchange.mailaccount.internal.MailAccountStorageInit() };
+    new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
+    new com.openexchange.mailaccount.servlet.MailAccountServletInit() };
 
     /**
      * This contains the components that must be started if the admin uses APIs of the server.
