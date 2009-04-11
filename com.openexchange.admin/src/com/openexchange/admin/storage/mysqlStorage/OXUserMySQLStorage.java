@@ -85,6 +85,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -1128,14 +1129,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private void createPrimaryMailAccount(Context ctx, User user, int userId) throws ServiceException, StorageException {
-        ContextService contextS = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
-        final com.openexchange.groupware.contexts.Context context;
-        try {
-            context = contextS.getContext(ctx.getId().intValue());
-        } catch (ContextException e) {
-            log.error("Problem loading context.", e);
-            throw new StorageException(e.toString());
-        }
+        // Loading a context is not possible if here the primary mail account for the admin is created.
+        final com.openexchange.groupware.contexts.Context context = new ContextImpl(ctx.getId().intValue());
         MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
