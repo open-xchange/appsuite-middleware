@@ -81,7 +81,6 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.api2.OXException;
-import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -1082,7 +1081,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 closePreparedStatement(stmt);
             }
             // Write primary mail account.
-            createPrimaryMailAccount(ctx, usrdata, internal_user_id);
+            createPrimaryMailAccount(ctx, write_ox_con, usrdata, internal_user_id);
             // Write GUI configuration to database.
             storeUISettings(ctx, write_ox_con, usrdata, internal_user_id);
             if (log.isInfoEnabled()) {
@@ -1128,7 +1127,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void createPrimaryMailAccount(Context ctx, User user, int userId) throws ServiceException, StorageException {
+    private void createPrimaryMailAccount(Context ctx, Connection con, User user, int userId) throws ServiceException, StorageException {
         // Loading a context is not possible if here the primary mail account for the admin is created.
         final com.openexchange.groupware.contexts.Context context = new ContextImpl(ctx.getId().intValue());
         MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
@@ -1154,7 +1153,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
         account.setTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
         try {
-            mass.insertMailAccount(account, userId, context, null);
+            mass.insertMailAccount(account, userId, context, null, con);
         } catch (MailAccountException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
