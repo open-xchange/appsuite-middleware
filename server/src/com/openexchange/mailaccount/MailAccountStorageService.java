@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount;
 
 import java.net.InetSocketAddress;
+import java.sql.Connection;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -112,6 +113,19 @@ public interface MailAccountStorageService {
      * @throws MailAccountException If the mail account cannot be updated
      */
     public int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, String sessionPassword) throws MailAccountException;
+
+    /**
+     * Inserts mail account's value taken from specified mail account.
+     * 
+     * @param mailAccount The mail account containing the values to update.
+     * @param user The user ID
+     * @param ctx The context
+     * @param sessionPassword The session password
+     * @param con writable database connection
+     * @return The ID of the newly created mail account
+     * @throws MailAccountException If the mail account cannot be updated
+     */
+    int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, String sessionPassword, Connection con) throws MailAccountException;
 
     /**
      * Deletes the mail account identified by specified ID.

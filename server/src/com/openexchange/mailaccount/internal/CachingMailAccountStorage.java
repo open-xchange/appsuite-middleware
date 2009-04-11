@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.internal;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.sql.Connection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
@@ -193,6 +194,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws MailAccountException {
         return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
+    }
+
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, Connection con) throws MailAccountException {
+        return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
     }
 
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {
