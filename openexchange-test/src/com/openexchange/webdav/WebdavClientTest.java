@@ -81,6 +81,17 @@ public class WebdavClientTest extends TestCase {
 		getResource(from).moveMethod(getUrl(to));
 	}
 	
+	public void lock(final String resource) throws HttpException, IOException {
+	    getResource(resource).lockMethod();
+	}
+	
+	public String lock(final String resource, int seconds) throws HttpException, IOException {
+	    WebdavResource res = getResource(resource);
+        boolean locked = res.lockMethod(getClass().getName(), seconds);
+	    assertTrue("Lock failed", locked);
+	    return res.getLockDiscovery().getActiveLocks()[0].getLockToken();
+    }
+	
 	public void assertContent(final String path, final String...names) throws HttpException, IOException {
 		final WebdavResource res = getResource(path);
 		final WebdavResources resources = res.getChildResources();

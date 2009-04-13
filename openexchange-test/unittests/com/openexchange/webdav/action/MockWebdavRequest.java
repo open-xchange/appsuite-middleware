@@ -80,7 +80,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	
 	public InputStream getBody(){
 		try {
-			return new ByteArrayInputStream(content.getBytes("UTF-8"));
+			return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes("UTF-8"));
 		} catch (final UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
@@ -131,5 +131,10 @@ public class MockWebdavRequest implements WebdavRequest {
 	public String getCharset() {
 		return "UTF-8";
 	}
+
+
+    public boolean hasBody() {
+        return content != null;
+    }
 
 }
