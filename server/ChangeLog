@@ -1,6 +1,7 @@
-* 2009-04-06 - francisco.laguna@open-xchange.com
+* 2009-04-13 - francisco.laguna@open-xchange.com
 
  - Bugfix #13482: Survive empty LOCK request bodies in webdav infostore.
+ - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents. 
 
 * 2009-04-06 - francisco.laguna@open-xchange.com
 
@@ -24,7 +25,7 @@
 
 * 2009-03-23 - thorben.betten@open-xchange.com
 
- - Bugfix #12220: Enhanced forward/reply calls by an optional "view" parameter to define the desired format
+  - Bugfix #12220: Enhanced forward/reply calls by an optional "view" parameter to define the desired format.
 
 * 2009-03-18 - thorben.betten@open-xchange.com
 
