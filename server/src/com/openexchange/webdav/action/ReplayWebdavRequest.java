@@ -148,4 +148,8 @@ public class ReplayWebdavRequest implements WebdavRequest{
 	public String getCharset() {
 		return delegate.getCharset();
 	}
+	
+	public boolean hasBody() {
+	    return delegate.hasBody();
+	}
 }
