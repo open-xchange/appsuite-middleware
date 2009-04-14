@@ -1,3 +1,9 @@
+open-xchange-dataretention (6.9.0.0-1) unstable; urgency=low
+
+  * Build for public ptf 2009-04-14
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 14 Apr 2009 11:57:43 +0200
+
 open-xchange-dataretention (6.9.0.0-0) unstable; urgency=low
 
   * new unstable cycle
