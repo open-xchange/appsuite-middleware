@@ -51,7 +51,9 @@ package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -540,11 +542,22 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
+        final int retval;
         try {
-            return insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+            con.setAutoCommit(false);
+            retval = insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (MailAccountException e) {
+            rollback(con);
+            throw e;
         } finally {
+            autocommit(con);
             Database.back(cid, true, con);
         }
+        return retval;
     }
 
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {
