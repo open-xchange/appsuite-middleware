@@ -191,7 +191,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
-            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, calendars, writecon, writecon);
             for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder,false, System.currentTimeMillis());
             }

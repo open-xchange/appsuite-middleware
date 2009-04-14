@@ -514,7 +514,8 @@ public class CalendarTest extends TestCase {
         final int folder_id = getPrivateFolder();
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
+        final CalendarSql csql = new CalendarSql(so);            
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -530,7 +531,6 @@ public class CalendarTest extends TestCase {
             //ofa.createFolder(fo, so, true, readcon, writecon, false);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             public_folder_id = fo.getObjectID();
-            final CalendarSql csql = new CalendarSql(so);            
             SearchIterator si = csql.searchAppointments("test", folder_id, 0, "ASC", cols);
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
@@ -606,7 +606,7 @@ public class CalendarTest extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -716,7 +716,7 @@ public class CalendarTest extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1140,7 +1140,8 @@ public class CalendarTest extends TestCase {
         
         final int fid = getPrivateFolder();
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
+        final CalendarSql csql = new CalendarSql(so);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -1172,7 +1173,6 @@ public class CalendarTest extends TestCase {
             fillDatesInDao(cdao);
             cdao.setTitle("testSharedFolder");
             cdao.setIgnoreConflicts(true);
-            final CalendarSql csql = new CalendarSql(so);
             csql.insertAppointmentObject(cdao);        
             final int object_id = cdao.getObjectID();    
             
@@ -1383,13 +1383,13 @@ public class CalendarTest extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("testInsertMoveAndDeleteAppointmentsWithPrivateFlagFolder");
+        fo.setFolderName("testInsertMoveAndDeleteAppointmentsWithPrivateFlagFolder"+System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
