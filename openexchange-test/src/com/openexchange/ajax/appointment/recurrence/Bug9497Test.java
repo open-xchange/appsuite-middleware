@@ -8,9 +8,17 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.container.AppointmentObject;
 
+/**
+ * 
+ * {@link Bug9497Test}
+ * @author Offspring
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - fixes
+ *
+ */
 public class Bug9497Test extends AbstractRecurrenceTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug9497Test.class);
+    private int objectId = -1;
 	
 	public Bug9497Test(final String name) {
 		super(name);
@@ -36,8 +44,16 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 		appointmentObj.setDayInMonth(28);
 		appointmentObj.setMonth(Calendar.DECEMBER);
 		appointmentObj.setIgnoreConflicts(true);
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		objectId  = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL+getHostName(), getSessionId());
+    }
+	
+	
 }
