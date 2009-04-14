@@ -55,8 +55,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
