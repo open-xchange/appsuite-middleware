@@ -64,6 +64,7 @@ public class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
         tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
         tests.addTestSuite(com.openexchange.ajax.UserTest.class);
+        tests.addTestSuite(com.openexchange.ajax.mailaccount.MailAccountLifecycleTest.class);
 
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
         tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
