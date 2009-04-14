@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.servlet.request;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -227,13 +228,7 @@ public final class MailAccountRequest {
     
     private JSONArray actionAll(JSONObject request) throws JSONException, OXException {
         final String colString = request.getString(AJAXServlet.PARAMETER_COLUMNS);
-        List<Attribute> attributes = new LinkedList<Attribute>();
-        for(String col : colString.split("\\s*,\\s*")) {
-            if("".equals(col)) {
-                continue;
-            }
-            attributes.add(Attribute.getById(Integer.parseInt(col)));
-        }
+        List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
@@ -245,16 +240,25 @@ public final class MailAccountRequest {
             throw new OXException(e);
         }
     }
+
+    private List<Attribute> getColumns(final String colString) {
+        List<Attribute> attributes = new LinkedList<Attribute>();
+        if(colString != null) {
+            for(String col : colString.split("\\s*,\\s*")) {
+                if("".equals(col)) {
+                    continue;
+                }
+                attributes.add(Attribute.getById(Integer.parseInt(col)));
+            }
+        } else {
+            attributes = Arrays.asList(Attribute.values());
+        }
+        return attributes;
+    }
     
     private JSONArray actionList(JSONObject request) throws JSONException, OXException {
         final String colString = request.getString(AJAXServlet.PARAMETER_COLUMNS);
-        List<Attribute> attributes = new LinkedList<Attribute>();
-        for(String col : colString.split("\\s*,\\s*")) {
-            if("".equals(col)) {
-                continue;
-            }
-            attributes.add(Attribute.getById(Integer.parseInt(col)));
-        }
+        List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
