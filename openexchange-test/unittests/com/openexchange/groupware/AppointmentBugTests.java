@@ -1466,7 +1466,7 @@ public class AppointmentBugTests extends TestCase {
         oclp1.setFolderAdmin(true);
 
 
-        fo.setFolderName("testBug6400");
+        fo.setFolderName("testBug6400 - "+System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -1575,7 +1575,7 @@ public class AppointmentBugTests extends TestCase {
         oclp1.setFolderAdmin(true);
 
 
-        fo.setFolderName("testBug6214");
+        fo.setFolderName("testBug6214 "+System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2257,7 +2257,7 @@ public class AppointmentBugTests extends TestCase {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        fo.setFolderName("testSharedFolder8490");
+        fo.setFolderName("testSharedFolder8490 - "+System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2375,7 +2375,7 @@ public class AppointmentBugTests extends TestCase {
 
         oclp2.setEntity(userid);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder8482");
+        fo.setFolderName("testSharedFolder8482 - "+System.currentTimeMillis());
         fo.setParentFolderID(fid2);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2573,7 +2573,7 @@ public class AppointmentBugTests extends TestCase {
 
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder8495");
+        fo.setFolderName("testSharedFolder8495 - "+System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2810,7 +2810,7 @@ public class AppointmentBugTests extends TestCase {
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
         final OCLPermission oclp2 = new OCLPermission();
-        fo.setFolderName("testPublicFolder9089");
+        fo.setFolderName("testPublicFolder9089 - "+System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -2983,7 +2983,7 @@ public class AppointmentBugTests extends TestCase {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder10154");
+        fo.setFolderName("testSharedFolder10154 - "+System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
