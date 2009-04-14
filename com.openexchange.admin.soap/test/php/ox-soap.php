@@ -6,7 +6,7 @@
  * 
  */
 
-$SOAPHOST = "cc-server-apache";
+$SOAPHOST = "cc-server-apache.netline.de";
 
 $OXMASTER_ADMIN = "oxadminmaster";
 $OXMASTER_ADMIN_PASS = "netline";
