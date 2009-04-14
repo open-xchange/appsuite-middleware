@@ -3,13 +3,13 @@
 !|Table:CreateFolder|
 | start_folder   |
 | parent         | module |
-| /Public folders| calendar  |
+| public| calendar  |
 
 
 !|Table:CreateFolder|
 | destination_folder   |
 | parent         | module |
-| /Public folders| calendar  |
+| public| calendar  |
 
 
 !|Table:CreateAppointment|

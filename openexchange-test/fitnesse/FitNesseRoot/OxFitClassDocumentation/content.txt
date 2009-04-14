@@ -40,3 +40,4 @@ Note that as of now, all of these are actually SLIM !-TableTables-!, not FIT !-D
 !2 Helpers
  * !-SearchUsers-! - takes a user name and field names and returns the values of these fields.
  * !-WhoAmI-! - outputs the user currently logged in.
+ * !-ShowFolders-! - gives an overview of all folders as a tree.

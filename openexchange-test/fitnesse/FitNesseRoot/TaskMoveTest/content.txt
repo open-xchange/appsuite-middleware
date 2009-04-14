@@ -8,7 +8,7 @@
 !|Table:CreateFolder|
 |new_folder|
 |folder| module|
-|/Public folders| tasks|
+|public| tasks|
 
 !|Table:MoveTask|
 | Demo fixture |
@@ -20,4 +20,4 @@
 | title     | start_date | end_date | note | folder |
 | Nice Task | 08:30 AM   | 10:30 AM | Nice note | new_folder |
 
-!include CommonTeardown
+!include CommonTearDown

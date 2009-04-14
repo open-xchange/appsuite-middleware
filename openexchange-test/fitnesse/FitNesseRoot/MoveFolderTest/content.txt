@@ -5,14 +5,14 @@ Create the folder where we're going to start...
 !|Table:CreateFolder|
 |start_folder|
 |folder| module|
-|/Public folders| tasks|
+|public| tasks|
 
 ...then create the folder we're going to end up in...
 
 !|Table:CreateFolder|
 |destination_folder|
 |folder| module|
-|/Public folders| tasks|
+|public| tasks|
 
 ...then create our test folder as child of the start folder...
 

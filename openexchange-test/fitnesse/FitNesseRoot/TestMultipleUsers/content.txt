@@ -12,9 +12,9 @@ First, define a set of permissions. We are going to make the first user a typica
 Next, we create a folder with those permissions. Since we did not say anything about who creates the folder, it will be the first user, as defined in CommonSetup.
 
 !|Table:CreateFolder|
-|editable by both|
-|parent         | module | permissions |
-|/Public folders| tasks  | Both        |
+|editable by both   |
+|parent    | module | permissions |
+|public    | tasks  | Both        |
 
 Then we create a task in the folder that is editable by both.
 

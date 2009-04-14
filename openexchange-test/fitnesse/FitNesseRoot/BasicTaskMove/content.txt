@@ -5,16 +5,16 @@ This time, we use the pre-defined setup, because doing all this by hand would be
 First, we create a start folder for our move. A folder has a reference name so we can reference it by that later on. Here, we omit the folder name itself. As default, the reference name is used. It is always necessary to mention both the type of module (tasks, calendar...) and the parent folder.
 
 !|Table:CreateFolder|
-| start_folder   |
-| parent         | module |
-| /Public folders| tasks  |
+| start_folder      |
+| parent   | module |
+| public   | tasks  |
 
 Then, we do the same thing again for our destination folder.
 
 !|Table:CreateFolder|
 | destination_folder   |
-| parent         | module |
-| /Public folders| tasks  |
+| parent      | module |
+| public      | tasks  |
 
 Then we create a task in the start folder.
 
