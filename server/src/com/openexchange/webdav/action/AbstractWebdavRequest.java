@@ -64,8 +64,6 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
 
-import static com.openexchange.java.Autoboxing.I;
-
 public abstract class AbstractWebdavRequest implements WebdavRequest {
 	private WebdavResource res;
 	private WebdavResource dest;
@@ -127,7 +125,12 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 	    if(getHeader("Content-Length") == null) {
 	        return false;
 	    }
-	    int length = I(getHeader("Content-Length"));
+	    int length;
+	    try {
+	        length = Integer.parseInt(getHeader("Content-Length"));
+	    } catch (NumberFormatException e) {
+	        length = -1;
+	    }
         return length != -1;
 	}
 }
