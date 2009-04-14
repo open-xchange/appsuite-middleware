@@ -200,9 +200,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public void deleteMailAccount(final int id, final int user, final int cid) throws MailAccountException {
-        if (MailAccount.DEFAULT_ID == id) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_DELETE, I(user), I(cid));
-        }
+        // Commented this because deleting users was not possible.
+        // if (MailAccount.DEFAULT_ID == id) {
+        //     throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_DELETE, I(user), I(cid));
+        // }
         Connection con = null;
         try {
             con = Database.get(cid, true);
