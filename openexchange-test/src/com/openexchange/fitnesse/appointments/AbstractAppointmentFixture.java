@@ -126,8 +126,12 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
         
         List<UserParticipant> users = new LinkedList<UserParticipant>();
         for (String participant : participantsList) {
-            UserParticipant resolvedParticipant = (UserParticipant) resolver.resolveEntity(participant);
-            users.add(resolvedParticipant);
+            try {
+                UserParticipant resolvedParticipant = (UserParticipant) resolver.resolveEntity(participant);
+                users.add(resolvedParticipant);
+            } catch(ClassCastException e){
+                throw new FitnesseException("Could not find an existing user with the name: "+participant);
+            }
         }
         entry.getEntry().setUsers(users);
     }
