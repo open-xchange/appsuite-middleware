@@ -1,1 +1,4 @@
-!contents -R2 -g -p -f -h
+!see >AppointmentAcceptanceTestSuite
+!see >ContactAcceptanceTestSuite
+!see >FolderAcceptanceTestSuite
+!see >TaskAcceptanceTestSuite
