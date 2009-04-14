@@ -54,13 +54,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * {@link BlockableBufferedOutputStream} - A synchronizable version of {@link BufferedOutputStream}.
+ * {@link BlockableBufferedOutputStream} - A blockable version of {@link BufferedOutputStream} which keeps track of last write access time
+ * stamp.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BlockableBufferedOutputStream extends BufferedOutputStream implements Blockable {
 
     private final Blocker blocker;
+
+    private long lastAccessed;
 
     /**
      * Initializes a new {@link BlockableBufferedOutputStream}.
@@ -170,6 +173,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
         try {
             flushBuffer();
             out.flush();
+            lastAccessed = System.currentTimeMillis();
         } finally {
             blocker.release();
         }
@@ -183,5 +187,16 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
         } finally {
             blocker.release();
         }
+    }
+
+    /**
+     * Gets the last-accessed time stamp of this output stream.
+     * <p>
+     * The last-accessed time stamp reflects when data was lastly flushed.
+     * 
+     * @return The last-accessed time stamp.
+     */
+    public long getLastAccessed() {
+        return lastAccessed;
     }
 }

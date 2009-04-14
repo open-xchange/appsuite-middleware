@@ -344,6 +344,15 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     }
 
     /**
+     * Gets the last write access time stamp.
+     * 
+     * @return The last write access time stamp.
+     */
+    public long getLastWriteAccess() {
+        return outputStream.getLastAccessed();
+    }
+
+    /**
      * Reads a certain amount or all data from given <code>InputStream</code> instance dependent on boolean value of <code>strict</code>.
      * 
      * @param payloadLength

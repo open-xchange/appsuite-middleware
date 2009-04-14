@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -69,9 +70,7 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.najp.threadpool.AJPv13ThreadFactory;
 import com.openexchange.ajp13.najp.threadpool.Java6SynchronousQueue;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.server.ServerTimer;
 
 /**
  * {@link AJPv13TaskWatcher} - Keeps track of submitted AJP tasks.
@@ -132,7 +131,7 @@ public class AJPv13TaskWatcher {
         }
     }
 
-    private ScheduledTimerTask task;
+    private Task task;
 
     private final ConcurrentMap<Long, WatcherFutureTask> listeners;
 
@@ -146,14 +145,7 @@ public class AJPv13TaskWatcher {
             /*
              * Start task if enabled
              */
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
-            if (null != timer) {
-                task = timer.scheduleWithFixedDelay(
-                    new Task(listeners.values(), LOG),
-                    1000,
-                    AJPv13Config.getAJPWatcherFrequency(),
-                    TimeUnit.MILLISECONDS);
-            }
+            ServerTimer.getTimer().schedule((task = new Task(listeners.values(), LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
         }
     }
 
@@ -172,16 +164,13 @@ public class AJPv13TaskWatcher {
         }
         listeners.clear();
         if (null != task) {
-            task.cancel(true);
+            task.cancel();
             task = null;
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
-            if (null != timer) {
-                timer.purge();
-            }
+            ServerTimer.getTimer().purge();
         }
     }
 
-    private static class Task implements Runnable {
+    private static class Task extends TimerTask {
 
         private final Collection<WatcherFutureTask> listeners;
 
@@ -208,6 +197,7 @@ public class AJPv13TaskWatcher {
                 new AJPv13ThreadFactory("AJPTaskWatcher-"));
         }
 
+        @Override
         public void run() {
             try {
                 final boolean enabled = AJPv13Config.getAJPWatcherPermission();
@@ -318,7 +308,8 @@ public class AJPv13TaskWatcher {
                     /*
                      * Check if keep-alive shall be sent
                      */
-                    if (task.getKeepAliveCounter() == 0 || (System.currentTimeMillis() - task.getKeepAliveStamp()) > AJPv13Config.getAJPWatcherMaxRunningTime()) {
+                    final AJPv13ConnectionImpl ajpConnection = task.getAJPConnection();
+                    if ((System.currentTimeMillis() - ajpConnection.getLastWriteAccess()) > AJPv13Config.getAJPWatcherMaxRunningTime()) {
                         if (log.isInfoEnabled()) {
                             log.info(new StringBuilder(128).append("Sending KEEP-ALIVE for AJP Listener \"").append(task.getThreadName()).append(
                                 '"').toString());
@@ -333,11 +324,6 @@ public class AJPv13TaskWatcher {
                         } catch (final IOException e) {
                             log.error("AJP KEEP-ALIVE failed.", e);
                         }
-                        /*
-                         * Remember time stamp
-                         */
-                        task.incrementKeepAliveCounter();
-                        task.setKeepAliveStamp(System.currentTimeMillis());
                     }
                 }
             }
@@ -349,7 +335,6 @@ public class AJPv13TaskWatcher {
              * Send "keep-alive" package; first poll connection by sending outstanding data
              */
             final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
-            final boolean swallow;
             ajpConnection.blockOutputStream(true);
             try {
                 final OutputStream out = ajpConnection.getOutputStream();
@@ -365,7 +350,8 @@ public class AJPv13TaskWatcher {
                     int offset = 0;
                     final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
                     while (offset < remainingData.length) {
-                        final int curLen = Math.min(maxLen, (remainingData.length - offset));
+                        int b = (remainingData.length - offset);
+                        final int curLen = ((maxLen <= b) ? maxLen : b); // Math.min(int a, int b)
                         out.write(AJPv13Response.getSendBodyChunkBytes(remainingData, offset, curLen));
                         out.flush();
                         offset += curLen;
@@ -374,43 +360,35 @@ public class AJPv13TaskWatcher {
                         log.info(new StringBuilder().append("Flushed available data to socket \"").append(remoteAddress).append(
                             "\" to initiate a KEEP-ALIVE poll."));
                     }
-                    swallow = false;
                 } else {
                     /*
-                     * No outstanding data; poll connection through requesting data
+                     * No outstanding data; poll connection through requesting an empty data chunk.
                      */
-                    out.write(AJPv13Response.getGetBodyChunkBytes(0));
-                    out.flush();
-                    if (log.isInfoEnabled()) {
-                        log.info(new StringBuilder().append("Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
-                            "\" to initiate a KEEP-ALIVE poll."));
+                    ajpConnection.blockInputStream(true);
+                    try {
+                        out.write(AJPv13Response.getGetBodyChunkBytes(0));
+                        out.flush();
+                        if (log.isInfoEnabled()) {
+                            log.info(new StringBuilder().append("Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
+                                "\" to initiate a KEEP-ALIVE poll."));
+                        }
+                        /*
+                         * Swallow expected empty body chunk
+                         */
+                        final int bodyRequestDataLength = ajpConnection.readInitialBytes(true);
+                        if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
+                            log.warn("Got a non-empty data chunk from web server although an empty one was requested");
+                        } else if (log.isInfoEnabled()) {
+                            log.info(new StringBuilder().append("Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
+                                "\" initiated by former KEEP-ALIVE poll."));
+                        }
+                    } finally {
+                        ajpConnection.blockInputStream(false);
                     }
-                    swallow = true;
                 }
             } finally {
                 ajpConnection.blockOutputStream(false);
             }
-            /*
-             * Check flag
-             */
-            if (swallow) {
-                /*
-                 * Swallow expected empty body chunk
-                 */
-                ajpConnection.blockInputStream(true);
-                try {
-                    final int bodyRequestDataLength = ajpConnection.readInitialBytes(true);
-                    if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
-                        log.warn("Got a non-empty data chunk from web server although an empty one was requested");
-                    } else if (log.isInfoEnabled()) {
-                        log.info(new StringBuilder().append("Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
-                            "\" initiated by former KEEP-ALIVE poll."));
-                    }
-                } finally {
-                    ajpConnection.blockInputStream(false);
-                }
-            }
-
         } // End of keepAlive()
 
         private static int parseInt(final byte[] payloadData) {
