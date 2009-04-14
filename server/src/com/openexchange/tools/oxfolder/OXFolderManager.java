@@ -112,6 +112,21 @@ public abstract class OXFolderManager {
     public static final OXFolderManager getInstance(final Session session, final Connection readCon, final Connection writeCon) throws OXFolderException {
         return new OXFolderManagerImpl(session, readCon, writeCon);
     }
+    
+    /**
+     * Gets an appropriate instance of {@link OXFolderManager} with AppointmentSQLInterface for testing purposes.
+     * 
+     * @param session The session
+     * @param appSql AppointemtSQLInterface
+     * @return An appropriate instance of {@link OXFolderManager}.
+     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     */
+    public static final OXFolderManager getInstance(final Session session, AppointmentSQLInterface appSql, final Connection readCon, final Connection writeCon) throws OXFolderException {
+        OXFolderManagerImpl retVal = new OXFolderManagerImpl(session, readCon, writeCon);
+        retVal.setCSql(appSql);
+        return retVal;
+    }
+
 
     /**
      * Gets an appropriate instance of {@link OXFolderManager}.
