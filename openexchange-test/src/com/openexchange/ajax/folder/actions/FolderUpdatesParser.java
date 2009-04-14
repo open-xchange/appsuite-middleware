@@ -68,8 +68,15 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
         return 
            column == DataObject.LAST_MODIFIED_UTC
         || column == FolderObject.OWN_RIGHTS //generated based on user
-        || column == FolderObject.SUMMARY //mail-specific, Thorben said
-        || column > 307 //TODO: Handle more fields
+        || column == FolderObject.SUMMARY //Thorben said that one's mail-specific
+        || column  == FolderObject.STANDARD_FOLDER
+        || column  == FolderObject.TOTAL
+        || column  == FolderObject.NEW
+        || column  == FolderObject.UNREAD
+        || column  == FolderObject.DELETED
+        || column  == FolderObject.CAPABILITIES
+        || column  == FolderObject.SUBSCRIBED
+        || column  == FolderObject.SUBSCR_SUBFLDS
         ;
     }
     
