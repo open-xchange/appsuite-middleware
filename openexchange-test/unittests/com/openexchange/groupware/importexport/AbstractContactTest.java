@@ -68,6 +68,7 @@ import org.junit.BeforeClass;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.ContactObject;
@@ -410,7 +411,7 @@ public class AbstractContactTest {
 		if(fuid < 0){
 			return;
 		}
-		final OXFolderManager oxfa = OXFolderManager.getInstance(sessObj);
+		final OXFolderManager oxfa = OXFolderManager.getInstance(sessObj, new CalendarSql(sessObj));
 		final FolderObject fo = new FolderObject(fuid);
 		if(fo.exists(sessObj.getContext())){
 			oxfa.deleteFolder(fo, true, System.currentTimeMillis());
