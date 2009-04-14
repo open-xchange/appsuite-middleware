@@ -6,18 +6,28 @@ import java.util.List;
 
 import com.openexchange.groupware.container.AppointmentObject;
 
-//TODO: Do the fucking clean-up! --Tierlieb
+/**
+ * 
+ * {@link Bug10760Test}
+ * @author Offspring
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added clean-up
+ *
+ */
 public class Bug10760Test extends AbstractRecurrenceTest {
 	
-	public Bug10760Test(final String name) {
+	private int objectId;
+
+    public Bug10760Test(final String name) {
 		super(name);
 	}
-	
-	public void testDummy() {
-		
-	}
 
-	public void testBug10760() throws Exception {
+	@Override
+    public void setUp() throws Exception {
+        super.setUp();
+        objectId = -1;
+    }
+
+    public void testBug10760() throws Exception {
 		final String title = "testBug10760";
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle(title);
@@ -28,7 +38,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setIgnoreConflicts(true);
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
 		appointmentObj.setRecurrencePosition(2);
@@ -56,5 +66,16 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 				assertEquals("recurrence pos is not equals expected", 2, appointmentArray[a].getRecurrencePosition());
 			}
 		}
+
 	}
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        if(objectId != -1){
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        }
+    }
+	
+	
 }
