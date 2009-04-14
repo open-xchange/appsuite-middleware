@@ -70,6 +70,7 @@ import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.session.Session;
+import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -92,6 +93,10 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
 
+    /*-
+     * Members
+     */
+
     private transient POP3FolderStorage folderStorage;
 
     private transient POP3MessageStorage messageStorage;
@@ -101,6 +106,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     private transient POP3Store pop3Store;
 
     private transient javax.mail.Session pop3Session;
+
+    private transient POP3Folder inboxFolder;
 
     private boolean connected;
 
@@ -141,7 +148,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public int getCacheIdleSeconds() {
         // TODO Get from configuration
-        return 120;
+        return 300; // 5 minutes
     }
 
     @Override
@@ -405,14 +412,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     /**
-     * Gets used IMAP session
+     * Gets used POP3 session
      * 
-     * @return The IMAP session
+     * @return The POP3 session
      */
     public javax.mail.Session getSession() {
         return pop3Session;
     }
 
+    // TODO: Add getter for INBOX folder
+    
     @Override
     protected void startup() throws MailException {
         // Nothing to start
