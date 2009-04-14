@@ -59,38 +59,78 @@ import com.openexchange.fitnesse.FitnesseEnvironment;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link FolderResolver}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class FolderResolver {
-    
+
     private AJAXClient client;
+
     private FitnesseEnvironment environment;
 
     public FolderResolver(AJAXClient client, FitnesseEnvironment environment) {
         this.client = client;
         this.environment = environment;
     }
-    
+
     public int getFolderId(String folderExpression) throws FitnesseException {
-        int folderId = tryEnvironment(folderExpression);
-        if(folderId != -1) {
+        int folderId = -1;
+        folderId = tryEnvironment(folderExpression);
+        if (folderId != -1) {
             return folderId;
         }
-        
-        return tryServer(folderExpression);
+        folderId = tryServer(folderExpression);
+        if (folderId != -1) {
+            return folderId;
+        }
+        folderId = trySystem(folderExpression);
+        if (folderId != -1) {
+            return folderId;
+        }
+        throw new FitnesseException("Could not resolve the following folder expression: " + folderExpression);
     }
 
-    private int tryServer(String folderExpression) throws FitnesseException {
+    private int trySystem(String folderExpression) {
+        if( "global".equalsIgnoreCase(folderExpression)){
+            return FolderObject.SYSTEM_GLOBAL_FOLDER_ID;
+        } else
+            if( "infostore".equalsIgnoreCase(folderExpression)){
+                return FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;  
+            } else
+                if( "system".equalsIgnoreCase(folderExpression)){
+                    return FolderObject.SYSTEM_FOLDER_ID;
+                } else
+                    if( "ldap".equalsIgnoreCase(folderExpression)){
+                        return FolderObject.SYSTEM_LDAP_FOLDER_ID;
+                    } else
+                        if( "private".equalsIgnoreCase(folderExpression)){
+                            return FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
+                        } else
+                            if( "public".equalsIgnoreCase(folderExpression)){
+                                return FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
+                            } else
+                                if( "public_infostore".equalsIgnoreCase(folderExpression)){
+                                    return FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID;
+                                } else
+                                    if( "shared".equalsIgnoreCase(folderExpression)){
+                                        return FolderObject.SYSTEM_SHARED_FOLDER_ID;
+                                    } else
+                                        if( "user_inforstore".equalsIgnoreCase(folderExpression)){
+                                            return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+                                        }
+        return -1;
+    }
+
+    private int tryServer(String folderExpression){
         String[] path = folderExpression.split("/");
         path = eliminateEmptyElements(path);
         FolderNode node = new RootNode(client).resolve(path);
-        if(node == null)
-            throw new FitnesseException("Could not resolve folder. Given expression was: " + folderExpression);
+
+        if (node == null || node.getFolder() == null) {
+            return -1;
+        }
         return node.getFolder().getObjectID();
     }
 
@@ -100,10 +140,10 @@ public class FolderResolver {
      */
     private int tryEnvironment(String folderExpression) {
         IdentitySource identitySource = environment.getSymbol(folderExpression);
-        if(identitySource == null) {
+        if (identitySource == null) {
             return -1;
         }
-        if(identitySource.getType() == FolderObject.class) {
+        if (identitySource.getType() == FolderObject.class) {
             FolderObject folderObject = new FolderObject();
             identitySource.assumeIdentity(folderObject);
             return folderObject.getObjectID();
@@ -113,8 +153,8 @@ public class FolderResolver {
 
     private String[] eliminateEmptyElements(String[] path) {
         List<String> newPath = new ArrayList<String>();
-        for(String pathElement : path) {
-            if(! isEmpty( pathElement )) {
+        for (String pathElement : path) {
+            if (!isEmpty(pathElement)) {
                 newPath.add(pathElement);
             }
         }
