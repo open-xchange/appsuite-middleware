@@ -242,18 +242,20 @@ public final class MailAccountRequest {
     }
 
     private List<Attribute> getColumns(final String colString) {
-        List<Attribute> attributes = new LinkedList<Attribute>();
-        if(colString != null) {
+        List<Attribute> attributes = null;
+        if(colString != null && !"".equals(colString.trim())) {
+        	attributes = new LinkedList<Attribute>();
             for(String col : colString.split("\\s*,\\s*")) {
                 if("".equals(col)) {
                     continue;
                 }
                 attributes.add(Attribute.getById(Integer.parseInt(col)));
             }
+            return attributes;
         } else {
-            attributes = Arrays.asList(Attribute.values());
+        	return Arrays.asList(Attribute.values());
+            
         }
-        return attributes;
     }
     
     private JSONArray actionList(JSONObject request) throws JSONException, OXException {
