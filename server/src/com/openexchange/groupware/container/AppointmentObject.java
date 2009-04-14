@@ -50,8 +50,7 @@
 package com.openexchange.groupware.container;
 
 import java.util.Set;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.groupware.calendar.Constants;
 
 /**
  * The appointment object.
@@ -179,8 +178,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     }
 
     public final void setRecurringStart(final long recurring_start) {
-        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        this.recurring_start = recColl.normalizeLong(recurring_start);
+        this.recurring_start = recurring_start - (recurring_start % Constants.MILLI_DAY);
         b_recurring_start = true;
     }
 
