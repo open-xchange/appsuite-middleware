@@ -13,6 +13,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
+import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
@@ -34,6 +35,7 @@ import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.group.internal.GroupInit;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
@@ -231,6 +233,7 @@ public final class Init {
      */
     private static void startAndInjectCalendarServices() {
         ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
+        ServerServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
     }
 
     private static void startAndInjectXMLServices() {
