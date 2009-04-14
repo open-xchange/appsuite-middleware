@@ -70,6 +70,7 @@ public class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
         tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
         tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.folder.FolderTestSuite.suite());
         tests.addTest(com.openexchange.ajax.group.GroupTestSuite.suite());
         tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());

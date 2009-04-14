@@ -80,7 +80,6 @@ import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
@@ -1261,36 +1260,6 @@ public class FolderTest extends AbstractAJAXTest {
             cal.getTimeInMillis(),
             true);
         assertFalse((failedIds != null && failedIds.length > 0));
-    }
-
-    public void testGetMailInbox() throws OXException, AjaxException, IOException, SAXException, JSONException {
-        List<FolderObject> l = getSubfolders(
-            getWebConversation(),
-            getHostName(),
-            getSessionId(),
-            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            true);
-        FolderObject defaultIMAPFolder = null;
-        for (int i = 0; i < l.size(); i++) {
-            final FolderObject fo = l.get(i);
-            if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
-                defaultIMAPFolder = fo;
-                break;
-            }
-        }
-        assertTrue(defaultIMAPFolder != null && defaultIMAPFolder.hasSubfolders());
-        l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), defaultIMAPFolder.getFullName(), true);
-        assertTrue(l != null && l.size() > 0);
-        FolderObject inboxFolder = null;
-        for (int i = 0; i < l.size() && (inboxFolder == null); i++) {
-            final FolderObject fo = l.get(i);
-            if (fo.getFullName().endsWith("INBOX")) {
-                inboxFolder = fo;
-            }
-        }
-        assertTrue(inboxFolder != null);
-        final Calendar cal = GregorianCalendar.getInstance();
-        getFolder(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), cal, true);
     }
 
     public void testGetSortedMailFolder() throws OXException, AjaxException, IOException, SAXException, JSONException {
