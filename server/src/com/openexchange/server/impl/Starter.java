@@ -359,7 +359,7 @@ public class Starter implements Initialization {
         }
 
         if (LOG.isInfoEnabled()) {
-            if (started.size() == inits.length) {
+            if (started.size() == adminInits.length) {
                 LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
             } else {
                 LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
