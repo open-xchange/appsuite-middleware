@@ -49,7 +49,10 @@
 
 package com.openexchange.mailaccount.servlet.request;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,8 +62,10 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.servlet.fields.MailAccountFields.Attribute;
 import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -121,6 +126,10 @@ public final class MailAccountRequest {
             return actionUpate(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
             return actionGet(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+            return actionAll(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+            return actionList(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -212,6 +221,55 @@ public final class MailAccountRequest {
 
             return jsonAccount;
         } catch (final AbstractOXException e) {
+            throw new OXException(e);
+        }
+    }
+    
+    private JSONArray actionAll(JSONObject request) throws JSONException, OXException {
+        final String colString = request.getString(AJAXServlet.PARAMETER_COLUMNS);
+        List<Attribute> attributes = new LinkedList<Attribute>();
+        for(String col : colString.split("\\s*,\\s*")) {
+            if("".equals(col)) {
+                continue;
+            }
+            attributes.add(Attribute.getById(Integer.parseInt(col)));
+        }
+        try {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+            
+            MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            return MailAccountWriter.writeArray(userMailAccounts, attributes);
+        } catch (AbstractOXException e) {
+            throw new OXException(e);
+        }
+    }
+    
+    private JSONArray actionList(JSONObject request) throws JSONException, OXException {
+        final String colString = request.getString(AJAXServlet.PARAMETER_COLUMNS);
+        List<Attribute> attributes = new LinkedList<Attribute>();
+        for(String col : colString.split("\\s*,\\s*")) {
+            if("".equals(col)) {
+                continue;
+            }
+            attributes.add(Attribute.getById(Integer.parseInt(col)));
+        }
+        try {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+           
+            JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
+            List<MailAccount> accounts = new ArrayList<MailAccount>();
+            for(int i = 0, size = ids.length(); i < size; i++) {
+                int id = ids.getInt(i);
+                MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+                accounts.add(account);
+            }
+            
+            return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
+        } catch (AbstractOXException e) {
             throw new OXException(e);
         }
     }

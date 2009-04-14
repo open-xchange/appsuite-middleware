@@ -49,6 +49,9 @@
 
 package com.openexchange.mailaccount.servlet.fields;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link MailAccountFields} - Provides constants for mail account JSON fields.
  * 
@@ -83,4 +86,70 @@ public final class MailAccountFields {
     public static final String CONFIRMED_SPAM = "confirmed_spam";
 
     public static final String CONFIRMED_HAM = "confirmed_ham";
+    
+    public enum Attribute {
+        ID_LITERAL(ID, 1001),
+        LOGIN_LITERAL(LOGIN , 1002),
+        PASSWORD_LITERAL(PASSWORD, 1003),
+        MAIL_URL_LITERAL(MAIL_URL, 1004),
+        TRANSPORT_URL_LITERAL(TRANSPORT_URL, 1005),
+        NAME_LITERAL(NAME, 1006),
+        PRIMARY_ADDRESS_LITERAL(PRIMARY_ADDRESS, 1007),
+        SPAM_HANDLER_LITERAL(SPAM_HANDLER, 1008),
+        TRASH_LITERAL(TRASH, 1009),
+        SENT_LITERAL(SENT, 1010),
+        DRAFTS_LITERAL(DRAFTS,1011),
+        SPAM_LITERAL(SPAM, 1012),
+        CONFIRMED_SPAM_LITERAL(CONFIRMED_SPAM, 1013),
+        CONFIRMED_HAM_LITERAL(CONFIRMED_HAM, 1014);
+        
+        private int id;
+        private String attrName;
+        
+        private Attribute(String name, int id) {
+            this.attrName = name;
+            this.id = id;
+        }
+        
+        public Object doSwitch(AttributeSwitch switcher) {
+            switch(this) {
+            case ID_LITERAL : return switcher.id();
+            case LOGIN_LITERAL : return switcher.login();
+            case PASSWORD_LITERAL : return switcher.password();
+            case MAIL_URL_LITERAL : return switcher.mailURL();
+            case TRANSPORT_URL_LITERAL : return switcher.transportURL();
+            case NAME_LITERAL : return switcher.name();
+            case PRIMARY_ADDRESS_LITERAL : return switcher.primaryAddress();
+            case SPAM_HANDLER_LITERAL : return switcher.spamHandler();
+            case TRASH_LITERAL : return switcher.trash();
+            case DRAFTS_LITERAL : return switcher.drafts();
+            case SPAM_LITERAL : return switcher.spam();
+            case SENT_LITERAL : return switcher.sent();
+            case CONFIRMED_SPAM_LITERAL : return switcher.confirmedSpam();
+            case CONFIRMED_HAM_LITERAL : return switcher.confirmedHam();
+            default: throw new IllegalArgumentException(this.getName());
+            }
+        }
+        
+        
+        public String getName() {
+            return attrName;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        private static Map<Integer, Attribute> byId = new HashMap<Integer, Attribute>();
+        
+        static {
+            for(Attribute attribute : Attribute.values()) {
+                byId.put(attribute.getId(), attribute);
+            }
+        }
+        
+        public static Attribute getById(int col) {
+            return byId.get(col);
+        }
+    }
 }

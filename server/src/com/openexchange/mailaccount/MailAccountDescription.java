@@ -367,4 +367,5 @@ public final class MailAccountDescription implements Serializable {
         this.defaultFlag = defaultFlag;
     }
 
+
 }

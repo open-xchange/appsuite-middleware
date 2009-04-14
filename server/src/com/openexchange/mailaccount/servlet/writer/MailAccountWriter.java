@@ -49,10 +49,15 @@
 
 package com.openexchange.mailaccount.servlet.writer;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.servlet.fields.GetSwitch;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
+import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
+import com.openexchange.mailaccount.servlet.fields.MailAccountFields.Attribute;
 
 /**
  * {@link MailAccountWriter} - TODO Short description of this class' purpose.
@@ -91,5 +96,18 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
 
         return json;
+    }
+
+    public static JSONArray writeArray(MailAccount[] userMailAccounts, List<Attribute> attributes) throws JSONException {
+        JSONArray rows = new JSONArray();
+        for(MailAccount account : userMailAccounts) {
+            MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
+            JSONArray row = new JSONArray();
+            for(Attribute attribute : attributes) {
+                row.put(attribute.doSwitch(getter));
+            }
+            rows.put(row);
+        }
+        return rows;
     }
 }
