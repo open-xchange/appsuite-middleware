@@ -33,7 +33,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        1.3.0
-Release:	17
+Release:	18
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build

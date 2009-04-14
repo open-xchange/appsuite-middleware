@@ -5,7 +5,7 @@
 Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml open-xchange-dataretention
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -33,15 +33,15 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.9.0.0
-Release:	0
+Version:	6.8.1
+Release:	4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
-Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer
+Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml open-xchange-dataretention
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -303,17 +303,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
-* Mon Mar 23 2009 - thorben.betten@open-xchange.com
- - Bugfix #12220: Enhanced forward/reply calls by an optional "view" parameter to define the desired format
-* Wed Mar 18 2009 - thorben.betten@open-xchange.com
- - Bugfix #13406: Ensured applying receiver's locale to action replacement for proper translation
-* Tue Mar 17 2009 - thorben.betten@open-xchange.com
- - Bugfix #13362: Checking requested columns for last-modified field prior to adding it
- - Bugfix #13048: Proper export/import of VCards with empty "URL"/"ORG" property. This change fixes handling of "PHOTO" property, too.
- - Postprocessings for bugfix #13154
+* Tue Apr 14 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13343: Proper last-accessed check when deciding whether to send an AJP KEEP-ALIVE or not
 * Mon Mar 16 2009 - marcus.klein@open-xchange.com
  - Bugfix #13394: Adding delete listener to remove server settings for a user.
- - Bugfix #13396: Using group storage with group 0 to resolve participants for notification.
 * Mon Mar 16 2009 - thorben.betten@open-xchange.com
  - Bugfix #13372: Extending auto complete search to support distribution lists.
 * Fri Mar 13 2009 - martin.herfurth@open-xchange.com

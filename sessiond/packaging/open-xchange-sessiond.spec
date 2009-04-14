@@ -4,7 +4,7 @@
 Name:           open-xchange-sessiond
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management open-xchange-timer
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -32,15 +32,15 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.9.0.0
-Release:	0
+Version:	6.8.1
+Release:	4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Session Daemon
-Requires:       open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management open-xchange-timer
+Requires:       open-xchange-global open-xchange-configread open-xchange-cache open-xchange-management
 #
 
 %description
