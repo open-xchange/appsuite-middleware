@@ -177,6 +177,9 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         return "UTC";
     }
 
+    /**
+     * TODO Recalculation to UTC start of day must be done outside this data object.
+     */
     public final void setRecurringStart(final long recurring_start) {
         this.recurring_start = recurring_start - (recurring_start % Constants.MILLI_DAY);
         b_recurring_start = true;
