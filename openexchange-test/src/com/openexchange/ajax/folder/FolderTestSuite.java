@@ -75,6 +75,7 @@ public final class FolderTestSuite {
 
         // Now several single function tests.
         tests.addTestSuite(GetMailInboxTest.class);
+        tests.addTestSuite(GetSortedMailFolderTest.class);
 
         // Nodes
 

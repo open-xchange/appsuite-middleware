@@ -83,18 +83,30 @@ public final class FolderTools {
         super();
     }
 
+    /**
+     * @deprecated the generic type of the request now deals with that.
+     */
+    @Deprecated
     public static CommonInsertResponse insert(final AJAXClient client,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
+    /**
+     * @deprecated the generic type of the request now deals with that.
+     */
+    @Deprecated
     public static CommonDeleteResponse delete(final AJAXClient client,
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
+    /**
+     * @deprecated the generic type of the request now deals with that.
+     */
+    @Deprecated
     public static ListResponse list(final AJAXClient client,
         final ListRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -138,9 +150,11 @@ public final class FolderTools {
         return retval;
     }
 
-    public static void deleteFolder(final AJAXClient client,
-        final FolderObject... folder) throws AjaxException, IOException,
-        SAXException, JSONException {
-        client.execute(new DeleteRequest(folder));
+    public static List<FolderObject> convert(Iterator<FolderObject> iter) {
+        List<FolderObject> retval = new ArrayList<FolderObject>();
+        while (iter.hasNext()) {
+            retval.add(iter.next());
+        }
+        return retval;
     }
 }

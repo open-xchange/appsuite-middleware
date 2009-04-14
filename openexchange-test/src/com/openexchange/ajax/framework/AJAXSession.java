@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
 
 /**
@@ -63,7 +64,7 @@ public class AJAXSession {
     private boolean mustLogout = true;
 
     public AJAXSession() {
-        this(new WebConversation(), null);
+        this(newWebConversation(), null);
     }
 
 	public AJAXSession(final WebConversation conversation) {
@@ -101,5 +102,15 @@ public class AJAXSession {
 
     public boolean mustLogout() {
         return mustLogout;
+    }
+
+    /**
+     * Setup the web conversation here so tests are able to create additional if
+     * several users are needed for tests.
+     * @return a new web conversation.
+     */
+    public static WebConversation newWebConversation() {
+        HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+        return new WebConversation();
     }
 }
