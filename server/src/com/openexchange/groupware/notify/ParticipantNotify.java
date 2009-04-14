@@ -142,7 +142,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     public static ParticipantNotify messageSender = new ParticipantNotify();
     
-    private static CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+    
 
     /**
      * Initializes a new {@link ParticipantNotify}
@@ -1261,7 +1261,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
-            tz = calColl.getTimeZone(user.getTimeZone());
+            tz = getCalendarTools().getTimeZone(user.getTimeZone());
         } catch (final LdapException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
@@ -1305,7 +1305,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 displayName = participant.getDisplayName();
             }
             groups = user.getGroups();
-            tz = calColl.getTimeZone(user.getTimeZone());
+            tz = getCalendarTools().getTimeZone(user.getTimeZone());
             if (participant instanceof UserParticipant) {
                 final UserParticipant userParticipant = (UserParticipant) participant;
                 folderId = userParticipant.getPersonalFolderId();
@@ -1669,7 +1669,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @return The first occurence's end time.
      */
     private static Date computeFirstOccurrenceEnd(final long startMillis, final long endMillis) {
-        final Calendar cal = GregorianCalendar.getInstance(calColl.getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar cal = GregorianCalendar.getInstance(getCalendarTools().getTimeZone("UTC"), Locale.ENGLISH);
         cal.setTimeInMillis(endMillis);
         final int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
         final int minutes = cal.get(Calendar.MINUTE);
@@ -1702,9 +1702,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return null;
         }
         try {
-            return calColl.getAppointmentTitle(recurrenceId, ctx);
+            return getCalendarTools().getAppointmentTitle(recurrenceId, ctx);
         } catch (final OXCalendarException e) {
             return null;
         }
+    }
+    
+    private static CalendarCollectionService getCalendarTools() {
+        return ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
     }
 }
