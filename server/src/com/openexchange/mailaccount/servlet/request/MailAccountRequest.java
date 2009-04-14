@@ -227,7 +227,7 @@ public final class MailAccountRequest {
     }
     
     private JSONArray actionAll(JSONObject request) throws JSONException, OXException {
-        final String colString = request.getString(AJAXServlet.PARAMETER_COLUMNS);
+        final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
         List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
@@ -257,7 +257,7 @@ public final class MailAccountRequest {
     }
     
     private JSONArray actionList(JSONObject request) throws JSONException, OXException {
-        final String colString = request.getString(AJAXServlet.PARAMETER_COLUMNS);
+        final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
         List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
