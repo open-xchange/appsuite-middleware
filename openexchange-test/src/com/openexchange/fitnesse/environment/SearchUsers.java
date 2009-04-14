@@ -113,7 +113,7 @@ public class SearchUsers implements SlimTableTable {
     }
 
     protected boolean addPatternToOutput() {
-        return true;
+        return false;
     }
 
     private String getValue(User user, String field) {
