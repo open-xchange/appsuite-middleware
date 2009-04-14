@@ -46,11 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.mailfilter.ajax;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
@@ -61,16 +64,16 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 
-
 /**
  * This class is used to deal with the fact that the mailfilter takes requests
  * from the admin-gui and the groupware gui. So it has to deal with different
  * session and session type. To handle this unique this class is introduced
  * 
  * @author d7
- * 
  */
 public class SessionWrapper {
+
+    private static final Log LOG = LogFactory.getLog(SessionWrapper.class);
 
     private static final String USERNAME_PARAMETER = "username";
 
@@ -188,7 +191,7 @@ public class SessionWrapper {
             if (null == this.username) {
                 return this.authname;
             }
-			return this.username;
+            return this.username;
         }
 
         /**
@@ -197,10 +200,10 @@ public class SessionWrapper {
          * @return The string value of context ID if a context ID is present; otherwise "unknown" is returned
          */
         public final String getContextString() {
-        	if (!b_contextid) {
-        		return "unknown";
-        	}
-        	return String.valueOf(contextid);
+            if (!b_contextid) {
+                return "unknown";
+            }
+            return String.valueOf(contextid);
         }
         
         /* (non-Javadoc)
@@ -252,10 +255,14 @@ public class SessionWrapper {
                 this.session = service.getSession(cookie.getValue());
                 if (null != this.session) {
                     return;
+                } else {
+                    LOG.warn("Found cookie but not matching session. " + cookie.getName() + ':' + cookie.getValue());
                 }
+            } else if (cookie.getName().startsWith(Login.COOKIE_PREFIX)) {
+                LOG.warn("Found cookie with matching prefix but invalid secret. " + cookie.getName() + ':' + cookie.getValue());
             }
         }
-        throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
+        throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
     }
 
     public Credentials getCredentials() {
