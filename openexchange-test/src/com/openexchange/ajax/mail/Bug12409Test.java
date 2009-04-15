@@ -118,26 +118,13 @@ public class Bug12409Test extends AbstractMailTest {
 		super(name);
 	}
 	
-	public void testSavedDispositionNotificationReturnedWhenEditing() {
+	public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, AbstractOXException {
 		final AJAXClient client = getClient();
 		// load the email to edit it again
 		GetResponse response;
-		try {
-			response = (GetResponse) client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
-			// verify that the delivery receipt option is still set
-			assertTrue("Disposition notification was not saved.", response.getMail(getTimeZone()).getDispositionNotification().toString().equals("testmail@example.invalid"));
-			
-		} catch (AjaxException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (AbstractOXException e) {
-			e.printStackTrace();
-		}
+		response = (GetResponse) client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
+		// verify that the delivery receipt option is still set
+		assertTrue("Disposition notification was not saved.", response.getMail(getTimeZone()).getDispositionNotification().toString().equals("testmail@example.invalid"));
 	}
 
 }
