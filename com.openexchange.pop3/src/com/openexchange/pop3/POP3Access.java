@@ -70,7 +70,6 @@ import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.session.Session;
-import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -107,7 +106,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private transient javax.mail.Session pop3Session;
 
-    private transient POP3Folder inboxFolder;
+    private transient POP3InboxFolder inboxFolder;
 
     private boolean connected;
 
@@ -141,6 +140,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         logicTools = null;
         pop3Store = null;
         pop3Session = null;
+        inboxFolder = null;
         connected = false;
         decrement = false;
     }
@@ -180,11 +180,19 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected void closeInternal() {
         try {
+            if (inboxFolder != null) {
+                try {
+                    inboxFolder.closeAndExpunge();
+                } catch (final MailException e) {
+                    LOG.error("Error while closing POP3 INBOX folder.", e);
+                }
+                inboxFolder = null;
+            }
             if (pop3Store != null) {
                 try {
                     pop3Store.close();
                 } catch (final MessagingException e) {
-                    LOG.error("Error while closing POP3Store", e);
+                    LOG.error("Error while closing POP3Store.", e);
                 }
                 pop3Store = null;
             }
@@ -412,7 +420,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     /**
-     * Gets used POP3 session
+     * Gets used POP3 session.
      * 
      * @return The POP3 session
      */
@@ -420,8 +428,15 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         return pop3Session;
     }
 
-    // TODO: Add getter for INBOX folder
-    
+    /**
+     * Gets the POP3 INBOX folder.
+     * 
+     * @return The POP3 INBOX folder
+     */
+    public POP3InboxFolder getInboxFolder() {
+        return inboxFolder;
+    }
+
     @Override
     protected void startup() throws MailException {
         // Nothing to start

@@ -49,8 +49,10 @@
 
 package com.openexchange.pop3;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Message;
@@ -58,29 +60,74 @@ import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
+import com.sun.mail.pop3.POP3Folder;
 
 /**
- * {@link POP3Folder} - Wrapper for POP3 INBOX folder which keeps track of open/connected status to manage a opened POP3 session.
+ * {@link POP3InboxFolder} - Wrapper for POP3 INBOX folder which keeps track of open/connected status to manage a opened POP3 session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Folder {
+public final class POP3InboxFolder {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3InboxFolder.class);
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
-    private final com.sun.mail.pop3.POP3Folder inbox;
+    private final POP3Folder inbox;
 
     private final Set<String> deletedUIDLs;
+
+    private Message[] msgs;
+
+    private String[] uidls;
 
     private boolean open;
 
     /**
-     * Initializes a new {@link POP3Folder}.
+     * Initializes a new {@link POP3InboxFolder}.
+     * 
+     * @param inbox The POP3 INBOX folder
      */
-    public POP3Folder(final com.sun.mail.pop3.POP3Folder inbox) {
+    public POP3InboxFolder(final POP3Folder inbox) {
         super();
         this.inbox = inbox;
         deletedUIDLs = new HashSet<String>();
+    }
+
+    /**
+     * (Possibly opens and) Gets all messages currently contained in POP3 INBOX folder, which are not marked as deleted.
+     * 
+     * @return All messages currently contained in POP3 INBOX folder.
+     * @throws MailException If fetching messages' UIDLs fails
+     */
+    public Message[] getMessages() throws MailException {
+        open();
+        /*
+         * The UIDLs will not change while the folder is open because the POP3 protocol doesn't support notification of new messages
+         * arriving in open folders. Therefore it is safe to remember the UIDLs once.
+         */
+        if (msgs == null) {
+            try {
+                msgs = inbox.getMessages();
+                inbox.fetch(msgs, MIMEStorageUtility.getUIDFetchProfile());
+                uidls = new String[msgs.length];
+                for (int i = 0; i < msgs.length; i++) {
+                    uidls[i] = inbox.getUID(msgs[i]);
+                }
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
+        }
+        if (deletedUIDLs.isEmpty()) {
+            return msgs;
+        }
+        final List<Message> l = new ArrayList<Message>(msgs.length);
+        for (int i = 0; i < msgs.length; i++) {
+            if (!deletedUIDLs.contains(uidls[i])) {
+                l.add(msgs[i]);
+            }
+        }
+        return l.toArray(new Message[l.size()]);
     }
 
     /**
@@ -115,11 +162,10 @@ public final class POP3Folder {
         boolean expunge = false;
         try {
             if (!deletedUIDLs.isEmpty()) {
-                final Message[] msgs = inbox.getMessages();
-                inbox.fetch(msgs, MIMEStorageUtility.getUIDFetchProfile());
-                for (final Message message : msgs) {
-                    if (deletedUIDLs.contains(inbox.getUID(message))) {
-                        message.setFlags(FLAGS_DELETED, true);
+                getMessages();
+                for (int i = 0; i < uidls.length; i++) {
+                    if (deletedUIDLs.contains(uidls[i])) {
+                        msgs[i].setFlags(FLAGS_DELETED, true);
                     }
                 }
                 expunge = true;
@@ -130,6 +176,8 @@ public final class POP3Folder {
             try {
                 inbox.close(expunge);
                 open = false;
+            } catch (final IllegalStateException e) {
+                LOG.warn("Invoked close() on a closed folder", e);
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e);
             }
@@ -145,21 +193,6 @@ public final class POP3Folder {
      */
     public void deleteByUIDLs(final Collection<String> uidls) {
         deletedUIDLs.addAll(uidls);
-    }
-
-    /**
-     * (Possibly opens and) Gets all messages currently contained in POP3 INBOX folder.
-     * 
-     * @return All messages currently contained in POP3 INBOX folder
-     * @throws MailException If retrieving messages fails
-     */
-    public Message[] getMessages() throws MailException {
-        try {
-            open();
-            return inbox.getMessages();
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
-        }
     }
 
 }
