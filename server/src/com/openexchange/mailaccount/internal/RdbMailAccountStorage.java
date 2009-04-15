@@ -180,7 +180,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             stmt = con.prepareStatement(SELECT_TRANSPORT_ACCOUNT);
             stmt.setLong(1, cid);
-            stmt.setLong(2, MailAccount.DEFAULT_ID);
+            stmt.setLong(2, id);
             stmt.setLong(3, user);
             result = stmt.executeQuery();
             if (!result.next()) {
