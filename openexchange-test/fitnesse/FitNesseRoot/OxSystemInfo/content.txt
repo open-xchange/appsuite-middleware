@@ -6,4 +6,3 @@
 
 !2 What folders do exist?
 |Table: Show folders|
-|root|

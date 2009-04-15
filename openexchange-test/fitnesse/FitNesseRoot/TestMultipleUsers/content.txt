@@ -1,4 +1,4 @@
-We're going to create a folder with different permissions for two users, a task in that folder and then try to modify and delete it using a user with restricted rights. 
+We're going to create a folder with different permissions for two users, a task in that folder and then try to modify and delete it using a user with restricted rights.
 
 !include CommonSetup
 

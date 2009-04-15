@@ -15,7 +15,7 @@ Setup, step 2: Configure the environment where our tests run.
 |localhost|
 
 Setup, step 3: Tell the environment which existing users are used for this test.
- 
+
 !|Table:DefineUsers|
 |thorben|netline|
 |marcus|netline|

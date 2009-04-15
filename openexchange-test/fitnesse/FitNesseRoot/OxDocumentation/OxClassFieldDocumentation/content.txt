@@ -5,7 +5,7 @@ But before we delve into those long lists, here are the "special" fields. "Speci
 
  * expectedError: This field expects an error code, like TSK-0001. Use it if you're expecting a test to raise an error. This only makes sense during testing, right?
  * fixturename: This is the name of the fixture. Usually, the second row of the table is used for defining the name, but some might think this way is more handy. This is also used only in tests to refer to other objects.
- * destination: This field is used while moving objects. The field "folder" or "parent" (which we treat the same, you can use both, depending which you think sounds better) defines where the object resides currently, the "destination" field defines where it is to be moved. When performing a request, this is handled an additional parameter outside the object (well, actually, the original location is the additional parameter and the destination is stored in the "folder" field, but you catch my drift). 
+ * destination: This field is used while moving objects. The field "folder" or "parent" (which we treat the same, you can use both, depending which you think sounds better) defines where the object resides currently, the "destination" field defines where it is to be moved. When performing a request, this is handled an additional parameter outside the object (well, actually, the original location is the additional parameter and the destination is stored in the "folder" field, but you catch my drift).
 
 !2 Appointments
 !- as in com.openexchange.groupware.calendar.CalendarDataObject:-!

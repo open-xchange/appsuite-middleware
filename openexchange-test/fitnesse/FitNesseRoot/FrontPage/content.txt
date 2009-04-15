@@ -2,14 +2,13 @@
 
 
 | '''Tests on this server'''|
-| [[All test suites][OpenXchangeTestSuites]]|''All test suites are bundled into this one.''|
 | [[All acceptance test suites][OpenXchangeTestSuites.AcceptanceTestSuites]]|''If you're a customer or just want to write an acceptance test, you should start here.''|
-| [[Example tests][TestExamples]]|''An set of example tests to get you started.''|
-| [[Guidelines][OxTestGuidelines]]|''How to organize tests in this system.''|
+| [[Example tests][OxDocumentation.TestExamples]]|''An set of example tests to get you started.''|
+| [[Guidelines][OxDocumentation.OxTestGuidelines]]|''How to organize tests in this system.''|
 | [[System info][OxSystemInfo]]|''Shows information about the OX system that is tested. An example for our info fixtures.''|
-| [[Fixture documentation][OxFitClassDocumentation]]|''What kind of test fixtures exist for testing an OX.''|
-| [[Field documentation][OxClassFieldDocumentation]]|''What classes and fields exist on the OX that can be tested here.''|
-| [[Helpful constant documentation][OxHelpfulConstants]]|''And overview what kind of helpful constants exist in here.''|
+| [[Fixture documentation][OxDocumentation.OxFitClassDocumentation]]|''What kind of test fixtures exist for testing an OX.''|
+| [[Field documentation][OxDocumentation.OxClassFieldDocumentation]]|''What classes and fields exist on the OX that can be tested here.''|
+| [[Helpful constant documentation][OxDocumentation.OxHelpfulConstants]]|''And overview what kind of helpful constants exist in here.''|
 
 
 | '''To Learn More about !-FitNesse-!'''|
