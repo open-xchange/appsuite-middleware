@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -122,9 +123,11 @@ public class Bug12393Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
+        AJAXClient client2 = new AJAXClient(User.User2);
+        int userId2 = client2.getValues().getUserId();
+        client2.logout();
         final OCLPermission perm2 = new OCLPermission();
-        // TODO: There should be a better way to get another users id
-        perm2.setEntity(12);
+        perm2.setEntity(userId2);
         perm2.setGroupPermission(false);
         perm2.setFolderAdmin(true);
         perm2.setAllPermission(
