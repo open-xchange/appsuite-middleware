@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.servlet.fields;
 
+import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 

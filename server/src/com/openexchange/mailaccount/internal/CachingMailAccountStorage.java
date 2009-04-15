@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.internal;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
@@ -60,6 +61,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
@@ -190,6 +192,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
         return delegate.resolveLogin(login, server, cid);
+    }
+
+    public void updateMailAccount(final MailAccountDescription mailAccount,Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
+        delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
+        invalidateUser(mailAccount.getId(), user, cid);
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws MailAccountException {

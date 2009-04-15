@@ -47,79 +47,28 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.fields;
-
-import com.openexchange.mailaccount.AttributeSwitch;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountDescription;
+package com.openexchange.mailaccount;
 
 
 /**
- * {@link MailAccountGetSwitch}
+ * {@link AttributeSwitch}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountGetSwitch implements AttributeSwitch{
-    private MailAccount desc;
-
-    public MailAccountGetSwitch(MailAccount desc) {
-        this.desc = desc;
-    }
-    
-    public Object confirmedHam() {
-        return desc.getConfirmedHam();
-    }
-
-    public Object confirmedSpam() {
-        return desc.getConfirmedSpam();
-    }
-
-    public Object drafts() {
-        return desc.getDrafts();
-    }
-
-    public Object id() {
-        return desc.getId();
-    }
-
-    public Object login() {
-        return desc.getLogin();
-    }
-
-    public Object mailURL() {
-        return desc.getMailServerURL();
-    }
-
-    public Object name() {
-        return desc.getName();
-    }
-
-    public Object password() {
-        return desc.getPassword();
-    }
-
-    public Object primaryAddress() {
-        return desc.getPrimaryAddress();
-    }
-
-    public Object sent() {
-        return desc.getSent();
-    }
-
-    public Object spam() {
-        return desc.getSpam();
-    }
-
-    public Object spamHandler() {
-        return desc.getSpamHandler();
-    }
-
-    public Object transportURL() {
-        return desc.getTransportServerURL();
-    }
-
-    public Object trash() {
-        return desc.getTrash();
-    }
+public interface AttributeSwitch {
+    public Object id();
+    public Object login();
+    public Object password();
+    public Object mailURL();
+    public Object transportURL();
+    public Object name();
+    public Object primaryAddress();
+    public Object spamHandler();
+    public Object trash();
+    public Object sent();
+    public Object drafts();
+    public Object spam();
+    public Object confirmedSpam();
+    public Object confirmedHam();
 }

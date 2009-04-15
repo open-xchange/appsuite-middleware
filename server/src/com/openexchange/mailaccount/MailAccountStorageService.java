@@ -51,6 +51,8 @@ package com.openexchange.mailaccount;
 
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -90,6 +92,18 @@ public interface MailAccountStorageService {
      * @throws MailAccountException If the default mail account cannot be returned
      */
     public MailAccount getDefaultMailAccount(int user, int cid) throws MailAccountException;
+
+    /**
+     * Updates mail account's value taken from specified mail account.
+     * 
+     * @param mailAccount The mail account containing the values to update.
+     * @param attributes The attributes to update
+     * @param user The user ID
+     * @param cid The context ID
+     * @param sessionPassword The session password
+     * @throws MailAccountException If the mail account cannot be updated
+     */
+    public void updateMailAccount(MailAccountDescription mailAccount,Set<Attribute> attributes, int user, int cid, String sessionPassword) throws MailAccountException;
 
     /**
      * Updates mail account's value taken from specified mail account.

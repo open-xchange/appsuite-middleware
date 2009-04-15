@@ -47,79 +47,118 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.fields;
+package com.openexchange.mailaccount.internal;
 
+import java.util.EnumSet;
+import java.util.Set;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.AttributeSwitch;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountDescription;
 
 
 /**
- * {@link MailAccountGetSwitch}
+ * {@link UpdateMailAccountBuilder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountGetSwitch implements AttributeSwitch{
-    private MailAccount desc;
+public class UpdateMailAccountBuilder implements AttributeSwitch {
 
-    public MailAccountGetSwitch(MailAccount desc) {
-        this.desc = desc;
+    private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.complementOf(EnumSet.of(Attribute.ID_LITERAL, Attribute.TRANSPORT_URL_LITERAL));
+    
+    public static boolean needsUpdate(Set<Attribute> attributes) {
+        for(Attribute attribute : attributes ) {
+            if (KNOWN_ATTRIBUTES.contains(attribute)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean handles(Attribute attribute) {
+        return KNOWN_ATTRIBUTES.contains(attribute);
+    }
+    
+    private StringBuilder bob = new StringBuilder("UPDATE user_mail_account SET ");
+    
+    public String getUpdateQuery() {
+        bob.setLength(bob.length()-1);
+        bob.append(" WHERE cid = ? AND id = ? AND user = ?");
+        return bob.toString();
+    }
+    
+    public String toString() {
+        return getUpdateQuery();
     }
     
     public Object confirmedHam() {
-        return desc.getConfirmedHam();
+        bob.append("confirmed_ham = ?,");
+        return null;
     }
 
     public Object confirmedSpam() {
-        return desc.getConfirmedSpam();
+        bob.append("confirmed_spam = ?,");
+        return null;
     }
 
     public Object drafts() {
-        return desc.getDrafts();
+        bob.append("drafts = ?,");
+        return null;
     }
 
     public Object id() {
-        return desc.getId();
+        return null;
     }
 
     public Object login() {
-        return desc.getLogin();
+        bob.append("login = ?,");
+        return null;
     }
 
     public Object mailURL() {
-        return desc.getMailServerURL();
+        bob.append("url = ?,");
+        return null;
     }
 
     public Object name() {
-        return desc.getName();
+        bob.append("name = ?,");
+        return null;
     }
 
     public Object password() {
-        return desc.getPassword();
+        bob.append("password = ?,");
+        return null;
     }
 
     public Object primaryAddress() {
-        return desc.getPrimaryAddress();
+        bob.append("primary_addr = ?,");
+        return null;
     }
 
     public Object sent() {
-        return desc.getSent();
+        bob.append("sent = ?,");
+        return null;
     }
 
     public Object spam() {
-        return desc.getSpam();
+        bob.append("spam = ?,");
+        return null;
     }
 
     public Object spamHandler() {
-        return desc.getSpamHandler();
+        bob.append("spam_handler = ?,");
+        return null;
     }
 
     public Object transportURL() {
-        return desc.getTransportServerURL();
+        return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mailaccount.AttributeSwitch#trash()
+     */
     public Object trash() {
-        return desc.getTrash();
+        bob.append("trash = ?,");
+        return null;
     }
+
 }

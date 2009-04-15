@@ -53,11 +53,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.servlet.fields.GetSwitch;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields.Attribute;
 
 /**
  * {@link MailAccountWriter} - TODO Short description of this class' purpose.

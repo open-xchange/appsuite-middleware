@@ -47,28 +47,112 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.fields;
+package com.openexchange.mailaccount.internal;
+
+import java.util.EnumSet;
+import java.util.Set;
+import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.AttributeSwitch;
 
 
 /**
- * {@link AttributeSwitch}
+ * {@link UpdateTransportAccountBuilder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AttributeSwitch {
-    public Object id();
-    public Object login();
-    public Object password();
-    public Object mailURL();
-    public Object transportURL();
-    public Object name();
-    public Object primaryAddress();
-    public Object spamHandler();
-    public Object trash();
-    public Object sent();
-    public Object drafts();
-    public Object spam();
-    public Object confirmedSpam();
-    public Object confirmedHam();
+public class UpdateTransportAccountBuilder implements AttributeSwitch {
+
+    private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL, Attribute.TRANSPORT_URL_LITERAL, Attribute.PRIMARY_ADDRESS_LITERAL);
+    
+    public static boolean needsUpdate(Set<Attribute> attributes) {
+        for(Attribute attribute : attributes ) {
+            if (KNOWN_ATTRIBUTES.contains(attribute)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean handles(Attribute attribute) {
+        return KNOWN_ATTRIBUTES.contains(attribute);
+    }
+    
+    private StringBuilder bob = new StringBuilder("UPDATE user_transport_account SET ");
+   
+    public String getUpdateQuery() {
+        bob.setLength(bob.length()-1);
+        bob.append(" WHERE cid = ? AND id = ? and user = ?");
+        return bob.toString();
+    }
+    
+    public String toString() {
+        return getUpdateQuery();
+    }
+    
+    public Object name() {
+        bob.append("name = ?,");
+        return null;
+    }
+    
+    public Object login() {
+        bob.append("login = ?,");
+        return null;
+    }
+
+    public Object password() {
+        bob.append("password = ?,");
+        return null;
+    }
+    
+    public Object transportURL() {
+        bob.append("url = ?,");
+        return null;
+    }
+
+    public Object primaryAddress() {
+        bob.append("send_addr = ?,");
+        return null;
+    }
+
+    
+    
+    public Object confirmedHam() {
+        return null;
+    }
+
+    public Object confirmedSpam() {
+        return null;
+    }
+
+    public Object drafts() {
+        return null;
+    }
+
+    public Object id() {
+        return null;
+    }
+
+    public Object mailURL() {
+        return null;
+    }
+
+    
+    public Object sent() {
+        return null;
+    }
+
+    public Object spam() {
+        return null;
+    }
+
+    public Object spamHandler() {
+        return null;
+    }
+
+  
+    public Object trash() {
+        return null;
+    }
+
 }

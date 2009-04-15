@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,10 +64,10 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields.Attribute;
 import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -207,13 +208,13 @@ public final class MailAccountRequest {
 
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();
-            new MailAccountParser().parse(accountDescription, jData);
+            Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
 
-            storageService.updateMailAccount(accountDescription, session.getUserId(), session.getContextId(), session.getPassword());
+            storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), session.getContextId(), session.getPassword());
 
             final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
                 accountDescription.getId(),
