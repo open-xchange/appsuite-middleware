@@ -83,7 +83,7 @@ public class MailAccountDeleteListener implements DeleteListener {
                 final int cid = deleteEvent.getContext().getContextId();
                 final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
                 for (final MailAccount account : accounts) {
-                    storageService.deleteMailAccount(account.getId(), user, cid);
+                    storageService.deleteMailAccount(account.getId(), user, cid, true);
                 }
             } catch (final ServiceException e) {
                 throw new DeleteFailedException(e);

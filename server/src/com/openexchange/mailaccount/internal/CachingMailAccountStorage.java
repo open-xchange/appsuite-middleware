@@ -108,6 +108,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary) throws MailAccountException {
+        delegate.deleteMailAccount(id, user, cid, deletePrimary);
+        invalidateUser(id, user, cid);
+    }
+
     public void deleteMailAccount(final int id, final int user, final int cid) throws MailAccountException {
         delegate.deleteMailAccount(id, user, cid);
         invalidateUser(id, user, cid);

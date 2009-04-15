@@ -138,6 +138,17 @@ public interface MailAccountStorageService {
     public void deleteMailAccount(int id, int user, int cid) throws MailAccountException;
 
     /**
+     * Deletes the mail account identified by specified ID.
+     * 
+     * @param id The mail account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
+     * @throws MailAccountException If the mail account cannot be deleted
+     */
+    public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary) throws MailAccountException;
+
+    /**
      * Gets the mail accounts of the users whose login matches specified login.
      * 
      * @param login The login
