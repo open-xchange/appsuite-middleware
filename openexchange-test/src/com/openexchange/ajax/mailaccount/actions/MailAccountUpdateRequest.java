@@ -49,42 +49,75 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
+import java.util.EnumSet;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.SetSwitch;
+import com.openexchange.mailaccount.servlet.fields.GetSwitch;
 
 
 /**
- * {@link MailAccountAllParser}
+ * {@link MailAccountUpdateRequest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllResponse> {
+public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateResponse>{
 
-    private int[] cols;
+    private MailAccountDescription account;
+    private Set<Attribute> attributes;
+    private boolean failOnError;
 
-    protected MailAccountAllParser(boolean failOnError, int[] cols) {
-        super(failOnError);
-        this.cols = cols;
+    public MailAccountUpdateRequest(MailAccountDescription account, Set<Attribute> attributes, boolean failOnError) {
+        this.account = account;
+        this.attributes = attributes;
+        this.failOnError = failOnError;
     }
-
-    @Override
-    protected MailAccountAllResponse createResponse(Response response) throws JSONException {
-        MailAccountAllResponse resp = new MailAccountAllResponse(response);
-        JSONArray arrayOfArrays = (JSONArray) resp.getData();
-        List<MailAccountDescription> accounts = ParserTools.parseList(arrayOfArrays, cols);
-        
-        resp.setDescriptions(accounts);
-        return resp;
-    }
-
     
+    public MailAccountUpdateRequest(MailAccountDescription account, boolean failOnError) {
+        this(account, EnumSet.allOf(Attribute.class), failOnError);
+    }
+    
+    public MailAccountUpdateRequest(MailAccountDescription account, Set<Attribute> attributes) {
+        this(account, attributes, true);
+    }
+    
+    public MailAccountUpdateRequest(MailAccountDescription account) {
+        this(account, true);
+    }
+    
+    public Object getBody() throws JSONException {
+        JSONObject incrementalUpdate = new JSONObject();
+        GetSwitch getter = new GetSwitch(account);
+        for(Attribute attribute : attributes) {
+            incrementalUpdate.put(attribute.getName(), attribute.doSwitch(getter));
+        }
+        if(! attributes.contains(Attribute.ID_LITERAL)) {
+            incrementalUpdate.put(Attribute.ID_LITERAL.getName(), account.getId());
+        }
+        
+        return incrementalUpdate;
+    }
+
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
+    }
+
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        return new Parameter[]{
+            new Parameter("action", "update")
+        };
+    }
+
+    public AbstractAJAXParser<MailAccountUpdateResponse> getParser() {
+        return new MailAccountUpdateParser(failOnError);
+    }
+    public String getServletPath() {
+        return "/ajax/account";
+    }
 
 }

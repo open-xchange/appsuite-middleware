@@ -47,44 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.mailaccount.actions;
+package com.openexchange.ajax.mailaccount;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
+import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
+import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.SetSwitch;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link MailAccountAllParser}
+ * {@link AbstractMailAccountTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllResponse> {
-
-    private int[] cols;
-
-    protected MailAccountAllParser(boolean failOnError, int[] cols) {
-        super(failOnError);
-        this.cols = cols;
+public class AbstractMailAccountTest extends AbstractAJAXSession {
+    protected AbstractMailAccountTest(String name) {
+        super(name);
     }
 
-    @Override
-    protected MailAccountAllResponse createResponse(Response response) throws JSONException {
-        MailAccountAllResponse resp = new MailAccountAllResponse(response);
-        JSONArray arrayOfArrays = (JSONArray) resp.getData();
-        List<MailAccountDescription> accounts = ParserTools.parseList(arrayOfArrays, cols);
+    protected MailAccountDescription mailAccountDescription;
+
+    protected void createMailAccount() throws AjaxException, IOException, SAXException, JSONException {
+        mailAccountDescription = new MailAccountDescription();
+        mailAccountDescription.setConfirmedHam("confirmedHam");
+        mailAccountDescription.setConfirmedSpam("confirmedSpam");
+        mailAccountDescription.setDrafts("drafts");
+        mailAccountDescription.setLogin("login");
+        mailAccountDescription.setMailServerURL("imap://mail.test.invalid");
+        mailAccountDescription.setName("Test Mail Account");
+        mailAccountDescription.setPassword("Password");
+        mailAccountDescription.setPrimaryAddress("bob@test.invalid");
+        mailAccountDescription.setSent("sent");
+        mailAccountDescription.setSpam("Spam");
+        mailAccountDescription.setSpamHandler("spamHandler");
+        mailAccountDescription.setTransportServerURL("localhost");
+        mailAccountDescription.setTrash("trash");
         
-        resp.setDescriptions(accounts);
-        return resp;
+        MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
+        response.fillObject(mailAccountDescription);
+        
     }
-
     
-
+    protected void deleteMailAccount() throws AjaxException, IOException, SAXException, JSONException {
+        getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
+    }
 }

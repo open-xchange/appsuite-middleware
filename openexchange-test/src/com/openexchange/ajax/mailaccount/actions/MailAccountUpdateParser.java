@@ -49,42 +49,26 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.SetSwitch;
 
 
 /**
- * {@link MailAccountAllParser}
+ * {@link MailAccountUpdateParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllResponse> {
+public class MailAccountUpdateParser extends AbstractAJAXParser<MailAccountUpdateResponse> {
 
-    private int[] cols;
-
-    protected MailAccountAllParser(boolean failOnError, int[] cols) {
+    public MailAccountUpdateParser(boolean failOnError) {
         super(failOnError);
-        this.cols = cols;
     }
 
     @Override
-    protected MailAccountAllResponse createResponse(Response response) throws JSONException {
-        MailAccountAllResponse resp = new MailAccountAllResponse(response);
-        JSONArray arrayOfArrays = (JSONArray) resp.getData();
-        List<MailAccountDescription> accounts = ParserTools.parseList(arrayOfArrays, cols);
-        
-        resp.setDescriptions(accounts);
-        return resp;
+    protected MailAccountUpdateResponse createResponse(Response response) throws JSONException {
+        return new MailAccountUpdateResponse(response);
     }
-
-    
 
 }

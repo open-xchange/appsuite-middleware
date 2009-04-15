@@ -47,44 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.mailaccount.actions;
+package com.openexchange.ajax.mailaccount;
 
-import java.util.LinkedList;
+import java.io.IOException;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
+import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.SetSwitch;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link MailAccountAllParser}
- *
+ * {@link MailAccountAllTest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllResponse> {
+public class MailAccountAllTest extends AbstractMailAccountTest {
 
-    private int[] cols;
-
-    protected MailAccountAllParser(boolean failOnError, int[] cols) {
-        super(failOnError);
-        this.cols = cols;
+    public MailAccountAllTest(String name) {
+        super(name);
     }
 
-    @Override
-    protected MailAccountAllResponse createResponse(Response response) throws JSONException {
-        MailAccountAllResponse resp = new MailAccountAllResponse(response);
-        JSONArray arrayOfArrays = (JSONArray) resp.getData();
-        List<MailAccountDescription> accounts = ParserTools.parseList(arrayOfArrays, cols);
-        
-        resp.setDescriptions(accounts);
-        return resp;
+    public void setUp() throws Exception {
+        super.setUp();
+        createMailAccount();
     }
 
+    public void tearDown() throws Exception {
+        if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
+            deleteMailAccount();
+        }
+        super.tearDown();
+    }
     
-
+    public void testAllShouldNotIncludePassword() throws AjaxException, IOException, SAXException, JSONException {
+        int[] fields = new int[]{Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId()};
+        MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
+        
+        List<MailAccountDescription> descriptions = response.getDescriptions();
+        assertFalse(descriptions.isEmpty());
+        
+        boolean found = false;
+        for(MailAccountDescription description : descriptions) {
+            if(description.getId() == mailAccountDescription.getId()) {
+                assertTrue("Password was not null", null == description.getPassword());
+                found = true;
+            }
+        }
+        assertTrue("Did not find mail account in response" ,found);
+    }
 }

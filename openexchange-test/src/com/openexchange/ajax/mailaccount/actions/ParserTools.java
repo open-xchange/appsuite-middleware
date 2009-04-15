@@ -54,9 +54,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.servlet.fields.SetSwitch;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields.Attribute;
 
 
 /**

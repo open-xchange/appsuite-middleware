@@ -50,188 +50,149 @@
 package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
-import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
-import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
-import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListResponse;
+import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
+import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateResponse;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.servlet.fields.GetSwitch;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields.Attribute;
 import com.openexchange.tools.servlet.AjaxException;
-
 
 /**
  * {@link MailAccountLifecycleTest}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class MailAccountLifecycleTest extends AbstractAJAXSession {
+public class MailAccountLifecycleTest extends AbstractMailAccountTest {
+
     /**
      * Initializes a new {@link MailAccountLifecycleTest}.
+     * 
      * @param name
      */
-   public MailAccountLifecycleTest(String name) {
+    public MailAccountLifecycleTest(String name) {
         super(name);
     }
-    
-    public void tearDown() throws AjaxException, IOException, SAXException, JSONException {
-        if(null != mailAccountDescription) {
+
+    public void tearDown() throws Exception {
+        if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
             deleteMailAccount();
         }
+        super.tearDown();
     }
 
-    private MailAccountDescription mailAccountDescription;
-
     public void testLifeCycle() throws AjaxException, IOException, SAXException, JSONException {
-        
+
         createMailAccount();
         readByGet();
         readByAll();
         readByList();
-        /*updateMailAccount();
+
+        updateMailAccount();
         readByGet();
         readByAll();
         readByList();
-        */
+
     }
 
-    private void deleteMailAccount() throws AjaxException, IOException, SAXException, JSONException {
-        getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
-    }
-
-    /**
-     * 
-    
-    private void updateMailAccount() {
-        // TODO Auto-generated method stub
+    private void updateMailAccount() throws AjaxException, IOException, SAXException, JSONException {
+        mailAccountDescription.setName("Other Name");
+        mailAccountDescription.setLogin("Other Login");
+        mailAccountDescription.setPassword("New Password");
         
+        MailAccountUpdateResponse response = getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL)));
+        // *shrugs* don't need the response
     }
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws AjaxException 
 
-     * 
-     */
     private void readByList() throws AjaxException, IOException, SAXException, JSONException {
-        
-        MailAccountListResponse response = getClient().execute(new MailAccountListRequest(new int[] {mailAccountDescription.getId()}, allFields()));
-        
+
+        MailAccountListResponse response = getClient().execute(
+            new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
+
         List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
         assertEquals(1, descriptions.size());
-        
+
         boolean found = false;
-        for(MailAccountDescription description : descriptions) {
-            if(description.getId() == mailAccountDescription.getId()) {
+        for (MailAccountDescription description : descriptions) {
+            if (description.getId() == mailAccountDescription.getId()) {
                 compare(mailAccountDescription, description);
                 found = true;
             }
         }
-        assertTrue("Did not find mail account in response" ,found);
+        assertTrue("Did not find mail account in response", found);
     }
 
     /**
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws AjaxException 
-     * 
+     * @throws JSONException
+     * @throws SAXException
+     * @throws IOException
+     * @throws AjaxException
      */
     private void readByAll() throws AjaxException, IOException, SAXException, JSONException {
         int[] fields = allFields();
         MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
-        
+
         List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
-        
+
         boolean found = false;
-        for(MailAccountDescription description : descriptions) {
-            if(description.getId() == mailAccountDescription.getId()) {
+        for (MailAccountDescription description : descriptions) {
+            if (description.getId() == mailAccountDescription.getId()) {
                 compare(mailAccountDescription, description);
                 found = true;
             }
         }
-        assertTrue("Did not find mail account in response" ,found);
+        assertTrue("Did not find mail account in response", found);
     }
 
     private int[] allFields() {
-        int[] fields = new int[MailAccountFields.Attribute.values().length];
+        int[] fields = new int[Attribute.values().length];
         int index = 0;
-        for(Attribute attr : MailAccountFields.Attribute.values()) {
+        for (Attribute attr : Attribute.values()) {
             fields[index++] = attr.getId();
         }
         return fields;
     }
 
     /**
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws AjaxException 
-     * 
+     * @throws JSONException
+     * @throws SAXException
+     * @throws IOException
+     * @throws AjaxException
      */
     private void readByGet() throws AjaxException, IOException, SAXException, JSONException {
         MailAccountGetRequest request = new MailAccountGetRequest(mailAccountDescription.getId());
         MailAccountGetResponse response = getClient().execute(request);
-        
+
         MailAccountDescription loaded = response.getAsDescription();
-        
+
         compare(mailAccountDescription, loaded);
-        
+
     }
 
     private void compare(MailAccountDescription expectedAcc, MailAccountDescription actualAcc) {
         GetSwitch expectedSwitch = new GetSwitch(expectedAcc);
         GetSwitch actualSwitch = new GetSwitch(actualAcc);
-        
-        for(Attribute attribute : MailAccountFields.Attribute.values()) {
-            if(attribute == MailAccountFields.Attribute.PASSWORD_LITERAL) {
+
+        for (Attribute attribute : Attribute.values()) {
+            if (attribute == Attribute.PASSWORD_LITERAL) {
                 continue;
             }
             Object expected = attribute.doSwitch(expectedSwitch);
             Object actual = attribute.doSwitch(actualSwitch);
-            
-            assertEquals(attribute.getName()+" differs!", expected, actual);
+
+            assertEquals(attribute.getName() + " differs!", expected, actual);
         }
     }
 
-    /**
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws AjaxException 
-     * 
-     */
-    private void createMailAccount() throws AjaxException, IOException, SAXException, JSONException {
-        mailAccountDescription = new MailAccountDescription();
-        mailAccountDescription.setConfirmedHam("confirmedHam");
-        mailAccountDescription.setConfirmedSpam("confirmedSpam");
-        mailAccountDescription.setDrafts("drafts");
-        mailAccountDescription.setLogin("login");
-        mailAccountDescription.setMailServerURL("imap://mail.test.invalid");
-        mailAccountDescription.setName("Test Mail Account");
-        mailAccountDescription.setPassword("Password");
-        mailAccountDescription.setPrimaryAddress("bob@test.invalid");
-        mailAccountDescription.setSent("sent");
-        mailAccountDescription.setSpam("Spam");
-        mailAccountDescription.setSpamHandler("spamHandler");
-        mailAccountDescription.setTransportServerURL("localhost");
-        mailAccountDescription.setTrash("trash");
-        
-        MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
-        response.fillObject(mailAccountDescription);
-        
-    }
 }
