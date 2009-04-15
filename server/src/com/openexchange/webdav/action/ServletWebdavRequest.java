@@ -86,7 +86,6 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		builder.append(req.getServletPath());
 		builder.append('/');
 		this.urlPrefix = builder.toString();
-		System.out.println("WEBDAV DEBUGGING: THIS IS THE URL PREFIX: '"+this.urlPrefix+"'");
         this.url = toWebdavURL(req.getRequestURI());
 	}
 
