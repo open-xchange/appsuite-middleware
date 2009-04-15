@@ -104,7 +104,11 @@ public final class MailAccountWriter {
             MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
             JSONArray row = new JSONArray();
             for(Attribute attribute : attributes) {
-                row.put(attribute.doSwitch(getter));
+                if(Attribute.PASSWORD_LITERAL == attribute) {
+                    row.put(JSONObject.NULL);
+                } else {
+                    row.put(attribute.doSwitch(getter));
+                }
             }
             rows.put(row);
         }
