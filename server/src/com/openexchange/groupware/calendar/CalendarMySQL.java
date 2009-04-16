@@ -3671,6 +3671,14 @@ class CalendarMySQL implements CalendarSqlImp {
 			stmt.close();
 			stmt = null;
 
+			stmt = writecon.prepareStatement("DELETE FROM del_date_rights WHERE cid = ? AND object_id = ?");
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
 			stmt = writecon.prepareStatement(SQL_BACKUP_MEMBERS);
 			pos = 1;
 			stmt.setInt(pos++, cid);
