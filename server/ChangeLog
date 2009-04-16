@@ -1,3 +1,7 @@
+* 2009-04-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #13437: Implemented free busy for resources.
+
 * 2009-04-13 - francisco.laguna@open-xchange.com
 
  - Bugfix #13482: Survive empty LOCK request bodies in webdav infostore.
