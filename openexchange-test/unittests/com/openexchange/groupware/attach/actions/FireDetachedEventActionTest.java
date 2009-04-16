@@ -10,12 +10,18 @@ import java.util.Set;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.FireDetachedEventAction;
+import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.UndoableAction;
 
 public class FireDetachedEventActionTest extends AbstractAttachmentEventActionTest {
 
 	private final MockAttachmentListener listener = new MockAttachmentListener();
-	private final MockDBProvider provider = new MockDBProvider();
+	private MockDBProvider provider = null;
+	
+	public void setUp() throws Exception {
+	    super.setUp();
+	    provider = new MockDBProvider(new DBPoolProvider());
+	}
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
