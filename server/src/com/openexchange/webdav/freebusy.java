@@ -47,205 +47,261 @@
  *
  */
 
-
-
 package com.openexchange.webdav;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
- *    @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * Servlet for writing free busy information.
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public class freebusy extends HttpServlet {
-	
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 6336387126907903347L;
-	
-	private static final transient Log LOG = LogFactory.getLog(freebusy.class);
-	
-	@Override
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
-		final SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-		outputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		
-		int contextid = -1;
-		String mailPrefix = null;
-		String mailSuffix = null;
-		Date start = null;
-		Date end = null;
-		
-		if (httpServletRequest.getParameter("contextid") != null) {
-			contextid = Integer.parseInt(httpServletRequest.getParameter("contextid"));
-		} else {
-			httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "missing parameter: contextid");
-			return;
-		}
-		
-		boolean bPeriod = false;
-		
-		int period = 0;
-		
-		if (httpServletRequest.getParameter("period") != null) {
-			try {
-				period = Integer.parseInt(httpServletRequest.getParameter("period"));
-				
-				if (period > 0) {
-					Calendar c = Calendar.getInstance();
-					c.add(Calendar.MONTH, period);
-					end = c.getTime();
-					
-					period = period-period*2;
-					c = Calendar.getInstance();
-					c.add(Calendar.MONTH, period);
-					start = c.getTime();
-					
-					
-					bPeriod = true;
-				}
-			} catch (final NumberFormatException ex) {
-				httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "invalid value in parameter: period");
-				return;
-			}
-		}
-		
-		if (!bPeriod) {
-			if (httpServletRequest.getParameter("start") != null) {
-				try {
-					start = inputFormat.parse(httpServletRequest.getParameter("start"));
-				} catch (final ParseException ex) {
-					httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "invalid value in parameter: start");
-					return;
-				}
-			} else {
-				httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "missing parameter: start");
-				return;
-			}
-			
-			if (httpServletRequest.getParameter("end") != null) {
-				try {
-					end = inputFormat.parse(httpServletRequest.getParameter("end"));
-				} catch (final ParseException ex) {
-					httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "invalid value in parameter: end");
-					return;
-				}
-			} else {
-				httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "missing parameter: end");
-				return;
-			}
-		}
-		
-		if (httpServletRequest.getParameter("username") != null) {
-			mailPrefix = httpServletRequest.getParameter("username");
-		} else {
-			httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "missing parameter: username");
-			return;
-		}
-		
-		if (httpServletRequest.getParameter("server") != null) {
-			mailSuffix = httpServletRequest.getParameter("server");
-		} else {
-			httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "missing parameter: server");
-			return;
-		}
-		
-		httpServletResponse.setContentType("text/html");
-		final PrintWriter printWriter = httpServletResponse.getWriter();
-		try {
-			writeVCalendar(contextid, start, end, mailPrefix, mailSuffix, httpServletRequest.getRemoteHost(), printWriter, outputFormat);
-		} catch (final Exception exc) {
-			LOG.error("doGet", exc);
-		}
-	}
-	
-	private void writeVCalendar(final int contextId, final Date start, final Date end, final String mailPrefix, final String mailSuffix, final String remoteHost, final PrintWriter printWriter, final SimpleDateFormat outputFormat) throws Exception {
-		SearchIterator<CalendarDataObject> it = null;
-		
-		printWriter.println("BEGIN:VCALENDAR");
-		printWriter.println("PRODID:-//www.open-xchange.org//");
-		printWriter.println("VERSION:2.0");
-		printWriter.println("METHOD:PUBLISH");
-		printWriter.println("BEGIN:VFREEBUSY");
-		printWriter.println(new StringBuilder("ORGANIZER:").append(mailPrefix).append('@').append(mailSuffix).toString());
-		
-		try {
-			final Context context = new ContextImpl(contextId);
-			final User user = UserStorage.getInstance().searchUser(mailPrefix + '@' + mailSuffix, context);
-			final Session sessionObj = SessionObjectWrapper.createSessionObject(user.getId(), context, "freebusysessionobject");
-			
-			final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
-			it = appointmentInterface.getFreeBusyInformation(user.getId(), Participant.USER, start, end);
-			while (it.hasNext()) {
-				writeFreeBusy(it.next(), printWriter, outputFormat);
-				printWriter.flush();
-			}
-		} catch (final Exception exc) {
-			LOG.error("writeVCalendar", exc);
-		} finally {
-			if (it != null) {
-				it.close();
-			}
-		}
-		
-		printWriter.println("END:VFREEBUSY");
-		printWriter.println("END:VCALENDAR");
-		printWriter.flush();
-	}
-	
-	private void writeFreeBusy(final AppointmentObject appointmentObject, final PrintWriter printWriter, final SimpleDateFormat outputFormat) throws Exception {
-		printWriter.print("FREEBUSY;");
-		
-		switch (appointmentObject.getShownAs()) {
-			case AppointmentObject.ABSENT:
-				printWriter.print("FBTYPE=BUSY:");
-				break;
-			case AppointmentObject.RESERVED:
-				printWriter.print("FBTYPE=BUSY-TENTATIVE:");
-				break;
-			case AppointmentObject.TEMPORARY:
-				printWriter.print("FBTYPE=BUSY-UNAVAILABLE:");
-				break;
-			case AppointmentObject.FREE:
-				printWriter.print("FBTYPE=FREE:");
-				break;
-			default:
-				printWriter.print("FBTYPE=BUSY:");
-		}
-		
-		printWriter.write(outputFormat.format(appointmentObject.getStartDate()));
-		printWriter.write('/');
-		printWriter.println(outputFormat.format(appointmentObject.getEndDate()));
-		printWriter.flush();
-	}
+
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 6336387126907903347L;
+
+    private static final Log LOG = LogFactory.getLog(freebusy.class);
+
+    private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
+
+    private static final TimeZone utc = TimeZone.getTimeZone("UTC");
+
+    private static final DateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+
+    static {
+        outputFormat.setTimeZone(utc);
+    }
+
+    @Override
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+        Context context = getContext(request);
+        if (null == context) {
+            response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine context.");
+            return;
+        }
+
+        int period = getPeriod(request);
+        final Date start;
+        final Date end;
+        if (-1 == period) {
+            start = getStart(request);
+            if (null == start) {
+                response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine start of free busy time frame.");
+                return;
+            }
+            end = getEnd(request);
+            if (null == end) {
+                response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine end of free busy time frame.");
+                return;
+            }
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.MONTH, -period);
+            start = calendar.getTime();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.add(Calendar.MONTH, period);
+            end = calendar.getTime();
+        }
+
+        String mailAddress = getMailAddress(request);
+        if (null == mailAddress) {
+            response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine mail address.");
+            return;
+        }
+
+        User user = null;
+        try {
+            // TODO Replace with UserService
+            user = UserStorage.getInstance().searchUser(mailAddress, context);
+        } catch (LdapException e) {
+            LOG.debug("User '" + mailAddress + "' not found.");
+        }
+        Resource resource = null;
+        try {
+            // TODO Replace with ResourceService
+            if (null == user) {
+                Resource[] resources = ResourceStorage.getInstance().searchResourcesByMail(mailAddress, context);
+                if (1 == resources.length) {
+                    resource = resources[0];
+                }
+            }
+        } catch (LdapException e) {
+            LOG.error("Resource '" + mailAddress + "' not found.");
+        }
+        final int principalId;
+        final int type;
+        if (null != user) {
+            type = Participant.USER;
+            principalId = user.getId();
+        } else if (null != resource) {
+            type = Participant.RESOURCE;
+            principalId = resource.getIdentifier();
+        } else {
+            response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to resolve mail address to a user or a resource.");
+            return;
+        }
+        
+        response.setContentType("text/calendar");
+        final PrintWriter printWriter = response.getWriter();
+        writeVCalendar(context, start, end, mailAddress, principalId, type, request.getRemoteHost(), printWriter);
+    }
+
+    private String getMailAddress(HttpServletRequest request) {
+        if (null == request.getParameter("username") || null == request.getParameter("server")) {
+            return null;
+        }
+        return request.getParameter("username") + '@' + request.getParameter("server");
+    }
+
+    private Date getStart(HttpServletRequest request) {
+        if (null == request.getParameter("start")) {
+            return null;
+        }
+        final Date start;
+        try {
+            start = inputFormat.parse(request.getParameter("start"));
+        } catch (ParseException e) {
+            LOG.debug("Unable to parse parameter start.", e);
+            return null;
+        }
+        return start;
+    }
+
+    private Date getEnd(HttpServletRequest request) {
+        if (null == request.getParameter("end")) {
+            return null;
+        }
+        final Date end;
+        try {
+            end = inputFormat.parse(request.getParameter("end"));
+        } catch (ParseException e) {
+            LOG.debug("Unable to parse parameter end.", e);
+            return null;
+        }
+        return end;
+    }
+
+    private Context getContext(final HttpServletRequest request) throws IOException {
+        if (request.getParameter("contextid") == null) {
+            return null;
+        }
+        final int contextId;
+        try {
+            contextId = Integer.parseInt(request.getParameter("contextid"));
+        } catch (NumberFormatException e) {
+            LOG.error("Unable to parse context identifier.", e);
+            return null;
+        }
+        // TODO Replace with ContextService
+        ContextStorage service = ContextStorage.getInstance();
+        final Context context;
+        try {
+            context = service.getContext(contextId);
+        } catch (ContextException e) {
+            LOG.error("Can not load context.", e);
+            return null;
+        }
+        return context;
+    }
+
+    private int getPeriod(HttpServletRequest request) {
+        if (null == request.getParameter("period")) {
+            return -1;
+        }
+        final int period;
+        try {
+            period = Integer.parseInt(request.getParameter("period"));
+        } catch (NumberFormatException e) {
+            LOG.error("Unable to parse period parameter.", e);
+            return -1;
+        }
+        return period;
+    }
+
+    private void writeVCalendar(Context context, Date start, Date end, String mailAddress, int principalId, int type, String remoteHost, PrintWriter printWriter) {
+        printWriter.println("BEGIN:VCALENDAR");
+        printWriter.println("PRODID:-//www.open-xchange.org//");
+        printWriter.println("VERSION:2.0");
+        printWriter.println("METHOD:PUBLISH");
+        printWriter.println("BEGIN:VFREEBUSY");
+        printWriter.println("ORGANIZER:" + mailAddress);
+        printWriter.println("DTSTART:" + outputFormat.format(start));
+        printWriter.println("DTEND:" + outputFormat.format(end));
+        try {
+            final Session sessionObj = SessionObjectWrapper.createSessionObject(context.getMailadmin(), context, "freebusysessionobject");
+            final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
+            SearchIterator<CalendarDataObject> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
+            try {
+                while (it.hasNext()) {
+                    writeFreeBusy(it.next(), printWriter, outputFormat);
+                    printWriter.flush();
+                }
+            } finally {
+                it.close();
+            }
+        } catch (SearchIteratorException e) {
+            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+        } catch (OXException e) {
+            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+        }
+        printWriter.println("END:VFREEBUSY");
+        printWriter.println("END:VCALENDAR");
+        printWriter.flush();
+    }
+
+    private void writeFreeBusy(final AppointmentObject appointment, final PrintWriter pw, final DateFormat format) {
+        pw.print("FREEBUSY;");
+        switch (appointment.getShownAs()) {
+        case AppointmentObject.ABSENT:
+            pw.print("FBTYPE=BUSY:");
+            break;
+        case AppointmentObject.RESERVED:
+            pw.print("FBTYPE=BUSY-TENTATIVE:");
+            break;
+        case AppointmentObject.TEMPORARY:
+            pw.print("FBTYPE=BUSY-UNAVAILABLE:");
+            break;
+        case AppointmentObject.FREE:
+            pw.print("FBTYPE=FREE:");
+            break;
+        default:
+            pw.print("FBTYPE=BUSY:");
+        }
+        pw.print(format.format(appointment.getStartDate()));
+        pw.print('/');
+        pw.println(format.format(appointment.getEndDate()));
+    }
 }

@@ -1,3 +1,7 @@
+* 2009-04-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #13437: Implemented free busy for resources.
+
 * 2009-03-11 - thorben.betten@open-xchange.com
 
  - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
