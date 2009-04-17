@@ -4,7 +4,7 @@
 Name:           open-xchange-calendar
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-caching open-xchange-server
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-cache open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
