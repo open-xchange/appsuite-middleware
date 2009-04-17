@@ -18,4 +18,4 @@ Referencing them if they are very deep in a hierarchy can be a pain in the butt.
 Also make sure that '''one test only tests one condition'''.
 
 !2 Naming
-A name is the prime identifier of a test. So please '''use descriptive names'''. "TaskTest" isn't. "TaskWithStartDateBeforeEndDate" is. Don't be afraid to use long names for tests.
+A name is the prime identifier of a test. So please '''use descriptive names'''. "TaskTest" isn't. ".TaskWithStartDateBeforeEndDate" is. Don't be afraid to use long names for tests.

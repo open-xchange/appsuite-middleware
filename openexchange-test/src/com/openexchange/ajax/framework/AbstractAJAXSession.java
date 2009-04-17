@@ -55,7 +55,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 
 public abstract class AbstractAJAXSession extends TestCase {
 
-    private AJAXClient client;
+    protected AJAXClient client;
 
     /**
      * Default constructor.

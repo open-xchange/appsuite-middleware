@@ -54,10 +54,10 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -303,28 +303,6 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         }
     }
 
-    // TODO: Use helper
-    private <T> boolean compareArrays(T[] expected, T[] actual) {
-        if (expected == null && actual == null){
-            return true;
-        }
-        if (expected == null && actual != null){
-            return false;
-        }
-        if (expected != null && actual == null){
-            return false;
-        }
-        Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
-        Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
-        if (expectedParticipants.size() != actualParticipants.size()){
-            return false;
-        }
-        if (!expectedParticipants.containsAll(actualParticipants)){
-            return false;
-        }
-        return true;
-    }
-
     private void checkInList(AppointmentObject appointment, List<AppointmentObject> appointments) {
         for (AppointmentObject appointmentFromList : appointments) {
             if (appointmentFromList.getObjectID() == appointment.getObjectID()) {
@@ -345,15 +323,36 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         fail("No ID column requested. This won't work. " + name);
         return -1;
     }
+    
+    protected <T> boolean compareArrays(T[] expected, T[] actual) {
+        if (expected == null && actual == null){
+            return true;
+        }
+        if (expected == null && actual != null){
+            return false;
+        }
+        if (expected != null && actual == null){
+            return false;
+        }
+        Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
+        Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
+        if (expectedParticipants.size() != actualParticipants.size()){
+            return false;
+        }
+        if (!expectedParticipants.containsAll(actualParticipants)){
+            return false;
+        }
+        return true;
+    }
 
-    private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
+    protected Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
         switch (column) {
-
+    
         case AppointmentObject.START_DATE:
         case AppointmentObject.END_DATE:
             int offset = getTimeZone().getOffset(((Long) actual).longValue());
             return new Date(((Long) actual).longValue() - offset);
-
+    
         case AppointmentObject.PARTICIPANTS:
             JSONArray participantArr = (JSONArray) actual;
             List<Participant> participants = new LinkedList<Participant>();
@@ -373,7 +372,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 }
             }
             return participants.toArray(new Participant[participants.size()]);
-
+    
         case AppointmentObject.USERS:
             JSONArray userParticipantArr = (JSONArray) actual;
             List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
@@ -383,7 +382,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             }
             return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
         }
-
+    
         return actual;
     }
 

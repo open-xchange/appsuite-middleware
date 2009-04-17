@@ -137,7 +137,10 @@ public class ParticipantTransformator implements Transformator {
 	}
 
 	private UserParticipant getUserParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
-		final ContactObject user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact();
+		final ContactObject user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class)
+		    .getEntry(fixtureEntry)
+		        .getEntry()
+		            .asContact();
 		final UserParticipant participant = new UserParticipant(user.getInternalUserId());
 		participant.setDisplayName(user.getDisplayName());
 		participant.setEmailAddress(user.getEmail1());

@@ -3,3 +3,5 @@
 !see .TaskMoveTest
 !see .BasicTaskMove
 !see .TestMultipleUsers
+!see .TaskWithUserParticipants
+!see .TaskWithNormalParticipants

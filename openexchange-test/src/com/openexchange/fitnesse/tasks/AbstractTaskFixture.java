@@ -50,15 +50,18 @@
 package com.openexchange.fitnesse.tasks;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.fitnesse.AbstractStepFixture;
-import com.openexchange.fitnesse.AbstractTableTable;
+import com.openexchange.fitnesse.environment.PrincipalResolver;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
@@ -71,7 +74,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * {@link AbstractTaskFixture}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - participant handling
  */
 public abstract class AbstractTaskFixture extends AbstractStepFixture {
 
@@ -96,12 +99,45 @@ public abstract class AbstractTaskFixture extends AbstractStepFixture {
      */
     public Task createTask(String fixtureName, FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException{
         TaskFixtureFactory taskFixtureFactory = new TaskFixtureFactory(null, null);
-        Fixtures<Task> fixtures = taskFixtureFactory.createFixture(fixtureName, data.asFixtureMap("task"));
+        Map<String, Map<String, String>> fixtureMap = data.asFixtureMap("task");
+        String participants = fixtureMap.get("task").remove("participants");
+        String users = fixtureMap.get("task").remove("users");
+        Fixtures<Task> fixtures = taskFixtureFactory.createFixture(fixtureName, fixtureMap);
         Fixture<Task> entry = fixtures.getEntry("task");
+        resolveParticipants(entry, participants);
+        resolveUserParticipants(entry, users);
         int folderId = getClient().getValues().getPrivateTaskFolder();
         return (Task) addFolder(entry.getEntry(), data, folderId);
     }
     
+    private void resolveParticipants(Fixture<Task> entry, String participants) throws FitnesseException {
+        if(participants == null)
+            return;
+        String[] participantsList = participants.split("\\s*,\\s*");
+        PrincipalResolver resolver = new PrincipalResolver(environment.getClient());
+        for (String participant : participantsList) {
+            Participant resolvedParticipant = resolver.resolveEntity(participant);
+            entry.getEntry().addParticipant(resolvedParticipant);
+        }
+    }
+    
+    private void resolveUserParticipants(Fixture<Task> entry, String userParticipants) throws FitnesseException {
+        if(userParticipants == null)
+            return;
+        String[] participantsList = userParticipants.split("\\s*,\\s*");
+        PrincipalResolver resolver = new PrincipalResolver(environment.getClient());
+        
+        List<UserParticipant> users = new LinkedList<UserParticipant>();
+        for (String participant : participantsList) {
+            try {
+                UserParticipant resolvedParticipant = (UserParticipant) resolver.resolveEntity(participant);
+                users.add(resolvedParticipant);
+            } catch(ClassCastException e){
+                throw new FitnesseException("Could not find an existing user with the name: "+participant);
+            }
+        }
+        entry.getEntry().setUsers(users);
+    }
 
     protected abstract Step createStep(Task task, String fixtureName, String expectedError);
 }
