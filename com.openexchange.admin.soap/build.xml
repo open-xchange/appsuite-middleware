@@ -40,7 +40,7 @@
 
 	<target name="manifest">
 		<manifest file="META-INF/MANIFEST.MF">
-			<attribute name="Class-Path"  value="${libdir}/${adminRMI} ${libdir}/${adminHostingRMI}"/>
+			<attribute name="Class-Path"  value="${libdir}/${adminRMI} ${libdir}/${adminHostingRMI} ${libdir}/soaprmimapper.jar"/>
 			<attribute name="Config-File" value="${configdir}/${configfile}"/>
 		</manifest>
 	</target>
@@ -54,13 +54,23 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile,manifest">
+    <target name="mapperjar" depends="compile">
+    	<mkdir dir="jar"/>
+        <jar jarfile="jar/soaprmimapper.jar"
+        	includes="com/openexchange/admin/soap/OXSOAPRMIMapper**"
+        	basedir="classes"/>
+    </target>
+
+	<target name="jar" depends="compile,manifest,mapperjar">
 		<mkdir dir="classes/META-INF"/>
     	<copy todir="classes/META-INF">
 			<fileset dir="META-INF"/>
 		</copy>
     	<mkdir dir="jar"/>
-        <jar update="true" jarfile="jar/${service.name}.aar" manifest="META-INF/MANIFEST.MF" basedir="classes"/>
+        <jar jarfile="jar/${service.name}.aar"
+        	manifest="META-INF/MANIFEST.MF"
+        	excludes="com/openexchange/admin/soap/OXSOAPRMIMapper*"
+        	basedir="classes"/>
     </target>
 
 	<target name="doc">
@@ -126,6 +136,9 @@
     	<copy todir="${destdir}/${axis2dir}/services" overwrite="true">
             <fileset file="jar/${service.name}.aar"/>
         </copy>
+    	<copy todir="${destdir}${libdir}" overwrite="true">
+    		<fileset file="jar/soaprmimapper.jar"/>
+    	</copy>
     	<copy todir="${destdir}/${configdir}" overwrite="true">
             <fileset file="conf/${configfile}"/>
         </copy>
