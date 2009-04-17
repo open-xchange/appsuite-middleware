@@ -1,6 +1,7 @@
 * 2009-04-17 - francisco.laguna@open-xchange.com
 
  - Bugfix #11305: Fixed batching of deletes.
+ - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents.
 
 * 2009-04-16 - martin.herfurth@open-xchange.com
 
