@@ -97,7 +97,7 @@ import com.openexchange.user.UserService;
 import com.sun.mail.pop3.POP3Store;
 
 /**
- * {@link POP3MessageStorage} - The POP3 implementation of message storage.
+ * {@link POP3MessageStorage} - The POP3 message storage implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
