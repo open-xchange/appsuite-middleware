@@ -64,7 +64,7 @@
 		<pathelement location="${bundlesdir}/${cachebundle}"/>
         <pathelement location="${admin.classpath}"/>
         <pathelement location="${adminhosting.classpath}"/>
-        <pathelement location="${axis.services.dir}/open-xchange-admin-soap.aar"/>
+        <pathelement location="${libdir}/soaprmimapper.jar"/>
     </path>
 
 	<filterset id="pathsubst">		
@@ -102,25 +102,26 @@
 
     <target name="jar" depends="compile">
         <mkdir dir="jar"/>
-        <jar update="true" jarfile="jar/${bundle.name}"
+        <jar jarfile="jar/${bundle.name}"
         basedir="classes"
         manifest="META-INF/MANIFEST.MF"/>
     </target>
 
 	<target name="manifest">
-		<manifest file="META-INF/MANIFEST.MF">
-			<attribute name="Class-Path"  value="${libdir}/${adminRMI} ${libdir}/${adminHostingRMI} ${libdir}/${adminResellerRMI} ${axis.services.dir}/open-xchange-admin-soap.aar"/>
+        <copy todir="classes/META-INF" file="META-INF/services.xml"/>
+		<delete file="classes/META-INF/MANIFEST.MF"/>
+		<manifest file="classes/META-INF/MANIFEST.MF">
+			<attribute name="Class-Path"  value="${libdir}/soaprmimapper.jar ${libdir}/${adminRMI} ${libdir}/${adminHostingRMI} ${libdir}/${adminResellerRMI}"/>
 			<attribute name="Config-File" value="${configdir}/${configfile}"/>
 		</manifest>
-        <copy todir="classes/META-INF" file="META-INF/services.xml"/>
 	</target>
 
 	<target name="aar" depends="compile,manifest">
     	<mkdir dir="jar"/>
-        <jar update="true" jarfile="jar/${service.name}.aar"
-        	manifest="META-INF/MANIFEST.MF"
+        <jar jarfile="jar/${service.name}.aar"
+        	manifest="classes/META-INF/MANIFEST.MF"
         	basedir="classes"
-        	includes="com/openexchange/admin/reseller/soap/,META-INF/**"/>
+        	includes="com/openexchange/admin/reseller/soap/,com/openexchange/admin/reseller/rmi/,META-INF/**"/>
     	<delete dir="classes/META-INF"/>
     </target>
 
