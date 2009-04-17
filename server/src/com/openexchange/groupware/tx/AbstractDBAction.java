@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,8 +93,12 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		}
 		return counter;
 	}
-	
-	public void setContext(final Context context) {
+
+    protected int doUpdates(List<UpdateBlock> updates) throws TransactionException, UpdateException {
+        return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
+    }
+
+    public void setContext(final Context context) {
 		this.context = context;
 	}
 	

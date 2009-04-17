@@ -50,6 +50,8 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -67,8 +69,10 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 public class DeleteDocumentAction extends AbstractDocumentListAction {
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DeleteDocumentAction.class);
-	
-	@OXThrows(
+
+    private static final int batchSize = 1000;
+
+    @OXThrows(
 			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server",
 			exceptionId = 0,
@@ -115,37 +119,46 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 		if(getDocuments().size() == 0) {
 			return;
 		}
-		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+2];
-		int i = 0;
-		updates[i++] = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
+        final List<DocumentMetadata> documents = getDocuments();
+        final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
-			@Override
-			public void fillStatement() throws SQLException {
-				stmt.setInt(1, getContext().getContextId());
-			}
-			
-		};
+        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
+
+        for(int j = 0, size = slices.length; j < size; j++) {
+            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
+
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+
+            });
+        }
 
 		for(final DocumentMetadata doc : getDocuments()) {
-			updates[i++] = new Update(getQueryCatalog().getDelDocumentInsert()) {
+           updates.add(new Update(getQueryCatalog().getDelDocumentInsert()) {
 
 				@Override
 				public void fillStatement() throws SQLException {
 					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
-			};
+           });
 		}
-		updates[i] = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
+        for(int j = 0, size = slices.length; j < size; j++) {
+            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
 
-			@Override
-			public void fillStatement() throws SQLException {
-				stmt.setInt(1, getContext().getContextId());
-			}
-			
-		};
-		
-		try {
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+
+            });
+        }
+
+        try {
 			doUpdates(updates);
 		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());

@@ -1,3 +1,7 @@
+* 2009-04-17 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11305: Fixed batching of deletes.
+
 * 2009-04-16 - martin.herfurth@open-xchange.com
 
  - Bugfix #13300: Removing appointment right virtual fake deletes before backing up appointment on delete operation.
