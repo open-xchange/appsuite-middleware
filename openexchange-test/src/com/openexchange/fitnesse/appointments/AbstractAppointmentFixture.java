@@ -64,8 +64,7 @@ import com.openexchange.ajax.kata.appointments.ParticipantComparisonFailure;
 import com.openexchange.ajax.kata.appointments.UserParticipantComparisonFailure;
 import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.api2.OXException;
-import com.openexchange.fitnesse.AbstractStepFixture;
-import com.openexchange.fitnesse.environment.PrincipalResolver;
+import com.openexchange.fitnesse.calendar.AbstractCalendarFixture;
 import com.openexchange.fitnesse.exceptions.FitnesseException;
 import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
@@ -86,8 +85,10 @@ import com.openexchange.tools.servlet.OXJSONException;
  * {@link AbstractAppointmentFixture}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring: extracted superclass
  */
-public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
+public abstract class AbstractAppointmentFixture extends 
+AbstractCalendarFixture {
 
     @Override
     protected Step createStep(FixtureDataWrapper data) throws FixtureException, AjaxException, IOException, SAXException, JSONException, FitnesseException {
@@ -118,47 +119,7 @@ public abstract class AbstractAppointmentFixture extends AbstractStepFixture {
         return (AppointmentObject) addFolder(entry.getEntry(), data, folderId);
     }
 
-    private void resolveUserParticipants(Fixture<AppointmentObject> entry, String userParticipants) throws FitnesseException {
-        if(userParticipants == null)
-            return;
-        String[] participantsList = userParticipants.split("\\s*,\\s*");
-        PrincipalResolver resolver = new PrincipalResolver(environment.getClient());
-        
-        List<UserParticipant> users = new LinkedList<UserParticipant>();
-        for (String participant : participantsList) {
-            try {
-                UserParticipant resolvedParticipant = (UserParticipant) resolver.resolveEntity(participant);
-                users.add(resolvedParticipant);
-            } catch(ClassCastException e){
-                throw new FitnesseException("Could not find an existing user with the name: "+participant);
-            }
-        }
-        entry.getEntry().setUsers(users);
-    }
-
-    private void resolveParticipants(Fixture<AppointmentObject> entry, String participants) throws FitnesseException {
-        if(participants == null)
-            return;
-        String[] participantsList = participants.split("\\s*,\\s*");
-        PrincipalResolver resolver = new PrincipalResolver(environment.getClient());
-        for (String participant : participantsList) {
-            Participant resolvedParticipant = resolver.resolveEntity(participant);
-            entry.getEntry().addParticipant(resolvedParticipant);
-        }
-
-    }
-
     protected abstract Step createStep(AppointmentObject appointment, String fixtureName, String expectedError);
-
-    public int findFailedFieldPosition(String expectedValue, Throwable t) {
-        if (UserParticipantComparisonFailure.class.isInstance(t)) {
-            return data.getHeader().indexOf("users");
-        }
-        if (ParticipantComparisonFailure.class.isInstance(t)) {
-            return data.getHeader().indexOf("participants");
-        }
-        return super.findFailedFieldPosition(expectedValue, t);
-    }
 
     @Override
     protected String createErrorColumn(ComparisonFailure failure) throws FitnesseException {

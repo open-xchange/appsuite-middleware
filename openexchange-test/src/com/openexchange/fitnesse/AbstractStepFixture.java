@@ -126,7 +126,7 @@ public abstract class AbstractStepFixture extends AbstractTableTable {
             if (expectedValue.equals(data.get(i)))
                 return i;
         }
-        throw new IllegalStateException("Could not find the broken field in the list of fields. This should not happen.");
+        throw new IllegalStateException("Could not find the broken field in the list of fields. This should not happen. The value expected to find was: "+ expectedValue);
 
     }
 
