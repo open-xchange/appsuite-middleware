@@ -74,7 +74,9 @@ ant -Ddestdir=%{buildroot} \
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/com.openexchange.axis2/services
 %dir /opt/open-xchange/etc/admindaemon/plugin
+%dir /opt/open-xchange/lib
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
+/opt/open-xchange/lib/soaprmimapper.jar
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
 %doc docs
 %changelog
