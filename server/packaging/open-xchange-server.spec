@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	22
+Release:	23
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,17 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Apr 17 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #11305: Fixed batching of deletes.
+ - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents.
+* Thu Apr 16 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13437: Implemented free busy for resources.
+* Thu Apr 16 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13300: Removing appointment right virtual fake deletes before backing up appointment on delete operation.
+* Wed Mar 11 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13157: Fixed tons of logging through handling broken socket connection in servlet output stream
+* Fri Mar 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13319: Skip empty recurrence sets.
 * Tue Mar 03 2009 - francisco.laguna@open-xchange.com
  - Bugfix #11148: Survive invalid recurrence pattern on load.
 * Tue Mar 03 2009 - thorben.betten@open-xchange.com
@@ -149,8 +160,6 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
  - Bugfix #12832: Replaced the HashMap with a thread safe ConcurrentHashMap.
 * Tue Mar 03 2009 - martin.herfurth@open-xchange.com
  - Bugfix #11865: Fixed deleting corrupted Appointments.
-* Tue Mar 03 2009 - marcus.klein@open-xchange.com
- - Bugfix #13157: Updated log4j library to 1.2.15.
 * Tue Dec 09 2008 - marcus.klein@open-xchange.com
  - Bugfix #12716: Made server robust for illegal requested columns.
 * Fri Dec 05 2008 - marcus.klein@open-xchange.com
