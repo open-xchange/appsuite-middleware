@@ -70,6 +70,7 @@ import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.session.Session;
+import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -432,8 +433,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Gets the POP3 INBOX folder.
      * 
      * @return The POP3 INBOX folder
+     * @throws MailException If INBOX folder cannot be retrieved from POP3 store
      */
-    public POP3InboxFolder getInboxFolder() {
+    public POP3InboxFolder getInboxFolder() throws MailException {
+        if (null == inboxFolder) {
+            try {
+                inboxFolder = new POP3InboxFolder((POP3Folder) pop3Store.getFolder("INBOX"), session.getUserId(), session.getContextId());
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
+        }
         return inboxFolder;
     }
 

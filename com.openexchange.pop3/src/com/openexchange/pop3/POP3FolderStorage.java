@@ -54,16 +54,12 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.mail.Flags;
 import javax.mail.Folder;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -81,25 +77,15 @@ import com.sun.mail.pop3.POP3Store;
  */
 public final class POP3FolderStorage extends MailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3FolderStorage.class);
-
-    private static final String STR_INBOX = "INBOX";
-
-    private static final String STR_MSEC = "msec";
-
     private final POP3Store pop3Store;
 
     private final POP3Access pop3Access;
-
-    private final int accountId;
 
     private final Session session;
 
     private final Context ctx;
 
     private final POP3Config pop3Config;
-
-    private Character separator;
 
     /**
      * Initializes a new {@link POP3FolderStorage}
@@ -113,7 +99,6 @@ public final class POP3FolderStorage extends MailFolderStorage {
         super();
         this.pop3Store = pop3Store;
         this.pop3Access = pop3Access;
-        this.accountId = pop3Access.getAccountId();
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -121,13 +106,6 @@ public final class POP3FolderStorage extends MailFolderStorage {
             throw new POP3Exception(e);
         }
         pop3Config = pop3Access.getPOP3Config();
-    }
-
-    private char getSeparator() throws MessagingException {
-        if (null == separator) {
-            separator = Character.valueOf(pop3Store.getDefaultFolder().getSeparator());
-        }
-        return separator.charValue();
     }
 
     @Override
@@ -184,13 +162,13 @@ public final class POP3FolderStorage extends MailFolderStorage {
                     subfolders.addAll(Arrays.asList(childFolders));
                     boolean containsInbox = false;
                     for (int i = 0; i < childFolders.length && !containsInbox; i++) {
-                        containsInbox = STR_INBOX.equals(childFolders[i].getFullName());
+                        containsInbox = "INBOX".equals(childFolders[i].getFullName());
                     }
                     if (!containsInbox) {
                         /*
                          * Add folder INBOX manually
                          */
-                        subfolders.add(0, pop3Store.getFolder(STR_INBOX));
+                        subfolders.add(0, pop3Store.getFolder("INBOX"));
                     }
                 }
                 /*
@@ -238,40 +216,10 @@ public final class POP3FolderStorage extends MailFolderStorage {
         }
     }
 
-    private boolean isDefaultFoldersChecked() {
-        final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId));
-        return (b != null) && b.booleanValue();
-    }
-
-    private void setDefaultFoldersChecked(final boolean checked) {
-        session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId), Boolean.valueOf(checked));
-    }
-
-    /**
-     * Stores specified separator character in session parameters for future look-ups
-     * 
-     * @param separator The separator character
-     */
-    private void setSeparator(final char separator) {
-        session.setParameter(MailSessionParameterNames.getParamSeparator(accountId), Character.valueOf(separator));
-    }
-
-    private void setDefaultMailFolder(final int index, final String fullname) {
-        final String key = MailSessionParameterNames.getParamDefaultFolderArray(accountId);
-        String[] arr = (String[]) session.getParameter(key);
-        if (null == arr) {
-            arr = new String[6];
-            session.setParameter(key, arr);
-        }
-        arr[index] = fullname;
-    }
-
     @Override
     public void checkDefaultFolders() throws MailException {
         // POP3 mailbox only contains ONE folder: The INBOX folder
     }
-
-    private static final int FOLDER_TYPE = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws MailException {
@@ -293,68 +241,22 @@ public final class POP3FolderStorage extends MailFolderStorage {
         throw new POP3Exception(POP3Exception.Code.DELETE_DENIED);
     }
 
-    private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
-
     @Override
     public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(fullname)) {
             throw new POP3Exception(POP3Exception.Code.UPDATE_DENIED);
         }
-        try {
-            final Folder f = pop3Store.getFolder(fullname);
-            if (!f.exists()) {
-                throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
-            }
-            pop3Access.getMessageStorage().notifyPOP3FolderModification(fullname);
-            if (!isSelectable(f)) {
-                throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, f.getFullName());
-            }
-            f.open(Folder.READ_WRITE);
-            boolean closeFolder = true;
-            try {
-                final int msgCount = f.getMessageCount();
-                if (msgCount == 0) {
-                    /*
-                     * Empty folder
-                     */
-                    return;
-                }
-                final StringBuilder debug;
-                if (LOG.isDebugEnabled()) {
-                    debug = new StringBuilder(128);
-                } else {
-                    debug = null;
-                }
-                final long startClear = System.currentTimeMillis();
-                final Message[] msgs = f.getMessages();
-                for (final Message message : msgs) {
-                    message.setFlags(FLAGS_DELETED, true);
-                }
-                final long start = System.currentTimeMillis();
-                f.close(true);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                closeFolder = false;
-                if (LOG.isDebugEnabled()) {
-                    debug.setLength(0);
-                    LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
-                        System.currentTimeMillis() - startClear).append(STR_MSEC));
-                }
-            } finally {
-                if (closeFolder) {
-                    f.close(false);
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
-        } catch (final AbstractOXException e) {
-            throw new POP3Exception(e);
+        if (!"INBOX".equals(fullname)) {
+            throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
         }
+        final POP3InboxFolder pop3InboxFolder = pop3Access.getInboxFolder();
+        pop3InboxFolder.clear();
     }
 
     @Override
     public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
         try {
-            if (fullname.equals(DEFAULT_FOLDER_ID)) {
+            if (DEFAULT_FOLDER_ID.equals(fullname)) {
                 return EMPTY_PATH;
             }
             Folder f = pop3Store.getFolder(fullname);
@@ -411,21 +313,6 @@ public final class POP3FolderStorage extends MailFolderStorage {
     @Override
     public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types) throws MailException {
         return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
-    }
-
-    /*-
-     * ++++++++++++++++++ Helper methods ++++++++++++++++++
-     */
-
-    /**
-     * Checks if specified folder is selectable; meaning to check if it is capable to hold messages.
-     * 
-     * @param folder The folder to check
-     * @return <code>true</code> if specified folder is selectable; otherwise <code>false</code>
-     * @throws MessagingException If a messaging error occurs
-     */
-    private static boolean isSelectable(final Folder folder) throws MessagingException {
-        return (folder.getType() & Folder.HOLDS_MESSAGES) == Folder.HOLDS_MESSAGES;
     }
 
 }
