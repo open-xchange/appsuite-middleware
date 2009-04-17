@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.FetchProfile;
-import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.UIDFolder;
 import com.openexchange.context.ContextService;
@@ -84,9 +83,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.sort.MailMessageComparator;
 import com.openexchange.pop3.util.UIDUtil;
@@ -94,7 +90,6 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
-import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link POP3MessageStorage} - The POP3 message storage implementation.
@@ -103,52 +98,33 @@ import com.sun.mail.pop3.POP3Store;
  */
 public final class POP3MessageStorage extends MailMessageStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3MessageStorage.class);
-
     /**
      * Serial version UID
      */
     private static final long serialVersionUID = 1467121647337217270L;
 
     /*-
-     * Flag constants
-     */
-
-    private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
-
-    /*-
      * Members
      */
 
-    private final POP3Store pop3Store;
-
     private final Session session;
-
-    private final int accountId;
 
     private final Context ctx;
 
     private final POP3Access pop3Access;
-
-    private final UserSettingMail usm;
-
-    private final POP3Config pop3Config;
 
     private Locale locale;
 
     /**
      * Initializes a new {@link POP3MessageStorage}.
      * 
-     * @param pop3Store The POP3 store
      * @param pop3Access The POP3 access
      * @param session The session providing needed user data
      * @throws POP3Exception If context loading fails
      */
-    public POP3MessageStorage(final POP3Store pop3Store, final POP3Access pop3Access, final Session session) throws POP3Exception {
+    public POP3MessageStorage(final POP3Access pop3Access, final Session session) throws POP3Exception {
         super();
-        this.pop3Store = pop3Store;
         this.pop3Access = pop3Access;
-        this.accountId = pop3Access.getAccountId();
         this.session = session;
         try {
             final ContextService contextService = POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
@@ -158,8 +134,6 @@ public final class POP3MessageStorage extends MailMessageStorage {
         } catch (final ServiceException e) {
             throw new POP3Exception(e);
         }
-        usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-        pop3Config = pop3Access.getPOP3Config();
     }
 
     @Override

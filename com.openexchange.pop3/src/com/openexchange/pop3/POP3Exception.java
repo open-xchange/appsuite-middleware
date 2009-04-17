@@ -410,7 +410,7 @@ public final class POP3Exception extends MIMEMailException {
      * @param messageArgs The message arguments
      */
     public POP3Exception(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(POP3Provider.PROTOCOL_POP3, code.category, code.detailNumber, code.message, cause);
+        super(POP3Provider.PROTOCOL_POP3, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         super.setMessageArgs(messageArgs);
     }
 

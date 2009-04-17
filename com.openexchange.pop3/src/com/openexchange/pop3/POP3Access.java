@@ -388,7 +388,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         connected = ((pop3Store != null) && pop3Store.isConnected());
         if (connected) {
             if (null == messageStorage) {
-                messageStorage = new POP3MessageStorage(pop3Store, this, session);
+                messageStorage = new POP3MessageStorage(this, session);
             }
             return messageStorage;
         }
