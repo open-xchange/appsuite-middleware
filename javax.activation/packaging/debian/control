@@ -1,0 +1,12 @@
+Source: open-xchange-activation
+Section: unknown
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk
+Standards-Version: 3.6.1
+
+Package: open-xchange-activation
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre
+Conflicts: j2re1.6|sun-java6-jre
+Description: Bundled version of the Java Activation Framework
