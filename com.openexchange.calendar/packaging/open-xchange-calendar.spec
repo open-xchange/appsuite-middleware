@@ -40,7 +40,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Calendar Module
-Requires:       open-xchange-common open-xchange-global open-xchange-caching open-xchange-server
+Requires:       open-xchange-common open-xchange-global open-xchange-cache open-xchange-server
 #
 
 %description
