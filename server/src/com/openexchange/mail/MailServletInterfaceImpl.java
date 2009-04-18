@@ -466,7 +466,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getConfirmedHamFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM, accountId));
         }
         initConnection(accountId);
@@ -475,7 +475,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getConfirmedSpamFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM, accountId));
         }
         initConnection(accountId);
@@ -507,7 +507,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getDraftsFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_DRAFTS, accountId));
         }
         initConnection(accountId);
@@ -560,7 +560,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getInboxFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, INBOX_ID);
         }
         initConnection(accountId);
@@ -869,7 +869,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getSentFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_SENT, accountId));
         }
         initConnection(accountId);
@@ -878,7 +878,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getSpamFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_SPAM, accountId));
         }
         initConnection(accountId);
@@ -950,7 +950,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String getTrashFolder(final int accountId) throws MailException {
-        if (MailAccount.DEFAULT_ID == accountId && isDefaultFoldersChecked(accountId)) {
+        if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_TRASH, accountId));
         }
         initConnection(accountId);
