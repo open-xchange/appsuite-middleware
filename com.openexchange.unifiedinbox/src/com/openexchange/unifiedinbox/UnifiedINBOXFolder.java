@@ -134,9 +134,9 @@ public final class UnifiedINBOXFolder {
             boolean close = false;
             try {
                 mailAccess.connect();
-                close = true;
+                close = true; //UnifiedINBOXAccess.INBOX
                 
-                
+                mailAccess.getMessageStorage().getAllMessages(UnifiedINBOXAccess.INBOX, null, )
             } finally {
                 if (close) {
                     mailAccess.close(true);

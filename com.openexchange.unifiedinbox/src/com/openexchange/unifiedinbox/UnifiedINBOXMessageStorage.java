@@ -1,0 +1,643 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.unifiedinbox;
+
+import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertMessages;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import javax.mail.FetchProfile;
+import javax.mail.Message;
+import javax.mail.UIDFolder;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.Database;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.utils.MIMEStorageUtility;
+import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
+import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.user.UserService;
+
+/**
+ * {@link UnifiedINBOXMessageStorage} - The POP3 message storage implementation.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
+
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 1467121647337217270L;
+
+    /*-
+     * Members
+     */
+
+    private final Session session;
+
+    private final Context ctx;
+
+    private final UnifiedINBOXAccess access;
+
+    private Locale locale;
+
+    /**
+     * Initializes a new {@link UnifiedINBOXMessageStorage}.
+     * 
+     * @param pop3Access The Unified INBOX access
+     * @param session The session providing needed user data
+     * @throws UnifiedINBOXException If context loading fails
+     */
+    public UnifiedINBOXMessageStorage(final UnifiedINBOXAccess pop3Access, final Session session) throws UnifiedINBOXException {
+        super();
+        this.access = pop3Access;
+        this.session = session;
+        try {
+            final ContextService contextService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            ctx = contextService.getContext(session.getContextId());
+        } catch (final ContextException e) {
+            throw new UnifiedINBOXException(e);
+        } catch (final ServiceException e) {
+            throw new UnifiedINBOXException(e);
+        }
+    }
+
+    @Override
+    public void releaseResources() throws MailException {
+        // Nothing to release
+    }
+
+    /**
+     * Gets session user's locale
+     * 
+     * @return The session user's locale
+     * @throws UnifiedINBOXException If retrieving user's locale fails
+     */
+    private Locale getLocale() throws UnifiedINBOXException {
+        if (null == locale) {
+            try {
+                final UserService userService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+                locale = userService.getUser(session.getUserId(), ctx).getLocale();
+            } catch (final ServiceException e) {
+                throw new UnifiedINBOXException(e);
+            } catch (final UserException e) {
+                throw new UnifiedINBOXException(e);
+            }
+        }
+        return locale;
+    }
+
+    @Override
+    public MailMessage[] getMessages(final String fullname, final String[] mailIds, final MailField[] fields) throws MailException {
+        if ((mailIds == null) || (mailIds.length == 0)) {
+            return EMPTY_RETVAL;
+        }
+        final boolean body;
+        {
+            final MailFields fieldSet = new MailFields(fields);
+            if (fieldSet.contains(MailField.FULL)) {
+                final MailMessage[] mails = new MailMessage[mailIds.length];
+                for (int j = 0; j < mails.length; j++) {
+                    mails[j] = getMessage(fullname, mailIds[j], true);
+                }
+                return mails;
+            }
+            body = (fieldSet.contains(MailField.BODY));
+        }
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final Map<Integer, Map<String, String>> parsed;
+        
+        
+        final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+            MailAccountStorageService.class,
+            true);
+        final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+        final List<MailMessage> messages = new ArrayList<MailMessage>();
+        for (final MailAccount mailAccount : accounts) {
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+            boolean close = false;
+            try {
+                mailAccess.connect();
+                close = true; //UnifiedINBOXAccess.INBOX
+                
+                mailAccess.getMessageStorage().getMessages();
+            } finally {
+                if (close) {
+                    mailAccess.close(true);
+                }
+            }
+        }
+        
+        
+        
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        // Get matching messages by UID
+        final Message[] msgs;
+        {
+            final Message[] allmsgs = pop3Fld.getMessages();
+            final String[] uidls = pop3Fld.getUIDLs();
+            msgs = new Message[mailIds.length];
+            for (int i = 0; i < mailIds.length; i++) {
+                final String mailId = mailIds[i];
+                if (mailId == null) {
+                    msgs[i] = null;
+                } else {
+                    for (int j = 0; j < uidls.length && msgs[i] == null; j++) {
+                        if (mailId.equals(uidls[j])) {
+                            msgs[i] = allmsgs[j];
+                        }
+                    }
+                }
+            }
+        }
+        // Fetch messages
+        final FetchProfile fetchProfile = MIMEStorageUtility.getFetchProfile(fields, true);
+        final MailMessage[] mails = fetch(fetchProfile, msgs, body);
+        return mails;
+    }
+
+    @Override
+    public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        if (pop3Fld.getMessageCount() == 0) {
+            return EMPTY_RETVAL;
+        }
+        final FetchProfile fetchProfile;
+        {
+            final Set<MailField> searchFields = new HashSet<MailField>();
+            searchTerm.addMailField(searchFields);
+            fetchProfile = MIMEStorageUtility.getFetchProfile(
+                fields,
+                searchFields.toArray(new MailField[searchFields.size()]),
+                MailField.toField(sortField.getListField()),
+                true);
+        }
+        // Prefetch all messages
+        final MailFields fieldSet = new MailFields(fields);
+        final boolean body = (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY));
+        final MailMessage[] mails = fetch(fetchProfile, pop3Fld.getMessages(), body);
+        // Filter and sort them
+        MailMessage[] msgs = null;
+        {
+            // Filter them
+            final List<MailMessage> filteredMails = new ArrayList<MailMessage>(mails.length);
+            for (int i = 0; i < mails.length; i++) {
+                final MailMessage mail = mails[i];
+                if (searchTerm.matches(mail)) {
+                    filteredMails.add(mail);
+                }
+            }
+            // Sort them
+            {
+                Collections.sort(filteredMails, new MailMessageComparator(OrderDirection.DESC.equals(order), getLocale()));
+            }
+            msgs = filteredMails.toArray(new MailMessage[filteredMails.size()]);
+        }
+        if (indexRange != null) {
+            final int fromIndex = indexRange.start;
+            int toIndex = indexRange.end;
+            if ((msgs == null) || (msgs.length == 0)) {
+                return EMPTY_RETVAL;
+            }
+            if ((fromIndex) > msgs.length) {
+                /*
+                 * Return empty iterator if start is out of range
+                 */
+                return EMPTY_RETVAL;
+            }
+            /*
+             * Reset end index if out of range
+             */
+            if (toIndex >= msgs.length) {
+                toIndex = msgs.length;
+            }
+            final MailMessage[] tmp = msgs;
+            final int retvalLength = toIndex - fromIndex;
+            msgs = new MailMessage[retvalLength];
+            System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
+        }
+        return msgs;
+    }
+
+    @Override
+    public MailMessage[] getUnreadMessages(final String fullname, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        Message[] msgs = null;
+        {
+            /*
+             * Get UIDs of unread messages
+             */
+            final Message[] allMsgs = pop3Fld.getMessages();
+            final Set<String> unreadUIDs = getUnreadMessages(allMsgs.length);
+            /*
+             * Get UIDLs
+             */
+            final String[] uidls = pop3Fld.getUIDLs();
+            /*
+             * Check which occur in unread UIDLs
+             */
+            final List<Message> tmp = new ArrayList<Message>(uidls.length);
+            for (int i = 0; i < uidls.length; i++) {
+                if (unreadUIDs.contains(uidls[i])) {
+                    tmp.add(allMsgs[i]);
+                }
+            }
+            msgs = tmp.toArray(new Message[tmp.size()]);
+        }
+        final MailFields fieldSet = new MailFields(fields);
+        final boolean body = (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY));
+        // Fetch messages
+        final FetchProfile fetchProfile = MIMEStorageUtility.getFetchProfile(fields, true);
+        final MailMessage[] mails = fetch(fetchProfile, msgs, body);
+        return mails;
+    }
+
+    @Override
+    public void deleteMessages(final String fullname, final String[] msgUIDs, final boolean hardDelete) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        pop3Fld.deleteByUIDLs(Arrays.asList(msgUIDs));
+    }
+
+    @Override
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+        throw new UnifiedINBOXException(UnifiedINBOXException.Code.COPY_MSGS_DENIED);
+    }
+
+    @Override
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+        throw new UnifiedINBOXException(UnifiedINBOXException.Code.MOVE_MSGS_DENIED);
+    }
+
+    @Override
+    public String[] appendMessages(final String destFullname, final MailMessage[] mailMessages) throws MailException {
+        throw new UnifiedINBOXException(UnifiedINBOXException.Code.APPEND_MSGS_DENIED);
+    }
+
+    @Override
+    public void updateMessageFlags(final String fullname, final String[] mailIds, final int flags, final boolean set) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        // Get matching messages by UID
+        final MailMessage[] msgs;
+        {
+            final MailMessage[] mails = fetch(MIMEStorageUtility.getFlagsFetchProfile(), pop3Fld.getMessages(), false);
+            final String[] uidls = pop3Fld.getUIDLs();
+            msgs = new MailMessage[mailIds.length];
+            for (int i = 0; i < mailIds.length; i++) {
+                final String mailId = mailIds[i];
+                if (mailId == null) {
+                    msgs[i] = null;
+                } else {
+                    for (int j = 0; j < uidls.length && msgs[i] == null; j++) {
+                        if (mailId.equals(uidls[j])) {
+                            msgs[i] = mails[j];
+                        }
+                    }
+                }
+            }
+        }
+        // Update system flags
+        for (final MailMessage m : msgs) {
+            int newFlags = m.getFlags();
+            if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_ANSWERED) : (newFlags & ~MailMessage.FLAG_ANSWERED);
+            }
+            if (((flags & MailMessage.FLAG_DELETED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_DELETED) : (newFlags & ~MailMessage.FLAG_DELETED);
+            }
+            if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_DRAFT) : (newFlags & ~MailMessage.FLAG_DRAFT);
+            }
+            if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_FLAGGED) : (newFlags & ~MailMessage.FLAG_FLAGGED);
+            }
+            if (((flags & MailMessage.FLAG_SEEN) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_SEEN) : (newFlags & ~MailMessage.FLAG_SEEN);
+            }
+            if (((flags & MailMessage.FLAG_USER) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_USER) : (newFlags & ~MailMessage.FLAG_USER);
+            }
+            if (((flags & MailMessage.FLAG_SPAM) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_SPAM) : (newFlags & ~MailMessage.FLAG_SPAM);
+            }
+            if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_FORWARDED) : (newFlags & ~MailMessage.FLAG_FORWARDED);
+            }
+            if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_READ_ACK) : (newFlags & ~MailMessage.FLAG_READ_ACK);
+            }
+            // Apply new flags
+            updateSystemFlags(m.getMailId(), newFlags);
+        }
+    }
+
+    @Override
+    public void updateMessageColorLabel(final String fullname, final String[] mailIds, final int colorLabel) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        // Get matching messages by UID
+        final MailMessage[] msgs;
+        {
+            final MailMessage[] mails = fetch(MIMEStorageUtility.getFlagsFetchProfile(), pop3Fld.getMessages(), false);
+            final String[] uidls = pop3Fld.getUIDLs();
+            msgs = new MailMessage[mailIds.length];
+            for (int i = 0; i < mailIds.length; i++) {
+                final String mailId = mailIds[i];
+                if (mailId == null) {
+                    msgs[i] = null;
+                } else {
+                    for (int j = 0; j < uidls.length && msgs[i] == null; j++) {
+                        if (mailId.equals(uidls[j])) {
+                            msgs[i] = mails[j];
+                        }
+                    }
+                }
+            }
+        }
+        // Update color flags
+        for (final MailMessage m : msgs) {
+            updateColorFlag(m.getMailId(), colorLabel);
+        }
+    }
+
+    @Override
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage composedMail) throws MailException {
+        throw new UnifiedINBOXException(UnifiedINBOXException.Code.DRAFTS_NOT_SUPPORTED);
+    }
+
+    /*-
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * +++++++++++++++++ Helper methods +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     */
+
+    private static void prepareFetchProfile(final FetchProfile fetchProfile) {
+        // Check if ENVELOPE fetch item needs to be added
+        if ((fetchProfile.getHeaderNames().length > 0 || fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) && !fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
+    }
+
+    private MailMessage[] fetch(final FetchProfile fetchProfile, final Message[] messages, final boolean body) throws MailException {
+        prepareFetchProfile(fetchProfile);
+        // Fetches UID, all HEADERS, and SIZE
+        final UnifiedINBOXFolder pop3Fld = access.getInboxFolder();
+        pop3Fld.fetch(messages, fetchProfile);
+        final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
+        /*
+         * Folder is always set
+         */
+        set.add(MailField.FOLDER_ID);
+        if (fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            /*
+             * From, To, Cc, Bcc, ReplyTo, Subject and Date
+             */
+            set.add(MailField.FROM);
+            set.add(MailField.TO);
+            set.add(MailField.CC);
+            set.add(MailField.BCC);
+            set.add(MailField.SUBJECT);
+            set.add(MailField.RECEIVED_DATE);
+            set.add(MailField.SENT_DATE);
+            set.add(MailField.SIZE);
+            /*
+             * Furthermore the ENVELOPE in POP3 is performed through a TOP command; meaning all headers are present though
+             */
+            set.add(MailField.CONTENT_TYPE);
+            set.add(MailField.HEADERS);
+        }
+        if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+            set.add(MailField.ID);
+        }
+        // Convert with fields pre-fetched through previous POP3 fetch
+        final MailMessage[] mails = convertMessages(messages, pop3Fld.getPOP3InboxFolder(), set.toArray(new MailField[set.size()]), body);
+        // Check for flags
+        if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
+            for (int i = 0; i < mails.length; i++) {
+                final MailMessage mm = mails[i];
+                prefillFlags(mails[i], UIDUtil.uid2long(mm.getMailId()), session.getContextId(), session.getUserId());
+            }
+        }
+        return mails;
+    }
+
+    private static final String SELECT_FLAGS = "SELECT flags, color_flag FROM user_pop3_data WHERE cid = ? AND user = ? AND uid = ?";
+
+    private static final String SELECT_USER_FLAGS = "SELECT user_flag FROM user_pop3_user_flag WHERE cid = ? AND user = ? AND uid = ?";
+
+    private static void prefillFlags(final MailMessage message, final long uid, final int cid, final int user) throws UnifiedINBOXException {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SELECT_FLAGS);
+            int pos = 1;
+            stmt.setLong(pos++, cid);
+            stmt.setLong(pos++, user);
+            stmt.setLong(pos++, uid);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                message.setFlags(rs.getInt(1));
+                message.setColorLabel(rs.getInt(2));
+            }
+            rs.close();
+            stmt.close();
+            stmt = con.prepareStatement(SELECT_USER_FLAGS);
+            pos = 1;
+            stmt.setLong(pos++, cid);
+            stmt.setLong(pos++, user);
+            stmt.setLong(pos++, uid);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                message.addUserFlag(rs.getString(1));
+            }
+        } catch (final SQLException e) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
+    }
+
+    private static final String SQL_SELECT_UNREAD = "SELECT uidl FROM user_pop3_data WHERE cid = ? AND user = ? AND (flags & ?) = ?";
+
+    private Set<String> getUnreadMessages(final int initialSize) throws UnifiedINBOXException {
+        final int cid = session.getContextId();
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        final Set<String> uidls = new HashSet<String>(initialSize);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_UNREAD);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, session.getUserId());
+            stmt.setInt(pos++, MailMessage.FLAG_SEEN);
+            stmt.setInt(pos++, 0);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                uidls.add(rs.getString(1));
+            }
+        } catch (final SQLException e) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
+        return uidls;
+    }
+
+    private static final String SQL_UPDATE_FLAGS = "UPDATE user_pop3_data SET flags = ? WHERE cid = ? AND user = ? AND uidl = ?";
+
+    private void updateSystemFlags(final String uidl, final int newFlags) throws UnifiedINBOXException {
+        final int cid = session.getContextId();
+        final Connection con;
+        try {
+            con = Database.get(cid, true);
+        } catch (final DBPoolingException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_UPDATE_FLAGS);
+            stmt.setInt(1, newFlags);
+            stmt.setInt(2, session.getContextId());
+            stmt.setInt(3, session.getUserId());
+            stmt.setString(4, uidl);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
+        }
+    }
+
+    private static final String SQL_UPDATE_COLOR_FLAGS = "UPDATE user_pop3_data SET color_flag = ? WHERE cid = ? AND user = ? AND uidl = ?";
+
+    private void updateColorFlag(final String uidl, final int colorFlag) throws UnifiedINBOXException {
+        final int cid = session.getContextId();
+        final Connection con;
+        try {
+            con = Database.get(cid, true);
+        } catch (final DBPoolingException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_UPDATE_COLOR_FLAGS);
+            stmt.setInt(1, colorFlag);
+            stmt.setInt(2, session.getContextId());
+            stmt.setInt(3, session.getUserId());
+            stmt.setString(4, uidl);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
+        }
+    }
+
+}
