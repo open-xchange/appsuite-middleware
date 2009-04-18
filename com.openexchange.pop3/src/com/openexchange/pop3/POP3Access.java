@@ -70,6 +70,7 @@ import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.session.Session;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
@@ -236,8 +237,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
-    private static final String CLASSNAME_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
-
     private static final String ERR_CONNECT_TIMEOUT = "connect timed out";
 
     @Override
@@ -278,14 +277,14 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
              * Check if a secure POP3 connection should be established
              */
             if (getMailConfig().isSecure()) {
-                pop3Props.put("mail.pop3.socketFactory.class", CLASSNAME_SECURITY_FACTORY);
+                pop3Props.put("mail.pop3.socketFactory.class", TrustAllSSLSocketFactory.class.getName());
                 pop3Props.put("mail.pop3.socketFactory.port", String.valueOf(getMailConfig().getPort()));
                 pop3Props.put("mail.pop3.socketFactory.fallback", "false");
                 pop3Props.put("mail.pop3.starttls.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4
                  */
-                Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+                Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
             }
             /*
              * Apply properties to IMAP session
