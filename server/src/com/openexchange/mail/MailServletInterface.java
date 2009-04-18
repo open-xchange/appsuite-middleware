@@ -224,7 +224,7 @@ public abstract class MailServletInterface {
     public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave) throws MailException;
 
     /**
-     * Sends a read acknowledgement to given message
+     * Sends a read acknowledgment to given message
      */
     public abstract void sendReceiptAck(String folder, String msgUID, String fromAddr) throws MailException;
 
