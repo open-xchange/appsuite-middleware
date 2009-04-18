@@ -832,7 +832,7 @@ public class Folder extends SessionServlet {
                  * Determine if all folders, regardless of their subscription status, shall be included
                  */
                 final boolean all = (STRING_1.equals(paramContainer.getStringParam(PARAMETER_ALL)));
-                SearchIterator<?> it = null;
+                SearchIterator<MailFolder> it = null;
                 MailServletInterface mailInterface = null;
                 try {
                     mailInterface = MailServletInterface.getInstance(session);
@@ -846,7 +846,7 @@ public class Folder extends SessionServlet {
                     final int size = it.size();
                     boolean inboxFound = false;
                     for (int i = 0; i < size; i++) {
-                        final MailFolder f = (MailFolder) it.next();
+                        final MailFolder f = it.next();
                         if (!inboxFound && STR_INBOX.equals(f.getFullname())) {
                             inboxFound = true;
                             final JSONArray ja = new JSONArray();
@@ -988,7 +988,7 @@ public class Folder extends SessionServlet {
                 }
             } else {
                 MailServletInterface mailInterface = null;
-                SearchIterator<?> it = null;
+                SearchIterator<MailFolder> it = null;
                 try {
                     mailInterface = MailServletInterface.getInstance(session);
                     /*
@@ -1000,7 +1000,7 @@ public class Folder extends SessionServlet {
                         mailInterface.getMailConfig());
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
-                        final MailFolder fld = (MailFolder) it.next();
+                        final MailFolder fld = it.next();
                         final JSONArray ja = new JSONArray();
                         for (final MailFolderFieldWriter w : writers) {
                             w.writeField(ja, mailInterface.getAccountID(), fld, false);

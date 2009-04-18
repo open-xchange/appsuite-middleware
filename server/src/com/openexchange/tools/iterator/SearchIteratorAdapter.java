@@ -160,29 +160,25 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         };
     }
 
-    public static SearchIterator<?> createArrayIterator(final Object array) {
+    public static <T> SearchIterator<T> createArrayIterator(final T[] array) {
         if (null == array) {
             return createEmptyIterator();
         }
         /*
          * Tiny iterator implementation for arrays
          */
-        class ArrayIterator implements SearchIterator<Object> {
+        class ArrayIterator implements SearchIterator<T> {
 
             private final int size;
 
             private int cursor;
 
-            private final Object arr;
+            private final T[] arr;
 
             private final List<AbstractOXException> warnings;
 
-            ArrayIterator(final Object array) {
-                final Class<?> type = array.getClass();
-                if (!type.isArray()) {
-                    throw new IllegalArgumentException(
-                        new StringBuilder("Can not create an array iterator from type: ").append(type).toString());
-                }
+            ArrayIterator(final T[] array) {
+                super();
                 this.arr = array;
                 size = Array.getLength(array);
                 warnings = new ArrayList<AbstractOXException>(2);
@@ -197,8 +193,8 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 return (cursor < size);
             }
 
-            public Object next() {
-                return Array.get(arr, cursor++);
+            public T next() {
+                return arr[cursor++];
             }
 
             public void close() throws SearchIteratorException {

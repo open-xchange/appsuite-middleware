@@ -391,17 +391,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<?> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws MailException {
+    public SearchIterator<MailMessage> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws MailException {
         return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
     }
 
     @Override
-    public SearchIterator<?> getAllThreadedMessages(final String folder, final int[] fields, final int[] fromToIndices) throws MailException {
+    public SearchIterator<MailMessage> getAllThreadedMessages(final String folder, final int[] fields, final int[] fromToIndices) throws MailException {
         return getThreadedMessages(folder, fromToIndices, null, null, false, fields);
     }
 
     @Override
-    public SearchIterator<?> getChildFolders(final String parentFolder, final boolean all) throws MailException {
+    public SearchIterator<MailFolder> getChildFolders(final String parentFolder, final boolean all) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(parentFolder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -687,7 +687,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<?> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -707,7 +707,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.<MailMessage>createEmptyIterator();
         }
         final boolean cachable = (mails.length < MailProperties.getInstance().getMailFetchLimit());
         final MailField[] useFields;
@@ -749,7 +749,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
-        return SearchIteratorAdapter.createArrayIterator(mails);
+        return SearchIteratorAdapter.<MailMessage>createArrayIterator(mails);
     }
 
     /**
@@ -783,7 +783,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<?> getNewMessages(final String folder, final int sortCol, final int order, final int[] fields, final int limit) throws MailException {
+    public SearchIterator<MailMessage> getNewMessages(final String folder, final int sortCol, final int order, final int[] fields, final int limit) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -797,7 +797,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<?> getPathToDefaultFolder(final String folder) throws MailException {
+    public SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -862,7 +862,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<?> getRootFolders() throws MailException {
+    public SearchIterator<MailFolder> getRootFolders() throws MailException {
         initConnection(MailAccount.DEFAULT_ID);
         return SearchIteratorAdapter.createArrayIterator(new MailFolder[] { mailAccess.getFolderStorage().getRootFolder() });
     }
@@ -886,7 +886,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<?> getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+    public SearchIterator<MailMessage> getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -904,7 +904,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.<MailMessage>createEmptyIterator();
         }
         final MailField[] useFields;
         final boolean onlyFolderAndID;

@@ -154,31 +154,31 @@ public abstract class MailServletInterface {
     /**
      * Returns an instance of <code>SearchIterator</code> containing max. <code>limit</code> new (unseen) messages located in given folder.
      */
-    public abstract SearchIterator<?> getNewMessages(String folder, int sortCol, int order, int[] fields, int limit) throws MailException;
+    public abstract SearchIterator<MailMessage> getNewMessages(String folder, int sortCol, int order, int[] fields, int limit) throws MailException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<?> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws MailException;
+    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws MailException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<?> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<?> getAllThreadedMessages(String folder, int[] fields, int[] fromToIndices) throws MailException;
+    public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int[] fields, int[] fromToIndices) throws MailException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<?> getThreadedMessages(String folder, int[] fromToIndices, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
+    public abstract SearchIterator<MailMessage> getThreadedMessages(String folder, int[] fromToIndices, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
 
     /**
      * Returns the an array of messages located in given folder. If <code>fromToUID</code> is not <code>null</code> only messages fitting
@@ -277,12 +277,12 @@ public abstract class MailServletInterface {
     /**
      * Returns an instance of <code>SearchIterator</code> containing the mailbox's default folder
      */
-    public abstract SearchIterator<?> getRootFolders() throws MailException;
+    public abstract SearchIterator<MailFolder> getRootFolders() throws MailException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing the subfolders of given folder
      */
-    public abstract SearchIterator<?> getChildFolders(String parentFolder, boolean all) throws MailException;
+    public abstract SearchIterator<MailFolder> getChildFolders(String parentFolder, boolean all) throws MailException;
 
     /**
      * Returns the store's folder identfied through given <code>String</code> instance
@@ -292,7 +292,7 @@ public abstract class MailServletInterface {
     /**
      * Returns an instance of <code>SearchIterator</code> containing all antecessor folders on path to mailbox's default folder
      */
-    public abstract SearchIterator<?> getPathToDefaultFolder(final String folder) throws MailException;
+    public abstract SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws MailException;
 
     /**
      * Closes the interface and releases all resources

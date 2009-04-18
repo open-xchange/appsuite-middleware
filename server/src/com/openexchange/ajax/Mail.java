@@ -528,7 +528,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Start response
          */
         jsonWriter.array();
-        SearchIterator<?> it = null;
+        SearchIterator<MailMessage> it = null;
         try {
             /*
              * Read in parameters
@@ -574,7 +574,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     it = mailInterface.getAllThreadedMessages(folderId, columns, fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
-                        final MailMessage mail = (MailMessage) it.next();
+                        final MailMessage mail = it.next();
                         final JSONArray ja = new JSONArray();
                         if (mail == null) {
                             for (int j = 0; j < writers.length; j++) {
@@ -612,7 +612,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
-                        final MailMessage mail = (MailMessage) it.next();
+                        final MailMessage mail = it.next();
                         final JSONArray ja = new JSONArray();
                         if (mail == null) {
                             for (int j = 0; j < writers.length; j++) {
@@ -1138,7 +1138,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Start response
          */
         jsonWriter.array();
-        SearchIterator<?> it = null;
+        SearchIterator<MailMessage> it = null;
         try {
             /*
              * Read in parameters
@@ -1179,7 +1179,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns, limit == ParamContainer.NOT_FOUND ? -1 : limit);
                 final int size = it.size();
                 for (int i = 0; i < size; i++) {
-                    final MailMessage mail = (MailMessage) it.next();
+                    final MailMessage mail = it.next();
                     final JSONArray ja = new JSONArray();
                     for (final MailFieldWriter writer : writers) {
                         writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), session.getUserId(), session.getContextId());
@@ -2045,7 +2045,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Start response
          */
         jsonWriter.array();
-        SearchIterator<?> it = null;
+        SearchIterator<MailMessage> it = null;
         try {
             /*
              * Read in parameters
@@ -2095,7 +2095,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         it = mailInterface.getThreadedMessages(folderId, null, searchCols, searchPats, true, columns);
                         final int size = it.size();
                         for (int i = 0; i < size; i++) {
-                            final MailMessage mail = (MailMessage) it.next();
+                            final MailMessage mail = it.next();
                             final JSONArray arr = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(
@@ -2124,7 +2124,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
                         final int size = it.size();
                         for (int i = 0; i < size; i++) {
-                            final MailMessage mail = (MailMessage) it.next();
+                            final MailMessage mail = it.next();
                             final JSONArray arr = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(
