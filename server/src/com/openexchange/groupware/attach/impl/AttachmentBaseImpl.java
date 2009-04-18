@@ -63,12 +63,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.activation.MimetypesFileTypeMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -96,7 +93,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
@@ -135,10 +131,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	
 	private final Map<Integer,List<AttachmentListener>> moduleListeners = new HashMap<Integer,List<AttachmentListener>>();
 	private final Map<Integer,List<AttachmentAuthorization>> moduleAuthorizors = new HashMap<Integer,List<AttachmentAuthorization>>();
-	
-	
+
+	/**
+	 * Initializes a new {@link AttachmentBaseImpl}.
+	 */
 	public AttachmentBaseImpl(){
-		
+		super();
 	}
 	
 	public AttachmentBaseImpl(final DBProvider provider) {
@@ -328,16 +326,16 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 				select.append(" ASC");
 			}
 		}
-		
-		final SearchIterator newIterator = new AttachmentIterator(select.toString(),columns,ctx,folderId,fetchMode,Integer.valueOf(moduleId),Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId()), Long.valueOf(ts));
-		
-		SearchIterator deletedIterator = SearchIterator.EMPTY_ITERATOR;
-		
+
+		final SearchIterator<AttachmentMetadata> newIterator = new AttachmentIterator(select.toString(),columns,ctx,folderId,fetchMode,Integer.valueOf(moduleId),Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId()), Long.valueOf(ts));
+
+		SearchIterator<AttachmentMetadata> deletedIterator = SearchIteratorAdapter.createEmptyIterator();
+
 		if(!ignoreDeleted) {
 			deletedIterator = new AttachmentIterator("SELECT id FROM del_attachment WHERE module = ? and attached = ? and cid = ? and del_date > ?",new AttachmentField[]{AttachmentField.ID_LITERAL},ctx, folderId, fetchMode, Integer.valueOf(moduleId), Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId()), Long.valueOf(ts));
 		}
-		
-		return new DeltaImpl(newIterator,SearchIterator.EMPTY_ITERATOR,deletedIterator, System.currentTimeMillis());
+
+		return new DeltaImpl<AttachmentMetadata>(newIterator, SearchIteratorAdapter.<AttachmentMetadata>createEmptyIterator(), deletedIterator, System.currentTimeMillis());
 	}
 	
 	public void registerAttachmentListener(final AttachmentListener listener, final int moduleId) {
@@ -348,15 +346,15 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		getListeners(moduleId).remove(listener);
 	}
 	
-	private AttachmentField[] addCreationDateAsNeeded(AttachmentField[] columns) {
-	    for (AttachmentField attachmentField : columns) {
+	private AttachmentField[] addCreationDateAsNeeded(final AttachmentField[] columns) {
+	    for (final AttachmentField attachmentField : columns) {
             if(attachmentField == AttachmentField.CREATION_DATE_LITERAL) {
                 return columns;
             }
         }
 	    int i = 0;
-	    AttachmentField[] copy = new AttachmentField[columns.length+1];
-	    for (AttachmentField attachmentField : columns) {
+	    final AttachmentField[] copy = new AttachmentField[columns.length+1];
+	    for (final AttachmentField attachmentField : columns) {
             copy[i++] = attachmentField;
         }
 	    copy[i] = AttachmentField.CREATION_DATE_LITERAL;

@@ -707,7 +707,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIterator.EMPTY_ITERATOR;
+            return SearchIteratorAdapter.createEmptyIterator();
         }
         final boolean cachable = (mails.length < MailProperties.getInstance().getMailFetchLimit());
         final MailField[] useFields;
@@ -904,7 +904,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIterator.EMPTY_ITERATOR;
+            return SearchIteratorAdapter.createEmptyIterator();
         }
         final MailField[] useFields;
         final boolean onlyFolderAndID;
