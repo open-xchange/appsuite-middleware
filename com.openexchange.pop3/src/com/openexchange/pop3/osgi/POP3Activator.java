@@ -64,7 +64,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
- * {@link POP3Activator} - The {@link BundleActivator activator} for IMAP bundle.
+ * {@link POP3Activator} - The {@link BundleActivator activator} for POP3 bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
