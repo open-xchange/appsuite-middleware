@@ -63,16 +63,20 @@ import com.openexchange.unifiedinbox.config.UnifiedINBOXConfig;
  */
 public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStorage, UnifiedINBOXMessageStorage> {
 
+    private static final long serialVersionUID = 6666321725945931657L;
+
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXAccess.class);
 
     /**
-     * Fullname of Unified INBOX.
+     * Fullname of INBOX.
      */
     public static final String INBOX = "INBOX";
 
     /*-
      * Members
      */
+
+    private boolean connected;
 
     private transient UnifiedINBOXFolderStorage folderStorage;
 
@@ -83,7 +87,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     protected UnifiedINBOXAccess(final Session session) {
         super(session);
     }
-    
+
     protected UnifiedINBOXAccess(final Session session, final int accountId) {
         super(session, accountId);
     }
@@ -92,6 +96,8 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
         super.resetFields();
         folderStorage = null;
         messageStorage = null;
+        logicTools = null;
+        connected = false;
     }
 
     @Override
@@ -101,12 +107,16 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     @Override
     protected void closeInternal() {
-        // Nothing to close
+        /*
+         * Reset
+         */
+        reset();
     }
 
     @Override
     protected void connectInternal() throws MailException {
         // Nothing to connect
+        connected = true;
     }
 
     @Override
@@ -116,6 +126,9 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     @Override
     public UnifiedINBOXFolderStorage getFolderStorage() throws MailException {
+        if (!connected) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NOT_CONNECTED);
+        }
         if (null == folderStorage) {
             folderStorage = new UnifiedINBOXFolderStorage(this, session);
         }
@@ -124,12 +137,20 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     @Override
     public MailLogicTools getLogicTools() throws MailException {
-        // TODO Auto-generated method stub
-        return null;
+        if (!connected) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NOT_CONNECTED);
+        }
+        if (null == logicTools) {
+            logicTools = new MailLogicTools(session, accountId);
+        }
+        return logicTools;
     }
 
     @Override
     public UnifiedINBOXMessageStorage getMessageStorage() throws MailException {
+        if (!connected) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NOT_CONNECTED);
+        }
         if (null == messageStorage) {
             messageStorage = new UnifiedINBOXMessageStorage(this, session);
         }
@@ -138,14 +159,12 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     @Override
     public boolean isConnected() {
-        // TODO Auto-generated method stub
-        return false;
+        return connected;
     }
 
     @Override
     public boolean isConnectedUnsafe() {
-        // TODO Auto-generated method stub
-        return false;
+        return connected;
     }
 
     @Override
@@ -176,14 +195,12 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     @Override
     protected void shutdown() throws MailException {
-        // TODO Auto-generated method stub
-
+        // Nothing to shut-down
     }
 
     @Override
     protected void startup() throws MailException {
-        // TODO Auto-generated method stub
-
+        // Nothing to start-up
     }
 
 }

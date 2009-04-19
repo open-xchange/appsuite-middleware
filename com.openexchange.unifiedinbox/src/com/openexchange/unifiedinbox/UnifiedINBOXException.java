@@ -108,6 +108,10 @@ public final class UnifiedINBOXException extends MIMEMailException {
          */
         CLEAR_NOT_SUPPORTED("Unified INBOX does not support to clear INBOX folder.", Category.CODE_ERROR, 2010),
         /**
+         * No connection available to access mailbox
+         */
+        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 2011),
+        /**
          * Folder %1$s does not hold messages and is therefore not selectable.
          */
         FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES),
