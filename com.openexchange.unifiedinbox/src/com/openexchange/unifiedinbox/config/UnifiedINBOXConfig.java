@@ -85,7 +85,7 @@ public final class UnifiedINBOXConfig extends MailConfig {
 
     @Override
     public String getServer() {
-        return null;
+        return "localhost";
     }
 
     @Override
@@ -106,6 +106,8 @@ public final class UnifiedINBOXConfig extends MailConfig {
     @Override
     protected void parseServerURL(final String serverURL) {
         // Nothing to parse
+        login = "dummy";
+        password = "secret";
     }
 
 }
