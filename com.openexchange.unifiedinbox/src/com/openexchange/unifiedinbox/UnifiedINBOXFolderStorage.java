@@ -110,8 +110,6 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, fullname);
     }
 
-    private static final String PATTERN_ALL = "%";
-
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
