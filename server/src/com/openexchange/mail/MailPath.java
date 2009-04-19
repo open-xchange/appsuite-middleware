@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the folder fullname followed by the value of
- * {@link #SEPERATOR} followed by mail's unique numeric ID:<br>
+ * {@link #SEPERATOR} followed by mail's unique ID:<br>
  * Example: <i>INBOX.Subfolder/1234</i>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
