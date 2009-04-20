@@ -92,7 +92,7 @@ public class POP3CreateTableTask implements UpdateTask {
         return "CREATE TABLE user_pop3_data (" + 
         		"cid INT4 unsigned NOT NULL," + 
         		"user INT4 unsigned NOT NULL," + 
-        		"uid INT4 unsigned NOT NULL," + 
+        		"uid INT8 NOT NULL," + 
         		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
         		"flags TINYINT unsigned NOT NULL default 0," + 
         		"color_flag TINYINT unsigned NOT NULL default 0," + 
@@ -109,7 +109,7 @@ public class POP3CreateTableTask implements UpdateTask {
         return "CREATE TABLE user_pop3_user_flag (" + 
         		"cid INT4 unsigned NOT NULL," + 
         		"user INT4 unsigned NOT NULL," + 
-        		"uid INT4 unsigned NOT NULL," + 
+        		"uid INT8 NOT NULL," + 
         		"user_flag VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
         		"INDEX (cid, user, uid)," + 
         		"PRIMARY KEY (cid, user, uid, user_flag)," + 
