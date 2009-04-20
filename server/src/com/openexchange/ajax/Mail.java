@@ -173,8 +173,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Mail.class);
 
-    private static final String PARAMETER_COL = "col";
-
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 
     private static final String STR_INLINE_FILENAME = "inline; filename=\"";
@@ -271,6 +269,8 @@ public class Mail extends PermissionServlet implements UploadListener {
     public static final String PARAMETER_UNSEEN = "unseen";
 
     public static final String PARAMETER_FILTER = "filter";
+    
+    public static final String PARAMETER_COL = "col";
 
     private static final String VIEW_TEXT = "text";
 
