@@ -150,6 +150,26 @@ public final class POP3InboxFolder {
     }
 
     /**
+     * Gets matching message by specified UIDL.
+     * 
+     * @param uidl The UIDL
+     * @return The corresponding message
+     * @throws MailException If message cannot be returned
+     */
+    public Message getMessage(final String uidl) throws MailException {
+        open();
+        // Get matching message by UID
+        final Message[] allmsgs = getMessages();
+        final String[] uidls = getUIDLs();
+        for (int i = 0; i < uidls.length; i++) {
+            if (uidls[i].equals(uidl)) {
+                return allmsgs[i];
+            }
+        }
+        return null;
+    }
+
+    /**
      * Prefetch information about POP3 messages. If the <code>FetchProfile</code> contains <code>UIDFolder.FetchProfileItem.UID</code>, POP3
      * UIDs for all messages in the folder are fetched using the POP3 UIDL command. If the FetchProfile contains
      * <code>FetchProfile.Item.ENVELOPE</code>, the headers and size of all messages are fetched using the POP3 TOP and LIST commands.
@@ -229,7 +249,9 @@ public final class POP3InboxFolder {
             return;
         }
         try {
-            inbox.open(com.sun.mail.pop3.POP3Folder.READ_WRITE);
+            if (!inbox.isOpen()) {
+                inbox.open(com.sun.mail.pop3.POP3Folder.READ_WRITE);
+            }
             syncMessages(getUIDLs(null));
             open = true;
         } catch (final MessagingException e) {

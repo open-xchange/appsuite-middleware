@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -210,18 +209,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         if (!MailInitialization.getInstance().isInitialized()) {
             throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
         }
-        try {
-            if (MailAccessCache.getInstance().containsMailAccess(session, accountId)) {
-                final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
-                if (mailAccess != null) {
-                    return mailAccess;
-                }
+        if (MailAccessCache.getInstance().containsMailAccess(session, accountId)) {
+            final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
+            if (mailAccess != null) {
+                return mailAccess;
             }
-        } catch (final CacheException e1) {
-            /*
-             * Fetching from cache failed
-             */
-            LOG.error(e1.getMessage(), e1);
         }
         /*
          * No cached connection available, check for admin login
@@ -254,11 +246,6 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
             } catch (final InterruptedException e) {
                 LOG.error(e.getMessage(), e);
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e, new Object[0]);
-            } catch (final CacheException e) {
-                /*
-                 * Fetching from cache failed
-                 */
-                LOG.error(e.getMessage(), e);
             } finally {
                 LOCK_CON.unlock();
             }
@@ -402,7 +389,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
                     signalAvailableConnection();
                     return;
                 }
-            } catch (final CacheException e) {
+            } catch (final MailException e) {
                 LOG.error(e.getMessage(), e);
             }
             /*

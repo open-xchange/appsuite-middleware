@@ -143,4 +143,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
+    public void handleLogout(final Login logout) throws LoginException {
+        // Nothing to do on logout
+    }
+
 }

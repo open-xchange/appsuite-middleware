@@ -233,15 +233,17 @@ public class Login extends AJAXServlet {
                     }
                 }
             }
-            /*
-             * Drop the session
-             */
-            if (sessionId != null) {
-                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                sessiondService.removeSession(sessionId);
-
-            } else if (LOG.isDebugEnabled()) {
-                LOG.debug("no session cookie found in request!");
+            if (sessionId == null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("no session cookie found in request!");
+                }
+            } else {
+                // Do logout
+                try {
+                    LoginPerformer.getInstance().doLogout(sessionId);
+                } catch (final LoginException e) {
+                    LOG.error("Logout failed", e);
+                }
             }
         } else if (ACTION_REDIRECT.equals(action)) {
             /*

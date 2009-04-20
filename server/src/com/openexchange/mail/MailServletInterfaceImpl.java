@@ -291,10 +291,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 int spamActionSource = SPAM_NOOP;
                 int spamActionDest = SPAM_NOOP;
                 if (usm.isSpamEnabled()) {
-                    if (mailAccess.getFolderStorage().getSpamFolder().equals(sourceFullname)) {
+                    if (sourceFullname.equals(mailAccess.getFolderStorage().getSpamFolder())) {
                         spamActionSource = SPAM_HAM;
                     }
-                    if (destAccess.getFolderStorage().getSpamFolder().equals(destFullname)) {
+                    if (destFullname.equals(destAccess.getFolderStorage().getSpamFolder())) {
                         spamActionDest = SPAM_SPAM;
                     }
                 }
@@ -368,7 +368,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Hard-delete if hard-delete is set in user's mail configuration or fullname denotes trash (sub)folder
          */
-        final boolean hd = (hardDelete || UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() || (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+        final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
+        final boolean hd = (hardDelete || UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() || (null != trashFullname && fullname.startsWith(trashFullname)));
         mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hd);
         try {
             /*
@@ -707,7 +708,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIteratorAdapter.<MailMessage>createEmptyIterator();
+            return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
         final boolean cachable = (mails.length < MailProperties.getInstance().getMailFetchLimit());
         final MailField[] useFields;
@@ -749,7 +750,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
-        return SearchIteratorAdapter.<MailMessage>createArrayIterator(mails);
+        return SearchIteratorAdapter.<MailMessage> createArrayIterator(mails);
     }
 
     /**
@@ -904,7 +905,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIteratorAdapter.<MailMessage>createEmptyIterator();
+            return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
         final MailField[] useFields;
         final boolean onlyFolderAndID;

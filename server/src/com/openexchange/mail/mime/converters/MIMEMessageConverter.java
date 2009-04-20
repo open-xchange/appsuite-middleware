@@ -1095,10 +1095,12 @@ public final class MIMEMessageConverter {
                     fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                            if (folder instanceof FullnameFolder) {
-                                mailMessage.setMailId(((FullnameFolder) folder).getUID(msg));
-                            } else {
+                            if (folder instanceof UIDFolder) {
                                 mailMessage.setMailId(String.valueOf(((UIDFolder) folder).getUID(msg)));
+                            } else if (folder instanceof FullnameFolder) {
+                                mailMessage.setMailId(((FullnameFolder) folder).getUID(msg));
+                            } else if (folder instanceof POP3Folder) {
+                                mailMessage.setMailId(((POP3Folder) folder).getUID(msg));
                             }
                         }
                     };

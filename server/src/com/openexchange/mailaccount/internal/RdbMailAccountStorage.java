@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.net.InetSocketAddress;
+import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -125,7 +126,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid, Connection con) throws MailAccountException {
+    private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -177,7 +178,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private static void fillTransportAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid, Connection con) throws MailAccountException {
+    private static void fillTransportAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -204,11 +205,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         super();
     }
 
-    public void deleteMailAccount(int id, int user, int cid) throws MailAccountException {
+    public void deleteMailAccount(final int id, final int user, final int cid) throws MailAccountException {
         deleteMailAccount(id, user, cid, false);
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid, boolean deletePrimary) throws MailAccountException {
+    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_DELETE, I(user), I(cid));
         }
@@ -401,8 +402,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         return l.toArray(new MailAccount[l.size()]);
     }
-    
-    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, String sessionPassword) throws MailAccountException {
+
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
         if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
         }
@@ -415,76 +416,84 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         try {
             String encryptedPassword = null; //
-            
+
             List<Attribute> orderedAttributes = null;
-            if(UpdateMailAccountBuilder.needsUpdate(attributes)) {
+            if (UpdateMailAccountBuilder.needsUpdate(attributes)) {
                 orderedAttributes = new ArrayList<Attribute>(attributes);
-                
-                UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
-                for(Attribute attribute : orderedAttributes) {
+
+                final UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
+                for (final Attribute attribute : orderedAttributes) {
                     attribute.doSwitch(sqlBuilder);
                 }
-                
+
                 stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-                
-                GetSwitch getter = new GetSwitch(mailAccount);
+
+                final GetSwitch getter = new GetSwitch(mailAccount);
                 int pos = 1;
-                for(Attribute attribute : orderedAttributes) {
-                    if(!sqlBuilder.handles(attribute)) {
+                for (final Attribute attribute : orderedAttributes) {
+                    if (!sqlBuilder.handles(attribute)) {
                         continue;
                     }
-                    Object value = attribute.doSwitch(getter);
-                    if(Attribute.PASSWORD_LITERAL == attribute) {
-                        encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
-                        stmt.setObject(pos++, encryptedPassword);
-                    } else {
-                        stmt.setObject(pos++, value);
-                    }
-                }
-                
-                stmt.setLong(pos++, cid);
-                stmt.setLong(pos++, mailAccount.getId());
-                stmt.setLong(pos++, user);
-                stmt.executeUpdate();
-                stmt.close();
-                
-            }
-            
-            if(UpdateTransportAccountBuilder.needsUpdate(attributes)) {
-                if(orderedAttributes == null) {
-                    orderedAttributes = new ArrayList<Attribute>(attributes);
-                }
-                
-                UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
-                for(Attribute attribute : orderedAttributes) {
-                    attribute.doSwitch(sqlBuilder);
-                }
-                
-                stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-                
-                GetSwitch getter = new GetSwitch(mailAccount);
-                int pos = 1;
-                for(Attribute attribute : orderedAttributes) {
-                    if(!sqlBuilder.handles(attribute)) {
-                        continue;
-                    }
-                    Object value = attribute.doSwitch(getter);
-                    if(Attribute.PASSWORD_LITERAL == attribute) {
-                        if(encryptedPassword == null) {
+                    final Object value = attribute.doSwitch(getter);
+                    if (Attribute.PASSWORD_LITERAL == attribute) {
+                        try {
                             encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                        } catch (final GeneralSecurityException e) {
+                            throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                         }
                         stmt.setObject(pos++, encryptedPassword);
                     } else {
                         stmt.setObject(pos++, value);
                     }
                 }
-                
+
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
                 stmt.executeUpdate();
                 stmt.close();
-                
+
+            }
+
+            if (UpdateTransportAccountBuilder.needsUpdate(attributes)) {
+                if (orderedAttributes == null) {
+                    orderedAttributes = new ArrayList<Attribute>(attributes);
+                }
+
+                final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                for (final Attribute attribute : orderedAttributes) {
+                    attribute.doSwitch(sqlBuilder);
+                }
+
+                stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+
+                final GetSwitch getter = new GetSwitch(mailAccount);
+                int pos = 1;
+                for (final Attribute attribute : orderedAttributes) {
+                    if (!sqlBuilder.handles(attribute)) {
+                        continue;
+                    }
+                    final Object value = attribute.doSwitch(getter);
+                    if (Attribute.PASSWORD_LITERAL == attribute) {
+                        if (encryptedPassword == null) {
+                            try {
+                                encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                            } catch (final GeneralSecurityException e) {
+                                throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                            }
+                        }
+                        stmt.setObject(pos++, encryptedPassword);
+                    } else {
+                        stmt.setObject(pos++, value);
+                    }
+                }
+
+                stmt.setLong(pos++, cid);
+                stmt.setLong(pos++, mailAccount.getId());
+                stmt.setLong(pos++, user);
+                stmt.executeUpdate();
+                stmt.close();
+
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
@@ -506,7 +515,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
-            final String encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+            final String encryptedPassword;
+            try {
+                encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+            } catch (final GeneralSecurityException e) {
+                throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+            }
             stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
             int pos = 1;
             stmt.setString(pos++, mailAccount.getName());
@@ -574,9 +588,16 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_MAIL_ACCOUNT);
-            final String encryptedPassword = sessionPassword == null ? null : PasswordUtil.encrypt(
-                mailAccount.getPassword(),
-                sessionPassword);
+            final String encryptedPassword;
+            if (sessionPassword == null) {
+                encryptedPassword = null;
+            } else {
+                try {
+                    encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                } catch (final GeneralSecurityException e) {
+                    throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                }
+            }
             int pos = 1;
             // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
             // confirmed_ham, spam_handler
@@ -645,10 +666,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             con.setAutoCommit(false);
             retval = insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
-        } catch (MailAccountException e) {
+        } catch (final MailAccountException e) {
             rollback(con);
             throw e;
         } finally {

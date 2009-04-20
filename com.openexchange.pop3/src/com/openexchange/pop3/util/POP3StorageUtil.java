@@ -138,7 +138,7 @@ public class POP3StorageUtil {
 
         // Determine & insert new UIDLs
         final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
-        newUIDLs.remove(databaseUIDLs);
+        newUIDLs.removeAll(databaseUIDLs);
         insertMessagesIntoTables(newUIDLs, user, cid);
         return newUIDLs.size();
     }
@@ -306,5 +306,123 @@ public class POP3StorageUtil {
             Database.back(cid, false, con);
         }
         return uidls;
+    }
+
+    private static final String SQL_SELECT_SYS_FLAGS = "SELECT flags FROM user_pop3_data WHERE uidl = ? AND user = ? AND cid = ?";
+
+    /**
+     * Gets the system flags of the message identified by specified UIDL.
+     * 
+     * @param uidl The UIDL
+     * @param user The user ID
+     * @param cid The context ID
+     * @return The system flags of the message identified by specified UIDL
+     * @throws POP3Exception If message's flags cannot be retrieved
+     */
+    public static int getSystemFlags(final String uidl, final int user, final int cid) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_SYS_FLAGS);
+            stmt.setString(1, uidl);
+            stmt.setLong(2, user);
+            stmt.setLong(3, cid);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return 0;
+            }
+            return rs.getInt(1);
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
+    }
+
+    private static final String SQL_SELECT_COL_FLAGS = "SELECT color_flag FROM user_pop3_data WHERE uidl = ? AND user = ? AND cid = ?";
+
+    /**
+     * Gets the color flag of the message identified by specified UIDL.
+     * 
+     * @param uidl The UIDL
+     * @param user The user ID
+     * @param cid The context ID
+     * @return The color flag of the message identified by specified UIDL
+     * @throws POP3Exception If message's color flag cannot be retrieved
+     */
+    public static int getColorFlag(final String uidl, final int user, final int cid) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_COL_FLAGS);
+            stmt.setString(1, uidl);
+            stmt.setLong(2, user);
+            stmt.setLong(3, cid);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return 0;
+            }
+            return rs.getInt(1);
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
+    }
+
+    private static final String SQL_SELECT_USER_FLAGS = "SELECT user_flag FROM user_pop3_user_flag WHERE uid = ? AND user = ? AND cid = ?";
+
+    /**
+     * Gets the user flags of the message identified by specified UIDL.
+     * 
+     * @param uidl The UIDL
+     * @param user The user ID
+     * @param cid The context ID
+     * @return The user flags of the message identified by specified UIDL
+     * @throws POP3Exception If message's flags cannot be retrieved
+     */
+    public static String[] getUserFlags(final String uidl, final int user, final int cid) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_USER_FLAGS);
+            stmt.setLong(1, UIDUtil.uid2long(uidl));
+            stmt.setLong(2, user);
+            stmt.setLong(3, cid);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new String[0];
+            }
+            final List<String> tmp = new ArrayList<String>();
+            do {
+                tmp.add(rs.getString(1));
+            } while (rs.next());
+            return tmp.toArray(new String[tmp.size()]);
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
     }
 }

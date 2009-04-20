@@ -90,7 +90,15 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * No duplicate default account allowed.
      */
-    NO_DUPLICATE_DEFAULT(MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG, Category.CODE_ERROR, 8);
+    NO_DUPLICATE_DEFAULT(MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG, Category.CODE_ERROR, 8),
+    /**
+     * Password encryption failed.
+     */
+    PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_ENCRYPTION_FAILED_MSG, Category.CODE_ERROR, 9),
+    /**
+     * Password decryption failed.
+     */
+    PASSWORD_DECRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_DECRYPTION_FAILED_MSG, Category.CODE_ERROR, 10);
 
     /**
      * Message of the exception.

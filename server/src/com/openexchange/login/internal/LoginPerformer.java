@@ -79,6 +79,8 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class LoginPerformer {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoginPerformer.class);
+
     private static volatile LoginPerformer instance;
 
     /**
@@ -205,6 +207,58 @@ public final class LoginPerformer {
         }
     }
 
+    /**
+     * Performs the logout for specified session ID.
+     * 
+     * @param sessionId The session ID
+     * @throws LoginException If logout fails
+     */
+    public void doLogout(final String sessionId) throws LoginException {
+        /*
+         * Drop the session
+         */
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        final Session session = sessiondService.getSession(sessionId);
+        if (null == session) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("No session found for ID: " + sessionId);
+            }
+            return;
+        }
+        // Get context
+        final ContextStorage contextStor = ContextStorage.getInstance();
+        final Context context;
+        try {
+            context = contextStor.getContext(session.getContextId());
+        } catch (final ContextException e) {
+            throw new LoginException(e);
+        }
+        if (null == context) {
+            throw new LoginException(new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(session.getContextId())));
+        }
+        // Get user
+        final User u;
+        try {
+            final UserStorage us = UserStorage.getInstance();
+            u = us.getUser(session.getUserId(), context);
+        } catch (final LdapException e) {
+            throw new LoginException(e);
+        }
+        final LoginImpl logout = new LoginImpl(session, context, u);
+        /*
+         * Remove session
+         */
+        sessiondService.removeSession(sessionId);
+        /*
+         * Trigger registered logout handlers
+         */
+        try {
+            triggerLogoutHandlers(logout);
+        } catch (final InterruptedException e) {
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+        }
+    }
+
     private static void triggerLoginHandlers(final LoginImpl login) throws InterruptedException {
         // TODO: Use global thread pool and provided default thread factory
         final ExecutorService executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
@@ -217,6 +271,27 @@ public final class LoginPerformer {
                         handler.handleLogin(login);
                     } catch (final LoginException e) {
                         login.setError(e);
+                    }
+                }
+            });
+        }
+        executor.shutdown();
+        // Wait for finished
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+    }
+
+    private static void triggerLogoutHandlers(final LoginImpl logout) throws InterruptedException {
+        // TODO: Use global thread pool and provided default thread factory
+        final ExecutorService executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
+        for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
+            final LoginHandlerService handler = it.next();
+            executor.execute(new Runnable() {
+
+                public void run() {
+                    try {
+                        handler.handleLogout(logout);
+                    } catch (final LoginException e) {
+                        logout.setError(e);
                     }
                 }
             });

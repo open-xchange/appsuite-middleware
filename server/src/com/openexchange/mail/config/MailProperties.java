@@ -147,6 +147,10 @@ public final class MailProperties {
 
     private boolean adminMailLoginEnabled;
 
+    private int mailAccessCacheShrinkerSeconds;
+
+    private int mailAccessCacheIdleSeconds;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -227,6 +231,8 @@ public final class MailProperties {
         supportSubscription = false;
         defaultMailProvider = null;
         adminMailLoginEnabled = false;
+        mailAccessCacheShrinkerSeconds = 0;
+        mailAccessCacheIdleSeconds = 0;
     }
 
     private void loadProperties0() throws MailConfigException {
@@ -334,6 +340,30 @@ public final class MailProperties {
                 attachDisplaySize = 8192;
                 logBuilder.append("\tAttachment Display Size Limit: Non parseable value \"").append(attachDisplaySizeStr).append(
                     fallbackPrefix).append(attachDisplaySize).append('\n');
+            }
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", "3").trim();
+            try {
+                mailAccessCacheShrinkerSeconds = Integer.parseInt(tmp);
+                logBuilder.append("\tMail Access Cache shrinker-interval seconds: ").append(mailAccessCacheShrinkerSeconds).append('\n');
+            } catch (final NumberFormatException e) {
+                mailAccessCacheShrinkerSeconds = 3;
+                logBuilder.append("\tMail Access Cache shrinker-interval seconds: Non parseable value \"").append(tmp).append(
+                    fallbackPrefix).append(mailAccessCacheShrinkerSeconds).append('\n');
+            }
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", "7").trim();
+            try {
+                mailAccessCacheIdleSeconds = Integer.parseInt(tmp);
+                logBuilder.append("\tMail Access Cache idle seconds: ").append(mailAccessCacheIdleSeconds).append('\n');
+            } catch (final NumberFormatException e) {
+                mailAccessCacheIdleSeconds = 7;
+                logBuilder.append("\tMail Access Cache idle seconds: Non parseable value \"").append(tmp).append(fallbackPrefix).append(
+                    mailAccessCacheIdleSeconds).append('\n');
             }
         }
 
@@ -789,4 +819,23 @@ public final class MailProperties {
         System.arraycopy(phishingHeaders, 0, retval, 0, phishingHeaders.length);
         return retval;
     }
+
+    /**
+     * Gets the mail access cache shrinker-interval seconds.
+     * 
+     * @return The mail access cache shrinker-interval seconds
+     */
+    public int getMailAccessCacheShrinkerSeconds() {
+        return mailAccessCacheShrinkerSeconds;
+    }
+
+    /**
+     * Gets the mail access cache idle seconds.
+     * 
+     * @return The mail access cache idle seconds.
+     */
+    public int getMailAccessCacheIdleSeconds() {
+        return mailAccessCacheIdleSeconds;
+    }
+
 }

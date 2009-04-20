@@ -60,7 +60,6 @@ import com.openexchange.login.Login;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link LdapUserFolderCreator}
@@ -161,4 +160,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
+    public void handleLogout(final Login logout) throws LoginException {
+        // Nothing to do on logout
+    }
 }

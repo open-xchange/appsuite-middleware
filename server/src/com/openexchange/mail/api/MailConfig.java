@@ -50,6 +50,7 @@
 package com.openexchange.mail.api;
 
 import java.net.InetSocketAddress;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -65,6 +66,7 @@ import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -430,7 +432,7 @@ public abstract class MailConfig {
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
      * @param mailAccount The mail account
-     * @throws MailConfigException
+     * @throws MailConfigException If a configuration error occurs
      */
     protected static final void fillLoginAndPassword(final MailConfig mailConfig, final String sessionPassword, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
         // Assign login
@@ -449,7 +451,11 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            mailConfig.password = PasswordUtil.decrypt(mailAccount.getPassword(), sessionPassword);
+            try {
+                mailConfig.password = PasswordUtil.decrypt(mailAccount.getPassword(), sessionPassword);
+            } catch (final GeneralSecurityException e) {
+                throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(e, new Object[0]));
+            }
         }
     }
 

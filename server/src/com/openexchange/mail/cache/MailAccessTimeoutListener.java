@@ -47,30 +47,26 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.mail.cache;
 
-import com.openexchange.authentication.LoginException;
+import com.openexchange.mail.api.MailAccess;
 
 /**
- * {@link LoginHandlerService} - Handles a performed login.
+ * {@link MailAccessTimeoutListener} - The mail access event handler which preludes mail access closure if an instance of {@link MailAccess}
+ * is removed from mail access cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface LoginHandlerService {
+public final class MailAccessTimeoutListener implements TimeoutConcurrentMap.TimeoutListener<MailAccess<?, ?>> {
 
     /**
-     * Handles the specified performed login.
-     * 
-     * @param login The performed login.
-     * @throws LoginException If an error occurs while handling the login
+     * Default constructor
      */
-    public void handleLogin(Login login) throws LoginException;
+    public MailAccessTimeoutListener() {
+        super();
+    }
 
-    /**
-     * Handles the specified performed logout.
-     * 
-     * @param logout The performed logout.
-     * @throws LoginException If an error occurs while handling the logout
-     */
-    public void handleLogout(Login logout) throws LoginException;
+    public void onTimeout(final MailAccess<?, ?> mailAccess) {
+        mailAccess.close(false);
+    }
 }

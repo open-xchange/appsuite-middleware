@@ -82,6 +82,12 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // No duplicate default account allowed.
     public static final String NO_DUPLICATE_DEFAULT_MSG = "No duplicate default account allowed.";
 
+    // Password encryption failed.
+    public static final String PASSWORD_ENCRYPTION_FAILED_MSG = "Password encryption failed.";
+
+    // Password decryption failed.
+    public static final String PASSWORD_DECRYPTION_FAILED_MSG = "Password decryption failed.";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */

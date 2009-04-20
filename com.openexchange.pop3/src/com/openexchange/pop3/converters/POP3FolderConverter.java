@@ -49,24 +49,16 @@
 
 package com.openexchange.pop3.converters;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.ReadOnlyMailFolder;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.pop3.POP3InboxFolder;
 import com.openexchange.pop3.dataobjects.POP3MailFolder;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.sun.mail.pop3.DefaultFolder;
-import com.sun.mail.pop3.POP3Folder;
 
 /**
  * {@link POP3FolderConverter} - Converts a POP3 folder to an instance of {@link MailFolder}.
@@ -116,73 +108,53 @@ public final class POP3FolderConverter {
     }
 
     /**
-     * Creates a folder data object from given POP3 folder.
+     * Gets the POP3 root folder.
      * 
-     * @param pop3Folder The POP3 folder
-     * @param session The session
-     * @param ctx The context
-     * @return an instance of <code>{@link POP3MailFolder}</code> containing the attributes from given POP3 folder
-     * @throws MailException If conversion fails
+     * @return The POP3 root folder
      */
-    public static MailFolder convertFolder(final Folder pop3Folder, final Session session, final Context ctx) throws MailException {
-        if (pop3Folder instanceof DefaultFolder) {
-            return ROOT_POP3_FOLDER;
+    public static MailFolder getRootFolder() {
+        return ROOT_POP3_FOLDER;
+    }
+
+    /**
+     * Gets a new instance of {@link MailFolder} representing the POP3 INBOX folder.
+     * 
+     * @return A new instance of {@link MailFolder} representing the POP3 INBOX folder
+     * @throws MailException If mail folder creation fails
+     */
+    public static MailFolder getINBOXFolder(final POP3InboxFolder pop3Folder, final Session session) throws MailException {
+        final POP3MailFolder mailFolder = new POP3MailFolder();
+        // Subscription not supported by POP3, so every folder is "subscribed"
+        mailFolder.setSubscribed(true);
+        mailFolder.setSupportsUserFlags(true); // Yap, through database storage
+        mailFolder.setRootFolder(false);
+        mailFolder.setExists(true);
+        mailFolder.setSeparator('/');
+        // A POP3 folder does not contain subfolders
+        mailFolder.setSubfolders(false);
+        mailFolder.setSubscribedSubfolders(false);
+        mailFolder.setFullname("INBOX");
+        mailFolder.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
+        mailFolder.setName("INBOX");
+        mailFolder.setHoldsFolders(false);
+        mailFolder.setHoldsMessages(true);
+        {
+            final MailPermission ownPermission = new DefaultMailPermission();
+            ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+            mailFolder.setOwnPermission(ownPermission);
+            mailFolder.addPermission(ownPermission);
         }
-        try {
-            final POP3MailFolder mailFolder = new POP3MailFolder();
-            // Subscription not supported by POP3, so every folder is "subscribed"
-            mailFolder.setSubscribed(true);
-            mailFolder.setSupportsUserFlags(false);
-            mailFolder.setRootFolder(false);
-            final boolean exists = pop3Folder.exists();
-            mailFolder.setExists(exists);
-            mailFolder.setSeparator(pop3Folder.getSeparator());
-            // A POP3 folder does not contain subfolders
-            mailFolder.setSubfolders(false);
-            mailFolder.setSubscribedSubfolders(false);
-            mailFolder.setFullname(pop3Folder.getFullName());
-            mailFolder.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
-            mailFolder.setName(pop3Folder.getName());
-            mailFolder.setHoldsFolders(false);
-            mailFolder.setHoldsMessages(true);
-            {
-                final MailPermission ownPermission = new DefaultMailPermission();
-                ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-                mailFolder.setOwnPermission(ownPermission);
-                mailFolder.addPermission(ownPermission);
-            }
-            // Can only be INBOX folder, no other folder permitted/supported
-            mailFolder.setDefaultFolder(true);
-            // NEW and DELETED messages
-            final POP3Folder pop3Fld = (POP3Folder) pop3Folder;
-            pop3Fld.open(Folder.READ_ONLY);
-            try {
-                final Message[] allmsgs = pop3Fld.getMessages();
-                final long start = System.currentTimeMillis();
-                pop3Fld.fetch(allmsgs, MIMEStorageUtility.getUIDFetchProfile());
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-
-                final String[] uidls = new String[allmsgs.length];
-                for (int i = 0; i < uidls.length; i++) {
-                    uidls[i] = pop3Fld.getUID(allmsgs[i]);
-                }
-                final int user = session.getUserId();
-                final int cid = session.getContextId();
-                final int newMessages = POP3StorageUtil.getNewMessageCount(uidls, user, cid);
-
-                mailFolder.setMessageCount(pop3Fld.getMessageCount());
-                mailFolder.setNewMessageCount(newMessages);
-                mailFolder.setUnreadMessageCount(newMessages + POP3StorageUtil.getUnreadMessagesCount(user, cid));
-                mailFolder.setDeletedMessageCount(POP3StorageUtil.getDeletedMessageCount(uidls, user, cid));
-
-                // POP3StorageUtil.syncDBEntries(uidls, user, cid);
-            } finally {
-                pop3Fld.close(false);
-            }
-            return mailFolder;
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
-        }
+        mailFolder.setDefaultFolder(true);
+        // NEW and DELETED messages
+        final int user = session.getUserId();
+        final int cid = session.getContextId();
+        final String[] uidls = pop3Folder.getUIDLs();
+        final int newMessages = POP3StorageUtil.getNewMessageCount(uidls, user, cid);
+        mailFolder.setMessageCount(pop3Folder.getMessageCount());
+        mailFolder.setNewMessageCount(newMessages);
+        mailFolder.setUnreadMessageCount(/* newMessages + */POP3StorageUtil.getUnreadMessagesCount(user, cid));
+        mailFolder.setDeletedMessageCount(POP3StorageUtil.getDeletedMessageCount(uidls, user, cid));
+        return mailFolder;
     }
 
 }

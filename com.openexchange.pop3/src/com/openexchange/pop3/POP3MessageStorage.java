@@ -67,6 +67,7 @@ import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.UIDFolder;
+import javax.mail.internet.MimeMessage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
@@ -81,10 +82,13 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.sort.MailMessageComparator;
+import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.pop3.util.UIDUtil;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPoolingException;
@@ -169,14 +173,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
         final boolean body;
         {
             final MailFields fieldSet = new MailFields(fields);
-            if (fieldSet.contains(MailField.FULL)) {
-                final MailMessage[] mails = new MailMessage[mailIds.length];
-                for (int j = 0; j < mails.length; j++) {
-                    mails[j] = getMessage(fullname, mailIds[j], true);
-                }
-                return mails;
-            }
-            body = (fieldSet.contains(MailField.BODY));
+            body = (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY));
         }
         if (DEFAULT_FOLDER_ID.equals(fullname)) {
             throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
@@ -208,6 +205,63 @@ public final class POP3MessageStorage extends MailMessageStorage {
     }
 
     @Override
+    public MailMessage getMessage(final String fullname, final String mailId, final boolean markSeen) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+        }
+        final POP3InboxFolder pop3Fld = pop3Access.getInboxFolder();
+        // Get matching message by UID
+        final MimeMessage msg = (MimeMessage) pop3Fld.getMessage(mailId);
+        if (null == msg) {
+            return null;
+        }
+        final MailMessage mail;
+        try {
+            mail = MIMEMessageConverter.convertMessage(msg);
+        } catch (final MIMEMailException e) {
+            if (MIMEMailException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return null;
+            }
+            throw e;
+        }
+        // Set system flags
+        mail.setFlags(POP3StorageUtil.getSystemFlags(mailId, session.getUserId(), session.getContextId()));
+        // Set color flag
+        mail.setColorLabel(POP3StorageUtil.getColorFlag(mailId, session.getUserId(), session.getContextId()));
+        // Set user flags
+        final String[] userFlags = POP3StorageUtil.getUserFlags(mailId, session.getUserId(), session.getContextId());
+        if (userFlags != null) {
+            /*
+             * Mark message to contain user flags
+             */
+            mail.addUserFlags(new String[0]);
+            for (final String userFlag : userFlags) {
+                if (MailMessage.isColorLabel(userFlag)) {
+                    mail.setColorLabel(MailMessage.getColorLabelIntValue(userFlag));
+                } else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlag)) {
+                    mail.setFlags(mail.getFlags() | MailMessage.FLAG_FORWARDED);
+                } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
+                    mail.setFlags(mail.getFlags() | MailMessage.FLAG_READ_ACK);
+                } else {
+                    mail.addUserFlag(userFlag);
+                }
+            }
+        }
+        // Mark message as seen
+        if (!mail.isSeen() && markSeen) {
+            mail.setPrevSeen(false);
+            mail.setFlag(MailMessage.FLAG_SEEN, true);
+            mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
+            // Apply seen flag
+            updateSystemFlags(mailId, mail.getFlags());
+        }
+        return mail;
+    }
+
+    @Override
     public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(fullname)) {
             throw new POP3Exception(POP3Exception.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
@@ -217,7 +271,10 @@ public final class POP3MessageStorage extends MailMessageStorage {
             return EMPTY_RETVAL;
         }
         final FetchProfile fetchProfile;
-        {
+        if (null == searchTerm) {
+            fetchProfile = MIMEStorageUtility.getFetchProfile(fields, MailField.toField(sortField.getListField()), true);
+        } else {
+            // Add fields addressed by search term as well
             final Set<MailField> searchFields = new HashSet<MailField>();
             searchTerm.addMailField(searchFields);
             fetchProfile = MIMEStorageUtility.getFetchProfile(
@@ -232,7 +289,12 @@ public final class POP3MessageStorage extends MailMessageStorage {
         final MailMessage[] mails = fetch(fetchProfile, pop3Fld.getMessages(), body);
         // Filter and sort them
         MailMessage[] msgs = null;
-        {
+        if (null == searchTerm) {
+            // Sort them
+            final List<MailMessage> tmp = new ArrayList<MailMessage>(Arrays.asList(mails));
+            Collections.sort(tmp, new MailMessageComparator(OrderDirection.DESC.equals(order), getLocale()));
+            msgs = tmp.toArray(new MailMessage[tmp.size()]);
+        } else {
             // Filter them
             final List<MailMessage> filteredMails = new ArrayList<MailMessage>(mails.length);
             for (int i = 0; i < mails.length; i++) {
@@ -242,9 +304,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
                 }
             }
             // Sort them
-            {
-                Collections.sort(filteredMails, new MailMessageComparator(OrderDirection.DESC.equals(order), getLocale()));
-            }
+            Collections.sort(filteredMails, new MailMessageComparator(OrderDirection.DESC.equals(order), getLocale()));
             msgs = filteredMails.toArray(new MailMessage[filteredMails.size()]);
         }
         if (indexRange != null) {
@@ -470,9 +530,11 @@ public final class POP3MessageStorage extends MailMessageStorage {
             set.add(MailField.CONTENT_TYPE);
             set.add(MailField.HEADERS);
         }
-        if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
-            set.add(MailField.ID);
+        // Add UID to fetch profile
+        if (!fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+            fetchProfile.add(UIDFolder.FetchProfileItem.UID);
         }
+        set.add(MailField.ID);
         // Convert with fields pre-fetched through previous POP3 fetch
         final MailMessage[] mails = convertMessages(messages, pop3Fld.getPOP3InboxFolder(), set.toArray(new MailField[set.size()]), body);
         // Check for flags

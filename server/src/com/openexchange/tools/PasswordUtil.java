@@ -50,6 +50,7 @@
 package com.openexchange.tools;
 
 import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -66,6 +67,8 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class PasswordUtil {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
+
     private static final String CIPHER_TYPE = "DES/ECB/PKCS5Padding";
 
     /**
@@ -74,8 +77,9 @@ public class PasswordUtil {
      * @param password The password
      * @param key The key
      * @return The encrypted password
+     * @throws GeneralSecurityException If password encryption fails
      */
-    public static String encrypt(final String password, final String key) {
+    public static String encrypt(final String password, final String key) throws GeneralSecurityException {
         return encrypt(password, generateSecretKey(key));
     }
 
@@ -85,17 +89,20 @@ public class PasswordUtil {
      * @param password The password
      * @param key The key
      * @return The encrypted password
+     * @throws GeneralSecurityException If password encryption fails
      */
-    public static String encrypt(final String password, final Key key) {
+    public static String encrypt(final String password, final Key key) throws GeneralSecurityException {
+        final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        final byte[] outputBytes = cipher.doFinal(password.getBytes());
+
         try {
-            final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-
-            final byte[] outputBytes = cipher.doFinal(password.getBytes());
-
             return new String(Base64.encodeBase64(outputBytes), "US-ASCII");
-        } catch (final Exception e) {
-            throw new RuntimeException("Failed to encrypt password", e);
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            LOG.error(e.getMessage(), e);
+            return null;
         }
     }
 
@@ -105,8 +112,9 @@ public class PasswordUtil {
      * @param password The password
      * @param key The key
      * @return The decrypted password
+     * @throws GeneralSecurityException If password decryption fails
      */
-    public static String decrypt(final String password, final String key) {
+    public static String decrypt(final String password, final String key) throws GeneralSecurityException {
         return decrypt(password, generateSecretKey(key));
     }
 
@@ -116,20 +124,24 @@ public class PasswordUtil {
      * @param password The password
      * @param key The key
      * @return The decrypted password
+     * @throws GeneralSecurityException If password decryption fails
      */
-    public static String decrypt(final String password, final Key key) {
+    public static String decrypt(final String password, final Key key) throws GeneralSecurityException {
+        final byte encrypted[];
         try {
-            final byte encrypted[] = Base64.decodeBase64(password.getBytes("US-ASCII"));
-
-            final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.DECRYPT_MODE, key);
-
-            final byte[] outputBytes = cipher.doFinal(encrypted);
-
-            return new String(outputBytes);
-        } catch (final Exception e) {
-            throw new RuntimeException("Failed to decrypt password", e);
+            encrypted = Base64.decodeBase64(password.getBytes("US-ASCII"));
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            LOG.error(e.getMessage(), e);
+            return null;
         }
+
+        final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+
+        final byte[] outputBytes = cipher.doFinal(encrypted);
+
+        return new String(outputBytes);
     }
 
     /**

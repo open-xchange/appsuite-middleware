@@ -56,11 +56,11 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
-import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.passwordchange.mechs.SHACrypt;
@@ -189,7 +189,7 @@ public abstract class PasswordChangeService {
          */
         try {
             MailAccessCache.getInstance().removeMailAccess(event.getSession(), MailAccount.DEFAULT_ID);
-        } catch (final CacheException e) {
+        } catch (final MailException e) {
             LOG.error("Removing cached mail access failed", e);
             throw new UserException(e);
         }

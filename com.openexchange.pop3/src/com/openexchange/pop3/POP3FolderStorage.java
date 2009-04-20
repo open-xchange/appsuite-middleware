@@ -49,19 +49,10 @@
 
 package com.openexchange.pop3;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.mail.Folder;
 import javax.mail.MessagingException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailFolderStorage;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -72,6 +63,14 @@ import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link POP3FolderStorage} - The POP3 folder storage implementation.
+ * <p>
+ * POP3 folder structure only consists of the INBOX folder with its parental root folder:
+ * 
+ * <pre>
+ * &lt;default&gt;
+ *      |
+ *      |-- INBOX
+ * </pre>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,8 +81,6 @@ public final class POP3FolderStorage extends MailFolderStorage {
     private final POP3Access pop3Access;
 
     private final Session session;
-
-    private final Context ctx;
 
     private final POP3Config pop3Config;
 
@@ -100,11 +97,6 @@ public final class POP3FolderStorage extends MailFolderStorage {
         this.pop3Store = pop3Store;
         this.pop3Access = pop3Access;
         this.session = session;
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
-            throw new POP3Exception(e);
-        }
         pop3Config = pop3Access.getPOP3Config();
     }
 
@@ -122,98 +114,30 @@ public final class POP3FolderStorage extends MailFolderStorage {
 
     @Override
     public MailFolder getFolder(final String fullname) throws MailException {
-        try {
-            if (DEFAULT_FOLDER_ID.equals(fullname)) {
-                return POP3FolderConverter.convertFolder(pop3Store.getDefaultFolder(), session, ctx);
-            }
-            final Folder f = pop3Store.getFolder(fullname);
-            if (f.exists()) {
-                return POP3FolderConverter.convertFolder(f, session, ctx);
-            }
-            throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            return POP3FolderConverter.getRootFolder();
         }
+        if ("INBOX".equals(fullname)) {
+            // INBOX
+            return POP3FolderConverter.getINBOXFolder(pop3Access.getInboxFolder(), session);
+        }
+        throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
     }
 
     private static final String PATTERN_ALL = "%";
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
-        try {
-            Folder parent;
-            if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
-                parent = pop3Store.getDefaultFolder();
-                final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
-                /*
-                 * Request subfolders the usual way
-                 */
-                final List<Folder> subfolders = new ArrayList<Folder>();
-                {
-                    final Folder[] childFolders;
-                    final long start = System.currentTimeMillis();
-                    if (subscribed) {
-                        childFolders = parent.listSubscribed(PATTERN_ALL);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } else {
-                        childFolders = parent.list(PATTERN_ALL);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    }
-                    subfolders.addAll(Arrays.asList(childFolders));
-                    boolean containsInbox = false;
-                    for (int i = 0; i < childFolders.length && !containsInbox; i++) {
-                        containsInbox = "INBOX".equals(childFolders[i].getFullName());
-                    }
-                    if (!containsInbox) {
-                        /*
-                         * Add folder INBOX manually
-                         */
-                        subfolders.add(0, pop3Store.getFolder("INBOX"));
-                    }
-                }
-                /*
-                 * Output subfolders
-                 */
-                final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size());
-                for (final Folder subfolder : subfolders) {
-                    list.add(POP3FolderConverter.convertFolder(subfolder, session, ctx));
-                }
-                return list.toArray(new MailFolder[list.size()]);
-            }
-            parent = pop3Store.getFolder(parentFullname);
-            if (parent.exists()) {
-                return getSubfolderArray(all, parent);
-            }
-            return EMPTY_PATH;
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
+        if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
+            // INBOX
+            return new MailFolder[] { POP3FolderConverter.getINBOXFolder(pop3Access.getInboxFolder(), session) };
         }
-    }
-
-    private MailFolder[] getSubfolderArray(final boolean all, final Folder parent) throws MessagingException, MailException {
-        final Folder[] subfolders;
-        if (MailProperties.getInstance().isIgnoreSubscription() || all) {
-            subfolders = parent.list(PATTERN_ALL);
-        } else {
-            subfolders = parent.listSubscribed(PATTERN_ALL);
-        }
-        final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.length);
-        for (int i = 0; i < subfolders.length; i++) {
-            final MailFolder mo = POP3FolderConverter.convertFolder(subfolders[i], session, ctx);
-            if (mo.exists()) {
-                list.add(mo);
-            }
-        }
-        return list.toArray(new MailFolder[list.size()]);
+        return EMPTY_PATH;
     }
 
     @Override
     public MailFolder getRootFolder() throws MailException {
-        try {
-            return POP3FolderConverter.convertFolder(pop3Store.getDefaultFolder(), session, ctx);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
-        }
+        return POP3FolderConverter.getRootFolder();
     }
 
     @Override
@@ -255,24 +179,11 @@ public final class POP3FolderStorage extends MailFolderStorage {
 
     @Override
     public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
-        try {
-            if (DEFAULT_FOLDER_ID.equals(fullname)) {
-                return EMPTY_PATH;
-            }
-            Folder f = pop3Store.getFolder(fullname);
-            if (!f.exists()) {
-                throw new POP3Exception(POP3Exception.Code.FOLDER_NOT_FOUND, fullname);
-            }
-            final List<MailFolder> list = new ArrayList<MailFolder>();
-            final String defaultFolder = pop3Store.getDefaultFolder().getFullName();
-            while (!f.getFullName().equals(defaultFolder)) {
-                list.add(POP3FolderConverter.convertFolder(f, session, ctx));
-                f = f.getParent();
-            }
-            return list.toArray(new MailFolder[list.size()]);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            return EMPTY_PATH;
         }
+        return new MailFolder[] {
+            POP3FolderConverter.getINBOXFolder(pop3Access.getInboxFolder(), session), POP3FolderConverter.getRootFolder() };
     }
 
     @Override

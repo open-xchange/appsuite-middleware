@@ -293,7 +293,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Check if debug should be enabled
              */
-            if (true || Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 pop3Session.setDebug(true);
                 pop3Session.setDebugOut(System.out);
             }
