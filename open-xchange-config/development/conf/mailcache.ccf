@@ -31,20 +31,3 @@ jcs.region.MailMessageCache.elementattributes.IdleTime=60
 jcs.region.MailMessageCache.elementattributes.IsSpool=false
 jcs.region.MailMessageCache.elementattributes.IsRemote=false
 jcs.region.MailMessageCache.elementattributes.IsLateral=false
-
-# PRE-DEFINED CACHE REGIONS
-jcs.region.MailConnectionCache=
-jcs.region.MailConnectionCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.MailConnectionCache.cacheattributes.MaxObjects=1000000
-jcs.region.MailConnectionCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.MailConnectionCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.MailConnectionCache.cacheattributes.MaxMemoryIdleTimeSeconds=7
-jcs.region.MailConnectionCache.cacheattributes.ShrinkerIntervalSeconds=3
-jcs.region.MailConnectionCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.MailConnectionCache.elementattributes.IsEternal=false
-jcs.region.MailConnectionCache.elementattributes.MaxLifeSeconds=3600
-jcs.region.MailConnectionCache.elementattributes.IdleTime=7
-# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
-jcs.region.MailConnectionCache.elementattributes.IsSpool=false
-jcs.region.MailConnectionCache.elementattributes.IsRemote=false
-jcs.region.MailConnectionCache.elementattributes.IsLateral=false
