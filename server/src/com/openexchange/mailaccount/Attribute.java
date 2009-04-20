@@ -53,9 +53,15 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 
+/**
+ * {@link Attribute}.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public enum Attribute {
+
     ID_LITERAL(MailAccountFields.ID, 1001),
-    LOGIN_LITERAL(MailAccountFields.LOGIN , 1002),
+    LOGIN_LITERAL(MailAccountFields.LOGIN, 1002),
     PASSWORD_LITERAL(MailAccountFields.PASSWORD, 1003),
     MAIL_URL_LITERAL(MailAccountFields.MAIL_URL, 1004),
     TRANSPORT_URL_LITERAL(MailAccountFields.TRANSPORT_URL, 1005),
@@ -64,40 +70,55 @@ public enum Attribute {
     SPAM_HANDLER_LITERAL(MailAccountFields.SPAM_HANDLER, 1008),
     TRASH_LITERAL(MailAccountFields.TRASH, 1009),
     SENT_LITERAL(MailAccountFields.SENT, 1010),
-    DRAFTS_LITERAL(MailAccountFields.DRAFTS,1011),
+    DRAFTS_LITERAL(MailAccountFields.DRAFTS, 1011),
     SPAM_LITERAL(MailAccountFields.SPAM, 1012),
     CONFIRMED_SPAM_LITERAL(MailAccountFields.CONFIRMED_SPAM, 1013),
     CONFIRMED_HAM_LITERAL(MailAccountFields.CONFIRMED_HAM, 1014);
-    
+
     private int id;
+
     private String attrName;
-    
-    private Attribute(String name, int id) {
+
+    private Attribute(final String name, final int id) {
         this.attrName = name;
         this.id = id;
     }
-    
-    public Object doSwitch(AttributeSwitch switcher) {
-        switch(this) {
-        case ID_LITERAL : return switcher.id();
-        case LOGIN_LITERAL : return switcher.login();
-        case PASSWORD_LITERAL : return switcher.password();
-        case MAIL_URL_LITERAL : return switcher.mailURL();
-        case TRANSPORT_URL_LITERAL : return switcher.transportURL();
-        case NAME_LITERAL : return switcher.name();
-        case PRIMARY_ADDRESS_LITERAL : return switcher.primaryAddress();
-        case SPAM_HANDLER_LITERAL : return switcher.spamHandler();
-        case TRASH_LITERAL : return switcher.trash();
-        case DRAFTS_LITERAL : return switcher.drafts();
-        case SPAM_LITERAL : return switcher.spam();
-        case SENT_LITERAL : return switcher.sent();
-        case CONFIRMED_SPAM_LITERAL : return switcher.confirmedSpam();
-        case CONFIRMED_HAM_LITERAL : return switcher.confirmedHam();
-        default: throw new IllegalArgumentException(this.getName());
+
+    public Object doSwitch(final AttributeSwitch switcher) {
+        switch (this) {
+        case ID_LITERAL:
+            return switcher.id();
+        case LOGIN_LITERAL:
+            return switcher.login();
+        case PASSWORD_LITERAL:
+            return switcher.password();
+        case MAIL_URL_LITERAL:
+            return switcher.mailURL();
+        case TRANSPORT_URL_LITERAL:
+            return switcher.transportURL();
+        case NAME_LITERAL:
+            return switcher.name();
+        case PRIMARY_ADDRESS_LITERAL:
+            return switcher.primaryAddress();
+        case SPAM_HANDLER_LITERAL:
+            return switcher.spamHandler();
+        case TRASH_LITERAL:
+            return switcher.trash();
+        case DRAFTS_LITERAL:
+            return switcher.drafts();
+        case SPAM_LITERAL:
+            return switcher.spam();
+        case SENT_LITERAL:
+            return switcher.sent();
+        case CONFIRMED_SPAM_LITERAL:
+            return switcher.confirmedSpam();
+        case CONFIRMED_HAM_LITERAL:
+            return switcher.confirmedHam();
+        default:
+            throw new IllegalArgumentException(this.getName());
         }
     }
-    
-    
+
     public String getName() {
         return attrName;
     }
@@ -107,14 +128,14 @@ public enum Attribute {
     }
 
     private static Map<Integer, Attribute> byId = new HashMap<Integer, Attribute>();
-    
+
     static {
-        for(Attribute attribute : Attribute.values()) {
-            byId.put(attribute.getId(), attribute);
+        for (final Attribute attribute : Attribute.values()) {
+            byId.put(Integer.valueOf(attribute.getId()), attribute);
         }
     }
-    
-    public static Attribute getById(int col) {
-        return byId.get(col);
+
+    public static Attribute getById(final int col) {
+        return byId.get(Integer.valueOf(col));
     }
 }
