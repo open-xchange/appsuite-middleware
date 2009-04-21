@@ -101,7 +101,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse>
     }
 
     /**
-     * This method must either return the detailed response object of fail with a JSONException.
+     * This method must either return the detailed response object or fail with a JSONException.
      * @param response simple response data object providing some method for handling the general JSON response object.
      * @return the detailed response object corresponding to the request and NEVER <code>null</code>.
      * @throws JSONException if creating the detailed response object fails.
