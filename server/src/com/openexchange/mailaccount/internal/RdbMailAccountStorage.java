@@ -149,12 +149,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 mailAccount.setPassword(pw);
             }
             mailAccount.setPrimaryAddress(result.getString(5));
-            mailAccount.setTrash(result.getString(7));
-            mailAccount.setSent(result.getString(8));
-            mailAccount.setDrafts(result.getString(9));
-            mailAccount.setSpam(result.getString(10));
-            mailAccount.setConfirmedSpam(result.getString(11));
-            mailAccount.setConfirmedHam(result.getString(12));
+            mailAccount.setTrash(getOptionalString(result.getString(7)));
+            mailAccount.setSent(getOptionalString(result.getString(8)));
+            mailAccount.setDrafts(getOptionalString(result.getString(9)));
+            mailAccount.setSpam(getOptionalString(result.getString(10)));
+            mailAccount.setConfirmedSpam(getOptionalString(result.getString(11)));
+            mailAccount.setConfirmedHam(getOptionalString(result.getString(12)));
             mailAccount.setSpamHandler(result.getString(13));
             mailAccount.setUserId(user);
         } catch (final SQLException e) {
@@ -534,12 +534,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             } else {
                 stmt.setString(pos++, sh);
             }
-            stmt.setString(pos++, mailAccount.getTrash());
-            stmt.setString(pos++, mailAccount.getSent());
-            stmt.setString(pos++, mailAccount.getDrafts());
-            stmt.setString(pos++, mailAccount.getSpam());
-            stmt.setString(pos++, mailAccount.getConfirmedSpam());
-            stmt.setString(pos++, mailAccount.getConfirmedHam());
+            setOptionalString(stmt, pos++, mailAccount.getTrash());
+            setOptionalString(stmt, pos++, mailAccount.getSent());
+            setOptionalString(stmt, pos++, mailAccount.getDrafts());
+            setOptionalString(stmt, pos++, mailAccount.getSpam());
+            setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
+            setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
             stmt.setLong(pos++, cid);
             stmt.setLong(pos++, mailAccount.getId());
             stmt.setLong(pos++, user);
@@ -614,12 +614,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             stmt.setString(pos++, mailAccount.getPrimaryAddress());
             stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
-            stmt.setString(pos++, mailAccount.getTrash());
-            stmt.setString(pos++, mailAccount.getSent());
-            stmt.setString(pos++, mailAccount.getDrafts());
-            stmt.setString(pos++, mailAccount.getSpam());
-            stmt.setString(pos++, mailAccount.getConfirmedSpam());
-            stmt.setString(pos++, mailAccount.getConfirmedHam());
+            setOptionalString(stmt, pos++, mailAccount.getTrash());
+            setOptionalString(stmt, pos++, mailAccount.getSent());
+            setOptionalString(stmt, pos++, mailAccount.getDrafts());
+            setOptionalString(stmt, pos++, mailAccount.getSpam());
+            setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
+            setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
             final String sh = mailAccount.getSpamHandler();
             if (null == sh) {
                 stmt.setNull(pos++, Types.VARCHAR);
@@ -714,4 +714,19 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    /*-
+     * ++++++++++++++++++++++++++++++++++++ UTILITY METHOD(S) ++++++++++++++++++++++++++++++++++++
+     */
+
+    private static void setOptionalString(final PreparedStatement stmt, final int pos, final String string) throws SQLException {
+        if (null == string) {
+            stmt.setString(pos, "");
+        } else {
+            stmt.setString(pos, string);
+        }
+    }
+
+    private static String getOptionalString(final String string) {
+        return string.length() == 0 ? null : string;
+    }
 }
