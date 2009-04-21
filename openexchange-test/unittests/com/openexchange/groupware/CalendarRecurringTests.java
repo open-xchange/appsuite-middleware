@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -63,6 +64,7 @@ import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -1198,12 +1200,19 @@ public class CalendarRecurringTests extends TestCase {
         cdao2.setMonth(Calendar.AUGUST);
         cdao2.setDayInMonth(20);
         new CalendarCollection().fillDAO(cdao);
+
+        CalendarCollection coll = new CalendarCollection();
         
-        final long check_until2 = new CalendarCollection().normalizeLong( (cdao.getStartDate().getTime() + (Constants.MILLI_YEAR *  99)) );
+        Calendar check_until2 = new GregorianCalendar();
+        check_until2.setTime(cdao2.getStartDate());
+        // No longer any calculation, just say, what is expected...
+        // (-1) in years because internal calculation is 1-based.
+        // 21st of August, because we need the 24:00:00 of the day of the last occurrence, which is 00:00:00 of the following day.
+        check_until2.add(Calendar.YEAR, coll.MAXTC - 1);
+        check_until2.set(Calendar.MONTH, Calendar.AUGUST);
+        check_until2.set(Calendar.DAY_OF_MONTH, 21);
         
-        assertEquals("Check correct until for yearly " , check_until2 , cdao2.getUntil().getTime());
-        
-        
+        assertEquals("Check correct until for yearly " , coll.normalizeLong(check_until2.getTimeInMillis()) , cdao2.getUntil().getTime());
     }
     
     public void testFlagSingleException() throws Throwable {
