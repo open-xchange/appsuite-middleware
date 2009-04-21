@@ -94,6 +94,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
@@ -521,7 +522,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             final MailAccount mailAccount = IMAPServiceRegistry.getServiceRegistry().getService(
                                 MailAccountStorageService.class,
                                 true).getMailAccount(accountId, session.getUserId(), session.getContextId());
-                            defaultFolderNames = StorageUtility.getDefaultFolderNames(
+                            defaultFolderNames = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId()).getDefaultFolderNames(
                                 mailAccount.getTrash(),
                                 mailAccount.getSent(),
                                 mailAccount.getDrafts(),

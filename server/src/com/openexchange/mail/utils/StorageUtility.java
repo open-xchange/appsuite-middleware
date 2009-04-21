@@ -163,25 +163,27 @@ public final class StorageUtility {
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      * 
+     * @param accountId The account ID
      * @param usm The user's mail settings
      * @return The default folder names as an array of {@link String}
-     * @throws MailConfigException If spam enablement/disablement cannot be determined
+     * @throws MailException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final UserSettingMail usm) throws MailConfigException {
-        return getDefaultFolderNames(usm, usm.isSpamEnabled());
+    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm) throws MailException {
+        return getDefaultFolderNames(accountId, usm, usm.isSpamEnabled());
     }
 
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      * 
+     * @param accountId The account ID
      * @param usm The user's mail settings
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
-     * @throws MailConfigException If spam enablement/disablement cannot be determined
+     * @throws MailException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final UserSettingMail usm, final boolean isSpamEnabled) throws MailConfigException {
-        return getDefaultFolderNames(
+    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm, final boolean isSpamEnabled) throws MailException {
+        return new DefaultFolderNamesProvider(accountId, usm.getUserId(), usm.getCid()).getDefaultFolderNames(
             usm.getStdTrashName(),
             usm.getStdSentName(),
             usm.getStdDraftsName(),
@@ -204,7 +206,9 @@ public final class StorageUtility {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
      * @throws MailConfigException If spam enablement/disablement cannot be determined
+     * @deprecated Use {@link DefaultFolderNamesProvider} instead
      */
+    @Deprecated
     public static String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) throws MailConfigException {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
