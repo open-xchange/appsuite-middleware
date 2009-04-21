@@ -23,5 +23,6 @@
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/jcharset,net.freeutils.jcharset"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-config/development,open-xchange-development"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-gui,open-xchange-gui"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.calendar,com.openexchange.calendar"/>
 </provider>
 </psf>
