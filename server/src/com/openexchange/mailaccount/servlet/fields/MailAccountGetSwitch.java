@@ -51,22 +51,20 @@ package com.openexchange.mailaccount.servlet.fields;
 
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountDescription;
-
 
 /**
  * {@link MailAccountGetSwitch}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class MailAccountGetSwitch implements AttributeSwitch{
-    private MailAccount desc;
+public class MailAccountGetSwitch implements AttributeSwitch {
 
-    public MailAccountGetSwitch(MailAccount desc) {
+    private final MailAccount desc;
+
+    public MailAccountGetSwitch(final MailAccount desc) {
         this.desc = desc;
     }
-    
+
     public Object confirmedHam() {
         return desc.getConfirmedHam();
     }

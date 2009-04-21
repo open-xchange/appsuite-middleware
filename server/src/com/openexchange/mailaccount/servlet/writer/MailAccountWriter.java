@@ -53,9 +53,12 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.utils.ProviderUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.servlet.fields.GetSwitch;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
 
@@ -82,8 +85,70 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.ID, account.getId());
         json.put(MailAccountFields.LOGIN, account.getLogin());
         // json.put(MailAccountFields.PASSWORD, account.getLogin());
-        json.put(MailAccountFields.MAIL_URL, account.getMailServerURL());
-        json.put(MailAccountFields.TRANSPORT_URL, account.getTransportServerURL());
+        {
+            final String mailURL = account.getMailServerURL();
+            json.put(MailAccountFields.MAIL_URL, mailURL);
+            String protocol = ProviderUtility.extractProtocol(mailURL, MailProperties.getInstance().getDefaultMailProvider());
+            final boolean secure = protocol.endsWith("s");
+            if (secure) {
+                protocol = protocol.substring(0, protocol.length() - 1);
+            }
+            String hostname;
+            {
+                final String[] parsed = MailConfig.parseProtocol(mailURL);
+                if (parsed == null) {
+                    hostname = mailURL;
+                } else {
+                    hostname = parsed[1];
+                }
+            }
+            final int port;
+            {
+                final int pos = hostname.indexOf(':');
+                if (pos > -1) {
+                    port = Integer.parseInt(hostname.substring(pos + 1));
+                    hostname = hostname.substring(0, pos);
+                } else {
+                    port = 143;
+                }
+            }
+            json.put(MailAccountFields.MAIL_PORT, port);
+            json.put(MailAccountFields.MAIL_PROTOCOL, protocol);
+            json.put(MailAccountFields.MAIL_SECURE, secure);
+            json.put(MailAccountFields.MAIL_SERVER, hostname);
+        }
+        {
+            final String transportURL = account.getTransportServerURL();
+            json.put(MailAccountFields.TRANSPORT_URL, account.getTransportServerURL());
+            String protocol = ProviderUtility.extractProtocol(transportURL, TransportProperties.getInstance().getDefaultTransportProvider());
+            final boolean secure = protocol.endsWith("s");
+            if (secure) {
+                protocol = protocol.substring(0, protocol.length() - 1);
+            }
+            String hostname;
+            {
+                final String[] parsed = MailConfig.parseProtocol(transportURL);
+                if (parsed == null) {
+                    hostname = transportURL;
+                } else {
+                    hostname = parsed[1];
+                }
+            }
+            final int port;
+            {
+                final int pos = hostname.indexOf(':');
+                if (pos > -1) {
+                    port = Integer.parseInt(hostname.substring(pos + 1));
+                    hostname = hostname.substring(0, pos);
+                } else {
+                    port = 25;
+                }
+            }
+            json.put(MailAccountFields.TRANSPORT_PORT, port);
+            json.put(MailAccountFields.TRANSPORT_PROTOCOL, protocol);
+            json.put(MailAccountFields.TRANSPORT_SECURE, secure);
+            json.put(MailAccountFields.TRANSPORT_SERVER, hostname);
+        }
         json.put(MailAccountFields.NAME, account.getName());
         json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
         json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
@@ -98,13 +163,13 @@ public final class MailAccountWriter {
         return json;
     }
 
-    public static JSONArray writeArray(MailAccount[] userMailAccounts, List<Attribute> attributes) throws JSONException {
-        JSONArray rows = new JSONArray();
-        for(MailAccount account : userMailAccounts) {
-            MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
-            JSONArray row = new JSONArray();
-            for(Attribute attribute : attributes) {
-                if(Attribute.PASSWORD_LITERAL == attribute) {
+    public static JSONArray writeArray(final MailAccount[] userMailAccounts, final List<Attribute> attributes) throws JSONException {
+        final JSONArray rows = new JSONArray();
+        for (final MailAccount account : userMailAccounts) {
+            final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
+            final JSONArray row = new JSONArray();
+            for (final Attribute attribute : attributes) {
+                if (Attribute.PASSWORD_LITERAL == attribute) {
                     row.put(JSONObject.NULL);
                 } else {
                     row.put(attribute.doSwitch(getter));

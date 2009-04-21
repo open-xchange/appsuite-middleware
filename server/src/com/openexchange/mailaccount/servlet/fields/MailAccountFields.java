@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount.servlet.fields;
 
-
 /**
  * {@link MailAccountFields} - Provides constants for mail account JSON fields.
  * 
@@ -65,7 +64,23 @@ public final class MailAccountFields {
 
     public static final String MAIL_URL = "mail_url";
 
+    public static final String MAIL_SERVER = "mail_server";
+
+    public static final String MAIL_PORT = "mail_port";
+
+    public static final String MAIL_PROTOCOL = "mail_protocol";
+
+    public static final String MAIL_SECURE = "mail_secure";
+
     public static final String TRANSPORT_URL = "transport_url";
+
+    public static final String TRANSPORT_SERVER = "transport_server";
+
+    public static final String TRANSPORT_PORT = "transport_port";
+
+    public static final String TRANSPORT_PROTOCOL = "transport_protocol";
+
+    public static final String TRANSPORT_SECURE = "transport_secure";
 
     public static final String NAME = "name";
 
