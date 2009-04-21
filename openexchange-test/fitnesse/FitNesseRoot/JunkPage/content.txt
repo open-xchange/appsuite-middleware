@@ -1,4 +1,0 @@
-!define X {1}
->JunkTest
->SuiteSetUp
-

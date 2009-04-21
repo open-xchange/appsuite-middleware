@@ -1,8 +1,0 @@
-This category contains tests that are meant as examples. They may not be written as efficiently, as well-organized and they probably break with the rule of a good test to fit a single screen (on most devices), but they have lots of explanations.
-
-!see .BasicTaskLifeCycle - this shows the complete life cycle of a task, from creation to deletion.
-!see .BasicTaskMove - this shows how a task is moved from one folder to the other. A lesson in '''folder'''-creation and '''permission''' management.
-!see .TaskWithStartDateBeforeEndDate  - this shows how to work with '''exceptions''' and how to tests for them.
-!see .FailedTaskVerification - this shows you what happens if exceptions appear and a specific problem fitness has with multiple errors
-!see .TestMultipleUsers - This test uses more than one user.
-!see .TestQueries - Shows The queries you can run to investigate your system

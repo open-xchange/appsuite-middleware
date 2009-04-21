@@ -1,4 +1,0 @@
-!include >AppointmentAcceptanceTestSuite
-!include >ContactAcceptanceTestSuite
-!include >FolderAcceptanceTestSuite
-!include >TaskAcceptanceTestSuite

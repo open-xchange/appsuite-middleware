@@ -1,5 +1,0 @@
-!include CommonSetup
-
-|Table:search users|
-|thorben|
-|display_name|

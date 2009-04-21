@@ -1,8 +1,0 @@
-!include CommonSetup
-
-!2 What users exist on this system?
-|Table: Search users|
-||
-
-!2 What folders do exist?
-|Table: Show folders|

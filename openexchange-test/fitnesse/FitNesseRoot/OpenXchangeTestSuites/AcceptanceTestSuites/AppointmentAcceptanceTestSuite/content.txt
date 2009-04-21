@@ -1,5 +1,0 @@
-!see .BasicAppointmentLifeCycle
-!see .AppointmentMoveTest
-!see .AppointmentParticipantTest
-!see .AppointmentDefaultParticipantTest
-!see .AppointmentParticipantTestWithUserSwitch
