@@ -97,6 +97,7 @@ import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.sun.mail.smtp.SMTPMessage;
 
@@ -136,8 +137,6 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
-
-    private static final String CLASSNAME_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
 
     /**
      * Constructor
@@ -217,7 +216,9 @@ public final class SMTPTransport extends MailTransport {
                      * Check if a secure SMTP connection should be established
                      */
                     if (smtpConfig.isSecure()) {
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
+                        smtpProps.put(
+                            MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS,
+                            TrustAllSSLSocketFactory.class.getName());
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig.getPort()));
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
@@ -230,7 +231,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Needed for JavaMail >= 1.4
                          */
-                        Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+                        Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
                     }
                     /*
                      * Apply host & port to SMTP session
