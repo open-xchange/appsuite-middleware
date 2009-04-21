@@ -117,6 +117,7 @@ import com.openexchange.session.Session;
  * {@link MessageParser} - Parses instances of {@link JSONObject} to instances of {@link MailMessage}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - {@link #parseBasics(JSONObject, MailMessage, TimeZone)}
  */
 public final class MessageParser {
 
@@ -341,137 +342,7 @@ public final class MessageParser {
 
     private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final QuotaChecker quotaChecker) throws MailException {
         try {
-            /*
-             * System flags
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
-                mail.setFlags(jsonObj.getInt(MailJSONField.FLAGS.getKey()));
-            }
-            /*
-             * Thread level
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.THREAD_LEVEL.getKey())) {
-                mail.setThreadLevel(jsonObj.getInt(MailJSONField.THREAD_LEVEL.getKey()));
-            }
-            /*
-             * User flags
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.USER.getKey())) {
-                final JSONArray arr = jsonObj.getJSONArray(MailJSONField.USER.getKey());
-                final int length = arr.length();
-                final List<String> l = new ArrayList<String>(length);
-                for (int i = 0; i < length; i++) {
-                    l.add(arr.getString(i));
-                }
-                mail.addUserFlags(l.toArray(new String[l.size()]));
-            }
-            /*
-             * Parse headers
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.HEADERS.getKey())) {
-                final JSONObject obj = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
-                final int size = obj.length();
-                final HeaderCollection headers = new HeaderCollection(size);
-                final Iterator<String> iter = obj.keys();
-                for (int i = 0; i < size; i++) {
-                    final String key = iter.next();
-                    headers.addHeader(key, obj.getString(key));
-                }
-                mail.addHeaders(headers);
-            }
-            /*
-             * From Only mandatory if non-draft message
-             */
-            mail.addFrom(parseAddressKey(MailJSONField.FROM.getKey(), jsonObj));
-            /*
-             * To Only mandatory if non-draft message
-             */
-            mail.addTo(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), jsonObj));
-            /*
-             * Cc
-             */
-            mail.addCc(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), jsonObj));
-            /*
-             * Bcc
-             */
-            mail.addBcc(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), jsonObj));
-            /*
-             * Disposition notification
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {
-                /*
-                 * Ok, disposition-notification-to is set. Check if its value is a valid email address
-                 */
-                final String dispVal = jsonObj.getString(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey());
-                if (STR_TRUE.equalsIgnoreCase(dispVal)) {
-                    /*
-                     * Boolean value "true"
-                     */
-                    mail.setDispositionNotification(mail.getFrom().length > 0 ? mail.getFrom()[0] : null);
-                } else {
-                    final InternetAddress ia = getEmailAddress(dispVal);
-                    if (ia == null) {
-                        /*
-                         * Any other value
-                         */
-                        mail.setDispositionNotification(null);
-                    } else {
-                        /*
-                         * Valid email address
-                         */
-                        mail.setDispositionNotification(ia);
-                    }
-                }
-            }
-            /*
-             * Priority
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.PRIORITY.getKey())) {
-                mail.setPriority(jsonObj.getInt(MailJSONField.PRIORITY.getKey()));
-            }
-            /*
-             * Color Label
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.COLOR_LABEL.getKey())) {
-                mail.setColorLabel(jsonObj.getInt(MailJSONField.COLOR_LABEL.getKey()));
-            }
-            /*
-             * VCard
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.VCARD.getKey())) {
-                mail.setAppendVCard((jsonObj.getInt(MailJSONField.VCARD.getKey()) > 0));
-            }
-            /*
-             * Msg Ref
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                mail.setMsgref(new MailPath(jsonObj.getString(MailJSONField.MSGREF.getKey())));
-            }
-            /*
-             * Subject, etc.
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
-                mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()));
-            }
-            /*
-             * Size
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.SIZE.getKey())) {
-                mail.setSize(jsonObj.getInt(MailJSONField.SIZE.getKey()));
-            }
-            /*
-             * Sent & received date
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.SENT_DATE.getKey())) {
-                final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
-                final int offset = timeZone.getOffset(date.getTime());
-                mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
-            }
-            if (jsonObj.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
-                final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
-                final int offset = timeZone.getOffset(date.getTime());
-                mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
-            }
+            parseBasics(jsonObj, mail, timeZone);
             /*
              * Parse attachments
              */
@@ -505,6 +376,152 @@ public final class MessageParser {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Takes a mail as jsonObj and extracts the values into a given MailMessage object.
+     * Handles all basic values that do not need information about the session, like 
+     * attachments.
+     * 
+     * @param jsonObj
+     * @param mail
+     * @param timeZone
+     * @throws JSONException
+     * @throws AddressException
+     * @throws MailException
+     */
+    public static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone) throws JSONException, AddressException, MailException {
+        /*
+         * System flags
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
+            mail.setFlags(jsonObj.getInt(MailJSONField.FLAGS.getKey()));
+        }
+        /*
+         * Thread level
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.THREAD_LEVEL.getKey())) {
+            mail.setThreadLevel(jsonObj.getInt(MailJSONField.THREAD_LEVEL.getKey()));
+        }
+        /*
+         * User flags
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.USER.getKey())) {
+            final JSONArray arr = jsonObj.getJSONArray(MailJSONField.USER.getKey());
+            final int length = arr.length();
+            final List<String> l = new ArrayList<String>(length);
+            for (int i = 0; i < length; i++) {
+                l.add(arr.getString(i));
+            }
+            mail.addUserFlags(l.toArray(new String[l.size()]));
+        }
+        /*
+         * Parse headers
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.HEADERS.getKey())) {
+            final JSONObject obj = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
+            final int size = obj.length();
+            final HeaderCollection headers = new HeaderCollection(size);
+            final Iterator<String> iter = obj.keys();
+            for (int i = 0; i < size; i++) {
+                final String key = iter.next();
+                headers.addHeader(key, obj.getString(key));
+            }
+            mail.addHeaders(headers);
+        }
+        /*
+         * From Only mandatory if non-draft message
+         */
+        mail.addFrom(parseAddressKey(MailJSONField.FROM.getKey(), jsonObj));
+        /*
+         * To Only mandatory if non-draft message
+         */
+        mail.addTo(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), jsonObj));
+        /*
+         * Cc
+         */
+        mail.addCc(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), jsonObj));
+        /*
+         * Bcc
+         */
+        mail.addBcc(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), jsonObj));
+        /*
+         * Disposition notification
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {
+            /*
+             * Ok, disposition-notification-to is set. Check if its value is a valid email address
+             */
+            final String dispVal = jsonObj.getString(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey());
+            if (STR_TRUE.equalsIgnoreCase(dispVal)) {
+                /*
+                 * Boolean value "true"
+                 */
+                mail.setDispositionNotification(mail.getFrom().length > 0 ? mail.getFrom()[0] : null);
+            } else {
+                final InternetAddress ia = getEmailAddress(dispVal);
+                if (ia == null) {
+                    /*
+                     * Any other value
+                     */
+                    mail.setDispositionNotification(null);
+                } else {
+                    /*
+                     * Valid email address
+                     */
+                    mail.setDispositionNotification(ia);
+                }
+            }
+        }
+        /*
+         * Priority
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.PRIORITY.getKey())) {
+            mail.setPriority(jsonObj.getInt(MailJSONField.PRIORITY.getKey()));
+        }
+        /*
+         * Color Label
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.COLOR_LABEL.getKey())) {
+            mail.setColorLabel(jsonObj.getInt(MailJSONField.COLOR_LABEL.getKey()));
+        }
+        /*
+         * VCard
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.VCARD.getKey())) {
+            mail.setAppendVCard((jsonObj.getInt(MailJSONField.VCARD.getKey()) > 0));
+        }
+        /*
+         * Msg Ref
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
+            mail.setMsgref(new MailPath(jsonObj.getString(MailJSONField.MSGREF.getKey())));
+        }
+        /*
+         * Subject, etc.
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
+            mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()));
+        }
+        /*
+         * Size
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.SIZE.getKey())) {
+            mail.setSize(jsonObj.getInt(MailJSONField.SIZE.getKey()));
+        }
+        /*
+         * Sent & received date
+         */
+        if (jsonObj.hasAndNotNull(MailJSONField.SENT_DATE.getKey())) {
+            final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
+            final int offset = timeZone.getOffset(date.getTime());
+            mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
+        }
+        if (jsonObj.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
+            final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
+            final int offset = timeZone.getOffset(date.getTime());
+            mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
         }
     }
 
