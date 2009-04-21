@@ -99,10 +99,6 @@ public final class POP3Properties extends AbstractProtocolProperties {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
-     */
     @Override
     protected void loadProperties0() throws MailConfigException {
         final StringBuilder logBuilder = new StringBuilder(1024);
@@ -147,14 +143,14 @@ public final class POP3Properties extends AbstractProtocolProperties {
         }
 
         {
-            final String maxConIdleTime = configuration.getProperty("com.openexchange.pop3.maxPOP3ConnectionIdleTime", "60000").trim();
+            final String tmp = configuration.getProperty("com.openexchange.pop3.pop3ConnectionIdleTime", "300000").trim();
             try {
-                pop3ConnectionIdleTime = Integer.parseInt(maxConIdleTime);
-                logBuilder.append("\tMax POP3 Connection Idle Time: ").append(pop3ConnectionIdleTime).append('\n');
+                pop3ConnectionIdleTime = Integer.parseInt(tmp);
+                logBuilder.append("\tPOP3 Connection Idle Time: ").append(pop3ConnectionIdleTime).append('\n');
             } catch (final NumberFormatException e) {
-                pop3ConnectionIdleTime = 60000;
-                logBuilder.append("\tMax POP3 Connection Idle Time: Invalid value \"").append(maxConIdleTime).append(
-                    "\". Setting to fallback: ").append(pop3ConnectionIdleTime).append('\n');
+                pop3ConnectionIdleTime = 300000;
+                logBuilder.append("\tPOP3 Connection Idle Time: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
+                    pop3ConnectionIdleTime).append('\n');
             }
         }
 
@@ -178,10 +174,6 @@ public final class POP3Properties extends AbstractProtocolProperties {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
-     */
     @Override
     protected void resetFields() {
         pop3Timeout = 0;
@@ -202,43 +194,43 @@ public final class POP3Properties extends AbstractProtocolProperties {
     }
 
     /**
-     * Gets the POP3 connection idle time.
+     * Gets the POP3 connection idle time in milliseconds.
      * 
-     * @return The POP3 connection idle time
+     * @return The POP3 connection idle time in milliseconds
      */
-    public int getImapConnectionIdleTime() {
+    public int getPOP3ConnectionIdleTime() {
         return pop3ConnectionIdleTime;
     }
 
     /**
-     * Gets the POP3 connection timeout.
+     * Gets the POP3 connection timeout in milliseconds.
      * 
-     * @return The POP3 connection timeout
+     * @return The POP3 connection timeout in milliseconds
      */
     public int getPOP3ConnectionTimeout() {
         return pop3ConnectionTimeout;
     }
 
     /**
-     * Gets the POP3 temporary down
+     * Gets the POP3 temporary down in milliseconds.
      * 
-     * @return The POP3 temporary down
+     * @return The POP3 temporary down in milliseconds
      */
     public int getPOP3TemporaryDown() {
         return pop3TemporaryDown;
     }
 
     /**
-     * Gets the POP3 timeout
+     * Gets the POP3 timeout in milliseconds.
      * 
-     * @return The POP3 timeout
+     * @return The POP3 timeout in milliseconds
      */
     public int getPOP3Timeout() {
         return pop3Timeout;
     }
 
     /**
-     * Gets the spam handler name
+     * Gets the spam handler name.
      * 
      * @return The spam handler name
      */

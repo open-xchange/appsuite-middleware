@@ -149,8 +149,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public int getCacheIdleSeconds() {
-        // TODO Get from configuration
-        return 300; // 5 minutes
+        return (POP3Properties.getInstance().getPOP3ConnectionIdleTime() / 1000);
     }
 
     @Override
