@@ -1012,16 +1012,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave) throws MailException {
+    public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave, final int accountId) throws MailException {
         if (autosave) {
-            return autosaveDraft(draftMail);
+            return autosaveDraft(draftMail, accountId);
         }
-        initConnection(MailAccount.DEFAULT_ID);
+        initConnection(accountId);
         return mailAccess.getMessageStorage().saveDraft(mailAccess.getFolderStorage().getDraftsFolder(), draftMail).getMailPath().toString();
     }
 
-    private String autosaveDraft(final ComposedMailMessage draftMail) throws MailException {
-        initConnection(MailAccount.DEFAULT_ID);
+    private String autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws MailException {
+        initConnection(accountId);
         final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         /*
          * Auto-save draft
@@ -1223,12 +1223,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type) throws MailException {
+    public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws MailException {
         /*
          * Initialize
          */
-        initConnection(MailAccount.DEFAULT_ID);
-        final MailTransport transport = MailTransport.getInstance(session);
+        initConnection(accountId);
+        final MailTransport transport = MailTransport.getInstance(session, accountId);
         try {
             /*
              * Send mail

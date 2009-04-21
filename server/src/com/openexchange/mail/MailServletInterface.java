@@ -221,7 +221,7 @@ public abstract class MailServletInterface {
      * @return The stored draft's mail path
      * @throws MailException
      */
-    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave) throws MailException;
+    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws MailException;
 
     /**
      * Sends a read acknowledgment to given message
@@ -232,7 +232,7 @@ public abstract class MailServletInterface {
      * Sends a message described through given instance of <code>msgObj</code> and its possible file attachments contained in given instance
      * of <code>uploadEvent</code>.
      */
-    public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType) throws MailException;
+    public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId) throws MailException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial reply content of the message identifed through

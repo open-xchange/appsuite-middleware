@@ -269,7 +269,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     public static final String PARAMETER_UNSEEN = "unseen";
 
     public static final String PARAMETER_FILTER = "filter";
-    
+
     public static final String PARAMETER_COL = "col";
 
     private static final String VIEW_TEXT = "text";
@@ -1868,7 +1868,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Parse
                      */
-                    // TODO: Proper account ID on autosave?!?!
                     final ComposedMailMessage composedMail = MessageParser.parse(
                         jsonMailObj,
                         (UploadEvent) null,
@@ -1882,7 +1881,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * ... and autosave draft
                          */
-                        msgIdentifier = mailInterface.saveDraft(composedMail, true);
+                        final int accountId;
+                        if (composedMail.containsFrom()) {
+                            accountId = resolveFrom2Account(session, composedMail.getFrom()[0]);
+                        } else {
+                            accountId = MailAccount.DEFAULT_ID;
+                        }
+                        msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
                     } else {
                         throw new MailException(MailException.Code.UNEXPECTED_ERROR, "No new message on action=edit");
                     }
@@ -3309,7 +3314,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                              */
                             msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(
                                 composedMail,
-                                false);
+                                false,
+                                accountId);
                         } else {
                             /*
                              * ... and send message
@@ -3317,7 +3323,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final ComposeType sendType = jsonMailObj.has(PARAMETER_SEND_TYPE) && !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                             msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).sendMessage(
                                 composedMail,
-                                sendType);
+                                sendType,
+                                accountId);
                             /*
                              * Trigger contact collector
                              */
@@ -3356,7 +3363,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                             throw MIMEMailException.handleMessagingException(e);
                         }
                         final int accountId = resolveFrom2Account(session, from);
-
                         /*
                          * Parse
                          */
@@ -3367,7 +3373,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                              */
                             msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(
                                 composedMail,
-                                false);
+                                false,
+                                accountId);
                         } else {
                             throw new MailException(MailException.Code.UNEXPECTED_ERROR, "No new message on action=edit");
                         }
@@ -3454,76 +3461,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             accountId = MailAccount.DEFAULT_ID;
         }
         return accountId;
-    }
-
-    private static class SmartLongArray implements Cloneable {
-
-        /**
-         * Pointer to keep track of position in the array
-         */
-        private int pointer;
-
-        private long[] array;
-
-        private final int growthSize;
-
-        public SmartLongArray() {
-            this(1024);
-        }
-
-        public SmartLongArray(final int initialSize) {
-            this(initialSize, (initialSize >> 2));
-        }
-
-        public SmartLongArray(final int initialSize, final int growthSize) {
-            this.growthSize = growthSize;
-            array = new long[initialSize];
-        }
-
-        public void reset() {
-            pointer = 0;
-        }
-
-        public int size() {
-            return pointer;
-        }
-
-        public SmartLongArray append(final long l) {
-            if (pointer >= array.length) {
-                /*
-                 * time to grow!
-                 */
-                final long[] tmpArray = new long[array.length + growthSize];
-                System.arraycopy(array, 0, tmpArray, 0, array.length);
-                array = tmpArray;
-            }
-            array[pointer++] = l;
-            return this;
-        }
-
-        public long[] toArray() {
-            final long[] trimmedArray = new long[pointer];
-            System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-            return trimmedArray;
-        }
-
-        @Override
-        public String toString() {
-            return Arrays.toString(toArray());
-        }
-
-        @Override
-        public Object clone() {
-            SmartLongArray clone;
-            try {
-                clone = (SmartLongArray) super.clone();
-                clone.array = new long[this.array.length];
-                System.arraycopy(array, 0, clone.array, 0, array.length);
-                return clone;
-            } catch (final CloneNotSupportedException e) {
-                throw new InternalError(e.getMessage());
-            }
-        }
     }
 
 }
