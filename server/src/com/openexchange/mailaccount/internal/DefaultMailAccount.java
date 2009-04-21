@@ -69,4 +69,10 @@ public final class DefaultMailAccount extends AbstractMailAccount {
         return true;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append(DefaultMailAccount.class.getSimpleName()).append(super.toString());
+        return sb.toString();
+    }
 }

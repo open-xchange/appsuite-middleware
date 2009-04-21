@@ -216,4 +216,13 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void setSpamHandler(final String spamHandler) {
         this.spamHandler = spamHandler;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append(" id=").append(getId()).append(" user=").append(getUserId());
+        sb.append("\nname=").append(getName()).append(" primary-address=").append(getPrimaryAddress());
+        sb.append("\nmail-server=").append(getMailServerURL()).append(" transport-server=").append(getTransportServerURL());
+        return sb.toString();
+    }
 }
