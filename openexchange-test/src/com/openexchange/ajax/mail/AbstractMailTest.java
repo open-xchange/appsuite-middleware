@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -122,30 +124,37 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 			+ "ransport when sending MimeMessages<br />        with no encoding<br />6456444 MimeMessages created from stream are not correctly handle"
 			+ "d<br />        with allow8bitmime<br />&lt;no id&gt; fix performance bug in base64 encoder; now even faster!";
 
-	protected final JSONObject createSelfAddressed25KBMailObject() throws AjaxException, JSONException, IOException,
-			SAXException {
-		/*
-		 * Create JSON mail object
-		 */
-		final JSONObject mailObject_25kb = new JSONObject();
-		mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
-		mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
-		mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-		mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-		mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-		mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    public static final String MAIL_SUBJECT = "The mail subject";
 
-		final JSONObject bodyObject = new JSONObject();
-		bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
-		bodyObject.put(MailJSONField.CONTENT.getKey(), MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />"
-				+ MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY
-				+ "<br />" + MAIL_TEXT_BODY + "<br />");
+    protected final JSONObject createSelfAddressed25KBMailObject(String subject) throws AjaxException, JSONException, IOException,
+            SAXException {
+        /*
+         * Create JSON mail object
+         */
+        final JSONObject mailObject_25kb = new JSONObject();
+        mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
+        mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
+        mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+        mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+        mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), subject);
+        mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
-		final JSONArray attachments = new JSONArray();
-		attachments.put(bodyObject);
-		mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-		return mailObject_25kb;
-	}
+        final JSONObject bodyObject = new JSONObject();
+        bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
+        bodyObject.put(MailJSONField.CONTENT.getKey(), MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />"
+                + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY
+                + "<br />" + MAIL_TEXT_BODY + "<br />");
+
+        final JSONArray attachments = new JSONArray();
+        attachments.put(bodyObject);
+        mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+        return mailObject_25kb;
+    }
+
+    protected final JSONObject createSelfAddressed25KBMailObject() throws AjaxException, JSONException, IOException,
+            SAXException {
+        return createSelfAddressed25KBMailObject(MAIL_SUBJECT);
+    }
 
 	/**
 	 * @return <code>true</code> if SP3 is enabled via 'ajax.properties' file;
@@ -225,4 +234,19 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
 		return getClient().getValues().getTimeZone();
 	}
+	
+    protected void sendMail(String mail) throws AjaxException, IOException, SAXException, JSONException {
+        client.execute(new SendRequest(mail) );    
+    }
+    
+    protected String generateMail() throws Exception {
+        JSONObject mailObject = createSelfAddressed25KBMailObject();
+       return mailObject.toString();
+    }
+    
+    protected String generateMail(String subject) throws Exception {
+        JSONObject mailObject = createSelfAddressed25KBMailObject(subject);
+       return mailObject.toString();
+    }
+    
 }

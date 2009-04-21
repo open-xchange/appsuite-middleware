@@ -2,13 +2,11 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.actions.CountRequest;
 import com.openexchange.ajax.mail.actions.CountResponse;
-import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -39,25 +37,14 @@ public class CountMailTest extends AbstractMailTest {
         clearFolder(folder);
         super.tearDown();
     }
-
-    private void sendMail(String mail) throws AjaxException, IOException, SAXException, JSONException {
-        client.execute(new SendRequest(mail) );    
-    }
-    
-    private String generateMail() throws Exception {
-        JSONObject mailObject = createSelfAddressed25KBMailObject();
-       return mailObject.toString();
-    }
     
     public void testCounting() throws Exception {
         clearFolder(folder);
         assertEquals("Should be empty", 0, count(folder) );
 
-        
-        
         for(int number = 1; number < 10; number++){
             sendMail(generateMail());
-            assertEquals("Should contain "+number+" element(s)", number, count(folder) );    
+            assertEquals("Does not contain the expected number of elements in folder "+folder, number, count(folder) );    
         }
         
         clearFolder(folder);
