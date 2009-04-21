@@ -219,6 +219,81 @@ public final class IMAPCommandsCollection {
     }
 
     /**
+     * Checks if IMAP server supports specified folder type.
+     * <p>
+     * This method is useful to detect if MBox format is enabled. If enabled a mail folder can only either hold subfolders or hold messages.
+     * Furthermore the folder type on creation is determined by the folder name. If folder name ends with the server-defined folder
+     * separator character its type is HOLDS-FOLDERS; otherwise its type is HOLDS-MESSAGES.
+     * <p>
+     * Note that there's currently an unresolved problem concerning deletion of mail folders. Since the trash folder is created to hold only
+     * messages, no backup of the deleted folder can be copied to trash folder; meaning the folder in question (including messages, its
+     * subfolders, and subfolders' contents) is irretrievably lost.
+     * 
+     * @param imapFolder An IMAP folder
+     * @param type The folder type to check
+     * @return <code>true</code> if IMAP server supports specified folder type; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static boolean supportsFolderType(final IMAPFolder imapFolder, final int type, final String fullnamePrefix) throws MessagingException {
+        return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String fullName;
+                if (null == fullnamePrefix || fullnamePrefix.length() == 0) {
+                    fullName = String.valueOf(System.currentTimeMillis());
+                } else {
+                    fullName = new StringBuilder(64).append(fullnamePrefix).append(String.valueOf(System.currentTimeMillis())).toString();
+                }
+                Boolean retval = Boolean.TRUE;
+                boolean delete = false;
+                try {
+                    if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                        // Only holds folders
+                        final char separator = getSeparator(p);
+                        p.create(fullName + separator);
+                        delete = true;
+                    } else {
+                        p.create(fullName);
+                        delete = true;
+                        /*
+                         * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that created
+                         * folder may also contain subfolders.
+                         */
+                        if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                            final ListInfo[] li = p.list("", fullName);
+                            if (li != null && !li[0].hasInferiors) {
+                                /*
+                                 * The new folder doesn't support inferiors.
+                                 */
+                                retval = Boolean.FALSE;
+                            }
+                        }
+                    }
+                } finally {
+                    if (delete) {
+                        p.delete(fullName);
+                    }
+                }
+                return retval;
+            }
+        }))).booleanValue();
+    }
+
+    static char getSeparator(final IMAPProtocol p) throws ProtocolException {
+        final String dummyFullname = String.valueOf(System.currentTimeMillis());
+        final ListInfo[] li;
+        if (p.isREV1()) {
+            li = p.list(dummyFullname, "");
+        } else {
+            li = p.list("", dummyFullname);
+        }
+        if (li != null) {
+            return li[0].separator;
+        }
+        return '/';
+    }
+
+    /**
      * Checks if IMAP folder's prefix allows subfolder creation.
      * 
      * @param prefix The IMAP folder's prefix

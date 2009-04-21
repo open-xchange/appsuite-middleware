@@ -187,4 +187,19 @@ public final class MailSessionParameterNames {
     public static String getParamSpamHandler(final int accountId) {
         return new StringBuilder(16).append(PARAM_SPAM_HANDLER).append(accountId).toString();
     }
+
+    /**
+     * MBox.
+     */
+    private static final String PARAM_MBOX = "mail.mbox";
+
+    /**
+     * Gets the parameter name for MBox.
+     * 
+     * @param accountId The account ID
+     * @return The parameter name for MBox
+     */
+    public static String getParamMBox(final int accountId) {
+        return new StringBuilder(16).append(PARAM_MBOX).append(accountId).toString();
+    }
 }

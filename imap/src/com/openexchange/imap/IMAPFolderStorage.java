@@ -434,7 +434,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     /*
                      * Get INBOX folder
                      */
-                    final Folder inboxFolder = imapStore.getFolder(STR_INBOX);
+                    final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
                     if (!inboxFolder.exists()) {
                         throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, STR_INBOX);
                     }
@@ -465,7 +465,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         if ((persPrefix.length() == 0)) {
                             if (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace() && IMAPCommandsCollection.canCreateSubfolder(
                                 persPrefix,
-                                (IMAPFolder) inboxFolder)) {
+                                inboxFolder)) {
                                 /*
                                  * Personal namespace folder allows subfolders and nested default folder are demanded, thus use INBOX as
                                  * prefix although NAMESPACE signals to use no prefix.
@@ -494,7 +494,17 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final String prefix = tmp.toString();
                     tmp.setLength(0);
                     final int type;
-                    if (IMAPConfig.isMBoxEnabled()) {
+                    final boolean mboxEnabled;
+                    {
+                        final String param = MailSessionParameterNames.getParamMBox(accountId);
+                        Boolean mbox = (Boolean) session.getParameter(param);
+                        if (null == mbox) {
+                            mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(inboxFolder, FOLDER_TYPE, prefix));
+                            session.setParameter(param, mbox);
+                        }
+                        mboxEnabled = mbox.booleanValue();
+                    }
+                    if (mboxEnabled) {
                         type = Folder.HOLDS_MESSAGES;
                     } else {
                         type = FOLDER_TYPE;
@@ -632,8 +642,23 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                 }
             }
-            if (!checkFolderNameValidity(name, parent.getSeparator())) {
-                throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(parent.getSeparator()));
+            /*
+             * Check if IMAP server is in MBox format; meaning folder either hold messages or subfolders but not both
+             */
+            final char separator = parent.getSeparator();
+            final boolean mboxEnabled;
+            {
+                final String param = MailSessionParameterNames.getParamMBox(accountId);
+                Boolean mbox = (Boolean) session.getParameter(param);
+                if (null == mbox) {
+                    mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(parent, FOLDER_TYPE, new StringBuilder(
+                        parent.getFullName()).append(separator).toString()));
+                    session.setParameter(param, mbox);
+                }
+                mboxEnabled = mbox.booleanValue();
+            }
+            if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
+                throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
             }
             if (isParentDefault) {
                 /*
@@ -641,18 +666,17 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                  */
                 createMe = (IMAPFolder) imapStore.getFolder(name);
             } else {
-                createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(parent.getSeparator()).append(
-                    name).toString());
+                createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(separator).append(name).toString());
             }
             if (createMe.exists()) {
                 throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, createMe.getFullName());
             }
             final int ftype;
-            if (IMAPConfig.isMBoxEnabled()) {
+            if (mboxEnabled) {
                 /*
                  * Determine folder creation type dependent on folder name
                  */
-                ftype = createMe.getName().endsWith(String.valueOf(parent.getSeparator())) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES;
+                ftype = createMe.getName().endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES;
             } else {
                 ftype = FOLDER_TYPE;
             }
@@ -852,11 +876,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, newParent);
                     }
                 }
-                if (destFolder instanceof DefaultFolder) {
-                    if (!inferiors(destFolder)) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder.getFullName());
-                    }
-                } else if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
+                if (!inferiors(destFolder)) {
+                    throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
                     try {
                         if (!aclExtension.canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
                             throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, newParent);
@@ -881,7 +904,18 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         }
                     }
                 }
-                if (!checkFolderNameValidity(newName, separator)) {
+                final boolean mboxEnabled;
+                {
+                    final String param = MailSessionParameterNames.getParamMBox(accountId);
+                    Boolean mbox = (Boolean) session.getParameter(param);
+                    if (null == mbox) {
+                        mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(destFolder, FOLDER_TYPE, new StringBuilder(
+                            destFolder.getFullName()).append(separator).toString()));
+                        session.setParameter(param, mbox);
+                    }
+                    mboxEnabled = mbox.booleanValue();
+                }
+                if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
                     throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
                 }
                 if (destFolder.getFullName().startsWith(moveMe.getFullName())) {
@@ -915,27 +949,38 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         throw new IMAPException(IMAPException.Code.NO_ACCESS, e, moveMe.getFullName());
                     }
                 }
-                if (!checkFolderNameValidity(newName, separator)) {
-                    throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
-                }
                 /*
                  * Rename can only be invoked on a closed folder
                  */
                 if (moveMe.isOpen()) {
                     moveMe.close(false);
                 }
+                final boolean mboxEnabled;
                 final IMAPFolder renameFolder;
                 {
-                    final String parentFullName = moveMe.getParent().getFullName();
+                    final IMAPFolder par = (IMAPFolder) moveMe.getParent();
+                    final String parentFullName = par.getFullName();
                     final StringBuilder tmp = new StringBuilder();
                     if (parentFullName.length() > 0) {
                         tmp.append(parentFullName).append(separator);
                     }
                     tmp.append(newName);
                     renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
+                    final String param = MailSessionParameterNames.getParamMBox(accountId);
+                    // Check for MBox format
+                    Boolean mbox = (Boolean) session.getParameter(param);
+                    if (null == mbox) {
+                        mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(par, FOLDER_TYPE, new StringBuilder(
+                            par.getFullName()).append(separator).toString()));
+                        session.setParameter(param, mbox);
+                    }
+                    mboxEnabled = mbox.booleanValue();
                 }
                 if (renameFolder.exists()) {
                     throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, renameFolder.getFullName());
+                }
+                if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
+                    throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
                 }
                 /*
                  * Remember subscription status
@@ -1976,11 +2021,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      * 
      * @param name The folder name to check.
      * @param separator The separator character.
+     * @param mboxEnabled <code>true</code> If MBox format is enabled; otherwise <code>false</code>
      * @return <code>true</code> if folder name is valid; otherwise <code>false</code>
      */
-    private static boolean checkFolderNameValidity(final String name, final char separator) {
+    private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
         final int pos = name.indexOf(separator);
-        if (IMAPConfig.isMBoxEnabled()) {
+        if (mboxEnabled) {
             /*
              * Allow trailing separator
              */

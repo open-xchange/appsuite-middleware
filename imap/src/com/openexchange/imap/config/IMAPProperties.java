@@ -50,11 +50,9 @@
 package com.openexchange.imap.config;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -106,8 +104,6 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 
 	private String entity2AclImpl;
 
-	private boolean mboxEnabled;
-
 	private int blockSize;
 
 	private final Map<String, Boolean> newACLExtMap;
@@ -122,12 +118,6 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		newACLExtMap = new ConcurrentHashMap<String, Boolean>();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
-	 */
 	@Override
 	protected void loadProperties0() throws MailConfigException {
 		final StringBuilder logBuilder = new StringBuilder(1024);
@@ -234,13 +224,6 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		}
 
 		{
-			final String mboxEnabledStr = configuration.getProperty("com.openexchange.imap.mboxEnabled", STR_FALSE)
-					.trim();
-			mboxEnabled = Boolean.parseBoolean(mboxEnabledStr);
-			logBuilder.append("\tMBox Enabled: ").append(mboxEnabled).append('\n');
-		}
-
-		{
 			final String blockSizeStr = configuration.getProperty("com.openexchange.imap.blockSize", "1000").trim();
 			try {
 				blockSize = Integer.parseInt(blockSizeStr);
@@ -262,12 +245,6 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
-	 */
 	@Override
 	protected void resetFields() {
 		imapSort = false;
@@ -280,7 +257,6 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		imapTemporaryDown = 0;
 		imapAuthEnc = null;
 		entity2AclImpl = null;
-		mboxEnabled = false;
 		blockSize = 0;
 		spamHandlerName = null;
 	}
@@ -373,15 +349,6 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 	 */
 	String getEntity2AclImpl() {
 		return entity2AclImpl;
-	}
-
-	/**
-	 * Gets the mboxEnabled
-	 * 
-	 * @return The mboxEnabled
-	 */
-	boolean isMBoxEnabled() {
-		return mboxEnabled;
 	}
 
 	/**

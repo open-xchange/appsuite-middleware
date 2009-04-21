@@ -167,15 +167,6 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
-     * Checks if mbox format is enabled
-     * 
-     * @return <code>true</code> if mbox format is enabled; otherwise <code>false</code>
-     */
-    public static boolean isMBoxEnabled() {
-        return IMAPProperties.getInstance().isMBoxEnabled();
-    }
-
-    /**
      * Gets the global supportsACLs
      * 
      * @return the global supportsACLs
