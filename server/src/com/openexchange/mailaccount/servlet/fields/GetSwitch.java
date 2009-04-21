@@ -61,9 +61,9 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class GetSwitch implements AttributeSwitch {
 
-    private MailAccountDescription desc;
+    private final MailAccountDescription desc;
 
-    public GetSwitch(MailAccountDescription desc) {
+    public GetSwitch(final MailAccountDescription desc) {
         this.desc = desc;
     }
     
@@ -80,7 +80,7 @@ public class GetSwitch implements AttributeSwitch {
     }
 
     public Object id() {
-        return desc.getId();
+        return Integer.valueOf(desc.getId());
     }
 
     public Object login() {
