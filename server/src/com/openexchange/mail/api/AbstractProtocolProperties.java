@@ -129,7 +129,7 @@ public abstract class AbstractProtocolProperties {
     /**
      * Loads protocol's global properties
      * 
-     * @throws MailConfigException
+     * @throws MailConfigException If loading of protocol's global properties fails
      */
     protected abstract void loadProperties0() throws MailConfigException;
 
