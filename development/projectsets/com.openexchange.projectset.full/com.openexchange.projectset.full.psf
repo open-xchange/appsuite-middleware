@@ -45,5 +45,7 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,openexchange-buildsystem,open-xchange-buildsystem"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.admin.contextrestore,com.openexchange.admin.contextrestore"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.calendar,com.openexchange.calendar"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.pop3,com.openexchange.pop3"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.unifiedinbox,com.openexchange.unifiedinbox"/>
 </provider>
 </psf>
