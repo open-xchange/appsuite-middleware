@@ -10,6 +10,7 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
 	<property name="lib.dir" value="lib"/>
+	<property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -21,6 +22,8 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+	<property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -36,10 +39,10 @@
 	<property name="mailjar" value="mail-1.4.2.jar" />
 	
 	<!-- Third party libs -->
-	    <fileset dir="${basedir}" id="3rdpartyjars">
-	        <include name="${lib.dir}/*.jar"/>
-	        <exclude name="CVS"/>
-	    </fileset>
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -78,9 +81,16 @@
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJar,installConfig"/>
-
-    <target name="installConfig">
+    <target name="install" depends="installJar,installInclude,installConfig"/>
+	
+	<target name="installConfig">
+        <mkdir dir="${conf.install.copy.dir}"/>
+        <copy todir="${conf.install.copy.dir}" overwrite="true">
+            <fileset dir="${conf.dir}"/>
+        </copy>
+    </target>
+	
+	<target name="installInclude">
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
