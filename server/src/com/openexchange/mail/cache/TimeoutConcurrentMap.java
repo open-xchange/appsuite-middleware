@@ -130,6 +130,17 @@ public final class TimeoutConcurrentMap<K, V> {
     }
 
     /**
+     * Acts like the value associated with specified key receives its time-out event. <br>
+     * Furthermore the value is removed from map.
+     */
+    public void timeout(final K key) {
+        final ValueWrapper<V> vw = map.remove(key);
+        if (vw != null && vw.timeoutListener != null) {
+            vw.timeoutListener.onTimeout(vw.value);
+        }
+    }
+
+    /**
      * Puts specified key-value-pair into this time-out map with default time-out listener.
      * 
      * @param key The value's key

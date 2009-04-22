@@ -109,7 +109,7 @@ public final class MailLoginHandler implements LoginHandlerService {
     public void handleLogout(final Login logout) throws LoginException {
         // Time-out mail access cache
         try {
-            MailAccessCache.getInstance().clear();
+            MailAccessCache.getInstance().clearUserEntries(logout.getSession());
         } catch (final MailException e) {
             throw new LoginException(e);
         }

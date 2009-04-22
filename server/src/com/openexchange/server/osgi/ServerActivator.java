@@ -81,6 +81,7 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.impl.EventQueue;
+import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.filemanagement.ManagedFileException;
@@ -102,6 +103,7 @@ import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailLoginHandler;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
@@ -161,17 +163,21 @@ public final class ServerActivator extends DeferredActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class, EventAdmin.class, Timer.class, CalendarAdministrationService.class };
+    private static final Class<?>[] NEEDED_SERVICES_ADMIN = {
+        ConfigurationService.class, CacheService.class, EventAdmin.class, Timer.class, CalendarAdministrationService.class };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
-        Timer.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, ReminderDeleteInterface.class };
+        Timer.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class,
+        ReminderDeleteInterface.class };
 
     private final List<ServiceRegistration> registrationList;
 
     private final List<ServiceTracker> serviceTrackerList;
 
     private final List<ComponentRegistration> componentRegistrationList;
+
+    private final List<EventHandlerRegistration> eventHandlerList;
 
     private final Starter starter;
 
@@ -189,6 +195,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList = new ArrayList<ServiceRegistration>();
         serviceTrackerList = new ArrayList<ServiceTracker>();
         componentRegistrationList = new ArrayList<ComponentRegistration>();
+        eventHandlerList = new ArrayList<EventHandlerRegistration>();
     }
 
     /**
@@ -310,11 +317,16 @@ public final class ServerActivator extends DeferredActivator {
             new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class)));
 
         /*
-         * Register Services and components
+         * Register EventHandler
          */
         final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
         EventQueue.setNewEventDispatcher(dispatcher);
-        dispatcher.registerService(context);
+        eventHandlerList.add(dispatcher);
+        eventHandlerList.add(new MailAccessCacheEventListener());
+        for (final EventHandlerRegistration ehr : eventHandlerList) {
+            ehr.registerService(context);
+        }
+
         /*
          * Start server dependent on whether admin bundle is available or not
          */
@@ -469,6 +481,13 @@ public final class ServerActivator extends DeferredActivator {
             }
             serviceTrackerList.clear();
             ServerRequestHandlerRegistry.getInstance().clearRegistry();
+            /*
+             * Unregister EventHandler
+             */
+            for (final EventHandlerRegistration ehr : eventHandlerList) {
+                ehr.unregisterService();
+            }
+            eventHandlerList.clear();
             // Stop all inside the server.
             starter.stop();
             /*

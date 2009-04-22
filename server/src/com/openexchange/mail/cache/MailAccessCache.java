@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.cache;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -59,18 +58,21 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAccessCache} - a very volatile cache for already connected instances of {@link MailAccess}.
+ * {@link MailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
  * <p>
  * Only one mail access can be cached per user and is dedicated to fasten sequential mail requests<br>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessCache {
-
-    static final String REGION_NAME = "MailConnectionCache";
 
     private static final Lock LOCK_MOD = new ReentrantLock();
 
@@ -96,7 +98,7 @@ public final class MailAccessCache {
     }
 
     /**
-     * Fetches the appropriate lock
+     * Fetches the appropriate lock.
      * 
      * @param key The lock's key
      * @return The appropriate lock
@@ -113,6 +115,20 @@ public final class MailAccessCache {
             }
         }
         return contextLocks.get(key);
+    }
+
+    /**
+     * Drops the lock bound to given key.
+     * 
+     * @param key The lock's key
+     */
+    private static void dropLock(final Key key) {
+        LOCK_MOD.lock();
+        try {
+            contextLocks.remove(key);
+        } finally {
+            LOCK_MOD.unlock();
+        }
     }
 
     /**
@@ -299,95 +315,97 @@ public final class MailAccessCache {
     }
 
     /**
-     * Clears the cache.
+     * Clears the cache entries kept for specified user.
+     * 
+     * @param session The session
+     * @throws MailException If clearing user entries fails
      */
-    public void clear() {
-        timeoutMap.timeoutAll();
+    public void clearUserEntries(final Session session) throws MailException {
+        try {
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+            for (final MailAccount mailAccount : accounts) {
+                final Key key = getUserKey(user, mailAccount.getId(), cid);
+                final Lock writeLock = getLock(key).writeLock();
+                writeLock.lock();
+                try {
+                    timeoutMap.timeout(key);
+                } finally {
+                    writeLock.unlock();
+                }
+                dropLock(key);
+            }
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
     }
 
     private Key getUserKey(final int user, final int accountId, final int cid) {
-        return new Key(cid, user ^ accountId);
+        return new Key(user, cid, accountId);
     }
 
     private static final class Key {
 
-        /**
-         * For serialization.
-         */
-        private static final long serialVersionUID = -3144968305668671430L;
+        private final int user;
 
-        /**
-         * Unique identifier of the context.
-         */
-        private final int contextId;
+        private final int cid;
 
-        /**
-         * Object key of the cached object.
-         */
-        private final Serializable keyObj;
+        private final int accountId;
 
-        /**
-         * Hash code of the context specific object.
-         */
         private final int hash;
 
-        /**
-         * Initializes a new {@link Key}
-         * 
-         * @param contextId The context ID
-         * @param objectId The object ID
-         */
-        public Key(final int contextId, final int objectId) {
-            this(contextId, Integer.valueOf(objectId));
-        }
-
-        /**
-         * Initializes a new {@link Key}
-         * 
-         * @param contextId The context ID
-         * @param obj Any instance of {@link Serializable} to identify the cached object.
-         */
-        public Key(final int contextId, final Serializable obj) {
+        public Key(final int user, final int cid, final int accountId) {
             super();
-            this.contextId = contextId;
-            keyObj = obj;
-            hash = obj.hashCode() ^ contextId;
+            this.user = user;
+            this.cid = cid;
+            this.accountId = accountId;
+            this.hash = hashCode0();
         }
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean equals(final Object obj) {
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            return contextId == other.contextId && keyObj.equals(other.keyObj);
+        private int hashCode0() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + accountId;
+            result = prime * result + cid;
+            result = prime * result + user;
+            return result;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public int hashCode() {
             return hash;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public String toString() {
-            return new StringBuilder(32).append("Key: context=").append(contextId).append(" | key=").append(keyObj.toString()).toString();
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (accountId != other.accountId) {
+                return false;
+            }
+            if (cid != other.cid) {
+                return false;
+            }
+            if (user != other.user) {
+                return false;
+            }
+            return true;
         }
 
-        public int getContextId() {
-            return contextId;
-        }
-
-        public Serializable getObject() {
-            return keyObj;
-        }
     }
+
 }

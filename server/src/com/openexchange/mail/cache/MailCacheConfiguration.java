@@ -123,7 +123,6 @@ public final class MailCacheConfiguration implements Initialization {
         }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         try {
-            cacheService.freeCache(MailAccessCache.REGION_NAME);
             cacheService.freeCache(MailMessageCache.REGION_NAME);
         } catch (final CacheException e) {
             LOG.error(e.getMessage(), e);
