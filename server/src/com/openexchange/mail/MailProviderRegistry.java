@@ -102,9 +102,9 @@ public final class MailProviderRegistry {
         final String protocol;
         if (mailServerURL == null) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set for user ").append(
-                    session.getUserId()).append(" in context ").append(session.getContextId()).append(". Using fallback protocol ").append(
-                    MailProperties.getInstance().getDefaultMailProvider()));
+                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set in account ").append(accountId).append(
+                    " for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
+                    ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
             }
             protocol = MailProperties.getInstance().getDefaultMailProvider();
         } else {

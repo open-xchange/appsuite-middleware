@@ -1866,7 +1866,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 {
                     final JSONObject jsonMailObj = new JSONObject(body);
                     /*
-                     * Parse
+                     * Parse with default account's transport provider
                      */
                     final ComposedMailMessage composedMail = MessageParser.parse(
                         jsonMailObj,
@@ -1881,10 +1881,24 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * ... and autosave draft
                          */
-                        final int accountId;
+                        int accountId;
                         if (composedMail.containsFrom()) {
-                            accountId = resolveFrom2Account(session, composedMail.getFrom()[0]);
+                            accountId = resolveFrom2Account(session, composedMail.getFrom()[0], false);
                         } else {
+                            accountId = MailAccount.DEFAULT_ID;
+                        }
+                        /*
+                         * Check if detected account has a drafts folder
+                         */
+                        if (mailInterface.getDraftsFolder(accountId) == null) {
+                            if (MailAccount.DEFAULT_ID == accountId) {
+                                // Huh... No drafts folder in default account
+                                throw new MailException(MailException.Code.FOLDER_NOT_FOUND, "Drafts");
+                            }
+                            LOG.warn(new StringBuilder(64).append("Mail account ").append(accountId).append(" for user ").append(
+                                session.getUserId()).append(" in context ").append(session.getContextId()).append(
+                                " has no drafts folder. Saving draft to default account's draft folder."));
+                            // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                         }
                         msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
@@ -2579,7 +2593,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Extract from out of RFC 822 bytes
                  */
                 final InternetAddress from = m.getFrom()[0];
-                final int accountId = resolveFrom2Account(session, from);
+                int accountId;
+                try {
+                    accountId = resolveFrom2Account(session, from, true);
+                } catch (final MailException e) {
+                    if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
+                        // Re-throw
+                        throw e;
+                    }
+                    LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                    // Send with default account's transport provider
+                    accountId = MailAccount.DEFAULT_ID;
+                }
                 /*
                  * Missing "folder" element indicates to send given message via default mail account
                  */
@@ -3306,7 +3331,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                         } catch (final AddressException e) {
                             throw MIMEMailException.handleMessagingException(e);
                         }
-                        final int accountId = resolveFrom2Account(session, from);
+                        int accountId;
+                        try {
+                            accountId = resolveFrom2Account(session, from, true);
+                        } catch (final MailException e) {
+                            if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
+                                // Re-throw
+                                throw e;
+                            }
+                            LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                            // Send with default account's transport provider
+                            accountId = MailAccount.DEFAULT_ID;
+                        }
                         final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session, accountId);
                         if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
                             /*
@@ -3362,19 +3398,35 @@ public class Mail extends PermissionServlet implements UploadListener {
                         } catch (final AddressException e) {
                             throw MIMEMailException.handleMessagingException(e);
                         }
-                        final int accountId = resolveFrom2Account(session, from);
+                        int accountId = resolveFrom2Account(session, from, false);
                         /*
-                         * Parse
+                         * Check if detected account has drafts
                          */
-                        final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session, accountId);
+                        final MailServletInterface msi = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE));
+                        if (msi.getDraftsFolder(accountId) == null) {
+                            if (MailAccount.DEFAULT_ID == accountId) {
+                                // Huh... No drafts folder in default account
+                                throw new MailException(MailException.Code.FOLDER_NOT_FOUND, "Drafts");
+                            }
+                            LOG.warn(new StringBuilder(64).append("Mail account ").append(accountId).append(" for user ").append(
+                                session.getUserId()).append(" in context ").append(session.getContextId()).append(
+                                " has no drafts folder. Saving draft to default account's draft folder."));
+                            // No drafts folder in detected mail account; auto-save to default account
+                            accountId = MailAccount.DEFAULT_ID;
+                        }
+                        /*
+                         * Parse with default account's transport provider
+                         */
+                        final ComposedMailMessage composedMail = MessageParser.parse(
+                            jsonMailObj,
+                            uploadEvent,
+                            session,
+                            MailAccount.DEFAULT_ID);
                         if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT && (composedMail.getMsgref() != null)) {
                             /*
                              * ... and edit draft
                              */
-                            msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(
-                                composedMail,
-                                false,
-                                accountId);
+                            msgIdentifier = msi.saveDraft(composedMail, false, accountId);
                         } else {
                             throw new MailException(MailException.Code.UNEXPECTED_ERROR, "No new message on action=edit");
                         }
@@ -3426,7 +3478,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return session.getUserConfiguration().hasWebMail();
     }
 
-    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from) throws MailException, OXException {
+    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport) throws MailException, OXException {
         /*
          * Resolve "From" to proper mail account to select right transport server
          */
@@ -3436,6 +3488,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                 MailAccountStorageService.class,
                 true);
             accountId = storageService.getByPrimaryAddress(from.getAddress(), session.getUserId(), session.getContextId());
+            if (checkTransportSupport && accountId != -1) {
+                final MailAccount account = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                // Check if determined account supports mail transport
+                if (null == account.getTransportServerURL()) {
+                    // Account does not support mail transport
+                    throw new MailException(MailException.Code.NO_TRANSPORT_SUPPORT, account.getName(), Integer.valueOf(accountId));
+                }
+            }
         } catch (final MailAccountException e) {
             throw new OXException(e);
         } catch (final ServiceException e) {

@@ -322,13 +322,21 @@ public class MailException extends AbstractOXException {
          */
         INVALID_CONTENT_DISPOSITION("Invalid Content-Disposition value: %1$s", Category.CODE_ERROR, 62),
         /**
-         * A folder named %1$s already exists
+         * A folder named %1$s already exists.
          */
-        DUPLICATE_FOLDER("A folder named %1$s already exists", Category.PERMISSION, 63),
+        DUPLICATE_FOLDER("A folder named %1$s already exists.", Category.PERMISSION, 63),
         /**
-         * No create access on mail folder %1$s
+         * No create access on mail folder %1$s.
          */
-        NO_CREATE_ACCESS("No create access on mail folder %1$s", Category.PERMISSION, 64);
+        NO_CREATE_ACCESS("No create access on mail folder %1$s.", Category.PERMISSION, 64),
+        /**
+         * Mail account %1$s with ID %2$s does not support mail transport.
+         */
+        NO_TRANSPORT_SUPPORT("Mail account %1$s with ID %2$s does not support mail transport.", Category.CODE_ERROR, 65),
+        /**
+         * Mail folder could not be found: %1$s.
+         */
+        FOLDER_NOT_FOUND("Mail folder could not be found: %1$s.", Category.CODE_ERROR, 66);
 
         private final String message;
 
