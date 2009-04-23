@@ -58,12 +58,20 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -82,6 +90,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountRequest {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountRequest.class);
 
     private final ServerSession session;
 
@@ -119,7 +129,7 @@ public final class MailAccountRequest {
      * @throws AjaxException If an AJAX error occurs
      * @throws OXJSONException If a JSON error occurs
      */
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
             return actionDelete(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -132,6 +142,8 @@ public final class MailAccountRequest {
             return actionAll(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
             return actionList(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_VALIDATE)) {
+            return actionValidate(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -203,18 +215,159 @@ public final class MailAccountRequest {
         }
     }
 
+    private Boolean actionValidate(final JSONObject jsonObject) throws AjaxException, OXException {
+        final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
+
+        try {
+            final MailAccountDescription accountDescription = new MailAccountDescription();
+            new MailAccountParser().parse(accountDescription, jData);
+            // Validate mail server
+            boolean validated = checkMailServerURL(accountDescription);
+            // Failed?
+            if (!validated) {
+                return Boolean.FALSE;
+            }
+            // Now check transport server URL
+            validated = checkTransportServerURL(accountDescription);
+            return Boolean.valueOf(validated);
+        } catch (final AbstractOXException e) {
+            throw new OXException(e);
+        }
+    }
+
+    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException {
+        final String mailServerURL = accountDescription.getMailServerURL();
+        // Get the appropriate mail provider by mail server URL
+        final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
+        if (null == mailProvider) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
+            }
+            return false;
+        }
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+        final MailConfig mailConfig = mailAccess.getMailConfig();
+        // Set login and password
+        mailConfig.setLogin(accountDescription.getLogin());
+        mailConfig.setPassword(accountDescription.getPassword());
+        // Set server and port
+        final String server;
+        {
+            final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+            server = tmp == null ? mailServerURL : tmp[1];
+        }
+        final int pos = server.indexOf(':');
+        if (pos == -1) {
+            mailConfig.setPort(143);
+            mailConfig.setServer(server);
+        } else {
+            final String sPort = server.substring(pos + 1);
+            try {
+                mailConfig.setPort(Integer.parseInt(sPort));
+            } catch (final NumberFormatException e) {
+                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
+                    "\". Using fallback 143 instead."), e);
+                mailConfig.setPort(143);
+            }
+            mailConfig.setServer(server.substring(0, pos));
+        }
+        boolean validated = true;
+        // Now try to connect
+        boolean close = false;
+        try {
+            mailAccess.connect();
+            close = true;
+        } catch (final AbstractOXException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Validating mail account failed.", e);
+            }
+            validated = false;
+        } finally {
+            if (close) {
+                mailAccess.close(false);
+            }
+        }
+        return validated;
+    }
+
+    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException {
+        final String transportServerURL = accountDescription.getTransportServerURL();
+        if (null == transportServerURL) {
+            // Nothing to validate, treat as success
+            return true;
+        }
+        // Get the appropriate transport provider by transport server URL
+        final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
+        if (null == transportProvider) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
+            }
+            return false;
+        }
+        // Create a transport access instance
+        final MailTransport mailTransport = transportProvider.createNewMailTransport(session);
+        final TransportConfig transportConfig = mailTransport.getTransportConfig();
+        // Set login and password
+        transportConfig.setLogin(accountDescription.getLogin());
+        transportConfig.setPassword(accountDescription.getPassword());
+        // Set server and port
+        final String server;
+        {
+            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
+            server = tmp == null ? transportServerURL : tmp[1];
+        }
+        final int pos = server.indexOf(':');
+        if (pos == -1) {
+            transportConfig.setPort(25);
+            transportConfig.setServer(server);
+        } else {
+            final String sPort = server.substring(pos + 1);
+            try {
+                transportConfig.setPort(Integer.parseInt(sPort));
+            } catch (final NumberFormatException e) {
+                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
+                    "\". Using fallback 25 instead."), e);
+                transportConfig.setPort(25);
+            }
+            transportConfig.setServer(server.substring(0, pos));
+        }
+        boolean validated = true;
+        // Now try to connect
+        boolean close = false;
+        try {
+            mailTransport.ping();
+            close = true;
+        } catch (final AbstractOXException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Validating transport account failed.", e);
+            }
+            validated = false;
+        } finally {
+            if (close) {
+                mailTransport.close();
+            }
+        }
+        return validated;
+    }
+
     private JSONObject actionUpate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();
-            Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
+            final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
 
-            storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), session.getContextId(), session.getPassword());
+            storageService.updateMailAccount(
+                accountDescription,
+                fieldsToUpdate,
+                session.getUserId(),
+                session.getContextId(),
+                session.getPassword());
 
             final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
                 accountDescription.getId(),
@@ -226,57 +379,57 @@ public final class MailAccountRequest {
             throw new OXException(e);
         }
     }
-    
-    private JSONArray actionAll(JSONObject request) throws JSONException, OXException {
+
+    private JSONArray actionAll(final JSONObject request) throws JSONException, OXException {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
-        List<Attribute> attributes = getColumns(colString);
+        final List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
-            
-            MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+
+            final MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             return MailAccountWriter.writeArray(userMailAccounts, attributes);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new OXException(e);
         }
     }
 
     private List<Attribute> getColumns(final String colString) {
         List<Attribute> attributes = null;
-        if(colString != null && !"".equals(colString.trim())) {
-        	attributes = new LinkedList<Attribute>();
-            for(String col : colString.split("\\s*,\\s*")) {
-                if("".equals(col)) {
+        if (colString != null && !"".equals(colString.trim())) {
+            attributes = new LinkedList<Attribute>();
+            for (final String col : colString.split("\\s*,\\s*")) {
+                if ("".equals(col)) {
                     continue;
                 }
                 attributes.add(Attribute.getById(Integer.parseInt(col)));
             }
             return attributes;
         } else {
-        	return Arrays.asList(Attribute.values());
-            
+            return Arrays.asList(Attribute.values());
+
         }
     }
-    
-    private JSONArray actionList(JSONObject request) throws JSONException, OXException {
+
+    private JSONArray actionList(final JSONObject request) throws JSONException, OXException {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
-        List<Attribute> attributes = getColumns(colString);
+        final List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
-           
-            JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
-            List<MailAccount> accounts = new ArrayList<MailAccount>();
-            for(int i = 0, size = ids.length(); i < size; i++) {
-                int id = ids.getInt(i);
-                MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+
+            final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
+            final List<MailAccount> accounts = new ArrayList<MailAccount>();
+            for (int i = 0, size = ids.length(); i < size; i++) {
+                final int id = ids.getInt(i);
+                final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
                 accounts.add(account);
             }
-            
+
             return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new OXException(e);
         }
     }

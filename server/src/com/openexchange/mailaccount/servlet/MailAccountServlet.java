@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
@@ -105,7 +104,7 @@ public final class MailAccountServlet extends PermissionServlet {
 
             final MailAccountRequest accountRequest = new MailAccountRequest(session);
 
-            final JSONValue responseObj = accountRequest.action(action, jsonObj);
+            final Object responseObj = accountRequest.action(action, jsonObj);
             response.setTimestamp(accountRequest.getTimestamp());
             response.setData(responseObj);
         } catch (final OXMandatoryFieldException e) {
@@ -158,7 +157,7 @@ public final class MailAccountServlet extends PermissionServlet {
 
             final MailAccountRequest accountRequest = new MailAccountRequest(session);
 
-            final JSONValue responseObj;
+            final Object responseObj;
             if (data.charAt(0) == '[') {
                 final JSONArray jData = new JSONArray(data);
 

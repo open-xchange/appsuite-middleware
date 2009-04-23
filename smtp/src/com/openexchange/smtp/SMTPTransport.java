@@ -66,6 +66,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.NoSuchProviderException;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
@@ -517,6 +518,39 @@ public final class SMTPTransport extends MailTransport {
             composedMail.cleanUp();
         }
 
+    }
+
+    @Override
+    public void ping() throws MailException {
+        // Connect to SMTP server
+        final Transport transport;
+        try {
+            transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+        } catch (final NoSuchProviderException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        boolean close = false;
+        try {
+            if (SMTPConfig.isSmtpAuth()) {
+                final SMTPConfig config = getTransportConfig0();
+                final String encPass = encodePassword(config.getPassword());
+                transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
+                close = true;
+            } else {
+                transport.connect();
+                close = true;
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } finally {
+            if (close) {
+                try {
+                    transport.close();
+                } catch (final MessagingException e) {
+                    LOG.error("Closing SMTP transport failed.", e);
+                }
+            }
+        }
     }
 
 }

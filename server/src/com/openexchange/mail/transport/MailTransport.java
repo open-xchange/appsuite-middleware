@@ -203,6 +203,13 @@ public abstract class MailTransport {
     public abstract void sendReceiptAck(MailMessage srcMail, String fromAddr) throws MailException;
 
     /**
+     * Pings the transport server to check if a connection can be established.
+     * 
+     * @throws MailException If the ping fails
+     */
+    public abstract void ping() throws MailException;
+
+    /**
      * Closes this mail transport
      * 
      * @throws MailException If closing fails

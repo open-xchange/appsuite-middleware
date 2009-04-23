@@ -96,6 +96,11 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                 final Session session = iter.next();
                 try {
                     mac.clearUserEntries(session);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(new StringBuilder(128).append("Detected timed-out session: ").append(session.getSessionID()).append(
+                            ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
+                            " in context ").append(session.getContextId()).toString());
+                    }
                 } catch (final MailException e) {
                     LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
                 }
