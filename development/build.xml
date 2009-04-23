@@ -6,21 +6,23 @@
 
     <!-- Directories -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="adminTmpDir" value="adminTmp"/>
     <property name="conf.dir" value="conf"/>
+    <property name="adminConfDir" value="adminConf"/>
 
     <!-- Replacements -->
     <property name="conf.install.dir" value="${basedir}/${tmp.dir}"/>
 
-	<!-- Data Retention property file -->
-	<property name="dataretention.properties" value="${basedir}/${tmp.dir}/dataretention.properties"/>
+    <!-- Data Retention property file -->
+    <property name="dataretention.properties" value="${basedir}/${tmp.dir}/dataretention.properties"/>
 
     <target name="prepare">
         <mkdir dir="${tmp.dir}"/>
+        <mkdir dir="${adminTmpDir}"/>
     </target>
 
     <target name="patchConfig" depends="prepare">
         <property name="patch.conf.dir" value="${tmp.dir}"/>
-        <mkdir dir="${patch.conf.dir}"/>
         <copy todir="${patch.conf.dir}" overwrite="true">
             <fileset dir="${conf.dir}"/>
         </copy>
@@ -29,7 +31,21 @@
         </antcall>
     </target>
 
-    <target name="install" depends="patchConfig"/>
+    <target name="patchAdminConfig" depends="prepare">
+        <property name="patchConfDir" value="${adminTmpDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${adminConfDir}"/>
+        </copy>
+        <antcall target="patchAdminConfigFiles">
+            <param name="confAdminSubstPatch" value="${basedir}/${adminTmpDir}"/>
+            <param name="confGroupSubstPatch" value="${basedir}/${tmp.dir}"/>
+        </antcall>
+    </target>
+
+    <target name="install">
+        <antcall target="patchConfig"/>
+        <antcall target="patchAdminConfig"/>
+    </target>
 
     <target name="default" depends="install"/>
 
@@ -41,7 +57,13 @@
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
         <antcall target="patchSessiondProperties"/>
         <antcall target="patchPath"/>
-    	<antcall target="patchDataRetentionProperties"/>
+        <antcall target="patchDataRetentionProperties"/>
+    </target>
+
+    <target name="patchAdminConfigFiles">
+        <fail message="Define confGroupSubstPatch." unless="confGroupSubstPatch"/>
+        <fail message="Define confAdminSubstPatch." unless="confAdminSubstPatch"/>
+        <antcall target="patchAdminPath"/>
     </target>
 
     <target name="patchSessiondProperties">
@@ -63,9 +85,25 @@
         </replace>
     </target>
 
-	<target name="patchDataRetentionProperties">
-		<replace file="${dataretention.properties}" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${conf.install.dir}">
-		</replace>
-	</target>
+    <target name="patchAdminPath">
+        <move todir="${patchConfDir}" includeemptydirs="false">
+            <fileset dir="${patchConfDir}">
+                <include name="*.in"/>
+            </fileset>
+            <mapper type="glob" from="*.in" to="*"/>
+        </move>
+        <replace dir="${patchConfDir}">
+            <replacefilter token="$PWD/" value=""/>
+            <replacefilter token="INITIAL_OX_SQL_DIR=@oxconfdir@" value="INITIAL_OX_SQL_DIR=${basedir}/../open-xchange-admin/etc"/>
+            <replacefilter token="@oxconfdir@" value="${confAdminSubstPatch}"/>
+            <replacefilter token="@serverconfdir@" value="${confGroupSubstPatch}"/>
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${confGroupSubstPatch}"/>
+        </replace>
+    </target>
+
+    <target name="patchDataRetentionProperties">
+        <replace file="${dataretention.properties}" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${conf.install.dir}">
+        </replace>
+    </target>
 
 </project>
