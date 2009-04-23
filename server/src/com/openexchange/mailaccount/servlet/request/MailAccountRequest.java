@@ -76,6 +76,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -221,6 +222,16 @@ public final class MailAccountRequest {
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
+            // Check needed fields
+            if (accountDescription.getMailServerURL() == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
+            }
+            if (accountDescription.getLogin() == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.LOGIN);
+            }
+            if (accountDescription.getPassword() == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
+            }
             // Validate mail server
             boolean validated = checkMailServerURL(accountDescription);
             // Failed?
