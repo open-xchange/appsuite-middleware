@@ -82,8 +82,6 @@
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
         <filter token="systemproperties"  value="${prefix}/${oxconfdir}/system.properties"/>
         <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
-        <filter token="configdbdump"      value="${prefix}/${oxconfdir}/mysql/configdb-dump.sql"/>
-        <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
         <filter token="oxlibpath"         value="${prefix}/lib"/>
         <filter token="serverconfdir"     value="${serverconfdir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
