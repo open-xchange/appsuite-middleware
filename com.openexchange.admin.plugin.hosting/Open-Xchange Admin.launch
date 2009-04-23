@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
+<booleanAttribute key="append.args" value="true"/>
+<booleanAttribute key="automaticAdd" value="true"/>
+<booleanAttribute key="automaticValidate" value="false"/>
+<stringAttribute key="bootstrap" value=""/>
+<stringAttribute key="checked" value="[NONE]"/>
+<booleanAttribute key="clearConfig" value="false"/>
+<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Open-Xchange Admin"/>
+<booleanAttribute key="default_auto_start" value="true"/>
+<intAttribute key="default_start_level" value="4"/>
+<stringAttribute key="deselected_workspace_plugins" value="com.openexchange.mail.filter,com.openexchange.usm,com.openexchange.usm.configuration.impl,com.openexchange.data.conversion.ical.ical4j,net.freeutils.jcharset,org.apache.log4j.configuration,slow.send.servlet,com.openexchange.servletexample.mail,com.openexchange.configjump.netsol,com.openexchange.configjump.generic,com.openexchange.authentication.database,com.openexchange.axis2,com.openexchange.usm.database,org.apache.commons.logging.log4j,com.openexchange.spamhandler.spamassassin,bundle1,com.openexchange.debug,com.openexchange.custom.o3sis,bundle2,com.openexchange.mail.oneandone,com.openexchange.spamhandler.default,mail.event.creator,com.openexchange.conversion.servlet,com.openexchange.contactcollector,com.openexchange.exceptions.console,com.openexchange.push.udp,com.openexchange.sessiond,com.openexchange.admin.contextrestore,com.openexchange.usm.configuration,com.openexchange.spamhandler.netsol,com.openexchange.spellcheck,com.openexchange.authentication.imap,com.openexchange.admin.reseller,com.openexchange.passwordchange.servlet,com.openexchange.mail.netsol,com.openexchange.group.managerequest,com.openexchange.conversion.engine,com.openexchange.pop3,com.openexchange.servletexample.credentials,com.openexchange.imap,com.openexchange.usm.ox_event.impl,com.openexchange.usm.ox_event,com.openexchange.charset,com.openexchange.dataretention.csv,com.openexchange.servletexample.contacts,com.openexchange.custom.dynamicnet,com.openexchange.authentication.ldap,com.openexchange.groupware.settings.extensions,com.openexchange.resource.managerequest,com.openexchange.passwordchange.database,com.openexchange.smtp"/>
+<booleanAttribute key="includeOptional" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#10;-Xmx512M&#10;-XX:+UseConcMarkSweepGC&#10;-Dopenexchange.propdir=${workspace_loc:/config-development/adminTmp}&#10;-Dconfigdir=${workspace_loc:/config-development/adminTmp}&#10;-Djava.util.logging.config.file=${workspace_loc:/config-development/tmp/logging.properties}"/>
+<stringAttribute key="pde.version" value="3.3"/>
+<booleanAttribute key="show_selected_only" value="false"/>
+<stringAttribute key="target_bundles" value="org.apache.commons.logging*1.1.1@default:default,javax.servlet*2.4.0.v200806031604@default:default,org.eclipse.osgi@:,org.eclipse.osgi.services@default:default"/>
+<booleanAttribute key="tracing" value="false"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+<stringAttribute key="workspace_bundles" value="com.openexchange.global@default:default,com.openexchange.dataretention@default:default,open_xchange_admin_plugin_hosting@default:default,com.openexchange.xml@default:default,com.openexchange.monitoring@default:default,com.openexchange.caching@default:default,com.openexchange.admin@default:default,com.openexchange.configread@default:default,javax.activation@default:default,com.openexchange.conversion@default:default,com.openexchange.server@default:default,com.openexchange.control@default:default,com.openexchange.management@default:default,com.openexchange.calendar@default:default,com.openexchange.timer@default:default,com.openexchange.common@default:default,com.openexchange.i18n@default:default"/>
+</launchConfiguration>
