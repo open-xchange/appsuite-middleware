@@ -1,3 +1,7 @@
+* 2009-04-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #13440: Clearing string values with the CLT can be done with an empty string.
+
 * 2009-02-24 - choeger@open-xchange.com
 
  - Bugfix #12517: [L3] Foldercache does not synchronize properly
