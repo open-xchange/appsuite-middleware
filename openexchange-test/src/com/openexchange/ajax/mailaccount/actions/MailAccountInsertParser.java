@@ -56,21 +56,21 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link MailAcountInsertParser}
+ * {@link MailAccountInsertParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAcountInsertParser extends AbstractAJAXParser<MailAccountInsertResponse> {
+public class MailAccountInsertParser extends AbstractAJAXParser<MailAccountInsertResponse> {
 
-    protected MailAcountInsertParser(boolean failOnError) {
+    protected MailAccountInsertParser(final boolean failOnError) {
         super(failOnError);
     }
 
     @Override
-    protected MailAccountInsertResponse createResponse(Response response) throws JSONException {
-        MailAccountInsertResponse resp = new MailAccountInsertResponse(response);
-        JSONObject account = (JSONObject) response.getData();
+    protected MailAccountInsertResponse createResponse(final Response response) throws JSONException {
+        final MailAccountInsertResponse resp = new MailAccountInsertResponse(response);
+        final JSONObject account = (JSONObject) response.getData();
         resp.setId(account.getInt("id"));
         return resp;
     }

@@ -49,22 +49,42 @@
 
 package com.openexchange.ajax.mailaccount;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
+import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
+import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link MailAccountSuite}
- *
+ * {@link MailAccountValidateTest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class MailAccountSuite {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailAccountLifecycleTest.class);
-        tests.addTestSuite(MailAccountAllTest.class);
-        tests.addTestSuite(MailAccountValidateTest.class);
-        return tests;
+public class MailAccountValidateTest extends AbstractMailAccountTest {
+
+    public MailAccountValidateTest(final String name) {
+        super(name);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
+            deleteMailAccount();
+        }
+        super.tearDown();
+    }
+
+    public void testValidate() throws AjaxException, IOException, SAXException, JSONException {
+        final MailAccountDescription mailAccountDescription = createMailAccountObject();
+        final MailAccountValidateResponse response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
+
+        assertFalse("Broken mail account succesfully passed validation but shouldn't", response.isValidated());
     }
 }

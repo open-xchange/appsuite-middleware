@@ -47,24 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.mailaccount;
+package com.openexchange.ajax.mailaccount.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link MailAccountSuite}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * {@link MailAccountValidateResponse}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountSuite {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailAccountLifecycleTest.class);
-        tests.addTestSuite(MailAccountAllTest.class);
-        tests.addTestSuite(MailAccountValidateTest.class);
-        return tests;
+public class MailAccountValidateResponse extends AbstractAJAXResponse {
+
+    private boolean validated;
+
+    /**
+     * Initializes a new {@link MailAccountValidateResponse}.
+     * 
+     * @param response
+     */
+    protected MailAccountValidateResponse(final Response response) {
+        super(response);
+    }
+
+    // public void fillObject(final MailAccountDescription mailAccountDescription) {
+    // 
+    // mailAccountDescription.setId(id);
+    // }
+
+    public void setValidated(final boolean validated) {
+        this.validated = validated;
+    }
+
+    public boolean isValidated() {
+        return validated;
     }
 }

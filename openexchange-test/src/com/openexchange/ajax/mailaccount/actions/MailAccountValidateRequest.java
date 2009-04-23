@@ -59,21 +59,20 @@ import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
 
 
 /**
- * {@link MailAccountInsertRequest}
+ * {@link MailAccountValidateRequest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertResponse> {
+public class MailAccountValidateRequest implements AJAXRequest<MailAccountValidateResponse> {
 
     private final MailAccountDescription account;
     private final boolean failOnError;
 
-    public MailAccountInsertRequest(final MailAccountDescription account) {
+    public MailAccountValidateRequest(final MailAccountDescription account) {
         this(account, true);
     }
     
-    public MailAccountInsertRequest(final MailAccountDescription account, final boolean failOnError) {
+    public MailAccountValidateRequest(final MailAccountDescription account, final boolean failOnError) {
         this.account = account;
         this.failOnError = failOnError;
     }
@@ -90,12 +89,12 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter("action", "new")
+            new Parameter("action", "validate")
         };
     }
 
-    public AbstractAJAXParser<MailAccountInsertResponse> getParser() {
-        return new MailAccountInsertParser(failOnError);
+    public AbstractAJAXParser<MailAccountValidateResponse> getParser() {
+        return new MailAccountValidateParser(failOnError);
     }
 
     public String getServletPath() {

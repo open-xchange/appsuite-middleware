@@ -47,24 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.mailaccount;
+package com.openexchange.ajax.mailaccount.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link MailAccountSuite}
+ * {@link MailAccountValidateParser}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountSuite {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailAccountLifecycleTest.class);
-        tests.addTestSuite(MailAccountAllTest.class);
-        tests.addTestSuite(MailAccountValidateTest.class);
-        return tests;
+public class MailAccountValidateParser extends AbstractAJAXParser<MailAccountValidateResponse> {
+
+    protected MailAccountValidateParser(final boolean failOnError) {
+        super(failOnError);
     }
+
+    @Override
+    protected MailAccountValidateResponse createResponse(final Response response) throws JSONException {
+        final MailAccountValidateResponse resp = new MailAccountValidateResponse(response);
+        final Boolean validated = (Boolean) response.getData();
+        resp.setValidated(validated.booleanValue());
+        return resp;
+    }
+
 }

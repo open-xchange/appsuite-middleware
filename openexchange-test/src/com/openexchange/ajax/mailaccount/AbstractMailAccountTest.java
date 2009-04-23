@@ -73,8 +73,8 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
 
     protected MailAccountDescription mailAccountDescription;
 
-    protected void createMailAccount() throws AjaxException, IOException, SAXException, JSONException {
-        mailAccountDescription = new MailAccountDescription();
+    protected static MailAccountDescription createMailAccountObject() {
+        final MailAccountDescription mailAccountDescription = new MailAccountDescription();
         mailAccountDescription.setConfirmedHam("confirmedHam");
         mailAccountDescription.setConfirmedSpam("confirmedSpam");
         mailAccountDescription.setDrafts("drafts");
@@ -88,6 +88,11 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         mailAccountDescription.setSpamHandler("spamHandler");
         mailAccountDescription.parseTransportServerURL("localhost");
         mailAccountDescription.setTrash("trash");
+        return mailAccountDescription;
+    }
+
+    protected void createMailAccount() throws AjaxException, IOException, SAXException, JSONException {
+        mailAccountDescription = createMailAccountObject();
         
         final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         response.fillObject(mailAccountDescription);
