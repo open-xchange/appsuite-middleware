@@ -76,6 +76,8 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(com.openexchange.ajax.mail.ListTest.class);
         mailSuite.addTestSuite(com.openexchange.ajax.mail.GetTest.class);
         mailSuite.addTestSuite(com.openexchange.ajax.mail.SendTest.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.CountMailTest.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.MailSearchTest.class);
         /*mailSuite.addTestSuite(com.openexchange.ajax.mail.AlwaysTest.class);*/
         return mailSuite;
     }
