@@ -121,7 +121,7 @@ public final class MailAccountWriter {
             final String transportURL = account.getTransportServerURL();
             json.put(MailAccountFields.TRANSPORT_URL, account.getTransportServerURL());
             String protocol = ProviderUtility.extractProtocol(transportURL, TransportProperties.getInstance().getDefaultTransportProvider());
-            final boolean secure = protocol.endsWith("s");
+            final boolean secure = null != protocol && protocol.endsWith("s");
             if (secure) {
                 protocol = protocol.substring(0, protocol.length() - 1);
             }
