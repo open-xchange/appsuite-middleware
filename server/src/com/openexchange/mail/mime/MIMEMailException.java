@@ -106,9 +106,9 @@ public class MIMEMailException extends MailException {
          */
         LOGIN_FAILED("There was an issue in authenticating your E-Mail password. This may be because of a recent password change. " + "To continue please logout now and then log back in with your most current password. (server=%1$s | user=%2$s)", Category.PERMISSION, 1000),
         /**
-         * Wrong or missing login data to access server %1$s.
+         * Wrong or missing login data to access server %1$s. Error message from server: %2$s.
          */
-        INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s.", Category.PERMISSION, 1001),
+        INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s. Error message from server: %2$s.", Category.PERMISSION, 1001),
         /**
          * Mail folder could not be found: %1$s.
          */
@@ -333,7 +333,8 @@ public class MIMEMailException extends MailException {
                 return new MIMEMailException(
                     MIMEMailException.Code.INVALID_CREDENTIALS,
                     e,
-                    mailConfig == null ? STR_EMPTY : mailConfig.getServer());
+                    mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
+                    e.getMessage());
             } else if (e instanceof FolderClosedException) {
                 final Folder f = ((FolderClosedException) e).getFolder();
                 return new MIMEMailException(Code.FOLDER_CLOSED, e, null == f ? e.getMessage() : f.getFullName());
