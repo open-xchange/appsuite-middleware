@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.AjaxException;
  *
  */
 public class AbstractMailAccountTest extends AbstractAJAXSession {
-    protected AbstractMailAccountTest(String name) {
+    protected AbstractMailAccountTest(final String name) {
         super(name);
     }
 
@@ -79,17 +79,17 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         mailAccountDescription.setConfirmedSpam("confirmedSpam");
         mailAccountDescription.setDrafts("drafts");
         mailAccountDescription.setLogin("login");
-        mailAccountDescription.setMailServerURL("imap://mail.test.invalid");
+        mailAccountDescription.parseMailServerURL("imap://mail.test.invalid");
         mailAccountDescription.setName("Test Mail Account");
         mailAccountDescription.setPassword("Password");
         mailAccountDescription.setPrimaryAddress("bob@test.invalid");
         mailAccountDescription.setSent("sent");
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("spamHandler");
-        mailAccountDescription.setTransportServerURL("localhost");
+        mailAccountDescription.parseTransportServerURL("localhost");
         mailAccountDescription.setTrash("trash");
         
-        MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
+        final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         response.fillObject(mailAccountDescription);
         
     }

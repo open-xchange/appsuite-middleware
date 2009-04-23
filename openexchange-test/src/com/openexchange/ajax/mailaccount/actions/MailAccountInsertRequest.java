@@ -66,20 +66,20 @@ import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
  */
 public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertResponse> {
 
-    private MailAccountDescription account;
-    private boolean failOnError;
+    private final MailAccountDescription account;
+    private final boolean failOnError;
 
-    public MailAccountInsertRequest(MailAccountDescription account) {
+    public MailAccountInsertRequest(final MailAccountDescription account) {
         this(account, true);
     }
     
-    public MailAccountInsertRequest(MailAccountDescription account, boolean failOnError) {
+    public MailAccountInsertRequest(final MailAccountDescription account, final boolean failOnError) {
         this.account = account;
         this.failOnError = failOnError;
     }
     
     public Object getBody() throws JSONException {
-        JSONObject json = MailAccountWriter.write(wrap(account));
+        final JSONObject json = MailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
         return json;
     }
@@ -104,7 +104,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
     
     private MailAccount wrap(final MailAccountDescription acc) {
         return new MailAccount() {
-
+            
             public String getConfirmedHam() {
                 return acc.getConfirmedHam();
             }
@@ -125,8 +125,24 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
                 return acc.getLogin();
             }
 
-            public String getMailServerURL() {
-                return acc.getMailServerURL();
+            public String generateMailServerURL() {
+                return acc.generateMailServerURL();
+            }
+            
+            public int getMailPort() {
+                return acc.getMailPort();
+            }
+
+            public String getMailProtocol() {
+                return acc.getMailProtocol();
+            }
+
+            public String getMailServer() {
+                return acc.getMailServer();
+            }
+
+            public boolean isMailSecure() {
+                return acc.isMailSecure();
             }
 
             public String getName() {
@@ -153,8 +169,24 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
                 return acc.getSpamHandler();
             }
 
-            public String getTransportServerURL() {
-                return acc.getTransportServerURL();
+            public String generateTransportServerURL() {
+                return acc.generateTransportServerURL();
+            }
+            
+            public int getTransportPort() {
+                return acc.getTransportPort();
+            }
+
+            public String getTransportProtocol() {
+                return acc.getTransportProtocol();
+            }
+
+            public String getTransportServer() {
+                return acc.getTransportServer();
+            }
+
+            public boolean isTransportSecure() {
+                return acc.isTransportSecure();
             }
 
             public String getTrash() {

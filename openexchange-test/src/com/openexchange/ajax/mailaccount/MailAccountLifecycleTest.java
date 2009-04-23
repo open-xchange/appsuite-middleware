@@ -79,10 +79,11 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
      * 
      * @param name
      */
-    public MailAccountLifecycleTest(String name) {
+    public MailAccountLifecycleTest(final String name) {
         super(name);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
             deleteMailAccount();
@@ -108,22 +109,22 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         mailAccountDescription.setName("Other Name");
         mailAccountDescription.setLogin("Other Login");
         mailAccountDescription.setPassword("New Password");
-        
-        MailAccountUpdateResponse response = getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL)));
+        mailAccountDescription.setMailPort(123);
+        final MailAccountUpdateResponse response = getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL, Attribute.MAIL_PORT_LITERAL)));
         // *shrugs* don't need the response
     }
 
     private void readByList() throws AjaxException, IOException, SAXException, JSONException {
 
-        MailAccountListResponse response = getClient().execute(
+        final MailAccountListResponse response = getClient().execute(
             new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
 
-        List<MailAccountDescription> descriptions = response.getDescriptions();
+        final List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
         assertEquals(1, descriptions.size());
 
         boolean found = false;
-        for (MailAccountDescription description : descriptions) {
+        for (final MailAccountDescription description : descriptions) {
             if (description.getId() == mailAccountDescription.getId()) {
                 compare(mailAccountDescription, description);
                 found = true;
@@ -139,14 +140,14 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
      * @throws AjaxException
      */
     private void readByAll() throws AjaxException, IOException, SAXException, JSONException {
-        int[] fields = allFields();
-        MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
+        final int[] fields = allFields();
+        final MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 
-        List<MailAccountDescription> descriptions = response.getDescriptions();
+        final List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
 
         boolean found = false;
-        for (MailAccountDescription description : descriptions) {
+        for (final MailAccountDescription description : descriptions) {
             if (description.getId() == mailAccountDescription.getId()) {
                 compare(mailAccountDescription, description);
                 found = true;
@@ -156,9 +157,9 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
     }
 
     private int[] allFields() {
-        int[] fields = new int[Attribute.values().length];
+        final int[] fields = new int[Attribute.values().length];
         int index = 0;
-        for (Attribute attr : Attribute.values()) {
+        for (final Attribute attr : Attribute.values()) {
             fields[index++] = attr.getId();
         }
         return fields;
@@ -171,25 +172,25 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
      * @throws AjaxException
      */
     private void readByGet() throws AjaxException, IOException, SAXException, JSONException {
-        MailAccountGetRequest request = new MailAccountGetRequest(mailAccountDescription.getId());
-        MailAccountGetResponse response = getClient().execute(request);
+        final MailAccountGetRequest request = new MailAccountGetRequest(mailAccountDescription.getId());
+        final MailAccountGetResponse response = getClient().execute(request);
 
-        MailAccountDescription loaded = response.getAsDescription();
+        final MailAccountDescription loaded = response.getAsDescription();
 
         compare(mailAccountDescription, loaded);
 
     }
 
-    private void compare(MailAccountDescription expectedAcc, MailAccountDescription actualAcc) {
-        GetSwitch expectedSwitch = new GetSwitch(expectedAcc);
-        GetSwitch actualSwitch = new GetSwitch(actualAcc);
+    private void compare(final MailAccountDescription expectedAcc, final MailAccountDescription actualAcc) {
+        final GetSwitch expectedSwitch = new GetSwitch(expectedAcc);
+        final GetSwitch actualSwitch = new GetSwitch(actualAcc);
 
-        for (Attribute attribute : Attribute.values()) {
+        for (final Attribute attribute : Attribute.values()) {
             if (attribute == Attribute.PASSWORD_LITERAL) {
                 continue;
             }
-            Object expected = attribute.doSwitch(expectedSwitch);
-            Object actual = attribute.doSwitch(actualSwitch);
+            final Object expected = attribute.doSwitch(expectedSwitch);
+            final Object actual = attribute.doSwitch(actualSwitch);
 
             assertEquals(attribute.getName() + " differs!", expected, actual);
         }
