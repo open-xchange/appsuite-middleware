@@ -79,4 +79,4 @@ Whitelist=@serverconfdir@/whitelist.properties
 
 # Server name registered by registerserver in the configuration database
 # can be read with listservers
-SERVER_NAME=local
+SERVER_NAME=dev-prototyp
