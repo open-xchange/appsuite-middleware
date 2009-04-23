@@ -844,8 +844,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         for (final OptionAndMethod optionAndMethod : optionsandmethods) {
             if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
-                final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
+                String value = (String)parser.getOptionValue(optionAndMethod.getOption());
                 if (null != value) {
+                    // On the command line an empty string can be used to clear that specific attribute.
+                    if ("".equals(value)) { value = null; }
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
             } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_INTEGER)) {

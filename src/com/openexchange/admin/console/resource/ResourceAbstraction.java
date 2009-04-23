@@ -135,8 +135,9 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     }
 
     private void parseAndSetResourceDescription(final AdminParser parser, final Resource res) {
-        final String resourceDescription = (String) parser.getOptionValue(this.resourceDescriptionOption);
+        String resourceDescription = (String) parser.getOptionValue(this.resourceDescriptionOption);
         if (resourceDescription != null) {
+            if ("".equals(resourceDescription)) { resourceDescription = null; }
             res.setDescription(resourceDescription);
         }
     }
@@ -149,8 +150,9 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     }
 
     private void parseAndSetResourceEmail(final AdminParser parser, final Resource res) {
-        final String resourceEmail = (String) parser.getOptionValue(this.resourceEmailOption);
+        String resourceEmail = (String) parser.getOptionValue(this.resourceEmailOption);
         if (resourceEmail != null) {
+            if ("".equals(resourceEmail)) { resourceEmail = null; }
             res.setEmail(resourceEmail);
         }
     }
