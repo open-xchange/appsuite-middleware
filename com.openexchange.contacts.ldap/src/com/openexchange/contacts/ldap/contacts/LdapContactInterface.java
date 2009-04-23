@@ -182,15 +182,33 @@ public class LdapContactInterface implements ContactInterface {
         }
         final ArrayList<ContactObject> arrayList;
         final String searchfilter = folderprop.getSearchfilter();
+        final StringBuilder sb = new StringBuilder();
+        sb.append("(&");
+        sb.append(searchfilter);
+        final Mappings mappings = folderprop.getMappings();
         if (searchobject.isStartLetter()) {
-            arrayList = getLDAPContacts(folderId, columns, "(&" + searchfilter + "("+ folderprop.getMappings().getSurname() + "=" + searchobject.getPattern() + "*))", null);
+            sb.append("(");
+            sb.append(mappings.getSurname());
+            sb.append("=");
+            sb.append(escapeLDAPSearchFilter(searchobject.getPattern()));
+            sb.append("*))");
+            arrayList = getLDAPContacts(folderId, columns, sb.toString(), null);
         } else {
-            arrayList = getLDAPContacts(folderId, columns, searchfilter, null);
+            sb.append("(|");
+            addFilterFor(mappings.getDisplayname(), searchobject.getDisplayName(), sb);
+            addFilterFor(mappings.getGivenname(), searchobject.getGivenName(), sb);
+            addFilterFor(mappings.getSurname(), searchobject.getSurname(), sb);
+            addFilterFor(mappings.getEmail1(), searchobject.getEmail1(), sb);
+            addFilterFor(mappings.getEmail2(), searchobject.getEmail2(), sb);
+            addFilterFor(mappings.getEmail3(), searchobject.getEmail3(), sb);
+            sb.append("))");
+            arrayList = getLDAPContacts(folderId, columns, sb.toString(), null);
         }
         
         sorting(orderBy, orderDir, valueOf, arrayList);
         return new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
     }
+
 
     // The all request...
     public SearchIterator<ContactObject> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
@@ -277,6 +295,15 @@ public class LdapContactInterface implements ContactInterface {
     public void updateContactObject(final ContactObject co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
         LOG.info("Called updateContactObject");
     }
+
+    private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
+        sb.append("(");
+        sb.append(fieldname);
+        sb.append("=*");
+        sb.append(escapeLDAPSearchFilter(searchString));
+        sb.append("*)");
+    }
+
 
     private String[] getAttributes(final Set<Integer> columns) {
         final List<String> retval = new ArrayList<String>();
@@ -786,4 +813,38 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
 
+    private static String escapeLDAPSearchFilter(final String ldapfilter) {
+        // According to RFC2254 section 4 we escape the following chars so that no LDAP injection can be made:
+        // Character       ASCII value
+        // ---------------------------
+        // *               0x2a
+        // (               0x28
+        // )               0x29
+        // \               0x5c
+        // NUL             0x00
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ldapfilter.length(); i++) {
+            char curChar = ldapfilter.charAt(i);
+            switch (curChar) {
+                case '\\':
+                    sb.append("\\5c");
+                    break;
+                case '*':
+                    sb.append("\\2a");
+                    break;
+                case '(':
+                    sb.append("\\28");
+                    break;
+                case ')':
+                    sb.append("\\29");
+                    break;
+                case '\u0000': 
+                    sb.append("\\00"); 
+                    break;
+                default:
+                    sb.append(curChar);
+            }
+        }
+        return sb.toString();
+    }
 }

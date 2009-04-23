@@ -9,7 +9,7 @@
 # objects. This is used for unique identification. If you don't have such a
 # field, leave this property empty.
 com.openexchange.contacts.ldap.mapping.openldap.uniqueid 			= uidNumber
-com.openexchange.contacts.ldap.mapping.openldap.displayname 			= displayName
+com.openexchange.contacts.ldap.mapping.openldap.displayname 			= cn
 com.openexchange.contacts.ldap.mapping.openldap.givenname			= givenName
 com.openexchange.contacts.ldap.mapping.openldap.surname				= sn
 com.openexchange.contacts.ldap.mapping.openldap.email1				= mail
