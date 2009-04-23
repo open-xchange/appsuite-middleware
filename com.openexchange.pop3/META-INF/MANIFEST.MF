@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Pop3
+Bundle-Name: Open-Xchange POP3
 Bundle-SymbolicName: com.openexchange.pop3
 Bundle-Version: 6.9.0
 Bundle-Vendor: Open-Xchange Inc.
