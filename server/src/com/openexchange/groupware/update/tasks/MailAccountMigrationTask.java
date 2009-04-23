@@ -223,14 +223,14 @@ public final class MailAccountMigrationTask implements UpdateTask {
         account.setDrafts(prepareNonNullString(folderNameProvdider.getDrafts()));
         account.setId(MailAccount.DEFAULT_ID);
         account.setLogin(prepareNonNullString(user.getImapLogin()));
-        account.setMailServerURL(prepareNonNullString(user.getImapServer()));
+        account.parseMailServerURL(prepareNonNullString(user.getImapServer()));
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
         account.setPassword(null);
         account.setPrimaryAddress(prepareNonNullString(user.getMail()));
         account.setSent(prepareNonNullString(folderNameProvdider.getSent()));
         account.setSpam(prepareNonNullString(folderNameProvdider.getSpam()));
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK); // TODO: Obtain spam handler
-        account.setTransportServerURL(prepareNonNullString(user.getSmtpServer()));
+        account.parseTransportServerURL(prepareNonNullString(user.getSmtpServer()));
         account.setTrash(prepareNonNullString(folderNameProvdider.getTrash()));
         return account;
     }
@@ -341,7 +341,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             stmt.setLong(pos++, id);
             stmt.setLong(pos++, user);
             stmt.setString(pos++, mailAccount.getName());
-            stmt.setString(pos++, mailAccount.getMailServerURL());
+            stmt.setString(pos++, mailAccount.generateMailServerURL());
             stmt.setString(pos++, mailAccount.getLogin());
             stmt.setNull(pos++, Types.VARCHAR);
             stmt.setString(pos++, mailAccount.getPrimaryAddress());
@@ -367,7 +367,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             stmt.setLong(pos++, id);
             stmt.setLong(pos++, user);
             stmt.setString(pos++, mailAccount.getName());
-            stmt.setString(pos++, mailAccount.getTransportServerURL());
+            stmt.setString(pos++, mailAccount.generateTransportServerURL());
             stmt.setString(pos++, mailAccount.getLogin());
             stmt.setNull(pos++, Types.VARCHAR);
             stmt.setString(pos++, mailAccount.getPrimaryAddress());

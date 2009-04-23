@@ -223,7 +223,7 @@ public final class MailAccountRequest {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
             // Check needed fields
-            if (accountDescription.getMailServerURL() == null) {
+            if (accountDescription.getMailServer() == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
             }
             if (accountDescription.getLogin() == null) {
@@ -247,7 +247,7 @@ public final class MailAccountRequest {
     }
 
     private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException {
-        final String mailServerURL = accountDescription.getMailServerURL();
+        final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
@@ -303,11 +303,11 @@ public final class MailAccountRequest {
     }
 
     private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException {
-        final String transportServerURL = accountDescription.getTransportServerURL();
-        if (null == transportServerURL) {
+        if (null == accountDescription.getTransportServer()) {
             // Nothing to validate, treat as success
             return true;
         }
+        final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {

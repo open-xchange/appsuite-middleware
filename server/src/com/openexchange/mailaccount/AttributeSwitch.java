@@ -71,4 +71,12 @@ public interface AttributeSwitch {
     public Object spam();
     public Object confirmedSpam();
     public Object confirmedHam();
+    public Object mailServer();
+    public Object mailPort();
+    public Object mailProtocol();
+    public Object mailSecure();
+    public Object transportServer();
+    public Object transportPort();
+    public Object transportProtocol();
+    public Object transportSecure();
 }

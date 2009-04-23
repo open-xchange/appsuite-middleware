@@ -52,21 +52,21 @@ package com.openexchange.mailaccount.servlet.fields;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
 
-
 /**
  * {@link GetSwitch}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class GetSwitch implements AttributeSwitch {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetSwitch.class);
 
     private final MailAccountDescription desc;
 
     public GetSwitch(final MailAccountDescription desc) {
         this.desc = desc;
     }
-    
+
     public Object confirmedHam() {
         return desc.getConfirmedHam();
     }
@@ -88,7 +88,7 @@ public class GetSwitch implements AttributeSwitch {
     }
 
     public Object mailURL() {
-        return desc.getMailServerURL();
+        return desc.generateMailServerURL();
     }
 
     public Object name() {
@@ -116,11 +116,42 @@ public class GetSwitch implements AttributeSwitch {
     }
 
     public Object transportURL() {
-        return desc.getTransportServerURL();
+        return desc.generateTransportServerURL();
     }
 
     public Object trash() {
         return desc.getTrash();
     }
 
+    public Object mailPort() {
+        return Integer.valueOf(desc.getMailPort());
+    }
+
+    public Object mailProtocol() {
+        return desc.getMailProtocol();
+    }
+
+    public Object mailSecure() {
+        return Boolean.valueOf(desc.isMailSecure());
+    }
+
+    public Object mailServer() {
+        return desc.getMailServer();
+    }
+
+    public Object transportPort() {
+        return Integer.valueOf(desc.getTransportPort());
+    }
+
+    public Object transportProtocol() {
+        return desc.getTransportProtocol();
+    }
+
+    public Object transportSecure() {
+        return Boolean.valueOf(desc.isTransportSecure());
+    }
+
+    public Object transportServer() {
+        return desc.getTransportServer();
+    }
 }

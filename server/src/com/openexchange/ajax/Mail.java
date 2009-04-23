@@ -3491,7 +3491,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (checkTransportSupport && accountId != -1) {
                 final MailAccount account = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
                 // Check if determined account supports mail transport
-                if (null == account.getTransportServerURL()) {
+                if (null == account.getTransportServer()) {
                     // Account does not support mail transport
                     throw new MailException(MailException.Code.NO_TRANSPORT_SUPPORT, account.getName(), Integer.valueOf(accountId));
                 }

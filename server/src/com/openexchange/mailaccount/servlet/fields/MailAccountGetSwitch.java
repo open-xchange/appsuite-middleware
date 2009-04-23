@@ -59,6 +59,8 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class MailAccountGetSwitch implements AttributeSwitch {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountGetSwitch.class);
+
     private final MailAccount desc;
 
     public MailAccountGetSwitch(final MailAccount desc) {
@@ -86,7 +88,7 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     }
 
     public Object mailURL() {
-        return desc.getMailServerURL();
+        return desc.generateMailServerURL();
     }
 
     public Object name() {
@@ -114,10 +116,42 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     }
 
     public Object transportURL() {
-        return desc.getTransportServerURL();
+        return desc.generateTransportServerURL();
     }
 
     public Object trash() {
         return desc.getTrash();
+    }
+
+    public Object mailPort() {
+        return Integer.valueOf(desc.getMailPort());
+    }
+
+    public Object mailProtocol() {
+        return desc.getMailProtocol();
+    }
+
+    public Object mailSecure() {
+        return Boolean.valueOf(desc.isMailSecure());
+    }
+
+    public Object mailServer() {
+        return desc.getMailServer();
+    }
+
+    public Object transportPort() {
+        return Integer.valueOf(desc.getTransportPort());
+    }
+
+    public Object transportProtocol() {
+        return desc.getTransportProtocol();
+    }
+
+    public Object transportSecure() {
+        return Boolean.valueOf(desc.isTransportSecure());
+    }
+
+    public Object transportServer() {
+        return desc.getTransportServer();
     }
 }

@@ -141,12 +141,12 @@ public abstract class TransportConfig extends MailConfig {
      */
     public static String getTransportServerURL(final MailAccount mailAccount) {
         if (!mailAccount.isDefaultAccount()) {
-            return mailAccount.getTransportServerURL();
+            return mailAccount.generateTransportServerURL();
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
             return MailProperties.getInstance().getTransportServer();
         }
-        return mailAccount.getTransportServerURL();
+        return mailAccount.generateTransportServerURL();
     }
 
     /**

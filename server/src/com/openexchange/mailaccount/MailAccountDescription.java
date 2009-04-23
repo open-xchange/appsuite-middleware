@@ -50,6 +50,8 @@
 package com.openexchange.mailaccount;
 
 import java.io.Serializable;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.transport.config.TransportConfig;
 
 /**
  * {@link MailAccountDescription} - Container object describing a mail account to insert/update.
@@ -57,6 +59,8 @@ import java.io.Serializable;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountDescription implements Serializable {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountDescription.class);
 
     private static final long serialVersionUID = -2443656355399068302L;
 
@@ -66,13 +70,9 @@ public final class MailAccountDescription implements Serializable {
 
     private String password;
 
-    private String mailServerURL;
-
     private String name;
 
     private String primaryAddress;
-
-    private String transportServerURL;
 
     private String spamHandler;
 
@@ -90,11 +90,35 @@ public final class MailAccountDescription implements Serializable {
 
     private boolean defaultFlag;
 
+    private String mailServer;
+
+    private int mailPort;
+
+    private String mailProtocol;
+
+    private boolean mailSecure;
+
+    private String transportServer;
+
+    private int transportPort;
+
+    private String transportProtocol;
+
+    private boolean transportSecure;
+
+    private String mailServerUrl;
+
+    private String transportUrl;
+
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
     public MailAccountDescription() {
         super();
+        transportPort = 25;
+        mailPort = 143;
+        transportProtocol = "smtp";
+        mailProtocol = "imap";
     }
 
     /**
@@ -113,15 +137,6 @@ public final class MailAccountDescription implements Serializable {
      */
     public String getLogin() {
         return login;
-    }
-
-    /**
-     * Gets the mail server URL.
-     * 
-     * @return The mail server URL
-     */
-    public String getMailServerURL() {
-        return mailServerURL;
     }
 
     /**
@@ -152,15 +167,6 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
-     * Gets the transport server URL.
-     * 
-     * @return The transport server URL
-     */
-    public String getTransportServerURL() {
-        return transportServerURL;
-    }
-
-    /**
      * Gets the ID
      * 
      * @return The ID
@@ -188,12 +194,256 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
-     * Sets the mail server URL.
+     * Gets the mail server name.
+     * <p>
+     * The mail server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
+     * address.
      * 
-     * @param mailServerURL The mail server URL
+     * @return The mail server name
      */
-    public void setMailServerURL(final String mailServerURL) {
-        this.mailServerURL = mailServerURL;
+    public String getMailServer() {
+        return mailServer;
+    }
+
+    /**
+     * Gets the mail server port.
+     * 
+     * @return The mail server port
+     */
+    public int getMailPort() {
+        return mailPort;
+    }
+
+    /**
+     * Gets the mail server protocol.
+     * 
+     * @return The mail server protocol
+     */
+    public String getMailProtocol() {
+        return mailProtocol;
+    }
+
+    /**
+     * Checks if a secure connection to mail server shall be established.
+     * 
+     * @return <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
+     */
+    public boolean isMailSecure() {
+        return mailSecure;
+    }
+
+    /**
+     * Sets the mail server name.
+     * 
+     * @param mailServer The mail server name to set
+     */
+    public void setMailServer(final String mailServer) {
+        mailServerUrl = null;
+        this.mailServer = mailServer;
+    }
+
+    /**
+     * Sets the mail server port.
+     * 
+     * @param mailPort The mail server port to set
+     */
+    public void setMailPort(final int mailPort) {
+        mailServerUrl = null;
+        this.mailPort = mailPort;
+    }
+
+    /**
+     * Sets the mail server protocol.
+     * 
+     * @param mailProtocol The mail server protocol to set
+     */
+    public void setMailProtocol(final String mailProtocol) {
+        mailServerUrl = null;
+        this.mailProtocol = mailProtocol;
+    }
+
+    /**
+     * Sets if a secure connection to mail server shall be established.
+     * 
+     * @param mailSecure <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
+     */
+    public void setMailSecure(final boolean mailSecure) {
+        mailServerUrl = null;
+        this.mailSecure = mailSecure;
+    }
+
+    /**
+     * Gets the transport server name.
+     * <p>
+     * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
+     * address.
+     * 
+     * @return The transport server name
+     */
+    public String getTransportServer() {
+        return transportServer;
+    }
+
+    /**
+     * Gets the transport server port.
+     * 
+     * @return The transport server port
+     */
+    public int getTransportPort() {
+        return transportPort;
+    }
+
+    /**
+     * Gets the transport server protocol.
+     * 
+     * @return The transport server protocol
+     */
+    public String getTransportProtocol() {
+        return transportProtocol;
+    }
+
+    /**
+     * Checks if a secure connection to transport server shall be established.
+     * 
+     * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
+     */
+    public boolean isTransportSecure() {
+        return transportSecure;
+    }
+
+    /**
+     * Sets the transport server name.
+     * 
+     * @param transportServer The transport server name to set
+     */
+    public void setTransportServer(final String transportServer) {
+        transportUrl = null;
+        this.transportServer = transportServer;
+    }
+
+    /**
+     * Sets the transport server port
+     * 
+     * @param transportPort The transport server port to set
+     */
+    public void setTransportPort(final int transportPort) {
+        transportUrl = null;
+        this.transportPort = transportPort;
+    }
+
+    /**
+     * Sets the transport server protocol
+     * 
+     * @param transportProtocol The transport server protocol to set
+     */
+    public void setTransportProtocol(final String transportProtocol) {
+        transportUrl = null;
+        this.transportProtocol = transportProtocol;
+    }
+
+    /**
+     * Sets if a secure connection to transport server shall be established.
+     * 
+     * @param mailSecure <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
+     */
+    public void setTransportSecure(final boolean transportSecure) {
+        transportUrl = null;
+        this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Generates the mail server URL.
+     * 
+     * @return The generated mail server URL
+     */
+    public String generateMailServerURL() {
+        if (null != mailServerUrl) {
+            return mailServerUrl;
+        }
+        if (null == mailServer) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(mailProtocol);
+        if (mailSecure) {
+            sb.append('s');
+        }
+        return mailServerUrl = sb.append("://").append(mailServer).append(':').append(mailPort).toString();
+    }
+
+    /**
+     * Parses specified mail server URL
+     * 
+     * @param mailServerURL The mail server URL to parse
+     */
+    public void parseMailServerURL(final String mailServerURL) {
+        if (null == mailServerURL) {
+            setMailServer(null);
+            return;
+        }
+        final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+        final String prot;
+        final Object[] parsed;
+        if (tmp != null) {
+            prot = tmp[0];
+            parsed = parseServerAndPort(tmp[1], getMailPort());
+        } else {
+            prot = getMailProtocol();
+            parsed = parseServerAndPort(mailServerURL, getMailPort());
+        }
+        if (prot.endsWith("s")) {
+            setMailSecure(true);
+            setMailProtocol(prot.substring(0, prot.length() - 1));
+        } else {
+            setMailProtocol(prot);
+        }
+        setMailServer(parsed[0].toString());
+        setMailPort(((Integer) parsed[1]).intValue());
+    }
+
+    /**
+     * Parses specified transport server URL
+     * 
+     * @param mailServerURL The transport server URL to parse
+     */
+    public void parseTransportServerURL(final String transportServerURL) {
+        if (null == transportServerURL) {
+            setTransportServer(null);
+            return;
+        }
+        final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
+        final String prot;
+        final Object[] parsed;
+        if (tmp != null) {
+            prot = tmp[0];
+            parsed = parseServerAndPort(tmp[1], getTransportPort());
+        } else {
+            prot = getTransportProtocol();
+            parsed = parseServerAndPort(transportServerURL, getTransportPort());
+        }
+        if (prot.endsWith("s")) {
+            setTransportSecure(true);
+            setTransportProtocol(prot.substring(0, prot.length() - 1));
+        } else {
+            setTransportProtocol(prot);
+        }
+        setTransportServer(parsed[0].toString());
+        setTransportPort(((Integer) parsed[1]).intValue());
+    }
+
+    public String generateTransportServerURL() {
+        if (null != transportUrl) {
+            return transportUrl;
+        }
+        if (null == transportServer) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(transportProtocol);
+        if (transportSecure) {
+            sb.append('s');
+        }
+        return transportUrl = sb.append("://").append(transportServer).append(':').append(transportPort).toString();
     }
 
     /**
@@ -212,15 +462,6 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setPrimaryAddress(final String primaryAddress) {
         this.primaryAddress = primaryAddress;
-    }
-
-    /**
-     * Sets the transport server URL.
-     * 
-     * @param transportServerURL The transport server URL
-     */
-    public void setTransportServerURL(final String transportServerURL) {
-        this.transportServerURL = transportServerURL;
     }
 
     /**
@@ -367,5 +608,19 @@ public final class MailAccountDescription implements Serializable {
         this.defaultFlag = defaultFlag;
     }
 
+    private static Object[] parseServerAndPort(final String server, final int defaultPort) {
+        final int pos = server.indexOf(':');
+        if (pos == -1) {
+            return new Object[] { server, Integer.valueOf(defaultPort) };
+        }
+        int port;
+        try {
+            port = Integer.parseInt(server.substring(pos + 1));
+        } catch (final NumberFormatException e) {
+            LOG.warn("Unable to parse port out of URL: " + server + ". Using default port instead.", e);
+            port = defaultPort;
+        }
+        return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
+    }
 
 }

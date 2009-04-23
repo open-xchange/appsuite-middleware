@@ -332,12 +332,12 @@ public abstract class MailConfig {
      */
     public static final String getMailServerURL(final MailAccount mailAccount) {
         if (!mailAccount.isDefaultAccount()) {
-            return mailAccount.getMailServerURL();
+            return mailAccount.generateMailServerURL();
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
             return MailProperties.getInstance().getMailServer();
         }
-        return mailAccount.getMailServerURL();
+        return mailAccount.generateMailServerURL();
     }
 
     /**

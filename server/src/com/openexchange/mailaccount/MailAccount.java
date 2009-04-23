@@ -85,18 +85,80 @@ public interface MailAccount extends Serializable {
     public String getName();
 
     /**
-     * Gets the mail server URL; e.g. <code>&quot;imap://imap.somewhere.com:4143&quot;</code>.
+     * Generates the mail server URL; e.g. <code>&quot;imap://imap.somewhere.com:4143&quot;</code>.
      * 
-     * @return The mail server URL
+     * @return The generated mail server URL
      */
-    public String getMailServerURL();
+    public String generateMailServerURL();
 
     /**
-     * Gets the transport server URL; e.g. <code>&quot;smtp://smtp.somewhere.com:225&quot;</code>.
+     * Generates the transport server URL; e.g. <code>&quot;smtp://smtp.somewhere.com:225&quot;</code>.
      * 
-     * @return The transport server URL
+     * @return The generated transport server URL
      */
-    public String getTransportServerURL();
+    public String generateTransportServerURL();
+
+    /**
+     * Gets the mail server name.
+     * <p>
+     * The mail server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
+     * address.
+     * 
+     * @return The mail server name
+     */
+    public String getMailServer();
+
+    /**
+     * Gets the mail server port.
+     * 
+     * @return The mail server port
+     */
+    public int getMailPort();
+
+    /**
+     * Gets the mail server protocol.
+     * 
+     * @return The mail server protocol
+     */
+    public String getMailProtocol();
+
+    /**
+     * Checks if a secure connection to mail server shall be established.
+     * 
+     * @return <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
+     */
+    public boolean isMailSecure();
+
+    /**
+     * Gets the transport server name.
+     * <p>
+     * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
+     * address.
+     * 
+     * @return The transport server name
+     */
+    public String getTransportServer();
+
+    /**
+     * Gets the transport server port.
+     * 
+     * @return The transport server port
+     */
+    public int getTransportPort();
+
+    /**
+     * Gets the transport server protocol.
+     * 
+     * @return The transport server protocol
+     */
+    public String getTransportProtocol();
+
+    /**
+     * Checks if a secure connection to transport server shall be established.
+     * 
+     * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
+     */
+    public boolean isTransportSecure();
 
     /**
      * Gets the login.

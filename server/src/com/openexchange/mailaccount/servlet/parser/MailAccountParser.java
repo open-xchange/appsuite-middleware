@@ -54,11 +54,10 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
+import com.openexchange.mailaccount.servlet.fields.SetSwitch;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
@@ -106,62 +105,35 @@ public class MailAccountParser extends DataParser {
         }
         // Expect URL or separate fields for protocol, server, port, and secure
         if (json.has(MailAccountFields.MAIL_URL)) {
-            account.setMailServerURL(parseString(json, MailAccountFields.MAIL_URL));
+            account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL));
             attributes.add(Attribute.MAIL_URL_LITERAL);
+            attributes.addAll(Attribute.MAIL_URL_ATTRIBUTES);
+            
         } else {
-            final String url;
-            {
-                if (!json.has(MailAccountFields.MAIL_SERVER)) {
-                    throw new JSONException("Missing field \"" + MailAccountFields.MAIL_SERVER + "\" in JSON object.");
+            final SetSwitch setSwitch = new SetSwitch(account);
+            for(final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
+                if(json.has(attribute.getName())) {
+                    setSwitch.setValue(json.get(attribute.getName()));
+                    attribute.doSwitch(setSwitch);
+                    attributes.add(attribute);
                 }
-                if (!json.has(MailAccountFields.MAIL_PORT)) {
-                    throw new JSONException("Missing field \"" + MailAccountFields.MAIL_PORT + "\" in JSON object.");
-                }
-                final StringBuilder urlBuilder = new StringBuilder(128);
-                if (json.has(MailAccountFields.MAIL_PROTOCOL)) {
-                    urlBuilder.append(parseString(json, MailAccountFields.MAIL_PROTOCOL));
-                } else {
-                    urlBuilder.append(MailProperties.getInstance().getDefaultMailProvider());
-                }
-                if (parseBoolean(json, MailAccountFields.MAIL_SECURE)) {
-                    urlBuilder.append('s');
-                }
-                urlBuilder.append("://");
-                urlBuilder.append(parseString(json, MailAccountFields.MAIL_SERVER));
-                urlBuilder.append(':').append(parseInt(json, MailAccountFields.MAIL_PORT));
-                url = urlBuilder.toString();
             }
-            account.setMailServerURL(url);
-            attributes.add(Attribute.MAIL_URL_LITERAL);
+            
         }
         if (json.has(MailAccountFields.TRANSPORT_URL)) {
-            account.setTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL));
+            account.parseTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL));
             attributes.add(Attribute.TRANSPORT_URL_LITERAL);
+            attributes.addAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
+            
         } else {
-            final String url;
-            {
-                if (!json.has(MailAccountFields.TRANSPORT_SERVER)) {
-                    throw new JSONException("Missing field \"" + MailAccountFields.TRANSPORT_SERVER + "\" in JSON object.");
+            final SetSwitch setSwitch = new SetSwitch(account);
+            for(final Attribute attribute :Attribute.TRANSPORT_URL_ATTRIBUTES) {
+                if(json.has(attribute.getName())) {
+                    setSwitch.setValue(json.get(attribute.getName()));
+                    attribute.doSwitch(setSwitch);
+                    attributes.add(attribute);
                 }
-                if (!json.has(MailAccountFields.TRANSPORT_PORT)) {
-                    throw new JSONException("Missing field \"" + MailAccountFields.TRANSPORT_PORT + "\" in JSON object.");
-                }
-                final StringBuilder urlBuilder = new StringBuilder(128);
-                if (json.has(MailAccountFields.TRANSPORT_PROTOCOL)) {
-                    urlBuilder.append(parseString(json, MailAccountFields.TRANSPORT_PROTOCOL));
-                } else {
-                    urlBuilder.append(TransportProperties.getInstance().getDefaultTransportProvider());
-                }
-                if (parseBoolean(json, MailAccountFields.TRANSPORT_SECURE)) {
-                    urlBuilder.append('s');
-                }
-                urlBuilder.append("://");
-                urlBuilder.append(parseString(json, MailAccountFields.TRANSPORT_SERVER));
-                urlBuilder.append(':').append(parseInt(json, MailAccountFields.TRANSPORT_PORT));
-                url = urlBuilder.toString();
             }
-            account.setTransportServerURL(url);
-            attributes.add(Attribute.TRANSPORT_URL_LITERAL);
         }
         if (json.has(MailAccountFields.NAME)) {
             account.setName(parseString(json, MailAccountFields.NAME));

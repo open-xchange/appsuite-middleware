@@ -115,9 +115,29 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
         return delegate.getLogin();
     }
 
-    public String getMailServerURL() {
+    public String generateMailServerURL() {
         updateDelegate();
-        return delegate.getMailServerURL();
+        return delegate.generateMailServerURL();
+    }
+
+    public int getMailPort() {
+        updateDelegate();
+        return delegate.getMailPort();
+    }
+
+    public String getMailProtocol() {
+        updateDelegate();
+        return delegate.getMailProtocol();
+    }
+
+    public String getMailServer() {
+        updateDelegate();
+        return delegate.getMailServer();
+    }
+
+    public boolean isMailSecure() {
+        updateDelegate();
+        return delegate.isMailSecure();
     }
 
     public String getName() {
@@ -135,9 +155,29 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
         return delegate.getPrimaryAddress();
     }
 
-    public String getTransportServerURL() {
+    public String generateTransportServerURL() {
         updateDelegate();
-        return delegate.getTransportServerURL();
+        return delegate.generateTransportServerURL();
+    }
+    
+    public int getTransportPort() {
+        updateDelegate();
+        return delegate.getTransportPort();
+    }
+
+    public String getTransportProtocol() {
+        updateDelegate();
+        return delegate.getTransportProtocol();
+    }
+
+    public String getTransportServer() {
+        updateDelegate();
+        return delegate.getTransportServer();
+    }
+
+    public boolean isTransportSecure() {
+        updateDelegate();
+        return delegate.isTransportSecure();
     }
 
     public int getUserId() {
@@ -149,30 +189,37 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
     }
 
     public String getConfirmedHam() {
+        updateDelegate();
         return delegate.getConfirmedHam();
     }
 
     public String getConfirmedSpam() {
+        updateDelegate();
         return delegate.getConfirmedSpam();
     }
 
     public String getDrafts() {
+        updateDelegate();
         return delegate.getDrafts();
     }
 
     public String getSent() {
+        updateDelegate();
         return delegate.getSent();
     }
 
     public String getSpam() {
+        updateDelegate();
         return delegate.getSpam();
     }
 
     public String getTrash() {
+        updateDelegate();
         return delegate.getTrash();
     }
 
     public String getSpamHandler() {
+        updateDelegate();
         return delegate.getSpamHandler();
     }
 }

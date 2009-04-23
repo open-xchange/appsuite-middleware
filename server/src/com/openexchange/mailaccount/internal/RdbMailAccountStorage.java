@@ -62,6 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.database.Database;
@@ -75,6 +76,8 @@ import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.servlet.fields.GetSwitch;
+import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
+import com.openexchange.mailaccount.servlet.fields.SetSwitch;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.PasswordUtil;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -140,7 +143,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             mailAccount.setId(id);
             mailAccount.setLogin(result.getString(3));
-            mailAccount.setMailServerURL(result.getString(2));
+            mailAccount.parseMailServerURL(result.getString(2));
             mailAccount.setName(result.getString(1));
             final String pw = result.getString(4);
             if (result.wasNull()) {
@@ -188,10 +191,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(3, user);
             result = stmt.executeQuery();
             if (result.next()) {
-                mailAccount.setTransportServerURL(result.getString(2));
+                mailAccount.parseTransportServerURL(result.getString(2));
             } else {
                 // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(cid));
-                mailAccount.setTransportServerURL(null);
+                mailAccount.setTransportServer(null);
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
@@ -349,7 +352,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
         for (int i = 0; i < tmp.length; i++) {
             final MailAccount cur = tmp[i];
-            if (server.equals(toSocketAddr(cur.getMailServerURL(), 143))) {
+            if (server.equals(toSocketAddr(cur.generateMailServerURL(), 143))) {
                 l.add(cur);
             }
         }
@@ -398,7 +401,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
         for (int i = 0; i < tmp.length; i++) {
             final MailAccount cur = tmp[i];
-            if (server.equals(toSocketAddr(cur.getMailServerURL(), 143))) {
+            if (server.equals(toSocketAddr(cur.generateMailServerURL(), 143))) {
                 l.add(cur);
             }
         }
@@ -417,6 +420,40 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
+            MailAccount storageVersion = null;
+            if (prepareURL(attributes, Attribute.MAIL_URL_ATTRIBUTES, Attribute.MAIL_URL_LITERAL)) {
+                storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);
+                final SetSwitch setSwitch = new SetSwitch(mailAccount);
+
+                for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
+                    if (!attributes.contains(attribute)) {
+                        final Object value = attribute.doSwitch(getSwitch);
+                        setSwitch.setValue(value);
+                        attribute.doSwitch(setSwitch);
+                    }
+                }
+            }
+
+            if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
+                if (storageVersion != null) {
+                    storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                }
+                final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);
+                final SetSwitch setSwitch = new SetSwitch(mailAccount);
+
+                for (final Attribute attribute : Attribute.TRANSPORT_URL_ATTRIBUTES) {
+                    if (!attributes.contains(attribute)) {
+                        final Object value = attribute.doSwitch(getSwitch);
+                        setSwitch.setValue(value);
+                        attribute.doSwitch(setSwitch);
+                    }
+                }
+            }
+
+            attributes.removeAll(Attribute.MAIL_URL_ATTRIBUTES);
+            attributes.removeAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
+
             String encryptedPassword = null; //
 
             List<Attribute> orderedAttributes = null;
@@ -505,6 +542,22 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    private boolean prepareURL(final Set<Attribute> attributes, final Set<Attribute> compareWith, final Attribute urlAttribute) {
+        final EnumSet<Attribute> copy = EnumSet.copyOf(attributes);
+        if (copy.removeAll(compareWith)) {
+            attributes.add(urlAttribute);
+            // At least one of the mail url attributes is present in attributes
+            if (attributes.containsAll(compareWith)) {
+                // All mail url attributes are present
+                return false;
+            }
+            // Not all are present
+            return true;
+        }
+        // None are present
+        return false;
+    }
+
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws MailAccountException {
         if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
@@ -526,7 +579,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
             int pos = 1;
             stmt.setString(pos++, mailAccount.getName());
-            stmt.setString(pos++, mailAccount.getMailServerURL());
+            stmt.setString(pos++, mailAccount.generateMailServerURL());
             stmt.setString(pos++, mailAccount.getLogin());
             stmt.setString(pos++, encryptedPassword);
             stmt.setString(pos++, mailAccount.getPrimaryAddress());
@@ -546,7 +599,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(pos++, mailAccount.getId());
             stmt.setLong(pos++, user);
             stmt.executeUpdate();
-            final String transportURL = mailAccount.getTransportServerURL();
+            final String transportURL = mailAccount.generateTransportServerURL();
             if (null != transportURL) {
                 stmt.close();
                 stmt = con.prepareStatement(UPDATE_TRANSPORT_ACCOUNT);
@@ -610,7 +663,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(pos++, id);
             stmt.setLong(pos++, user);
             stmt.setString(pos++, mailAccount.getName());
-            stmt.setString(pos++, mailAccount.getMailServerURL());
+            stmt.setString(pos++, mailAccount.generateMailServerURL());
             stmt.setString(pos++, mailAccount.getLogin());
             if (mailAccount.isDefaultFlag()) {
                 stmt.setNull(pos++, Types.VARCHAR);
@@ -632,7 +685,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, sh);
             }
             stmt.executeUpdate();
-            final String transportURL = mailAccount.getTransportServerURL();
+            final String transportURL = mailAccount.generateTransportServerURL();
             if (null != transportURL) {
                 stmt.close();
                 // cid, id, user, name, url, login, password, send_addr, default_flag

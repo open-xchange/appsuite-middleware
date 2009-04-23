@@ -65,8 +65,8 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
     private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL, Attribute.TRANSPORT_URL_LITERAL, Attribute.PRIMARY_ADDRESS_LITERAL);
     
-    public static boolean needsUpdate(Set<Attribute> attributes) {
-        for(Attribute attribute : attributes ) {
+    public static boolean needsUpdate(final Set<Attribute> attributes) {
+        for(final Attribute attribute : attributes ) {
             if (KNOWN_ATTRIBUTES.contains(attribute)) {
                 return true;
             }
@@ -74,11 +74,11 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return false;
     }
     
-    public boolean handles(Attribute attribute) {
+    public boolean handles(final Attribute attribute) {
         return KNOWN_ATTRIBUTES.contains(attribute);
     }
     
-    private StringBuilder bob = new StringBuilder("UPDATE user_transport_account SET ");
+    private final StringBuilder bob = new StringBuilder("UPDATE user_transport_account SET ");
    
     public String getUpdateQuery() {
         bob.setLength(bob.length()-1);
@@ -86,6 +86,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return bob.toString();
     }
     
+    @Override
     public String toString() {
         return getUpdateQuery();
     }
@@ -152,6 +153,38 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
   
     public Object trash() {
+        return null;
+    }
+
+    public Object mailPort() {
+        return null;
+    }
+
+    public Object mailProtocol() {
+        return null;
+    }
+
+    public Object mailSecure() {
+        return null;
+    }
+
+    public Object mailServer() {
+        return null;
+    }
+
+    public Object transportPort() {
+        return null;
+    }
+
+    public Object transportProtocol() {
+        return null;
+    }
+
+    public Object transportSecure() {
+        return null;
+    }
+
+    public Object transportServer() {
         return null;
     }
 

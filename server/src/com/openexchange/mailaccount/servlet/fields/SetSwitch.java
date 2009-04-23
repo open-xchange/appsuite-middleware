@@ -61,15 +61,15 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class SetSwitch implements AttributeSwitch{
 
-    private MailAccountDescription desc;
+    private final MailAccountDescription desc;
     private Object value;
     
-    public SetSwitch(MailAccountDescription desc) {
+    public SetSwitch(final MailAccountDescription desc) {
         super();
         this.desc = desc;
     }
 
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         this.value = value;
     }
     
@@ -99,7 +99,7 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object mailURL() {
-        desc.setMailServerURL((String) value);
+        desc.parseMailServerURL((String) value);
         return null;
     }
 
@@ -134,13 +134,53 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object transportURL() {
-        desc.setTransportServerURL((String) value);
+        desc.parseTransportServerURL((String) value);
         return null;
     }
 
 
     public Object trash() {
         desc.setTrash((String) value);
+        return null;
+    }
+
+    public Object mailPort() {
+        desc.setMailPort((Integer) value);
+        return null;
+    }
+
+    public Object mailProtocol() {
+        desc.setMailProtocol((String) value);
+        return null;
+    }
+
+    public Object mailSecure() {
+        desc.setMailSecure((Boolean) value);
+        return null;
+    }
+
+    public Object mailServer() {
+        desc.setMailServer((String) value);
+        return null;
+    }
+
+    public Object transportPort() {
+        desc.setTransportPort((Integer) value);
+        return null;
+    }
+
+    public Object transportProtocol() {
+        desc.setTransportProtocol((String) value);
+        return null;
+    }
+
+    public Object transportSecure() {
+        desc.setTransportSecure((Boolean) value);
+        return null;
+    }
+
+    public Object transportServer() {
+        desc.setTransportServer((String) value);
         return null;
     }
 

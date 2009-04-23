@@ -49,8 +49,11 @@
 
 package com.openexchange.mailaccount;
 
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 
 /**
@@ -73,8 +76,19 @@ public enum Attribute {
     DRAFTS_LITERAL(MailAccountFields.DRAFTS, 1011),
     SPAM_LITERAL(MailAccountFields.SPAM, 1012),
     CONFIRMED_SPAM_LITERAL(MailAccountFields.CONFIRMED_SPAM, 1013),
-    CONFIRMED_HAM_LITERAL(MailAccountFields.CONFIRMED_HAM, 1014);
+    CONFIRMED_HAM_LITERAL(MailAccountFields.CONFIRMED_HAM, 1014),
+    MAIL_SERVER_LITERAL(MailAccountFields.MAIL_SERVER, 1015),
+    MAIL_PORT_LITERAL(MailAccountFields.MAIL_PORT, 1016),
+    MAIL_PROTOCOL_LITERAL(MailAccountFields.MAIL_PROTOCOL, 1017),
+    MAIL_SECURE_LITERAL(MailAccountFields.MAIL_SECURE, 1018),
+    TRANSPORT_SERVER_LITERAL(MailAccountFields.TRANSPORT_SERVER, 1015),
+    TRANSPORT_PORT_LITERAL(MailAccountFields.TRANSPORT_PORT, 1016),
+    TRANSPORT_PROTOCOL_LITERAL(MailAccountFields.TRANSPORT_PROTOCOL, 1017),
+    TRANSPORT_SECURE_LITERAL(MailAccountFields.TRANSPORT_SECURE, 1018);
 
+    public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.MAIL_PORT_LITERAL, Attribute.MAIL_PROTOCOL_LITERAL, Attribute.MAIL_SECURE_LITERAL, Attribute.MAIL_SERVER_LITERAL));
+    public static final Set<Attribute> TRANSPORT_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.TRANSPORT_PORT_LITERAL, Attribute.TRANSPORT_PROTOCOL_LITERAL, Attribute.TRANSPORT_SECURE_LITERAL, Attribute.TRANSPORT_SERVER_LITERAL));
+    
     private int id;
 
     private String attrName;
@@ -114,6 +128,22 @@ public enum Attribute {
             return switcher.confirmedSpam();
         case CONFIRMED_HAM_LITERAL:
             return switcher.confirmedHam();
+        case MAIL_SERVER_LITERAL:
+            return switcher.mailServer();
+        case MAIL_PORT_LITERAL:
+            return switcher.mailPort();
+        case MAIL_PROTOCOL_LITERAL:
+            return switcher.mailProtocol();
+        case MAIL_SECURE_LITERAL:
+            return switcher.mailSecure();
+        case TRANSPORT_SERVER_LITERAL:
+            return switcher.transportServer();
+        case TRANSPORT_PORT_LITERAL:
+            return switcher.transportPort();
+        case TRANSPORT_PROTOCOL_LITERAL:
+            return switcher.transportProtocol();
+        case TRANSPORT_SECURE_LITERAL:
+            return switcher.transportSecure();
         default:
             throw new IllegalArgumentException(this.getName());
         }
