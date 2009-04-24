@@ -223,13 +223,13 @@ public final class MailAccountRequest {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
             // Check needed fields
-            if (accountDescription.getMailServer() == null) {
+            if (null == accountDescription.getMailServer()) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
             }
-            if (accountDescription.getLogin() == null) {
+            if (null == accountDescription.getLogin()) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.LOGIN);
             }
-            if (accountDescription.getPassword() == null) {
+            if (null == accountDescription.getPassword()) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
             }
             // Validate mail server
@@ -238,8 +238,10 @@ public final class MailAccountRequest {
             if (!validated) {
                 return Boolean.FALSE;
             }
-            // Now check transport server URL
-            validated = checkTransportServerURL(accountDescription);
+            // Now check transport server URL, if a transport server is present
+            if (null != accountDescription.getTransportServer()) {
+                validated = checkTransportServerURL(accountDescription);
+            }
             return Boolean.valueOf(validated);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
@@ -303,10 +305,6 @@ public final class MailAccountRequest {
     }
 
     private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException {
-        if (null == accountDescription.getTransportServer()) {
-            // Nothing to validate, treat as success
-            return true;
-        }
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
