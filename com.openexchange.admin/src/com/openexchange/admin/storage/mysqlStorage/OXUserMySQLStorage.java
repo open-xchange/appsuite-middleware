@@ -1134,7 +1134,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
-        account.setMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ':' + user.getImapPort());
+        account.parseMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ":" + user.getImapPort());
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
         String lang = user.getLanguage();
@@ -1151,7 +1151,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
         account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
-        account.setTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
+        account.parseTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
         try {
             mass.insertMailAccount(account, userId, context, null, con);
         } catch (MailAccountException e) {
