@@ -76,6 +76,7 @@ import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
+import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
@@ -481,15 +482,37 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                          * Examine INBOX folder since NAMESPACE capability is not supported
                          */
                         setSeparator(inboxFolder.getSeparator());
-                        final boolean noInferiors = !inferiors(inboxFolder);
+                        final boolean inboxInferiors = inferiors(inboxFolder);
+                        /*
+                         * Examine root folder if subfolders allowed
+                         */
+                        final boolean rootInferiors = RootSubfolderCache.canCreateSubfolders(
+                            (DefaultFolder) imapStore.getDefaultFolder(),
+                            true,
+                            session,
+                            accountId).booleanValue();
                         /*
                          * Determine where to create default folders and store as a prefix for folder fullname
                          */
-                        if (!noInferiors && (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace())) {
-                            /*
-                             * Only allow default folder below INBOX if inferiors are permitted nested default folder are explicitly allowed
-                             */
+                        if (!inboxInferiors && rootInferiors) {
+                            // Create folder beside INBOX folder
+                            tmp.append("");
+                        } else if (inboxInferiors && !rootInferiors) {
+                            // Create folder under INBOX folder
                             tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+                        } else if (inboxInferiors && rootInferiors) {
+                            if (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
+                                /*
+                                 * Only allow default folder below INBOX if inferiors are permitted nested default folder are explicitly
+                                 * allowed
+                                 */
+                                tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+                            } else {
+                                tmp.append("");
+                            }
+                        } else {
+                            // Cannot occur: No folders are allowed to be created, neither below INBOX nor below root folder
+                            throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, STR_INBOX);
                         }
                     }
                     final String prefix = tmp.toString();
@@ -500,7 +523,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         final String param = MailSessionParameterNames.getParamMBox(accountId);
                         Boolean mbox = (Boolean) session.getParameter(param);
                         if (null == mbox) {
-                            mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(inboxFolder, FOLDER_TYPE, prefix));
+                            mbox = Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(inboxFolder, FOLDER_TYPE, prefix));
                             session.setParameter(param, mbox);
                         }
                         mboxEnabled = mbox.booleanValue();
@@ -652,7 +675,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 final String param = MailSessionParameterNames.getParamMBox(accountId);
                 Boolean mbox = (Boolean) session.getParameter(param);
                 if (null == mbox) {
-                    mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(parent, FOLDER_TYPE, new StringBuilder(
+                    mbox = Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(parent, FOLDER_TYPE, new StringBuilder(
                         parent.getFullName()).append(separator).toString()));
                     session.setParameter(param, mbox);
                 }
@@ -910,7 +933,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final String param = MailSessionParameterNames.getParamMBox(accountId);
                     Boolean mbox = (Boolean) session.getParameter(param);
                     if (null == mbox) {
-                        mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(destFolder, FOLDER_TYPE, new StringBuilder(
+                        mbox = Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(destFolder, FOLDER_TYPE, new StringBuilder(
                             destFolder.getFullName()).append(separator).toString()));
                         session.setParameter(param, mbox);
                     }
