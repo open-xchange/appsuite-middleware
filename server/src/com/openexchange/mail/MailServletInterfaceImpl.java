@@ -1180,8 +1180,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Insert
          */
-        final FullnameArgument argument = prepareMailFolderParam(mailFolder.getParentFullname());
-        final int accountId = argument.getAccountId();
+        final int accountId = mailFolder.getParentAccountId();
         initConnection(accountId);
         return prepareFullname(accountId, mailAccess.getFolderStorage().createFolder(mailFolder));
     }
