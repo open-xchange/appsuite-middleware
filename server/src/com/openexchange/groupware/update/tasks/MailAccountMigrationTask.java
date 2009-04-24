@@ -161,6 +161,9 @@ public final class MailAccountMigrationTask implements UpdateTask {
 
     private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws UpdateException {
         final Context ctx = new ContextImpl(contextId);
+        // First check (and possibly insert) a sequence for specified context
+        checkAndInsertMailAccountSequence(ctx);
+        // Proceed with user data migration to new mail account tables
         try {
             final StringBuilder sb = new StringBuilder(256);
             for (final Integer userId : users) {
@@ -239,7 +242,12 @@ public final class MailAccountMigrationTask implements UpdateTask {
         return null == string ? "" : string;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." })
+    @OXThrowsMultiple(
+        category = { Category.CODE_ERROR },
+        desc = { "" },
+        exceptionId = { 1 },
+        msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." }
+    )
     private static UpdateException createSQLError(final SQLException e) {
         return EXCEPTION.create(1, e, e.getMessage());
     }
@@ -318,10 +326,6 @@ public final class MailAccountMigrationTask implements UpdateTask {
         };
     }
 
-    private static final String INSERT_MAIL_ACCOUNT = "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String INSERT_TRANSPORT_ACCOUNT = "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag) VALUES (?,?,?,?,?,?,?,?,?)";
-
     private static void insertDefaultMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx) throws UpdateException {
         final int cid = ctx.getContextId();
         final int id = MailAccount.DEFAULT_ID;
@@ -333,7 +337,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(INSERT_MAIL_ACCOUNT);
+            stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             int pos = 1;
             // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
             // confirmed_ham, spam_handler
@@ -361,7 +365,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             stmt.executeUpdate();
             stmt.close();
             // cid, id, user, name, url, login, password, send_addr, default_flag
-            stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
+            stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag) VALUES (?,?,?,?,?,?,?,?,?)");
             pos = 1;
             stmt.setLong(pos++, cid);
             stmt.setLong(pos++, id);
@@ -380,4 +384,37 @@ public final class MailAccountMigrationTask implements UpdateTask {
             Database.back(cid, true, con);
         }
     }
+
+    private static void checkAndInsertMailAccountSequence(final Context ctx) throws UpdateException {
+        final int cid = ctx.getContextId();
+        Connection con = null;
+        try {
+            con = Database.get(cid, true);
+        } catch (final DBPoolingException e) {
+            throw new UpdateException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT * FROM sequence_mail_service WHERE cid = ?");
+            stmt.setLong(1, cid);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                // Sequence table already contains an entry for specified context
+                return;
+            }
+            rs.close();
+            stmt.close();
+            stmt = con.prepareStatement("INSERT INTO sequence_mail_service (cid, id) VALUES (?, ?)");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, 0);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw createSQLError(e);
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
+        }
+    }
+
 }

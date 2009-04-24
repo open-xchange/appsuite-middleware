@@ -193,7 +193,12 @@ public class MailAccountCreateTablesTask implements UpdateTask {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." })
+    @OXThrowsMultiple(
+        category = { Category.CODE_ERROR },
+        desc = { "" },
+        exceptionId = { 1 },
+        msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." }
+    )
     private static UpdateException createSQLError(final SQLException e) {
         return EXCEPTION.create(1, e, e.getMessage());
     }
