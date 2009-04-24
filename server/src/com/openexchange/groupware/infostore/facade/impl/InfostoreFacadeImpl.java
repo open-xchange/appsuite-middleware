@@ -63,10 +63,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
@@ -88,8 +86,22 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
-import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
-import com.openexchange.groupware.infostore.database.impl.*;
+import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
+import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.GetSwitch;
+import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelTableAction;
+import com.openexchange.groupware.infostore.database.impl.SetSwitch;
+import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
@@ -106,7 +118,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.DBService;
@@ -117,7 +128,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -163,7 +173,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     private final ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
 
-    private TouchInfoitemsWithExpiredLocksListener expiredLocksListener;
+    private final TouchInfoitemsWithExpiredLocksListener expiredLocksListener;
 
     public InfostoreFacadeImpl() {
         super();
@@ -211,9 +221,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             throw EXCEPTIONS.create(0);
         }
         
-        List<Lock> locks = lockManager.findLocks(id, ctx, user, userConfig);
-        Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
-        allLocks.put(id, locks);
+        final List<Lock> locks = lockManager.findLocks(id, ctx, user, userConfig);
+        final Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
+        allLocks.put(Integer.valueOf(id), locks);
         
         return addNumberOfVersions(addLocked(load(id,version,ctx), allLocks,ctx, user, userConfig), ctx);
     }
@@ -349,7 +359,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 13, msg = "Could not iterate result")
-    private Delta addLocked(final Delta<DocumentMetadata> delta, Map<Integer, List<Lock>> locks, final Context ctx, final User user,
+    private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         try {
             return new LockDelta(delta, locks, ctx, user, userConfig);
@@ -359,7 +369,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 44, msg = "Could not iterate result")
-    private Delta addNumberOfVersions(final Delta<DocumentMetadata> delta, final Context ctx) throws OXException {
+    private Delta<DocumentMetadata> addNumberOfVersions(final Delta<DocumentMetadata> delta, final Context ctx) throws OXException {
         try {
             return new NumberOfVersionsDelta(delta, ctx);
         } catch (final SearchIteratorException e) {
@@ -371,11 +381,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     private TimedResult<DocumentMetadata> addNumberOfVersions(final TimedResult<DocumentMetadata> tr, final Context ctx) throws InfostoreException {
         try {
             return new NumberOfVersionsTimedResult(tr, ctx);
-        } catch (SearchIteratorException x) {
+        } catch (final SearchIteratorException x) {
             throw EXCEPTIONS.create(43, x);
-        } catch (InfostoreException x) {
+        } catch (final InfostoreException x) {
             throw x;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         }
     }
@@ -391,12 +401,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The query to cound the versions in a document failed.", exceptionId = 42, msg = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s")
-    private DocumentMetadata addNumberOfVersions(final DocumentMetadata document, Context ctx) throws InfostoreException {
+    private DocumentMetadata addNumberOfVersions(final DocumentMetadata document, final Context ctx) throws InfostoreException {
 
         try {
             return performQuery(ctx, QUERIES.getNumberOfVersionsQueryForOneDocument(), new ResultProcessor<DocumentMetadata>() {
 
-                public DocumentMetadata process(ResultSet rs) throws SQLException {
+                public DocumentMetadata process(final ResultSet rs) throws SQLException {
                     if(!rs.next()) {
                         LOG.error("Infoitem disappeared when trying to count versions");
                         return document;
@@ -406,20 +416,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                     document.setNumberOfVersions(numberOfVersions);
                     return document;
                 }
-            }, document.getId(), ctx.getContextId());
-        } catch (SQLException e) {
+            }, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw EXCEPTIONS.create(42, e, document.getId(), ctx.getContextId(), QUERIES.getNumberOfVersionsQueryForOneDocument());
-        } catch (TransactionException e) {
+            throw EXCEPTIONS.create(42, e, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()), QUERIES.getNumberOfVersionsQueryForOneDocument());
+        } catch (final TransactionException e) {
             throw new InfostoreException(e);
         }
     }
 
-    private DocumentMetadata addLocked(final DocumentMetadata document, Map<Integer, List<Lock>> allLocks, final Context ctx,
+    private DocumentMetadata addLocked(final DocumentMetadata document, final Map<Integer, List<Lock>> allLocks, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException {
         List<Lock> locks = null;
         if(allLocks != null) {
-            locks = allLocks.get(document.getId());
+            locks = allLocks.get(Integer.valueOf(document.getId()));
         } else {
             locks = lockManager.findLocks(document.getId(), ctx, user, userConfig);
         }
@@ -436,7 +446,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return document;
     }
 
-    private SearchIterator<DocumentMetadata> numberOfVersionsIterator(SearchIterator<?> iter, Context ctx) throws OXException, SearchIteratorException {
+    private SearchIterator<DocumentMetadata> numberOfVersionsIterator(final SearchIterator<?> iter, final Context ctx) throws OXException, SearchIteratorException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
         while (iter.hasNext()) {
             final DocumentMetadata m = (DocumentMetadata) iter.next();
@@ -449,7 +459,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, Map<Integer, List<Lock>> locks,
+    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks,
             final Context ctx, final User user, final UserConfiguration userConfig)
          throws SearchIteratorException, OXException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
@@ -650,7 +660,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
     }
 
-    protected <T> T  performQuery(Context ctx, String query, ResultProcessor<T> rsp, Object...args) throws SQLException, TransactionException {
+    protected <T> T  performQuery(final Context ctx, final String query, final ResultProcessor<T> rsp, final Object...args) throws SQLException, TransactionException {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1118,7 +1128,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
         final Set<Integer> idSet = new HashSet<Integer>();
         for (final int i : id) {
-            idSet.add(i);
+            idSet.add(Integer.valueOf(i));
         }
 
         final Map<Long, EffectivePermission> perms = new HashMap<Long, EffectivePermission>();
@@ -1139,9 +1149,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                         p, m, getUser(sessionObj));
                 if (!infoPerm.canDeleteObject()) {
                     throw EXCEPTIONS.create(45);
-                } else {
-                    toDeleteDocs.add(m);
                 }
+                toDeleteDocs.add(m);
             }
         }
 
@@ -1325,7 +1334,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return retval;
     }
 
-    public TimedResult getDocuments(final long folderId, final Context ctx, final User user,
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         return getDocuments(folderId,
                 Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user,
@@ -1455,7 +1464,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     }
 
-    public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns,
             final boolean ignoreDeleted, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException, SearchIteratorException {
         return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted,
@@ -1463,7 +1472,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public Delta getDelta(final long folderId, final long updateSince, Metadata[] columns,
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns,
             final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException, SearchIteratorException {
         boolean onlyOwn = false;
@@ -1487,7 +1496,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
 
-        Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, ctx, user, userConfig);
+        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, ctx, user, userConfig);
         
         final DBProvider reuse = new ReuseReadConProvider(getProvider());
 
@@ -1511,7 +1520,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
 
-        Delta delta = new DeltaImpl(newIter, modIter, (ignoreDeleted ? SearchIteratorAdapter.createEmptyIterator() : delIter), System.currentTimeMillis());
+        final SearchIterator<DocumentMetadata> it;
+        if (ignoreDeleted) {
+            it = SearchIteratorAdapter.createEmptyIterator();
+        } else {
+            it = delIter;
+        }
+        Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
 
         if (addLocked) {
             delta = addLocked(delta, locks, ctx,
@@ -1524,12 +1539,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
 
-    private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(long folderId, Context ctx, User user, UserConfiguration userConfig) throws SearchIteratorException, OXException {
-        Map<Integer, List<Lock>> locks = new HashMap<Integer, List<Lock>>();
-        InfostoreIterator documents = InfostoreIterator.documents(folderId, new Metadata[]{Metadata.ID_LITERAL}, null, -1, getProvider(), ctx);
+    private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
+        final Map<Integer, List<Lock>> locks = new HashMap<Integer, List<Lock>>();
+        final InfostoreIterator documents = InfostoreIterator.documents(folderId, new Metadata[]{Metadata.ID_LITERAL}, null, -1, getProvider(), ctx);
         try {
             while(documents.hasNext()) {
-                DocumentMetadata document = documents.next();
+                final DocumentMetadata document = documents.next();
                 lockManager.findLocks(document.getId(), ctx, user, userConfig);
             }
         } finally {
@@ -1580,15 +1595,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
     }
     
-    private Metadata[] addLastModifiedIfNeeded(Metadata[] columns) {
-        for (Metadata metadata : columns) {
+    private Metadata[] addLastModifiedIfNeeded(final Metadata[] columns) {
+        for (final Metadata metadata : columns) {
             if(metadata == Metadata.LAST_MODIFIED_LITERAL || metadata == Metadata.LAST_MODIFIED_UTC_LITERAL) {
                 return columns;
             }
         }
-        Metadata[] copy = new Metadata[columns.length+1];
+        final Metadata[] copy = new Metadata[columns.length+1];
         int i = 0;
-        for (Metadata metadata : columns) {
+        for (final Metadata metadata : columns) {
             copy[i++] = metadata;
         }
         copy[i] = Metadata.LAST_MODIFIED_UTC_LITERAL;
@@ -1620,7 +1635,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             final DBService service = (DBService) o;
             switch(this) {
                 default : return;
-                case SET_REQUEST_TRANSACTIONAL: service.setRequestTransactional((Boolean) args[0]); break;
+                case SET_REQUEST_TRANSACTIONAL: service.setRequestTransactional(((Boolean) args[0]).booleanValue()); break;
                 case SET_PROVIDER: service.setProvider((DBProvider)args[0]); break;
             }
         }
@@ -1698,7 +1713,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     @Override
     public void setRequestTransactional(final boolean transactional) {
         db.setRequestTransactional(transactional);
-        ServiceMethod.SET_REQUEST_TRANSACTIONAL.call(security, transactional);
+        ServiceMethod.SET_REQUEST_TRANSACTIONAL.call(security, Boolean.valueOf(transactional));
         lockManager.setRequestTransactional(transactional);
         super.setRequestTransactional(transactional);
     }
@@ -1784,20 +1799,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     }
 
-    private final class LockDelta implements Delta {
+    private final class LockDelta implements Delta<DocumentMetadata> {
 
         private final long sequenceNumber;
 
-        private final SearchIterator newIter;
+        private final SearchIterator<DocumentMetadata> newIter;
 
-        private final SearchIterator modified;
+        private final SearchIterator<DocumentMetadata> modified;
 
-        private SearchIterator deleted;
+        private SearchIterator<DocumentMetadata> deleted;
 
-        public LockDelta(final Delta delegate, Map<Integer, List<Lock>> locks, final Context ctx, final User user,
+        public LockDelta(final Delta<DocumentMetadata> delegate, final Map<Integer, List<Lock>> locks, final Context ctx, final User user,
                 final UserConfiguration userConfig) throws SearchIteratorException,
                 OXException {
-            final SearchIterator deleted = delegate.getDeleted();
+            final SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
             if(null != deleted) {
                 this.deleted = lockedUntilIterator(deleted, locks, ctx,
                         user, userConfig);
@@ -1809,20 +1824,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             this.sequenceNumber = delegate.sequenceNumber();
         }
 
-        public SearchIterator getDeleted() {
+        public SearchIterator<DocumentMetadata> getDeleted() {
             return deleted;
         }
 
-        public SearchIterator getModified() {
+        public SearchIterator<DocumentMetadata> getModified() {
             return modified;
         }
 
-        public SearchIterator getNew() {
+        public SearchIterator<DocumentMetadata> getNew() {
             return newIter;
         }
 
-        public SearchIterator results() {
-            return new CombinedSearchIterator(newIter, modified);
+        public SearchIterator<DocumentMetadata> results() {
+            return new CombinedSearchIterator<DocumentMetadata>(newIter, modified);
         }
 
         public long sequenceNumber() {
@@ -1837,19 +1852,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     }
 
-    private final class NumberOfVersionsDelta implements Delta {
+    private final class NumberOfVersionsDelta implements Delta<DocumentMetadata> {
 
         private final long sequenceNumber;
 
-        private final SearchIterator newIter;
+        private final SearchIterator<DocumentMetadata> newIter;
 
-        private final SearchIterator modified;
+        private final SearchIterator<DocumentMetadata> modified;
 
-        private SearchIterator deleted;
+        private SearchIterator<DocumentMetadata> deleted;
 
-        public NumberOfVersionsDelta(final Delta delegate, final Context ctx) throws SearchIteratorException,
+        public NumberOfVersionsDelta(final Delta<DocumentMetadata> delegate, final Context ctx) throws SearchIteratorException,
                 OXException {
-            final SearchIterator deleted = delegate.getDeleted();
+            final SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
             if(null != deleted) {
                 this.deleted = numberOfVersionsIterator(deleted, ctx);
             }
@@ -1858,20 +1873,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             this.sequenceNumber = delegate.sequenceNumber();
         }
 
-        public SearchIterator getDeleted() {
+        public SearchIterator<DocumentMetadata> getDeleted() {
             return deleted;
         }
 
-        public SearchIterator getModified() {
+        public SearchIterator<DocumentMetadata> getModified() {
             return modified;
         }
 
-        public SearchIterator getNew() {
+        public SearchIterator<DocumentMetadata> getNew() {
             return newIter;
         }
 
-        public SearchIterator results() {
-            return new CombinedSearchIterator(newIter, modified);
+        public SearchIterator<DocumentMetadata> results() {
+            return new CombinedSearchIterator<DocumentMetadata>(newIter, modified);
         }
 
         public long sequenceNumber() {
@@ -1890,7 +1905,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         public T process(ResultSet rs) throws SQLException;
     }
 
-    public void setSessionHolder(SessionHolder sessionHolder) {
+    public void setSessionHolder(final SessionHolder sessionHolder) {
        expiredLocksListener.setSessionHolder(sessionHolder);
     }
 }

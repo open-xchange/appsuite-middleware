@@ -139,7 +139,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			
 			msg={"Incorrect SQL Query: %s", "Cannot pre-fetch results."}
 	)
-	public SearchIterator search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+	public SearchIterator<DocumentMetadata> search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
 		List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -172,7 +172,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                 } else if (perm.canReadAllObjects()){
                     all.add(Integer.valueOf(folderId));
                 } else {
-                	return SearchIteratorAdapter.EMPTY_ITERATOR;
+                	return SearchIteratorAdapter.createEmptyIterator();
                 }
             }
             all = Collections.unmodifiableList(all);
@@ -182,7 +182,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         }
 		
         if(all.isEmpty() && own.isEmpty()) {
-        	return SearchIteratorAdapter.EMPTY_ITERATOR;
+        	return SearchIteratorAdapter.createEmptyIterator();
         }
         
 		final StringBuilder SQL_QUERY = new StringBuilder();
@@ -358,9 +358,9 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		return retval;
 	}
 	
-	public static class InfostoreSearchIterator implements SearchIterator {
+	public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
-		private Object next;
+		private DocumentMetadata next;
 		private ResultSet rs ;
 		private final Metadata[] columns;
 		private final SearchEngineImpl s;
@@ -392,9 +392,9 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			return next != null;
 		}
 
-		public Object next() throws SearchIteratorException {
+		public DocumentMetadata next() throws SearchIteratorException {
 			try {
-				Object retval = null;
+			    DocumentMetadata retval = null;
 				retval = next;
 				if (rs.next()) {
 					next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);

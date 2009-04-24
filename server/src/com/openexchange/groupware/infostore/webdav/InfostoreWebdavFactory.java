@@ -496,7 +496,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         if(!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
             return new ArrayList<OXWebdavResource>();
         }
-        final SearchIterator<?> iter = database.getDocuments(
+        final SearchIterator<DocumentMetadata> iter = database.getDocuments(
 				folderId,
 				session.getContext(),
 				UserStorage.getStorageUser(session.getUserId(), session.getContext()),
@@ -505,7 +505,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
 		
 		while(iter.hasNext()) {
-			final DocumentMetadata docMeta = (DocumentMetadata) iter.next();
+			final DocumentMetadata docMeta = iter.next();
 			if(null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
 				continue;
 			}

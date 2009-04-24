@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,12 +59,9 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -71,11 +70,11 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
@@ -221,18 +220,10 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			exists = false;
 			factory.invalidate(getUrl(), getId()	, ((resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE));
 		} catch (final SQLException x) {
-			try {
-				writeCon.rollback();
-			} catch (final SQLException e) {
-				LOG.debug("",e);
-			}
-			throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    rollback(writeCon);
+            throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final TransactionException e) {
-			try {
-				writeCon.rollback();
-			} catch (final SQLException e2) {
-				LOG.debug("",e2);
-			}
+		    rollback(writeCon);
 			throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if (stmt != null) {
@@ -242,12 +233,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 					LOG.debug("",e);
 				}
 			}
+			autocommit(writeCon);
 			if(writeCon != null) {
-				try {
-					writeCon.setAutoCommit(true);
-				} catch (final SQLException e) {
-					LOG.debug("",e);
-				}
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}
@@ -408,25 +395,17 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			setId(id);
 			writeCon.commit();
 		} catch (final SQLException x) {
-			try {
-				writeCon.rollback();
-			} catch (final SQLException x2) {
-				LOG.error("Can't roll back",x2);
-			}
+		    rollback(writeCon);
 			throw x;
 		} catch (final TransactionException e) {
-			try {
-				writeCon.rollback();
-			} catch (final SQLException x2) {
-				LOG.error("Can't roll back",x2);
-			}
+		    rollback(writeCon);
 			throw e;
 		} finally {
 			if (stmt != null) {
 				stmt.close();
 			}
+			autocommit(writeCon);
 			if(writeCon != null) {
-				writeCon.setAutoCommit(true);
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}

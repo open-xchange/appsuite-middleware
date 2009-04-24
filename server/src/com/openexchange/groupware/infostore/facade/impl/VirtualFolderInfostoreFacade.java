@@ -50,8 +50,6 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -63,13 +61,12 @@ import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.sessiond.impl.SessionHolder;
@@ -97,16 +94,18 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		return false;
 	}
 
-	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+	public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns,
 			final boolean ignoreDeleted, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
-		return new DeltaImpl(SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,System.currentTimeMillis());
+	    final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.createEmptyIterator();
+		return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
 	}
 
-	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+	public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns,
 			final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException {
-		return new DeltaImpl(SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,System.currentTimeMillis());
+	    final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.createEmptyIterator();
+		return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
 	}
 
 	public InputStream getDocument(final int id, final int version, final Context ctx, final User user,
@@ -120,40 +119,40 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		virtualFolder(); return null;
 	}
 
-	public TimedResult getDocuments(final long folderId, final Context ctx, final User user,
+	public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
 		return new EmptyTimedResult();
 	}
 
-	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+	public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns,
 			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		return new EmptyTimedResult();
 	}
 
-	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+	public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns,
 			final Metadata sort, final int order, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
 		return new EmptyTimedResult();
 	}
 
-	public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
+	public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
 			final User user, final UserConfiguration userConfig)
 			throws IllegalAccessException, OXException {
 		return new EmptyTimedResult();
 	}
 
-	public TimedResult getVersions(final int id, final Context ctx, final User user,
+	public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
 		return new EmptyTimedResult();
 	}
 
-	public TimedResult getVersions(final int id, final Metadata[] columns, final Context ctx,
+	public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException {
 		return new EmptyTimedResult();
 	}
 
-	public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort,
+	public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort,
 			final int order, final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		return new EmptyTimedResult();
@@ -260,7 +259,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         public EmptyTimedResult() {
             super(new SearchIterator<DocumentMetadata>() {
 
-                public void addWarning(AbstractOXException warning) {
+                public void addWarning(final AbstractOXException warning) {
                 }
 
                 public void close() throws SearchIteratorException {
@@ -293,20 +292,20 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         }
 
         @Override
-        protected long extractTimestamp(DocumentMetadata object) {
+        protected long extractTimestamp(final DocumentMetadata object) {
             return 0;
         }
 	    
 	}
 
-    public void touch(int id, ServerSession session) throws OXException {
+    public void touch(final int id, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.groupware.infostore.InfostoreFacade#setSessionHolder(com.openexchange.sessiond.impl.SessionHolder)
      */
-    public void setSessionHolder(SessionHolder sessionHolder) {
+    public void setSessionHolder(final SessionHolder sessionHolder) {
         // TODO Auto-generated method stub
         
     }

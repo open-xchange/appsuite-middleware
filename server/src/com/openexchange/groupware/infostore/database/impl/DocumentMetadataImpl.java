@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -91,11 +90,19 @@ public class DocumentMetadataImpl implements DocumentMetadata {
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
 
+    /**
+     * Initializes a new {@link DocumentMetadataImpl}.
+     */
     public DocumentMetadataImpl(){
-		
+		super();
 	}
 	
+	/**
+	 * Initializes a new {@link DocumentMetadataImpl}.
+	 * @param id The document ID
+	 */
 	public DocumentMetadataImpl(final int id){
+	    super();
 		this.id = id;
 	}
 	
@@ -112,7 +119,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return properties.get(key);
 	}
 
-	public Set getPropertyNames() {
+	public Set<String> getPropertyNames() {
 		return properties.keySet();
 	}
 	
@@ -154,7 +161,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return false;
 	}
 
-	public Map getProperties() {
+	public Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -266,6 +273,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	}
 
 	public void setSequenceNumber(final long sequenceNumber) {
+	    // Nothing to do, yet
 	}
 	
 	public void setCategories(final String categories) {
@@ -336,7 +344,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
         return numberOfVersions;
     }
 
-    public void setNumberOfVersions(int numberOfVersions) {
+    public void setNumberOfVersions(final int numberOfVersions) {
         this.numberOfVersions = numberOfVersions;
     }
 }

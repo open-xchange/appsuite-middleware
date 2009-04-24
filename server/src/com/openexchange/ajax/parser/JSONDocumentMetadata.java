@@ -53,13 +53,11 @@ package com.openexchange.ajax.parser;
 
 import java.util.Date;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.infostore.Classes;
@@ -112,7 +110,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		return null;
 	}
 
-	public Set getPropertyNames() {
+	public Set<String> getPropertyNames() {
 		return null;
 	}
 
@@ -453,10 +451,10 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		}
 	}
     
-    public void setNumberOfVersions(int numberOfVersions) {
+    public void setNumberOfVersions(final int numberOfVersions) {
         try {
             jsonObject.put(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName(), numberOfVersions);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error("", e);
         }
     }

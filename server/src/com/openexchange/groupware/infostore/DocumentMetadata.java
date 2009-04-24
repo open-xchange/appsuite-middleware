@@ -59,7 +59,7 @@ public interface DocumentMetadata extends Serializable{
 	public String getProperty(String key);
 	
 	// versioned
-	public Set getPropertyNames();
+	public Set<String> getPropertyNames();
 	
 	// versioned persistent
 	public Date getLastModified();

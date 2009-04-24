@@ -51,7 +51,6 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.InputStream;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -88,24 +87,24 @@ public interface InfostoreFacade extends Service{
 	public int[] removeDocument(int id[], long date, ServerSession sessionObj) throws OXException;
 	public int[] removeVersion(int id, int[] versionId, ServerSession sessionObj) throws OXException;
 	
-	public TimedResult getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public TimedResult getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public TimedResult<DocumentMetadata> getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	// order is either ASC or DESC
-	public TimedResult getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	public TimedResult getVersions(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public TimedResult getVersions(int id, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public TimedResult<DocumentMetadata> getVersions(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	// order is either ASC or DESC
-	public TimedResult getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	public TimedResult getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException;
+	public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException;
 	
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException;
+	public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException;
 
 	// order is either ASC or DESC
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException;
+	public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException;
 	
 	public int countDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	

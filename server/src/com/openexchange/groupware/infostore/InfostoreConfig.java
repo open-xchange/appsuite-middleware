@@ -51,10 +51,8 @@ package com.openexchange.groupware.infostore;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
@@ -85,7 +83,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     private static boolean loaded = false;
 
 
-    private InfostoreConfig() {}
+    private InfostoreConfig() { super(); }
 
     public static InfostoreConfig getInstance() {
         if(singleton != null) {

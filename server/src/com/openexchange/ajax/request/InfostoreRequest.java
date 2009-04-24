@@ -347,16 +347,15 @@ public class InfostoreRequest extends CommonRequest {
                     } catch (final JSONException x) {
                         folder = Integer.parseInt("folder");
                     }
-                    folderMapping.put(ids[i], folder);
+                    folderMapping.put(Integer.valueOf(ids[i]), Integer.valueOf(folder));
                 }
             }
 
             return ids;
-        } else {
-            final int[] ids = new int[1];
-            ids[0] = ((JSONObject)toDelete).getInt(AJAXServlet.PARAMETER_ID);
-            return ids;
         }
+        final int[] ids = new int[1];
+        ids[0] = ((JSONObject)toDelete).getInt(AJAXServlet.PARAMETER_ID);
+        return ids;
     }
 
 	protected void doSortedSearch(final SimpleRequest req) throws JSONException, SearchIteratorException {
@@ -475,8 +474,8 @@ public class InfostoreRequest extends CommonRequest {
 
 	protected void list(final int[] ids, final Metadata[] cols) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore();
-		TimedResult result = null;
-		SearchIterator iter = null;
+		TimedResult<DocumentMetadata> result = null;
+		SearchIterator<DocumentMetadata> iter = null;
 		try {
 
 			result = infostore.getDocuments(ids, cols, ctx, user, userConfiguration);
@@ -524,14 +523,14 @@ public class InfostoreRequest extends CommonRequest {
 
 	protected void revert(final int id, final long ts) {
 		final InfostoreFacade infostore = getInfostore();
-		SearchIterator iter = null;
+		SearchIterator<DocumentMetadata> iter = null;
 		long timestamp = -1;
 		try {
 			// SearchENgine?
 			infostore.startTransaction();
 			infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user,
 					userConfiguration).getSequenceNumber();
-			final TimedResult result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
+			final TimedResult<DocumentMetadata> result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
 					ctx, user, userConfiguration);
 			if (timestamp > ts) {
 				throw new OXConflictException();
@@ -539,7 +538,7 @@ public class InfostoreRequest extends CommonRequest {
 			iter = result.results();
 			final List<Integer> versions = new ArrayList<Integer>();
 			while (iter.hasNext()) {
-				final int version = ((DocumentMetadata) iter.next()).getVersion();
+				final int version = (iter.next()).getVersion();
 				if (version == 0) {
 					continue;
 				}
@@ -593,8 +592,8 @@ public class InfostoreRequest extends CommonRequest {
 		 * System.out.println("----------all------------");
 		 */
 		final InfostoreFacade infostore = getInfostore(folderId);
-		TimedResult result = null;
-		SearchIterator<?> iter = null;
+		TimedResult<DocumentMetadata> result = null;
+		SearchIterator<DocumentMetadata> iter = null;
 		try {
 
 			if (sortedBy == null) {
@@ -624,8 +623,8 @@ public class InfostoreRequest extends CommonRequest {
 	protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir)
 			throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore();
-		TimedResult result = null;
-		SearchIterator<?> iter = null;
+		TimedResult<DocumentMetadata> result = null;
+		SearchIterator<DocumentMetadata> iter = null;
 		try {
 
 			if (sortedBy == null) {
@@ -654,10 +653,10 @@ public class InfostoreRequest extends CommonRequest {
 	protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
 			final long timestamp, final boolean ignoreDelete) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore(folderId);
-		Delta delta = null;
+		Delta<DocumentMetadata> delta = null;
 
-		SearchIterator<?> iter = null;
-		SearchIterator<?> iter2 = null;
+		SearchIterator<DocumentMetadata> iter = null;
+		SearchIterator<DocumentMetadata> iter2 = null;
 
 		try {
 
@@ -1136,7 +1135,7 @@ public class InfostoreRequest extends CommonRequest {
 		try {
 			searchEngine.startTransaction();
 
-			final SearchIterator results = searchEngine.search(query, cols, folderId, sortedBy, dir, start, end,
+			final SearchIterator<DocumentMetadata> results = searchEngine.search(query, cols, folderId, sortedBy, dir, start, end,
 					ctx, user, userConfiguration);
 
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
