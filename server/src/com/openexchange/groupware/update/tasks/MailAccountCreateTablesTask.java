@@ -146,7 +146,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
         }
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
+    private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
