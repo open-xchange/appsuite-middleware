@@ -70,7 +70,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DeleteDocumentAction.class);
 
-    private static final int batchSize = 1000;
+    private static final int batchSize = 100;
 
     @OXThrows(
 			category = Category.CODE_ERROR,
