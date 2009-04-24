@@ -207,8 +207,7 @@ public final class IMAPCommandsCollection {
                  */
                 final StringBuilder sb = new StringBuilder(7 + mboxName.length());
                 final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
-                final Response response = r[r.length - 1];
-                if (response.isOK()) {
+                if (r[r.length - 1].isOK()) {
                     sb.setLength(0);
                     p.command(sb.append("DELETE ").append(mboxName).toString(), null);
                     return Boolean.TRUE;
@@ -316,8 +315,7 @@ public final class IMAPCommandsCollection {
                  */
                 sb.setLength(0);
                 final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
-                final Response response = r[r.length - 1];
-                if (response.isOK()) {
+                if (r[r.length - 1].isOK()) {
                     sb.setLength(0);
                     p.command(sb.append("DELETE ").append(mboxName).toString(), null);
                     return Boolean.TRUE;
