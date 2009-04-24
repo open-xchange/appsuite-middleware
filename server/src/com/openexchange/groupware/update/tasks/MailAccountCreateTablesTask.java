@@ -128,8 +128,17 @@ public class MailAccountCreateTablesTask implements UpdateTask {
         		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
+    private static final String getCreateSequence() {
+        return "CREATE TABLE sequence_mail_service (" + 
+        		"cid INT4 unsigned NOT NULL," + 
+        		"id INT4 unsigned NOT NULL," + 
+        		"PRIMARY KEY (cid)" + 
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    }
+
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+        createTable("sequence_mail_service", getCreateSequence(), contextId);
         createTable("user_mail_account", getCreateMailAccount(), contextId);
         createTable("user_transport_account", getCreateTransportAccount(), contextId);
         if (LOG.isInfoEnabled()) {
