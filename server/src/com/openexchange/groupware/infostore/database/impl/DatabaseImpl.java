@@ -1463,7 +1463,6 @@ public class DatabaseImpl extends DBService {
     }
 
     private void removePrivate(final int id, final Context ctx, final ServerSession session) throws OXException {
-        List<UndoableAction> actions = new LinkedList<UndoableAction>();
 
         try {
             final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
@@ -1474,7 +1473,7 @@ public class DatabaseImpl extends DBService {
             List<String> files = new LinkedList<String>();
 
             for (FolderObject folder : foldersWithPrivateItems) {
-                clearFolder(folder, session, actions, files);
+                clearFolder(folder, session, files);
             }
 
             FileStorage fileStorage = getFileStorage(ctx);
@@ -1483,18 +1482,11 @@ public class DatabaseImpl extends DBService {
             }
 
         } catch (final AbstractOXException x) {
-            for (UndoableAction action : actions) {
-                try {
-                    action.undo();
-                } catch (AbstractOXException e) {
-                    LOG.fatal("Error rolling back user delete. The data may be inconsistent.", e);
-                }
-            }
             throw new InfostoreException(x);
         }
     }
 
-    private void clearFolder(FolderObject folder, ServerSession session, List<UndoableAction> actions, List<String> files) throws AbstractOXException {
+    private void clearFolder(FolderObject folder, ServerSession session, List<String> files) throws AbstractOXException {
         com.openexchange.groupware.infostore.database.impl.InfostoreIterator allDocumentsInFolder = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.documents(
             folder.getObjectID(),
             Metadata.VALUES_ARRAY,
@@ -1502,44 +1494,38 @@ public class DatabaseImpl extends DBService {
             InfostoreFacade.ASC,
             getProvider(),
             session.getContext());
+        List<DocumentMetadata> parents = new ArrayList<DocumentMetadata>();
+        List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
 
         while (allDocumentsInFolder.hasNext()) {
             DocumentMetadata documentMetadata = allDocumentsInFolder.next();
-            removeAllVersions(documentMetadata, session, actions, files);
-            removeParent(documentMetadata, session, actions, files);
+            parents.add(documentMetadata);
+            discoverAllVersions(documentMetadata, session, versions, files);
         }
-    }
-
-    private void removeParent(DocumentMetadata documentMetadata, ServerSession session, List<UndoableAction> actions, List<String> files) throws AbstractOXException {
-        final DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
-        deleteDocumentAction.setProvider(getProvider());
-        deleteDocumentAction.setContext(session.getContext());
-        deleteDocumentAction.setDocuments(Arrays.asList(documentMetadata));
-        deleteDocumentAction.setQueryCatalog(new InfostoreQueryCatalog());
-        deleteDocumentAction.perform();
-        actions.add(deleteDocumentAction);
-        final EventClient ec = new EventClient(session);
-        try {
-            ec.delete(documentMetadata);
-        } catch (EventException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private void removeVersion(DocumentMetadata version, ServerSession session, List<UndoableAction> actions, List<String> files) throws AbstractOXException {
         final DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
         deleteVersionAction.setProvider(getProvider());
         deleteVersionAction.setContext(session.getContext());
-        deleteVersionAction.setDocuments(Arrays.asList(version));
+        deleteVersionAction.setDocuments(versions);
         deleteVersionAction.setQueryCatalog(new InfostoreQueryCatalog());
         deleteVersionAction.perform();
-        actions.add(deleteVersionAction);
-        if (null != version.getFilestoreLocation()) {
-            files.add(version.getFilestoreLocation());
+
+        final DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
+        deleteDocumentAction.setProvider(getProvider());
+        deleteDocumentAction.setContext(session.getContext());
+        deleteDocumentAction.setDocuments(parents);
+        deleteDocumentAction.setQueryCatalog(new InfostoreQueryCatalog());
+        deleteDocumentAction.perform();
+        final EventClient ec = new EventClient(session);
+        for (DocumentMetadata documentMetadata : parents) {
+            try {
+                ec.delete(documentMetadata);
+            } catch (EventException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void removeAllVersions(DocumentMetadata documentMetadata, ServerSession session, List<UndoableAction> actions, List<String> files) throws AbstractOXException {
+    private void discoverAllVersions(DocumentMetadata documentMetadata, ServerSession session, List<DocumentMetadata> versions, List<String> files) throws AbstractOXException {
         com.openexchange.groupware.infostore.database.impl.InfostoreIterator allVersions = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.versions(
             documentMetadata.getId(),
             Metadata.VALUES_ARRAY,
@@ -1550,7 +1536,10 @@ public class DatabaseImpl extends DBService {
 
         while (allVersions.hasNext()) {
             DocumentMetadata version = allVersions.next();
-            removeVersion(version, session, actions, files);
+            versions.add(version);
+            if (version.getFilestoreLocation() != null) {
+                files.add(version.getFilestoreLocation());
+            }
         }
     }
 
