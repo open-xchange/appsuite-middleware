@@ -93,5 +93,7 @@ public interface WebdavRequest {
 	WebdavFactory getFactory() throws WebdavProtocolException;
 
 	String getCharset();
+
+    boolean hasBody();
 	
 }

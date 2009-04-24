@@ -1,3 +1,7 @@
+* 2009-04-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #13482: Survive empty lock body on WebDAV infostore interface.
+
 * 2009-04-17 - francisco.laguna@open-xchange.com
 
  - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents.

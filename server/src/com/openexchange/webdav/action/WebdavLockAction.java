@@ -84,27 +84,11 @@ public class WebdavLockAction extends AbstractAction {
 		lock.setDepth(getDepth(req.getHeader("Depth")));
 		
 		try {
-			final Element root = req.getBodyAsDocument().getRootElement();
-			final Element lockscope = (Element) root.getChild("lockscope",DAV_NS).getChildren().get(0);
-			
-			if(lockscope.getNamespace().equals(DAV_NS)) {
-				if(lockscope.getName().equalsIgnoreCase("shared")) {
-					lock.setScope(Scope.SHARED_LITERAL);
-				} else {
-					lock.setScope(Scope.EXCLUSIVE_LITERAL);
-				}
-			}
-			
-			lock.setType(Type.WRITE_LITERAL);
-			
-			final Element owner = root.getChild("owner",DAV_NS);
-			
-			final XMLOutputter outputter = new XMLOutputter();
-
-            if(owner != null) {
-                lock.setOwner(outputter.outputString(owner.cloneContent()));
-            }
-
+		    if(req.hasBody()) {
+		        configureLock(req, lock);
+		    } else {
+		        defaultLockParams(lock);
+		    }
 			WebdavResource resource = req.getResource();
 			final int status = HttpServletResponse.SC_OK;
 			 
@@ -128,6 +112,7 @@ public class WebdavLockAction extends AbstractAction {
 			
 			responseDoc.setContent(rootElement);
 			
+	        final XMLOutputter outputter = new XMLOutputter();
 			outputter.output(responseDoc, res.getOutputStream());
 			
 		} catch (final JDOMException e) {
@@ -137,6 +122,37 @@ public class WebdavLockAction extends AbstractAction {
 			LOG.debug("Client gone?", e);
 		}
 	}
+
+    /**
+     * @param lock
+     */
+    private void defaultLockParams(WebdavLock lock) {
+        lock.setScope(Scope.EXCLUSIVE_LITERAL);
+        lock.setType(Type.WRITE_LITERAL);
+    }
+
+    private void configureLock(final WebdavRequest req, final WebdavLock lock) throws JDOMException, IOException {
+        final Element root = req.getBodyAsDocument().getRootElement();
+        final Element lockscope = (Element) root.getChild("lockscope",DAV_NS).getChildren().get(0);
+        
+        if(lockscope.getNamespace().equals(DAV_NS)) {
+        	if(lockscope.getName().equalsIgnoreCase("shared")) {
+        		lock.setScope(Scope.SHARED_LITERAL);
+        	} else {
+        		lock.setScope(Scope.EXCLUSIVE_LITERAL);
+        	}
+        }
+        
+        lock.setType(Type.WRITE_LITERAL);
+        
+        final Element owner = root.getChild("owner",DAV_NS);
+        
+        final XMLOutputter outputter = new XMLOutputter();
+
+        if(owner != null) {
+            lock.setOwner(outputter.outputString(owner.cloneContent()));
+        }
+    }
 
 	private int getDepth(final String header) {
         if(null == header) {

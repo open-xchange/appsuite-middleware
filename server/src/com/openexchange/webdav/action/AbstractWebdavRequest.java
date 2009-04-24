@@ -120,4 +120,17 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 	public WebdavFactory getFactory(){
 		return factory;
 	}
+	
+	public boolean hasBody() {
+	    if(getHeader("Content-Length") == null) {
+	        return false;
+	    }
+        int length;
+        try {
+            length = Integer.parseInt(getHeader("Content-Length"));
+        } catch (NumberFormatException e) {
+            length = -1;
+        }
+        return length != -1;
+	}
 }
