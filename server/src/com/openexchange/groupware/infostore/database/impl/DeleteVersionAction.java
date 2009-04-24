@@ -172,7 +172,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 		
 	}
 
-    private int batchSize = 100;
+    private int batchSize = 10;
 
     public int getBatchSize() {
         return batchSize;
