@@ -1155,7 +1155,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             session.getUserId(),
                             otherAccess.getMailConfig().getCapabilities().hasPermissions());
                         // Delete source
-                        mailAccess.getFolderStorage().deleteFolder(fullname);
+                        mailAccess.getFolderStorage().deleteFolder(fullname, true);
                         // Perform other updates
                         return prepareFullname(parentAccountID, otherAccess.getFolderStorage().updateFolder(destFullname, mailFolder));
                     } finally {
