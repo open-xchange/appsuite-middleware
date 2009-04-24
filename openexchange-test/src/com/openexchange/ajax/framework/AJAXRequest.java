@@ -197,7 +197,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
      */
     Parameter[] getParameters();
 
-    AbstractAJAXParser<T> getParser();
+    AbstractAJAXParser<? extends T> getParser();
 
     Object getBody() throws JSONException;
 }

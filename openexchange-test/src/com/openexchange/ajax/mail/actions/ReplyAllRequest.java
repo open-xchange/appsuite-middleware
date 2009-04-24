@@ -50,105 +50,41 @@
 package com.openexchange.ajax.mail.actions;
 
 import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
+
+
 /**
- * {@link GetRequest}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * {@link ReplyAllRequest}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class GetRequest extends AbstractMailRequest<GetResponse> {
+public class ReplyAllRequest extends ReplyRequest {
+    
+    public ReplyAllRequest(String folderID, String mailID){
+        super(folderID, mailID);
+    }
+    
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        Parameter[] arr = new Parameter[view != null ? 4 : 3];
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+        arr[0] = new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_REPLYALL);
+        arr[1] = new Parameter(Mail.PARAMETER_FOLDERID, folderID);
+        arr[2] = new Parameter(Mail.PARAMETER_ID, mailID);
+        if (view != null)
+            arr[3] = new Parameter(Mail.PARAMETER_VIEW, "");
 
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        return arr;
+    }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
-
-	/**
-	 * Unique identifier
-	 */
-	private final String[] folderAndID;
-
-	private final boolean failOnError;
-
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
-		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<GetResponse> getParser() {
-		return new GetParser(failOnError);
-	}
-
+    public AbstractAJAXParser<? extends ReplyResponse> getParser() {
+        return new AbstractAJAXParser<ReplyAllResponse>(failOnError) {
+            @Override
+            protected ReplyAllResponse createResponse(final Response response) throws JSONException {
+                return new ReplyAllResponse(response);
+            }
+        };
+    }
 }

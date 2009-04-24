@@ -47,108 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail;
 
+import java.io.IOException;
+import java.util.List;
 import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link GetRequest}
+ * {@link ReplyTest}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class GetRequest extends AbstractMailRequest<GetResponse> {
+public class ReplyTest extends AbstractReplyTest {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+    public ReplyTest(String name) {
+        super(name);
+    }
 
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+    public void testShouldReplyToSenderOnly() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+        AJAXClient client1 = new AJAXClient(User.User1);
+        AJAXClient client2 = new AJAXClient(User.User2);
+        String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
+        String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
+        this.client = client2;
+        JSONObject mySentMail = createEMail(mail1, "Reply test", "ALTERNATIVE", MAIL_TEXT_BODY);
+        sendMail(mySentMail.toString());
 
-	/**
-	 * Unique identifier
-	 */
-	private final String[] folderAndID;
+        this.client = client1;
+        JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
+        TestMail myReplyMail = new TestMail(getReplyEMail(new TestMail(myReceivedMail)));
 
-	private final boolean failOnError;
+        assertTrue("Should contain indicator that this is a reply in the subject line", myReplyMail.getSubject().startsWith("Re:"));
 
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
+        List<String> to = myReplyMail.getTo();
+        assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
 
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
+        List<String> from = myReplyMail.getFrom();
+        assertTrue("Recipient of original message should become sender in reply", contains(from, mail1));
+        
+        client1.logout(); client2.logout();
+    }
 
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
-		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<GetResponse> getParser() {
-		return new GetParser(failOnError);
-	}
 
 }

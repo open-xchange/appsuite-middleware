@@ -50,20 +50,18 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -124,31 +122,34 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 			+ "ransport when sending MimeMessages<br />        with no encoding<br />6456444 MimeMessages created from stream are not correctly handle"
 			+ "d<br />        with allow8bitmime<br />&lt;no id&gt; fix performance bug in base64 encoder; now even faster!";
 
+	protected static final String LARGE_MAIL_TEXT_BODY              = MAIL_TEXT_BODY + "<br />" 
+	        + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" 
+	        + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />";
+	
     public static final String MAIL_SUBJECT = "The mail subject";
 
-    protected final JSONObject createSelfAddressed25KBMailObject(String subject) throws AjaxException, JSONException, IOException,
-            SAXException {
-        /*
-         * Create JSON mail object
-         */
-        final JSONObject mailObject_25kb = new JSONObject();
-        mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
-        mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
-        mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-        mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-        mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), subject);
-        mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    protected final JSONObject createSelfAddressed25KBMailObject(String subject) throws AjaxException, JSONException, IOException, SAXException {
+        return createEMail(getSendAddress(), subject, "ALTERNATIVE", LARGE_MAIL_TEXT_BODY);
+    }
+    
+    protected JSONObject createEMail(String recipient, String subject, String content_type, String text) throws AjaxException, JSONException, IOException, SAXException{
+        final JSONObject myMail = new JSONObject();
+        myMail.put(MailJSONField.FROM.getKey(), getSendAddress());
+        myMail.put(MailJSONField.RECIPIENT_TO.getKey(), recipient);
+        myMail.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+        myMail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+        myMail.put(MailJSONField.SUBJECT.getKey(), subject);
+        myMail.put(MailJSONField.PRIORITY.getKey(), "3");
 
-        final JSONObject bodyObject = new JSONObject();
-        bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
-        bodyObject.put(MailJSONField.CONTENT.getKey(), MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />"
-                + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY
-                + "<br />" + MAIL_TEXT_BODY + "<br />");
+        final JSONObject mailBody = new JSONObject();
+        mailBody.put(MailJSONField.CONTENT_TYPE.getKey(), content_type);
+        mailBody.put(MailJSONField.CONTENT.getKey(), text);
 
         final JSONArray attachments = new JSONArray();
-        attachments.put(bodyObject);
-        mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-        return mailObject_25kb;
+        attachments.put(mailBody);
+        myMail.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+        return myMail;
+        
     }
 
     protected final JSONObject createSelfAddressed25KBMailObject() throws AjaxException, JSONException, IOException,
@@ -235,8 +236,9 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 		return getClient().getValues().getTimeZone();
 	}
 	
-    protected void sendMail(String mail) throws AjaxException, IOException, SAXException, JSONException {
-        client.execute(new SendRequest(mail) );    
+    protected String[] sendMail(String mail) throws AjaxException, IOException, SAXException, JSONException {
+        SendResponse response = client.execute(new SendRequest(mail) );
+        return response.getFolderAndID();
     }
     
     protected String generateMail() throws Exception {

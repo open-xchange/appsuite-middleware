@@ -149,7 +149,7 @@ public class Executor extends Assert {
 			resp = conv.getResponse(req);
 		}
 		final long requestDuration = System.currentTimeMillis() - startRequest;
-		final AbstractAJAXParser<T> parser = request.getParser();
+		final AbstractAJAXParser<? extends T> parser = request.getParser();
 		parser.checkResponse(resp);
 		final long startParse = System.currentTimeMillis();
 		final T retval = parser.parse(resp.getText());
