@@ -87,6 +87,8 @@
         <jar jarfile="open-xchange-unit-tests.jar" basedir="${build}" includes="**"/>
     </target>
 
+	<target name="all-jar" depends="unit-jar,interface-jar"/>
+
     <target name="run-mail-tests" depends="interface-jar">
         <antcall target="run-tests">
             <param name="test.jar" value="open-xchange-iface-tests.jar" />
