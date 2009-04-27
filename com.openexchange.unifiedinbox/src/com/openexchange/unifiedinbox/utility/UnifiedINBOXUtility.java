@@ -52,11 +52,16 @@ package com.openexchange.unifiedinbox.utility;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
+import com.openexchange.unifiedinbox.UnifiedINBOXException;
 
 /**
  * {@link UnifiedINBOXUtility} - Utility methods for Unified INBOX.
@@ -103,4 +108,60 @@ public final class UnifiedINBOXUtility {
         return map;
     }
 
+    /**
+     * Parses nested fullname.
+     * <p>
+     * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
+     * 
+     * @param nestedFullname The nested fullname to parse
+     * @return The parsed nested fullname argument
+     * @throws UnifiedINBOXException If specified nested fullname is invalid
+     */
+    public static FullnameArgument parseNestedFullname(final String nestedFullname) throws UnifiedINBOXException {
+        // INBOX/default0/INBOX
+        if (!startsWithKnownFullname(nestedFullname)) {
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, MailFolderUtility.prepareMailFolderParam(
+                nestedFullname).getFullname());
+        }
+        // Cut off starting known fullname and its separator character
+        final String fn = nestedFullname.substring(nestedFullname.indexOf(MailPath.SEPERATOR) + 1);
+        return MailFolderUtility.prepareMailFolderParam(fn);
+    }
+
+    private static boolean startsWithKnownFullname(final String fullname) {
+        for (final Iterator<String> iter = UnifiedINBOXAccess.KNOWN_FOLDERS.iterator(); iter.hasNext();) {
+            final String knownFullname = iter.next();
+            if (fullname.startsWith(knownFullname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the account's fullname.
+     * 
+     * @param mailAccess The mail access to desired account
+     * @param fullname The fullname to look-up
+     * @return The account's fullname
+     * @throws MailException If fullname look-up fails
+     */
+    public static String determineAccountFullname(final MailAccess<?, ?> mailAccess, final String fullname) throws MailException {
+        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+            return UnifiedINBOXAccess.INBOX;
+        }
+        if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+            return mailAccess.getFolderStorage().getDraftsFolder();
+        }
+        if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+            return mailAccess.getFolderStorage().getSentFolder();
+        }
+        if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+            return mailAccess.getFolderStorage().getSpamFolder();
+        }
+        if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+            return mailAccess.getFolderStorage().getTrashFolder();
+        }
+        throw new UnifiedINBOXException(UnifiedINBOXException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX, fullname);
+    }
 }

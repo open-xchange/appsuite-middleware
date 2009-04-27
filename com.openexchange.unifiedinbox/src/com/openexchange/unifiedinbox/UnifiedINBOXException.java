@@ -88,9 +88,9 @@ public final class UnifiedINBOXException extends MIMEMailException {
          */
         COPY_MSGS_DENIED("Unified INBOX does not support to copy messages.", Category.CODE_ERROR, 2005),
         /**
-         * Unified INBOX does not support to append messages.
+         * Append messages failed.
          */
-        APPEND_MSGS_DENIED("Unified INBOX does not support to append messages.", Category.CODE_ERROR, 2006),
+        APPEND_MSGS_DENIED("Append messages failed.", Category.CODE_ERROR, 2006),
         /**
          * Unified INBOX does not support draft messages.
          */
@@ -118,7 +118,11 @@ public final class UnifiedINBOXException extends MIMEMailException {
         /**
          * Mail folder could not be found: %1$s.
          */
-        FOLDER_NOT_FOUND(MIMEMailException.Code.FOLDER_NOT_FOUND);
+        FOLDER_NOT_FOUND(MIMEMailException.Code.FOLDER_NOT_FOUND),
+        /**
+         * Unknown default folder fullname: %1$s.
+         */
+        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", Category.CODE_ERROR, 2012);
 
         private final String message;
 

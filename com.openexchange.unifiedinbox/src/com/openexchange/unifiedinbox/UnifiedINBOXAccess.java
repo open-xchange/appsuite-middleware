@@ -49,6 +49,10 @@
 
 package com.openexchange.unifiedinbox;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -71,6 +75,36 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
      * Fullname of INBOX.
      */
     public static final String INBOX = "INBOX";
+
+    /**
+     * Fullname of Trash.
+     */
+    public static final String TRASH = "Trash";
+
+    /**
+     * Fullname of Sent.
+     */
+    public static final String SENT = "Sent";
+
+    /**
+     * Fullname of Spam.
+     */
+    public static final String SPAM = "Spam";
+
+    /**
+     * Fullname of Drafts.
+     */
+    public static final String DRAFTS = "Drafts";
+
+    /**
+     * A set containing all known default folders for an Unified INBOX account.
+     */
+    public static final Set<String> KNOWN_FOLDERS;
+
+    static {
+        final Set<String> tmp = new HashSet<String>(Arrays.asList(new String[] { INBOX, DRAFTS, SENT, SPAM, TRASH }));
+        KNOWN_FOLDERS = Collections.unmodifiableSet(tmp);
+    }
 
     /*-
      * Members

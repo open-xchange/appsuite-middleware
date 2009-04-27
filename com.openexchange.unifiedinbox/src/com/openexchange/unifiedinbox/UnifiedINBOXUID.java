@@ -61,11 +61,18 @@ import com.openexchange.mail.utils.MailFolderUtility;
  */
 public final class UnifiedINBOXUID {
 
-    private final int accountId;
+    private int accountId;
 
-    private final String fullname;
+    private String fullname;
 
-    private final String id;
+    private String id;
+
+    /**
+     * Initializes an empty {@link UnifiedINBOXUID}.
+     */
+    public UnifiedINBOXUID() {
+        super();
+    }
 
     /**
      * Initializes a new {@link UnifiedINBOXUID}.
@@ -76,9 +83,7 @@ public final class UnifiedINBOXUID {
      */
     public UnifiedINBOXUID(final int accountId, final String fullname, final String id) {
         super();
-        this.accountId = accountId;
-        this.fullname = fullname;
-        this.id = id;
+        setUID(accountId, fullname, id);
     }
 
     /**
@@ -89,11 +94,38 @@ public final class UnifiedINBOXUID {
      */
     public UnifiedINBOXUID(final String unifiedINBOXUID) throws MailException {
         super();
+        setUIDString(unifiedINBOXUID);
+    }
+
+    /**
+     * Sets the UID of this {@link UnifiedINBOXUID}.
+     * 
+     * @param accountId The account ID
+     * @param fullname The folder fullname
+     * @param id The mail ID
+     * @return This {@link UnifiedINBOXUID} with new UID applied.
+     */
+    public UnifiedINBOXUID setUID(final int accountId, final String fullname, final String id) {
+        this.accountId = accountId;
+        this.fullname = fullname;
+        this.id = id;
+        return this;
+    }
+
+    /**
+     * Sets the UID of this {@link UnifiedINBOXUID}.
+     * 
+     * @param unifiedINBOXUID The Unified INBOX UID as a string
+     * @throws MailException If parsing Unified INBOX UID fails
+     * @return This {@link UnifiedINBOXUID} with new UID applied.
+     */
+    public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws MailException {
         final MailPath mailPath = new MailPath(unifiedINBOXUID);
         final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(mailPath.getFolder());
         this.accountId = fa.getAccountId();
         this.fullname = fa.getFullname();
         this.id = mailPath.getUid();
+        return this;
     }
 
     /**
@@ -125,6 +157,6 @@ public final class UnifiedINBOXUID {
 
     @Override
     public String toString() {
-        return new MailPath(MailFolderUtility.prepareFullname(accountId, fullname), id).toString();
+        return MailPath.getMailPath(MailFolderUtility.prepareFullname(accountId, fullname), id).toString();
     }
 }

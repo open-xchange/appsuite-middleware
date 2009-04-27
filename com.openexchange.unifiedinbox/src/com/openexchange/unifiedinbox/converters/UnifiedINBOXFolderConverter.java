@@ -49,12 +49,21 @@
 
 package com.openexchange.unifiedinbox.converters;
 
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.ReadOnlyMailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
+import com.openexchange.session.Session;
+import com.openexchange.unifiedinbox.UnifiedINBOXException;
+import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
  * {@link UnifiedINBOXFolderConverter} - Converts a Unified INBOX folder to an instance of {@link MailFolder}.
@@ -103,42 +112,104 @@ public final class UnifiedINBOXFolderConverter {
         super();
     }
 
+    /**
+     * Gets the instance of {@link MailFolder} reflcting root folder.
+     * 
+     * @return The instance of {@link MailFolder} reflcting root folder.
+     */
     public static MailFolder getRootFolder() {
         return ROOT_UNIFIED_INBOX_FOLDER;
     }
 
-    public static MailFolder getUnifiedINBOXFolder() {
+    /**
+     * Gets the appropriately filled instance of {@link MailFolder}.
+     * 
+     * @param accountId The account ID of the Unified INBOX account
+     * @param session The session
+     * @param fullname The folder's fullname
+     * @param localizedName The localized name of the folder
+     * @return The appropriately filled instance of {@link MailFolder}
+     * @throws MailException If converting mail folder fails
+     */
+    public static MailFolder getUnifiedINBOXFolder(final int accountId, final Session session, final String fullname, final String localizedName) throws MailException {
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified INBOX, so every folder is "subscribed"
         tmp.setSubscribed(true);
-        tmp.setSupportsUserFlags(false);
+        tmp.setSupportsUserFlags(true);
         tmp.setRootFolder(false);
         tmp.setExists(true);
         tmp.setSeparator('/');
-        // A POP3 folder does not contain subfolders
-        tmp.setSubfolders(false);
-        tmp.setSubscribedSubfolders(false);
-        tmp.setFullname(UnifiedINBOXAccess.INBOX);
+        tmp.setFullname(fullname);
         tmp.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
-        tmp.setName(UnifiedINBOXAccess.INBOX);
-        tmp.setHoldsFolders(false);
+        tmp.setName(localizedName);
+        tmp.setHoldsFolders(true);
         tmp.setHoldsMessages(true);
         {
             final MailPermission ownPermission = new DefaultMailPermission();
-            ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+            ownPermission.setFolderPermission(OCLPermission.READ_FOLDER);
             tmp.setOwnPermission(ownPermission);
             tmp.addPermission(ownPermission);
         }
-        // Can only be INBOX folder, no other folder permitted/supported
+        // What else?!
         tmp.setDefaultFolder(true);
-        // TODO: NEW and DELETED messages
-        {
-            tmp.setMessageCount(-1);
-            tmp.setNewMessageCount(-1);
-            tmp.setUnreadMessageCount(-1);
-            tmp.setDeletedMessageCount(-1);
+        // Set message counts
+        final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullname, accountId, session, tmp);
+        if (hasAtLeastOneSuchFolder) {
+            tmp.setSubfolders(true);
+            tmp.setSubscribedSubfolders(true);
         }
         return tmp;
+    }
+
+    private static boolean setMessageCounts(final String fullname, final int accountId, final Session session, final MailFolder tmp) throws UnifiedINBOXException, MailException {
+        final MailAccount[] accounts;
+        try {
+            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+        } catch (final ServiceException e) {
+            throw new UnifiedINBOXException(e);
+        } catch (final MailAccountException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        boolean retval = false;
+        int totaCount = 0;
+        int unreadCount = 0;
+        int deletedCount = 0;
+        int newCount = 0;
+        for (final MailAccount mailAccount : accounts) {
+            if (accountId != mailAccount.getId()) {
+                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                boolean close = false;
+                try {
+                    mailAccess.connect();
+                    close = true;
+                    final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
+                    // Check if account fullname is not null
+                    if (null != accountFullname) {
+                        // Get counts
+                        final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
+                        totaCount += mailFolder.getMessageCount();
+                        unreadCount += mailFolder.getUnreadMessageCount();
+                        deletedCount += mailFolder.getDeletedMessageCount();
+                        newCount += mailFolder.getNewMessageCount();
+                        // At least one such default folder present
+                        retval = true;
+                    }
+                } finally {
+                    if (close) {
+                        mailAccess.close(true);
+                    }
+                }
+            }
+        }
+        // Apply counts
+        tmp.setMessageCount(totaCount);
+        tmp.setNewMessageCount(newCount);
+        tmp.setUnreadMessageCount(unreadCount);
+        tmp.setDeletedMessageCount(deletedCount);
+        return retval;
     }
 
 }
