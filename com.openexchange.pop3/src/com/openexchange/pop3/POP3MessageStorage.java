@@ -86,8 +86,8 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.pop3.sort.MailMessageComparator;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.pop3.util.UIDUtil;
 import com.openexchange.server.ServiceException;
@@ -292,7 +292,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
         if (null == searchTerm) {
             // Sort them
             final List<MailMessage> tmp = new ArrayList<MailMessage>(Arrays.asList(mails));
-            Collections.sort(tmp, new MailMessageComparator(OrderDirection.DESC.equals(order), getLocale()));
+            Collections.sort(tmp, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
             msgs = tmp.toArray(new MailMessage[tmp.size()]);
         } else {
             // Filter them
@@ -304,7 +304,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
                 }
             }
             // Sort them
-            Collections.sort(filteredMails, new MailMessageComparator(OrderDirection.DESC.equals(order), getLocale()));
+            Collections.sort(filteredMails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
             msgs = filteredMails.toArray(new MailMessage[filteredMails.size()]);
         }
         if (indexRange != null) {
