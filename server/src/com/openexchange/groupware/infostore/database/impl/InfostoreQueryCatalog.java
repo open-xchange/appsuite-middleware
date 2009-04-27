@@ -235,6 +235,19 @@ public class InfostoreQueryCatalog {
 		return delete.toString();
 	}
 	
+	public String getSingleDelete(final Table t) {
+        switch (t) {
+        default:
+            break;
+        case INFOSTORE_DOCUMENT:
+        case DEL_INFOSTORE_DOCUMENT:
+            throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
+        }
+        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append("  = ? AND cid = ?");
+        return delete.toString();
+    }
+	
 	public String getDocumentInsert(){
 		return INSERT_INFOSTORE;
 	}
@@ -328,7 +341,34 @@ public class InfostoreQueryCatalog {
 		delete.append(") ) AND cid = ?");
 		return delete.toString();
 	}
-	
+	public String getSingleVersionDelete(final Table t) {
+        switch (t) {
+        default:
+            break;
+        case INFOSTORE:
+        case DEL_INFOSTORE:
+            throw new IllegalArgumentException(
+                "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
+        }
+        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND ").append(
+            Metadata.VERSION_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND cid = ?");
+        return delete.toString();
+    }
+
+    public String getAllVersionsDelete(final Table t) {
+        switch (t) {
+        default:
+            break;
+        case INFOSTORE:
+        case DEL_INFOSTORE:
+            throw new IllegalArgumentException(
+                "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
+        }
+        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND cid = ?");
+        return delete.toString();
+    }
 	public FieldChooser getChooserForVersion(final int version) {
 		if(version == InfostoreFacade.CURRENT_VERSION) {
 			return new DocumentWins();
