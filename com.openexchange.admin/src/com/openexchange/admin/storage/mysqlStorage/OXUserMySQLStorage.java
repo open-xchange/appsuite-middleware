@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -66,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
@@ -100,6 +102,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -552,13 +555,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // update folder name via ox api if displayname was changed
                 final int[] changedfields = new int[] { ContactObject.DISPLAY_NAME };
 
-                OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), write_ox_con, write_ox_con, ctx.getId().intValue());
+                OXFolderAdminHelper.propagateUserModification(user_id, changedfields, System.currentTimeMillis(), write_ox_con, write_ox_con, ctx.getId().intValue());
             }
 
             // if administrator sets GUI configuration existing GUI
             // configuration
             // is overwritten
-            final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), usrdata.getId().intValue());
+            final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), user_id);
             final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
             if( guiPreferences != null ) {
                 final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
@@ -577,6 +580,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                 }
             }
+            changePrimaryMailAccount(ctx, write_ox_con, usrdata, user_id);
 
             // update last modified column
             changeLastModified(user_id, ctx, write_ox_con);
@@ -585,123 +589,55 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             write_ox_con.commit();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
+            throw new StorageException(e);
+        } catch (ServiceException e) {
+            log.error("Required service is missing.", e);
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final SecurityException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final NoSuchAlgorithmException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final UnsupportedEncodingException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw e;
         } catch (final OXException e) {
             log.error("Error", e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
+            rollback(write_ox_con);
             throw new StorageException(e);
         } finally {
             try {
@@ -726,6 +662,62 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox write connection to pool!", exp);
             }
+        }
+    }
+
+    private void changePrimaryMailAccount(Context ctx, Connection con, User user, int userId) throws ServiceException, StorageException {
+        // Loading a context is not possible if here the primary mail account for the admin is created.
+        int contextId = ctx.getId().intValue();
+        MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        MailAccountDescription account = new MailAccountDescription();
+        Set<Attribute> changed = new HashSet<Attribute>();
+        account.setDefaultFlag(true);
+        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        if (user.isImapServerset()) {
+            changed.add(Attribute.MAIL_URL_LITERAL);
+            account.parseMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ":" + user.getImapPort());
+        }
+        if (user.isImapLoginset()) {
+            changed.add(Attribute.LOGIN_LITERAL);
+            account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
+        }
+        if (null != user.getPrimaryEmail()) {
+            changed.add(Attribute.PRIMARY_ADDRESS_LITERAL);
+            account.setPrimaryAddress(user.getPrimaryEmail());
+        }
+        if (null != user.getMail_folder_drafts_name()) {
+            changed.add(Attribute.DRAFTS_LITERAL);
+            account.setDrafts(user.getMail_folder_drafts_name());
+        }
+        if (null != user.getMail_folder_sent_name()) {
+            changed.add(Attribute.SENT_LITERAL);
+            account.setDrafts(user.getMail_folder_sent_name());
+        }
+        if (null != user.getMail_folder_spam_name()) {
+            changed.add(Attribute.SPAM_LITERAL);
+            account.setDrafts(user.getMail_folder_spam_name());
+        }
+        if (null != user.getMail_folder_trash_name()) {
+            changed.add(Attribute.TRASH_LITERAL);
+            account.setDrafts(user.getMail_folder_trash_name());
+        }
+        if (null != user.getMail_folder_confirmed_ham_name()) {
+            changed.add(Attribute.CONFIRMED_HAM_LITERAL);
+            account.setDrafts(user.getMail_folder_confirmed_ham_name());
+        }
+        if (null != user.getMail_folder_confirmed_spam_name()) {
+            changed.add(Attribute.CONFIRMED_SPAM_LITERAL);
+            account.setDrafts(user.getMail_folder_confirmed_spam_name());
+        }
+        if (user.isSmtpServerset()) {
+            changed.add(Attribute.TRANSPORT_URL_LITERAL);
+            account.parseTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
+        }
+        try {
+            mass.updateMailAccount(account, changed, userId, contextId, null, con, true);
+        } catch (MailAccountException e) {
+            log.error("Problem storing the primary mail account.", e);
+            throw new StorageException(e.toString());
         }
     }
 
