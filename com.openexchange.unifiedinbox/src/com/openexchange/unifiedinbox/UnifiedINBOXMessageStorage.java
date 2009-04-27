@@ -478,7 +478,19 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     @Override
     public String[] appendMessages(final String destFullname, final MailMessage[] mailMessages) throws MailException {
-        throw new UnifiedINBOXException(UnifiedINBOXException.Code.APPEND_MSGS_DENIED);
+        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(destFullname)) {
+            // TODO: Error code OR default account?!
+            throw new IllegalArgumentException("Invalid destination folder. Don't know where to append the mails.");
+        }
+        // Parse destination folder
+        final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFullname);
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
+        mailAccess.connect();
+        try {
+            return mailAccess.getMessageStorage().appendMessages(destFullnameArgument.getFullname(), mailMessages);
+        } finally {
+            mailAccess.close(true);
+        }
     }
 
     @Override
