@@ -51,12 +51,15 @@ package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -70,6 +73,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -77,6 +81,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
+import com.openexchange.user.UserService;
 
 /**
  * {@link UnifiedINBOXMessageStorage} - The Unified INBOX message storage implementation.
@@ -104,6 +109,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     private final UnifiedINBOXAccess access;
 
+    private Locale locale;
+
     /**
      * Initializes a new {@link UnifiedINBOXMessageStorage}.
      * 
@@ -125,6 +132,26 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             throw new UnifiedINBOXException(e);
         }
         user = session.getUserId();
+    }
+
+    /**
+     * Gets session user's locale
+     * 
+     * @return The session user's locale
+     * @throws UnifiedINBOXException If retrieving user's locale fails
+     */
+    private Locale getLocale() throws UnifiedINBOXException {
+        if (null == locale) {
+            try {
+                final UserService userService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+                locale = userService.getUser(session.getUserId(), ctx).getLocale();
+            } catch (final ServiceException e) {
+                throw new UnifiedINBOXException(e);
+            } catch (final UserException e) {
+                throw new UnifiedINBOXException(e);
+            }
+        }
+        return locale;
     }
 
     @Override
@@ -255,6 +282,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 }
             }
         }
+        // Sort them
+        Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
+        // Return as array
         return messages.toArray(new MailMessage[messages.size()]);
     }
 
