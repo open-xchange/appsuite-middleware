@@ -82,6 +82,10 @@ public final class MailAccountFields {
 
     public static final String TRANSPORT_SECURE = "transport_secure";
 
+    public static final String TRANSPORT_LOGIN = "transport_login";
+
+    public static final String TRANSPORT_PASSWORD = "transport_password";
+
     public static final String NAME = "name";
 
     public static final String PRIMARY_ADDRESS = "primary_address";

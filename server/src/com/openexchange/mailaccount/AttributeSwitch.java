@@ -79,4 +79,6 @@ public interface AttributeSwitch {
     public Object transportPort();
     public Object transportProtocol();
     public Object transportSecure();
+    public Object transportLogin();
+    public Object transportPassword();
 }

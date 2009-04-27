@@ -135,6 +135,14 @@ public class MailAccountParser extends DataParser {
                 }
             }
         }
+        if (json.has(MailAccountFields.TRANSPORT_LOGIN)) {
+            account.setTransportLogin(parseString(json, MailAccountFields.TRANSPORT_LOGIN));
+            attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
+        }
+        if (json.has(MailAccountFields.TRANSPORT_PASSWORD)) {
+            account.setTransportPassword(parseString(json, MailAccountFields.TRANSPORT_PASSWORD));
+            attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
+        }
         if (json.has(MailAccountFields.NAME)) {
             account.setName(parseString(json, MailAccountFields.NAME));
             attributes.add(Attribute.NAME_LITERAL);

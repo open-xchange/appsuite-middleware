@@ -81,10 +81,12 @@ public enum Attribute {
     MAIL_PORT_LITERAL(MailAccountFields.MAIL_PORT, 1016),
     MAIL_PROTOCOL_LITERAL(MailAccountFields.MAIL_PROTOCOL, 1017),
     MAIL_SECURE_LITERAL(MailAccountFields.MAIL_SECURE, 1018),
-    TRANSPORT_SERVER_LITERAL(MailAccountFields.TRANSPORT_SERVER, 1015),
-    TRANSPORT_PORT_LITERAL(MailAccountFields.TRANSPORT_PORT, 1016),
-    TRANSPORT_PROTOCOL_LITERAL(MailAccountFields.TRANSPORT_PROTOCOL, 1017),
-    TRANSPORT_SECURE_LITERAL(MailAccountFields.TRANSPORT_SECURE, 1018);
+    TRANSPORT_SERVER_LITERAL(MailAccountFields.TRANSPORT_SERVER, 1019),
+    TRANSPORT_PORT_LITERAL(MailAccountFields.TRANSPORT_PORT, 1020),
+    TRANSPORT_PROTOCOL_LITERAL(MailAccountFields.TRANSPORT_PROTOCOL, 1021),
+    TRANSPORT_SECURE_LITERAL(MailAccountFields.TRANSPORT_SECURE, 1022),
+    TRANSPORT_LOGIN_LITERAL(MailAccountFields.TRANSPORT_LOGIN, 1023),
+    TRANSPORT_PASSWORD_LITERAL(MailAccountFields.TRANSPORT_PASSWORD, 1024);
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.MAIL_PORT_LITERAL, Attribute.MAIL_PROTOCOL_LITERAL, Attribute.MAIL_SECURE_LITERAL, Attribute.MAIL_SERVER_LITERAL));
     public static final Set<Attribute> TRANSPORT_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.TRANSPORT_PORT_LITERAL, Attribute.TRANSPORT_PROTOCOL_LITERAL, Attribute.TRANSPORT_SECURE_LITERAL, Attribute.TRANSPORT_SERVER_LITERAL));
@@ -144,6 +146,10 @@ public enum Attribute {
             return switcher.transportProtocol();
         case TRANSPORT_SECURE_LITERAL:
             return switcher.transportSecure();
+        case TRANSPORT_LOGIN_LITERAL:
+            return switcher.transportLogin();
+        case TRANSPORT_PASSWORD_LITERAL:
+            return switcher.transportPassword();
         default:
             throw new IllegalArgumentException(this.getName());
         }

@@ -70,6 +70,10 @@ public final class MailAccountDescription implements Serializable {
 
     private String password;
 
+    private String transportLogin;
+
+    private String transportPassword;
+
     private String name;
 
     private String primaryAddress;
@@ -606,6 +610,52 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setDefaultFlag(final boolean defaultFlag) {
         this.defaultFlag = defaultFlag;
+    }
+
+    /**
+     * Gets the optional transport login.
+     * <p>
+     * <b>NOTE</b>:&nbsp;{@link #getLogin()} is returned if no separate transport login is available.
+     * 
+     * @return The optional transport login
+     */
+    public String getTransportLogin() {
+        if (null == transportLogin) {
+            return getLogin();
+        }
+        return transportLogin;
+    }
+
+    /**
+     * Gets the optional transport password.
+     * <p>
+     * <b>NOTE</b>:&nbsp;{@link #getPassword()} is returned if no separate transport password is available.
+     * 
+     * @return The optional transport password
+     */
+    public String getTransportPassword() {
+        if (null == transportPassword) {
+            return getPassword();
+        }
+        return transportPassword;
+    }
+
+    /**
+     * Sets the optional transport login.
+     * 
+     * @param transportLogin The optional transport login
+     */
+    public void setTransportLogin(final String transportLogin) {
+        this.transportLogin = transportLogin;
+    }
+
+    /**
+     * Sets the optional transport password.
+     * 
+     * @param transportLogin The optional transport password
+     */
+    public void setTransportPassword(final String transportPassword) {
+        this.transportPassword = transportPassword;
     }
 
     private static Object[] parseServerAndPort(final String server, final int defaultPort) {

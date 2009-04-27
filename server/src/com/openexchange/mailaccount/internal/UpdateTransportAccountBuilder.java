@@ -54,58 +54,59 @@ import java.util.Set;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.AttributeSwitch;
 
-
 /**
  * {@link UpdateTransportAccountBuilder}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
-    private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL, Attribute.TRANSPORT_URL_LITERAL, Attribute.PRIMARY_ADDRESS_LITERAL);
-    
+    private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.of(
+        Attribute.NAME_LITERAL,
+        Attribute.TRANSPORT_LOGIN_LITERAL,
+        Attribute.TRANSPORT_PASSWORD_LITERAL,
+        Attribute.TRANSPORT_URL_LITERAL,
+        Attribute.PRIMARY_ADDRESS_LITERAL);
+
     public static boolean needsUpdate(final Set<Attribute> attributes) {
-        for(final Attribute attribute : attributes ) {
+        for (final Attribute attribute : attributes) {
             if (KNOWN_ATTRIBUTES.contains(attribute)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     public boolean handles(final Attribute attribute) {
         return KNOWN_ATTRIBUTES.contains(attribute);
     }
-    
+
     private final StringBuilder bob = new StringBuilder("UPDATE user_transport_account SET ");
-   
+
     public String getUpdateQuery() {
-        bob.setLength(bob.length()-1);
+        bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? and user = ?");
         return bob.toString();
     }
-    
+
     @Override
     public String toString() {
         return getUpdateQuery();
     }
-    
+
     public Object name() {
         bob.append("name = ?,");
         return null;
     }
-    
+
     public Object login() {
-        bob.append("login = ?,");
         return null;
     }
 
     public Object password() {
-        bob.append("password = ?,");
         return null;
     }
-    
+
     public Object transportURL() {
         bob.append("url = ?,");
         return null;
@@ -116,8 +117,6 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
-    
-    
     public Object confirmedHam() {
         return null;
     }
@@ -138,7 +137,6 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
-    
     public Object sent() {
         return null;
     }
@@ -151,7 +149,6 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
-  
     public Object trash() {
         return null;
     }
@@ -185,6 +182,16 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     }
 
     public Object transportServer() {
+        return null;
+    }
+
+    public Object transportLogin() {
+        bob.append("login = ?,");
+        return null;
+    }
+
+    public Object transportPassword() {
+        bob.append("password = ?,");
         return null;
     }
 

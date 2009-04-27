@@ -59,99 +59,105 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class MailAccountGetSwitch implements AttributeSwitch {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountGetSwitch.class);
-
-    private final MailAccount desc;
+    private final MailAccount account;
 
     public MailAccountGetSwitch(final MailAccount desc) {
-        this.desc = desc;
+        this.account = desc;
     }
 
     public Object confirmedHam() {
-        return desc.getConfirmedHam();
+        return account.getConfirmedHam();
     }
 
     public Object confirmedSpam() {
-        return desc.getConfirmedSpam();
+        return account.getConfirmedSpam();
     }
 
     public Object drafts() {
-        return desc.getDrafts();
+        return account.getDrafts();
     }
 
     public Object id() {
-        return desc.getId();
+        return Integer.valueOf(account.getId());
     }
 
     public Object login() {
-        return desc.getLogin();
+        return account.getLogin();
     }
 
     public Object mailURL() {
-        return desc.generateMailServerURL();
+        return account.generateMailServerURL();
     }
 
     public Object name() {
-        return desc.getName();
+        return account.getName();
     }
 
     public Object password() {
-        return desc.getPassword();
+        return account.getPassword();
     }
 
     public Object primaryAddress() {
-        return desc.getPrimaryAddress();
+        return account.getPrimaryAddress();
     }
 
     public Object sent() {
-        return desc.getSent();
+        return account.getSent();
     }
 
     public Object spam() {
-        return desc.getSpam();
+        return account.getSpam();
     }
 
     public Object spamHandler() {
-        return desc.getSpamHandler();
+        return account.getSpamHandler();
     }
 
     public Object transportURL() {
-        return desc.generateTransportServerURL();
+        return account.generateTransportServerURL();
     }
 
     public Object trash() {
-        return desc.getTrash();
+        return account.getTrash();
     }
 
     public Object mailPort() {
-        return Integer.valueOf(desc.getMailPort());
+        return Integer.valueOf(account.getMailPort());
     }
 
     public Object mailProtocol() {
-        return desc.getMailProtocol();
+        return account.getMailProtocol();
     }
 
     public Object mailSecure() {
-        return Boolean.valueOf(desc.isMailSecure());
+        return Boolean.valueOf(account.isMailSecure());
     }
 
     public Object mailServer() {
-        return desc.getMailServer();
+        return account.getMailServer();
     }
 
     public Object transportPort() {
-        return Integer.valueOf(desc.getTransportPort());
+        return Integer.valueOf(account.getTransportPort());
     }
 
     public Object transportProtocol() {
-        return desc.getTransportProtocol();
+        return account.getTransportProtocol();
     }
 
     public Object transportSecure() {
-        return Boolean.valueOf(desc.isTransportSecure());
+        return Boolean.valueOf(account.isTransportSecure());
     }
 
     public Object transportServer() {
-        return desc.getTransportServer();
+        return account.getTransportServer();
+    }
+
+    public Object transportLogin() {
+        return account.getTransportLogin();
+    }
+
+    public Object transportPassword() {
+        return account.getTransportPassword();
     }
 }

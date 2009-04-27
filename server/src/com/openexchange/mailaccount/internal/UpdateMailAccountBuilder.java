@@ -54,43 +54,45 @@ import java.util.Set;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.AttributeSwitch;
 
-
 /**
  * {@link UpdateMailAccountBuilder}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class UpdateMailAccountBuilder implements AttributeSwitch {
 
-    private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.complementOf(EnumSet.of(Attribute.ID_LITERAL, Attribute.TRANSPORT_URL_LITERAL));
-    
+    private static final Set<Attribute> KNOWN_ATTRIBUTES = EnumSet.complementOf(EnumSet.of(
+        Attribute.ID_LITERAL,
+        Attribute.TRANSPORT_URL_LITERAL,
+        Attribute.TRANSPORT_LOGIN_LITERAL,
+        Attribute.TRANSPORT_PASSWORD_LITERAL));
+
     public static boolean needsUpdate(final Set<Attribute> attributes) {
-        for(final Attribute attribute : attributes ) {
+        for (final Attribute attribute : attributes) {
             if (KNOWN_ATTRIBUTES.contains(attribute)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     public boolean handles(final Attribute attribute) {
         return KNOWN_ATTRIBUTES.contains(attribute);
     }
-    
+
     private final StringBuilder bob = new StringBuilder("UPDATE user_mail_account SET ");
-    
+
     public String getUpdateQuery() {
-        bob.setLength(bob.length()-1);
+        bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? AND user = ?");
         return bob.toString();
     }
-    
+
     @Override
     public String toString() {
         return getUpdateQuery();
     }
-    
+
     public Object confirmedHam() {
         bob.append("confirmed_ham = ?,");
         return null;
@@ -154,7 +156,8 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mailaccount.AttributeSwitch#trash()
      */
     public Object trash() {
@@ -191,6 +194,14 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     }
 
     public Object transportServer() {
+        return null;
+    }
+
+    public Object transportLogin() {
+        return null;
+    }
+
+    public Object transportPassword() {
         return null;
     }
 

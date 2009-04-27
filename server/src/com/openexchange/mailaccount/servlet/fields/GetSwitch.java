@@ -154,4 +154,12 @@ public class GetSwitch implements AttributeSwitch {
     public Object transportServer() {
         return desc.getTransportServer();
     }
+
+    public Object transportLogin() {
+        return desc.getTransportLogin();
+    }
+
+    public Object transportPassword() {
+        return desc.getTransportPassword();
+    }
 }

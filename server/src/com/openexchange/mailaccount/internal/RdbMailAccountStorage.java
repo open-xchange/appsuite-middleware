@@ -192,6 +192,22 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             result = stmt.executeQuery();
             if (result.next()) {
                 mailAccount.parseTransportServerURL(result.getString(2));
+                {
+                    final String transportLogin = result.getString(3);
+                    if (result.wasNull()) {
+                        mailAccount.setTransportLogin(null);
+                    } else {
+                        mailAccount.setTransportLogin(transportLogin);
+                    }
+                }
+                {
+                    final String transportPassword = result.getString(4);
+                    if (result.wasNull()) {
+                        mailAccount.setTransportPassword(null);
+                    } else {
+                        mailAccount.setTransportPassword(transportPassword);
+                    }
+                }
             } else {
                 // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(cid));
                 mailAccount.setTransportServer(null);
@@ -513,10 +529,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         continue;
                     }
                     final Object value = attribute.doSwitch(getter);
-                    if (Attribute.PASSWORD_LITERAL == attribute) {
+                    if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                         if (encryptedPassword == null) {
                             try {
-                                encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                                encryptedPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
                             } catch (final GeneralSecurityException e) {
                                 throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                             }
@@ -570,44 +586,52 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
-            final String encryptedPassword;
-            try {
-                encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
-            } catch (final GeneralSecurityException e) {
-                throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+            {
+                final String encryptedPassword;
+                try {
+                    encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                } catch (final GeneralSecurityException e) {
+                    throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                }
+                stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
+                int pos = 1;
+                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, mailAccount.generateMailServerURL());
+                stmt.setString(pos++, mailAccount.getLogin());
+                stmt.setString(pos++, encryptedPassword);
+                stmt.setString(pos++, mailAccount.getPrimaryAddress());
+                final String sh = mailAccount.getSpamHandler();
+                if (null == sh) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, sh);
+                }
+                setOptionalString(stmt, pos++, mailAccount.getTrash());
+                setOptionalString(stmt, pos++, mailAccount.getSent());
+                setOptionalString(stmt, pos++, mailAccount.getDrafts());
+                setOptionalString(stmt, pos++, mailAccount.getSpam());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
+                stmt.setLong(pos++, cid);
+                stmt.setLong(pos++, mailAccount.getId());
+                stmt.setLong(pos++, user);
+                stmt.executeUpdate();
             }
-            stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
-            int pos = 1;
-            stmt.setString(pos++, mailAccount.getName());
-            stmt.setString(pos++, mailAccount.generateMailServerURL());
-            stmt.setString(pos++, mailAccount.getLogin());
-            stmt.setString(pos++, encryptedPassword);
-            stmt.setString(pos++, mailAccount.getPrimaryAddress());
-            final String sh = mailAccount.getSpamHandler();
-            if (null == sh) {
-                stmt.setNull(pos++, Types.VARCHAR);
-            } else {
-                stmt.setString(pos++, sh);
-            }
-            setOptionalString(stmt, pos++, mailAccount.getTrash());
-            setOptionalString(stmt, pos++, mailAccount.getSent());
-            setOptionalString(stmt, pos++, mailAccount.getDrafts());
-            setOptionalString(stmt, pos++, mailAccount.getSpam());
-            setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
-            setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
-            stmt.setLong(pos++, cid);
-            stmt.setLong(pos++, mailAccount.getId());
-            stmt.setLong(pos++, user);
-            stmt.executeUpdate();
             final String transportURL = mailAccount.generateTransportServerURL();
             if (null != transportURL) {
+                final String encryptedTransportPassword;
+                try {
+                    encryptedTransportPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                } catch (final GeneralSecurityException e) {
+                    throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                }
                 stmt.close();
                 stmt = con.prepareStatement(UPDATE_TRANSPORT_ACCOUNT);
-                pos = 1;
+                int pos = 1;
                 stmt.setString(pos++, mailAccount.getName());
                 stmt.setString(pos++, transportURL);
                 stmt.setString(pos++, mailAccount.getLogin());
-                stmt.setString(pos++, encryptedPassword);
+                stmt.setString(pos++, encryptedTransportPassword);
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
@@ -645,62 +669,74 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(INSERT_MAIL_ACCOUNT);
-            final String encryptedPassword;
-            if (sessionPassword == null) {
-                encryptedPassword = null;
-            } else {
-                try {
-                    encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
-                } catch (final GeneralSecurityException e) {
-                    throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+            {
+                stmt = con.prepareStatement(INSERT_MAIL_ACCOUNT);
+                final String encryptedPassword;
+                if (sessionPassword == null) {
+                    encryptedPassword = null;
+                } else {
+                    try {
+                        encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                    } catch (final GeneralSecurityException e) {
+                        throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                    }
                 }
-            }
-            int pos = 1;
-            // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
-            // confirmed_ham, spam_handler
-            stmt.setLong(pos++, cid);
-            stmt.setLong(pos++, id);
-            stmt.setLong(pos++, user);
-            stmt.setString(pos++, mailAccount.getName());
-            stmt.setString(pos++, mailAccount.generateMailServerURL());
-            stmt.setString(pos++, mailAccount.getLogin());
-            if (mailAccount.isDefaultFlag()) {
-                stmt.setNull(pos++, Types.VARCHAR);
-            } else {
-                stmt.setString(pos++, encryptedPassword);
-            }
-            stmt.setString(pos++, mailAccount.getPrimaryAddress());
-            stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
-            setOptionalString(stmt, pos++, mailAccount.getTrash());
-            setOptionalString(stmt, pos++, mailAccount.getSent());
-            setOptionalString(stmt, pos++, mailAccount.getDrafts());
-            setOptionalString(stmt, pos++, mailAccount.getSpam());
-            setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
-            setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
-            final String sh = mailAccount.getSpamHandler();
-            if (null == sh) {
-                stmt.setNull(pos++, Types.VARCHAR);
-            } else {
-                stmt.setString(pos++, sh);
-            }
-            stmt.executeUpdate();
-            final String transportURL = mailAccount.generateTransportServerURL();
-            if (null != transportURL) {
-                stmt.close();
-                // cid, id, user, name, url, login, password, send_addr, default_flag
-                stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
-                pos = 1;
+                int pos = 1;
+                // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
+                // confirmed_ham, spam_handler
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, id);
                 stmt.setLong(pos++, user);
                 stmt.setString(pos++, mailAccount.getName());
-                stmt.setString(pos++, transportURL);
+                stmt.setString(pos++, mailAccount.generateMailServerURL());
                 stmt.setString(pos++, mailAccount.getLogin());
                 if (mailAccount.isDefaultFlag()) {
                     stmt.setNull(pos++, Types.VARCHAR);
                 } else {
                     stmt.setString(pos++, encryptedPassword);
+                }
+                stmt.setString(pos++, mailAccount.getPrimaryAddress());
+                stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
+                setOptionalString(stmt, pos++, mailAccount.getTrash());
+                setOptionalString(stmt, pos++, mailAccount.getSent());
+                setOptionalString(stmt, pos++, mailAccount.getDrafts());
+                setOptionalString(stmt, pos++, mailAccount.getSpam());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
+                final String sh = mailAccount.getSpamHandler();
+                if (null == sh) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, sh);
+                }
+                stmt.executeUpdate();
+            }
+            final String transportURL = mailAccount.generateTransportServerURL();
+            if (null != transportURL) {
+                stmt.close();
+                final String encryptedTransportPassword;
+                if (sessionPassword == null) {
+                    encryptedTransportPassword = null;
+                } else {
+                    try {
+                        encryptedTransportPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                    } catch (final GeneralSecurityException e) {
+                        throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                    }
+                }
+                // cid, id, user, name, url, login, password, send_addr, default_flag
+                stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
+                int pos = 1;
+                stmt.setLong(pos++, cid);
+                stmt.setLong(pos++, id);
+                stmt.setLong(pos++, user);
+                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, transportURL);
+                stmt.setString(pos++, mailAccount.getTransportLogin());
+                if (mailAccount.isDefaultFlag()) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, encryptedTransportPassword);
                 }
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);

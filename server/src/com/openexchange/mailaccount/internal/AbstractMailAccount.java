@@ -72,6 +72,10 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected String password;
 
+    protected String transportLogin;
+
+    protected String transportPassword;
+
     protected String mailServer;
 
     protected int mailPort;
@@ -492,6 +496,48 @@ public abstract class AbstractMailAccount implements MailAccount {
             sb.append('s');
         }
         return transportServerUrl = sb.append("://").append(transportServer).append(':').append(transportPort).toString();
+    }
+
+    /**
+     * Gets the optional transport login.
+     * 
+     * @return The optional transport login
+     */
+    public String getTransportLogin() {
+        if (null == transportLogin) {
+            return getLogin();
+        }
+        return transportLogin;
+    }
+
+    /**
+     * Gets the optional transport password.
+     * 
+     * @return The optional transport password
+     */
+    public String getTransportPassword() {
+        if (null == transportPassword) {
+            return getPassword();
+        }
+        return transportPassword;
+    }
+
+    /**
+     * Sets the optional transport login.
+     * 
+     * @param transportLogin The optional transport login
+     */
+    public void setTransportLogin(final String transportLogin) {
+        this.transportLogin = transportLogin;
+    }
+
+    /**
+     * Sets the optional transport password.
+     * 
+     * @param transportLogin The optional transport password
+     */
+    public void setTransportPassword(final String transportPassword) {
+        this.transportPassword = transportPassword;
     }
 
     @Override

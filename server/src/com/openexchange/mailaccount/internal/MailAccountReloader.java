@@ -159,7 +159,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
         updateDelegate();
         return delegate.generateTransportServerURL();
     }
-    
+
     public int getTransportPort() {
         updateDelegate();
         return delegate.getTransportPort();
@@ -221,5 +221,15 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
     public String getSpamHandler() {
         updateDelegate();
         return delegate.getSpamHandler();
+    }
+
+    public String getTransportLogin() {
+        updateDelegate();
+        return delegate.getTransportLogin();
+    }
+
+    public String getTransportPassword() {
+        updateDelegate();
+        return delegate.getTransportPassword();
     }
 }

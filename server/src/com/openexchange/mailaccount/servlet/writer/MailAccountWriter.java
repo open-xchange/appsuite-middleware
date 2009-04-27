@@ -93,6 +93,9 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.TRANSPORT_SERVER, account.getTransportServer());
         json.put(MailAccountFields.TRANSPORT_URL, account.generateTransportServerURL());
 
+        json.put(MailAccountFields.TRANSPORT_LOGIN, account.getTransportLogin());
+        // json.put(MailAccountFields.TRANSPORT_PASSWORD, account.getTransportPassword());
+
         json.put(MailAccountFields.NAME, account.getName());
         json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
         json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
@@ -113,7 +116,7 @@ public final class MailAccountWriter {
             final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
             final JSONArray row = new JSONArray();
             for (final Attribute attribute : attributes) {
-                if (Attribute.PASSWORD_LITERAL == attribute) {
+                if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                     row.put(JSONObject.NULL);
                 } else {
                     row.put(attribute.doSwitch(getter));

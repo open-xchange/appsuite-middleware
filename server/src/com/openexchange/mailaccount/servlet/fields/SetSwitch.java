@@ -89,7 +89,7 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object id() {
-        desc.setId((Integer) value);
+        desc.setId(((Integer) value).intValue());
         return null;
     }
 
@@ -145,7 +145,7 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object mailPort() {
-        desc.setMailPort((Integer) value);
+        desc.setMailPort(((Integer) value).intValue());
         return null;
     }
 
@@ -155,7 +155,7 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object mailSecure() {
-        desc.setMailSecure((Boolean) value);
+        desc.setMailSecure(((Boolean) value).booleanValue());
         return null;
     }
 
@@ -165,7 +165,7 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object transportPort() {
-        desc.setTransportPort((Integer) value);
+        desc.setTransportPort(((Integer) value).intValue());
         return null;
     }
 
@@ -175,12 +175,22 @@ public class SetSwitch implements AttributeSwitch{
     }
 
     public Object transportSecure() {
-        desc.setTransportSecure((Boolean) value);
+        desc.setTransportSecure(((Boolean) value).booleanValue());
         return null;
     }
 
     public Object transportServer() {
         desc.setTransportServer((String) value);
+        return null;
+    }
+
+    public Object transportLogin() {
+        desc.setTransportLogin((String) value);
+        return null;
+    }
+
+    public Object transportPassword() {
+        desc.setTransportPassword((String) value);
         return null;
     }
 

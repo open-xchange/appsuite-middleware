@@ -175,6 +175,24 @@ public interface MailAccount extends Serializable {
     public String getPassword();
 
     /**
+     * Gets the optional transport login.
+     * <p>
+     * <b>NOTE</b>:&nbsp;{@link #getLogin()} is returned if no separate transport login is available.
+     * 
+     * @return The optional transport login
+     */
+    public String getTransportLogin();
+
+    /**
+     * Gets the optional transport password.
+     * <p>
+     * <b>NOTE</b>:&nbsp;{@link #getPassword()} is returned if no separate transport password is available.
+     * 
+     * @return The optional transport password
+     */
+    public String getTransportPassword();
+
+    /**
      * Gets the primary email address.
      * 
      * @return The primary email address
