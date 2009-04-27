@@ -136,7 +136,7 @@ public final class MailFolderUtility {
      * Example:
      * 
      * <pre>
-     * &quot;INBOX&quot; -&gt; &quot;default/INBOX&quot;
+     * &quot;INBOX&quot; -&gt; &quot;default2/INBOX&quot;
      * </pre>
      * 
      * @param accountId The account ID
