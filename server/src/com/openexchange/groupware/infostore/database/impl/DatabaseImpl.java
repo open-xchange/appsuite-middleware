@@ -1514,9 +1514,9 @@ public class DatabaseImpl extends DBService {
 
         String parentDelete = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
         String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);
-        final Integer contextId = Autoboxing.I(session.getContextId());
+        final Integer contextId = Integer.valueOf(session.getContextId());
         for(DocumentMetadata documentMetadata : parents) {
-            final Integer id = Autoboxing.I(documentMetadata.getId());
+            final Integer id = Integer.valueOf(documentMetadata.getId());
             holder.execute(parentDelete, id, contextId);
             holder.execute(allChildrenDelete, id, contextId);
         }
