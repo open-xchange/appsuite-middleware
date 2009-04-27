@@ -230,6 +230,9 @@ case "$1" in
 	## Stop the service and regardless of whether it was
 	## running or not, start it again.
 	$0 stop
+        while ox_is_running open-xchange-admindaemon "/opt/open-xchange/etc/admindaemon"; do
+             sleep 1
+        done
 	$0 start
 
 	# Remember status and be quiet
