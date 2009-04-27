@@ -157,6 +157,7 @@ public final class MailProperties {
     private MailProperties() {
         super();
         loaded = new AtomicBoolean();
+        defaultSeparator = '/';
     }
 
     /**
@@ -220,7 +221,7 @@ public final class MailProperties {
         allowNestedDefaultFolderOnAltNamespace = false;
         defaultMimeCharset = null;
         ignoreSubscription = false;
-        defaultSeparator = '\0';
+        defaultSeparator = '/';
         maxNumOfConnections = 0;
         quoteLineColors = null;
         javaMailProperties = null;
