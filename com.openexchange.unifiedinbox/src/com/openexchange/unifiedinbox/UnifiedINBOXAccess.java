@@ -118,10 +118,21 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     private transient MailLogicTools logicTools;
 
+    /**
+     * Initializes a new {@link UnifiedINBOXAccess}.
+     * 
+     * @param session The session providing needed user data
+     */
     protected UnifiedINBOXAccess(final Session session) {
         super(session);
     }
 
+    /**
+     * Initializes a new {@link UnifiedINBOXAccess}.
+     * 
+     * @param session The session providing needed user data
+     * @param accountId The account ID
+     */
     protected UnifiedINBOXAccess(final Session session, final int accountId) {
         super(session, accountId);
     }
