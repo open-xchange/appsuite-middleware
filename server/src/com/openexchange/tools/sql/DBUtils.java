@@ -210,6 +210,9 @@ public final class DBUtils {
      * @param con connection to roll back.
      */
     public static void rollback(final Connection con) {
+        if (null == con) {
+            return;
+        }
         try {
             con.rollback();
         } catch (final SQLException e) {

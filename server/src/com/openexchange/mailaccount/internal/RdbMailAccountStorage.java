@@ -425,14 +425,22 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
-        if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
-        }
         Connection con = null;
         try {
             con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
+        }
+        try {
+            updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, false);
+        } finally {
+            Database.back(cid, true, con);
+        }
+    }
+
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, Connection con, boolean changePrimary) throws MailAccountException {
+        if ((mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) && !changePrimary) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
         }
         PreparedStatement stmt = null;
         try {
@@ -554,7 +562,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
         }
     }
 
