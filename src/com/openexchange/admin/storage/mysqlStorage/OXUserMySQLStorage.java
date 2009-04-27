@@ -673,11 +673,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         Set<Attribute> changed = new HashSet<Attribute>();
         account.setDefaultFlag(true);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
-        if (user.isImapServerset()) {
+        if (user.isImapServerset() || null != user.getImapServer()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
             account.parseMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ":" + user.getImapPort());
         }
-        if (user.isImapLoginset()) {
+        if (user.isImapLoginset() || null != user.getImapLogin()) {
             changed.add(Attribute.LOGIN_LITERAL);
             account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         }
@@ -709,12 +709,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             changed.add(Attribute.CONFIRMED_SPAM_LITERAL);
             account.setDrafts(user.getMail_folder_confirmed_spam_name());
         }
-        if (user.isSmtpServerset()) {
+        if (user.isSmtpServerset() || null != user.getSmtpServer()) {
             changed.add(Attribute.TRANSPORT_URL_LITERAL);
             account.parseTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
         }
         try {
-            mass.updateMailAccount(account, changed, userId, contextId, null, con, true);
+            if (!changed.isEmpty()) {
+                mass.updateMailAccount(account, changed, userId, contextId, null, con, true);
+            }
         } catch (MailAccountException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
