@@ -77,6 +77,7 @@
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
