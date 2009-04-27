@@ -199,10 +199,14 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public boolean isDefaultAccount() {
                 return false;
             }
-            
-            
+
+            public String getTransportLogin() {
+                return acc.getTransportLogin();
+            }
+
+            public String getTransportPassword() {
+                return acc.getTransportPassword();
+            }
         };
     }
-
-
 }

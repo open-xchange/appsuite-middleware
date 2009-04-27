@@ -200,10 +200,14 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public boolean isDefaultAccount() {
                 return false;
             }
-            
-            
+
+            public String getTransportLogin() {
+                return acc.getTransportLogin();
+            }
+
+            public String getTransportPassword() {
+                return acc.getTransportPassword();
+            }
         };
     }
-
-
 }
