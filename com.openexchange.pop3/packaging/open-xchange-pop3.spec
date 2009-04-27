@@ -71,3 +71,4 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/groupware/pop3.properties
