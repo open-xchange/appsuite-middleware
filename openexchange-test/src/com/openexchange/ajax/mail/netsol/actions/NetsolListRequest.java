@@ -59,7 +59,7 @@ import com.openexchange.ajax.mail.netsol.FolderAndID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class NetsolListRequest extends CommonListRequest {
+public class NetsolListRequest<CommonListResponse> extends CommonListRequest {
 
 	private static final int[] DEFAULT_COLUMNS = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604, 609 };
 
