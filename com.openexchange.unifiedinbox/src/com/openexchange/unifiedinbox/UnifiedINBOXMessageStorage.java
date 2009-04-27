@@ -51,7 +51,6 @@ package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +61,7 @@ import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
@@ -69,6 +69,7 @@ import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -222,22 +223,35 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             throw new UnifiedINBOXException(e);
         }
         final List<MailMessage> messages = new ArrayList<MailMessage>();
+        final StringBuilder helper = new StringBuilder(32);
         for (final MailAccount mailAccount : accounts) {
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-            boolean close = false;
-            try {
-                mailAccess.connect();
-                close = true;
-                messages.addAll(Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-                    UnifiedINBOXAccess.INBOX,
-                    indexRange,
-                    sortField,
-                    order,
-                    searchTerm,
-                    fields)));
-            } finally {
-                if (close) {
-                    mailAccess.close(true);
+            // Ignore the mail account denoting this Unified INBOX account
+            if (access.getAccountId() != mailAccount.getId()) {
+                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                boolean close = false;
+                try {
+                    mailAccess.connect();
+                    close = true;
+                    // Get account's messages
+                    final MailMessage[] accountMails = mailAccess.getMessageStorage().searchMessages(
+                        UnifiedINBOXAccess.INBOX,
+                        indexRange,
+                        sortField,
+                        order,
+                        searchTerm,
+                        fields);
+                    for (int i = 0; i < accountMails.length; i++) {
+                        final MailMessage accountMail = accountMails[i];
+                        helper.append(MailFolderUtility.prepareFullname(mailAccount.getId(), UnifiedINBOXAccess.INBOX));
+                        helper.append(MailPath.SEPERATOR).append(accountMail.getMailId());
+                        accountMail.setMailId(helper.toString());
+                        helper.setLength(0);
+                        messages.add(accountMail);
+                    }
+                } finally {
+                    if (close) {
+                        mailAccess.close(true);
+                    }
                 }
             }
         }
@@ -261,21 +275,34 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             throw new UnifiedINBOXException(e);
         }
         final List<MailMessage> messages = new ArrayList<MailMessage>();
+        final StringBuilder helper = new StringBuilder(32);
         for (final MailAccount mailAccount : accounts) {
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-            boolean close = false;
-            try {
-                mailAccess.connect();
-                close = true;
-                messages.addAll(Arrays.asList(mailAccess.getMessageStorage().getUnreadMessages(
-                    UnifiedINBOXAccess.INBOX,
-                    sortField,
-                    order,
-                    fields,
-                    limit)));
-            } finally {
-                if (close) {
-                    mailAccess.close(true);
+            // Ignore the mail account denoting this Unified INBOX account
+            if (access.getAccountId() != mailAccount.getId()) {
+                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                boolean close = false;
+                try {
+                    mailAccess.connect();
+                    close = true;
+                    // Get account's unread messages
+                    final MailMessage[] accountMails = mailAccess.getMessageStorage().getUnreadMessages(
+                        UnifiedINBOXAccess.INBOX,
+                        sortField,
+                        order,
+                        fields,
+                        limit);
+                    for (int i = 0; i < accountMails.length; i++) {
+                        final MailMessage accountMail = accountMails[i];
+                        helper.append(MailFolderUtility.prepareFullname(mailAccount.getId(), UnifiedINBOXAccess.INBOX));
+                        helper.append(MailPath.SEPERATOR).append(accountMail.getMailId());
+                        accountMail.setMailId(helper.toString());
+                        helper.setLength(0);
+                        messages.add(accountMail);
+                    }
+                } finally {
+                    if (close) {
+                        mailAccess.close(true);
+                    }
                 }
             }
         }
