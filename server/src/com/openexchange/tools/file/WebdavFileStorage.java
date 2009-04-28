@@ -53,7 +53,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.httpclient.HttpURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -144,12 +147,17 @@ public class WebdavFileStorage extends FileStorage {
      * e.nextElement(); lock.proppatchMethod(propName("freeIds"), ids+" "+identifier, true); } } finally { unlock(); } }
      */
 
-    @Override
-    protected boolean delete(final String name) throws FileStorageException {
+	@Override
+	protected Set<String> delete(final String[] names) throws FileStorageException {
         try {
-            final WebdavResource res = getResource(name);
-            final boolean del = res.deleteMethod();
-            return del;
+            Set<String> notDeleted = new HashSet<String>();
+            for (String name : names) {
+                final WebdavResource res = getResource(name);
+                if (!res.deleteMethod()) {
+                    notDeleted.add(name);
+                }
+            }
+    		return notDeleted;
         } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         }

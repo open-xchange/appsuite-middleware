@@ -250,27 +250,6 @@ public class QuotaFileStorage extends FileStorage {
         }
     }
 
-    @Override
-    public boolean deleteFile(final String identifier) throws FileStorageException {
-        try {
-            delegate.lock(LOCK_TIMEOUT);
-            lockMode.set(new NilLockMode());
-            final long size = delegate.getFileSize(identifier);
-            final boolean deleted = super.deleteFile(identifier);
-            if (deleted) {
-                decUsed(size);
-            }
-            return deleted;
-        } catch (final QuotaFileStorageException x) {
-            throw x;
-        } catch (final FileStorageException x) {
-            throw addContextInfo(x, ctx);
-        } finally {
-            lockMode.set(new NormalLockMode(delegate, ctx));
-            delegate.unlock();
-        }
-    }
-
     /*
      * @Override public String saveNewFile(InputStream input) throws IOException { //delegate.lock(LOCK_TIMEOUT); boolean locked = true; try
      * { //lockMode.set(new OnlyUnlockMode(delegate)); //locked = false; String name = super.saveNewFile(input); long length =
