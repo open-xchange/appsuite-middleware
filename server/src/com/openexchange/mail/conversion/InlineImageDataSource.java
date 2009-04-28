@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.conversion;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.InputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -63,7 +64,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -134,7 +134,7 @@ public final class InlineImageDataSource implements DataSource {
         }
         final MailPart mailPart;
         {
-            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final FullnameArgument arg = prepareMailFolderParam(dataArguments.get(ARGS[0]));
             final String fullname = arg.getFullname();
             final String mailId = dataArguments.get(ARGS[1]);
             final String cid = dataArguments.get(ARGS[2]);

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.text;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -71,7 +72,6 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.mime.ContentType;
@@ -962,7 +962,7 @@ public final class HTMLProcessing {
                                 final InlineImageDataSource imgSource = new InlineImageDataSource();
                                 final DataArguments args = new DataArguments();
                                 final String[] argsNames = imgSource.getRequiredArguments();
-                                args.put(argsNames[0], msgUID.getFolder());
+                                args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                                 args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                                 args.put(argsNames[2], filename);
                                 imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args, 60000).getImageURL();
