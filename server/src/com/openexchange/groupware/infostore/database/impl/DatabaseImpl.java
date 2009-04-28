@@ -1436,15 +1436,16 @@ public class DatabaseImpl extends DBService {
 
             // Remove the files. No rolling back from this point onward
 
+            if (fs == null) {
+                fs = getFileStorage(ctx);
+            }
+            List<String> files = new ArrayList<String>(versions.size());
             for (final DocumentMetadata version : versions) {
-
                 if (null != version.getFilestoreLocation()) {
-                    if (fs == null) {
-                        fs = getFileStorage(ctx);
-                    }
-                    fs.deleteFile(version.getFilestoreLocation());
+                    files.add(version.getFilestoreLocation());
                 }
             }
+            fs.deleteFile(files.toArray(new String[files.size()]));
 
             final EventClient ec = new EventClient(session);
 
@@ -1477,10 +1478,8 @@ public class DatabaseImpl extends DBService {
             }
             
             FileStorage fileStorage = getFileStorage(ctx);
-            for(String file : files) {
-                fileStorage.deleteFile(file);
-            }
-
+            String[] filesArray = files.toArray(new String[files.size()]);
+            fileStorage.deleteFile(filesArray);
         } catch (final AbstractOXException x) {
             throw new InfostoreException(x);
         }
