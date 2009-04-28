@@ -40,7 +40,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Context Restore Plugin
-Requires:       open-xchange-admin >= @OXVERSION@
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
 #

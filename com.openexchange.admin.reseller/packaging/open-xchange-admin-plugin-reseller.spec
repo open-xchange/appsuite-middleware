@@ -3,9 +3,7 @@
 
 Name:           open-xchange-admin-plugin-reseller
 BuildArch:	noarch
-BuildRequires:  ant
-BuildRequires:  open-xchange-admin >= @OXVERSION@
-BuildRequires:  open-xchange-admin-plugin-hosting >= @OXVERSION@
+BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -41,7 +39,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Context Restore Plugin
-Requires:       open-xchange-admin >= @OXVERSION@
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
 #
