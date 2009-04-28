@@ -146,7 +146,7 @@ public final class UnifiedINBOXFolderConverter {
         tmp.setHoldsMessages(true);
         {
             final MailPermission ownPermission = new DefaultMailPermission();
-            ownPermission.setFolderPermission(OCLPermission.READ_FOLDER);
+            ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
             tmp.setOwnPermission(ownPermission);
             tmp.addPermission(ownPermission);
         }

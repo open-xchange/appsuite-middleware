@@ -112,8 +112,18 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
             return true;
         }
-        // TODO: Deep check for existence
-        return (startsWithKnownFullname(fullname) != null);
+        final String fn = startsWithKnownFullname(fullname);
+        if (null == fn) {
+            return false;
+        }
+        final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+        mailAccess.connect();
+        try {
+            return mailAccess.getFolderStorage().exists(fa.getFullname());
+        } finally {
+            mailAccess.close(true);
+        }
     }
 
     @Override
@@ -127,10 +137,19 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         final String fn = startsWithKnownFullname(fullname);
         if (null != fn) {
             final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            final int nestedAccountId = fa.getAccountId();
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, nestedAccountId);
             mailAccess.connect();
             try {
-                return mailAccess.getFolderStorage().getFolder(fa.getFullname());
+                final String nestedFullname = fa.getFullname();
+                final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(nestedFullname);
+                mailFolder.setFullname(UnifiedINBOXUtility.generateNestedFullname(
+                    access.getAccountId(),
+                    getStartingKnownFullname(fullname),
+                    nestedAccountId,
+                    nestedFullname));
+                mailFolder.setName(getMailAccountName(nestedAccountId));
+                return mailFolder;
             } finally {
                 mailAccess.close(true);
             }
@@ -340,4 +359,28 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         }
         return null;
     }
+
+    private static String getStartingKnownFullname(final String fullname) {
+        for (final Iterator<String> iter = UnifiedINBOXAccess.KNOWN_FOLDERS.iterator(); iter.hasNext();) {
+            final String knownFullname = iter.next();
+            if (fullname.startsWith(knownFullname)) {
+                return knownFullname;
+            }
+        }
+        return null;
+    }
+
+    private String getMailAccountName(final int accountId) throws UnifiedINBOXException {
+        try {
+            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
+        } catch (final ServiceException e) {
+            throw new UnifiedINBOXException(e);
+        } catch (final MailAccountException e) {
+            throw new UnifiedINBOXException(e);
+        }
+    }
+
 }

@@ -112,8 +112,7 @@ public final class UnifiedINBOXMessageCopier {
          * folders is needed here.
          */
         if (move && sourceFolder.equals(destFolder)) {
-            // TODO: error code
-            throw new IllegalArgumentException("No equal move");
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
         }
         // Iterate mail IDs
         final UnifiedINBOXUID tmp = new UnifiedINBOXUID();
@@ -126,7 +125,7 @@ public final class UnifiedINBOXMessageCopier {
             try {
                 final String realSource = UnifiedINBOXUtility.determineAccountFullname(mailAccess, sourceFolder);
                 final String realDest = UnifiedINBOXUtility.determineAccountFullname(mailAccess, destFolder);
-                arr[0] = mailIds[i];
+                arr[0] = tmp.getId();
                 if (move) {
                     retval[i] = mailAccess.getMessageStorage().moveMessages(realSource, realDest, arr, fast)[0];
                 } else {
@@ -150,14 +149,14 @@ public final class UnifiedINBOXMessageCopier {
         final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFolder);
         final UnifiedINBOXUID tmp = new UnifiedINBOXUID();
         // Check for possible conflict on move
+        final String destFullname = destFullnameArgument.getFullname();
+        final int destAccountId = destFullnameArgument.getAccountId();
         if (move) {
             for (int i = 0; i < mailIds.length; i++) {
                 tmp.setUIDString(mailIds[i]);
                 // Check if accounts and fullnames are equal
-                if (tmp.getAccountId() == destFullnameArgument.getAccountId() && tmp.getFullname().equals(
-                    destFullnameArgument.getFullname())) {
-                    // TODO: error code
-                    throw new IllegalArgumentException("No equal move");
+                if (tmp.getAccountId() == destAccountId && tmp.getFullname().equals(destFullname)) {
+                    throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
                 }
             }
         }
@@ -166,7 +165,7 @@ public final class UnifiedINBOXMessageCopier {
         for (int i = 0; i < mailIds.length; i++) {
             tmp.setUIDString(mailIds[i]);
             // Check if accounts are equal...
-            if (tmp.getAccountId() == destFullnameArgument.getAccountId()) {
+            if (tmp.getAccountId() == destAccountId) {
                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, tmp.getAccountId());
                 mailAccess.connect();
                 try {
@@ -174,14 +173,14 @@ public final class UnifiedINBOXMessageCopier {
                     if (move) {
                         retval[i] = mailAccess.getMessageStorage().moveMessages(
                             realSource,
-                            destFullnameArgument.getFullname(),
-                            new String[] { mailIds[i] },
+                            destFullname,
+                            new String[] { tmp.getId() },
                             fast)[0];
                     } else {
                         retval[i] = mailAccess.getMessageStorage().copyMessages(
                             realSource,
-                            destFullnameArgument.getFullname(),
-                            new String[] { mailIds[i] },
+                            destFullname,
+                            new String[] { tmp.getId() },
                             fast)[0];
                     }
                 } finally {
@@ -189,21 +188,28 @@ public final class UnifiedINBOXMessageCopier {
                 }
             } else {
                 // Accounts differ
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, tmp.getAccountId());
-                mailAccess.connect();
+                final MailAccess<?, ?> sourceMailAccess = MailAccess.getInstance(session, tmp.getAccountId());
+                sourceMailAccess.connect();
                 try {
-                    final MailMessage mailToCopy = access.getMessageStorage().getMessage(sourceFolder, mailIds[i], false);
+                    final MailMessage mailToCopy = sourceMailAccess.getMessageStorage().getMessage(tmp.getFullname(), tmp.getId(), false);
                     if (null == mailToCopy) {
                         retval[i] = null;
                     } else {
-                        // Copy message
-                        retval[i] = mailAccess.getMessageStorage().appendMessages(destFolder, new MailMessage[] { mailToCopy })[0];
+                        // Append to destination's storage
+                        final MailAccess<?, ?> destMailAccess = MailAccess.getInstance(session, destAccountId);
+                        destMailAccess.connect();
+                        try {
+                            // Append message to destination folder
+                            retval[i] = destMailAccess.getMessageStorage().appendMessages(destFullname, new MailMessage[] { mailToCopy })[0];
+                        } finally {
+                            destMailAccess.close(true);
+                        }
+                        if (move) {
+                            sourceMailAccess.getMessageStorage().deleteMessages(tmp.getFullname(), new String[] { tmp.getId() }, true);
+                        }
                     }
                 } finally {
-                    mailAccess.close(true);
-                }
-                if (move) {
-                    access.getMessageStorage().deleteMessages(sourceFolder, mailIds, true);
+                    sourceMailAccess.close(true);
                 }
             }
         }
@@ -221,14 +227,14 @@ public final class UnifiedINBOXMessageCopier {
         mailAccess.connect();
         try {
             final String realDest = UnifiedINBOXUtility.determineAccountFullname(mailAccess, destFolder);
-            if (move && sourceFullnameArgument.getFullname().equals(realDest)) {
-                // TODO: error code
-                throw new IllegalArgumentException("No equal move");
+            final String sourceFullname = sourceFullnameArgument.getFullname();
+            if (move && sourceFullname.equals(realDest)) {
+                throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
             }
             if (move) {
-                retval = mailAccess.getMessageStorage().moveMessages(sourceFullnameArgument.getFullname(), realDest, mailIds, fast);
+                retval = mailAccess.getMessageStorage().moveMessages(sourceFullname, realDest, mailIds, fast);
             } else {
-                retval = mailAccess.getMessageStorage().copyMessages(sourceFullnameArgument.getFullname(), realDest, mailIds, fast);
+                retval = mailAccess.getMessageStorage().copyMessages(sourceFullname, realDest, mailIds, fast);
             }
 
         } finally {
@@ -246,22 +252,19 @@ public final class UnifiedINBOXMessageCopier {
         // Parse destination folder
         final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFolder);
         // Check for equal mail account
+        final String sourceFullname = sourceFullnameArgument.getFullname();
+        final String destFullname = destFullnameArgument.getFullname();
         if (sourceFullnameArgument.getAccountId() == destFullnameArgument.getAccountId()) {
+            if (move && sourceFullname.equals(destFullname)) {
+                throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
+            }
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
             mailAccess.connect();
             try {
                 if (move) {
-                    return mailAccess.getMessageStorage().moveMessages(
-                        sourceFullnameArgument.getFullname(),
-                        destFullnameArgument.getFullname(),
-                        mailIds,
-                        fast);
+                    return mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, mailIds, fast);
                 }
-                return mailAccess.getMessageStorage().copyMessages(
-                    sourceFullnameArgument.getFullname(),
-                    destFullnameArgument.getFullname(),
-                    mailIds,
-                    fast);
+                return mailAccess.getMessageStorage().copyMessages(sourceFullname, destFullname, mailIds, fast);
             } finally {
                 mailAccess.close(true);
             }
@@ -270,15 +273,16 @@ public final class UnifiedINBOXMessageCopier {
         final MailAccess<?, ?> sourceMailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
         sourceMailAccess.connect();
         try {
-            final MailMessage[] mails = sourceMailAccess.getMessageStorage().getMessages(
-                sourceFullnameArgument.getFullname(),
-                mailIds,
-                FIELDS_FULL);
+            final MailMessage[] mails = sourceMailAccess.getMessageStorage().getMessages(sourceFullname, mailIds, FIELDS_FULL);
             final MailAccess<?, ?> destMailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
+            destMailAccess.connect();
             try {
-                retval = destMailAccess.getMessageStorage().appendMessages(destFullnameArgument.getFullname(), mails);
+                retval = destMailAccess.getMessageStorage().appendMessages(destFullname, mails);
             } finally {
                 destMailAccess.close(true);
+            }
+            if (move) {
+                sourceMailAccess.getMessageStorage().deleteMessages(sourceFullname, mailIds, true);
             }
         } finally {
             sourceMailAccess.close(true);

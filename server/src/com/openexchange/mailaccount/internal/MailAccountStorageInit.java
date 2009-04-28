@@ -50,15 +50,13 @@
 package com.openexchange.mailaccount.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.servlet.MailAccountServlet;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * {@link MailAccountStorageInit} - Initialization for mail account storage.
@@ -87,6 +85,7 @@ public final class MailAccountStorageInit implements Initialization {
         ServerServiceRegistry.getInstance().addService(
             MailAccountStorageService.class,
             new CachingMailAccountStorage(new RdbMailAccountStorage()));
+        ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, new UnifiedINBOXManagementImpl());
         LOG.info("MailAccountStorageService successfully injected to server service registry");
     }
 
@@ -95,6 +94,7 @@ public final class MailAccountStorageInit implements Initialization {
             return;
         }
         // Simulate bundle stop
+        ServerServiceRegistry.getInstance().removeService(UnifiedINBOXManagement.class);
         ServerServiceRegistry.getInstance().removeService(MailAccountStorageService.class);
         LOG.info("MailAccountStorageService successfully removed from server service registry");
     }

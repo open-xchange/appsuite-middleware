@@ -122,7 +122,11 @@ public final class UnifiedINBOXException extends MIMEMailException {
         /**
          * Unknown default folder fullname: %1$s.
          */
-        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", Category.CODE_ERROR, 2012);
+        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", Category.CODE_ERROR, 2012),
+        /**
+         * Move operation aborted. Source and destination folder are equal.
+         */
+        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", Category.CODE_ERROR, 2013);
 
         private final String message;
 

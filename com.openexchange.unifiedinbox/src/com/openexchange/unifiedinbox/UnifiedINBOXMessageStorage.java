@@ -229,7 +229,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             mailAccess.connect();
             close = true;
             // Get messages
-            return mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
+            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
+            for (int i = 0; i < mails.length; i++) {
+                mails[i].setFolder(fullname);
+            }
+            return mails;
         } finally {
             if (close) {
                 mailAccess.close(true);

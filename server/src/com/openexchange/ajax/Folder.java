@@ -54,6 +54,7 @@ import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -109,6 +110,7 @@ import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.FolderObjectIterator;
@@ -614,10 +616,21 @@ public class Folder extends SessionServlet {
                             /*
                              * Get all user mail accounts
                              */
-                            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                                MailAccountStorageService.class,
-                                true);
-                            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                            final List<MailAccount> accounts;
+                            {
+                                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                                    MailAccountStorageService.class,
+                                    true);
+                                final MailAccount[] accountsArr = storageService.getUserMailAccounts(
+                                    session.getUserId(),
+                                    session.getContextId());
+                                final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
+                                tmp.addAll(Arrays.asList(accountsArr));
+                                // Sort them
+                                Collections.sort(tmp, new MailAccountComparator(locale));
+                                accounts = tmp;
+                            }
+
                             for (final MailAccount mailAccount : accounts) {
                                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                                 boolean close = false;
@@ -1789,4 +1802,37 @@ public class Folder extends SessionServlet {
         }
 
     }
+
+    private static final class MailAccountComparator implements Comparator<MailAccount> {
+
+        private final Collator collator;
+
+        public MailAccountComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final MailAccount o1, final MailAccount o2) {
+            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
+                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+                    return 0;
+                }
+                return -1;
+            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+                return 1;
+            }
+            if (o1.isDefaultAccount()) {
+                if (o2.isDefaultAccount()) {
+                    return 0;
+                }
+                return -1;
+            } else if (o2.isDefaultAccount()) {
+                return 1;
+            }
+            return collator.compare(o1.getName(), o2.getName());
+        }
+
+    }
+
 }

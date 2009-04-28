@@ -49,53 +49,53 @@
 
 package com.openexchange.mailaccount;
 
-import com.openexchange.exceptions.LocalizableStrings;
-
 /**
- * {@link MailAccountExceptionStrings} - The mail account exception strings.
+ * {@link UnifiedINBOXManagement} - Management for Unified INBOX accounts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountExceptionStrings implements LocalizableStrings {
-
-    // Unknown operation: %1$s.
-    public static final String UNKNOWN_OPERATION_MSG = "Unknown operation: %1$s.";
-
-    // Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
-    public static final String NOT_FOUND_MSG = "Cannot find mail account with identifier %1$s for user %2$s in context %3$s.";
-
-    // Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
-    public static final String CONFLICT_MSG = "Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.";
-
-    // A SQL error occurred: %1$s.
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";
-
-    // A host could not be resolved: %1$s.
-    public static final String UNKNOWN_HOST_ERROR_MSG = "A host could not be resolved: %1$s.";
-
-    // Denied deletion of default mail account of user %1$s in context %2$s.
-    public static final String NO_DEFAULT_DELETE_MSG = "Denied deletion of default mail account of user %1$s in context %2$s.";
-
-    // Denied update of default mail account of user %1$s in context %2$s.
-    public static final String NO_DEFAULT_UPDATE_MSG = "Denied update of default mail account of user %1$s in context %2$s.";
-
-    // No duplicate default account allowed.
-    public static final String NO_DUPLICATE_DEFAULT_MSG = "No duplicate default account allowed.";
-
-    // Password encryption failed.
-    public static final String PASSWORD_ENCRYPTION_FAILED_MSG = "Password encryption failed.";
-
-    // Password decryption failed.
-    public static final String PASSWORD_DECRYPTION_FAILED_MSG = "Password decryption failed.";
-
-    // The Unified INBOX account already exists for user %1$s in context %2$s.
-    public static final String DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG = "The Unified INBOX account already exists for user %1$s in context %2$s.";
+public interface UnifiedINBOXManagement {
 
     /**
-     * Initializes a new {@link MailAccountExceptionStrings}.
+     * The Unified INBOX protocol name.
      */
-    private MailAccountExceptionStrings() {
-        super();
-    }
+    public static final String PROTOCOL_UNIFIED_INBOX = "unifiedinbox";
 
+    /**
+     * Creates the Unified INBOX account for given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @throws MailAccountException If creating the Unified INBOX account fails for given user in specified context
+     */
+    public void createUnifiedINBOX(int userId, int contextId) throws MailAccountException;
+
+    /**
+     * Deletes the Unified INBOX account for given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @throws MailAccountException If deleting the Unified INBOX account fails for given user in specified context
+     */
+    public void deleteUnifiedINBOX(int userId, int contextId) throws MailAccountException;
+
+    /**
+     * Checks if the Unified INBOX account is enabled for given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return <code>true</code> if the Unified INBOX account is enabled for given user in specified context; otherwise <code>false</code>
+     * @throws MailAccountException If checking Unified INBOX account's enabled status fails
+     */
+    public boolean isEnabled(int userId, int contextId) throws MailAccountException;
+
+    /**
+     * Gets the ID of the mail account denoting the Unified INBOX account.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The ID of the Unified INBOX account or <code>-1</code> if none found
+     * @throws MailAccountException If detecting ID of the Unified INBOX account fails
+     */
+    public int getUnifiedINBOXAccountID(int userId, int contextId) throws MailAccountException;
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.unifiedinbox.utility;
 
+import static com.openexchange.mail.MailPath.SEPERATOR;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,6 +110,20 @@ public final class UnifiedINBOXUtility {
     }
 
     /**
+     * Generates a nested folder's fullname.
+     * 
+     * @param uiAccountId The Unified INBOX's account ID
+     * @param uiFullname The Unified INBOX's fullname
+     * @param nestedAccountId The nested account's ID
+     * @param nestedFullname The nested folder's fullname
+     * @return The generated nested folder's fullname.
+     */
+    public static String generateNestedFullname(final int uiAccountId, final String uiFullname, final int nestedAccountId, final String nestedFullname) {
+        return new StringBuilder(32).append(prepareFullname(uiAccountId, uiFullname)).append(SEPERATOR).append(
+            prepareFullname(nestedAccountId, nestedFullname)).toString();
+    }
+
+    /**
      * Parses nested fullname.
      * <p>
      * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
@@ -124,7 +140,7 @@ public final class UnifiedINBOXUtility {
                 prepareMailFolderParam(nestedFullname).getFullname());
         }
         // Cut off starting known fullname and its separator character
-        final String fn = nestedFullname.substring(nestedFullname.indexOf(MailPath.SEPERATOR) + 1);
+        final String fn = nestedFullname.substring(nestedFullname.indexOf(SEPERATOR) + 1);
         return prepareMailFolderParam(fn);
     }
 

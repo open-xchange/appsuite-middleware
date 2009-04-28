@@ -115,6 +115,7 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.management.ManagementService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
@@ -397,6 +398,11 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(
             MailAccountStorageService.class.getName(),
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class),
+            null));
+        // TODO: Register server's Unified INBOX management here until its encapsulated in an own bundle
+        registrationList.add(context.registerService(
+            UnifiedINBOXManagement.class.getName(),
+            ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class),
             null));
         /*
          * Register data sources

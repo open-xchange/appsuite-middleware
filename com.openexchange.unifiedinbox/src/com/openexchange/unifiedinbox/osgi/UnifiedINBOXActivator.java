@@ -75,7 +75,7 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
 
     private final Dictionary<String, String> dictionary;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration providerRegistration;
 
     /**
      * Initializes a new {@link UnifiedINBOXActivator}
@@ -88,7 +88,8 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class };
     }
 
     @Override
@@ -127,7 +128,7 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
                     }
                 }
             }
-            serviceRegistration = context.registerService(MailProvider.class.getName(), UnifiedINBOXProvider.getInstance(), dictionary);
+            providerRegistration = context.registerService(MailProvider.class.getName(), UnifiedINBOXProvider.getInstance(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -137,9 +138,9 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
+            if (null != providerRegistration) {
+                providerRegistration.unregister();
+                providerRegistration = null;
             }
             /*
              * Clear service registry

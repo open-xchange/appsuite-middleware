@@ -53,6 +53,7 @@ import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.unifiedinbox.config.UnifiedINBOXProperties;
@@ -67,7 +68,7 @@ public final class UnifiedINBOXProvider extends MailProvider {
     /**
      * Unified INBOX protocol.
      */
-    public static final Protocol PROTOCOL_UNIFIED_INBOX = new Protocol("unifiedinbox");
+    public static final Protocol PROTOCOL_UNIFIED_INBOX = new Protocol(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX);
 
     private static final UnifiedINBOXProvider instance = new UnifiedINBOXProvider();
 
