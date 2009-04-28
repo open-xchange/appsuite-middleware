@@ -77,9 +77,10 @@ public class ReplyAllTest extends AbstractReplyTest {
         String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
         String anotherMail = "tobias.prinz@open-xchange.com";
+        String yetAnotherMail = "tierlieb@open-xchange.com";
         
         this.client = client2;
-        JSONObject mySentMail = createEMail(adresses(mail1, anotherMail), "ReplyAll test", "ALTERNATIVE", MAIL_TEXT_BODY);
+        JSONObject mySentMail = createEMail(adresses(mail1, anotherMail, yetAnotherMail), "ReplyAll test", "ALTERNATIVE", MAIL_TEXT_BODY);
         sendMail(mySentMail.toString());
 
         this.client = client1;
@@ -91,6 +92,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         List<String> to = myReplyMail.getTo();
         assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
         assertTrue("Recipient of original message should still be recipient in reply", contains(to, anotherMail));
+        assertTrue("Recipient of original message should still be recipient in reply", contains(to, yetAnotherMail));
     }
     
     

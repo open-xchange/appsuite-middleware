@@ -151,6 +151,7 @@ public class TestMail {
     public void read(JSONObject json) throws JSONException {
         String field = MailJSONField.FROM.getKey();
         if (json.has(field))
+            System.out.println("From = " + json.getJSONArray(field));
             setFrom( j2l( json.getJSONArray(field) ) );
         
         field = MailJSONField.RECIPIENT_TO.getKey();
@@ -215,7 +216,7 @@ public class TestMail {
         return list;
     }
     
-    protected String join(Collection coll, String connector){
+    protected String join(Collection<? extends Object> coll, String connector){
         StringBuilder builder = new StringBuilder();
         for(Object obj: coll){
             builder.append(obj.toString());

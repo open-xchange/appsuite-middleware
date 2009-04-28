@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +59,8 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.mail.actions.AllRequest;
+import com.openexchange.ajax.mail.actions.ForwardRequest;
+import com.openexchange.ajax.mail.actions.ForwardResponse;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ReplyAllRequest;
 import com.openexchange.ajax.mail.actions.ReplyAllResponse;
@@ -66,7 +69,7 @@ import com.openexchange.ajax.mail.actions.ReplyResponse;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link AbstractReplyTest}
+ * {@link AbstractReplyTest} - test for the Reply/ReplyAll/Forward family of requests.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -118,6 +121,14 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         ReplyAllResponse response = (ReplyAllResponse) client.execute(reply);
         return (JSONObject) response.getData();
     }
+    
+    protected JSONObject getForwardMail(TestMail testMail) throws AjaxException, IOException, SAXException, JSONException {
+        ReplyRequest reply = new ForwardRequest(testMail.getFolder(), testMail.getId());
+        reply.setFailOnError(true);
+        client = getClient();
+        ForwardResponse response = (ForwardResponse) client.execute(reply);
+        return (JSONObject) response.getData();
+    }
 
     protected JSONObject getFirstMailInFolder(String inboxFolder) throws AjaxException, IOException, SAXException, JSONException {
         CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null));
@@ -126,6 +137,14 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         String id = mailFields.getString(0);
         AbstractAJAXResponse response2 = getClient().execute(new GetRequest(inboxFolder, id));
         return (JSONObject) response2.getData();
+    }
+
+    public static void assertNullOrEmpty(String msg, Collection coll){
+        if(coll == null)
+            return;
+        if(coll.size() == 0)
+            return;
+        fail(msg);
     }
 
 }

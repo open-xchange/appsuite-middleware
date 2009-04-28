@@ -50,48 +50,42 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
-import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.servlet.AjaxException;
 
+
 /**
- * {@link ReplyTest}
- * 
+ * {@link ForwardMailTest}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ReplyTest extends AbstractReplyTest {
+public class ForwardMailTest extends AbstractReplyTest {
 
-    public ReplyTest(String name) {
+    public ForwardMailTest(String name) {
         super(name);
     }
+    
+    public void testShouldForwardWithoutNotifyingFormerRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+        String mail1 = getClient().getValues().getSendAddress();
 
-    public void testShouldReplyToSenderOnly() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
-        AJAXClient client1 = new AJAXClient(User.User1);
-        AJAXClient client2 = new AJAXClient(User.User2);
-        String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
-        String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
-
-        this.client = client2;
-        JSONObject mySentMail = createEMail(mail1, "Reply test", "ALTERNATIVE", MAIL_TEXT_BODY);
+        JSONObject mySentMail = createEMail(mail1, "Forward test", "ALTERNATIVE", MAIL_TEXT_BODY);
         sendMail(mySentMail.toString());
 
-        this.client = client1;
         JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
-        TestMail myReplyMail = new TestMail(getReplyEMail(new TestMail(myReceivedMail)));
+        TestMail myForwardMail = new TestMail(getForwardMail(new TestMail(myReceivedMail)));
 
-        assertTrue("Should contain indicator that this is a reply in the subject line", myReplyMail.getSubject().startsWith("Re:"));
+        String subject = myForwardMail.getSubject();
+        assertTrue("Should contain indicator that this is a forwarded mail in the subject line", subject.startsWith("Fwd:"));
 
-        List<String> to = myReplyMail.getTo();
-        assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
+        AbstractReplyTest.assertNullOrEmpty("Recipient field should be empty", myForwardMail.getTo());
 
-        List<String> from = myReplyMail.getFrom();
-        assertNullOrEmpty("New sender field should be empty, because GUI offers selection there", from);        
+        AbstractReplyTest.assertNullOrEmpty("Carbon copy field should be empty", myForwardMail.getCc());
+        
+        AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
+       
     }
-
 
 }
