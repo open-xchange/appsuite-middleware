@@ -130,15 +130,6 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         return (JSONObject) response.getData();
     }
 
-    protected JSONObject getFirstMailInFolder(String inboxFolder) throws AjaxException, IOException, SAXException, JSONException {
-        CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null));
-        JSONArray arr = (JSONArray) response.getData();
-        JSONArray mailFields = arr.getJSONArray(0);
-        String id = mailFields.getString(0);
-        AbstractAJAXResponse response2 = getClient().execute(new GetRequest(inboxFolder, id));
-        return (JSONObject) response2.getData();
-    }
-
     public static void assertNullOrEmpty(String msg, Collection coll){
         if(coll == null)
             return;

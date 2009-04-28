@@ -47,42 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.mail;
+package com.openexchange.ajax.mail.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.container.mail.MailObject;
+import com.openexchange.mail.MailJSONField;
+
 
 /**
- * {@link MailTestSuite}
+ * {@link UpdateMailResponse}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class MailTestSuite extends TestSuite {
+public class UpdateMailResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link MailTestSuite}
-	 */
-	private MailTestSuite() {
-		super();
-	}
+    public UpdateMailResponse(Response response) {
+        super(response);
+    }
+    
+    public String getFolder() throws JSONException{
+        JSONObject data = (JSONObject) getData();
+        return data.getString("folder_id");
+    }
 
-	 /**
-     * @return a test suite containing smoke tests.
-     */
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.AllTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ListTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.GetTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.SendTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.CountMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.MailSearchTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ForwardMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ReplyAllTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ReplyTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.UpdateMailTest.class);
-        /*mailSuite.addTestSuite(com.openexchange.ajax.mail.AlwaysTest.class);*/
-        return mailSuite;
+    public String getID() throws JSONException{
+        JSONObject data = (JSONObject) getData();
+        return data.getString("id");
     }
 }

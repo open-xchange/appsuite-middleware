@@ -68,14 +68,28 @@ public class TestMail {
 
     private String subject, body, contentType, folder, id;
 
-    private int priority;
-    
-    
+    private int priority, flags, color;
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
+
     public int getPriority() {
         return priority;
     }
 
-    
     public void setPriority(int priority) {
         this.priority = priority;
     }
@@ -139,70 +153,72 @@ public class TestMail {
     public TestMail() {
 
     }
-    
-    public TestMail(JSONObject obj) throws JSONException{
+
+    public TestMail(JSONObject obj) throws JSONException {
         read(obj);
     }
-    
-    public static TestMail create(JSONObject obj) throws JSONException{
+
+    public static TestMail create(JSONObject obj) throws JSONException {
         return new TestMail(obj);
     }
 
     public void read(JSONObject json) throws JSONException {
+        // lists
         String field = MailJSONField.FROM.getKey();
-        if (json.has(field))
-            System.out.println("From = " + json.getJSONArray(field));
-            setFrom( j2l( json.getJSONArray(field) ) );
-        
+        if (json.has(field)) {
+            setFrom(j2l(json.getJSONArray(field)));
+        }
         field = MailJSONField.RECIPIENT_TO.getKey();
         if (json.has(field)) {
-            setTo( j2l( json.getJSONArray(field)));
+            setTo(j2l(json.getJSONArray(field)));
         }
-        
         field = MailJSONField.RECIPIENT_CC.getKey();
         if (json.has(field)) {
-            setCc( j2l( json.getJSONArray(field)));
+            setCc(j2l(json.getJSONArray(field)));
         }
-        
         field = MailJSONField.RECIPIENT_BCC.getKey();
         if (json.has(field)) {
             bcc = new LinkedList<String>();
-            setBcc( j2l( json.getJSONArray(field ) ) );
+            setBcc(j2l(json.getJSONArray(field)));
         }
-        
+        // strings
         field = MailJSONField.SUBJECT.getKey();
         if (json.has(field)) {
             setSubject(json.getString(field));
         }
-        
-        field = MailJSONField.PRIORITY.getKey();
-        if (json.has(field)) {
-            setPriority(json.getInt(field));
-        }
-        
         field = MailJSONField.CONTENT_TYPE.getKey();
         if (json.has(field)) {
             setContentType(json.getString(field));
         }
-        
         field = MailJSONField.CONTENT.getKey();
         if (json.has(field)) {
             setBody(json.getString(field));
         }
-        
         field = "id";
         if (json.has(field)) {
             setId(json.getString(field));
         }
-        
         field = "folder_id";
         if (json.has(field)) {
             setFolder(json.getString(field));
         }
+        // ints
+        field = "color_label";
+        if (json.has(field)) {
+            setColor(json.getInt(field));
+        }
+        field = "flags";
+        if (json.has(field)) {
+            setFlags(json.getInt(field));
+        }
+        field = "priority";
+        if (json.has(field)) {
+            setPriority(json.getInt(field));
+        }
     }
-    
-    public void read(int[] columns, JSONArray values){
-        
+
+    public void read(int[] columns, JSONArray values) {
+
     }
 
     /**
@@ -210,8 +226,8 @@ public class TestMail {
      */
     protected List<String> j2l(JSONArray array) throws JSONException {
         List<String> list = new LinkedList<String>();
-        for(int i = 0, size = array.length(); i < size; i++){
-            list.add( array.getString(i) );
+        for (int i = 0, size = array.length(); i < size; i++) {
+            list.add(array.getString(i));
         }
         return list;
     }
@@ -233,43 +249,39 @@ public class TestMail {
     public JSONObject toJSON() {
         return null;
     }
-    
-    public String toString(){
+
+    public String toString() {
         StringBuilder bob = new StringBuilder();
         bob.append("From: ");
-        bob.append( Strings.join(from, ", "));
+        bob.append(Strings.join(from, ", "));
         bob.append("\nTo: ");
-        bob.append( Strings.join(to,", ") );
+        bob.append(Strings.join(to, ", "));
         bob.append("\nCC: ");
-        bob.append( Strings.join(cc, ", ") );
+        bob.append(Strings.join(cc, ", "));
         bob.append("\nBCC: ");
-        bob.append( Strings.join(bcc, ", ") );
+        bob.append(Strings.join(bcc, ", "));
         bob.append("\nPriority: ");
-        bob.append( getPriority());
+        bob.append(getPriority());
         bob.append("\nContent-Type: ");
-        bob.append( getContentType() );
+        bob.append(getContentType());
         bob.append("\nSubject: ");
-        bob.append( getSubject() );
+        bob.append(getSubject());
         bob.append("\nContent:\n");
-        bob.append( getBody() );
+        bob.append(getBody());
         return bob.toString();
     }
-
 
     public void setId(String id) {
         this.id = id;
     }
 
-
     public String getId() {
         return id;
     }
 
-
     public void setFolder(String folder) {
         this.folder = folder;
     }
-
 
     public String getFolder() {
         return folder;
