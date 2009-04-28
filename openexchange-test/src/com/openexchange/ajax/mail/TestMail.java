@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
