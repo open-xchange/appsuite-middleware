@@ -112,6 +112,8 @@ public abstract class MailMessage extends MailPart {
     /**
      * This message is recent. Folder implementations set this flag to indicate that this message is new to this folder, that is, it has
      * arrived since the last time this folder was opened.
+     * <p>
+     * Clients cannot alter this flag.
      * 
      * @value 16
      */
@@ -126,7 +128,9 @@ public abstract class MailMessage extends MailPart {
     public static final int FLAG_SEEN = 1 << 5;
 
     /**
-     * A special flag that indicates that this folder supports user defined flags
+     * A special flag that indicates that this folder supports user defined flags.
+     * <p>
+     * Clients cannot alter this flag.
      * 
      * @value 64
      */
