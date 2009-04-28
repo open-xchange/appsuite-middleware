@@ -42,13 +42,13 @@ Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
 Requires:       open-xchange-admin-plugin-hosting-lib >= @OXVERSION@
 Requires:       open-xchange-admin >= @OXVERSION@
-Requires:       open-xchange-admin-client >= @OXVERSION@
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
 %package -n     open-xchange-admin-plugin-hosting-client
 Group:          Applications/Productivity
 Summary:        The Open Xchange Admin Hosting RMI client library
+Requires:       open-xchange-admin-client >= @OXVERSION@
 
 
 %description -n open-xchange-admin-plugin-hosting-client
@@ -61,6 +61,7 @@ Authors:
 %package -n     open-xchange-admin-plugin-hosting-lib
 Group:          Applications/Productivity
 Summary:        The Open Xchange Admin Hosting Bundle client library
+Requires:       open-xchange-admin-lib >= @OXVERSION@
 
 
 %description -n open-xchange-admin-plugin-hosting-lib
@@ -73,6 +74,7 @@ Authors:
 %package -n     open-xchange-admin-plugin-hosting-doc
 Group:          Applications/Productivity
 Summary:        Documentation for the Open Xchange RMI client library.
+Requires:       open-xchange-admin-doc >= @OXVERSION@
 
 
 %description -n open-xchange-admin-plugin-hosting-doc
