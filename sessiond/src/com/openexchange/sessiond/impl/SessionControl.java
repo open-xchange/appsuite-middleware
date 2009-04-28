@@ -124,4 +124,14 @@ public class SessionControl {
     public void updateTimestamp() {
         timestamp = System.currentTimeMillis();
     }
+
+    /**
+     * Checks if a session is still valid. Therefore the maximum lifetime of a session, a disabled context and a disabled user are checked.
+     * 
+     * @param session Session to check.
+     * @return <code>true</code> if the session is still valid.
+     */
+    public boolean isValid() {
+        return ((getTimestamp() + getLifetime()) >= System.currentTimeMillis());
+    }
 }
