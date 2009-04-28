@@ -65,113 +65,112 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
  * {@link MailSaveDraftTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailSaveDraftTest extends AbstractMailTest {
 
-	/**
+    /**
 	 * 
 	 */
-	public MailSaveDraftTest() {
-		super();
-	}
+    public MailSaveDraftTest() {
+        super();
+    }
 
-	/**
-	 * @param name
-	 */
-	public MailSaveDraftTest(final String name) {
-		super(name);
-	}
+    /**
+     * @param name
+     */
+    public MailSaveDraftTest(final String name) {
+        super(name);
+    }
 
-	public void testMailDraft() {
-		try {
-			final SessionObject session = getSession();
-			final Context dummyContext = new ContextImpl(session.getContextId());
+    public void testMailDraft() {
+        try {
+            final SessionObject session = getSession();
+            final Context dummyContext = new ContextImpl(session.getContextId());
 
-			ComposedMailMessage draftMail = new SMTPMailMessage("The first line", session, dummyContext);
-			draftMail.addFrom(new InternetAddress("someone@somewhere.com", true));
-			draftMail.addTo(new InternetAddress("someone.else@another.com", true));
+            ComposedMailMessage draftMail = new SMTPMailMessage("The first line", session, dummyContext);
+            draftMail.addFrom(new InternetAddress("someone@somewhere.com", true));
+            draftMail.addTo(new InternetAddress("someone.else@another.com", true));
 
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
 
-			final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
+            final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
 
-			String prevUid = null;
-			String uid = null;
-			try {
-				MailMessage mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
-				uid = mail.getMailId();
-				prevUid = uid;
-				/*
-				 * Check content
-				 */
-				String content = mail.getContent().toString();
-				assertTrue("Content mismatch", "The first line".equals(content));
-				/*
-				 * Edit draft
-				 */
-				draftMail = new SMTPMailMessage("The first line<br>And the second line", session, dummyContext);
-				draftMail.addFrom(new InternetAddress("someone@somewhere.com", true));
-				draftMail.addTo(new InternetAddress("someone.else@another.com", true));
-				draftMail.addTo(new InternetAddress("Jane Doe <another.one@anywhere.org>", true));
-				draftMail.setMsgref(new MailPath(mail.getFolder(), mail.getMailId()));
+            String prevUid = null;
+            String uid = null;
+            try {
+                MailMessage mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
+                uid = mail.getMailId();
+                prevUid = uid;
+                /*
+                 * Check content
+                 */
+                String content = mail.getContent().toString();
+                assertTrue("Content mismatch", "The first line".equals(content));
+                /*
+                 * Edit draft
+                 */
+                draftMail = new SMTPMailMessage("The first line<br>And the second line", session, dummyContext);
+                draftMail.addFrom(new InternetAddress("someone@somewhere.com", true));
+                draftMail.addTo(new InternetAddress("someone.else@another.com", true));
+                draftMail.addTo(new InternetAddress("Jane Doe <another.one@anywhere.org>", true));
+                draftMail.setMsgref(new MailPath(mailAccess.getAccountId(), mail.getFolder(), mail.getMailId()));
 
-				mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
-				uid = mail.getMailId();
-				/*
-				 * Check existence of former draft version
-				 */
-				Exception exc = null;
-				MailMessage tmp = null;
-				try {
-					tmp = mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
-				} catch (final MailException e) {
-					prevUid = null;
-					exc = e;
-				}
-				assertTrue("Former draft version still available", exc != null || tmp == null);
-				/*
-				 * Check content again
-				 */
-				final String expected = "The first line\nAnd the second line";
-				content = mail.getContent().toString();
-				if (!expected.equals(content.replaceAll("\r\n", "\n"))) {
-					final StringBuilder sb = new StringBuilder(1024);
-					sb.append("Expected value:\n");
-					char[] chars = expected.toCharArray();
-					sb.append((int) chars[0]);
-					for (int i = 1; i < chars.length; i++) {
-						sb.append(' ').append((int) chars[i]);
-					}
-					sb.append("\nReturned value:\n");
-					chars = content.toCharArray();
-					sb.append((int) chars[0]);
-					for (int i = 1; i < chars.length; i++) {
-						sb.append(' ').append((int) chars[i]);
-					}
-					sb.append("\nIn words:");
-					sb.append('"').append(expected).append('"').append('\n');
-					sb.append('"').append(content).append('"');
-					assertTrue(sb.toString(), false);
-				}
-			} finally {
-				if (prevUid != null) {
-					mailAccess.getMessageStorage().deleteMessages(draftFullname, new String[] { prevUid }, true);
-				}
-				if (uid != null) {
-					mailAccess.getMessageStorage().deleteMessages(draftFullname, new String[] { uid }, true);
-				}
-				/*
-				 * close
-				 */
-				mailAccess.close(false);
-			}
+                mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
+                uid = mail.getMailId();
+                /*
+                 * Check existence of former draft version
+                 */
+                Exception exc = null;
+                MailMessage tmp = null;
+                try {
+                    tmp = mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
+                } catch (final MailException e) {
+                    prevUid = null;
+                    exc = e;
+                }
+                assertTrue("Former draft version still available", exc != null || tmp == null);
+                /*
+                 * Check content again
+                 */
+                final String expected = "The first line\nAnd the second line";
+                content = mail.getContent().toString();
+                if (!expected.equals(content.replaceAll("\r\n", "\n"))) {
+                    final StringBuilder sb = new StringBuilder(1024);
+                    sb.append("Expected value:\n");
+                    char[] chars = expected.toCharArray();
+                    sb.append((int) chars[0]);
+                    for (int i = 1; i < chars.length; i++) {
+                        sb.append(' ').append((int) chars[i]);
+                    }
+                    sb.append("\nReturned value:\n");
+                    chars = content.toCharArray();
+                    sb.append((int) chars[0]);
+                    for (int i = 1; i < chars.length; i++) {
+                        sb.append(' ').append((int) chars[i]);
+                    }
+                    sb.append("\nIn words:");
+                    sb.append('"').append(expected).append('"').append('\n');
+                    sb.append('"').append(content).append('"');
+                    assertTrue(sb.toString(), false);
+                }
+            } finally {
+                if (prevUid != null) {
+                    mailAccess.getMessageStorage().deleteMessages(draftFullname, new String[] { prevUid }, true);
+                }
+                if (uid != null) {
+                    mailAccess.getMessageStorage().deleteMessages(draftFullname, new String[] { uid }, true);
+                }
+                /*
+                 * close
+                 */
+                mailAccess.close(false);
+            }
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }

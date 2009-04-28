@@ -109,8 +109,17 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         mailAccountDescription.setName("Other Name");
         mailAccountDescription.setLogin("Other Login");
         mailAccountDescription.setPassword("New Password");
+        mailAccountDescription.setTransportLogin("Other Login");
+        mailAccountDescription.setTransportPassword("New Password");
         mailAccountDescription.setMailPort(123);
-        final MailAccountUpdateResponse response = getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL, Attribute.PASSWORD_LITERAL, Attribute.MAIL_PORT_LITERAL)));
+        final MailAccountUpdateResponse response = getClient().execute(
+            new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(
+                Attribute.NAME_LITERAL,
+                Attribute.LOGIN_LITERAL,
+                Attribute.PASSWORD_LITERAL,
+                Attribute.TRANSPORT_LOGIN_LITERAL,
+                Attribute.TRANSPORT_PASSWORD_LITERAL,
+                Attribute.MAIL_PORT_LITERAL)));
         // *shrugs* don't need the response
     }
 
@@ -186,7 +195,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         final GetSwitch actualSwitch = new GetSwitch(actualAcc);
 
         for (final Attribute attribute : Attribute.values()) {
-            if (attribute == Attribute.PASSWORD_LITERAL) {
+            if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL) {
                 continue;
             }
             final Object expected = attribute.doSwitch(expectedSwitch);

@@ -288,7 +288,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 				for (final String id : hasAttachmentSet) {
 					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id, true);
-					final MailPath mailPath = new MailPath(mail.getFolder(), mail.getMailId());
+					final MailPath mailPath = new MailPath(mailAccess.getAccountId(), mail.getFolder(), mail.getMailId());
 
 					final SessionObject session = getSession();
 					final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,

@@ -134,7 +134,7 @@ public final class MailBugfixTest extends AbstractMailTest {
 							session.getUserId(), session.getContextId());
 					usm.setNoSave(true);
 					usm.setForwardAsAttachment(false);
-					final MailMessage forwardMail = MimeForward.getFowardMail(new MailMessage[] { mail }, session, usm);
+					final MailMessage forwardMail = MimeForward.getFowardMail(new MailMessage[] { mail }, session, mailAccess.getAccountId(), usm);
 					/*
 					 * Check for image attachment
 					 */

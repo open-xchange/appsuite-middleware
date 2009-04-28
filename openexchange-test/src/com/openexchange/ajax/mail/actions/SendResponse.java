@@ -90,7 +90,7 @@ public final class SendResponse extends AbstractAJAXResponse {
 				if (Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3))) {
 					return new String[] { mp.getFolder(), mp.toString() };
 				}
-				return new String[] { mp.getFolder(), String.valueOf(mp.getUid()) };
+				return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
 				return null;
