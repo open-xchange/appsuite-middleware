@@ -123,11 +123,12 @@ public final class MimeForward {
      * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
+     * @param accountID The account ID of the referenced original mails
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws MailException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session) throws MailException {
-        return getFowardMail(originalMails, session, null);
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID) throws MailException {
+        return getFowardMail(originalMails, session, accountID, null);
     }
 
     /**
@@ -137,11 +138,12 @@ public final class MimeForward {
      * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
+     * @param accountID The account ID of the referenced original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws MailException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final UserSettingMail usm) throws MailException {
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, final UserSettingMail usm) throws MailException {
         final MimeMessage[] mimeMessages = new MimeMessage[originalMails.length];
         try {
             for (int i = 0; i < mimeMessages.length; i++) {
@@ -151,7 +153,48 @@ public final class MimeForward {
                     /*
                      * Temporary store message reference in MIME message's headers
                      */
-                    mimeMessages[i].setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(cur.getFolder(), cur.getMailId()));
+                    mimeMessages[i].setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(
+                        accountID,
+                        cur.getFolder(),
+                        cur.getMailId()));
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        /*
+         * Compose forward message
+         */
+        return getFowardMail(mimeMessages, session, usm);
+    }
+
+    /**
+     * Composes a forward message from specified original messages taken from possibly differing accounts based on MIME objects from
+     * <code>JavaMail</code> API.
+     * <p>
+     * If multiple messages are given these messages are forwarded as attachments.
+     * 
+     * @param originalMails The referenced original mails
+     * @param session The session containing needed user data
+     * @param accountIDs The account IDs of the referenced original mails
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @return An instance of {@link MailMessage} representing an user-editable forward mail
+     * @throws MailException If forward mail cannot be composed
+     */
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int[] accountIDs, final UserSettingMail usm) throws MailException {
+        final MimeMessage[] mimeMessages = new MimeMessage[originalMails.length];
+        try {
+            for (int i = 0; i < mimeMessages.length; i++) {
+                final MailMessage cur = originalMails[i];
+                mimeMessages[i] = (MimeMessage) MIMEMessageConverter.convertMailMessage(cur);
+                if (cur.getMailId() != null && cur.getFolder() != null) {
+                    /*
+                     * Temporary store message reference in MIME message's headers
+                     */
+                    mimeMessages[i].setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(
+                        accountIDs[i],
+                        cur.getFolder(),
+                        cur.getMailId()));
                 }
             }
         } catch (final MessagingException e) {

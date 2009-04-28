@@ -2381,27 +2381,29 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final List<MailPath> l = new ArrayList<MailPath>(length);
                     for (int i = 0; i < length; i++) {
                         final JSONObject obj = jsonIDs.getJSONObject(i);
-                        l.add(new MailPath(obj.getString(PARAMETER_FOLDERID), obj.getString(PARAMETER_ID)));
+                        final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj.getString(PARAMETER_FOLDERID));
+                        l.add(new MailPath(fa.getAccountId(), fa.getFullname(), obj.getString(PARAMETER_ID)));
                     }
                     Collections.sort(l, MailPath.COMPARATOR);
-                    String lastFld = l.get(0).getFolder();
+                    String lastFldArg = l.get(0).getFolderArgument();
                     final List<String> arr = new ArrayList<String>(length);
                     for (int i = 0; i < length; i++) {
                         final MailPath current = l.get(i);
-                        if (!lastFld.equals(current.getFolder())) {
+                        final String folderArgument = current.getFolderArgument();
+                        if (!lastFldArg.equals(folderArgument)) {
                             /*
                              * Delete all collected UIDs til here and reset
                              */
                             final String[] uids = arr.toArray(new String[arr.size()]);
-                            mailInterface.deleteMessages(lastFld, uids, hardDelete);
+                            mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
                             arr.clear();
-                            lastFld = current.getFolder();
+                            lastFldArg = folderArgument;
                         }
-                        arr.add(current.getUid());
+                        arr.add(current.getMailID());
                     }
                     if (arr.size() > 0) {
                         final String[] uids = arr.toArray(new String[arr.size()]);
-                        mailInterface.deleteMessages(lastFld, uids, hardDelete);
+                        mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
                     }
                 }
             } finally {

@@ -67,7 +67,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
- * {@link InlineImageDataSource} - A generic {@link DataSource} for mail parts.
+ * {@link InlineImageDataSource} - A {@link DataSource} for image parts inside a mail.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

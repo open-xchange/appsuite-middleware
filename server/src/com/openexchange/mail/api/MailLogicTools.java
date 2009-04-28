@@ -131,7 +131,7 @@ public class MailLogicTools {
      * @throws MailException If forward message cannot be generated
      */
     public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
-        return MimeForward.getFowardMail(originalMails, session);
+        return MimeForward.getFowardMail(originalMails, session, accountId);
     }
 
     /**
@@ -148,6 +148,6 @@ public class MailLogicTools {
      * @throws MailException If forward message cannot be generated
      */
     public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws MailException {
-        return MimeForward.getFowardMail(originalMails, session, usm);
+        return MimeForward.getFowardMail(originalMails, session, accountId, usm);
     }
 }

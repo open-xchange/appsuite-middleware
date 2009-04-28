@@ -1121,7 +1121,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final MailPath msgref = composedMail.getMsgref();
             if (msgref != null) {
-                deleteMessagesLong(msgref.getFolder(), new long[] { Long.parseLong(msgref.getUid()) }, true);
+                if (accountId != msgref.getAccountId()) {
+                    LOG.warn(
+                        new StringBuilder("Differing account ID in msgref attribute.\nMessage storage account ID: ").append(accountId).append(
+                            ".\nmsgref account ID: ").append(msgref.getAccountId()).toString(),
+                        new Throwable());
+                }
+                deleteMessagesLong(msgref.getFolder(), new long[] { Long.parseLong(msgref.getMailID()) }, true);
                 composedMail.setMsgref(null);
             }
             /*

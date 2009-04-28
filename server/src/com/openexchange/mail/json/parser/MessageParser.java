@@ -380,9 +380,8 @@ public final class MessageParser {
     }
 
     /**
-     * Takes a mail as jsonObj and extracts the values into a given MailMessage object.
-     * Handles all basic values that do not need information about the session, like 
-     * attachments.
+     * Takes a mail as jsonObj and extracts the values into a given MailMessage object. Handles all basic values that do not need
+     * information about the session, like attachments.
      * 
      * @param jsonObj
      * @param mail
@@ -543,7 +542,6 @@ public final class MessageParser {
         final Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(
             provider,
             session,
-            accountId,
             transportMail.getMsgref(),
             attachmentArray);
         /*
@@ -594,7 +592,7 @@ public final class MessageParser {
                             access = MailAccess.getInstance(session);
                             access.connect();
                         }
-                        final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
+                        final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
                         quotaChecker.addConsumed(referencedMail.getSize(), referencedMail.getFileName());
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
@@ -612,7 +610,7 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath parentMsgRef, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray) throws MailException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -641,10 +639,13 @@ public final class MessageParser {
             return Collections.emptyMap();
         }
         final Map<String, ReferencedMailPart> retval = new HashMap<String, ReferencedMailPart>(len);
-        final MailAccess<?, ?> access = MailAccess.getInstance(session, accountId);
+        final MailAccess<?, ?> access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
         access.connect();
         try {
-            final MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getUid(), false);
+            final MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
+            if (null == referencedMail) {
+                throw new MailException(MailException.Code.REFERENCED_MAIL_NOT_FOUND, parentMsgRef.getMailID(), parentMsgRef.getFolder());
+            }
             // Get attachments out of referenced mail
             final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs, true);
             new MailMessageParser().parseMailMessage(referencedMail, handler);

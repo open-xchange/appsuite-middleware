@@ -159,7 +159,10 @@ public final class MimeReply {
                 /*
                  * Temporary store message reference in MIME message's headers
                  */
-                mimeMessage.setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(originalMailFolder, originalMail.getMailId()));
+                mimeMessage.setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(
+                    accountId,
+                    originalMailFolder,
+                    originalMail.getMailId()));
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e);
             }

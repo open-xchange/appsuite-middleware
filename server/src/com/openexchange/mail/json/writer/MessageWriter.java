@@ -112,7 +112,7 @@ public final class MessageWriter {
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings) throws MailException {
         final MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
-            mailPath = new MailPath(mail.getFolder(), mail.getMailId());
+            mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {

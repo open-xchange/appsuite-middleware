@@ -336,7 +336,11 @@ public class MailException extends AbstractOXException {
         /**
          * Mail folder could not be found: %1$s.
          */
-        FOLDER_NOT_FOUND("Mail folder could not be found: %1$s.", Category.CODE_ERROR, 66);
+        FOLDER_NOT_FOUND("Mail folder could not be found: %1$s.", Category.CODE_ERROR, 66),
+        /**
+         * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
+         */
+        REFERENCED_MAIL_NOT_FOUND("Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.", Category.CODE_ERROR, 67);
 
         private final String message;
 

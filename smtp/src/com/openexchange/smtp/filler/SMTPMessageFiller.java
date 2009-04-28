@@ -146,7 +146,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 			access.connect();
 			try {
 				setReplyHeaders(access.getMessageStorage().getMessage(mail.getMsgref().getFolder(),
-						mail.getMsgref().getUid(), false), smtpMessage);
+						mail.getMsgref().getMailID(), false), smtpMessage);
 			} finally {
 				access.close(true);
 			}

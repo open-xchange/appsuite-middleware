@@ -90,6 +90,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.permission.MailPermission;
@@ -555,8 +556,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 ma.close(true);
             }
         }
-        initConnection(accountId);
-        return mailAccess.getLogicTools().getFowardMessage(originalMails, usm);
+        final int[] accountIDs = new int[originalMails.length];
+        for (int i = 0; i < accountIDs.length; i++) {
+            accountIDs[i] = arguments[i].getAccountId();
+        }
+        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm);
     }
 
     @Override
@@ -1017,7 +1021,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return autosaveDraft(draftMail, accountId);
         }
         initConnection(accountId);
-        return mailAccess.getMessageStorage().saveDraft(mailAccess.getFolderStorage().getDraftsFolder(), draftMail).getMailPath().toString();
+        return mailAccess.getMessageStorage().saveDraft(mailAccess.getFolderStorage().getDraftsFolder(), draftMail).getMailPath(
+            mailAccess.getAccountId()).toString();
     }
 
     private String autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws MailException {
@@ -1034,7 +1039,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == msgref) {
             origMail = null;
         } else {
-            origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
+            origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
             if (origMail != null) {
                 /*
                  * Check for attachments and add them
@@ -1078,7 +1083,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == m) {
             throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), draftFullname);
         }
-        return m.getMailPath().toString();
+        return m.getMailPath(mailAccess.getAccountId()).toString();
     }
 
     @Override
@@ -1283,7 +1288,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Mark referenced mail as answered
                      */
                     final String fullname = path.getFolder();
-                    final String[] uids = new String[] { path.getUid() };
+                    final String[] uids = new String[] { path.getMailID() };
                     mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(
@@ -1319,7 +1324,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             /*
                              * Mark referenced mail as forwarded
                              */
-                            ids[0] = path.getUid();
+                            ids[0] = path.getMailID();
                             mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                             try {
                                 if (MailMessageCache.getInstance().containsFolderMessages(
@@ -1349,7 +1354,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Mark referenced mail as forwarded
                      */
                     final String fullname = supPath.getFolder();
-                    final String[] uids = new String[] { supPath.getUid() };
+                    final String[] uids = new String[] { supPath.getMailID() };
                     mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(
@@ -1408,7 +1413,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
             }
-            final MailPath retval = new MailPath(sentFullname, uidArr[0]);
+            final MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder(128).append("Mail copy (").append(retval.toString()).append(") appended in ").append(
                     System.currentTimeMillis() - start).append("msec").toString());

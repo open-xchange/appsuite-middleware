@@ -49,10 +49,8 @@
 
 package com.openexchange.unifiedinbox;
 
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
  * {@link UnifiedINBOXUID} - The Unified INBOX UID.
@@ -121,10 +119,9 @@ public final class UnifiedINBOXUID {
      */
     public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws MailException {
         final MailPath mailPath = new MailPath(unifiedINBOXUID);
-        final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(mailPath.getFolder());
-        this.accountId = fa.getAccountId();
-        this.fullname = fa.getFullname();
-        this.id = mailPath.getUid();
+        this.accountId = mailPath.getAccountId();
+        this.fullname = mailPath.getFolder();
+        this.id = mailPath.getMailID();
         return this;
     }
 
@@ -157,6 +154,6 @@ public final class UnifiedINBOXUID {
 
     @Override
     public String toString() {
-        return MailPath.getMailPath(MailFolderUtility.prepareFullname(accountId, fullname), id).toString();
+        return MailPath.getMailPath(accountId, fullname, id);
     }
 }

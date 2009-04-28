@@ -378,7 +378,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
          */
         final MailPath msgref = draftMail.getMsgref();
         if (msgref != null) {
-            deleteMessages(msgref.getFolder(), new String[] { msgref.getUid() }, true);
+            deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }
         /*

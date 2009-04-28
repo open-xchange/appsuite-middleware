@@ -49,6 +49,7 @@
 
 package com.openexchange.unifiedinbox;
 
+import static com.openexchange.mail.MailPath.SEPERATOR;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -58,7 +59,6 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -202,7 +202,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                             final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
                             mailFolder.setFullname(new StringBuilder(MailFolderUtility.prepareFullname(
                                 unifiedInboxAccountId,
-                                parentFullname)).append(MailPath.SEPERATOR).append(
+                                parentFullname)).append(SEPERATOR).append(
                                 MailFolderUtility.prepareFullname(mailAccount.getId(), mailFolder.getFullname())).toString());
                             mailFolder.setSubfolders(false);
                             mailFolder.setSubscribedSubfolders(false);

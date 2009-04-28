@@ -59,7 +59,6 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 
@@ -91,19 +90,19 @@ public final class UnifiedINBOXUtility {
         for (final String mailID : mailIDs) {
             mailPath.setMailIdentifierString(mailID);
 
-            final FullnameArgument fa = prepareMailFolderParam(mailPath.getFolder());
-            final Integer key = Integer.valueOf(fa.getAccountId());
+            final Integer key = Integer.valueOf(mailPath.getAccountId());
             Map<String, List<String>> folderUIDMap = map.get(key);
             if (null == folderUIDMap) {
                 folderUIDMap = new HashMap<String, List<String>>(mailIDs.length / 2);
                 map.put(key, folderUIDMap);
             }
-            List<String> uids = folderUIDMap.get(fa.getFullname());
+            final String folder = mailPath.getFolder();
+            List<String> uids = folderUIDMap.get(folder);
             if (null == uids) {
                 uids = new ArrayList<String>();
-                folderUIDMap.put(fa.getFullname(), uids);
+                folderUIDMap.put(folder, uids);
             }
-            uids.add(mailPath.getUid());
+            uids.add(mailPath.getMailID());
         }
         return map;
     }
@@ -120,12 +119,13 @@ public final class UnifiedINBOXUtility {
     public static FullnameArgument parseNestedFullname(final String nestedFullname) throws UnifiedINBOXException {
         // INBOX/default0/INBOX
         if (!startsWithKnownFullname(nestedFullname)) {
-            throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, MailFolderUtility.prepareMailFolderParam(
-                nestedFullname).getFullname());
+            throw new UnifiedINBOXException(
+                UnifiedINBOXException.Code.FOLDER_NOT_FOUND,
+                prepareMailFolderParam(nestedFullname).getFullname());
         }
         // Cut off starting known fullname and its separator character
         final String fn = nestedFullname.substring(nestedFullname.indexOf(MailPath.SEPERATOR) + 1);
-        return MailFolderUtility.prepareMailFolderParam(fn);
+        return prepareMailFolderParam(fn);
     }
 
     private static boolean startsWithKnownFullname(final String fullname) {

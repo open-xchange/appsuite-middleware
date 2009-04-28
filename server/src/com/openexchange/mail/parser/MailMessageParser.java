@@ -159,6 +159,12 @@ public final class MailMessageParser {
      * @throws MailException If parsing specified mail fails
      */
     public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler, final String prefix) throws MailException {
+        if (null == mail) {
+            throw new MailException(MailException.Code.MISSING_PARAMETER, "mail");
+        }
+        if (null == handler) {
+            throw new MailException(MailException.Code.MISSING_PARAMETER, "handler");
+        }
         try {
             /*
              * Parse mail's envelope

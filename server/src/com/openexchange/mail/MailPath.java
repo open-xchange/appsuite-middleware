@@ -49,15 +49,17 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the folder fullname followed by the value of
- * {@link #SEPERATOR} followed by mail's unique ID:<br>
- * Example: <i>INBOX.Subfolder/1234</i>
+ * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder fullname followed
+ * by the value of {@link #SEPERATOR} followed by mail's unique ID:<br>
+ * Example: <i>default1/INBOX.Subfolder/1234</i>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,9 +72,13 @@ public final class MailPath implements Cloneable, Serializable {
      */
     public static final Comparator<MailPath> COMPARATOR = new Comparator<MailPath>() {
 
-        public int compare(final MailPath mi1, final MailPath mi2) {
-            final int folderComp = mi1.folder.compareTo(mi2.folder);
-            return folderComp == 0 ? Long.valueOf(mi1.uid).compareTo(Long.valueOf(mi2.uid)) : folderComp;
+        public int compare(final MailPath mailPath1, final MailPath mailPath2) {
+            final int accountComp = (mailPath1.getAccountId() < mailPath2.getAccountId() ? -1 : (mailPath1.getAccountId() == mailPath2.getAccountId() ? 0 : 1));
+            if (accountComp == 0) {
+                final int folderComp = mailPath1.getFolder().compareTo(mailPath2.getFolder());
+                return folderComp == 0 ? mailPath1.getMailID().compareTo(mailPath2.getMailID()) : folderComp;
+            }
+            return accountComp;
         }
     };
 
@@ -82,21 +88,23 @@ public final class MailPath implements Cloneable, Serializable {
     public static final MailPath NULL = null;
 
     /**
-     * The <code>'/'</code> character which separates folder's fullname from mail's UID in a mail path
+     * The <code>'/'</code> character which separates folder's fullname from mail's ID in a mail path
      */
     public static final char SEPERATOR = '/';
 
-    private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(16).append("(\\p{Print}+)(").append(SEPERATOR).append(")(\\p{Print}+)").toString());
+    private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(16).append("(\\p{Print}+)(").append(SEPERATOR).append(
+        ")(\\p{Print}+)").toString());
 
     /**
      * Gets the mail path corresponding to given folder fullname and message UID
      * 
+     * @param accountId The account ID
      * @param folder The folder fullname
-     * @param uid The message UID
+     * @param mailId The mail ID
      * @return The mail path as {@link String}
      */
-    public static String getMailPath(final String folder, final String uid) {
-        return new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
+    public static String getMailPath(final int accountId, final String folder, final String mailId) {
+        return new StringBuilder(32).append(prepareFullname(accountId, folder)).append(SEPERATOR).append(mailId).toString();
     }
 
     /**
@@ -128,27 +136,30 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /**
-     * Extracts the UIDs from given mail paths
+     * Extracts the IDs from given mail paths
      * 
      * @param mailPaths The mail IDs
-     * @return The extracted UIDs
+     * @return The extracted IDs
      */
     public static String[] getUIDs(final MailPath[] mailPaths) {
         final String[] retval = new String[mailPaths.length];
         for (int i = 0; i < mailPaths.length; i++) {
-            retval[i] = mailPaths[i].uid;
+            retval[i] = mailPaths[i].mailID;
         }
         return retval;
     }
 
-    /*
+    /*-
      * Fields
      */
+
+    private int accountId;
+
     private String folder;
 
     private String str;
 
-    private String uid;
+    private String mailID;
 
     /**
      * Default constructor
@@ -161,37 +172,35 @@ public final class MailPath implements Cloneable, Serializable {
      * Initializes a new {@link MailPath}
      * 
      * @param mailPathStr The mail path's string representation
-     * @throws MailException If mail path's string representation does not match expected pattern: <i>(.+)(value of {@link #SEPERATOR}
-     *             )([0-9]+)</i>
+     * @throws MailException If mail path's string representation does not match expected pattern
      */
     public MailPath(final String mailPathStr) throws MailException {
-        final Matcher m = DELIM_PATTERN.matcher(mailPathStr);
-        if (!m.matches()) {
-            throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
-        }
-        uid = m.group(3);
-        folder = m.group(1);
-        str = mailPathStr;
+        super();
+        setMailIdentifierString(mailPathStr);
     }
 
     /**
      * Initializes a new {@link MailPath}
      * 
+     * @param accountId The account ID
      * @param folder Folder fullname
      * @param uid The mail's unique ID
      */
-    public MailPath(final String folder, final String uid) {
+    public MailPath(final int accountId, final String folder, final String uid) {
+        super();
+        this.accountId = accountId;
         this.folder = folder;
-        this.uid = uid;
-        str = new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
+        this.mailID = uid;
+        str = getMailPath(accountId, folder, mailID);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + accountId;
         result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+        result = prime * result + ((mailID == null) ? 0 : mailID.hashCode());
         return result;
     }
 
@@ -207,6 +216,9 @@ public final class MailPath implements Cloneable, Serializable {
             return false;
         }
         final MailPath other = (MailPath) obj;
+        if (accountId != other.accountId) {
+            return false;
+        }
         if (folder == null) {
             if (other.folder != null) {
                 return false;
@@ -214,11 +226,11 @@ public final class MailPath implements Cloneable, Serializable {
         } else if (!folder.equals(other.folder)) {
             return false;
         }
-        if (uid == null) {
-            if (other.uid != null) {
+        if (mailID == null) {
+            if (other.mailID != null) {
                 return false;
             }
-        } else if (!uid.equals(other.uid)) {
+        } else if (!mailID.equals(other.mailID)) {
             return false;
         }
         return true;
@@ -236,16 +248,50 @@ public final class MailPath implements Cloneable, Serializable {
         }
     }
 
+    /**
+     * Gets the account ID.
+     * 
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Gets the folder fullname
+     * 
+     * @return The folder fullname
+     */
     public String getFolder() {
         return folder;
     }
 
+    /**
+     * Gets the folder argument; <i>default3/INBOX</i>.
+     * 
+     * @return The folder argument
+     */
+    public String getFolderArgument() {
+        return prepareFullname(accountId, folder);
+    }
+
+    /**
+     * Gets this mail path's string representation.
+     * 
+     * @return This mail path's string representation
+     * @see #toString()
+     */
     public String getStr() {
         return str;
     }
 
-    public String getUid() {
-        return uid;
+    /**
+     * Gets the mail ID.
+     * 
+     * @return The mail ID
+     */
+    public String getMailID() {
+        return mailID;
     }
 
     /**
@@ -253,23 +299,28 @@ public final class MailPath implements Cloneable, Serializable {
      * 
      * @param mailPathStr The mail paths string representation
      * @return The mail path itself
-     * @throws MailException If mail path's string representation does not match expected pattern: <i>(.+)(value of {@link #SEPERATOR}
-     *             )([0-9]+)</i>
+     * @throws MailException If mail path's string representation does not match expected pattern
      */
     public MailPath setMailIdentifierString(final String mailPathStr) throws MailException {
         final Matcher m = DELIM_PATTERN.matcher(mailPathStr);
         if (!m.matches()) {
             throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
         }
-        uid = m.group(3);
-        folder = m.group(1);
+        final FullnameArgument fa = prepareMailFolderParam(m.group(1));
+        this.accountId = fa.getAccountId();
+        this.folder = fa.getFullname();
+        this.mailID = m.group(3);
         str = mailPathStr;
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * Gets this mail path's string representation following pattern:<br>
+     * <i>"default" + &lt;account-id&gt; + &lt;default-separator&gt; + &lt;folder-fullname&gt; + "/" + &lt;mail-id&gt;</i>
+     * 
+     * <pre>
+     * default2/INBOX/Subfolder/453&quot;
+     * </pre>
      */
     @Override
     public String toString() {
