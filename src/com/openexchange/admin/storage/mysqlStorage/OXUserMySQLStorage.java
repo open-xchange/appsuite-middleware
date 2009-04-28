@@ -691,23 +691,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         if (null != user.getMail_folder_sent_name()) {
             changed.add(Attribute.SENT_LITERAL);
-            account.setDrafts(user.getMail_folder_sent_name());
+            account.setSent(user.getMail_folder_sent_name());
         }
         if (null != user.getMail_folder_spam_name()) {
             changed.add(Attribute.SPAM_LITERAL);
-            account.setDrafts(user.getMail_folder_spam_name());
+            account.setSpam(user.getMail_folder_spam_name());
         }
         if (null != user.getMail_folder_trash_name()) {
             changed.add(Attribute.TRASH_LITERAL);
-            account.setDrafts(user.getMail_folder_trash_name());
+            account.setTrash(user.getMail_folder_trash_name());
         }
         if (null != user.getMail_folder_confirmed_ham_name()) {
             changed.add(Attribute.CONFIRMED_HAM_LITERAL);
-            account.setDrafts(user.getMail_folder_confirmed_ham_name());
+            account.setConfirmedHam(user.getMail_folder_confirmed_ham_name());
         }
         if (null != user.getMail_folder_confirmed_spam_name()) {
             changed.add(Attribute.CONFIRMED_SPAM_LITERAL);
-            account.setDrafts(user.getMail_folder_confirmed_spam_name());
+            account.setConfirmedSpam(user.getMail_folder_confirmed_spam_name());
         }
         if (user.isSmtpServerset() || null != user.getSmtpServer()) {
             changed.add(Attribute.TRANSPORT_URL_LITERAL);
