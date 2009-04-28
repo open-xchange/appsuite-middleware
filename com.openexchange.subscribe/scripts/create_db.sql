@@ -11,13 +11,14 @@ PRIMARY KEY (id),
 FOREIGN KEY(cid, user) REFERENCES user(cid, id))
 ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-DROP TABLE IF EXISTS xing_subscriptions;
+DROP TABLE IF EXISTS external_subscriptions;
 
-CREATE TABLE xing_subscriptions(
+CREATE TABLE external_subscriptions(
 cid INT4 UNSIGNED NOT NULL, 
 user INT4 UNSIGNED NOT NULL, 
-xingUser VARCHAR(255) NOT NULL,
-xingPassword VARCHAR(255) NOT NULL,
+userName VARCHAR(255) NOT NULL,
+password VARCHAR(255) NOT NULL,
+externalService VARCHAR(255) NOT NULL,
 targetFolder INT4 UNSIGNED NOT NULL,
-PRIMARY KEY(cid, user))
+PRIMARY KEY(cid, user, externalService))
 ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
