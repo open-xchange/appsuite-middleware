@@ -54,6 +54,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -218,6 +221,35 @@ public class QuotaFileStorage extends FileStorage {
         }
     }
 
+	@Override
+    public Set<String> deleteFile(String[] identifiers) throws FileStorageException {
+        try {
+            delegate.lock(LOCK_TIMEOUT);
+            lockMode.set(new NilLockMode());
+            Map<String, Long> sizeMap = new HashMap<String, Long>(identifiers.length, 1);
+            for (String identifier : identifiers) {
+                sizeMap.put(identifier, Long.valueOf(delegate.getFileSize(identifier)));
+            }
+            Set<String> notDeleted = super.deleteFile(identifiers);
+            for (String not : notDeleted) {
+                sizeMap.remove(not);
+            }
+            long deletedSize = 0;
+            for (Long size : sizeMap.values()) {
+                deletedSize += size.longValue();
+            }
+            decUsed(deletedSize);
+            return notDeleted;
+        } catch (final QuotaFileStorageException x) {
+            throw x;
+        } catch (final FileStorageException x) {
+            throw addContextInfo(x, ctx);
+        }  finally {
+            lockMode.set(new NormalLockMode(delegate, ctx));
+            delegate.unlock();
+        }
+    }
+
     @Override
     public boolean deleteFile(final String identifier) throws FileStorageException {
         try {
@@ -257,9 +289,9 @@ public class QuotaFileStorage extends FileStorage {
     }
 
     @Override
-    protected boolean delete(final String name) throws FileStorageException {
+    protected Set<String> delete(final String[] names) throws FileStorageException {
         try {
-            return delegate.delete(name);
+            return delegate.delete(names);
         } catch (final FileStorageException x) {
             throw addContextInfo(x, ctx);
         }
