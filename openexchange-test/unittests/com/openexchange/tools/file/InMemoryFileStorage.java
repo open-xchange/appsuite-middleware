@@ -52,9 +52,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.groupware.contexts.Context;
 
@@ -75,10 +77,12 @@ public class InMemoryFileStorage extends FileStorage{
     }
 
     @Override
-	protected boolean delete(final String name) throws FileStorageException {
-        getCtxMap().put(name,null);
-        deletions.get(ctx).add(name);
-        return true;
+	protected Set<String> delete(final String[] names) throws FileStorageException {
+        for (String name : names) {
+            getCtxMap().put(name,null);
+            deletions.get(ctx).add(name);
+        }
+        return Collections.emptySet();
     }
 
     @Override
