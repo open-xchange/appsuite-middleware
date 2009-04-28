@@ -61,7 +61,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- * {@link PasswordUtil} - Utility class to encrypt/decrypt passwords with a key.
+ * {@link PasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka password based encryption (PBE).
+ * <p>
+ * PBE is a form of symmetric encryption where the same key or password is used to encrypt and decrypt the file.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,7 +78,7 @@ public class PasswordUtil {
      * 
      * @param password The password
      * @param key The key
-     * @return The encrypted password
+     * @return The encrypted password as Base64 encoded string
      * @throws GeneralSecurityException If password encryption fails
      */
     public static String encrypt(final String password, final String key) throws GeneralSecurityException {
@@ -84,20 +86,49 @@ public class PasswordUtil {
     }
 
     /**
+     * Decrypts specified encrypted password with given key.
+     * 
+     * @param encryptedPassword The Base64 encoded encrypted password
+     * @param key The key
+     * @return The decrypted password
+     * @throws GeneralSecurityException If password decryption fails
+     */
+    public static String decrypt(final String encryptedPassword, final String key) throws GeneralSecurityException {
+        return decrypt(encryptedPassword, generateSecretKey(key));
+    }
+
+    /**
      * Encrypts specified password with given key.
      * 
-     * @param password The password
+     * @param password The password to encrypt
      * @param key The key
-     * @return The encrypted password
+     * @return The encrypted password as Base64 encoded string
      * @throws GeneralSecurityException If password encryption fails
      */
     public static String encrypt(final String password, final Key key) throws GeneralSecurityException {
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
         cipher.init(Cipher.ENCRYPT_MODE, key);
 
-        final byte[] outputBytes = cipher.doFinal(password.getBytes());
-
         try {
+            final byte[] outputBytes = cipher.doFinal(password.getBytes("UTF-8"));
+            /*-
+             * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
+             * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
+             * 
+             * A 65-character subset of US-ASCII is used, enabling 6 bits to be
+             * represented per printable character. (The extra 65th character, "=",
+             * is used to signify a special processing function.)
+             * 
+             * NOTE: This subset has the important property that it is represented
+             * identically in all versions of ISO 646, including US-ASCII, and all
+             * characters in the subset are also represented identically in all
+             * versions of EBCDIC. Other popular encodings, such as the encoding
+             * used by the uuencode utility, Macintosh binhex 4.0 [RFC-1741], and
+             * the base85 encoding specified as part of Level 2 PostScript, do not
+             * share these properties, and thus do not fulfill the portability
+             * requirements a binary transport encoding for mail must meet.
+             * 
+             */
             return new String(Base64.encodeBase64(outputBytes), "US-ASCII");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
@@ -107,29 +138,35 @@ public class PasswordUtil {
     }
 
     /**
-     * Decrypts specified password with given key.
+     * Decrypts specified encrypted password with given key.
      * 
-     * @param password The password
+     * @param encryptedPassword The Base64 encoded encrypted password
      * @param key The key
      * @return The decrypted password
      * @throws GeneralSecurityException If password decryption fails
      */
-    public static String decrypt(final String password, final String key) throws GeneralSecurityException {
-        return decrypt(password, generateSecretKey(key));
-    }
-
-    /**
-     * Decrypts specified password with given key.
-     * 
-     * @param password The password
-     * @param key The key
-     * @return The decrypted password
-     * @throws GeneralSecurityException If password decryption fails
-     */
-    public static String decrypt(final String password, final Key key) throws GeneralSecurityException {
+    public static String decrypt(final String encryptedPassword, final Key key) throws GeneralSecurityException {
         final byte encrypted[];
         try {
-            encrypted = Base64.decodeBase64(password.getBytes("US-ASCII"));
+            /*-
+             * It's safe to use "US-ASCII" to turn Base64 encoded encrypted password string into bytes.
+             * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
+             * 
+             * A 65-character subset of US-ASCII is used, enabling 6 bits to be
+             * represented per printable character. (The extra 65th character, "=",
+             * is used to signify a special processing function.)
+             * 
+             * NOTE: This subset has the important property that it is represented
+             * identically in all versions of ISO 646, including US-ASCII, and all
+             * characters in the subset are also represented identically in all
+             * versions of EBCDIC. Other popular encodings, such as the encoding
+             * used by the uuencode utility, Macintosh binhex 4.0 [RFC-1741], and
+             * the base85 encoding specified as part of Level 2 PostScript, do not
+             * share these properties, and thus do not fulfill the portability
+             * requirements a binary transport encoding for mail must meet.
+             * 
+             */
+            encrypted = Base64.decodeBase64(encryptedPassword.getBytes("US-ASCII"));
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error(e.getMessage(), e);
@@ -141,7 +178,12 @@ public class PasswordUtil {
 
         final byte[] outputBytes = cipher.doFinal(encrypted);
 
-        return new String(outputBytes);
+        try {
+            return new String(outputBytes, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            throw new GeneralSecurityException("Failed to decypt encrypted password.", e);
+        }
     }
 
     /**
@@ -154,32 +196,38 @@ public class PasswordUtil {
         return secretKey;
     }
 
+    private static final int KEY_LENGTH = 8;
+
     /**
      * Generates a secret key from specified key string.
      * 
      * @param key The key string
      * @return A secret key generated from specified key string
+     * @throws GeneralSecurityException If generating secret key fails
      */
-    public static Key generateSecretKey(final String key) {
-        final String ks;
-        final int len = key.length();
-        if (len < 8) {
-            final StringBuilder tmp = new StringBuilder(8).append(key);
-            final int diff = 8 - len;
-            for (int i = 0; i < diff; i++) {
-                tmp.append('0');
-            }
-            ks = tmp.toString();
-        } else if (len > 8) {
-            ks = key.substring(0, 8);
-        } else {
-            ks = key;
-        }
+    public static Key generateSecretKey(final String key) throws GeneralSecurityException {
+        final byte[] bytes;
         try {
-            return new SecretKeySpec(ks.getBytes("UTF-8"), "DES");
+            bytes = key.getBytes("UTF-8");
         } catch (final UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to generate secret key", e);
+            // Cannot occur
+            throw new GeneralSecurityException("Failed to generate secret key.", e);
         }
+        final byte[] keyBytes;
+        final int len = bytes.length;
+        if (len < KEY_LENGTH) {
+            keyBytes = new byte[KEY_LENGTH];
+            System.arraycopy(bytes, 0, keyBytes, 0, len);
+            for (int i = len; i < keyBytes.length; i++) {
+                keyBytes[i] = 48;
+            }
+        } else if (len > KEY_LENGTH) {
+            keyBytes = new byte[8];
+            System.arraycopy(bytes, 0, keyBytes, 0, keyBytes.length);
+        } else {
+            keyBytes = bytes;
+        }
+        return new SecretKeySpec(keyBytes, "DES");
     }
 
     /*-
