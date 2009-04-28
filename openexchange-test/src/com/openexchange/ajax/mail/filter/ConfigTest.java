@@ -1,7 +1,6 @@
 package com.openexchange.ajax.mail.filter;
 
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.filter.actions.ConfigRequest;
 import com.openexchange.ajax.mail.filter.actions.ConfigResponse;
 
@@ -24,11 +23,10 @@ public class ConfigTest extends AbstractMailFilterTest {
 	}
 
 	public void testConfig() throws Exception {
-		final AJAXSession ajaxSession = getSession();
+		final AJAXClient client = getClient();
 		
 		final ConfigRequest configRequest = new ConfigRequest(true);
-		final ConfigResponse configResponse = (ConfigResponse) Executor.execute(ajaxSession,
-				configRequest);
+		final ConfigResponse configResponse = client.execute(configRequest);
 		
 		final ConfigTestHolder[] configTests = configResponse.getConfigTests();
 		final String[] actions = configResponse.getActionCommands();

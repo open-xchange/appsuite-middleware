@@ -53,13 +53,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class ConfigRequest extends AbstractMailFilterRequest {
+public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
 
     private final boolean failOnError;
 
@@ -101,7 +100,7 @@ public class ConfigRequest extends AbstractMailFilterRequest {
         };
     }
 
-	public AbstractAJAXParser getParser() {
+	public ConfigParser getParser() {
 		return new ConfigParser(failOnError);
 	}
 }

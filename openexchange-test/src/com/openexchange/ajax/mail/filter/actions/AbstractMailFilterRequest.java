@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.filter.Rule;
 import com.openexchange.ajax.mail.filter.writer.MailFilterWriter;
 
@@ -60,7 +61,7 @@ import com.openexchange.ajax.mail.filter.writer.MailFilterWriter;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public abstract class AbstractMailFilterRequest implements AJAXRequest {
+public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the calendar AJAX interface.
