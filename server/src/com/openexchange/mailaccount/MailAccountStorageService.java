@@ -102,7 +102,7 @@ public interface MailAccountStorageService {
      * @param sessionPassword The session password
      * @throws MailAccountException If the mail account cannot be updated
      */
-    public void updateMailAccount(MailAccountDescription mailAccount,Set<Attribute> attributes, int user, int cid, String sessionPassword) throws MailAccountException;
+    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, String sessionPassword) throws MailAccountException;
 
     /**
      * Updates mail account's value taken from specified mail account.
@@ -135,7 +135,7 @@ public interface MailAccountStorageService {
      * @param mailAccount The mail account containing the values to update.
      * @param user The user ID
      * @param ctx The context
-     * @param sessionPassword The session password
+     * @param sessionPassword The session password; set to <code>null</code> to insert mail account with an empty password
      * @return The ID of the newly created mail account
      * @throws MailAccountException If the mail account cannot be updated
      */
@@ -147,7 +147,7 @@ public interface MailAccountStorageService {
      * @param mailAccount The mail account containing the values to update.
      * @param user The user ID
      * @param ctx The context
-     * @param sessionPassword The session password
+     * @param sessionPassword The session password; set to <code>null</code> to insert mail account with an empty password
      * @param con writable database connection
      * @return The ID of the newly created mail account
      * @throws MailAccountException If the mail account cannot be updated
