@@ -72,7 +72,7 @@ public class PasswordUtil {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
 
     /**
-     * The algorithm
+     * The DES algorithm.
      */
     private static final String ALGORITHM_DES = "DES";
 
