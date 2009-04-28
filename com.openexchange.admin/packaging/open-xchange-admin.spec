@@ -4,7 +4,7 @@
 Name:           open-xchange-admin
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-server
+BuildRequires:  ant open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -40,33 +40,12 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Admin Daemon
-Requires:	open-xchange-admin-lib >= @OXVERSION@
-Requires:       open-xchange-common open-xchange-server open-xchange
+Requires:	open-xchange-admin-lib >= @OXVERSION@ open-xchange
 %if 0%{?suse_version}
 Requires:  mysql-client >= 5.0.0
-%if %{?suse_version} <= 1010
-# SLES10
-Requires:  java-1_5_0-ibm >= 1.5.0_sr9
-Requires:  update-alternatives
-%endif
-%if %{?suse_version} >= 1100
-Requires:  java-openjdk
-%endif
-%if %{?suse_version} > 1010 && %{?suse_version} < 1100
-Requires:  java-1_5_0-sun
-%endif
 %endif
 %if 0%{?fedora_version}
 Requires:  mysql >= 5.0.0
-%if %{?fedora_version} > 8
-Requires:  java-1.6.0-openjdk
-%endif
-%if %{?fedora_version} <= 8
-Requires:  java-icedtea
-%endif
-%endif
-%if 0%{?rhel_version}
-Requires:  java-1.5.0-sun
 %endif
 #
 
@@ -85,6 +64,7 @@ Authors:
 %package -n	open-xchange-admin-lib
 Group:          Applications/Productivity
 Summary:	The Open Xchange Admin Daemon Bundle client library
+Requires:       open-xchange-server
 
 
 %description -n open-xchange-admin-lib
