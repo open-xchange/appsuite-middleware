@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
 
 /**
@@ -215,16 +216,6 @@ public class TestMail {
         }
         return list;
     }
-    
-    protected String join(Collection<? extends Object> coll, String connector){
-        StringBuilder builder = new StringBuilder();
-        for(Object obj: coll){
-            builder.append(obj.toString());
-            builder.append(connector);
-        }
-        return builder.substring(0, builder.length() - connector.length());
-    }
-
 
     /**
      * Makes this mail look properly (e.g. attaching the content as attachment if it is of content_type &quot;alternative&quot;
@@ -247,13 +238,13 @@ public class TestMail {
     public String toString(){
         StringBuilder bob = new StringBuilder();
         bob.append("From: ");
-        bob.append( join(from, ", "));
+        bob.append( Strings.join(from, ", "));
         bob.append("\nTo: ");
-        bob.append( join(to,", ") );
+        bob.append( Strings.join(to,", ") );
         bob.append("\nCC: ");
-        bob.append( join(cc, ", ") );
+        bob.append( Strings.join(cc, ", ") );
         bob.append("\nBCC: ");
-        bob.append( join(bcc, ", ") );
+        bob.append( Strings.join(bcc, ", ") );
         bob.append("\nPriority: ");
         bob.append( getPriority());
         bob.append("\nContent-Type: ");
