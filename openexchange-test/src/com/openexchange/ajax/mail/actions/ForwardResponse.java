@@ -49,34 +49,22 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import org.json.JSONException;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
 
 
 /**
- * {@link ReplyAllRequest}
+ * {@link ForwardResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ReplyAllRequest extends ReplyRequest {
-    
-    public ReplyAllRequest(String folderID, String mailID){
-        super(folderID, mailID);
-    }
-    
-    public String getAction(){
-        return Mail.ACTION_REPLYALL;
+public class ForwardResponse extends ReplyResponse{
+
+    /**
+     * Initializes a new {@link ForwardResponse}.
+     * @param response
+     */
+    public ForwardResponse(Response response) {
+        super(response);
     }
 
-    public AbstractAJAXParser<? extends ReplyResponse> getParser() {
-        return new AbstractAJAXParser<ReplyAllResponse>(failOnError) {
-            @Override
-            protected ReplyAllResponse createResponse(final Response response) throws JSONException {
-                return new ReplyAllResponse(response);
-            }
-        };
-    }
 }

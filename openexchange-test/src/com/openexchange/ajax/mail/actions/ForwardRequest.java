@@ -49,127 +49,33 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import java.util.LinkedList;
-import java.util.List;
+
 import org.json.JSONException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+
 
 /**
- * {@link ReplyRequest}
- * 
+ * {@link ForwardRequest}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
-
-    public enum ViewOption {
-        TEXT("text"), HTML("html");
-
-        private String str;
-
-        ViewOption(String str) {
-            this.str = str;
-        }
-
-        public String toString() {
-            return this.str;
-        }
-
-        public static ViewOption getBy(String str) {
-            for (ViewOption option : values()) {
-                if (str.equals(option.toString()))
-                    return option;
-            }
-            return null;
-        }
-    }
+public class ForwardRequest extends ReplyRequest {
     
-    protected boolean failOnError;
-
-    protected ViewOption view;
-
-    protected String folderID;
-
-    protected String mailID;
-
-    public ReplyRequest(){
-        
-    }
-    
-    public ReplyRequest(String folderID, String mailID){
-        this.folderID = folderID;
-        this.mailID = mailID;
-    }
-    
-    public ViewOption getView() {
-        return view;
-    }
-
-    
-    public void setView(ViewOption view) {
-        this.view = view;
-    }
-
-    
-    public String getFolderID() {
-        return folderID;
-    }
-
-    
-    public void setFolderID(String folderID) {
-        this.folderID = folderID;
-    }
-
-    
-    public String getMailID() {
-        return mailID;
-    }
-
-    
-    public void setMailID(String mailID) {
-        this.mailID = mailID;
-    }
-    
-    public boolean isFailOnError() {
-        return failOnError;
-    }
-
-    
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+    public ForwardRequest(String folderID, String mailID){
+        super(folderID, mailID);
     }
     
     public String getAction(){
-        return Mail.ACTION_REPLY;
-    }
-
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        List<Parameter> list = new LinkedList<Parameter>();
-
-        list.add( new Parameter(Mail.PARAMETER_ACTION, getAction()) );
-        list.add( new Parameter(Mail.PARAMETER_FOLDERID, folderID) );
-        list.add( new Parameter(Mail.PARAMETER_ID, mailID) );
-        if (getView() != null)
-            list.add( new Parameter(Mail.PARAMETER_VIEW, getView().toString()) );
-
-        return list.toArray(new Parameter[list.size()]);
+        return Mail.ACTION_FORWARD;
     }
 
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
-        return new AbstractAJAXParser<ReplyResponse>(failOnError) {
+        return new AbstractAJAXParser<ForwardResponse>(failOnError) {
             @Override
-            protected ReplyResponse createResponse(final Response response) throws JSONException {
-                return new ReplyResponse(response);
+            protected ForwardResponse createResponse(final Response response) throws JSONException {
+                return new ForwardResponse(response);
             }
         };
     }
