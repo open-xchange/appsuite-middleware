@@ -71,7 +71,15 @@ public class PasswordUtil {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
 
-    private static final String CIPHER_TYPE = "DES/ECB/PKCS5Padding";
+    /**
+     * The algorithm
+     */
+    private static final String ALGORITHM_DES = "DES";
+
+    /**
+     * The transformation following pattern <i>"algorithm/mode/padding"</i>.
+     */
+    private static final String CIPHER_TYPE = ALGORITHM_DES + "/ECB/PKCS5Padding";
 
     /**
      * Encrypts specified password with given key.
@@ -190,7 +198,7 @@ public class PasswordUtil {
      * Create a key for use in the cipher code
      */
     public static Key generateRandomKey() throws NoSuchAlgorithmException {
-        final KeyGenerator keyGenerator = KeyGenerator.getInstance("DES");
+        final KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM_DES);
         keyGenerator.init(new SecureRandom());
         final SecretKey secretKey = keyGenerator.generateKey();
         return secretKey;
@@ -207,7 +215,7 @@ public class PasswordUtil {
      */
     public static Key generateSecretKey(final String key) throws GeneralSecurityException {
         try {
-            return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), "DES");
+            return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), ALGORITHM_DES);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw new GeneralSecurityException("Failed to generate secret key.", e);
