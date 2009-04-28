@@ -316,7 +316,7 @@ public abstract class FileStorage {
         try {
             save(nextentry, input);
         } catch (final FileStorageException ie) {
-            delete(nextentry);
+            delete(new String[] { nextentry });
             lock(LOCK_TIMEOUT);
             try {
                 state = loadState();
@@ -337,18 +337,32 @@ public abstract class FileStorage {
      * @throws FileStorageException if an error occurs.
      */
     public boolean deleteFile(final String identifier) throws FileStorageException {
-        final boolean retval = delete(identifier);
-        if (retval) {
+        return deleteFile(new String[] { identifier }).size() == 0;
+    }
+
+    /**
+     * Deletes a set of files in the FileStorage.
+     * @param identifier identifier of the files to delete.
+     * @return a set of identifiers that could not be deleted.
+     * @throws FileStorageException if an error occurs.
+     */
+    public Set<String> deleteFile(final String[] identifiers) throws FileStorageException {
+        Set<String> notDeleted = delete(identifiers);
+        if (notDeleted.size() < identifiers.length) {
             lock(LOCK_TIMEOUT);
             try {
                 final State state = loadState();
-                state.addUnused(identifier);
+                for (String identifier : identifiers) {
+                    if (!notDeleted.contains(identifier)) {
+                        state.addUnused(identifier);
+                    }
+                }
                 saveState(state);
             } finally {
                 unlock();
             }
         }
-        return retval;
+        return notDeleted;
     }
 
     /**
@@ -403,7 +417,7 @@ public abstract class FileStorage {
         try {
             return new State(load(STATEFILENAME));
         } catch (final FileStorageException e) {
-            delete(STATEFILENAME);
+            delete(new String[] { STATEFILENAME});
             throw e;
         }
     }
@@ -417,7 +431,7 @@ public abstract class FileStorage {
         try {
             save(STATEFILENAME, state.saveState());
         } catch (final FileStorageException e) {
-            delete(STATEFILENAME);
+            delete(new String[] { STATEFILENAME });
             throw e;
         }
     }
@@ -567,11 +581,10 @@ public abstract class FileStorage {
     /**
      * Deletes a file in the file storage.
      * @param name name of the file to delete.
-     * @return <code>true</code> if the file can be deleted successfully,
-     * <code>false</code> otherwise.
+     * @return the identifier that could not be deleted. If all are deleted an empty array is returned.
      * @throws FileStorageException if an error occurs.
      */
-    protected abstract boolean delete(String name) throws FileStorageException;
+    protected abstract Set<String> delete(String[] name) throws FileStorageException;
 
     /**
      * Save the data for the input stream into the file storage under the given

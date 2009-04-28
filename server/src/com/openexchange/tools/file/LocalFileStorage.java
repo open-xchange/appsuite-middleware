@@ -184,8 +184,14 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected boolean delete(final String name) {
-        return new File(storage, name).delete();
+	protected Set<String> delete(final String[] names) {
+        Set<String> notDeleted = new HashSet<String>();
+        for (String name : names) {
+            if (!new File(storage, name).delete()) {
+                notDeleted.add(name);
+            }
+        }
+        return notDeleted;
     }
 
     /**
