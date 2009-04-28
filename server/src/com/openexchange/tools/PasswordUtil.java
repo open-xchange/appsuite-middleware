@@ -206,13 +206,15 @@ public class PasswordUtil {
      * @throws GeneralSecurityException If generating secret key fails
      */
     public static Key generateSecretKey(final String key) throws GeneralSecurityException {
-        final byte[] bytes;
         try {
-            bytes = key.getBytes("UTF-8");
+            return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), "DES");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw new GeneralSecurityException("Failed to generate secret key.", e);
         }
+    }
+
+    private static byte[] ensureLength(final byte[] bytes) {
         final byte[] keyBytes;
         final int len = bytes.length;
         if (len < KEY_LENGTH) {
@@ -227,7 +229,7 @@ public class PasswordUtil {
         } else {
             keyBytes = bytes;
         }
-        return new SecretKeySpec(keyBytes, "DES");
+        return keyBytes;
     }
 
     /*-
