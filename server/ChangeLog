@@ -1,3 +1,7 @@
+* 2009-04-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #13473: Fixed cookie parsing when an ending ";" is present
+
 * 2009-04-28 - thorben.betten@open-xchange.com
 
  - Bugfix #13553: Using a specified charset name when encrypting/decrypting passwords

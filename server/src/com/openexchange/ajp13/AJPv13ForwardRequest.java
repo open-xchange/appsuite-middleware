@@ -470,11 +470,14 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 final int start = m.start();
                 if (start > prevEnd) {
                     // Last cookie skipped some characters
-                    reparsePrevCookie(headerValue, prevEnd, start, valueBuilder, cookieList);
+                    final String skipped = prepare(headerValue.substring(prevEnd, start));
+                    if (skipped.length() > 0) {
+                        reparsePrevCookie(headerValue, skipped, valueBuilder, cookieList);
+                    }
                 }
             }
             prevEnd = m.end();
-            final Cookie c = new Cookie(name, stripQuotes(m.group(4)));
+            final Cookie c = new Cookie(name, prepare(m.group(4)));
             c.setVersion(version);
             String attr = m.group(5);
             if (attr != null) {
@@ -498,7 +501,10 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         final int len = headerValue.length();
         if (len > prevEnd) {
             // Last cookie skipped some characters
-            reparsePrevCookie(headerValue, prevEnd, len, valueBuilder, cookieList);
+            final String skipped = prepare(headerValue.substring(prevEnd, len));
+            if (skipped.length() > 0) {
+                reparsePrevCookie(headerValue, skipped, valueBuilder, cookieList);
+            }
         }
         if ((headerValue.length() > 0) && cookieList.isEmpty()) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
@@ -510,12 +516,11 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
      * Re-Parse previous cookie in list
      * 
      * @param headerValue The complete cookie header value
-     * @param prevEnd The detected cookie's end position
-     * @param realEnd The real cookie's end position
+     * @param skipped The skipped string
      * @param valueBuilder A string builder needed to compose proper cookie value
      * @param cookieList The cookie list
      */
-    private static void reparsePrevCookie(final String headerValue, final int prevEnd, final int realEnd, final StringBuilder valueBuilder, final List<Cookie> cookieList) {
+    private static void reparsePrevCookie(final String headerValue, final String skipped, final StringBuilder valueBuilder, final List<Cookie> cookieList) {
         final String prevValue;
         final Cookie prevCookie = cookieList.get(cookieList.size() - 1);
         valueBuilder.append(prevCookie.getValue());
@@ -527,7 +532,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         if (null != prevAttr) {
             valueBuilder.append("; $Domain=").append(prevAttr);
         }
-        valueBuilder.append(headerValue.substring(prevEnd, realEnd));
+        valueBuilder.append(skipped);
         final String complVal = valueBuilder.toString();
         valueBuilder.setLength(0);
         int paramsStart = -1;
@@ -553,25 +558,24 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     }
 
     /**
-     * Removes heading/trailing quote character <code>'"'</code> if both present.
+     * Prepares passed cookie value.
      * 
-     * @param cookieValue The cookie value to strip quotes from
-     * @return The stripped cookie value.
+     * @param cookieValue The cookie value to prepare
+     * @return The prepared cookie value.
      */
-    private static String stripQuotes(final String cookieValue) {
+    private static String prepare(final String cookieValue) {
         if (null == cookieValue || cookieValue.length() == 0) {
             return cookieValue;
         }
         String cv = cookieValue;
         int mlen = cv.length() - 1;
         if (cv.charAt(mlen) == ';') {
-            cv =  cv.substring(0, mlen);
+            cv = cv.substring(0, mlen);
             mlen--;
         }
-        if ((cv.charAt(0) == '"') && (cv.charAt(mlen) == '"')) {
-            cv =  cv.substring(1, mlen);
+        if ((mlen > 0) && (cv.charAt(0) == '"') && (cv.charAt(mlen) == '"')) {
+            cv = cv.substring(1, mlen);
         }
-        
         return cv;
     }
 
