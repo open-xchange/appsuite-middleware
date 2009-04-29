@@ -115,7 +115,7 @@ public final class CachedSession implements Serializable {
         this.localIp = localIp;
         this.contextId = contextId;
         this.login = login;
-        final Map<String, Serializable> tmpparameters = new HashMap<String, Serializable>(parameters.size());
+        final Map<String, Serializable> tmpparameters = new HashMap<String, Serializable>(parameters.size(), 1);
         /*
          * Only fill with serializable objects
          */
