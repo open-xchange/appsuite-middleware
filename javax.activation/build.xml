@@ -12,7 +12,7 @@
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
     <property name="composite.name" value="open-xchange-activation-${version}"/>
 
     <!-- Install Constants -->
@@ -40,11 +40,15 @@
     </target>
 
     <target name="jar" depends="prepare">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
-            <fileset dir="${output..}"/>
-            <fileset refid="3rdpartyjars"/>
-        </jar>
+        <property name="bundledir" value="${tmp.dir}/${bundle.name}"/>
+    	<mkdir dir="${bundledir}"/>
+    	<mkdir dir="${bundledir}/${lib.dir}"/>
+    	<copy todir="${bundledir}">
+            <include name="META-INF/MANIFEST.MF"/>
+		</copy>
+    	<copy todir="${bundledir}/${lib.dir}">
+    		<fileset refid="3rdpartyjars"/>
+        </copy>
     </target>
 
     <!-- Install targets -->
