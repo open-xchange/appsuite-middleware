@@ -44,7 +44,9 @@
     	<mkdir dir="${bundledir}"/>
     	<mkdir dir="${bundledir}/${lib.dir}"/>
     	<copy todir="${bundledir}">
-            <include name="META-INF/MANIFEST.MF"/>
+    		<fileset dir="${basedir}">
+    		    <include name="META-INF/MANIFEST.MF"/>
+    		</fileset>
 		</copy>
     	<copy todir="${bundledir}/${lib.dir}">
     		<fileset refid="3rdpartyjars"/>
