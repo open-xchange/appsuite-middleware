@@ -46,5 +46,6 @@
 	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.timer"/>
 	<classpathentry kind="src" path="/com.openexchange.calendar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/javax.activation"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
