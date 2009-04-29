@@ -42,13 +42,12 @@
     <target name="jar" depends="prepare">
         <property name="bundledir" value="${tmp.dir}/${bundle.name}"/>
     	<mkdir dir="${bundledir}"/>
-    	<mkdir dir="${bundledir}/${lib.dir}"/>
     	<copy todir="${bundledir}">
     		<fileset dir="${basedir}">
     		    <include name="META-INF/MANIFEST.MF"/>
     		</fileset>
 		</copy>
-    	<copy todir="${bundledir}/${lib.dir}">
+    	<copy todir="${bundledir}">
     		<fileset refid="3rdpartyjars"/>
         </copy>
     </target>
