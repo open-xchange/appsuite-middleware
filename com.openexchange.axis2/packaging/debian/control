@@ -2,10 +2,10 @@ Source: open-xchange-axis2
 Section: unknown
 Priority: optional
 Maintainer: Carsten Hoeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-server (>=@OXVERSION@), perl
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|sun-java6-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-server (>=@OXVERSION@), perl
 Standards-Version: 3.6.1
 
 Package: open-xchange-axis2
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= @OXVERSION@), open-xchange-server (>=@OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-server (>=@OXVERSION@)
 Description: The Open-Xchange Axis2 Bundle

@@ -2,10 +2,10 @@ Source: open-xchange-commons-logging-log4j
 Section: unknown
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-log4j (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|sun-java6-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-log4j (>= @OXVERSION@)
 Standards-Version: 3.6.1
 
 Package: open-xchange-commons-logging-log4j
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= @OXVERSION@), open-xchange-log4j (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-log4j (>= @OXVERSION@)
 Description: Fragment for commons logging for adding dependency to log4j
