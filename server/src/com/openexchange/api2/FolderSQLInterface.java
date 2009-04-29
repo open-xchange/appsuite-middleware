@@ -51,7 +51,6 @@ package com.openexchange.api2;
 
 import java.sql.Timestamp;
 import java.util.Date;
-
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -167,4 +166,15 @@ public interface FolderSQLInterface {
 	 */
 	public int deleteFolderObject(FolderObject folderobject, Date clientLastModified) throws OXException;
 
+	/**
+     * Deletes all items located in given folder
+     * 
+     * @param delFolderObj -
+     *            the unique ID of the folder whose content should be deleted
+     * @param clientLastModified -
+     *            the client's last modified timestamp
+     * @return the ID of cleared folder as an <code>int</code>
+     * @throws OXException
+     */
+    public int clearFolder(FolderObject delFolderObj, Date clientLastModified) throws OXException;
 }

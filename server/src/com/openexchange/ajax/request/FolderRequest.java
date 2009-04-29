@@ -58,40 +58,47 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link FolderRequest} - Folder request.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class FolderRequest {
-	
-	private final ServerSession session;
 
-	private final JSONWriter pw;
-	
-	private static final Folder FOLDER_SERVLET = new Folder();
+    private final ServerSession session;
 
-	public FolderRequest(final ServerSession session, final JSONWriter pw) {
-		super();
-		this.session = session;
-		this.pw = pw;
-	}
-	
-	public void action(final String action, final JSONObject jsonObject) throws JSONException, OXFolderException {
-		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ROOT)) {
-			FOLDER_SERVLET.actionGetRoot(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			FOLDER_SERVLET.actionGetSubfolders(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_PATH)) {
-			FOLDER_SERVLET.actionGetPath(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			FOLDER_SERVLET.actionGetUpdatedFolders(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			FOLDER_SERVLET.actionGetFolder(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			FOLDER_SERVLET.actionPutUpdateFolder(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-			FOLDER_SERVLET.actionPutInsertFolder(session, pw, jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			FOLDER_SERVLET.actionPutDeleteFolder(session, pw, jsonObject);
-		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_ACTION, action);
-		}
-	}
+    private final JSONWriter pw;
+
+    private static final Folder FOLDER_SERVLET = new Folder();
+
+    public FolderRequest(final ServerSession session, final JSONWriter pw) {
+        super();
+        this.session = session;
+        this.pw = pw;
+    }
+
+    public void action(final String action, final JSONObject jsonObject) throws JSONException, OXFolderException {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_ROOT)) {
+            FOLDER_SERVLET.actionGetRoot(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+            FOLDER_SERVLET.actionGetSubfolders(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_PATH)) {
+            FOLDER_SERVLET.actionGetPath(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+            FOLDER_SERVLET.actionGetUpdatedFolders(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+            FOLDER_SERVLET.actionGetFolder(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+            FOLDER_SERVLET.actionPutUpdateFolder(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+            FOLDER_SERVLET.actionPutInsertFolder(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+            FOLDER_SERVLET.actionPutDeleteFolder(session, pw, jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
+            FOLDER_SERVLET.actionPutClearFolder(session, pw, jsonObject);
+        } else {
+            throw new OXFolderException(FolderCode.UNKNOWN_ACTION, action);
+        }
+    }
 
 }

@@ -722,6 +722,54 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         }
     }
 
+    public int clearFolder(final FolderObject folderobject, final Date clientLastModified) throws OXException {
+        try {
+            if (folderobject.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
+                throw new OXFolderException(
+                    FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                    getUserName(session, user),
+                    getFolderName(folderobject),
+                    Integer.valueOf(ctx.getContextId()));
+            }
+            if (!folderobject.exists(ctx)) {
+                throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx.getContextId());
+            }
+            if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
+                throw new OXConcurrentModificationException(
+                    EnumComponent.FOLDER,
+                    OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
+                    new Object[0]);
+            }
+            final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, userConfiguration);
+            if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
+                throw new OXFolderException(
+                    FolderCode.NO_MODULE_ACCESS,
+                    getUserName(session, user),
+                    folderModule2String(folderobject.getModule()),
+                    Integer.valueOf(ctx.getContextId()));
+            }
+            if (!effectivePerm.isFolderVisible()) {
+                if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
+                    throw new OXFolderPermissionException(
+                        FolderCode.NOT_VISIBLE,
+                        getFolderName(folderobject),
+                        getUserName(session, user),
+                        Integer.valueOf(ctx.getContextId()));
+                }
+                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, getFolderName(folderobject), getUserName(
+                    session,
+                    user), Integer.valueOf(ctx.getContextId()));
+            }
+            final long lastModified = System.currentTimeMillis();
+            OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
+            return folderobject.getObjectID();
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        }
+    }
+
     private static final Queue<FolderObject> int2folder(final Queue<Integer> iq, final OXFolderAccess oxfolderAccess) {
         final Queue<FolderObject> retval = new LinkedList<FolderObject>();
         final int size = iq.size();
