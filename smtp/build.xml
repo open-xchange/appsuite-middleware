@@ -44,7 +44,7 @@
 
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
+    	<pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
     </path>
 
     <!-- Compile -->

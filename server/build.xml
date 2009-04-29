@@ -101,7 +101,7 @@
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
     	<pathelement location="${bundlesdir}/${timerjar}"/>
 
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
+        <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsfileuploadjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
