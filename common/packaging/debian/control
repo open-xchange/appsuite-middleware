@@ -2,10 +2,10 @@ Source: open-xchange-common
 Section: unknown
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|sun-java6-jdk, open-xchange-activation|sun-java6-jre
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|sun-java6-jdk, open-xchange-activation
 Standards-Version: 3.6.1
 
 Package: open-xchange-common
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-activation|sun-java6-jre
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-activation
 Description: jar files and OSGi bundles commonly used by all open-xchange packages
