@@ -49,72 +49,46 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertEquals;
+
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link Asserts}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class Subscription {
-
-    private int folderId;
-
-    private int contextId;
-
-    private int userId;
-
-    private Date lastUpdate;
-    
-    private Map<String, String> configuration= new HashMap<String, String>();
-
-    private SubscriptionFormDescription description;
-
-    public int getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(int folderId) {
-        this.folderId = folderId;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+public class Asserts {
+    public static void assertKnows(SubscriptionSourceDiscoveryService discoverer, String id) {
+        assertTrue("Did not know: "+id, discoverer.knowsSource(id));
     }
     
-    public Map<String, String> getConfiguration() {
-        return configuration;
+    public static void assertDoesNotKnow(SubscriptionSourceDiscoveryService discoverer, String id) {
+        assertFalse("Did know: "+id, discoverer.knowsSource(id));
     }
     
-    public void setConfiguration(Map<String, String> configuration) {
-        this.configuration = configuration;
-    }
-    
-    public SubscriptionFormDescription getDescription() {
-        return description;
-    }
-    
-    public void setDescription(SubscriptionFormDescription description) {
-        this.description = description;
+    public static void assertSources(List<SubscriptionSource> sources, String...expectedIdentifiers) {
+        List<String> identifier = new ArrayList<String>();
+        for(SubscriptionSource source : sources) {
+            identifier.add(source.getIdentifier());
+        }
+        List<String> expectedList = Arrays.asList(expectedIdentifiers);
+        assertEquals("Expected: "+expectedList+" Got: "+identifier, sources.size(), expectedIdentifiers.length);
+        
+        Set<String> actual = new HashSet<String>(identifier);
+        for(String expected : expectedIdentifiers) {
+            assertTrue("Expected: "+expectedList+" Got: "+identifier +" Missing: "+expected, actual.remove(expected));
+        }
+        assertTrue("Expected: "+expectedList+" Got: "+identifier, actual.isEmpty());
+        
     }
 }

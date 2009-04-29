@@ -266,7 +266,7 @@ public class SubscribeJSONServlet extends PermissionServlet {
         subscription.setContextId(session.getContextId());
         subscription.setUserId(session.getUserId());
         subscription.setFolderId(objectToSubscribe.getInt("folder"));
-        subscription.setUrl(objectToSubscribe.optString("url"));
+        //subscription.setUrl(objectToSubscribe.optString("url"));
         subscription.setLastUpdate(new Date(0));
 
         return subscription;
@@ -287,7 +287,7 @@ public class SubscribeJSONServlet extends PermissionServlet {
         final JSONObject subscriptionObject = new JSONObject();
         subscriptionObject.put("folder", subscription.getFolderId());
         subscriptionObject.put("last_update", subscription.getLastUpdate().getTime());
-        subscriptionObject.put("url", subscription.getUrl());
+        //subscriptionObject.put("url", subscription.getUrl());
         return subscriptionObject;
     }
     

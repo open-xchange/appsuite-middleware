@@ -55,7 +55,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
      * @throws IOException
      */
     protected String readSubscription(Subscription subscription) throws IOException{ //TODO: refactor to composite pattern
-        URL url = new URL(subscription.getUrl());
+        URL url = null; //new URL(subscription.getUrl());
         URLConnection connection = url.openConnection();
         BufferedReader buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
         StringBuilder bob = new StringBuilder();

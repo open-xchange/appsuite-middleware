@@ -49,13 +49,11 @@
 
 package com.openexchange.subscribe;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import static com.openexchange.subscribe.Asserts.assertDoesNotKnow;
+import static com.openexchange.subscribe.Asserts.assertKnows;
+import static com.openexchange.subscribe.Asserts.assertSources;
 import java.util.List;
-import java.util.Set;
 import junit.framework.TestCase;
-
 
 /**
  * {@link CompositeSubscriptionSourceDiscoveryServiceTest}
@@ -110,29 +108,7 @@ public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
     }
     
     
-    private static void assertKnows(SubscriptionSourceDiscoveryService discoverer, String id) {
-        assertTrue("Did not know: "+id, discoverer.knowsSource(id));
-    }
     
-    private static void assertDoesNotKnow(SubscriptionSourceDiscoveryService discoverer, String id) {
-        assertFalse("Did know: "+id, discoverer.knowsSource(id));
-    }
-    
-    private static void assertSources(List<SubscriptionSource> sources, String...expectedIdentifiers) {
-        List<String> identifier = new ArrayList<String>();
-        for(SubscriptionSource source : sources) {
-            identifier.add(source.getIdentifier());
-        }
-        List<String> expectedList = Arrays.asList(expectedIdentifiers);
-        assertEquals("Expected: "+expectedList+" Got: "+identifier, sources.size(), expectedIdentifiers.length);
-        
-        Set<String> actual = new HashSet<String>(identifier);
-        for(String expected : expectedIdentifiers) {
-            assertTrue("Expected: "+expectedList+" Got: "+identifier +" Missing: "+expected, actual.remove(expected));
-        }
-        assertTrue("Expected: "+expectedList+" Got: "+identifier, actual.isEmpty());
-        
-    }
 
     private SubscriptionSource source(String identifier) {
         SubscriptionSource source = new SubscriptionSource();

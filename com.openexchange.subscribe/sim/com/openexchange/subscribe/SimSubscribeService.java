@@ -49,72 +49,51 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import com.openexchange.groupware.container.FolderObject;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SimSubscribeService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class Subscription {
-
-    private int folderId;
-
-    private int contextId;
-
-    private int userId;
-
-    private Date lastUpdate;
+public class SimSubscribeService implements SubscribeService {
     
-    private Map<String, String> configuration= new HashMap<String, String>();
+    private SubscriptionSource source;
 
-    private SubscriptionFormDescription description;
-
-    public int getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(int folderId) {
-        this.folderId = folderId;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+    public SubscriptionSource getSubscriptionSource() {
+        return source;
     }
     
-    public Map<String, String> getConfiguration() {
-        return configuration;
+    public void setSource(SubscriptionSource source) {
+        this.source = source;
     }
     
-    public void setConfiguration(Map<String, String> configuration) {
-        this.configuration = configuration;
+
+    public boolean handles(FolderObject folder) {
+        return true;
     }
-    
-    public SubscriptionFormDescription getDescription() {
-        return description;
+
+    public Collection<Subscription> load(int contextId, int folderId) {
+        return null;
     }
-    
-    public void setDescription(SubscriptionFormDescription description) {
-        this.description = description;
+
+    public Collection<Subscription> loadForUser(int contextId, int userId) {
+        return null;
     }
+
+    public void subscribe(Subscription subscription) {
+
+    }
+
+    public void unsubscribe(Subscription subscription) {
+
+    }
+
+    public void update(Subscription subscription) {
+
+    }
+
 }

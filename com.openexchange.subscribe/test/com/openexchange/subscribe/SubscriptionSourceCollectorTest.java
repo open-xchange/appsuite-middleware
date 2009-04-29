@@ -1,0 +1,142 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.subscribe;
+
+import java.util.List;
+import com.openexchange.groupware.container.FolderObject;
+import junit.framework.TestCase;
+import static com.openexchange.subscribe.Asserts.assertDoesNotKnow;
+import static com.openexchange.subscribe.Asserts.assertKnows;
+import static com.openexchange.subscribe.Asserts.assertSources;
+
+/**
+ * {@link SubscriptionSourceCollectorTest}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class SubscriptionSourceCollectorTest extends TestCase {
+
+    private SubscriptionSourceCollector collector;
+
+    private List<SubscriptionSource> sources;
+
+    public void setUp() {
+        collector = new SubscriptionSourceCollector();
+        collector.addSubscribeService(service("com.openexchange.subscription.test1"));
+        collector.addSubscribeService(service("com.openexchange.subscription.test2"));
+        collector.addSubscribeService(service("com.openexchange.subscription.test3"));
+        collector.addSubscribeService(serviceHandlingNothing("com.openexchange.subscription.testHandlesNoFolder"));
+
+    }
+
+    public void testGetSources() {
+        sources = collector.getSources(null);
+        assertNotNull("Sources was null!", sources);
+        assertSources(
+            sources,
+            "com.openexchange.subscription.test1",
+            "com.openexchange.subscription.test2",
+            "com.openexchange.subscription.test3");
+        
+    }
+    
+    public void testKnows() {
+        assertKnows(collector, "com.openexchange.subscription.test1");
+        assertKnows(collector, "com.openexchange.subscription.test2");
+        assertKnows(collector, "com.openexchange.subscription.test3");
+        assertKnows(collector, "com.openexchange.subscription.testHandlesNoFolder");
+        assertDoesNotKnow(collector, "unknown");
+    }
+    
+    public void testGet() {
+        assertNotNull("Missing com.openexchange.susbscription.test1", collector.getSource("com.openexchange.subscription.test1"));
+        assertNotNull("Missing com.openexchange.susbscription.test2", collector.getSource("com.openexchange.subscription.test2"));
+        assertNotNull("Missing com.openexchange.susbscription.test3", collector.getSource("com.openexchange.subscription.test3"));
+        assertNotNull("Missing com.openexchange.susbscription.testHandlesNoFolder", collector.getSource("com.openexchange.subscription.testHandlesNoFolder"));
+        assertNull("Got unknown?!?", collector.getSource("unknown"));
+    }
+    
+    public void testRemove() {
+        collector.removeSubscribeService("com.openexchange.subscription.test1");
+        sources = collector.getSources(null);
+        assertNotNull("Sources was null!", sources);
+        assertSources(
+            sources,
+            "com.openexchange.subscription.test2",
+            "com.openexchange.subscription.test3");
+        assertDoesNotKnow(collector, "com.openexchange.subscription.test1");
+        assertNull("Didn't expect a source", collector.getSource("com.openexchange.subscription.test1"));
+    }
+
+    private SubscribeService service(String string) {
+        SubscriptionSource source = new SubscriptionSource();
+        source.setIdentifier(string);
+        SimSubscribeService service = new SimSubscribeService();
+        service.setSource(source);
+        return service;
+    }
+
+    private SubscribeService serviceHandlingNothing(String string) {
+        SubscriptionSource source = new SubscriptionSource();
+        source.setIdentifier(string);
+        SimSubscribeService service = new SimSubscribeService() {
+
+            @Override
+            public boolean handles(FolderObject folder) {
+                return false;
+            }
+
+        };
+        service.setSource(source);
+        return service;
+
+    }
+
+}

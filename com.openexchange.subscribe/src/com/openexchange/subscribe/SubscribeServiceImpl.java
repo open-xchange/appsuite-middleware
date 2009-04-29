@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class SubscribeServiceImpl implements SubscribeService {
+public class SubscribeServiceImpl /*implements SubscribeService */{
 
     private static final Log LOG = LogFactory.getLog(SubscribeServiceImpl.class);
 

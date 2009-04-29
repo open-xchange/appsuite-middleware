@@ -49,72 +49,50 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import com.openexchange.groupware.container.FolderObject;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SubscriptionSourceCollector}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class Subscription {
+public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryService {
 
-    private int folderId;
+    private Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
 
-    private int contextId;
-
-    private int userId;
-
-    private Date lastUpdate;
-    
-    private Map<String, String> configuration= new HashMap<String, String>();
-
-    private SubscriptionFormDescription description;
-
-    public int getFolderId() {
-        return folderId;
+    public SubscriptionSource getSource(String identifier) {
+        if(!services.containsKey(identifier)) {
+            return null;
+        }
+        return services.get(identifier).getSubscriptionSource();
     }
 
-    public void setFolderId(int folderId) {
-        this.folderId = folderId;
+    public List<SubscriptionSource> getSources(FolderObject folder) {
+        List<SubscriptionSource> sources = new LinkedList<SubscriptionSource>();
+        for(SubscribeService subscriber : services.values()) {
+            if(subscriber.handles(folder)) {
+                sources.add(subscriber.getSubscriptionSource());
+            }
+        }
+        return sources;
     }
 
-    public int getContextId() {
-        return contextId;
+    public boolean knowsSource(String identifier) {
+        return services.containsKey(identifier);
     }
 
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
+    public void addSubscribeService(SubscribeService service) {
+        services.put(service.getSubscriptionSource().getIdentifier(), service);
     }
 
-    public int getUserId() {
-        return userId;
+    public void removeSubscribeService(String identifier) {
+        services.remove(identifier);        
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-    
-    public Map<String, String> getConfiguration() {
-        return configuration;
-    }
-    
-    public void setConfiguration(Map<String, String> configuration) {
-        this.configuration = configuration;
-    }
-    
-    public SubscriptionFormDescription getDescription() {
-        return description;
-    }
-    
-    public void setDescription(SubscriptionFormDescription description) {
-        this.description = description;
-    }
 }

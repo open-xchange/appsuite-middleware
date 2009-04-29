@@ -81,7 +81,7 @@ public class SubscriptionSQL {
             sb.toString(),
             subscription.getContextId(),
             subscription.getUserId(),
-            subscription.getUrl(),
+            //subscription.getUrl(),
             subscription.getFolderId(),
             subscription.getLastUpdate().getTime());
     }
@@ -113,7 +113,7 @@ public class SubscriptionSQL {
             subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
             subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
             subscriptionObject.setLastUpdate(new Date((Long) subscription.get("last_update")));
-            subscriptionObject.setUrl((String) subscription.get("url"));
+           // subscriptionObject.setUrl((String) subscription.get("url"));
             subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
             retval.add(subscriptionObject);
         }
@@ -135,7 +135,7 @@ public class SubscriptionSQL {
             subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
             subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
             subscriptionObject.setLastUpdate(new Date((Long)subscription.get("last_update")));
-            subscriptionObject.setUrl((String) subscription.get("url"));
+           // subscriptionObject.setUrl((String) subscription.get("url"));
             subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
             retval.add(subscriptionObject);
         }
@@ -160,7 +160,7 @@ public class SubscriptionSQL {
             subscription.getLastUpdate(),
             subscription.getContextId(),
             subscription.getUserId(),
-            subscription.getUrl(),
+           // subscription.getUrl(),
             subscription.getFolderId());
     }
 
@@ -175,7 +175,7 @@ public class SubscriptionSQL {
             sb.toString(),
             subscription.getContextId(),
             subscription.getUserId(),
-            subscription.getUrl(),
+         //   subscription.getUrl(),
             subscription.getFolderId());
 
         return subscriptions.size() > 0;

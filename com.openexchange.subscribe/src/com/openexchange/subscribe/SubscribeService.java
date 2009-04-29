@@ -50,12 +50,17 @@
 package com.openexchange.subscribe;
 
 import java.util.Collection;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public interface SubscribeService {
 
+    public SubscriptionSource getSubscriptionSource();
+    
+    public boolean handles(FolderObject folder);
+    
     public void subscribe(Subscription subscription);
 
     public Collection<Subscription> load(int contextId, int folderId);

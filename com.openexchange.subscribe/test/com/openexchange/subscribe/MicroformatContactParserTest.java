@@ -31,7 +31,7 @@ public class MicroformatContactParserTest extends TestCase {
         Subscription subscription = new Subscription();
         subscription.setContextId(1);
         subscription.setUserId(8);
-        subscription.setUrl("http://localhost/~development/test/micro.html");
+        //subscription.setUrl("http://localhost/~development/test/micro.html");
         
         parser.handleSubscription(subscription);
         Collection<ContactObject> contacts = parser.getContacts();
