@@ -91,6 +91,12 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // The Unified INBOX account already exists for user %1$s in context %2$s.
     public static final String DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG = "The Unified INBOX account already exists for user %1$s in context %2$s.";
 
+    // Mail account creation failed.
+    public static final String CREATION_FAILED_MSG = "Mail account creation failed.";
+
+    // Mail account validation failed.
+    public static final String VALIDATION_FAILED_MSG = "Mail account validation failed.";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */

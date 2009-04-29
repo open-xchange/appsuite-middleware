@@ -630,7 +630,9 @@ public class Folder extends SessionServlet {
                                 Collections.sort(tmp, new MailAccountComparator(locale));
                                 accounts = tmp;
                             }
-
+                            /*
+                             * Iterate sorted mail accounts
+                             */
                             for (final MailAccount mailAccount : accounts) {
                                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                                 boolean close = false;

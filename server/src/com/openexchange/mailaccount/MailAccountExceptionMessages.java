@@ -102,7 +102,15 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * The Unified INBOX account already exists for user %1$s in context %2$s.
      */
-    DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, Category.CODE_ERROR, 11);
+    DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, Category.CODE_ERROR, 11),
+    /**
+     * Mail account creation failed.
+     */
+    CREATION_FAILED(MailAccountExceptionStrings.CREATION_FAILED_MSG, Category.CODE_ERROR, 12),
+    /**
+     * Mail account validation failed.
+     */
+    VALIDATION_FAILED(MailAccountExceptionStrings.VALIDATION_FAILED_MSG, Category.CODE_ERROR, 13);
 
     /**
      * Message of the exception.

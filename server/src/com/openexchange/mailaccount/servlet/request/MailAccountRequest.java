@@ -75,7 +75,9 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
@@ -158,10 +160,16 @@ public final class MailAccountRequest {
                 MailAccountStorageService.class,
                 true);
 
-            final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
-                id,
-                session.getUserId(),
-                session.getContextId()));
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            if (isUnifiedINBOXAccount(mailAccount)) {
+                // Treat as no hit
+                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                    Integer.valueOf(id),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
             return jsonAccount;
         } catch (final AbstractOXException exc) {
             throw new OXException(exc);
@@ -178,9 +186,14 @@ public final class MailAccountRequest {
                 true);
 
             for (int i = 0; i < ids.length; i++) {
-                storageService.deleteMailAccount(ids[i], session.getUserId(), session.getContextId());
+                final int id = ids[i];
+                final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
-                jsonArray.put(ids[i]);
+                if (!isUnifiedINBOXAccount(mailAccount)) {
+                    storageService.deleteMailAccount(id, session.getUserId(), session.getContextId());
+                }
+
+                jsonArray.put(id);
             }
         } catch (final AbstractOXException exc) {
             throw new OXException(exc);
@@ -194,6 +207,11 @@ public final class MailAccountRequest {
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
+
+            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+                // Deny creation of Unified INBOX account
+                throw MailAccountExceptionMessages.CREATION_FAILED.create();
+            }
 
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
@@ -231,6 +249,10 @@ public final class MailAccountRequest {
             }
             if (null == accountDescription.getPassword()) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
+            }
+            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+                // Deny validation of Unified INBOX account
+                throw MailAccountExceptionMessages.VALIDATION_FAILED.create();
             }
             // Validate mail server
             boolean validated = checkMailServerURL(accountDescription);
@@ -371,6 +393,17 @@ public final class MailAccountRequest {
                 MailAccountStorageService.class,
                 true);
 
+            final int id = accountDescription.getId();
+
+            final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            if (isUnifiedINBOXAccount(toUpdate)) {
+                // Treat as no hit
+                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                    Integer.valueOf(id),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
             storageService.updateMailAccount(
                 accountDescription,
                 fieldsToUpdate,
@@ -379,7 +412,7 @@ public final class MailAccountRequest {
                 session.getPassword());
 
             final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
-                accountDescription.getId(),
+                id,
                 session.getUserId(),
                 session.getContextId()));
 
@@ -389,15 +422,25 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONArray actionAll(final JSONObject request) throws JSONException, OXException {
+    private JSONArray actionAll(final JSONObject request) throws OXException {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
+
         final List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
 
-            final MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
+            for (int i = 0; i < userMailAccounts.length; i++) {
+                final MailAccount mailAccount = userMailAccounts[i];
+                if (!isUnifiedINBOXAccount(mailAccount)) {
+                    tmp.add(mailAccount);
+                }
+            }
+            userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
+
             return MailAccountWriter.writeArray(userMailAccounts, attributes);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
@@ -415,14 +458,14 @@ public final class MailAccountRequest {
                 attributes.add(Attribute.getById(Integer.parseInt(col)));
             }
             return attributes;
-        } else {
-            return Arrays.asList(Attribute.values());
-
         }
+        // All columns
+        return Arrays.asList(Attribute.values());
     }
 
     private JSONArray actionList(final JSONObject request) throws JSONException, OXException {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
+
         final List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
@@ -434,13 +477,23 @@ public final class MailAccountRequest {
             for (int i = 0, size = ids.length(); i < size; i++) {
                 final int id = ids.getInt(i);
                 final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-                accounts.add(account);
+                if (!isUnifiedINBOXAccount(account)) {
+                    accounts.add(account);
+                }
             }
 
             return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
         }
+    }
+
+    private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {
+        return isUnifiedINBOXAccount(mailAccount.getMailProtocol());
+    }
+
+    private static boolean isUnifiedINBOXAccount(final String mailProtocol) {
+        return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
 }
