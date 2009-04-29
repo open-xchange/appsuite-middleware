@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +63,10 @@ import java.util.List;
  */
 public class SubscriptionFormDescription implements Iterable<FormElement>{
     private List<FormElement> formElements;
+    
+    public SubscriptionFormDescription() {
+        formElements = new ArrayList<FormElement>();
+    }
 
     public Iterator<FormElement> iterator() {
         return formElements.iterator();

@@ -88,7 +88,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
     }
 
     public void addSubscribeService(SubscribeService service) {
-        services.put(service.getSubscriptionSource().getIdentifier(), service);
+        services.put(service.getSubscriptionSource().getId(), service);
     }
 
     public void removeSubscribeService(String identifier) {

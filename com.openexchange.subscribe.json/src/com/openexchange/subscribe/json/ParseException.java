@@ -47,51 +47,23 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.json;
 
+import org.json.JSONException;
 
 /**
- * {@link SubscriptionSource}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class SubscriptionSource {
-    private String id;
-    private String displayName;
-    private String icon;
-    private SubscriptionFormDescription formDescription;
-    
-    public String getId() {
-        return id;
+public class ParseException extends Exception {
+
+    private static final long serialVersionUID = 5976972835120202376L;
+
+    public ParseException(String string) {
+        super(string);
     }
-    
-    public void setId(String id) {
-        this.id = id;
+
+    public ParseException(JSONException e) {
+        super(e);
     }
-    
-    public String getDisplayName() {
-        return displayName;
-    }
-    
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-    
-    public String getIcon() {
-        return icon;
-    }
-    
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-    
-    public SubscriptionFormDescription getFormDescription() {
-        return formDescription;
-    }
-    
-    public void setFormDescription(SubscriptionFormDescription formDescription) {
-        this.formDescription = formDescription;
-    }
-    
+
 }

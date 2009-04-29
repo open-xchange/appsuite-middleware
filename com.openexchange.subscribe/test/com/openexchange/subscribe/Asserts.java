@@ -79,7 +79,7 @@ public class Asserts {
     public static void assertSources(List<SubscriptionSource> sources, String...expectedIdentifiers) {
         List<String> identifier = new ArrayList<String>();
         for(SubscriptionSource source : sources) {
-            identifier.add(source.getIdentifier());
+            identifier.add(source.getId());
         }
         List<String> expectedList = Arrays.asList(expectedIdentifiers);
         assertEquals("Expected: "+expectedList+" Got: "+identifier, sources.size(), expectedIdentifiers.length);

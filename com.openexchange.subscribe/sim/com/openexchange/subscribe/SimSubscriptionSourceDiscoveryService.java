@@ -79,7 +79,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     }
     
     public void addSource(SubscriptionSource source) {
-        sources.put(source.getIdentifier(), source);
+        sources.put(source.getId(), source);
     }
     
 }

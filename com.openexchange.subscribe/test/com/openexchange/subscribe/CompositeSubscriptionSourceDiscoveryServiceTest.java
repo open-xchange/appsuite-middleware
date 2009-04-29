@@ -112,7 +112,7 @@ public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
 
     private SubscriptionSource source(String identifier) {
         SubscriptionSource source = new SubscriptionSource();
-        source.setIdentifier(identifier);
+        source.setId(identifier);
         return source;
     }
 }

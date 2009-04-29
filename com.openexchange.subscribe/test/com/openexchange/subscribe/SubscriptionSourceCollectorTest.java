@@ -117,7 +117,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     private SubscribeService service(String string) {
         SubscriptionSource source = new SubscriptionSource();
-        source.setIdentifier(string);
+        source.setId(string);
         SimSubscribeService service = new SimSubscribeService();
         service.setSource(source);
         return service;
@@ -125,7 +125,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     private SubscribeService serviceHandlingNothing(String string) {
         SubscriptionSource source = new SubscriptionSource();
-        source.setIdentifier(string);
+        source.setId(string);
         SimSubscribeService service = new SimSubscribeService() {
 
             @Override

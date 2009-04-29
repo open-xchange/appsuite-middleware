@@ -59,13 +59,23 @@ package com.openexchange.subscribe;
 public class FormElement {
     
     public static enum Widget {
-        INPUT, PASSWORD;
-        
+        INPUT("input", false), PASSWORD("password", true);
+
+        private String keyword;
+
+        private boolean needsEncryption;
+
+        private Widget(String keyword, boolean needsEncryption) {
+            this.keyword = keyword;
+            this.needsEncryption = needsEncryption;
+        }
+
         public boolean needsEncryption() {
-            switch(this) {
-            default: return false;
-            case PASSWORD : return true;
-            }
+            return needsEncryption;
+        }
+
+        public String getKeyword() {
+            return keyword;
         }
     }
     
