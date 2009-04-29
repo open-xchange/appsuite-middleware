@@ -88,18 +88,6 @@ public class PluginStarter {
 
     public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException {
         try {
-
-            if (null == System.getSecurityManager()) {
-                System.setSecurityManager(new SecurityManager() {
-                    @Override
-					public void checkPermission(final Permission perm) {
-                    }
-
-                    @Override
-					public void checkPermission(final Permission perm, final Object context) {
-                    }
-                });
-            }
             initCache();
             registry = AdminDaemon.getRegistry();
 
