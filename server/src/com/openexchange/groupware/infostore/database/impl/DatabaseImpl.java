@@ -1487,7 +1487,7 @@ public class DatabaseImpl extends DBService {
             fileStorage.deleteFile(filesArray);
         } catch (final SQLException x) {
             LOG.error(x.getMessage(), x);
-            throw EXCEPTIONS.create(36, "");
+            throw EXCEPTIONS.create(36, x.toString(), x);
         } catch (final AbstractOXException x) {
             throw new InfostoreException(x);
         } finally {
