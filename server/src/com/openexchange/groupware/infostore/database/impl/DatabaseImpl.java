@@ -1519,8 +1519,8 @@ public class DatabaseImpl extends DBService {
         final Integer contextId = Autoboxing.I(session.getContextId());
         for(DocumentMetadata documentMetadata : parents) {
             final Integer id = Autoboxing.I(documentMetadata.getId());
-            holder.execute(parentDelete, id, contextId);
             holder.execute(allChildrenDelete, id, contextId);
+            holder.execute(parentDelete, id, contextId);
         }
             
         
