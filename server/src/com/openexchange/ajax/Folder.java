@@ -635,12 +635,11 @@ public class Folder extends SessionServlet {
                                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                                 boolean close = false;
                                 try {
-                                    mailAccess.connect();
+                                    final MailFolder rootFolder = mailAccess.getRootFolder();
                                     close = true;
                                     final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                                         columns,
                                         mailAccess.getMailConfig());
-                                    final MailFolder rootFolder = mailAccess.getFolderStorage().getRootFolder();
                                     final JSONArray ja = new JSONArray();
                                     if (mailAccount.isDefaultAccount()) {
                                         for (int i = 0; i < mailFolderWriters.length; i++) {

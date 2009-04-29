@@ -65,6 +65,7 @@ import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
@@ -325,6 +326,36 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      * @throws MailException If the connection could not be established for various reasons
      */
     public final void connect() throws MailException {
+        connect0(true);
+    }
+
+    /**
+     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
+     * the root folder.
+     * <p>
+     * The same result is yielded through calling <code>getFolderStorage().getRootFolder()</code> on a connected {@link MailAccess}.
+     * <p>
+     * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
+     * afterwards:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = MailAccess.getInstance(session);
+     * final MailFolder rootFolder = mailAccess.getRootFolder();
+     * try {
+     *  // Do something with root folder
+     * } finally {
+     *  mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @throws MailException If the returning the root folder fails
+     */
+    public final MailFolder getRootFolder() throws MailException {
+        connect0(false);
+        return getFolderStorage().getRootFolder();
+    }
+
+    private final void connect0(final boolean checkDefaultFolder) throws MailException {
         applyNewThread();
         if (isConnected()) {
             getFolderStorage().checkDefaultFolders();
@@ -333,13 +364,15 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         }
         checkFieldsBeforeConnect(getMailConfig());
         connectInternal();
-        try {
-            getFolderStorage().checkDefaultFolders();
-        } catch (final Exception e) {
-            final MailException mailExc = new MailException(MailException.Code.DEFAULT_FOLDER_CHECK_FAILED, e, e.getMessage());
-            LOG.error(mailExc.getMessage(), mailExc);
-            closeInternal();
-            throw mailExc;
+        if (checkDefaultFolder) {
+            try {
+                getFolderStorage().checkDefaultFolders();
+            } catch (final Exception e) {
+                final MailException mailExc = new MailException(MailException.Code.DEFAULT_FOLDER_CHECK_FAILED, e, e.getMessage());
+                LOG.error(mailExc.getMessage(), mailExc);
+                closeInternal();
+                throw mailExc;
+            }
         }
         MailAccessWatcher.addMailAccess(this);
     }

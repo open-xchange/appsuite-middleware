@@ -1006,7 +1006,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 throw e;
             }
         }
-        mailAccess.getFolderStorage().checkDefaultFolders();
         return mailAccess;
     }
 
