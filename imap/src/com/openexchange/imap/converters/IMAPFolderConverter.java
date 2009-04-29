@@ -183,14 +183,17 @@ public final class IMAPFolderConverter {
      * @param imapFolder The IMAP folder
      * @param session The session
      * @param ctx The context
-     * @return an instance of <code>{@link IMAPMailFolder}</code> containing the attributes from given IMAP folder
+     * @return An instance of <code>{@link IMAPMailFolder}</code> containing the attributes from given IMAP folder
      * @throws MailException If conversion fails
      */
     public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session, final IMAPConfig imapConfig, final Context ctx) throws MailException {
         try {
+            if (imapFolder instanceof DefaultFolder) {
+                return convertRootFolder((DefaultFolder) imapFolder, session, imapConfig);
+            }
+            // Convert non-root folder
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
-            final boolean isRoot = (imapFolder instanceof DefaultFolder);
-            mailFolder.setRootFolder(isRoot);
+            mailFolder.setRootFolder(false);
             final boolean exists = imapFolder.exists();
             mailFolder.setExists(exists);
             mailFolder.setSeparator(imapFolder.getSeparator());
@@ -235,33 +238,31 @@ public final class IMAPFolderConverter {
                  */
                 checkSubfoldersByCommands(imapFolder, mailFolder, imapFullname, mailFolder.getSeparator(), true);
             }
-            if (isRoot) {
-                mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
-                mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
-                mailFolder.setParentFullname(null);
-                mailFolder.setDefaultFolder(false);
-            } else {
-                mailFolder.setFullname(imapFullname);
-                mailFolder.setName(imapFolder.getName());
-                final Folder parent = imapFolder.getParent();
-                mailFolder.setParentFullname(parent instanceof DefaultFolder ? MailFolder.DEFAULT_FOLDER_ID : parent.getFullName());
-                /*
-                 * Default folder
-                 */
-                if ("INBOX".equals(imapFullname)) {
-                    mailFolder.setDefaultFolder(true);
-                } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
-                    final int len = UserSettingMailStorage.getInstance().getUserSettingMail(
-                        session.getUserId(),
-                        ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
-                    for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
-                        if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
-                            mailFolder.setDefaultFolder(true);
-                        }
+            /*
+             * Set fullname, name, and parent fullname
+             */
+            mailFolder.setFullname(imapFullname);
+            mailFolder.setName(imapFolder.getName());
+            {
+                final String parentFullname = imapFolder.getParent().getFullName();
+                mailFolder.setParentFullname(parentFullname.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : parentFullname);
+            }
+            /*
+             * Default folder
+             */
+            if ("INBOX".equals(imapFullname)) {
+                mailFolder.setDefaultFolder(true);
+            } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
+                final int len = UserSettingMailStorage.getInstance().getUserSettingMail(
+                    session.getUserId(),
+                    ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
+                for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
+                    if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
+                        mailFolder.setDefaultFolder(true);
                     }
-                    if (!mailFolder.containsDefaultFolder()) {
-                        mailFolder.setDefaultFolder(false);
-                    }
+                }
+                if (!mailFolder.containsDefaultFolder()) {
+                    mailFolder.setDefaultFolder(false);
                 }
             }
             /*
@@ -283,17 +284,10 @@ public final class IMAPFolderConverter {
             }
             final boolean selectable = mailFolder.isHoldsMessages();
             final Rights ownRights;
-            if (isRoot) {
-                /*
-                 * Properly handled in com.openexchange.mail.json.writer.FolderWriter
-                 */
-                final ACLPermission ownPermission = new ACLPermission();
-                final int fp = RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
-                ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-                ownPermission.setFolderAdmin(false);
-                mailFolder.setOwnPermission(ownPermission);
-                ownRights = (Rights) RIGHTS_EMPTY.clone();
-            } else {
+            /*
+             * Add own rights
+             */
+            {
                 final ACLPermission ownPermission = new ACLPermission();
                 ownPermission.setEntity(session.getUserId());
                 if (!exists || mailFolder.isNonExistent()) {
@@ -335,8 +329,11 @@ public final class IMAPFolderConverter {
                 }
                 mailFolder.setOwnPermission(ownPermission);
             }
-            final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
-            if (selectable && aclExtension.canRead(ownRights)) {
+            /*
+             * Set message counts for total, new, unread, and deleted
+             */
+            final ACLExtensionProxy proxy = new ACLExtensionProxy(imapConfig);
+            if (selectable && proxy.getACLExtension().canRead(ownRights)) {
                 try {
                     mailFolder.setMessageCount(imapFolder.getMessageCount());
                     mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
@@ -366,7 +363,7 @@ public final class IMAPFolderConverter {
             mailFolder.setSubscribed(MailProperties.getInstance().isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : imapFolder.isSubscribed()) : true);
             if (imapConfig.isSupportsACLs()) {
                 // Check if ACLs can be read; meaning GETACL is allowed
-                if (selectable && exists && !isRoot && aclExtension.canGetACL(ownRights)) {
+                if (selectable && exists && proxy.getACLExtension().canGetACL(ownRights)) {
                     try {
                         applyACL2Permissions(imapFolder, session, imapConfig, mailFolder, ownRights, ctx);
                     } catch (final MailException e) {
@@ -382,7 +379,7 @@ public final class IMAPFolderConverter {
             } else {
                 addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
             }
-            if (MailProperties.getInstance().isUserFlagsEnabled() && exists && selectable && aclExtension.canRead(ownRights) && UserFlagsCache.supportsUserFlags(
+            if (MailProperties.getInstance().isUserFlagsEnabled() && exists && selectable && proxy.getACLExtension().canRead(ownRights) && UserFlagsCache.supportsUserFlags(
                 imapFolder,
                 true,
                 session,
@@ -414,6 +411,95 @@ public final class IMAPFolderConverter {
             mailFolder.setSubscribedSubfolders((li != null) && (li.length > 0));
         } else {
             mailFolder.setSubfolders((li != null) && (li.length > 0));
+        }
+    }
+
+    private static IMAPMailFolder convertRootFolder(final DefaultFolder rootFolder, final Session session, final IMAPConfig imapConfig) throws MailException {
+        try {
+            final IMAPMailFolder mailFolder = new IMAPMailFolder();
+            mailFolder.setRootFolder(true);
+            mailFolder.setExists(true);
+            mailFolder.setSeparator(rootFolder.getSeparator());
+            final String imapFullname = rootFolder.getFullName();
+
+            String[] attrs;
+            try {
+                attrs = rootFolder.getAttributes();
+            } catch (final NullPointerException e) {
+                /*
+                 * No attributes available.
+                 */
+                attrs = null;
+            }
+            if (null != attrs) {
+                final boolean hasChildren = imapConfig.getImapCapabilities().hasChildren();
+                for (final String attribute : attrs) {
+                    if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
+                        mailFolder.setNonExistent(true);
+                    }
+                    if (hasChildren) {
+                        if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+                            mailFolder.setSubfolders(true);
+                        } else if (ATTRIBUTE_HAS_NO_CHILDREN.equalsIgnoreCase(attribute)) {
+                            mailFolder.setSubfolders(false);
+                        }
+                    }
+                }
+            }
+            if (!mailFolder.containsSubfolders()) {
+                /*
+                 * No \HasChildren attribute found; check for subfolders through a LIST command
+                 */
+                checkSubfoldersByCommands(rootFolder, mailFolder, imapFullname, mailFolder.getSeparator(), false);
+            }
+            if (!mailFolder.containsNonExistent()) {
+                mailFolder.setNonExistent(false);
+            }
+            /*
+             * Check reliably for subscribed subfolders through LSUB command since folder attributes need not to to be present as per RFC
+             * 3501
+             */
+            checkSubfoldersByCommands(rootFolder, mailFolder, imapFullname, mailFolder.getSeparator(), true);
+            /*
+             * Set fullname, name, and parent fullname
+             */
+            mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
+            mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
+            mailFolder.setParentFullname(null);
+            mailFolder.setDefaultFolder(false);
+            /*
+             * Root folder only holds folders but no messages
+             */
+            mailFolder.setHoldsFolders(true);
+            mailFolder.setHoldsMessages(false);
+            /*
+             * Check if subfolder creation is allowed
+             */
+            final ACLPermission ownPermission = new ACLPermission();
+            final int fp = RootSubfolderCache.canCreateSubfolders(rootFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
+            ownPermission.setEntity(session.getUserId());
+            ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            ownPermission.setFolderAdmin(false);
+            mailFolder.setOwnPermission(ownPermission);
+            mailFolder.addPermission(ownPermission);
+            /*
+             * Set message counts
+             */
+            mailFolder.setMessageCount(-1);
+            mailFolder.setNewMessageCount(-1);
+            mailFolder.setUnreadMessageCount(-1);
+            mailFolder.setDeletedMessageCount(-1);
+            /*
+             * Root folder is always subscribed
+             */
+            mailFolder.setSubscribed(true);
+            /*
+             * No user flag support
+             */
+            mailFolder.setSupportsUserFlags(false);
+            return mailFolder;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
         }
     }
 
@@ -615,6 +701,28 @@ public final class IMAPFolderConverter {
             }
         }
         return retval;
+    }
+
+    /**
+     * Simple proxy class for {@link ACLExtension} to have it loaded only when needed.
+     */
+    private static final class ACLExtensionProxy {
+
+        private final IMAPConfig imapConfig;
+
+        private ACLExtension aclExtension;
+
+        public ACLExtensionProxy(final IMAPConfig imapConfig) {
+            super();
+            this.imapConfig = imapConfig;
+        }
+
+        public ACLExtension getACLExtension() throws IMAPException {
+            if (null == aclExtension) {
+                aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+            }
+            return aclExtension;
+        }
     }
 
 }

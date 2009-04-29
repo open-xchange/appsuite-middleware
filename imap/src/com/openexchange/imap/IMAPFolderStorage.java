@@ -139,7 +139,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private final IMAPConfig imapConfig;
 
-    private final ACLExtension aclExtension;
+    private ACLExtension aclExtension;
 
     private Character separator;
 
@@ -163,7 +163,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             throw new IMAPException(e);
         }
         imapConfig = imapAccess.getIMAPConfig();
-        aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+    }
+
+    private ACLExtension getACLExtension() throws IMAPException {
+        if (null == aclExtension) {
+            aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+        }
+        return aclExtension;
     }
 
     private char getSeparator() throws MessagingException {
@@ -285,7 +291,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                  */
                 if (imapConfig.isSupportsACLs() && isSelectable(parent)) {
                     try {
-                        if (!aclExtension.canLookUp(RightsCache.getCachedRights(parent, true, session, accountId))) {
+                        if (!getACLExtension().canLookUp(RightsCache.getCachedRights(parent, true, session, accountId))) {
                             throw new IMAPException(IMAPException.Code.NO_LOOKUP_ACCESS, parentFullname);
                         }
                     } catch (final MessagingException e) {
@@ -643,7 +649,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
              */
             if (imapConfig.isSupportsACLs()) {
                 try {
-                    if (!aclExtension.canCreate(RightsCache.getCachedRights(parent, true, session, accountId))) {
+                    if (!getACLExtension().canCreate(RightsCache.getCachedRights(parent, true, session, accountId))) {
                         throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, parentFullname);
                     }
                 } catch (final MessagingException e) {
@@ -750,12 +756,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
                     final Map<String, ACL> m = acl2map(newACLs);
                     if (!equals(initialACLs, m, entity2ACL, args)) {
-                        if (!aclExtension.canSetACL(createMe.myRights())) {
+                        if (!getACLExtension().canSetACL(createMe.myRights())) {
                             throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe.getFullName());
                         }
                         boolean adminFound = false;
                         for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                            if (aclExtension.canSetACL(newACLs[i].getRights())) {
+                            if (getACLExtension().canSetACL(newACLs[i].getRights())) {
                                 adminFound = true;
                             }
                         }
@@ -905,7 +911,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
                 if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
                     try {
-                        if (!aclExtension.canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
+                        if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
                             throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, newParent);
                         }
                     } catch (final MessagingException e) {
@@ -966,7 +972,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
                 } else if (imapConfig.isSupportsACLs() && isSelectable(moveMe)) {
                     try {
-                        if (!aclExtension.canCreate(RightsCache.getCachedRights(moveMe, true, session, accountId))) {
+                        if (!getACLExtension().canCreate(RightsCache.getCachedRights(moveMe, true, session, accountId))) {
                             throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, moveMe.getFullName());
                         }
                     } catch (final MessagingException e) {
@@ -1095,7 +1101,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         if (isStandardFolder(updateMe.getFullName()) && !stillHoldsFullRights(updateMe, newACLs, imapConfig, session, ctx)) {
                             throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
                         }
-                        if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
+                        if (!getACLExtension().canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
                             throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS, updateMe.getFullName());
                         }
                         /*
@@ -1107,7 +1113,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         {
                             boolean adminFound = false;
                             for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                                if (aclExtension.canSetACL(newACLs[i].getRights())) {
+                                if (getACLExtension().canSetACL(newACLs[i].getRights())) {
                                     adminFound = true;
                                 }
                             }
@@ -1252,10 +1258,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
                 if (imapConfig.isSupportsACLs()) {
                     final Rights myrights = RightsCache.getCachedRights(f, true, session, accountId);
-                    if (!aclExtension.canRead(myrights)) {
+                    if (!getACLExtension().canRead(myrights)) {
                         throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, f.getFullName());
                     }
-                    if (!aclExtension.canDeleteMessages(myrights)) {
+                    if (!getACLExtension().canDeleteMessages(myrights)) {
                         throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, f.getFullName());
                     }
                 }
@@ -1428,7 +1434,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             if (imapConfig.isSupportsACLs() && isSelectable(f)) {
                 try {
-                    if (!aclExtension.canLookUp(RightsCache.getCachedRights(f, true, session, accountId))) {
+                    if (!getACLExtension().canLookUp(RightsCache.getCachedRights(f, true, session, accountId))) {
                         throw new IMAPException(IMAPException.Code.NO_LOOKUP_ACCESS, fullname);
                     }
                 } catch (final MessagingException e) {
@@ -1499,10 +1505,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                     if (imapConfig.isSupportsACLs()) {
                         final Rights myrights = RightsCache.getCachedRights(f, true, session, accountId);
-                        if (!aclExtension.canRead(myrights)) {
+                        if (!getACLExtension().canRead(myrights)) {
                             throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, fullname);
                         }
-                        if (!aclExtension.canDeleteMailbox(myrights)) {
+                        if (!getACLExtension().canDeleteMailbox(myrights)) {
                             throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, fullname);
                         }
                     }
@@ -1625,11 +1631,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, deleteMe.getFullName());
         }
         try {
-            if (imapConfig.isSupportsACLs() && isSelectable(deleteMe) && !aclExtension.canDeleteMailbox(RightsCache.getCachedRights(
-                deleteMe,
-                true,
-                session,
-                accountId))) {
+            if (imapConfig.isSupportsACLs() && isSelectable(deleteMe) && !getACLExtension().canDeleteMailbox(
+                RightsCache.getCachedRights(deleteMe, true, session, accountId))) {
                 throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, deleteMe.getFullName());
             }
         } catch (final MessagingException e) {
@@ -1735,14 +1738,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         final String moveFullname = toMove.getFullName();
         if (imapConfig.isSupportsACLs() && ((toMoveType & Folder.HOLDS_MESSAGES) > 0)) {
             try {
-                if (!aclExtension.canRead(RightsCache.getCachedRights(toMove, true, session, accountId))) {
+                if (!getACLExtension().canRead(RightsCache.getCachedRights(toMove, true, session, accountId))) {
                     throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, moveFullname);
                 }
             } catch (final MessagingException e) {
                 throw new IMAPException(IMAPException.Code.NO_ACCESS, e, moveFullname);
             }
             try {
-                if (!aclExtension.canCreate(RightsCache.getCachedRights(toMove, true, session, accountId))) {
+                if (!getACLExtension().canCreate(RightsCache.getCachedRights(toMove, true, session, accountId))) {
                     throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, moveFullname);
                 }
             } catch (final MessagingException e) {
