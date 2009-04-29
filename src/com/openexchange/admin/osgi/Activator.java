@@ -79,14 +79,6 @@ public class Activator implements BundleActivator {
      * {@inheritDoc}
      */
     public void start(BundleContext context) throws Exception {
-        if (null == System.getSecurityManager()) {
-            System.setSecurityManager(new SecurityManager() {
-                public void checkPermission(Permission perm) {
-                }
-                public void checkPermission(Permission perm, Object context) {
-                }
-            });
-        }
 
         trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
         trackers.push(new ServiceTracker(context, MailAccountStorageService.class.getName(), new AdminServiceRegisterer(
