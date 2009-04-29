@@ -6,7 +6,8 @@ Bundle-Version: 6.9.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-RegisterBuddy: javax.activation
-Import-Package: javax.naming,
+Import-Package: javax.activation,
+ javax.naming,
  javax.net,
  javax.net.ssl,
  javax.servlet,
