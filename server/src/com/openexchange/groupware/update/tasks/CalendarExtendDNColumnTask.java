@@ -113,7 +113,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
     private void modifyColumnInTable(final String tableName, final int contextId) throws UpdateException {
         if (checkColumnInTable(tableName, contextId)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going ot extend size of column `dn` in table `" + tableName + "`.");
+                LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going to extend size of column `dn` in table `" + tableName + "`.");
             }
             /*
              * Column does not exist yet
