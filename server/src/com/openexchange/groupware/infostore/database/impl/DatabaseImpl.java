@@ -1518,8 +1518,8 @@ public class DatabaseImpl extends DBService {
         final Integer contextId = Integer.valueOf(session.getContextId());
         for(DocumentMetadata documentMetadata : parents) {
             final Integer id = Integer.valueOf(documentMetadata.getId());
-            holder.execute(parentDelete, id, contextId);
             holder.execute(allChildrenDelete, id, contextId);
+            holder.execute(parentDelete, id, contextId);
         }
 
 
