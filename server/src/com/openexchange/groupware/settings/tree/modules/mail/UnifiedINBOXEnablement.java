@@ -60,7 +60,9 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link UnifiedINBOXEnablement}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UnifiedINBOXEnablement implements PreferencesItemService {
 
