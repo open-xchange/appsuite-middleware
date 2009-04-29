@@ -18,8 +18,8 @@ public class FacebookContactParserTest extends TestCase {
 	public void testGetFacebookContacts() {
 		FacebookContactParser parser = new FacebookContactParser();
 		// Enter valid credentials for facebook.com here
-		String facebookUser = "karsten.will@gmx.de";
-		String facebookPassword = "P1lotFAC";
+		String facebookUser = "";
+		String facebookPassword = "";
 		try {
 			ContactObject[] contacts = parser.getFacebookContactsForUser(facebookUser, facebookPassword);
 			assertTrue("There should be at least one contact.", contacts.length >= 1);
