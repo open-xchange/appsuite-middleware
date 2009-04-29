@@ -12,8 +12,6 @@ import com.openexchange.ajax.mail.filter.test.HeaderTest;
 
 public class NewTest extends AbstractMailFilterTest {
 
-	private static final Log LOG = LogFactory.getLog(NewTest.class);
-
 	public static final int[] cols = { Rule.ID };
 
 	public NewTest(String name) {
@@ -30,7 +28,6 @@ public class NewTest extends AbstractMailFilterTest {
 
 	public void testNew() throws Exception {
 		final AJAXSession ajaxSession = getSession();
-		final AJAXClient ajaxClient = getClient();
 		
 		String forUser = null;
 		
