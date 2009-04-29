@@ -16,7 +16,8 @@ Import-Package: com.openexchange.context,
  org.xml.sax,
  org.xml.sax.helpers,
  javax.net.ssl,
- javax.net
+ javax.net,
+ org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.subscribe
 Bundle-ClassPath: .,
