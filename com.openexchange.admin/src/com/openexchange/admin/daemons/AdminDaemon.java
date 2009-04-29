@@ -177,18 +177,6 @@ public class AdminDaemon {
     public void initRMI(final BundleContext context) {
 
         try {
-            if (null == System.getSecurityManager()) {
-                System.setSecurityManager(new SecurityManager() {
-                    @Override
-                    public void checkPermission(final Permission perm) {
-                    }
-
-                    @Override
-                    public void checkPermission(final Permission perm, final Object context) {
-                    }
-                });
-            }
-            
             final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
             try {
                 // Use SslRMIServerSocketFactory for SSL here
