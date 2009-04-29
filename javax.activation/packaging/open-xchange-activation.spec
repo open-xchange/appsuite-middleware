@@ -72,6 +72,5 @@ ant -Ddestdir=%{buildroot} install
 /opt/open-xchange/etc/*/osgi/bundle.d/*
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
-%doc ChangeLog
 
 %changelog
