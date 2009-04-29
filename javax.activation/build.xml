@@ -72,7 +72,7 @@
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
-                <include name="${bundle.name}"/>
+                <include name="${bundle.name}/**"/>
             </fileset>
         </copy>
     </target>
