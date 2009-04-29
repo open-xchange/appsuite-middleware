@@ -117,6 +117,9 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             return false;
         }
         final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
+        if (!isMailAccountEnabled(fa.getAccountId())) {
+            return false;
+        }
         final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
         mailAccess.connect();
         try {
@@ -138,6 +141,9 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (null != fn) {
             final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
             final int nestedAccountId = fa.getAccountId();
+            if (!isMailAccountEnabled(nestedAccountId)) {
+                throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, fullname);
+            }
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, nestedAccountId);
             mailAccess.connect();
             try {
@@ -208,7 +214,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             final int unifiedInboxAccountId = access.getAccountId();
             final List<MailFolder> tmp = new ArrayList<MailFolder>(8);
             for (final MailAccount mailAccount : accounts) {
-                if (unifiedInboxAccountId != mailAccount.getId()) {
+                if (unifiedInboxAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                     boolean close = false;
                     try {
@@ -376,6 +382,19 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 MailAccountStorageService.class,
                 true);
             return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
+        } catch (final ServiceException e) {
+            throw new UnifiedINBOXException(e);
+        } catch (final MailAccountException e) {
+            throw new UnifiedINBOXException(e);
+        }
+    }
+
+    private boolean isMailAccountEnabled(final int accountId) throws UnifiedINBOXException {
+        try {
+            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).isUnifiedINBOXEnabled();
         } catch (final ServiceException e) {
             throw new UnifiedINBOXException(e);
         } catch (final MailAccountException e) {

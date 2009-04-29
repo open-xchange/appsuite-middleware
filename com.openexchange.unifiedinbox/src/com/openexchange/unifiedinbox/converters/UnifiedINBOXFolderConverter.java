@@ -179,7 +179,7 @@ public final class UnifiedINBOXFolderConverter {
         int deletedCount = 0;
         int newCount = 0;
         for (final MailAccount mailAccount : accounts) {
-            if (accountId != mailAccount.getId()) {
+            if (accountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                 boolean close = false;
                 try {

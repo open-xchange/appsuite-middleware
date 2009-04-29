@@ -301,7 +301,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
             for (final MailAccount mailAccount : accounts) {
                 // Ignore the mail account denoting this Unified INBOX account
-                if (access.getAccountId() != mailAccount.getId()) {
+                if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                     boolean close = false;
                     try {
@@ -373,7 +373,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
             for (final MailAccount mailAccount : accounts) {
                 // Ignore the mail account denoting this Unified INBOX account
-                if (access.getAccountId() != mailAccount.getId()) {
+                if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                     boolean close = false;
                     try {
@@ -622,15 +622,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 toFill[pos] = mails[k];
                 mails[k].setMailId(mailIds[pos]);
             }
-        }
-    }
-
-    private static boolean isValidUnifiedINBOXUID(final UnifiedINBOXUID hlp, final String uid) {
-        try {
-            hlp.setUIDString(uid);
-            return true;
-        } catch (final MailException e) {
-            return false;
         }
     }
 
