@@ -12,5 +12,6 @@
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/server,com.openexchange.server"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/cache,com.openexchange.caching"/>
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.timer,com.openexchange.timer"/>
+<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/javax.activation,javax.activation"/>
 </provider>
 </psf>
