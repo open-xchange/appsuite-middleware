@@ -106,6 +106,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
     		"spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
     		"confirmed_spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
     		"confirmed_ham VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+    		"options INT4 unsigned default 0," + 
     		"PRIMARY KEY  (cid, id, user)," + 
     		"INDEX (cid, user)," + 
     		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
@@ -123,6 +124,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
         		"password VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
         		"send_addr VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
         		"default_flag TINYINT unsigned NOT NULL default 0," + 
+        		"options INT4 unsigned default 0," + 
         		"PRIMARY KEY  (cid, id, user)," + 
         		"INDEX (cid, user)," + 
         		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
