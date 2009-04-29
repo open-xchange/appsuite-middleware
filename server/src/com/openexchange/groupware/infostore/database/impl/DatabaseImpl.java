@@ -105,6 +105,7 @@ import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -1463,7 +1464,9 @@ public class DatabaseImpl extends DBService {
 
     }
 
+    @OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 36, msg = MSG_INVALID_SQL_QUERY)
     private void removePrivate(final int id, final Context ctx, final ServerSession session) throws OXException {
+        PreparedStatementHolder holder = null;
         
         try {
             final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
@@ -1472,20 +1475,29 @@ public class DatabaseImpl extends DBService {
             }
 
             List<String> files = new LinkedList<String>();
+            holder = new PreparedStatementHolder(getProvider().getWriteConnection(session.getContext()));
             
             for (FolderObject folder : foldersWithPrivateItems) {
-                clearFolder(folder, session, files);
+                clearFolder(folder, session, files, holder);
             }
             
             FileStorage fileStorage = getFileStorage(ctx);
             String[] filesArray = files.toArray(new String[files.size()]);
             fileStorage.deleteFile(filesArray);
+        } catch (final SQLException x) {
+            LOG.error(x.getMessage(), x);
+            throw EXCEPTIONS.create(36, x, x.toString());
         } catch (final AbstractOXException x) {
             throw new InfostoreException(x);
+        } finally {
+            if(holder != null) {
+                holder.close();
+                getProvider().releaseWriteConnection(session.getContext(), holder.getConnection());
+            }
         }
     }
 
-    private void clearFolder(FolderObject folder, ServerSession session, List<String> files) throws AbstractOXException {
+    private void clearFolder(FolderObject folder, ServerSession session, List<String> files, PreparedStatementHolder holder) throws AbstractOXException, SQLException {
         com.openexchange.groupware.infostore.database.impl.InfostoreIterator allDocumentsInFolder = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.documents(
             folder.getObjectID(),
             Metadata.VALUES_ARRAY,
@@ -1494,26 +1506,25 @@ public class DatabaseImpl extends DBService {
             getProvider(),
             session.getContext());
         List<DocumentMetadata> parents = new ArrayList<DocumentMetadata>();
-        List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
 
         while (allDocumentsInFolder.hasNext()) {
             DocumentMetadata documentMetadata = allDocumentsInFolder.next();
             parents.add(documentMetadata);
-            discoverAllVersions(documentMetadata, session, versions, files);
+            discoverAllFiles(documentMetadata, session, files);
         }
-        final DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
-        deleteVersionAction.setProvider(getProvider());
-        deleteVersionAction.setContext(session.getContext());
-        deleteVersionAction.setDocuments(versions);
-        deleteVersionAction.setQueryCatalog(new InfostoreQueryCatalog());
-        deleteVersionAction.perform();
-
-        final DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
-        deleteDocumentAction.setProvider(getProvider());
-        deleteDocumentAction.setContext(session.getContext());
-        deleteDocumentAction.setDocuments(parents);
-        deleteDocumentAction.setQueryCatalog(new InfostoreQueryCatalog());
-        deleteDocumentAction.perform();
+        InfostoreQueryCatalog queries = new InfostoreQueryCatalog();
+            
+        String parentDelete = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
+        String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);
+        final Integer contextId = Autoboxing.I(session.getContextId());
+        for(DocumentMetadata documentMetadata : parents) {
+            final Integer id = Autoboxing.I(documentMetadata.getId());
+            holder.execute(parentDelete, id, contextId);
+            holder.execute(allChildrenDelete, id, contextId);
+        }
+            
+        
+        
         final EventClient ec = new EventClient(session);
         for (DocumentMetadata documentMetadata : parents) {
             try {
@@ -1524,7 +1535,7 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    private void discoverAllVersions(DocumentMetadata documentMetadata, ServerSession session, List<DocumentMetadata> versions, List<String> files) throws AbstractOXException {
+    private void discoverAllFiles(DocumentMetadata documentMetadata, ServerSession session, List<String> files) throws AbstractOXException {
         com.openexchange.groupware.infostore.database.impl.InfostoreIterator allVersions = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.versions(
             documentMetadata.getId(),
             Metadata.VALUES_ARRAY,
@@ -1535,7 +1546,6 @@ public class DatabaseImpl extends DBService {
 
         while (allVersions.hasNext()) {
             DocumentMetadata version = allVersions.next();
-            versions.add(version);
             if (version.getFilestoreLocation() != null) {
                 files.add(version.getFilestoreLocation());
             }
