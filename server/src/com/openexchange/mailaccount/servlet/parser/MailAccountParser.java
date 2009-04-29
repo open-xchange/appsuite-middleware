@@ -180,6 +180,10 @@ public class MailAccountParser extends DataParser {
             account.setConfirmedHam(parseString(json, MailAccountFields.CONFIRMED_HAM));
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
         }
+        if (json.has(MailAccountFields.UNIFIED_INBOX_ENABLED)) {
+            account.setUnifiedINBOXEnabled(parseBoolean(json, MailAccountFields.UNIFIED_INBOX_ENABLED));
+            attributes.add(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
+        }
         return attributes;
     }
 

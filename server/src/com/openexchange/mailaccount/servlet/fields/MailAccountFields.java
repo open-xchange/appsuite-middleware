@@ -103,4 +103,6 @@ public final class MailAccountFields {
     public static final String CONFIRMED_SPAM = "confirmed_spam";
 
     public static final String CONFIRMED_HAM = "confirmed_ham";
+
+    public static final String UNIFIED_INBOX_ENABLED = "unified_inbox_enabled";
 }

@@ -195,4 +195,8 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    public Object unifiedINBOXEnabled() {
+        return null;
+    }
+
 }

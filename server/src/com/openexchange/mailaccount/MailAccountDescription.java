@@ -114,6 +114,8 @@ public final class MailAccountDescription implements Serializable {
 
     private String transportUrl;
 
+    private boolean unifiedINBOXEnabled;
+
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
@@ -658,6 +660,24 @@ public final class MailAccountDescription implements Serializable {
         this.transportPassword = transportPassword;
     }
 
+    /**
+     * Checks if this mail account is enabled for Unified INBOX.
+     * 
+     * @return <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
+     */
+    public boolean isUnifiedINBOXEnabled() {
+        return unifiedINBOXEnabled;
+    }
+
+    /**
+     * Sets if this mail account is enabled for Unified INBOX.
+     * 
+     * @param unifiedINBOXEnabled <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
+     */
+    public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
+        this.unifiedINBOXEnabled = unifiedINBOXEnabled;
+    }
+    
     private static Object[] parseServerAndPort(final String server, final int defaultPort) {
         final int pos = server.indexOf(':');
         if (pos == -1) {

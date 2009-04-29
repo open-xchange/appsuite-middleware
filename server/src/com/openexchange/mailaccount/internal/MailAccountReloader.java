@@ -232,4 +232,9 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
         updateDelegate();
         return delegate.getTransportPassword();
     }
+
+    public boolean isUnifiedINBOXEnabled() {
+        updateDelegate();
+        return delegate.isUnifiedINBOXEnabled();
+    }
 }

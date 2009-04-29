@@ -205,4 +205,9 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    public Object unifiedINBOXEnabled() {
+        bob.append("unified_inbox = ?,");
+        return null;
+    }
+
 }

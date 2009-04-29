@@ -266,4 +266,11 @@ public interface MailAccount extends Serializable {
      * @return The name of the confirmed spam folder
      */
     public String getConfirmedSpam();
+
+    /**
+     * Checks if this mail account is enabled for Unified INBOX.
+     * 
+     * @return <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
+     */
+    public boolean isUnifiedINBOXEnabled();
 }

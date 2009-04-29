@@ -106,7 +106,8 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.SPAM, account.getSpam());
         json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
         json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
-
+        // Unified INBOX enabled
+        json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         return json;
     }
 

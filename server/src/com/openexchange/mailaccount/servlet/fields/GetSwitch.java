@@ -162,4 +162,8 @@ public class GetSwitch implements AttributeSwitch {
     public Object transportPassword() {
         return desc.getTransportPassword();
     }
+
+    public Object unifiedINBOXEnabled() {
+        return Boolean.valueOf(desc.isUnifiedINBOXEnabled());
+    }
 }

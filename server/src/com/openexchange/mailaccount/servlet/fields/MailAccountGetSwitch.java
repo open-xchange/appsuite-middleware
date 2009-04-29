@@ -160,4 +160,8 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object transportPassword() {
         return account.getTransportPassword();
     }
+
+    public Object unifiedINBOXEnabled() {
+        return Boolean.valueOf(account.isUnifiedINBOXEnabled());
+    }
 }

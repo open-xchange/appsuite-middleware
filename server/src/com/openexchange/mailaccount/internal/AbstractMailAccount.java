@@ -112,9 +112,11 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected String confirmedHam;
 
-    private String mailServerUrl;
+    protected String mailServerUrl;
 
-    private String transportServerUrl;
+    protected String transportServerUrl;
+
+    protected boolean unifiedINBOXEnabled;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -538,6 +540,19 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setTransportPassword(final String transportPassword) {
         this.transportPassword = transportPassword;
+    }
+
+    public boolean isUnifiedINBOXEnabled() {
+        return unifiedINBOXEnabled;
+    }
+
+    /**
+     * Sets if this mail account is enabled for Unified INBOX.
+     * 
+     * @param unifiedINBOXEnabled <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
+     */
+    public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
+        this.unifiedINBOXEnabled = unifiedINBOXEnabled;
     }
 
     @Override

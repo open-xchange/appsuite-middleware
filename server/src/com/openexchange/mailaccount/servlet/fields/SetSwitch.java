@@ -194,4 +194,9 @@ public class SetSwitch implements AttributeSwitch{
         return null;
     }
 
+    public Object unifiedINBOXEnabled() {
+        desc.setUnifiedINBOXEnabled(((Boolean) value).booleanValue());
+        return null;
+    }
+
 }

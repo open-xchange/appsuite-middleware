@@ -81,4 +81,5 @@ public interface AttributeSwitch {
     public Object transportSecure();
     public Object transportLogin();
     public Object transportPassword();
+    public Object unifiedINBOXEnabled();
 }

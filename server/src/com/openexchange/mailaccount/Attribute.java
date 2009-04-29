@@ -86,7 +86,8 @@ public enum Attribute {
     TRANSPORT_PROTOCOL_LITERAL(MailAccountFields.TRANSPORT_PROTOCOL, 1021),
     TRANSPORT_SECURE_LITERAL(MailAccountFields.TRANSPORT_SECURE, 1022),
     TRANSPORT_LOGIN_LITERAL(MailAccountFields.TRANSPORT_LOGIN, 1023),
-    TRANSPORT_PASSWORD_LITERAL(MailAccountFields.TRANSPORT_PASSWORD, 1024);
+    TRANSPORT_PASSWORD_LITERAL(MailAccountFields.TRANSPORT_PASSWORD, 1024),
+    UNIFIED_INBOX_ENABLED_LITERAL(MailAccountFields.UNIFIED_INBOX_ENABLED, 1025);
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.MAIL_PORT_LITERAL, Attribute.MAIL_PROTOCOL_LITERAL, Attribute.MAIL_SECURE_LITERAL, Attribute.MAIL_SERVER_LITERAL));
     public static final Set<Attribute> TRANSPORT_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.TRANSPORT_PORT_LITERAL, Attribute.TRANSPORT_PROTOCOL_LITERAL, Attribute.TRANSPORT_SECURE_LITERAL, Attribute.TRANSPORT_SERVER_LITERAL));
@@ -150,6 +151,8 @@ public enum Attribute {
             return switcher.transportLogin();
         case TRANSPORT_PASSWORD_LITERAL:
             return switcher.transportPassword();
+        case UNIFIED_INBOX_ENABLED_LITERAL:
+            return switcher.unifiedINBOXEnabled();
         default:
             throw new IllegalArgumentException(this.getName());
         }
