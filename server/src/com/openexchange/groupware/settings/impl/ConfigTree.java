@@ -51,10 +51,8 @@ package com.openexchange.groupware.settings.impl;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -256,6 +254,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.Colorquoted.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
             com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
+            com.openexchange.groupware.settings.tree.modules.mail.UnifiedINBOXEnablement.class,
             com.openexchange.groupware.settings.tree.modules.mail.Emoticons.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Drafts.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Inbox.class,
