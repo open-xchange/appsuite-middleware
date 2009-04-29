@@ -56,14 +56,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
-
 import javax.activation.MimetypesFileTypeMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -164,7 +161,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 		req = postReq;
 		resp = conversation.getResource(req);
 		if (resp.getResponseCode() >= 300) {
-			throw new Error("Error Satus Code " + resp.getResponseCode() + ": " + resp.getResponseMessage());
+			throw new Error("Error Status Code " + resp.getResponseCode() + ": " + resp.getResponseMessage());
 		}
 		final JSONObject jResponse = extractFromCallback(resp.getText());
 		return jResponse;
