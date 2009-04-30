@@ -212,6 +212,30 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public boolean isUnifiedINBOXEnabled() {
                 return acc.isUnifiedINBOXEnabled();
             }
+
+            public String getConfirmedHamFullname() {
+                return acc.getConfirmedHamFullname();
+            }
+
+            public String getConfirmedSpamFullname() {
+                return acc.getConfirmedSpamFullname();
+            }
+
+            public String getDraftsFullname() {
+                return acc.getDraftsFullname();
+            }
+
+            public String getSentFullname() {
+                return acc.getSentFullname();
+            }
+
+            public String getSpamFullname() {
+                return acc.getSpamFullname();
+            }
+
+            public String getTrashFullname() {
+                return acc.getTrashFullname();
+            }
         };
     }
 }
