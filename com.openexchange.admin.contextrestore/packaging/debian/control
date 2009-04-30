@@ -2,7 +2,7 @@ Source: open-xchange-admin-plugin-contextrestore
 Section: net
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|sun-java6-jdk, open-xchange-admin-plugin-hosting-lib (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-admin-plugin-hosting-lib (>= @OXVERSION@)
 Standards-Version: 3.6.1
 
 Package: open-xchange-admin-plugin-contextrestore
