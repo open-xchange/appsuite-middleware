@@ -286,7 +286,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
             }
             /*
-             * Apply properties to IMAP session
+             * Apply properties to POP3 session
              */
             pop3Session = javax.mail.Session.getInstance(pop3Props, null);
             /*
@@ -328,6 +328,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 throw e;
             }
             connected = true;
+            // TODO: Perform sync with storage here
+            
             /*
              * Increase counter
              */
