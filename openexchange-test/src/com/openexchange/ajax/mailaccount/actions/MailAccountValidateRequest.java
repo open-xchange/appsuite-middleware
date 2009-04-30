@@ -207,6 +207,10 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public String getTransportPassword() {
                 return acc.getTransportPassword();
             }
+
+            public boolean isUnifiedINBOXEnabled() {
+                return acc.isUnifiedINBOXEnabled();
+            }
         };
     }
 }

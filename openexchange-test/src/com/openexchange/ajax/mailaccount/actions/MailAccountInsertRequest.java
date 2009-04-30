@@ -208,6 +208,10 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public String getTransportPassword() {
                 return acc.getTransportPassword();
             }
+
+            public boolean isUnifiedINBOXEnabled() {
+                return acc.isUnifiedINBOXEnabled();
+            }
         };
     }
 }
