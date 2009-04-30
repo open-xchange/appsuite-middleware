@@ -337,7 +337,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             int pos = 1;
             // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
             // confirmed_ham, spam_handler
@@ -362,6 +362,12 @@ public final class MailAccountMigrationTask implements UpdateTask {
             } else {
                 stmt.setString(pos++, sh);
             }
+            stmt.setString(pos++, "");
+            stmt.setString(pos++, "");
+            stmt.setString(pos++, "");
+            stmt.setString(pos++, "");
+            stmt.setString(pos++, "");
+            stmt.setString(pos++, "");
             stmt.executeUpdate();
             stmt.close();
             // cid, id, user, name, url, login, password, send_addr, default_flag

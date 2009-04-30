@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link DefaultFolderNamesProvider} - TODO Short description of this class' purpose.
+ * {@link DefaultFolderNamesProvider} - Provides the default folder names for a certain mail account.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -116,6 +116,25 @@ public final class DefaultFolderNamesProvider {
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      * 
+     * @param mailAccount The mail account providing the names
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     */
+    public String[] getDefaultFolderNames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+        return getDefaultFolderNames(
+            mailAccount.getTrash(),
+            mailAccount.getSent(),
+            mailAccount.getDrafts(),
+            mailAccount.getSpam(),
+            mailAccount.getConfirmedSpam(),
+            mailAccount.getConfirmedHam(),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
      * @param trash The trash name
      * @param sent The sent name
      * @param drafts The drafts name
@@ -124,9 +143,8 @@ public final class DefaultFolderNamesProvider {
      * @param confirmedHam The confirmed-ham name
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
-     * @throws MailConfigException If spam enablement/disablement cannot be determined
      */
-    public String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) throws MailConfigException {
+    public String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
@@ -185,6 +203,80 @@ public final class DefaultFolderNamesProvider {
             }
         }
         return names;
+    }
+
+    /**
+     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
+     * @param mailAccount The mail account providing the fullnames
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder fullnames as an array of {@link String}
+     */
+    public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+        return getDefaultFolderNames(
+            mailAccount.getTrashFullname(),
+            mailAccount.getSentFullname(),
+            mailAccount.getDraftsFullname(),
+            mailAccount.getSpamFullname(),
+            mailAccount.getConfirmedSpamFullname(),
+            mailAccount.getConfirmedHamFullname(),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
+     * @param trashFullname The trash fullname
+     * @param sentFullname The sent fullname
+     * @param draftsFullname The drafts fullname
+     * @param spamFullname The spam fullname
+     * @param confirmedSpamFullname The confirmed-spam fullname
+     * @param confirmedHamFullname The confirmed-ham fullname
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder fullnames as an array of {@link String}
+     */
+    public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) throws MailConfigException {
+        final String[] fullnames = new String[isSpamEnabled ? 6 : 4];
+        if ((draftsFullname != null) && (draftsFullname.length() != 0)) {
+            fullnames[INDEX_DRAFTS] = draftsFullname;
+        } else {
+            fullnames[INDEX_DRAFTS] = null;
+        }
+
+        if ((sentFullname != null) && (sentFullname.length() != 0)) {
+            fullnames[INDEX_SENT] = sentFullname;
+        } else {
+            fullnames[INDEX_SENT] = null;
+        }
+
+        if ((spamFullname != null) && (spamFullname.length() != 0)) {
+            fullnames[INDEX_SPAM] = spamFullname;
+        } else {
+            fullnames[INDEX_SPAM] = null;
+        }
+
+        if ((trashFullname != null) && (trashFullname.length() != 0)) {
+            fullnames[INDEX_TRASH] = trashFullname;
+        } else {
+            fullnames[INDEX_TRASH] = null;
+        }
+
+        if (isSpamEnabled) {
+            if ((confirmedSpamFullname != null) && (confirmedSpamFullname.length() != 0)) {
+                fullnames[INDEX_CONFIRMED_SPAM] = confirmedSpamFullname;
+            } else {
+                fullnames[INDEX_CONFIRMED_SPAM] = null;
+            }
+
+            if ((confirmedHamFullname != null) && (confirmedHamFullname.length() != 0)) {
+                fullnames[INDEX_CONFIRMED_HAM] = confirmedHamFullname;
+            } else {
+                fullnames[INDEX_CONFIRMED_HAM] = null;
+            }
+        }
+        return fullnames;
     }
 
     private static interface FallbackProvider {

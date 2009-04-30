@@ -540,58 +540,65 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         type = FOLDER_TYPE;
                     }
                     /*
+                     * Load mail account
+                     */
+                    final boolean isSpamOptionEnabled;
+                    final MailAccount mailAccount;
+                    try {
+                        mailAccount = IMAPServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true).getMailAccount(
+                            accountId,
+                            session.getUserId(),
+                            session.getContextId());
+                        final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+                        isSpamOptionEnabled = usm.isSpamOptionEnabled();
+                    } catch (final ServiceException e) {
+                        throw new MailException(e);
+                    } catch (final MailAccountException e) {
+                        throw new MailException(e);
+                    }
+                    /*
                      * Check default folders
                      */
-                    final String[] defaultFolderNames;
+                    final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(
+                        accountId,
+                        session.getUserId(),
+                        session.getContextId());
+                    final String[] defaultFolderFullnames = defaultFolderNamesProvider.getDefaultFolderFullnames(
+                        mailAccount,
+                        isSpamOptionEnabled);
+                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
                     final SpamHandler spamHandler;
                     {
-                        final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-                        spamHandler = usm.isSpamOptionEnabled() ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
-                        try {
-                            final MailAccount mailAccount = IMAPServiceRegistry.getServiceRegistry().getService(
-                                MailAccountStorageService.class,
-                                true).getMailAccount(accountId, session.getUserId(), session.getContextId());
-                            defaultFolderNames = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId()).getDefaultFolderNames(
-                                mailAccount.getTrash(),
-                                mailAccount.getSent(),
-                                mailAccount.getDrafts(),
-                                mailAccount.getSpam(),
-                                mailAccount.getConfirmedSpam(),
-                                mailAccount.getConfirmedHam(),
-                                usm.isSpamOptionEnabled());
-                        } catch (final ServiceException e) {
-                            throw new MailException(e);
-                        } catch (final MailAccountException e) {
-                            throw new MailException(e);
-                        }
+                        spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                     }
                     for (int i = 0; i < defaultFolderNames.length; i++) {
-                        if ((i != StorageUtility.INDEX_CONFIRMED_HAM) && (i != StorageUtility.INDEX_CONFIRMED_SPAM)) {
-                            setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, 1, tmp));
-                        } else {
-                            if (i == StorageUtility.INDEX_CONFIRMED_SPAM) {
-                                if (spamHandler.isCreateConfirmedSpam()) {
-                                    setDefaultMailFolder(i, checkDefaultFolder(
-                                        prefix,
-                                        defaultFolderNames[i],
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        tmp));
-                                } else if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
-                                }
-                            } else if (i == StorageUtility.INDEX_CONFIRMED_HAM) {
-                                if (spamHandler.isCreateConfirmedHam()) {
-                                    setDefaultMailFolder(i, checkDefaultFolder(
-                                        prefix,
-                                        defaultFolderNames[i],
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        tmp));
-                                } else if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
-                                }
+                        if (StorageUtility.INDEX_CONFIRMED_HAM == i) {
+                            if (spamHandler.isCreateConfirmedHam()) {
+                                final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
+                                setDefaultMailFolder(i, checkDefaultFolder(
+                                    prefixAndName[0],
+                                    prefixAndName[1],
+                                    type,
+                                    spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                    tmp));
+                            } else if (LOG.isDebugEnabled()) {
+                                LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
                             }
+                        } else if (StorageUtility.INDEX_CONFIRMED_SPAM == i) {
+                            if (spamHandler.isCreateConfirmedSpam()) {
+                                final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
+                                setDefaultMailFolder(i, checkDefaultFolder(
+                                    prefixAndName[0],
+                                    prefixAndName[1],
+                                    type,
+                                    spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                    tmp));
+                            } else if (LOG.isDebugEnabled()) {
+                                LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                            }
+                        } else {
+                            final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
+                            setDefaultMailFolder(i, checkDefaultFolder(prefixAndName[0], prefixAndName[1], type, 1, tmp));
                         }
                     }
                     setDefaultFoldersChecked(true);
@@ -600,6 +607,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
             }
         }
+    }
+
+    private static String[] choosePrefixAndName(final String prefix, final String name, final String fullname) {
+        if (null == fullname || 0 == fullname.length()) {
+            return new String[] { prefix, name };
+        }
+        return new String[] { "", fullname };
     }
 
     private static final int FOLDER_TYPE = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
@@ -2000,21 +2014,25 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             checkSubscribed = false;
         }
         if (checkSubscribed) {
-            if (1 == subscribe && !f.isSubscribed()) {
-                try {
-                    f.setSubscribed(true);
-                } catch (final MethodNotSupportedException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
+            if (1 == subscribe) {
+                if (!f.isSubscribed()) {
+                    try {
+                        f.setSubscribed(true);
+                    } catch (final MethodNotSupportedException e) {
+                        LOG.error(e.getMessage(), e);
+                    } catch (final MessagingException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
-            } else if (0 == subscribe && f.isSubscribed()) {
-                try {
-                    f.setSubscribed(false);
-                } catch (final MethodNotSupportedException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
+            } else if (0 == subscribe) {
+                if (f.isSubscribed()) {
+                    try {
+                        f.setSubscribed(false);
+                    } catch (final MethodNotSupportedException e) {
+                        LOG.error(e.getMessage(), e);
+                    } catch (final MessagingException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
         }
