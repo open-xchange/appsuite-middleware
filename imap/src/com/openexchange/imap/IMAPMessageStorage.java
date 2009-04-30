@@ -94,6 +94,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
@@ -1306,7 +1307,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Handle spam
                  */
                 try {
-                    IMAPProvider.getInstance().getSpamHandler().handleSpam(imapFolder.getFullName(), longs2uids(msgUIDs), move, session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleSpam(
+                        imapFolder.getFullName(),
+                        longs2uids(msgUIDs),
+                        move,
+                        session);
                     /*
                      * Close and reopen to force internal message cache update
                      */

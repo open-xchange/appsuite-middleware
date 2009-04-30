@@ -116,7 +116,15 @@ public final class SpamHandlerRegistry {
      * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
      */
     public static boolean hasSpamHandler(final MailAccount mailAccount) {
-        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(mailAccount)).getSpamHandler().getSpamHandlerName());
+        final SpamHandler handler;
+        try {
+            handler = getSpamHandler0(mailAccount, new URLMailProviderGetter(mailAccount));
+        } catch (final MailException e) {
+            // Cannot occur
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler);
     }
 
     /**
@@ -162,47 +170,64 @@ public final class SpamHandlerRegistry {
             return handler;
         }
         /*
-         * On first load account's spam handler
+         * Session does not hold spam handler
          */
+        final MailAccount mailAccount;
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
-            final MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            final String spamHandlerName;
-            if (mailAccount.isDefaultAccount()) {
-                // TODO: Maybe return provider's spam handler if default account is denoted by account ID
-                spamHandlerName = mailAccount.getSpamHandler();
-            } else {
-                spamHandlerName = mailAccount.getSpamHandler();
-            }
-            if (null != spamHandlerName && spamHandlerName.length() > 0) {
-                // Account specifies a valid spam handler name
-                handler = getSpamHandler(spamHandlerName);
-                if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
-                    return handler;
-                }
-                session.setParameter(key, handler);
-                return handler;
-            }
-
+            mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
         } catch (final ServiceException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);
         }
-        /*
-         * Account does not specify a valid spam handler name; take from mail provider
-         */
+        final MailProviderGetter mailProviderGetter;
         if (null == mailProvider) {
-            handler = MailProviderRegistry.getMailProviderBySession(session, accountId).getSpamHandler();
+            mailProviderGetter = new SessionMailProviderGetter(session, accountId);
         } else {
-            handler = mailProvider.getSpamHandler();
+            mailProviderGetter = new SimpleMailProviderGetter(mailProvider);
         }
-        if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
-            return handler;
+        handler = getSpamHandler0(mailAccount, mailProviderGetter);
+        if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+            /*
+             * Cache in session
+             */
+            session.setParameter(key, handler);
         }
-        session.setParameter(key, handler);
+        return handler;
+    }
+
+    private static SpamHandler getSpamHandler0(final MailAccount mailAccount, final MailProviderGetter mailProviderGetter) throws MailException {
+        /*
+         * On first load account's spam handler
+         */
+        final String spamHandlerName;
+        if (mailAccount.isDefaultAccount()) {
+            // TODO: Decide whether to return provider's spam handler if default account is denoted by account ID
+            /*-
+             * By now the providers spam handler is returned to maintain backward compatibility.
+             * To retrieve account's spam handler type:
+             * 
+             * spamHandlerName = mailAccount.getSpamHandler();
+             */
+            spamHandlerName = mailProviderGetter.getMailProvider().getSpamHandler().getSpamHandlerName();
+        } else {
+            spamHandlerName = mailAccount.getSpamHandler();
+        }
+        SpamHandler handler;
+        if (null != spamHandlerName && spamHandlerName.length() > 0) {
+            /*
+             * Account specifies a valid spam handler name
+             */
+            handler = getSpamHandler(spamHandlerName);
+        } else {
+            /*
+             * Account does not specify a valid spam handler name; take from mail provider
+             */
+            handler = mailProviderGetter.getMailProvider().getSpamHandler();
+        }
         return handler;
     }
 
@@ -303,5 +328,61 @@ public final class SpamHandlerRegistry {
          */
         unknownSpamHandlers.put(registrationName, PRESENT);
         return spamHandlers.remove(registrationName);
+    }
+
+    /*-
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * +++++++++++++++++++++++++++++++++++++++++++ HELPER CLASSES +++++++++++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     */
+
+    private static interface MailProviderGetter {
+
+        public MailProvider getMailProvider() throws MailException;
+    }
+
+    private static final class SimpleMailProviderGetter implements MailProviderGetter {
+
+        private final MailProvider mailProvider;
+
+        public SimpleMailProviderGetter(final MailProvider mailProvider) {
+            super();
+            this.mailProvider = mailProvider;
+        }
+
+        public MailProvider getMailProvider() {
+            return mailProvider;
+        }
+    }
+
+    private static final class SessionMailProviderGetter implements MailProviderGetter {
+
+        private final Session session;
+
+        private final int accountId;
+
+        public SessionMailProviderGetter(final Session session, final int accountId) {
+            super();
+            this.session = session;
+            this.accountId = accountId;
+        }
+
+        public MailProvider getMailProvider() throws MailException {
+            return MailProviderRegistry.getMailProviderBySession(session, accountId);
+        }
+    }
+
+    private static final class URLMailProviderGetter implements MailProviderGetter {
+
+        private final MailAccount mailAccount;
+
+        public URLMailProviderGetter(final MailAccount mailAccount) {
+            super();
+            this.mailAccount = mailAccount;
+        }
+
+        public MailProvider getMailProvider() {
+            return MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(mailAccount));
+        }
     }
 }
