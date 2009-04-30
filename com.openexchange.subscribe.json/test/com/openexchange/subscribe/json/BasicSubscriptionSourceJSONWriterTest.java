@@ -63,7 +63,7 @@ import junit.framework.TestCase;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class BasicSubscriptionSourceParserTest extends TestCase {
+public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
 
     private SubscriptionSource subscriptionSource;
 
@@ -129,14 +129,14 @@ public class BasicSubscriptionSourceParserTest extends TestCase {
     }
 
     public void testBasicSubscriptionSourceParsing() throws Exception {
-        SubscriptionSourceParser parser = new SubscriptionSourceParser();
-        JSONObject json = parser.parseSubscriptionSource(subscriptionSource);
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        JSONObject json = parser.writeJSON(subscriptionSource);
         checkJson(json);
     }
 
     public void testListSubscriptionSourceParsing() throws Exception {
-        SubscriptionSourceParser parser = new SubscriptionSourceParser();
-        JSONArray json = parser.parseSubscriptionSources(sourceList);
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        JSONArray json = parser.writeJson(sourceList);
         assertEquals("Length of JSON Array is wrong", 2, json.length());
         assertFalse("Subscription source is an JSON Array", json.getJSONObject(0).isArray());
         assertFalse("Subscription source is an JSON Array", json.getJSONObject(1).isArray());
@@ -151,7 +151,7 @@ public class BasicSubscriptionSourceParserTest extends TestCase {
     }
     
     public void testMandatoryFieldCheck() throws Exception {
-        SubscriptionSourceParser parser = new SubscriptionSourceParser();
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
         
         String temp = subscriptionSource.getId();
         subscriptionSource.setId(null);
@@ -186,11 +186,11 @@ public class BasicSubscriptionSourceParserTest extends TestCase {
         subscriptionSource.getFormDescription().getFormElements().get(0).setWidget(wTemp);
     }
     
-    private void checkForParseException(SubscriptionSourceParser parser, SubscriptionSource source) throws Exception {
+    private void checkForParseException(SubscriptionSourceJSONWriterInterface parser, SubscriptionSource source) throws Exception {
         try {
-            parser.parseSubscriptionSource(source);
+            parser.writeJSON(source);
             fail("ParseException expected");
-        } catch (ParseException e) {
+        } catch (WriteException e) {
             // expected
         }
     }

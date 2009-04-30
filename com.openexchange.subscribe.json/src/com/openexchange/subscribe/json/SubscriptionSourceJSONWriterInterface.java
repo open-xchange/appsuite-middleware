@@ -49,21 +49,31 @@
 
 package com.openexchange.subscribe.json;
 
-import org.json.JSONException;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.subscribe.SubscriptionSource;
 
-/**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- */
-public class ParseException extends Exception {
+public interface SubscriptionSourceJSONWriterInterface {
 
-    private static final long serialVersionUID = 5976972835120202376L;
+    public static final String ID = "id";
 
-    public ParseException(String string) {
-        super(string);
-    }
+    public static final String DISPLAY_NAME = "displayName";
 
-    public ParseException(JSONException e) {
-        super(e);
-    }
+    public static final String ICON = "icon";
+
+    public static final String FORM_DESCRIPTION = "formDescription";
+
+    public static final String NAME = "name";
+
+    public static final String WIDGET = "widget";
+
+    public static final String MANDATORY = "mandatory";
+
+    public static final String DEFAULT = "default";
+
+    public JSONObject writeJSON(SubscriptionSource source) throws WriteException;
+
+    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws WriteException;
 
 }
