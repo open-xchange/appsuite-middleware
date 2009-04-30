@@ -97,7 +97,6 @@ public class POP3CreateTableTask implements UpdateTask {
         		"flags TINYINT unsigned NOT NULL default 0," + 
         		"color_flag TINYINT unsigned NOT NULL default 0," + 
         		"received_date BIGINT(64) NOT NULL," + 
-        		"INDEX (cid, user)," + 
         		"INDEX (cid, user, uidl)," + 
         		"PRIMARY KEY (cid, user, uid)," + 
         		"UNIQUE (cid, user, uidl)," + 
@@ -111,7 +110,6 @@ public class POP3CreateTableTask implements UpdateTask {
         		"user INT4 unsigned NOT NULL," + 
         		"uid INT8 NOT NULL," + 
         		"user_flag VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"INDEX (cid, user, uid)," + 
         		"PRIMARY KEY (cid, user, uid, user_flag)," + 
         		" FOREIGN KEY (cid, user, uid) REFERENCES user_pop3_data (cid, user, uid)" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
