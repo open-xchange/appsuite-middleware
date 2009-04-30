@@ -273,4 +273,50 @@ public interface MailAccount extends Serializable {
      * @return <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
      */
     public boolean isUnifiedINBOXEnabled();
+
+    /**
+     * Gets the trash fullname
+     * 
+     * @return The trash fullname
+     */
+    public String getTrashFullname();
+
+
+    /**
+     * Gets the sent fullname
+     * 
+     * @return The sent fullname
+     */
+    public String getSentFullname();
+
+
+    /**
+     * Gets the drafts fullname
+     * 
+     * @return The drafts fullname
+     */
+    public String getDraftsFullname();
+
+
+    /**
+     * Gets the spam fullname
+     * 
+     * @return The spam fullname
+     */
+    public String getSpamFullname();
+
+
+    /**
+     * Gets the confirmed-spam fullname
+     * 
+     * @return The confirmed-spam fullname
+     */
+    public String getConfirmedSpamFullname();
+
+    /**
+     * Gets the confirmed-ham fullname
+     * 
+     * @return The confirmed-ham fullname
+     */
+    public String getConfirmedHamFullname();
 }

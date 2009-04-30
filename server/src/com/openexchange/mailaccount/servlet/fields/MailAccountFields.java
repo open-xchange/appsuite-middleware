@@ -105,4 +105,16 @@ public final class MailAccountFields {
     public static final String CONFIRMED_HAM = "confirmed_ham";
 
     public static final String UNIFIED_INBOX_ENABLED = "unified_inbox_enabled";
+
+    public static final String TRASH_FULLNAME = "trash_fullname";
+
+    public static final String SENT_FULLNAME = "sent_fullname";
+
+    public static final String DRAFTS_FULLNAME = "drafts_fullname";
+
+    public static final String SPAM_FULLNAME = "spam_fullname";
+
+    public static final String CONFIRMED_SPAM_FULLNAME = "confirmed_spam_fullname";
+
+    public static final String CONFIRMED_HAM_FULLNAME = "confirmed_ham_fullname";
 }

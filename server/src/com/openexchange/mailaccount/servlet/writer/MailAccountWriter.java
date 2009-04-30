@@ -99,13 +99,20 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.NAME, account.getName());
         json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
         json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
-        // Folder
+        // Folder names
         json.put(MailAccountFields.TRASH, account.getTrash());
         json.put(MailAccountFields.SENT, account.getSent());
         json.put(MailAccountFields.DRAFTS, account.getDrafts());
         json.put(MailAccountFields.SPAM, account.getSpam());
         json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
         json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
+        // Folder fullnames
+        json.put(MailAccountFields.TRASH_FULLNAME, account.getTrashFullname());
+        json.put(MailAccountFields.SENT_FULLNAME, account.getSentFullname());
+        json.put(MailAccountFields.DRAFTS_FULLNAME, account.getDraftsFullname());
+        json.put(MailAccountFields.SPAM_FULLNAME, account.getSpamFullname());
+        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, account.getConfirmedSpamFullname());
+        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, account.getConfirmedHamFullname());
         // Unified INBOX enabled
         json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         return json;

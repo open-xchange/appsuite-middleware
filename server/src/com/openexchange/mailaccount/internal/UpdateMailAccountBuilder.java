@@ -156,10 +156,6 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mailaccount.AttributeSwitch#trash()
-     */
     public Object trash() {
         bob.append("trash = ?,");
         return null;
@@ -207,6 +203,36 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
 
     public Object unifiedINBOXEnabled() {
         bob.append("unified_inbox = ?,");
+        return null;
+    }
+
+    public Object confirmedHamFullname() {
+        bob.append("confirmed_ham_fullname = ?,");
+        return null;
+    }
+
+    public Object confirmedSpamFullname() {
+        bob.append("confirmed_spam_fullname = ?,");
+        return null;
+    }
+
+    public Object draftsFullname() {
+        bob.append("drafts_fullname = ?,");
+        return null;
+    }
+
+    public Object sentFullname() {
+        bob.append("sent_fullname = ?,");
+        return null;
+    }
+
+    public Object spamFullname() {
+        bob.append("spam_fullname = ?,");
+        return null;
+    }
+
+    public Object trashFullname() {
+        bob.append("trash_fullname = ?,");
         return null;
     }
 

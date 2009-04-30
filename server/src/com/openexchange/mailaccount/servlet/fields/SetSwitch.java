@@ -52,18 +52,17 @@ package com.openexchange.mailaccount.servlet.fields;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
 
-
 /**
  * {@link SetSwitch}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SetSwitch implements AttributeSwitch{
+public class SetSwitch implements AttributeSwitch {
 
     private final MailAccountDescription desc;
+
     private Object value;
-    
+
     public SetSwitch(final MailAccountDescription desc) {
         super();
         this.desc = desc;
@@ -72,7 +71,7 @@ public class SetSwitch implements AttributeSwitch{
     public void setValue(final Object value) {
         this.value = value;
     }
-    
+
     public Object confirmedHam() {
         desc.setConfirmedHam((String) value);
         return null;
@@ -138,7 +137,6 @@ public class SetSwitch implements AttributeSwitch{
         return null;
     }
 
-
     public Object trash() {
         desc.setTrash((String) value);
         return null;
@@ -196,6 +194,36 @@ public class SetSwitch implements AttributeSwitch{
 
     public Object unifiedINBOXEnabled() {
         desc.setUnifiedINBOXEnabled(((Boolean) value).booleanValue());
+        return null;
+    }
+
+    public Object confirmedHamFullname() {
+        desc.setConfirmedHamFullname((String) value);
+        return null;
+    }
+
+    public Object confirmedSpamFullname() {
+        desc.setConfirmedSpamFullname((String) value);
+        return null;
+    }
+
+    public Object draftsFullname() {
+        desc.setDraftsFullname((String) value);
+        return null;
+    }
+
+    public Object sentFullname() {
+        desc.setSentFullname((String) value);
+        return null;
+    }
+
+    public Object spamFullname() {
+        desc.setSpamFullname((String) value);
+        return null;
+    }
+
+    public Object trashFullname() {
+        desc.setTrashFullname((String) value);
         return null;
     }
 

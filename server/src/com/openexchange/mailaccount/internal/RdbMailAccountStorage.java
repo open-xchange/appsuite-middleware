@@ -91,7 +91,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class);
 
-    private static final String SELECT_MAIL_ACCOUNT = "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
+    private static final String SELECT_MAIL_ACCOUNT = "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_TRANSPORT_ACCOUNT = "SELECT name, url, login, password, send_addr, default_flag FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
@@ -107,9 +107,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String DELETE_TRANSPORT_ACCOUNT = "DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
-    private static final String UPDATE_MAIL_ACCOUNT = "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
+    private static final String UPDATE_MAIL_ACCOUNT = "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ? WHERE cid = ? AND id = ? AND user = ?";
 
-    private static final String INSERT_MAIL_ACCOUNT = "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_MAIL_ACCOUNT = "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_TRANSPORT_ACCOUNT = "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ? WHERE cid = ? AND id = ? AND user = ?";
 
@@ -160,6 +160,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             mailAccount.setConfirmedHam(getOptionalString(result.getString(12)));
             mailAccount.setSpamHandler(result.getString(13));
             mailAccount.setUnifiedINBOXEnabled(result.getInt(14) > 0);
+            mailAccount.setTrashFullname(getOptionalString(result.getString(15)));
+            mailAccount.setSentFullname(getOptionalString(result.getString(16)));
+            mailAccount.setDraftsFullname(getOptionalString(result.getString(17)));
+            mailAccount.setSpamFullname(getOptionalString(result.getString(18)));
+            mailAccount.setConfirmedSpamFullname(getOptionalString(result.getString(19)));
+            mailAccount.setConfirmedHamFullname(getOptionalString(result.getString(20)));
             mailAccount.setUserId(user);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
@@ -621,6 +627,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
                 stmt.setInt(pos++, mailAccount.isUnifiedINBOXEnabled() ? 1 : 0);
+                setOptionalString(stmt, pos++, mailAccount.getTrashFullname());
+                setOptionalString(stmt, pos++, mailAccount.getSentFullname());
+                setOptionalString(stmt, pos++, mailAccount.getDraftsFullname());
+                setOptionalString(stmt, pos++, mailAccount.getSpamFullname());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpamFullname());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
@@ -719,6 +731,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, sh);
                 }
                 stmt.setInt(pos++, mailAccount.isUnifiedINBOXEnabled() ? 1 : 0);
+                setOptionalString(stmt, pos++, mailAccount.getTrashFullname());
+                setOptionalString(stmt, pos++, mailAccount.getSentFullname());
+                setOptionalString(stmt, pos++, mailAccount.getDraftsFullname());
+                setOptionalString(stmt, pos++, mailAccount.getSpamFullname());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpamFullname());
+                setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
                 stmt.executeUpdate();
             }
             final String transportURL = mailAccount.generateTransportServerURL();
@@ -834,6 +852,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private static String getOptionalString(final String string) {
-        return string.length() == 0 ? null : string;
+        return (null == string || string.length() == 0) ? null : string;
     }
 }

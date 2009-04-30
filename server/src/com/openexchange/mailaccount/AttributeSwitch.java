@@ -82,4 +82,10 @@ public interface AttributeSwitch {
     public Object transportLogin();
     public Object transportPassword();
     public Object unifiedINBOXEnabled();
+    public Object trashFullname();
+    public Object sentFullname();
+    public Object draftsFullname();
+    public Object spamFullname();
+    public Object confirmedSpamFullname();
+    public Object confirmedHamFullname();
 }

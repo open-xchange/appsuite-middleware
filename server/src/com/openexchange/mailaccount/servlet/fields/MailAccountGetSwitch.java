@@ -164,4 +164,29 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object unifiedINBOXEnabled() {
         return Boolean.valueOf(account.isUnifiedINBOXEnabled());
     }
+
+    public Object confirmedHamFullname() {
+        return account.getConfirmedHamFullname();
+    }
+
+    public Object confirmedSpamFullname() {
+        return account.getConfirmedSpamFullname();
+    }
+
+    public Object draftsFullname() {
+        return account.getDraftsFullname();
+    }
+
+    public Object sentFullname() {
+        return account.getSentFullname();
+    }
+
+    public Object spamFullname() {
+        return account.getSpamFullname();
+    }
+
+    public Object trashFullname() {
+        return account.getTrashFullname();
+    }
+
 }

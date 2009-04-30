@@ -87,11 +87,26 @@ public enum Attribute {
     TRANSPORT_SECURE_LITERAL(MailAccountFields.TRANSPORT_SECURE, 1022),
     TRANSPORT_LOGIN_LITERAL(MailAccountFields.TRANSPORT_LOGIN, 1023),
     TRANSPORT_PASSWORD_LITERAL(MailAccountFields.TRANSPORT_PASSWORD, 1024),
-    UNIFIED_INBOX_ENABLED_LITERAL(MailAccountFields.UNIFIED_INBOX_ENABLED, 1025);
+    UNIFIED_INBOX_ENABLED_LITERAL(MailAccountFields.UNIFIED_INBOX_ENABLED, 1025),
+    TRASH_FULLNAME_LITERAL(MailAccountFields.TRASH_FULLNAME, 1026),
+    SENT_FULLNAME_LITERAL(MailAccountFields.SENT_FULLNAME, 1027),
+    DRAFTS_FULLNAME_LITERAL(MailAccountFields.DRAFTS_FULLNAME, 1028),
+    SPAM_FULLNAME_LITERAL(MailAccountFields.SPAM_FULLNAME, 1029),
+    CONFIRMED_SPAM_FULLNAME_LITERAL(MailAccountFields.CONFIRMED_SPAM_FULLNAME, 1030),
+    CONFIRMED_HAM_FULLNAME_LITERAL(MailAccountFields.CONFIRMED_HAM_FULLNAME, 1031);
 
-    public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.MAIL_PORT_LITERAL, Attribute.MAIL_PROTOCOL_LITERAL, Attribute.MAIL_SECURE_LITERAL, Attribute.MAIL_SERVER_LITERAL));
-    public static final Set<Attribute> TRANSPORT_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(Attribute.TRANSPORT_PORT_LITERAL, Attribute.TRANSPORT_PROTOCOL_LITERAL, Attribute.TRANSPORT_SECURE_LITERAL, Attribute.TRANSPORT_SERVER_LITERAL));
-    
+    public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
+        Attribute.MAIL_PORT_LITERAL,
+        Attribute.MAIL_PROTOCOL_LITERAL,
+        Attribute.MAIL_SECURE_LITERAL,
+        Attribute.MAIL_SERVER_LITERAL));
+
+    public static final Set<Attribute> TRANSPORT_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
+        Attribute.TRANSPORT_PORT_LITERAL,
+        Attribute.TRANSPORT_PROTOCOL_LITERAL,
+        Attribute.TRANSPORT_SECURE_LITERAL,
+        Attribute.TRANSPORT_SERVER_LITERAL));
+
     private int id;
 
     private String attrName;
@@ -153,6 +168,18 @@ public enum Attribute {
             return switcher.transportPassword();
         case UNIFIED_INBOX_ENABLED_LITERAL:
             return switcher.unifiedINBOXEnabled();
+        case TRASH_FULLNAME_LITERAL:
+            return switcher.trashFullname();
+        case DRAFTS_FULLNAME_LITERAL:
+            return switcher.draftsFullname();
+        case SPAM_FULLNAME_LITERAL:
+            return switcher.spamFullname();
+        case SENT_FULLNAME_LITERAL:
+            return switcher.sentFullname();
+        case CONFIRMED_SPAM_FULLNAME_LITERAL:
+            return switcher.confirmedSpamFullname();
+        case CONFIRMED_HAM_FULLNAME_LITERAL:
+            return switcher.confirmedHamFullname();
         default:
             throw new IllegalArgumentException(this.getName());
         }

@@ -116,6 +116,18 @@ public final class MailAccountDescription implements Serializable {
 
     private boolean unifiedINBOXEnabled;
 
+    private String trashFullname;
+
+    private String sentFullname;
+
+    private String draftsFullname;
+
+    private String spamFullname;
+
+    private String confirmedSpamFullname;
+
+    private String confirmedHamFullname;
+
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
@@ -677,7 +689,115 @@ public final class MailAccountDescription implements Serializable {
     public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
         this.unifiedINBOXEnabled = unifiedINBOXEnabled;
     }
-    
+
+    /**
+     * Gets the trash fullname
+     * 
+     * @return The trash fullname
+     */
+    public String getTrashFullname() {
+        return trashFullname;
+    }
+
+    /**
+     * Sets the trash fullname
+     * 
+     * @param trashFullname The trash fullname to set
+     */
+    public void setTrashFullname(final String trashFullname) {
+        this.trashFullname = trashFullname;
+    }
+
+    /**
+     * Gets the sent fullname
+     * 
+     * @return The sent fullname
+     */
+    public String getSentFullname() {
+        return sentFullname;
+    }
+
+    /**
+     * Sets the sent fullname
+     * 
+     * @param sentFullname The sent fullname to set
+     */
+    public void setSentFullname(final String sentFullname) {
+        this.sentFullname = sentFullname;
+    }
+
+    /**
+     * Gets the drafts fullname
+     * 
+     * @return The drafts fullname
+     */
+    public String getDraftsFullname() {
+        return draftsFullname;
+    }
+
+    /**
+     * Sets the drafts fullname
+     * 
+     * @param draftsFullname The drafts fullname to set
+     */
+    public void setDraftsFullname(final String draftsFullname) {
+        this.draftsFullname = draftsFullname;
+    }
+
+    /**
+     * Gets the spam fullname
+     * 
+     * @return The spam fullname
+     */
+    public String getSpamFullname() {
+        return spamFullname;
+    }
+
+    /**
+     * Sets the spam fullname
+     * 
+     * @param spamFullname The spam fullname to set
+     */
+    public void setSpamFullname(final String spamFullname) {
+        this.spamFullname = spamFullname;
+    }
+
+    /**
+     * Gets the confirmed-spam fullname
+     * 
+     * @return The confirmed-spam fullname
+     */
+    public String getConfirmedSpamFullname() {
+        return confirmedSpamFullname;
+    }
+
+    /**
+     * Sets the confirmed-spam fullname
+     * 
+     * @param confirmedSpamFullname The confirmed-spam fullname to set
+     */
+    public void setConfirmedSpamFullname(final String confirmedSpamFullname) {
+        this.confirmedSpamFullname = confirmedSpamFullname;
+    }
+
+    /**
+     * Gets the confirmed-ham fullname
+     * 
+     * @return The confirmed-ham fullname
+     */
+    public String getConfirmedHamFullname() {
+        return confirmedHamFullname;
+    }
+
+    /**
+     * Sets the confirmed-ham fullname
+     * 
+     * @param confirmedHamFullname The confirmed-ham fullname to set
+     */
+    public void setConfirmedHamFullname(final String confirmedHamFullname) {
+        this.confirmedHamFullname = confirmedHamFullname;
+    }
+
     private static Object[] parseServerAndPort(final String server, final int defaultPort) {
         final int pos = server.indexOf(':');
         if (pos == -1) {

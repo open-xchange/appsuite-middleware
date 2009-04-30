@@ -237,4 +237,34 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
         updateDelegate();
         return delegate.isUnifiedINBOXEnabled();
     }
+
+    public String getConfirmedHamFullname() {
+        updateDelegate();
+        return delegate.getConfirmedHamFullname();
+    }
+
+    public String getConfirmedSpamFullname() {
+        updateDelegate();
+        return delegate.getConfirmedSpamFullname();
+    }
+
+    public String getDraftsFullname() {
+        updateDelegate();
+        return delegate.getDraftsFullname();
+    }
+
+    public String getSentFullname() {
+        updateDelegate();
+        return delegate.getSentFullname();
+    }
+
+    public String getSpamFullname() {
+        updateDelegate();
+        return delegate.getSpamFullname();
+    }
+
+    public String getTrashFullname() {
+        updateDelegate();
+        return delegate.getTrashFullname();
+    }
 }

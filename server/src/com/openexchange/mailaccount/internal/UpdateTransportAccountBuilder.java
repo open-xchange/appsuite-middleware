@@ -199,4 +199,28 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    public Object confirmedHamFullname() {
+        return null;
+    }
+
+    public Object confirmedSpamFullname() {
+        return null;
+    }
+
+    public Object draftsFullname() {
+        return null;
+    }
+
+    public Object sentFullname() {
+        return null;
+    }
+
+    public Object spamFullname() {
+        return null;
+    }
+
+    public Object trashFullname() {
+        return null;
+    }
+
 }

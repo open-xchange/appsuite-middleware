@@ -166,4 +166,29 @@ public class GetSwitch implements AttributeSwitch {
     public Object unifiedINBOXEnabled() {
         return Boolean.valueOf(desc.isUnifiedINBOXEnabled());
     }
+
+    public Object confirmedHamFullname() {
+        return desc.getConfirmedHamFullname();
+    }
+
+    public Object confirmedSpamFullname() {
+        return desc.getConfirmedSpamFullname();
+    }
+
+    public Object draftsFullname() {
+        return desc.getDraftsFullname();
+    }
+
+    public Object sentFullname() {
+        return desc.getSentFullname();
+    }
+
+    public Object spamFullname() {
+        return desc.getSpamFullname();
+    }
+
+    public Object trashFullname() {
+        return desc.getTrashFullname();
+    }
+    
 }

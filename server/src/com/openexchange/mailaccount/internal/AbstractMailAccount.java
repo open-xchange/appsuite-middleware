@@ -118,6 +118,18 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected boolean unifiedINBOXEnabled;
 
+    protected String trashFullname;
+
+    protected String sentFullname;
+
+    protected String draftsFullname;
+
+    protected String spamFullname;
+
+    protected String confirmedSpamFullname;
+
+    protected String confirmedHamFullname;
+
     /**
      * Initializes a new {@link AbstractMailAccount}.
      */
@@ -553,6 +565,84 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
         this.unifiedINBOXEnabled = unifiedINBOXEnabled;
+    }
+
+    public String getTrashFullname() {
+        return trashFullname;
+    }
+
+    /**
+     * Sets the trash fullname
+     * 
+     * @param trashFullname The trash fullname to set
+     */
+    public void setTrashFullname(final String trashFullname) {
+        this.trashFullname = trashFullname;
+    }
+
+    public String getSentFullname() {
+        return sentFullname;
+    }
+
+    /**
+     * Sets the sent fullname
+     * 
+     * @param sentFullname The sent fullname to set
+     */
+    public void setSentFullname(final String sentFullname) {
+        this.sentFullname = sentFullname;
+    }
+
+    public String getDraftsFullname() {
+        return draftsFullname;
+    }
+
+    /**
+     * Sets the drafts fullname
+     * 
+     * @param draftsFullname The drafts fullname to set
+     */
+    public void setDraftsFullname(final String draftsFullname) {
+        this.draftsFullname = draftsFullname;
+    }
+
+    public String getSpamFullname() {
+        return spamFullname;
+    }
+
+    /**
+     * Sets the spam fullname
+     * 
+     * @param spamFullname The spam fullname to set
+     */
+    public void setSpamFullname(final String spamFullname) {
+        this.spamFullname = spamFullname;
+    }
+
+    public String getConfirmedSpamFullname() {
+        return confirmedSpamFullname;
+    }
+
+    /**
+     * Sets the confirmed-spam fullname
+     * 
+     * @param confirmedSpamFullname The confirmed-spam fullname to set
+     */
+    public void setConfirmedSpamFullname(final String confirmedSpamFullname) {
+        this.confirmedSpamFullname = confirmedSpamFullname;
+    }
+
+    public String getConfirmedHamFullname() {
+        return confirmedHamFullname;
+    }
+
+    /**
+     * Sets the confirmed-ham fullname
+     * 
+     * @param confirmedHamFullname The confirmed-ham fullname to set
+     */
+    public void setConfirmedHamFullname(final String confirmedHamFullname) {
+        this.confirmedHamFullname = confirmedHamFullname;
     }
 
     @Override
