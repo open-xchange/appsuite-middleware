@@ -15,6 +15,7 @@ CREATE TABLE `user_mail_account` (
     spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     confirmed_spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     confirmed_ham VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+    unified_inbox TINYINT unsigned default 0, 
     PRIMARY KEY  (cid, id, user),
     INDEX (cid, user),
     FOREIGN KEY (cid, user) REFERENCES user (cid, id)
@@ -30,6 +31,7 @@ CREATE TABLE `user_transport_account` (
     password VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
     send_addr VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     default_flag TINYINT unsigned NOT NULL default 0,
+    unified_inbox TINYINT unsigned default 0, 
     PRIMARY KEY  (cid, id, user),
     INDEX (cid, user),
     FOREIGN KEY (cid, user) REFERENCES user (cid, id)
