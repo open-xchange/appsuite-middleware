@@ -55,7 +55,12 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -116,13 +121,33 @@ public final class SpamHandlerRegistry {
 
     /**
      * Gets the spam handler appropriate for specified session.
+     * <p>
+     * At first the mail account's spam handler is checked, if invalid the session provider's spam handler is checked. For last instance the
+     * fallback spam handler {@link NoSpamHandler} is returned to accomplish no spam handler support.
      * 
-     * @param session The session
+     * @param session The session which probably caches spam handler
      * @param accountId The account ID
      * @return The appropriate spam handler
      * @throws MailException If no supporting spam handler can be found
      */
     public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId) throws MailException {
+        return getSpamHandlerBySession(session, accountId, null);
+    }
+
+    /**
+     * Gets the spam handler appropriate for specified session.
+     * <p>
+     * At first the mail account's spam handler is checked, if invalid the specified provider's spam handler is checked. For last instance
+     * the fallback spam handler {@link NoSpamHandler} is returned to accomplish no spam handler support.
+     * 
+     * @param session The session which probably caches spam handler
+     * @param accountId The account ID
+     * @param mailProvider The mail provider whose spam handler is returned if account's one is empty (if <code>null</code> session's
+     *            provider is used as fallback)
+     * @return The appropriate spam handler
+     * @throws MailException If no supporting spam handler can be found
+     */
+    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId, final MailProvider mailProvider) throws MailException {
         final String key = MailSessionParameterNames.getParamSpamHandler(accountId);
         SpamHandler handler;
         try {
@@ -136,7 +161,44 @@ public final class SpamHandlerRegistry {
         if (null != handler) {
             return handler;
         }
-        handler = MailProviderRegistry.getMailProviderBySession(session, accountId).getSpamHandler();
+        /*
+         * On first load account's spam handler
+         */
+        try {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+            final MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            final String spamHandlerName;
+            if (mailAccount.isDefaultAccount()) {
+                // TODO: Maybe return provider's spam handler if default account is denoted by account ID
+                spamHandlerName = mailAccount.getSpamHandler();
+            } else {
+                spamHandlerName = mailAccount.getSpamHandler();
+            }
+            if (null != spamHandlerName && spamHandlerName.length() > 0) {
+                // Account specifies a valid spam handler name
+                handler = getSpamHandler(spamHandlerName);
+                if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+                    return handler;
+                }
+                session.setParameter(key, handler);
+                return handler;
+            }
+
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
+        /*
+         * Account does not specify a valid spam handler name; take from mail provider
+         */
+        if (null == mailProvider) {
+            handler = MailProviderRegistry.getMailProviderBySession(session, accountId).getSpamHandler();
+        } else {
+            handler = mailProvider.getSpamHandler();
+        }
         if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
             return handler;
         }
