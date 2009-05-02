@@ -1,3 +1,7 @@
+* 2009-05-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #13579: Using more sophisticated (cache) key for MailAccount instances to avoid collisions
+
 * 2009-04-29 - thorben.betten@open-xchange.com
 
  - Bugfix #13473: Fixed cookie parsing when an ending ";" is present

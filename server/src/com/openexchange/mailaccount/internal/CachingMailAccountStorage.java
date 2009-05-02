@@ -110,7 +110,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary) throws MailAccountException {
+    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
         delegate.deleteMailAccount(id, user, cid, deletePrimary);
         invalidateUser(id, user, cid);
     }
@@ -157,7 +157,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
 
             public Serializable getKey() {
-                return cacheService.newCacheKey(cid, id ^ user);
+                return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
             }
 
             public MailAccount load() throws MailAccountException {
@@ -194,12 +194,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return delegate.resolveLogin(login, server, cid);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount,Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
         invalidateUser(mailAccount.getId(), user, cid);
     }
 
-    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, String sessionPassword, Connection con, boolean changePrimary) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
         invalidateUser(mailAccount.getId(), user, cid);
     }
@@ -213,7 +213,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
     }
 
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, Connection con) throws MailAccountException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws MailAccountException {
         return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
     }
 
