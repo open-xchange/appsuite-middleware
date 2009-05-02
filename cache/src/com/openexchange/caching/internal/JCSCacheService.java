@@ -126,4 +126,8 @@ public final class JCSCacheService implements CacheService {
         return new CacheKeyImpl(contextId, obj);
     }
 
+    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
+        return new CacheKeyImpl(contextId, objs);
+    }
+
 }

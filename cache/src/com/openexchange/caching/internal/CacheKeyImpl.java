@@ -50,6 +50,7 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import com.openexchange.caching.CacheKey;
 
 /**
@@ -68,9 +69,9 @@ public class CacheKeyImpl implements CacheKey {
     private final int contextId;
 
     /**
-     * Object key of the cached object.
+     * Object keys of the cached object.
      */
-    private final Serializable keyObj;
+    private final Serializable[] keyObjs;
 
     /**
      * Hash code of the context specific object.
@@ -91,48 +92,82 @@ public class CacheKeyImpl implements CacheKey {
      * Initializes a new {@link CacheKeyImpl}
      * 
      * @param contextId The context ID
-     * @param obj Any instance of {@link Serializable} to identify the cached object.
+     * @param key Any instance of {@link Serializable} to identify the cached object
+     * @throws IllegalArgumentException If specified key is <code>null</code>
      */
-    public CacheKeyImpl(final int contextId, final Serializable obj) {
+    public CacheKeyImpl(final int contextId, final Serializable key) {
         super();
+        if (null == key) {
+            throw new IllegalArgumentException("key is null");
+        }
         this.contextId = contextId;
-        keyObj = obj;
-        hash = obj.hashCode() ^ contextId;
+        keyObjs = new Serializable[] { key };
+        hash = key.hashCode() ^ contextId;
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link CacheKeyImpl}.
+     * 
+     * @param contextId The context ID
+     * @param keys Instances of {@link Serializable} to identify the cached object.
+     * @throws IllegalArgumentException If specified keys are <code>null</code>
      */
+    public CacheKeyImpl(final int contextId, final Serializable... keys) {
+        super();
+        if (null == keys) {
+            throw new IllegalArgumentException("keys are null");
+        }
+        this.contextId = contextId;
+        keyObjs = keys;
+        // Generate hash
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        for (int i = 0; i < keys.length; i++) {
+            final Serializable key = keys[i];
+            result = prime * result + ((key == null) ? 0 : key.hashCode());
+        }
+        hash = result;
+    }
+
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof CacheKeyImpl)) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final CacheKeyImpl other = (CacheKeyImpl) obj;
-        return contextId == other.contextId && keyObj.equals(other.keyObj);
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (!Arrays.equals(keyObjs, other.keyObjs)) {
+            return false;
+        }
+        return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return hash;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
-        return new StringBuilder(32).append("CacheKey: context=").append(contextId).append(" | key=").append(keyObj.toString()).toString();
+        return new StringBuilder(32).append("CacheKey: context=").append(contextId).append(" | keys=").append(Arrays.toString(keyObjs)).toString();
     }
 
     public int getContextId() {
         return contextId;
     }
 
-    public Serializable getObject() {
-        return keyObj;
+    public Serializable[] getKeys() {
+        final Serializable[] retval = new Serializable[keyObjs.length];
+        System.arraycopy(keyObjs, 0, retval, 0, keyObjs.length);
+        return retval;
     }
 }

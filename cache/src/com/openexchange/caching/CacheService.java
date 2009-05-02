@@ -121,4 +121,13 @@ public interface CacheService {
      */
     public CacheKey newCacheKey(int contextId, Serializable obj);
 
+    /**
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable objects.
+     * 
+     * @param contextId The context ID
+     * @param objs The serializable objects
+     * @return new instance of {@link CacheKey}
+     */
+    public CacheKey newCacheKey(int contextId, Serializable... objs);
+
 }
