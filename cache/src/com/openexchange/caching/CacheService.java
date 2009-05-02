@@ -52,7 +52,7 @@ package com.openexchange.caching;
 import java.io.Serializable;
 
 /**
- * {@link CacheService} - The cache service
+ * {@link CacheService} - The cache service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
