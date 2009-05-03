@@ -58,8 +58,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Database;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -78,6 +80,46 @@ public class POP3StorageUtil {
      */
     private POP3StorageUtil() {
         super();
+    }
+
+    private static final String SQL_SELECT_STORAGE_PROPS = "SELECT name, value FROM user_pop3_storage_data WHERE cid = ? AND user = ? AND id = ?";
+
+    /**
+     * Loads POP3 storage properties of specified user for given account.
+     * 
+     * @param accountId The POP3 account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @return The POP3 storage properties of specified user for given account
+     * @throws POP3Exception If loading POP3 storage properties fails
+     */
+    public static Map<String, String> getUserPOP3StorageProperties(final int accountId, final int user, final int cid) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        final Map<String, String> properties = new HashMap<String, String>();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_STORAGE_PROPS);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                properties.put(rs.getString(1), rs.getString(2));
+            }
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
+        return properties;
     }
 
     /**

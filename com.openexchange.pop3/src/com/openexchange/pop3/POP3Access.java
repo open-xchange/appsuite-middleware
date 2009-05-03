@@ -328,8 +328,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 throw e;
             }
             connected = true;
-            // TODO: Perform sync with storage here
-            
             /*
              * Increase counter
              */
@@ -370,6 +368,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             timedOutServers.remove(key);
         }
     }
+
+    
 
     @Override
     public POP3FolderStorage getFolderStorage() throws MailException {

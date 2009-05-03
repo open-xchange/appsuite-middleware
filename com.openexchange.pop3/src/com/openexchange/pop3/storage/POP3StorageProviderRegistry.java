@@ -49,25 +49,60 @@
 
 package com.openexchange.pop3.storage;
 
-import java.util.Map;
-import com.openexchange.mail.MailException;
-import com.openexchange.session.Session;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link POP3StorageProvider} - Provider for POP3 storage.
+ * {@link POP3StorageProviderRegistry} - The registry for {@link POP3StorageProvider POP3 storage providers}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface POP3StorageProvider {
+public final class POP3StorageProviderRegistry {
+
+    private static final POP3StorageProviderRegistry instance = new POP3StorageProviderRegistry();
 
     /**
-     * Gets an appropriate POP3 storage.
+     * Gets the POP3 storage provider registry.
      * 
-     * @param session The session providing needed user data
-     * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
-     * @return An appropriate POP3 storage
-     * @throws MailException If no such storage can be found
-     * @see POP3StoragePropertyNames
+     * @return The POP3 storage provider registry
      */
-    public POP3Storage getPOP3Storage(Session session, Map<String, String> properties) throws MailException;
+    public static POP3StorageProviderRegistry getInstance() {
+        return instance;
+    }
+
+    /*-
+     * Member section
+     */
+
+    private final ConcurrentMap<String, POP3StorageProvider> registryMap;
+
+    /**
+     * Initializes a new {@link POP3StorageProviderRegistry}.
+     */
+    private POP3StorageProviderRegistry() {
+        super();
+        registryMap = new ConcurrentHashMap<String, POP3StorageProvider>();
+    }
+
+    /**
+     * Gets the provider from this registry which is bound to specified provider name.
+     * 
+     * @param providerName The provider name
+     * @return The provider bound to specified provider name or <code>null</code> if none found
+     */
+    public POP3StorageProvider getPOP3StorageProvider(final String providerName) {
+        return registryMap.get(providerName);
+    }
+
+    /**
+     * Adds given provider to this registry bound to specified provider name.
+     * 
+     * @param providerName The provider name
+     * @param provider The provider
+     * @return <code>true</code> if provider could be successfully added; otherwise <code>false</code>
+     */
+    public boolean addPOP3StorageProvider(final String providerName, final POP3StorageProvider provider) {
+        return (null == registryMap.putIfAbsent(providerName, provider));
+    }
+
 }

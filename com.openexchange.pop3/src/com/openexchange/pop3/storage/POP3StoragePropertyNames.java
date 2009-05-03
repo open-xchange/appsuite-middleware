@@ -50,7 +50,7 @@
 package com.openexchange.pop3.storage;
 
 /**
- * {@link POP3StoragePropertyNames} - TODO Short description of this class' purpose.
+ * {@link POP3StoragePropertyNames} - Constants for POP3 storage properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -63,5 +63,15 @@ public final class POP3StoragePropertyNames {
         super();
     }
 
+    /**
+     * The abbreviation of the storage to user;<br />
+     * e.g. <code>"imap"</code> to use an IMAP storage.
+     */
+    public static final String PROPERTY_STORAGE = "pop3.storage";
+
+    /**
+     * The path in storage to the folder/resource keeping POP3 messages;<br />
+     * e.g. <code>"INBOX/My POP3 Messages"</code> inside an IMAP storage.
+     */
     public static final String PROPERTY_PATH = "pop3.path";
 }

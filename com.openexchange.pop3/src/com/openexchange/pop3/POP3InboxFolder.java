@@ -55,16 +55,25 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
+import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StoragePropertyNames;
+import com.openexchange.pop3.storage.POP3StorageProvider;
+import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.util.POP3StorageUtil;
+import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 
 /**
@@ -78,11 +87,13 @@ public final class POP3InboxFolder {
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
+    private POP3Storage storage;
+
     private final POP3Folder inbox;
 
-    private final int user;
+    private final int accountId;
 
-    private final int cid;
+    private final Session session;
 
     private final Set<String> deletedUIDLs;
 
@@ -97,11 +108,11 @@ public final class POP3InboxFolder {
      * @param user The user ID
      * @param cid The context ID
      */
-    public POP3InboxFolder(final POP3Folder inbox, final int user, final int cid) {
+    public POP3InboxFolder(final POP3Folder inbox, final int accountId, final Session session) {
         super();
         this.inbox = inbox;
-        this.user = user;
-        this.cid = cid;
+        this.accountId = accountId;
+        this.session = session;
         deletedUIDLs = new HashSet<String>();
     }
 
@@ -252,15 +263,47 @@ public final class POP3InboxFolder {
             if (!inbox.isOpen()) {
                 inbox.open(com.sun.mail.pop3.POP3Folder.READ_WRITE);
             }
-            syncMessages(getUIDLs(null));
+
+            /*
+             * Get POP3 storage provider from registry
+             */
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            final Map<String, String> properties = POP3StorageUtil.getUserPOP3StorageProperties(accountId, user, cid);
+            final String providerName = properties.get(POP3StoragePropertyNames.PROPERTY_STORAGE);
+            if (null == providerName) {
+                throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
+            }
+            final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
+            if (null == provider) {
+                throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE, Integer.valueOf(user), Integer.valueOf(cid));
+            }
+            /*
+             * Fetch appropriate storage
+             */
+            storage = provider.getPOP3Storage(session, properties);
+            final Message[] allMessages = inbox.getMessages();
+            {
+                // Initiate fetch
+                final FetchProfile fetchProfile = MIMEStorageUtility.getUIDFetchProfile();
+                fetchProfile.add(FetchProfile.Item.ENVELOPE);
+                final long start = System.currentTimeMillis();
+                inbox.fetch(allMessages, fetchProfile);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            }
+            final MailMessage[] allMails = new MailMessage[allMessages.length];
+            for (int i = 0; i < allMails.length; i++) {
+                allMails[i] = MIMEMessageConverter.convertMessage((MimeMessage) allMessages[i]);
+            }
+            // Sync with storage
+            storage.syncMessages(allMails);
+            // POP3 connection not needed anymore since all messages should be sync'ed to storage
+            inbox.close(true);
+            // Mark as "open"
             open = true;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
-    }
-
-    private void syncMessages(final String[] uidls) throws POP3Exception {
-        POP3StorageUtil.syncDBEntries(uidls, user, cid);
     }
 
     /**

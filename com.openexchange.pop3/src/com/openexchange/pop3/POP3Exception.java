@@ -331,7 +331,15 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * POP3 does not support draft messages.
          */
-        DRAFTS_NOT_SUPPORTED("POP3 does not support draft messages.", Category.CODE_ERROR, 2059);
+        DRAFTS_NOT_SUPPORTED("POP3 does not support draft messages.", Category.CODE_ERROR, 2059),
+        /**
+         * Missing POP3 storage name for user %1$s in context %2$s.
+         */
+        MISSING_POP3_STORAGE_NAME("Missing POP3 storage name for user %1$s in context %2$s.", Category.CODE_ERROR, 2060),
+        /**
+         * Missing POP3 storage for user %1$s in context %2$s.
+         */
+        MISSING_POP3_STORAGE("Missing POP3 storage for user %1$s in context %2$s.", Category.CODE_ERROR, 2061);
 
         private final String message;
 
