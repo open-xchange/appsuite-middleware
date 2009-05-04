@@ -644,7 +644,13 @@ public class Folder extends SessionServlet {
                              * Iterate sorted mail accounts
                              */
                             for (final MailAccount mailAccount : accounts) {
-                                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                final MailAccess<?, ?> mailAccess;
+                                try {
+                                    mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                } catch (final MailException e) {
+                                    LOG.warn("Skipping mail account.", e);
+                                    continue;
+                                }
                                 boolean close = false;
                                 try {
                                     final MailFolder rootFolder = mailAccess.getRootFolder();
@@ -1291,7 +1297,13 @@ public class Folder extends SessionServlet {
                     /*
                      * Add root folders
                      */
-                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                    final MailAccess<?, ?> mailAccess;
+                    try {
+                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                    } catch (final MailException e) {
+                        LOG.warn("Skipping mail account.", e);
+                        continue;
+                    }
                     boolean close = false;
                     try {
                         mailAccess.connect();
