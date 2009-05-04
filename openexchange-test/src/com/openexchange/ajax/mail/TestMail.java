@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.mail;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.kata.IdentitySource;
+import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
 
@@ -62,7 +66,7 @@ import com.openexchange.mail.MailJSONField;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TestMail {
+public class TestMail implements IdentitySource<TestMail> {
 
     private List<String> from, to, cc, bcc;
 
@@ -162,6 +166,15 @@ public class TestMail {
         return new TestMail(obj);
     }
 
+    public void read(Map<String,String> map){
+        //TODO find some proper names
+        setFrom( Arrays.asList( map.get( "From" ).split("[,;]") ) );
+        setTo( Arrays.asList( map.get( "To" ).split("[,;]") ) );
+        setSubject(map.get( "Subject") );
+        setBody( map.get("Content") );
+        
+    }
+
     public void read(JSONObject json) throws JSONException {
         // lists
         String field = MailJSONField.FROM.getKey();
@@ -218,18 +231,14 @@ public class TestMail {
     }
 
     public void read(int[] columns, JSONArray values) {
-
+        //TODO
     }
 
     /**
      * Converts a JSON array into a string list.
      */
     protected List<String> j2l(JSONArray array) throws JSONException {
-        List<String> list = new LinkedList<String>();
-        for (int i = 0, size = array.length(); i < size; i++) {
-            list.add(array.getString(i));
-        }
-        return list;
+        return JSON.jsonArray2list(array);
     }
 
     /**
@@ -285,6 +294,34 @@ public class TestMail {
 
     public String getFolder() {
         return folder;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
+     */
+    public void assumeIdentity(TestMail entry) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.IdentitySource#forgetIdentity(java.lang.Object)
+     */
+    public void forgetIdentity(TestMail entry) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public Class<TestMail> getType() {
+        return TestMail.class;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
+     */
+    public void rememberIdentityValues(TestMail entry) {
+        // TODO Auto-generated method stub
+        
     }
 
 }
