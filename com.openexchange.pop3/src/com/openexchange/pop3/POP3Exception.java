@@ -347,7 +347,11 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * POP3 default folder %1$s must not be renamed.
          */
-        NO_DEFAULT_FOLDER_RENAME("POP3 default folder %1$s must not be renamed.", Category.CODE_ERROR, 2063);
+        NO_DEFAULT_FOLDER_RENAME("POP3 default folder %1$s must not be renamed.", Category.CODE_ERROR, 2063),
+        /**
+         * Inconsistency detected in UIDL map.
+         */
+        UIDL_INCONSISTENCY("Inconsistency detected in UIDL map.", Category.CODE_ERROR, 2064);
 
         private final String message;
 
