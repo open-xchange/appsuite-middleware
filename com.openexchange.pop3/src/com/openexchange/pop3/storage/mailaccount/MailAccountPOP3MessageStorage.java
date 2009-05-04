@@ -54,12 +54,14 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.storage.FullnameUIDPair;
+import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.pop3.storage.mailaccount.util.Utility;
 import com.openexchange.session.Session;
 
@@ -80,13 +82,37 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final char separator;
 
-    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final POP3Access pop3Access, final String path, final char separator) {
+    private final POP3StorageUIDLMap uidlMap;
+
+    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final POP3Access pop3Access, final String path, final char separator, final POP3StorageUIDLMap uidlMap) {
         super();
         this.delegatee = delegatee;
         this.path = path;
         this.separator = separator;
         this.session = pop3Access.getSession();
         this.accountId = pop3Access.getAccountId();
+        this.uidlMap = uidlMap;
+    }
+
+    private String[] getMailIDs(final String fullname, final String[] uidls) throws POP3Exception {
+        final String[] mailIds = new String[uidls.length];
+        final FullnameUIDPair[] pairs = uidlMap.getFullnameUIDPairs(uidls);
+        for (int i = 0; i < mailIds.length; i++) {
+            final FullnameUIDPair pair = pairs[i];
+            if (!fullname.equals(pair.getFullname())) {
+                throw new POP3Exception(POP3Exception.Code.UIDL_INCONSISTENCY);
+            }
+            mailIds[i] = pair.getMailId();
+        }
+        return mailIds;
+    }
+
+    private String getMailID(final String fullname, final String uidl) throws POP3Exception {
+        final FullnameUIDPair pair = uidlMap.getFullnameUIDPair(uidl);
+        if (!fullname.equals(pair.getFullname())) {
+            throw new POP3Exception(POP3Exception.Code.UIDL_INCONSISTENCY);
+        }
+        return pair.getMailId();
     }
 
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws MailException {
@@ -101,18 +127,24 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
          * Append to mail account storage
          */
         final String[] uids = delegatee.appendMessages(Utility.prependPath2Fullname(path, separator, destFolder), msgs);
-        Utility.addMappings(uidls, uids, accountId, session);
+        final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
+        for (int i = 0; i < pairs.length; i++) {
+            pairs[i] = new FullnameUIDPair(destFolder, uids[i]);
+        }
+        uidlMap.addMappings(uidls, pairs);
         return uidls;
     }
 
-    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] uidls, final boolean fast) throws MailException {
+        final String[] mailIds = getMailIDs(destFolder, uidls);
         return delegatee.copyMessages(Utility.prependPath2Fullname(path, separator, sourceFolder), Utility.prependPath2Fullname(
             path,
             separator,
             destFolder), mailIds, fast);
     }
 
-    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws MailException {
+    public void deleteMessages(final String folder, final String[] uidls, final boolean hardDelete) throws MailException {
+        final String[] mailIds = getMailIDs(destFolder, uidls);
         delegatee.deleteMessages(
             Utility.prependPath2Fullname(path, separator, folder),
             Utility.getRealIDs(mailIds, accountId, session),
@@ -138,10 +170,10 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
-    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+    public MailPart getAttachment(final String folder, final String uidl, final String sequenceId) throws MailException {
         return delegatee.getAttachment(
             Utility.prependPath2Fullname(path, separator, folder),
-            Utility.getRealID(mailId, accountId, session),
+            getMailID(folder, uidl),
             sequenceId);
     }
 

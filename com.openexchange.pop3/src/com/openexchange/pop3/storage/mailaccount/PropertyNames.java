@@ -66,6 +66,16 @@ public final class PropertyNames {
     /**
      * Property name prefix for maps.
      */
-    public static final String PROP_MAP = "pop3.maps.";
+    private static final String PROP_MAP = "pop3.uidlmap";
+
+    /**
+     * Gets the property name for UIDL map.
+     * 
+     * @param accountId The account ID
+     * @return The property name for UIDL map
+     */
+    public static String getUIDLMap(final int accountId) {
+        return new StringBuilder(PROP_MAP.length() + 4).append(PROP_MAP).append(accountId).toString();
+    }
 
 }

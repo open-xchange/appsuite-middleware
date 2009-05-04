@@ -75,6 +75,7 @@ import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3StoreConnector;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
+import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.pop3.storage.mailaccount.util.Utility;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
@@ -251,6 +252,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
             ids[i] = mails[i].getMailId();
         }
         return ids;
+    }
+
+    public POP3StorageUIDLMap getUIDLMap() {
+        return SessionPOP3StorageUIDLMap.getInstance(pop3Access);
     }
 
 }

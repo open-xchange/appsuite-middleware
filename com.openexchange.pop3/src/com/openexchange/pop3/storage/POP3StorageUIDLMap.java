@@ -49,64 +49,66 @@
 
 package com.openexchange.pop3.storage;
 
-import com.openexchange.mail.MailException;
+import java.util.Map;
+import com.openexchange.pop3.POP3Exception;
 
 /**
- * {@link POP3Storage} - Storage for messages from a POP3 account.
+ * {@link POP3StorageUIDLMap} - Maps POP3 UIDL to a fullname-UID-pair.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface POP3Storage {
+public interface POP3StorageUIDLMap {
 
     /**
-     * Connects this POP3 storage.
+     * Gets the fullname-UID-pairs to specified POP3 UIDLs.
      * 
-     * @throws MailException If establishing a connection for this storage fails
+     * @param uidls The POP3 UIDLs
+     * @return The fullname-UID-pairs to specified POP3 UIDLs. If no mapping could be found the corresponding entry is <code>null</code>
+     * @throws POP3Exception If mapping retrieval fails
      */
-    public void connect() throws MailException;
+    public FullnameUIDPair[] getFullnameUIDPairs(String[] uidls) throws POP3Exception;
 
     /**
-     * Closes this storage and releases occupied resources.
+     * Gets the fullname-UID-pair to specified POP3 UIDL.
      * 
-     * @throws MailException If closing the storage fails
+     * @param uidls The POP3 UIDL
+     * @return The fullname-UID-pair to specified POP3 UIDL or <code>null</code> if no such mapping exists
+     * @throws POP3Exception If mapping retrieval fails
      */
-    public void close() throws MailException;
+    public FullnameUIDPair getFullnameUIDPair(String uidl) throws POP3Exception;
 
     /**
-     * Releases all used resources prior to closing this storage.
-     */
-    public void releaseResources();
-
-    /**
-     * Synchronizes this storage with actual POP3 account.
-     * <p>
-     * Tries to establish a connection to actual POP3 account, fetches all contained messages and synchronizes them with the ones hold in
-     * this storage.
+     * Gets the POP3 UIDLs to specified fullname-UID-pairs.
      * 
-     * @throws MailException If synchronizing messages fails
+     * @param fullnameUIDPairs The fullname-UID-pairs
+     * @return The POP3 UIDLs to specified fullname-UID-pairs
+     * @throws POP3Exception If mapping retrieval fails
      */
-    public void syncMessages() throws MailException;
+    public String[] getUIDLs(FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception;
 
     /**
-     * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
+     * Gets the POP3 UIDL to specified fullname-UID-pair.
      * 
-     * @return The appropriate {@link IMailFolderStorage} implementation
-     * @throws MailException If connection is not established
+     * @param fullnameUIDPairs The fullname-UID-pair
+     * @return The POP3 UIDL to specified fullname-UID-pair or <code>null</code> if no such mapping exists
+     * @throws POP3Exception If mapping retrieval fails
      */
-    public IMailFolderStorage getFolderStorage() throws MailException;
+    public String getUIDL(FullnameUIDPair fullnameUIDPair) throws POP3Exception;
 
     /**
-     * Gets the appropriate {@link IMailMessageStorage} implementation that provides necessary message-related operations/methods.
+     * Adds specified mappings to this map.
      * 
-     * @return The appropriate {@link IMailMessageStorage} implementation
-     * @throws MailException If connection is not established
+     * @param uidls The POP3 UIDLs
+     * @param fullnameUIDPairs The fullname-UID-pairs. If no mapping could be found the corresponding entry is <code>null</code>
+     * @throws POP3Exception If adding mappings fails
      */
-    public IMailMessageStorage getMessageStorage() throws MailException;
+    public void addMappings(String[] uidls, FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception;
 
     /**
-     * Gets the UIDL map.
+     * Gets all mappings known by this UIDL map.
      * 
-     * @return The UIDL map
+     * @return All mappings known by this UIDL map
+     * @throws POP3Exception If mapping retrieval fails
      */
-    public POP3StorageUIDLMap getUIDLMap();
+    public Map<String, FullnameUIDPair> getAllUIDLs() throws POP3Exception;
 }
