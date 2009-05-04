@@ -889,7 +889,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * ... and append them to folder
              */
-            long[] retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+            long[] retval = new long[0];
+            final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
+            if (hasUIDPlus) {
+                retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+            }
             if (retval.length > 0) {
                 /*
                  * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
@@ -897,20 +901,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 notifyIMAPFolderModification(destFullname);
                 return retval;
             }
-            /*
-             * Missing UID information in APPENDUID response
+            /*-
+             * OK, go the long way:
+             * 1. Find the marker in folder's messages
+             * 2. Get the UIDs from found message's position
              */
-            if (LOG.isWarnEnabled()) {
+            if (hasUIDPlus && LOG.isWarnEnabled()) {
+                /*
+                 * Missing UID information in APPENDUID response
+                 */
                 LOG.warn("Missing UID information in APPENDUID response");
             }
             retval = new long[msgs.length];
-            long uid = IMAPCommandsCollection.findMarker(hash, imapFolder);
-            if (uid == -1) {
+            final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
+            if (uids.length == 0) {
                 Arrays.fill(retval, -1L);
             } else {
-                for (int i = 0; i < retval.length; i++) {
-                    retval[i] = uid++;
-                }
+                System.arraycopy(uids, 0, retval, 0, uids.length);
             }
             /*
              * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.

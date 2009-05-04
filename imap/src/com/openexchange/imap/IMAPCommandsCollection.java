@@ -1850,18 +1850,19 @@ public final class IMAPCommandsCollection {
      * Searches the message whose {@link MessageHeaders#HDR_X_OX_MARKER} header is set to specified marker.
      * 
      * @param marker The marker to lookup
+     * @param numOfAppendedMessages The number of appended messages
      * @param imapFolder The IMAP folder in which to search the message
      * @return The matching message's UID or <code>-1</code> if none found
      * @throws MessagingException If marker look-up fails
      */
-    public static long findMarker(final String marker, final IMAPFolder imapFolder) throws MessagingException {
+    public static long[] findMarker(final String marker, final int numOfAppendedMessages, final IMAPFolder imapFolder) throws MessagingException {
         if ((marker == null) || (marker.length() == 0)) {
-            return -1L;
+            return new long[0];
         }
         if (imapFolder.getMessageCount() == 0) {
-            return -1L;
+            return new long[0];
         }
-        return ((Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return ((long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final boolean isREV1 = p.isREV1();
@@ -1874,6 +1875,10 @@ public final class IMAPCommandsCollection {
                 final Response response = r[r.length - 1];
                 try {
                     if (response.isOK()) {
+                        final long[] retval = new long[numOfAppendedMessages];
+                        Arrays.fill(retval, -1L);
+                        boolean markerFound = false;
+                        int numAdded = 0;
                         HeaderString headerStream = null;
                         final HeaderCollection h = new HeaderCollection();
                         final int len = r.length - 1;
@@ -1882,29 +1887,40 @@ public final class IMAPCommandsCollection {
                                 continue;
                             }
                             final FetchResponse fetchResponse = (FetchResponse) r[i];
-                            final Item headerItem;
-                            if (isREV1) {
-                                headerItem = getItemOf(BODY.class, fetchResponse, "HEADER");
-                            } else {
-                                headerItem = getItemOf(RFC822DATA.class, fetchResponse, "HEADER");
-                            }
-                            final String curMarker;
-                            {
-                                if (null == headerStream) {
-                                    headerStream = getHeaderStream(isREV1);
+                            if (!markerFound) {
+                                final Item headerItem;
+                                if (isREV1) {
+                                    headerItem = getItemOf(BODY.class, fetchResponse, "HEADER");
+                                } else {
+                                    headerItem = getItemOf(RFC822DATA.class, fetchResponse, "HEADER");
                                 }
-                                if (!h.isEmpty()) {
-                                    h.clear();
+                                final String curMarker;
+                                {
+                                    if (null == headerStream) {
+                                        headerStream = getHeaderStream(isREV1);
+                                    }
+                                    if (!h.isEmpty()) {
+                                        h.clear();
+                                    }
+                                    h.load(headerStream.getHeaderString(headerItem));
+                                    curMarker = h.getHeader(MessageHeaders.HDR_X_OX_MARKER, null);
                                 }
-                                h.load(headerStream.getHeaderString(headerItem));
-                                curMarker = h.getHeader(MessageHeaders.HDR_X_OX_MARKER, null);
+                                markerFound = (marker.equals(curMarker));
                             }
-                            if (marker.equals(curMarker)) {
+                            /*
+                             * Marker found
+                             */
+                            if (markerFound) {
                                 final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
-                                return Long.valueOf(uidItem.uid);
+                                retval[numAdded++] = uidItem.uid;
+                                if (numAdded >= numOfAppendedMessages) {
+                                    // Break for loop
+                                    i = len;
+                                }
                             }
                             r[i] = null;
                         }
+                        return retval;
                     }
                 } catch (final MailException e) {
                     throw wrapException(e, null);
@@ -1912,9 +1928,9 @@ public final class IMAPCommandsCollection {
                     // p.notifyResponseHandlers(r);
                     p.handleResult(response);
                 }
-                return Long.valueOf(-1L);
+                return new long[0];
             }
-        })).longValue();
+        }));
     }
 
     private static final String COMMAND_FETCH_ENV_UID = "FETCH 1:* (ENVELOPE UID)";
