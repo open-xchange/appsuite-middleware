@@ -62,7 +62,6 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_SENT;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -214,7 +213,7 @@ public final class DefaultFolderNamesProvider {
      * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
-        return getDefaultFolderNames(
+        return getDefaultFolderFullnames(
             mailAccount.getTrashFullname(),
             mailAccount.getSentFullname(),
             mailAccount.getDraftsFullname(),
@@ -237,7 +236,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder fullnames as an array of {@link String}
      */
-    public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) throws MailConfigException {
+    public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) {
         final String[] fullnames = new String[isSpamEnabled ? 6 : 4];
         if ((draftsFullname != null) && (draftsFullname.length() != 0)) {
             fullnames[INDEX_DRAFTS] = draftsFullname;
