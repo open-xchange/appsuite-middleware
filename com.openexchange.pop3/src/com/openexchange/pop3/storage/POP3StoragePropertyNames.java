@@ -65,13 +65,18 @@ public final class POP3StoragePropertyNames {
 
     /**
      * The abbreviation of the storage to user;<br />
-     * e.g. <code>"imap"</code> to use an IMAP storage.
+     * e.g. <code>"mailaccount"</code> to use the default mail account as storage.
      */
     public static final String PROPERTY_STORAGE = "pop3.storage";
 
     /**
      * The path in storage to the folder/resource keeping POP3 messages;<br />
-     * e.g. <code>"INBOX/My POP3 Messages"</code> inside an IMAP storage.
+     * e.g. <code>"INBOX/My POP3 Messages"</code> inside an mail account storage.
      */
     public static final String PROPERTY_PATH = "pop3.path";
+
+    /**
+     * The frequency or interval in minutes when a new synchronization with actual POP3 account takes place.
+     */
+    public static final String PROPERTY_FREQUENCY = "pop3.frequency";
 }

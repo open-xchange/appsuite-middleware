@@ -47,34 +47,36 @@
  *
  */
 
-package com.openexchange.pop3.storage;
+package com.openexchange.pop3.storage.mailaccount;
 
 import java.util.Map;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StorageProvider;
 
 /**
- * {@link POP3StorageProvider} - Provider for POP3 storage.
+ * {@link MailAccountPOP3StorageProvider} - Mail account POP3 storage provider.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface POP3StorageProvider {
+public final class MailAccountPOP3StorageProvider implements POP3StorageProvider {
 
     /**
-     * Gets an appropriate POP3 storage.
-     * 
-     * @param pop3Access The POP3 access to which the storage shall be bound
-     * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
-     * @return An appropriate POP3 storage
-     * @throws MailException If no such storage can be found
-     * @see POP3StoragePropertyNames
+     * Initializes a new {@link MailAccountPOP3StorageProvider}.
      */
-    public POP3Storage getPOP3Storage(POP3Access pop3Access, Map<String, String> properties) throws MailException;
+    public MailAccountPOP3StorageProvider() {
+        super();
+    }
 
-    /**
-     * Gets the POP3 storage name.
-     * 
-     * @return The POP3 storage name
-     */
-    public String getPOP3StorageName();
+    public POP3Storage getPOP3Storage(final POP3Access pop3Access, final Map<String, String> properties) throws MailException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getPOP3StorageName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

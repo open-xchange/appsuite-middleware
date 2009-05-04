@@ -50,7 +50,8 @@
 package com.openexchange.pop3.storage;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 
 /**
  * {@link POP3Storage} - Storage for messages from a POP3 account.
@@ -60,6 +61,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public interface POP3Storage {
 
     /**
+     * Connects this POP3 storage.
+     * 
+     * @throws MailException If establishing a connection for this storage fails
+     */
+    public void connect() throws MailException;
+
+    /**
      * Closes this storage and releases occupied resources.
      * 
      * @throws MailException If closing the storage fails
@@ -67,38 +75,34 @@ public interface POP3Storage {
     public void close() throws MailException;
 
     /**
-     * Synchronizes this storage with specified messages.
+     * Releases all used resources prior to closing this storage.
+     */
+    public void releaseResources();
+
+    /**
+     * Synchronizes this storage with actual POP3 account.
+     * <p>
+     * Tries to establish a connection to actual POP3 account, fetches all contained messages and synchronizes them with the ones hold in
+     * this storage.
      * 
-     * @param allMessages The messages reflecting current POP3 INBOX content
      * @throws MailException If synchronizing messages fails
      */
-    public void syncMessages(MailMessage[] allMessages) throws MailException;
+    public void syncMessages() throws MailException;
 
     /**
-     * Gets the number of messages.
+     * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
      * 
-     * @throws MailException If determining message count fails
+     * @return The appropriate {@link IMailFolderStorage} implementation
+     * @throws MailException If connection is not established
      */
-    public int getMessageCount() throws MailException;
+    public IMailFolderStorage getFolderStorage() throws MailException;
 
     /**
-     * Gets the number of new messages.
+     * Gets the appropriate {@link IMailMessageStorage} implementation that provides necessary message-related operations/methods.
      * 
-     * @throws MailException If determining new message count fails
+     * @return The appropriate {@link IMailMessageStorage} implementation
+     * @throws MailException If connection is not established
      */
-    public int getNewMessageCount() throws MailException;
+    public IMailMessageStorage getMessageStorage() throws MailException;
 
-    /**
-     * Gets the number of messages marked for deletion.
-     * 
-     * @throws MailException If determining deleted message count fails
-     */
-    public int getDeletedMessageCount() throws MailException;
-
-    /**
-     * Gets the number of unread messages.
-     * 
-     * @throws MailException If determining unread message count fails
-     */
-    public int getUnreadMessageCount() throws MailException;
 }

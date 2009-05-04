@@ -69,6 +69,11 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
+import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StoragePropertyNames;
+import com.openexchange.pop3.storage.POP3StorageProvider;
+import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
+import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.pop3.POP3Folder;
@@ -98,6 +103,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Members
      */
 
+    private POP3Storage pop3Storage;
+
     private transient POP3FolderStorage folderStorage;
 
     private transient POP3MessageStorage messageStorage;
@@ -118,8 +125,58 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
      * 
      * @param session The session providing needed user data
+     * @throws MailException If initialization fails
      */
-    protected POP3Access(final Session session) {
+    protected POP3Access newInstance(final Session session) throws MailException {
+        final POP3Access pop3Access = new POP3Access(session);
+        final POP3Storage pop3Storage = getPOP3Storage(pop3Access);
+        pop3Access.pop3Storage = pop3Storage;
+        return pop3Access;
+    }
+
+    /**
+     * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
+     * 
+     * @param session The session providing needed user data
+     * @param accountId The account ID
+     * @throws MailException If initialization fails
+     */
+    protected POP3Access newInstance(final Session session, final int accountId) throws MailException {
+        final POP3Access pop3Access = new POP3Access(session, accountId);
+        final POP3Storage pop3Storage = getPOP3Storage(pop3Access);
+        pop3Access.pop3Storage = pop3Storage;
+        return pop3Access;
+    }
+
+    /**
+     * Initializes the POP3 storage for given POP3 access.
+     * 
+     * @param pop3Access The POP3 access
+     * @return The POP3 storage for given POP3 access
+     * @throws MailException If POP3 storage initialization fails
+     */
+    private static POP3Storage getPOP3Storage(final POP3Access pop3Access) throws MailException {
+        final Session session = pop3Access.session;
+        final int user = session.getUserId();
+        final int cid = session.getContextId();
+        final Map<String, String> properties = POP3StorageUtil.getUserPOP3StorageProperties(pop3Access.accountId, user, cid);
+        final String providerName = properties.get(POP3StoragePropertyNames.PROPERTY_STORAGE);
+        if (null == providerName) {
+            throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
+        }
+        final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
+        if (null == provider) {
+            throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE, Integer.valueOf(user), Integer.valueOf(cid));
+        }
+        return provider.getPOP3Storage(pop3Access, properties);
+    }
+
+    /**
+     * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
+     * 
+     * @param session The session providing needed user data
+     */
+    private POP3Access(final Session session) {
         super(session);
         setMailProperties((Properties) System.getProperties().clone());
     }
@@ -130,7 +187,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
-    protected POP3Access(final Session session, final int accountId) {
+    private POP3Access(final Session session, final int accountId) {
         super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
     }
@@ -145,6 +202,15 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         inboxFolder = null;
         connected = false;
         decrement = false;
+    }
+
+    /**
+     * Gets this POP3 access' session.
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
     }
 
     @Override
@@ -369,8 +435,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         }
     }
 
-    
-
     @Override
     public POP3FolderStorage getFolderStorage() throws MailException {
         connected = ((pop3Store != null) && pop3Store.isConnected());
@@ -425,7 +489,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * 
      * @return The POP3 session
      */
-    public javax.mail.Session getSession() {
+    public javax.mail.Session getPOP3Session() {
         return pop3Session;
     }
 

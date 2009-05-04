@@ -54,12 +54,16 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Provider;
+import com.openexchange.pop3.storage.POP3StorageProvider;
+import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
+import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
@@ -77,6 +81,8 @@ public final class POP3Activator extends DeferredActivator {
 
     private ServiceRegistration pop3ServiceRegistration;
 
+    private ServiceTracker providerServiceTracker;
+
     /**
      * Initializes a new {@link POP3Activator}
      */
@@ -88,7 +94,8 @@ public final class POP3Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class };
     }
 
     @Override
@@ -128,6 +135,18 @@ public final class POP3Activator extends DeferredActivator {
                 }
             }
             pop3ServiceRegistration = context.registerService(MailProvider.class.getName(), POP3Provider.getInstance(), dictionary);
+            /*
+             * Service tracker for possible POP3 storage provider
+             */
+            providerServiceTracker = new ServiceTracker(
+                context,
+                POP3StorageProvider.class.getName(),
+                new POP3StorageProviderServiceTrackerCustomizer(context));
+            providerServiceTracker.open();
+            /*
+             * Add built-in mail account POP3 storage provider
+             */
+            POP3StorageProviderRegistry.getInstance().addPOP3StorageProvider(new MailAccountPOP3StorageProvider());
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -137,6 +156,17 @@ public final class POP3Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            POP3StorageProviderRegistry.getInstance().clear();
+            if (null != providerServiceTracker) {
+                /*
+                 * Close tracker
+                 */
+                providerServiceTracker.close();
+                providerServiceTracker = null;
+            }
+            /*
+             * Unregister service
+             */
             if (null != pop3ServiceRegistration) {
                 pop3ServiceRegistration.unregister();
                 pop3ServiceRegistration = null;

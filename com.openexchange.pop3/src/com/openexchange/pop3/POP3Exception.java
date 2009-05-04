@@ -339,7 +339,15 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Missing POP3 storage for user %1$s in context %2$s.
          */
-        MISSING_POP3_STORAGE("Missing POP3 storage for user %1$s in context %2$s.", Category.CODE_ERROR, 2061);
+        MISSING_POP3_STORAGE("Missing POP3 storage for user %1$s in context %2$s.", Category.CODE_ERROR, 2061),
+        /**
+         * POP3 default folder %1$s must not be moved.
+         */
+        NO_DEFAULT_FOLDER_MOVE("POP3 default folder %1$s must not be moved.", Category.CODE_ERROR, 2062),
+        /**
+         * POP3 default folder %1$s must not be renamed.
+         */
+        NO_DEFAULT_FOLDER_RENAME("POP3 default folder %1$s must not be renamed.", Category.CODE_ERROR, 2063);
 
         private final String message;
 

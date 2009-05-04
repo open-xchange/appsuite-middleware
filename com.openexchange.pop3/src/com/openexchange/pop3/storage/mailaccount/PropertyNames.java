@@ -47,34 +47,25 @@
  *
  */
 
-package com.openexchange.pop3.storage;
-
-import java.util.Map;
-import com.openexchange.mail.MailException;
-import com.openexchange.pop3.POP3Access;
+package com.openexchange.pop3.storage.mailaccount;
 
 /**
- * {@link POP3StorageProvider} - Provider for POP3 storage.
+ * {@link PropertyNames} - TODO Short description of this class' purpose.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface POP3StorageProvider {
+public final class PropertyNames {
 
     /**
-     * Gets an appropriate POP3 storage.
-     * 
-     * @param pop3Access The POP3 access to which the storage shall be bound
-     * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
-     * @return An appropriate POP3 storage
-     * @throws MailException If no such storage can be found
-     * @see POP3StoragePropertyNames
+     * Initializes a new {@link PropertyNames}.
      */
-    public POP3Storage getPOP3Storage(POP3Access pop3Access, Map<String, String> properties) throws MailException;
+    private PropertyNames() {
+        super();
+    }
 
     /**
-     * Gets the POP3 storage name.
-     * 
-     * @return The POP3 storage name
+     * Property name prefix for maps.
      */
-    public String getPOP3StorageName();
+    public static final String PROP_MAP = "pop3.maps.";
+
 }

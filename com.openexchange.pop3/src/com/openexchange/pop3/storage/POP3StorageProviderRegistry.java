@@ -95,6 +95,16 @@ public final class POP3StorageProviderRegistry {
     }
 
     /**
+     * Adds given provider to this registry bound to name obtained by {@link POP3StorageProvider#getPOP3StorageName()}.
+     * 
+     * @param provider The provider
+     * @return <code>true</code> if provider could be successfully added; otherwise <code>false</code>
+     */
+    public boolean addPOP3StorageProvider(final POP3StorageProvider provider) {
+        return addPOP3StorageProvider(provider.getPOP3StorageName(), provider);
+    }
+
+    /**
      * Adds given provider to this registry bound to specified provider name.
      * 
      * @param providerName The provider name
@@ -105,4 +115,20 @@ public final class POP3StorageProviderRegistry {
         return (null == registryMap.putIfAbsent(providerName, provider));
     }
 
+    /**
+     * Removes the provider from this registry which is bound to specified provider name.
+     * 
+     * @param providerName The provider name
+     * @return The removed provider or <code>null</code> if none removed
+     */
+    public POP3StorageProvider removePOP3StorageProvider(final String providerName) {
+        return registryMap.remove(providerName);
+    }
+
+    /**
+     * Clears this registry.
+     */
+    public void clear() {
+        registryMap.clear();
+    }
 }
