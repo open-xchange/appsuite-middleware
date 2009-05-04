@@ -224,6 +224,9 @@ public class RefresherTest extends TestCase {
             public CacheKey newCacheKey(final int contextId, final Serializable obj) {
                 throw new UnsupportedOperationException();
             }
+            public CacheKey newCacheKey(int contextId, Serializable... objs) {
+                throw new UnsupportedOperationException();
+            }
         });
         Refreshed refreshed = new Refreshed();
         consumer1 = new Consumer(refreshed);
