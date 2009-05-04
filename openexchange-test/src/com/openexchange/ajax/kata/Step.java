@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AJAXClient;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface Step {
+public interface Step extends Cleanable{
     public void perform(AJAXClient client) throws Exception;
-    public void cleanUp() throws Exception;
 }

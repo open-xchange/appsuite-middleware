@@ -47,80 +47,15 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.kata;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.mail.TestMail;
 
 /**
- * {@link DeleteRequest}
- * 
+ * {@link Cleanable}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
-
-    private final String[][] folderAndMailIds;
-
-    private final boolean hardDelete;
-
-    private boolean failOnError = true;
-
-    public DeleteRequest(final String[][] folderAndMailIds) {
-        this(folderAndMailIds, false);
-    }
-
-    public DeleteRequest(final String[][] folderAndMailIds, final boolean hardDelete) {
-        this.folderAndMailIds = folderAndMailIds;
-        this.hardDelete = hardDelete;
-    }
-
-    public DeleteRequest(final TestMail mail, final boolean hardDelete) {
-        this.folderAndMailIds = new String[][] { mail.getFolderAndId() };
-        this.hardDelete = hardDelete;
-    }
-
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter("harddelete", hardDelete ? "1" : "0") };
-    }
-
-    public AbstractAJAXParser<DeleteResponse> getParser() {
-        return new AbstractAJAXParser<DeleteResponse>(failOnError) {
-
-            @Override
-            protected DeleteResponse createResponse(final Response response) throws JSONException {
-                return new DeleteResponse(response);
-            }
-        };
-    }
-
-    public Object getBody() throws JSONException {
-        final JSONArray array = new JSONArray();
-        for (final String[] folderAndObject : folderAndMailIds) {
-            final JSONObject json = new JSONObject();
-            json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndObject[0]);
-            json.put(DataFields.ID, folderAndObject[1]);
-            array.put(json);
-        }
-        return array;
-    }
-
-    public void ignoreError() {
-        failOnError = false;
-    }
-
-    public void failOnError() {
-        failOnError = true;
-    }
+public interface Cleanable {
+    public void cleanUp() throws Exception;
 }

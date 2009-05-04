@@ -154,9 +154,14 @@ public class TestMail implements IdentitySource<TestMail> {
         this.contentType = contentType;
     }
 
-    public TestMail() {
-
+    public String[] getFolderAndId(){
+        return new String[]{ getFolder(), getId() };
     }
+    
+    public TestMail() {
+    }
+    
+    
 
     public TestMail(JSONObject obj) throws JSONException {
         read(obj);
@@ -296,19 +301,12 @@ public class TestMail implements IdentitySource<TestMail> {
         return folder;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
-     */
     public void assumeIdentity(TestMail entry) {
-        // TODO Auto-generated method stub
-        
+        entry.setId(getId());
+        entry.setFolder(getFolder());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#forgetIdentity(java.lang.Object)
-     */
     public void forgetIdentity(TestMail entry) {
-        // TODO Auto-generated method stub
         
     }
 
@@ -316,12 +314,9 @@ public class TestMail implements IdentitySource<TestMail> {
         return TestMail.class;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
-     */
     public void rememberIdentityValues(TestMail entry) {
-        // TODO Auto-generated method stub
-        
+        setId(entry.getId());
+        setFolder(entry.getFolder());
     }
 
 }
