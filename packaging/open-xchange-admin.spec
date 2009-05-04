@@ -33,7 +33,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -221,6 +221,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Apr 23 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13440: Clearing string values with the CLT can be done with an empty string.
 * Tue Feb 24 2009 - choeger@open-xchange.com
  - Bugfix #12517: [L3] Foldercache does not synchronize properly
      set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
