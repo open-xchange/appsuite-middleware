@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,12 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Apr 24 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13482: Survive empty lock body on WebDAV infostore interface.
+* Fri Apr 17 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents.
+* Thu Apr 16 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13437: Implemented free busy for resources.
 * Tue Apr 14 2009 - thorben.betten@open-xchange.com
  - Bugfix #13343: Proper last-accessed check when deciding whether to send an AJP KEEP-ALIVE or not
 * Mon Mar 16 2009 - marcus.klein@open-xchange.com
