@@ -21,6 +21,7 @@
     <property name="distribution" value="debian"/>
     <property name="oxconfdir" value="etc/admindaemon"/>
     <property name="serverconfdir" value="etc/groupware"/>
+	<property name="commonConfDir" value="etc/common"/>
     <property name="masterauthfile" value="mpasswd"/>
     <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
 
@@ -84,10 +85,9 @@
         <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
         <filter token="oxlibpath"         value="${prefix}/lib"/>
         <filter token="serverconfdir"     value="${serverconfdir}"/>
+    	<filter token="commonConfDir"     value="${commonConfDir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
-        <filter token="oxserverconfdir"   value="${serverconfdir}"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
-        <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
         <filter token="adminlogfile"      value="${logdir}/open-xchange-admin.log"/>
         <filter token="consolelogfile"    value="${logdir}/open-xchange-admin-console.log"/>
         <filter token="osgilogfile"       value="${logdir}/osgi-admin.log"/>
