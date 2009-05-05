@@ -55,7 +55,6 @@ SESSIONDPROPERTIES:@serverconfdir@/sessiond.properties
 EVENTPROPERTIES:@serverconfdir@/event.properties
 PUSHPROPERTIES:@serverconfdir@/push.properties
 configDB=@oxconfdir@/configdb.properties
-FOLDERCACHEPROPERTIES=@serverconfdir@/foldercache.properties
 
 UPDATETASKSCFG=@serverconfdir@/updatetasks.cfg
 
