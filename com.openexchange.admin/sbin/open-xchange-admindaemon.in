@@ -54,7 +54,7 @@ OXCONFIG=@oxscriptconf@
 OXPREFIX=@oxprefix@
 CONSOLELOG=@consolelogfile@
 OXCONFIGDIR=@oxconfdir@
-OXSERVERCONFIGDIR=@oxserverconfdir@
+COMMONCONFIGDIR=@commonConfDir@
 
 test -f $OXFUNCTIONS || {
 	echo "missing common shell functions file"
@@ -82,6 +82,7 @@ ox_update_config_init "$OSGIPATH/config.ini" "$OSGIPATH/config.ini.template" "$O
 umask 066
 exec $JAVA_BIN $JAVA_XTRAOPTS \
 	-Dopenexchange.propdir=$OXPREFIX/$OXCONFIGDIR \
+	-Dopenexchange.propdir2=$OXPREFIX/$COMMONCONFIGDIR \
 	-Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
 	-Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 	-Duser.timezone=GMT \
