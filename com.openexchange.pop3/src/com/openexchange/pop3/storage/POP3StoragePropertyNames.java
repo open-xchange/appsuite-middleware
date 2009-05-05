@@ -66,22 +66,45 @@ public final class POP3StoragePropertyNames {
     /**
      * The abbreviation of the storage to user;<br />
      * e.g. <code>"mailaccount"</code> to use the default mail account as storage.
+     * 
+     * @type <code>String</code>
      */
     public static final String PROPERTY_STORAGE = "pop3.storage";
 
     /**
      * The path in storage to the folder/resource keeping POP3 messages;<br />
      * e.g. <code>"INBOX/My POP3 Messages"</code> inside an mail account storage.
+     * 
+     * @type <code>String</code>
      */
     public static final String PROPERTY_PATH = "pop3.path";
 
     /**
      * The frequency or interval in minutes when a new connection to actual POP3 account is (possibly) allowed.
+     * 
+     * @type <code>Integer</code>
      */
     public static final String PROPERTY_FREQUENCY = "pop3.frequency";
 
     /**
      * The last-accessed time stamp the last access to actual POP3 account took place.
+     * 
+     * @type <code>Long</code>
      */
     public static final String PROPERTY_LAST_ACCESSED = "pop3.lastaccess";
+
+    /**
+     * Whether to only retrieve (<code>"false"</code>) or to retrieve-and-delete (<code>"true"</code>) messages from POP3 account.
+     * 
+     * @type <code>Boolean</code>
+     */
+    public static final String PROPERTY_EXPUNGE = "pop3.expunge";
+
+    /**
+     * Whether a delete operation performed on storage also deletes affected message in POP3 account.
+     * 
+     * @type <code>Boolean</code>
+     */
+    public static final String PROPERTY_DELETE_WRITE_THROUGH = "pop3.deletewt";
+
 }

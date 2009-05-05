@@ -50,6 +50,7 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
+import java.util.Arrays;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -62,6 +63,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;
+import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.session.Session;
 
@@ -86,15 +88,18 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final POP3StorageUIDLMap uidlMap;
 
-    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3FolderStorage folderStorage, final POP3StorageUIDLMap uidlMap) throws MailException {
+    private final POP3StorageTrashContainer trashContainer;
+
+    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage) throws MailException {
         super();
         this.delegatee = delegatee;
-        this.folderStorage = folderStorage;
+        this.folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
         this.path = folderStorage.getPath();
         this.separator = folderStorage.getSeparator();
         this.session = folderStorage.getSession();
         this.accountId = folderStorage.getAccountId();
-        this.uidlMap = uidlMap;
+        this.uidlMap = storage.getUIDLMap();
+        this.trashContainer = storage.getTrashContainer();
     }
 
     private String[] getMailIDs(final String fullname, final String[] uidls) throws MailException {
@@ -152,6 +157,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             // Clean from storage
             delegatee.deleteMessages(getRealFullname(folder), mailIds, hardDelete);
             uidlMap.deleteUIDLMappings(uidls);
+            trashContainer.addAllUIDL(Arrays.asList(uidls));
             // TODO: Remember cleansed UIDLs for later "write-through" to POP3 account if option enabled
         } else {
             // Move to trash

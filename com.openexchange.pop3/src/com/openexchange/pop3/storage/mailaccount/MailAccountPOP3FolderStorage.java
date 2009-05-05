@@ -52,17 +52,24 @@ package com.openexchange.pop3.storage.mailaccount;
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.stripPathFromFullname;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -75,6 +82,8 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
+import com.openexchange.pop3.storage.POP3StorageTrashContainer;
+import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
@@ -92,6 +101,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private final IMailFolderStorage delegatee;
 
+    private final IMailMessageStorage messageStorage;
+
+    private final POP3StorageTrashContainer trashContainer;
+
+    private final POP3StorageUIDLMap uidlMap;
+
     private Context ctx;
 
     private final Session session;
@@ -102,15 +117,11 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private final int accountId;
 
-    /**
-     * Initializes a new {@link MailAccountPOP3FolderStorage}.
-     * 
-     * @param delegatee The {@link IMailFolderStorage} to delegate to
-     * @param pop3Access The POP3 access
-     * @param path The path in storage to POP3 folder structure
-     */
-    MailAccountPOP3FolderStorage(final IMailFolderStorage delegatee, final POP3Access pop3Access, final String path) {
+    MailAccountPOP3FolderStorage(final IMailFolderStorage delegatee, final MailAccountPOP3Storage storage, final POP3Access pop3Access, final String path) throws MailException {
         super();
+        this.trashContainer = storage.getTrashContainer();
+        this.messageStorage = storage.getMessageStorage();
+        this.uidlMap = storage.getUIDLMap();
         this.session = pop3Access.getSession();
         this.delegatee = delegatee;
         this.path = path;
@@ -326,10 +337,30 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         arr[index] = fullname;
     }
 
+    private static final MailField[] FIELDS_ID = { MailField.ID };
+
     public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
+        if (hardDelete) {
+            // Add affected UIDLs to trash container
+            final MailMessage[] mails = messageStorage.getAllMessages(
+                fullname,
+                null,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                FIELDS_ID);
+            final Set<String> knownUIDLs = uidlMap.getAllUIDLs().keySet();
+            final Set<String> uidls2Trash = new HashSet<String>(mails.length);
+            for (int i = 0; i < mails.length; i++) {
+                uidls2Trash.add(mails[i].getMailId());
+            }
+            uidls2Trash.retainAll(knownUIDLs);
+            trashContainer.addAllUIDL(uidls2Trash);
+            uidlMap.deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
+        }
+        // Clear folder
         final String realFullname = getRealFullname(fullname);
         delegatee.clearFolder(realFullname, hardDelete);
     }
@@ -348,7 +379,27 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw new POP3Exception(POP3Exception.Code.NO_DEFAULT_FOLDER_DELETE, fullname);
         }
-        return delegatee.deleteFolder(getRealFullname(fullname), hardDelete);
+        if (hardDelete) {
+            // Add affected UIDLs to trash container
+            final MailMessage[] mails = messageStorage.getAllMessages(
+                fullname,
+                null,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                FIELDS_ID);
+            final Set<String> knownUIDLs = uidlMap.getAllUIDLs().keySet();
+            final Set<String> uidls2Trash = new HashSet<String>(mails.length);
+            for (int i = 0; i < mails.length; i++) {
+                uidls2Trash.add(mails[i].getMailId());
+            }
+            uidls2Trash.retainAll(knownUIDLs);
+            trashContainer.addAllUIDL(uidls2Trash);
+            uidlMap.deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
+            // And finally hard-delete folder
+            return stripPathFromFullname(path, delegatee.deleteFolder(getRealFullname(fullname), true));
+        }
+        // TODO: Update UIDL map for folders moved below trash folder
+        return stripPathFromFullname(path, delegatee.deleteFolder(getRealFullname(fullname), hardDelete));
     }
 
     public String deleteFolder(final String fullname) throws MailException {

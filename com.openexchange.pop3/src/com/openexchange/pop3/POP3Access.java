@@ -296,7 +296,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 /*
                  * Access POP3 account and synchronize
                  */
-                pop3Storage.syncMessages();
+                pop3Storage.syncMessages(isExpungeOnQuit());
                 /*
                  * Update last-accessed time stamp
                  */
@@ -397,4 +397,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         // Fallback to 10 minutes
         return FALLBACK_MINUTES * 60 * 1000;
     }
+
+    private boolean isExpungeOnQuit() throws MailException {
+        final String expungeStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_EXPUNGE);
+        if (null != expungeStr) {
+            return Boolean.parseBoolean(expungeStr);
+        }
+        return false;
+    }
+
 }

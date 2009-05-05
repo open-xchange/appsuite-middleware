@@ -47,65 +47,56 @@
  *
  */
 
-package com.openexchange.pop3.storage.mailaccount;
+package com.openexchange.pop3.storage;
+
+import java.util.Collection;
+import java.util.Set;
+import com.openexchange.mail.MailException;
 
 /**
- * {@link SessionParameterNames} - Constants for session parameter names.
+ * {@link POP3StorageTrashContainer} - Container for permanently deleted POP3 messages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionParameterNames {
+public interface POP3StorageTrashContainer {
 
     /**
-     * Initializes a new {@link SessionParameterNames}.
-     */
-    private SessionParameterNames() {
-        super();
-    }
-
-    /**
-     * Property name prefix for maps.
-     */
-    private static final String PROP_MAP = "pop3.uidlmap";
-
-    /**
-     * Gets the property name for UIDL map.
+     * Adds specified UIDL to this trash container.
      * 
-     * @param accountId The account ID
-     * @return The property name for UIDL map
+     * @param uidl The UIDL of the permanently deleted POP3 message
+     * @throws MailException If adding UIDL fails
      */
-    public static String getUIDLMap(final int accountId) {
-        return new StringBuilder(PROP_MAP.length() + 4).append(PROP_MAP).append(accountId).toString();
-    }
+    public void addUIDL(String uidl) throws MailException;
 
     /**
-     * Property name prefix for properties.
-     */
-    private static final String PROP_PROPS = "pop3.props";
-
-    /**
-     * Gets the property name for POP3 storage properties.
+     * Adds all specified UIDLs to this trash container.
      * 
-     * @param accountId The account ID
-     * @return The property name for POP3 storage properties
+     * @param uidl The UIDLs of the permanently deleted POP3 messages
+     * @throws MailException If adding UIDLs fails
      */
-    public static String getStorageProperties(final int accountId) {
-        return new StringBuilder(PROP_PROPS.length() + 4).append(PROP_PROPS).append(accountId).toString();
-    }
+    public void addAllUIDL(Collection<? extends String> uidls) throws MailException;
 
     /**
-     * Property name prefix for trash container.
-     */
-    private static final String PROP_TRASH = "pop3.trash";
-
-    /**
-     * Gets the property name for trash container.
+     * Removes specified UIDL from this trash container.
      * 
-     * @param accountId The account ID
-     * @return The property name for trash container
+     * @param uidl The UIDL to remove
+     * @throws MailException If removing UIDL fails
      */
-    public static String getTrashContainer(final int accountId) {
-        return new StringBuilder(PROP_TRASH.length() + 4).append(PROP_TRASH).append(accountId).toString();
-    }
+    public void removeUIDL(String uidl) throws MailException;
+
+    /**
+     * Gets all UIDLs kept in this container.
+     * 
+     * @return All UIDLs kept in this container
+     * @throws MailException If retrieving UIDLs fails
+     */
+    public Set<String> getUIDLs() throws MailException;
+
+    /**
+     * Clears this container.
+     * 
+     * @throws MailException If clearing fails
+     */
+    public void clear() throws MailException;
 
 }

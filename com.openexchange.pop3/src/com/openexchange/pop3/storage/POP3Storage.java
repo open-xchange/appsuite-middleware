@@ -85,9 +85,10 @@ public interface POP3Storage {
      * Tries to establish a connection to actual POP3 account, fetches all contained messages and synchronizes them with the ones hold in
      * this storage.
      * 
+     * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
      * @throws MailException If synchronizing messages fails
      */
-    public void syncMessages() throws MailException;
+    public void syncMessages(boolean expunge) throws MailException;
 
     /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
@@ -112,4 +113,13 @@ public interface POP3Storage {
      * @throws MailException If UIDL map cannot be returned
      */
     public POP3StorageUIDLMap getUIDLMap() throws MailException;
+
+    /**
+     * Gets the trash container (containing UIDLS of permanently deleted POP3 messages)
+     * 
+     * @return The trash container
+     * @throws MailException If trash container cannot be returned
+     */
+    public POP3StorageTrashContainer getTrashContainer() throws MailException;
+
 }

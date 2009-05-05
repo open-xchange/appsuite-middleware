@@ -49,63 +49,82 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.mail.MailException;
+import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.storage.POP3StorageTrashContainer;
+import com.openexchange.session.Session;
+
 /**
- * {@link SessionParameterNames} - Constants for session parameter names.
+ * {@link SessionPOP3StorageTrashContainer} - Session-backed implementation of {@link POP3StorageTrashContainer}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionParameterNames {
+public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashContainer {
 
     /**
-     * Initializes a new {@link SessionParameterNames}.
+     * Gets the trash container bound to specified POP3 access.
+     * 
+     * @param pop3Access The POP3 access
+     * @return The trash container bound to specified POP3 access
+     * @throws MailException If instance cannot be returned
      */
-    private SessionParameterNames() {
+    public static SessionPOP3StorageTrashContainer getInstance(final POP3Access pop3Access) throws MailException {
+        final Session session = pop3Access.getSession();
+        final String key = SessionParameterNames.getTrashContainer(pop3Access.getAccountId());
+        SessionPOP3StorageTrashContainer cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
+        if (null == cached) {
+            cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access));
+            session.setParameter(key, cached);
+        }
+        return cached;
+    }
+
+    /*-
+     * Member section
+     */
+
+    private final POP3StorageTrashContainer delegatee;
+
+    private final Set<String> set;
+
+    private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee) throws MailException {
         super();
+        this.delegatee = delegatee;
+        set = new HashSet<String>();
+        init();
     }
 
-    /**
-     * Property name prefix for maps.
-     */
-    private static final String PROP_MAP = "pop3.uidlmap";
-
-    /**
-     * Gets the property name for UIDL map.
-     * 
-     * @param accountId The account ID
-     * @return The property name for UIDL map
-     */
-    public static String getUIDLMap(final int accountId) {
-        return new StringBuilder(PROP_MAP.length() + 4).append(PROP_MAP).append(accountId).toString();
+    private void init() throws MailException {
+        set.addAll(delegatee.getUIDLs());
     }
 
-    /**
-     * Property name prefix for properties.
-     */
-    private static final String PROP_PROPS = "pop3.props";
-
-    /**
-     * Gets the property name for POP3 storage properties.
-     * 
-     * @param accountId The account ID
-     * @return The property name for POP3 storage properties
-     */
-    public static String getStorageProperties(final int accountId) {
-        return new StringBuilder(PROP_PROPS.length() + 4).append(PROP_PROPS).append(accountId).toString();
+    public void addUIDL(final String uidl) throws MailException {
+        set.add(uidl);
+        delegatee.addUIDL(uidl);
     }
 
-    /**
-     * Property name prefix for trash container.
-     */
-    private static final String PROP_TRASH = "pop3.trash";
+    public void clear() throws MailException {
+        set.clear();
+        delegatee.clear();
+    }
 
-    /**
-     * Gets the property name for trash container.
-     * 
-     * @param accountId The account ID
-     * @return The property name for trash container
-     */
-    public static String getTrashContainer(final int accountId) {
-        return new StringBuilder(PROP_TRASH.length() + 4).append(PROP_TRASH).append(accountId).toString();
+    public Set<String> getUIDLs() throws MailException {
+        final Set<String> tmp = new HashSet<String>();
+        tmp.addAll(set);
+        return set;
+    }
+
+    public void removeUIDL(final String uidl) throws MailException {
+        set.remove(uidl);
+        delegatee.removeUIDL(uidl);
+    }
+
+    public void addAllUIDL(final Collection<? extends String> uidls) throws MailException {
+        set.addAll(uidls);
+        delegatee.addAllUIDL(uidls);
     }
 
 }

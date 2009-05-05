@@ -127,4 +127,5 @@ public interface POP3StorageUIDLMap {
      * @throws MailException If mapping deletion fails
      */
     public void deleteFullnameUIDPairMappings(FullnameUIDPair[] fullnameUIDPairs) throws MailException;
+
 }
