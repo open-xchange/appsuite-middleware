@@ -65,18 +65,24 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
+import com.openexchange.mail.permission.DefaultMailPermission;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.POP3StoreConnector;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
+import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
@@ -110,9 +116,16 @@ public class MailAccountPOP3Storage implements POP3Storage {
     MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
         super();
         this.pop3Access = pop3Access;
-        defaultMailAccess = MailAccess.getInstance(pop3Access.getSession());
+        final Session session = pop3Access.getSession();
+        defaultMailAccess = MailAccess.getInstance(session);
         this.properties = properties;
         path = properties.getProperty(POP3StoragePropertyNames.PROPERTY_PATH);
+        if (null == path) {
+            throw new POP3Exception(
+                POP3Exception.Code.MISSING_PATH,
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
     }
 
     public void close() throws MailException {
@@ -121,6 +134,33 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public void connect() throws MailException {
         defaultMailAccess.connect();
+        // Check path existence
+        if (!defaultMailAccess.getFolderStorage().exists(path)) {
+            final MailFolderDescription toCreate = new MailFolderDescription();
+            
+            final MailPermission mp = new DefaultMailPermission();
+            mp.setEntity(pop3Access.getSession().getUserId());
+            
+            toCreate.addPermission(mp);
+            toCreate.setExists(false);
+            
+            final char separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+            
+            final String[] parentAndName = parseFullname(path, separator);
+            toCreate.setName(parentAndName[1]);
+            toCreate.setParentFullname(parentAndName[0]);
+            toCreate.setSeparator(separator);
+            
+            defaultMailAccess.getFolderStorage().createFolder(toCreate);
+        }
+    }
+
+    private static String[] parseFullname(final String fullname, final char separator) {
+        final int pos = fullname.lastIndexOf(separator);
+        if (-1 == pos) {
+            return new String[] { MailFolder.DEFAULT_FOLDER_ID, fullname };
+        }
+        return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
 
     public IMailFolderStorage getFolderStorage() throws MailException {

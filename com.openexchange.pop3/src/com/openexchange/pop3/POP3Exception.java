@@ -351,7 +351,11 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Inconsistency detected in UIDL map.
          */
-        UIDL_INCONSISTENCY("Inconsistency detected in UIDL map.", Category.CODE_ERROR, 2064);
+        UIDL_INCONSISTENCY("Inconsistency detected in UIDL map.", Category.CODE_ERROR, 2064),
+        /**
+         * Missing POP3 storage path for user %1$s in context %2$s.
+         */
+        MISSING_PATH("Missing POP3 storage path for user %1$s in context %2$s.", Category.CODE_ERROR, 2065);
 
         private final String message;
 

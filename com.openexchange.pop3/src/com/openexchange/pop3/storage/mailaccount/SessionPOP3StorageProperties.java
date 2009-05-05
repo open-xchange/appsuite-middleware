@@ -108,7 +108,9 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
             return map.get(propertyName);
         }
         final String value = delegatee.getProperty(propertyName);
-        map.put(propertyName, value);
+        if (null != value) {
+            map.put(propertyName, value);
+        }
         return value;
     }
 

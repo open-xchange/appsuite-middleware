@@ -132,20 +132,22 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     private static void applyPOP3Storage(final POP3Access pop3Access) throws MailException {
         final Session session = pop3Access.session;
-        final int user = session.getUserId();
-        final int cid = session.getContextId();
-        // At least this property must be kept in database
-        final String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
-        if (null == providerName) {
-            throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
+        if (null != session) {
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            // At least this property must be kept in database
+            final String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
+            if (null == providerName) {
+                throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
+            }
+            final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
+            if (null == provider) {
+                throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE, Integer.valueOf(user), Integer.valueOf(cid));
+            }
+            final POP3StorageProperties properties = provider.getPOP3StorageProperties(pop3Access);
+            pop3Access.pop3Storage = provider.getPOP3Storage(pop3Access, properties);
+            pop3Access.pop3StorageProperties = properties;
         }
-        final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
-        if (null == provider) {
-            throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE, Integer.valueOf(user), Integer.valueOf(cid));
-        }
-        final POP3StorageProperties properties = provider.getPOP3StorageProperties(pop3Access);
-        pop3Access.pop3Storage = provider.getPOP3Storage(pop3Access, properties);
-        pop3Access.pop3StorageProperties = properties;
     }
 
     /**
@@ -192,6 +194,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public int getCacheIdleSeconds() {
         return (POP3Properties.getInstance().getPOP3ConnectionIdleTime() / 1000);
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return false;
     }
 
     @Override

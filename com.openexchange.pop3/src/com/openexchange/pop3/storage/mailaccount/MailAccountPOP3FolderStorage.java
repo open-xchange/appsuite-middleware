@@ -101,11 +101,13 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private final IMailFolderStorage delegatee;
 
-    private final IMailMessageStorage messageStorage;
+    private final MailAccountPOP3Storage storage;
 
-    private final POP3StorageTrashContainer trashContainer;
+    private IMailMessageStorage messageStorage;
 
-    private final POP3StorageUIDLMap uidlMap;
+    private POP3StorageTrashContainer trashContainer;
+
+    private POP3StorageUIDLMap uidlMap;
 
     private Context ctx;
 
@@ -117,15 +119,34 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private final int accountId;
 
-    MailAccountPOP3FolderStorage(final IMailFolderStorage delegatee, final MailAccountPOP3Storage storage, final POP3Access pop3Access, final String path) throws MailException {
+    MailAccountPOP3FolderStorage(final IMailFolderStorage delegatee, final MailAccountPOP3Storage storage, final POP3Access pop3Access, final String path) {
         super();
-        this.trashContainer = storage.getTrashContainer();
-        this.messageStorage = storage.getMessageStorage();
-        this.uidlMap = storage.getUIDLMap();
+        this.storage = storage;
         this.session = pop3Access.getSession();
         this.delegatee = delegatee;
         this.path = path;
         accountId = pop3Access.getAccountId();
+    }
+
+    private IMailMessageStorage getMessageStorage() throws MailException {
+        if (null == messageStorage) {
+            messageStorage = storage.getMessageStorage();
+        }
+        return messageStorage;
+    }
+
+    private POP3StorageTrashContainer getTrashContainer() throws MailException {
+        if (null == trashContainer) {
+            trashContainer = storage.getTrashContainer();
+        }
+        return trashContainer;
+    }
+
+    private POP3StorageUIDLMap getUIDLMap() throws MailException {
+        if (null == uidlMap) {
+            uidlMap = storage.getUIDLMap();
+        }
+        return uidlMap;
     }
 
     /**
@@ -345,20 +366,20 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         }
         if (hardDelete) {
             // Add affected UIDLs to trash container
-            final MailMessage[] mails = messageStorage.getAllMessages(
+            final MailMessage[] mails = getMessageStorage().getAllMessages(
                 fullname,
                 null,
                 MailSortField.RECEIVED_DATE,
                 OrderDirection.ASC,
                 FIELDS_ID);
-            final Set<String> knownUIDLs = uidlMap.getAllUIDLs().keySet();
+            final Set<String> knownUIDLs = getUIDLMap().getAllUIDLs().keySet();
             final Set<String> uidls2Trash = new HashSet<String>(mails.length);
             for (int i = 0; i < mails.length; i++) {
                 uidls2Trash.add(mails[i].getMailId());
             }
             uidls2Trash.retainAll(knownUIDLs);
-            trashContainer.addAllUIDL(uidls2Trash);
-            uidlMap.deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
+            getTrashContainer().addAllUIDL(uidls2Trash);
+            getUIDLMap().deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
         }
         // Clear folder
         final String realFullname = getRealFullname(fullname);
@@ -381,19 +402,20 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         }
         if (hardDelete) {
             // Add affected UIDLs to trash container
-            final MailMessage[] mails = messageStorage.getAllMessages(
+            final MailMessage[] mails = getMessageStorage().getAllMessages(
                 fullname,
                 null,
                 MailSortField.RECEIVED_DATE,
                 OrderDirection.ASC,
                 FIELDS_ID);
+            final POP3StorageUIDLMap uidlMap = getUIDLMap();
             final Set<String> knownUIDLs = uidlMap.getAllUIDLs().keySet();
             final Set<String> uidls2Trash = new HashSet<String>(mails.length);
             for (int i = 0; i < mails.length; i++) {
                 uidls2Trash.add(mails[i].getMailId());
             }
             uidls2Trash.retainAll(knownUIDLs);
-            trashContainer.addAllUIDL(uidls2Trash);
+            getTrashContainer().addAllUIDL(uidls2Trash);
             uidlMap.deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
             // And finally hard-delete folder
             return stripPathFromFullname(path, delegatee.deleteFolder(getRealFullname(fullname), true));
