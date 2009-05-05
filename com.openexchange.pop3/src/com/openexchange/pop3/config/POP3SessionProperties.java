@@ -162,7 +162,7 @@ public final class POP3SessionProperties {
         /*
          * RSET before quit means any messages, that have been marked as deleted by the POP3 server, are unmarked.
          */
-        pop3SessionProperties.put("mail.pop3.rsetbeforequit", "true");
+        pop3SessionProperties.put("mail.pop3.rsetbeforequit", "false");
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
