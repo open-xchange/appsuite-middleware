@@ -1,4 +1,6 @@
 tmp
+adminTmp
+commonTmp
 groupware
 admindaemon
 Makefile
