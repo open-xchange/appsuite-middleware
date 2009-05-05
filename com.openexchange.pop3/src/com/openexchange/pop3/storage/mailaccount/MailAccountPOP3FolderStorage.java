@@ -49,6 +49,8 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
+import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
+import static com.openexchange.pop3.storage.mailaccount.util.Utility.stripPathFromFullname;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.context.ContextService;
@@ -73,7 +75,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.pop3.storage.mailaccount.util.Utility;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
@@ -116,6 +117,33 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         accountId = pop3Access.getAccountId();
     }
 
+    /**
+     * Gets the account ID.
+     * 
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Gets the session.
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
+     * Gets the path.
+     * 
+     * @return The path
+     */
+    public String getPath() {
+        return path;
+    }
+
     private MailPermission getPOP3MailPermission() {
         final MailPermission mp = new DefaultMailPermission();
         mp.setFolderPermission(MailPermission.CREATE_OBJECTS_IN_FOLDER);
@@ -123,7 +151,13 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return mp;
     }
 
-    private char getSeparator() throws MailException {
+    /**
+     * Gets the separator character.
+     * 
+     * @return The separator character
+     * @throws MailException If separator character cannot be returned
+     */
+    public char getSeparator() throws MailException {
         if (0 == separator) {
             delegatee.getFolder("INBOX").getSeparator();
         }
@@ -208,19 +242,15 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 {
                     spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                 }
-                final char separator = getSeparator();
                 // INBOX
-                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(
-                    Utility.prependPath2Fullname(path, separator, "INBOX"),
-                    separator,
-                    1));
+                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), separator, 1));
                 // Other
                 for (int i = 0; i < defaultFolderNames.length; i++) {
                     final String realFullname;
                     if (null == defaultFolderFullnames[i]) {
-                        realFullname = Utility.prependPath2Fullname(path, separator, defaultFolderNames[i]);
+                        realFullname = getRealFullname(defaultFolderNames[i]);
                     } else {
-                        realFullname = Utility.prependPath2Fullname(path, separator, defaultFolderFullnames[i]);
+                        realFullname = getRealFullname(defaultFolderFullnames[i]);
                     }
 
                     if (StorageUtility.INDEX_CONFIRMED_HAM == i) {
@@ -274,7 +304,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
             }
             fn = delegatee.createFolder(description);
         }
-        return Utility.stripPathFromFullname(path, fn);
+        return stripPathFromFullname(path, fn);
     }
 
     private boolean isDefaultFoldersChecked() {
@@ -300,7 +330,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
-        final String realFullname = Utility.prependPath2Fullname(path, getSeparator(), fullname);
+        final String realFullname = getRealFullname(fullname);
         delegatee.clearFolder(realFullname, hardDelete);
     }
 
@@ -318,7 +348,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw new POP3Exception(POP3Exception.Code.NO_DEFAULT_FOLDER_DELETE, fullname);
         }
-        return delegatee.deleteFolder(Utility.prependPath2Fullname(path, getSeparator(), fullname), hardDelete);
+        return delegatee.deleteFolder(getRealFullname(fullname), hardDelete);
     }
 
     public String deleteFolder(final String fullname) throws MailException {
@@ -329,7 +359,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             return false;
         }
-        return delegatee.exists(Utility.prependPath2Fullname(path, getSeparator(), fullname));
+        return delegatee.exists(getRealFullname(fullname));
     }
 
     public String getConfirmedHamFolder() throws MailException {
@@ -348,7 +378,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
-        final MailFolder mailFolder = delegatee.getFolder(Utility.prependPath2Fullname(path, getSeparator(), fullname));
+        final MailFolder mailFolder = delegatee.getFolder(getRealFullname(fullname));
         prepareMailFolder(mailFolder, true);
         return mailFolder;
     }
@@ -357,14 +387,14 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
-        return delegatee.getMessageQuota(Utility.prependPath2Fullname(path, getSeparator(), fullname));
+        return delegatee.getMessageQuota(getRealFullname(fullname));
     }
 
     public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
-        final MailFolder[] folders = delegatee.getPath2DefaultFolder(Utility.prependPath2Fullname(path, getSeparator(), fullname));
+        final MailFolder[] folders = delegatee.getPath2DefaultFolder(getRealFullname(fullname));
         final List<MailFolder> tmp = new ArrayList<MailFolder>(folders.length);
         boolean stop = false;
         for (int i = 0; i < folders.length && !stop; i++) {
@@ -379,7 +409,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
-        return delegatee.getQuotas(Utility.prependPath2Fullname(path, getSeparator(), fullname), types);
+        return delegatee.getQuotas(getRealFullname(fullname), types);
     }
 
     public MailFolder getRootFolder() throws MailException {
@@ -398,12 +428,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
         }
-        return delegatee.getStorageQuota(Utility.prependPath2Fullname(path, getSeparator(), fullname));
+        return delegatee.getStorageQuota(getRealFullname(fullname));
     }
 
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname)) {
-            final MailFolder[] subfolders = delegatee.getSubfolders(Utility.prependPath2Fullname(path, getSeparator(), ""), all);
+            final MailFolder[] subfolders = delegatee.getSubfolders(getRealFullname(""), all);
             for (final MailFolder mailFolder : subfolders) {
                 prepareMailFolder(mailFolder, false);
             }
@@ -431,18 +461,18 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw new POP3Exception(POP3Exception.Code.NO_DEFAULT_FOLDER_RENAME, fullname);
         }
-        return delegatee.renameFolder(Utility.prependPath2Fullname(path, getSeparator(), fullname), newName);
+        return delegatee.renameFolder(getRealFullname(fullname), newName);
     }
 
     public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw new POP3Exception(POP3Exception.Code.NO_DEFAULT_FOLDER_RENAME, fullname);
         }
-        return delegatee.updateFolder(Utility.prependPath2Fullname(path, getSeparator(), fullname), toUpdate);
+        return delegatee.updateFolder(getRealFullname(fullname), toUpdate);
     }
 
     private void prepareMailFolder(final MailFolder mailFolder, final boolean checkForRoot) {
-        mailFolder.setFullname(Utility.stripPathFromFullname(path, mailFolder.getFullname()));
+        mailFolder.setFullname(stripPathFromFullname(path, mailFolder.getFullname()));
         final MailPermission mp = getPOP3MailPermission();
         if (checkForRoot && MailFolder.DEFAULT_FOLDER_ID.equals(mailFolder.getFullname())) {
             mp.setAllPermission(
@@ -455,5 +485,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         mailFolder.removeOwnPermission();
         mailFolder.addPermission(mp);
         mailFolder.setOwnPermission(mp);
+    }
+
+    private String getRealFullname(final String fullname) throws MailException {
+        return prependPath2Fullname(path, getSeparator(), fullname);
     }
 }

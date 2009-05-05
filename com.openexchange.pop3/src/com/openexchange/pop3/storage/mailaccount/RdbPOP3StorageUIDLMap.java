@@ -90,6 +90,8 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         this.accountId = pop3Access.getAccountId();
     }
 
+    private static final String SQL_DELETE_UIDLS = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND uidl = ?";
+
     private static final String SQL_INSERT_UIDLS = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl, fullname, uid) VALUES (?, ?, ?, ?, ?, ?)";
 
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
@@ -101,6 +103,19 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
         PreparedStatement stmt = null;
         try {
+            // Delete possibly existing mappings for specified UIDLs
+            stmt = con.prepareStatement(SQL_DELETE_UIDLS);
+            for (int i = 0; i < uidls.length; i++) {
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setInt(pos++, accountId);
+                stmt.setString(pos++, uidls[i]);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            closeSQLStuff(null, stmt);
+            // Insert new mappings for specified UIDLs
             stmt = con.prepareStatement(SQL_INSERT_UIDLS);
             for (int i = 0; i < uidls.length; i++) {
                 int pos = 1;
@@ -230,6 +245,64 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
+        }
+    }
+
+    private static final String SQL_DELETE_PAIRS = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND fullname = ? AND uid = ?";
+
+    public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, true);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_DELETE_PAIRS);
+            for (int i = 0; i < fullnameUIDPairs.length; i++) {
+                final FullnameUIDPair pair = fullnameUIDPairs[i];
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setInt(pos++, accountId);
+                stmt.setString(pos++, pair.getFullname());
+                stmt.setString(pos++, pair.getMailId());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
+        }
+    }
+
+    public void deleteUIDLMappings(final String[] uidls) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, true);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_DELETE_UIDLS);
+            for (int i = 0; i < uidls.length; i++) {
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setInt(pos++, accountId);
+                stmt.setString(pos++, uidls[i]);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
         }
     }
 }

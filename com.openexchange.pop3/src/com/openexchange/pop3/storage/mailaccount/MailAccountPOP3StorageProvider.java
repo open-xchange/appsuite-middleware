@@ -49,14 +49,14 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
-import java.util.Map;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 
 /**
- * {@link MailAccountPOP3StorageProvider} - Mail account POP3 storage provider.
+ * {@link MailAccountPOP3StorageProvider} - Primary mail account POP3 storage provider.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -69,14 +69,16 @@ public final class MailAccountPOP3StorageProvider implements POP3StorageProvider
         super();
     }
 
-    public POP3Storage getPOP3Storage(final POP3Access pop3Access, final Map<String, String> properties) throws MailException {
-        // TODO Auto-generated method stub
-        return null;
+    public POP3Storage getPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
+        return new MailAccountPOP3Storage(pop3Access, properties);
     }
 
     public String getPOP3StorageName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "mailaccount";
+    }
+
+    public POP3StorageProperties getPOP3StorageProperties(final POP3Access pop3Access) throws MailException {
+        return SessionPOP3StorageProperties.getInstance(pop3Access);
     }
 
 }

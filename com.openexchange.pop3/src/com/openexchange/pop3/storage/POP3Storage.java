@@ -50,6 +50,8 @@
 package com.openexchange.pop3.storage;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 
 /**
  * {@link POP3Storage} - Storage for messages from a POP3 account.
@@ -107,6 +109,7 @@ public interface POP3Storage {
      * Gets the UIDL map.
      * 
      * @return The UIDL map
+     * @throws MailException If UIDL map cannot be returned
      */
-    public POP3StorageUIDLMap getUIDLMap();
+    public POP3StorageUIDLMap getUIDLMap() throws MailException;
 }

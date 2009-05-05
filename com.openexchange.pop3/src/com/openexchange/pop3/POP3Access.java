@@ -49,35 +49,23 @@
 
 package com.openexchange.pop3;
 
-import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
-import java.security.Security;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.session.Session;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
-import com.sun.mail.pop3.POP3Folder;
-import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link POP3Access} - Establishes a POP3 access and provides access to storages.
@@ -93,29 +81,19 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
 
-    private static final String CHARENC_ISO8859 = "ISO-8859-1";
-
-    private static final Map<HostAndPort, Long> timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
-
-    private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
-
     /*-
      * Members
      */
 
     private POP3Storage pop3Storage;
 
+    private POP3StorageProperties pop3StorageProperties;
+
     private transient POP3FolderStorage folderStorage;
 
     private transient POP3MessageStorage messageStorage;
 
     private transient MailLogicTools logicTools;
-
-    private transient POP3Store pop3Store;
-
-    private transient javax.mail.Session pop3Session;
-
-    private transient POP3InboxFolder inboxFolder;
 
     private boolean connected;
 
@@ -127,10 +105,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * @param session The session providing needed user data
      * @throws MailException If initialization fails
      */
-    protected POP3Access newInstance(final Session session) throws MailException {
+    protected static POP3Access newInstance(final Session session) throws MailException {
         final POP3Access pop3Access = new POP3Access(session);
-        final POP3Storage pop3Storage = getPOP3Storage(pop3Access);
-        pop3Access.pop3Storage = pop3Storage;
+        applyPOP3Storage(pop3Access);
         return pop3Access;
     }
 
@@ -141,26 +118,24 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * @param accountId The account ID
      * @throws MailException If initialization fails
      */
-    protected POP3Access newInstance(final Session session, final int accountId) throws MailException {
+    protected static POP3Access newInstance(final Session session, final int accountId) throws MailException {
         final POP3Access pop3Access = new POP3Access(session, accountId);
-        final POP3Storage pop3Storage = getPOP3Storage(pop3Access);
-        pop3Access.pop3Storage = pop3Storage;
+        applyPOP3Storage(pop3Access);
         return pop3Access;
     }
 
     /**
-     * Initializes the POP3 storage for given POP3 access.
+     * Applies the POP3 storage to given POP3 access.
      * 
      * @param pop3Access The POP3 access
-     * @return The POP3 storage for given POP3 access
      * @throws MailException If POP3 storage initialization fails
      */
-    private static POP3Storage getPOP3Storage(final POP3Access pop3Access) throws MailException {
+    private static void applyPOP3Storage(final POP3Access pop3Access) throws MailException {
         final Session session = pop3Access.session;
         final int user = session.getUserId();
         final int cid = session.getContextId();
-        final Map<String, String> properties = POP3StorageUtil.getUserPOP3StorageProperties(pop3Access.accountId, user, cid);
-        final String providerName = properties.get(POP3StoragePropertyNames.PROPERTY_STORAGE);
+        // At least this property must be kept in database
+        final String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
         if (null == providerName) {
             throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
         }
@@ -168,7 +143,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (null == provider) {
             throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE, Integer.valueOf(user), Integer.valueOf(cid));
         }
-        return provider.getPOP3Storage(pop3Access, properties);
+        final POP3StorageProperties properties = provider.getPOP3StorageProperties(pop3Access);
+        pop3Access.pop3Storage = provider.getPOP3Storage(pop3Access, properties);
+        pop3Access.pop3StorageProperties = properties;
     }
 
     /**
@@ -194,12 +171,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private void reset() {
         super.resetFields();
+        pop3Storage = null;
+        pop3StorageProperties = null;
         folderStorage = null;
         messageStorage = null;
         logicTools = null;
-        pop3Store = null;
-        pop3Session = null;
-        inboxFolder = null;
         connected = false;
         decrement = false;
     }
@@ -242,26 +218,21 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (logicTools != null) {
             logicTools = null;
         }
+        if (pop3Storage != null) {
+            pop3Storage.releaseResources();
+        }
     }
 
     @Override
     protected void closeInternal() {
         try {
-            if (inboxFolder != null) {
+            if (pop3Storage != null) {
                 try {
-                    inboxFolder.closeAndExpunge();
+                    pop3Storage.close();
                 } catch (final MailException e) {
-                    LOG.error("Error while closing POP3 INBOX folder.", e);
+                    LOG.error("Error while closing POP3 storage.", e);
                 }
-                inboxFolder = null;
-            }
-            if (pop3Store != null) {
-                try {
-                    pop3Store.close();
-                } catch (final MessagingException e) {
-                    LOG.error("Error while closing POP3Store.", e);
-                }
-                pop3Store = null;
+                pop3Storage = null;
             }
         } finally {
             if (decrement) {
@@ -300,147 +271,49 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         }
     }
 
-    private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
-
-    private static final String ERR_CONNECT_TIMEOUT = "connect timed out";
-
     @Override
     protected void connectInternal() throws MailException {
-        if ((pop3Store != null) && pop3Store.isConnected()) {
-            connected = true;
-            return;
-        }
-        try {
-            final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
-            if (tmpDownEnabled) {
-                /*
-                 * Check if POP3 server is marked as being (temporary) down since connecting to it failed before
-                 */
-                checkTemporaryDown();
-            }
-            String tmpPass = getMailConfig().getPassword();
-            if (tmpPass != null) {
-                try {
-                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), CHARENC_ISO8859);
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            /*
-             * Check for already failed authentication
-             */
-            final String login = getMailConfig().getLogin();
-            checkFailedAuths(login, tmpPass);
-            /*
-             * Get properties
-             */
-            final Properties pop3Props = POP3SessionProperties.getDefaultSessionProperties();
-            if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
-                pop3Props.putAll(getMailProperties());
-            }
-            /*
-             * Check if a secure POP3 connection should be established
-             */
-            if (getMailConfig().isSecure()) {
-                pop3Props.put("mail.pop3.socketFactory.class", TrustAllSSLSocketFactory.class.getName());
-                pop3Props.put("mail.pop3.socketFactory.port", String.valueOf(getMailConfig().getPort()));
-                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
-                pop3Props.put("mail.pop3.starttls.enable", "true");
-                /*
-                 * Needed for JavaMail >= 1.4
-                 */
-                Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
-            }
-            /*
-             * Apply properties to POP3 session
-             */
-            pop3Session = javax.mail.Session.getInstance(pop3Props, null);
-            /*
-             * Check if debug should be enabled
-             */
-            if (Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
-                pop3Session.setDebug(true);
-                pop3Session.setDebugOut(System.out);
-            }
-            /*
-             * Get store
-             */
-            pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
-            /*
-             * ... and connect
-             */
+        // Connect the storage
+        pop3Storage.connect();
+        connected = true;
+        /*
+         * Increase counter
+         */
+        MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
+        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+        incrementCounter();
+        /*
+         * Remember to decrement
+         */
+        decrement = true;
+        /*
+         * Is it allowed to connect to real POP3 account to synchronize messages?
+         */
+        final long lastAccessed = getLastAccessed();
+        final long frequencyMillis = getFrequencyMillis();
+        if ((System.currentTimeMillis() - lastAccessed) >= frequencyMillis) {
             try {
-                pop3Store.connect(getMailConfig().getServer(), getMailConfig().getPort(), login, tmpPass);
-            } catch (final AuthenticationFailedException e) {
                 /*
-                 * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
+                 * Access POP3 account and synchronize
                  */
-                failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
-                throw e;
-            } catch (final MessagingException e) {
+                pop3Storage.syncMessages();
                 /*
-                 * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
-                 * SocketTimeoutException
+                 * Update last-accessed time stamp
                  */
-                if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException()) && ((SocketTimeoutException) e.getNextException()).getMessage().toLowerCase(
-                    Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
-                    /*
-                     * Remember a timed-out POP3 server on connect attempt
-                     */
-                    timedOutServers.put(
-                        new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort()),
-                        Long.valueOf(System.currentTimeMillis()));
-                }
-                throw e;
+                pop3StorageProperties.addProperty(
+                    POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED,
+                    String.valueOf(System.currentTimeMillis()));
+            } catch (final MailException e) {
+                LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             }
-            connected = true;
-            /*
-             * Increase counter
-             */
-            MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
-            MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-            incrementCounter();
-            /*
-             * Remember to decrement
-             */
-            decrement = true;
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, getMailConfig());
-        }
-    }
-
-    private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
-        final LoginAndPass key = new LoginAndPass(login, pass);
-        final Long range = failedAuths.get(key);
-        if (range != null) {
-            // TODO: Put time-out to pop3.properties
-            if (System.currentTimeMillis() - range.longValue() <= 10000) {
-                throw new AuthenticationFailedException("Login failed: authentication failure");
-            }
-            failedAuths.remove(key);
-        }
-    }
-
-    private void checkTemporaryDown() throws MailException, POP3Exception {
-        final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
-        final Long range = timedOutServers.get(key);
-        if (range != null) {
-            if (System.currentTimeMillis() - range.longValue() <= POP3Properties.getInstance().getPOP3TemporaryDown()) {
-                /*
-                 * Still treated as being temporary broken
-                 */
-                throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig().getLogin());
-            }
-            timedOutServers.remove(key);
         }
     }
 
     @Override
     public POP3FolderStorage getFolderStorage() throws MailException {
-        connected = ((pop3Store != null) && pop3Store.isConnected());
         if (connected) {
             if (null == folderStorage) {
-                folderStorage = new POP3FolderStorage(pop3Store, this, session);
+                folderStorage = new POP3FolderStorage(pop3Storage);
             }
             return folderStorage;
         }
@@ -449,10 +322,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public POP3MessageStorage getMessageStorage() throws MailException {
-        connected = ((pop3Store != null) && pop3Store.isConnected());
         if (connected) {
             if (null == messageStorage) {
-                messageStorage = new POP3MessageStorage(this, session);
+                messageStorage = new POP3MessageStorage(pop3Storage);
             }
             return messageStorage;
         }
@@ -461,7 +333,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public MailLogicTools getLogicTools() throws MailException {
-        connected = ((pop3Store != null) && pop3Store.isConnected());
         if (connected) {
             if (null == logicTools) {
                 logicTools = new MailLogicTools(session, accountId);
@@ -473,41 +344,12 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public boolean isConnected() {
-        if (!connected) {
-            return false;
-        }
-        return (connected = ((pop3Store != null) && pop3Store.isConnected()));
+        return connected;
     }
 
     @Override
     public boolean isConnectedUnsafe() {
         return connected;
-    }
-
-    /**
-     * Gets used POP3 session.
-     * 
-     * @return The POP3 session
-     */
-    public javax.mail.Session getPOP3Session() {
-        return pop3Session;
-    }
-
-    /**
-     * Gets the POP3 INBOX folder.
-     * 
-     * @return The POP3 INBOX folder
-     * @throws MailException If INBOX folder cannot be retrieved from POP3 store
-     */
-    public POP3InboxFolder getInboxFolder() throws MailException {
-        if (null == inboxFolder) {
-            try {
-                inboxFolder = new POP3InboxFolder((POP3Folder) pop3Store.getFolder("INBOX"), session.getUserId(), session.getContextId());
-            } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
-            }
-        }
-        return inboxFolder;
     }
 
     @Override
@@ -525,107 +367,34 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         return true;
     }
 
-    private static final class LoginAndPass {
-
-        private final String login;
-
-        private final String pass;
-
-        private final int hashCode;
-
-        public LoginAndPass(final String login, final String pass) {
-            super();
-            this.login = login;
-            this.pass = pass;
-            hashCode = (login.hashCode()) ^ (pass.hashCode());
+    private long getLastAccessed() throws MailException {
+        final String lastAccessedStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
+        if (null != lastAccessedStr) {
+            try {
+                return Long.parseLong(lastAccessedStr);
+            } catch (final NumberFormatException e) {
+                LOG.warn(e.getMessage(), e);
+                return System.currentTimeMillis();
+            }
         }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final LoginAndPass other = (LoginAndPass) obj;
-            if (login == null) {
-                if (other.login != null) {
-                    return false;
-                }
-            } else if (!login.equals(other.login)) {
-                return false;
-            }
-            if (pass == null) {
-                if (other.pass != null) {
-                    return false;
-                }
-            } else if (!pass.equals(other.pass)) {
-                return false;
-            }
-            return true;
-        }
-
+        return System.currentTimeMillis();
     }
 
-    private static final class HostAndPort {
+    private static final int FALLBACK_MINUTES = 10;
 
-        private final String host;
-
-        private final int port;
-
-        private final int hashCode;
-
-        public HostAndPort(final String host, final int port) {
-            super();
-            if (port < 0 || port > 0xFFFF) {
-                throw new IllegalArgumentException("port out of range:" + port);
+    private long getFrequencyMillis() throws MailException {
+        final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_FREQUENCY);
+        if (null != frequencyStr) {
+            int minutes = 0;
+            try {
+                minutes = Integer.parseInt(frequencyStr);
+            } catch (final NumberFormatException e) {
+                LOG.warn(e.getMessage(), e);
+                minutes = FALLBACK_MINUTES;
             }
-            if (host == null) {
-                throw new IllegalArgumentException("hostname can't be null");
-            }
-            this.host = host;
-            this.port = port;
-            hashCode = (host.toLowerCase(Locale.ENGLISH).hashCode()) ^ port;
+            return minutes * 60 * 1000;
         }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final HostAndPort other = (HostAndPort) obj;
-            if (host == null) {
-                if (other.host != null) {
-                    return false;
-                }
-            } else if (!host.equals(other.host)) {
-                return false;
-            }
-            if (port != other.port) {
-                return false;
-            }
-            return true;
-        }
+        // Fallback to 10 minutes
+        return FALLBACK_MINUTES * 60 * 1000;
     }
-
 }

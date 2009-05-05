@@ -76,7 +76,12 @@ public final class POP3StoragePropertyNames {
     public static final String PROPERTY_PATH = "pop3.path";
 
     /**
-     * The frequency or interval in minutes when a new synchronization with actual POP3 account takes place.
+     * The frequency or interval in minutes when a new connection to actual POP3 account is (possibly) allowed.
      */
     public static final String PROPERTY_FREQUENCY = "pop3.frequency";
+
+    /**
+     * The last-accessed time stamp the last access to actual POP3 account took place.
+     */
+    public static final String PROPERTY_LAST_ACCESSED = "pop3.lastaccess";
 }

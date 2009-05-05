@@ -58,14 +58,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Database;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
@@ -82,44 +81,44 @@ public class POP3StorageUtil {
         super();
     }
 
-    private static final String SQL_SELECT_STORAGE_PROPS = "SELECT name, value FROM user_pop3_storage_data WHERE cid = ? AND user = ? AND id = ?";
+    private static final String SQL_SELECT_STORAGE_NAME = "SELECT value FROM pop3_storage_data WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
     /**
-     * Loads POP3 storage properties of specified user for given account.
+     * Gets the POP3 storage provider name of specified user for given account.
      * 
      * @param accountId The POP3 account ID
      * @param user The user ID
      * @param cid The context ID
-     * @return The POP3 storage properties of specified user for given account
-     * @throws POP3Exception If loading POP3 storage properties fails
+     * @return The POP3 storage provider name of specified user for given account
+     * @throws POP3Exception If POP3 storage provider name cannot be returned
      */
-    public static Map<String, String> getUserPOP3StorageProperties(final int accountId, final int user, final int cid) throws POP3Exception {
+    public static String getPOP3StorageProviderName(final int accountId, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
             con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
-        final Map<String, String> properties = new HashMap<String, String>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_STORAGE_PROPS);
+            stmt = con.prepareStatement(SQL_SELECT_STORAGE_NAME);
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_STORAGE);
             rs = stmt.executeQuery();
-            while (rs.next()) {
-                properties.put(rs.getString(1), rs.getString(2));
+            if (rs.next()) {
+                return rs.getString(1);
             }
+            return null;
         } catch (final SQLException e) {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
         }
-        return properties;
     }
 
     /**

@@ -47,69 +47,74 @@
  *
  */
 
-package com.openexchange.pop3;
+package com.openexchange.pop3.storage.mailaccount;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.Protocol;
-import com.openexchange.mail.api.AbstractProtocolProperties;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.pop3.config.POP3Properties;
+import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.session.Session;
 
 /**
- * {@link POP3Provider} - The provider for POP3 protocol.
+ * {@link SessionPOP3StorageProperties} - Session-backed implementation of {@link POP3StorageProperties}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Provider extends MailProvider {
+public final class SessionPOP3StorageProperties implements POP3StorageProperties {
 
     /**
-     * POP3 protocol.
-     */
-    public static final Protocol PROTOCOL_POP3 = new Protocol("pop3", "pop3s");
-
-    private static final POP3Provider instance = new POP3Provider();
-
-    /**
-     * Gets the singleton instance of POP3 provider.
+     * Gets the storage properties bound to specified POP3 access.
      * 
-     * @return The singleton instance of POP3 provider
+     * @param pop3Access The POP3 access
+     * @return The storage properties bound to specified POP3 access
+     * @throws MailException If instance cannot be returned
      */
-    public static POP3Provider getInstance() {
-        return instance;
+    public static SessionPOP3StorageProperties getInstance(final POP3Access pop3Access) throws MailException {
+        final Session session = pop3Access.getSession();
+        final String key = PropertyNames.getStorageProperties(pop3Access.getAccountId());
+        SessionPOP3StorageProperties cached = (SessionPOP3StorageProperties) session.getParameter(key);
+        if (null == cached) {
+            cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access));
+            session.setParameter(key, cached);
+        }
+        return cached;
     }
+
+    /*-
+     * Member section
+     */
+
+    private final Map<String, String> map;
+
+    private final POP3StorageProperties delegatee;
 
     /**
-     * Initializes a new {@link POP3Provider}.
+     * Initializes a new {@link SessionPOP3StorageProperties}.
      */
-    private POP3Provider() {
+    private SessionPOP3StorageProperties(final POP3StorageProperties delegatee) {
         super();
+        this.delegatee = delegatee;
+        map = new ConcurrentHashMap<String, String>();
     }
 
-    @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) throws MailException {
-        return POP3Access.newInstance(session);
+    public void addProperty(final String propertyName, final String propertyValue) throws MailException {
+        map.put(propertyName, propertyValue);
+        delegatee.addProperty(propertyName, propertyValue);
     }
 
-    @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws MailException {
-        return POP3Access.newInstance(session, accountId);
+    public String getProperty(final String propertyName) throws MailException {
+        if (map.containsKey(propertyName)) {
+            return map.get(propertyName);
+        }
+        final String value = delegatee.getProperty(propertyName);
+        map.put(propertyName, value);
+        return value;
     }
 
-    @Override
-    public Protocol getProtocol() {
-        return PROTOCOL_POP3;
-    }
-
-    @Override
-    protected AbstractProtocolProperties getProtocolProperties() {
-        return POP3Properties.getInstance();
-    }
-
-    @Override
-    protected String getSpamHandlerName() {
-        return POP3Properties.getInstance().getSpamHandlerName();
+    public void removeProperty(final String propertyName) throws MailException {
+        map.remove(propertyName);
+        delegatee.removeProperty(propertyName);
     }
 
 }

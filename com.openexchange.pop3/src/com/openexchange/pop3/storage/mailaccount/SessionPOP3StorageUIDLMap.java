@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -71,9 +73,9 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
      * 
      * @param pop3Access The POP3 access
      * @return The UIDL map bound to specified POP3 access
-     * @throws POP3Exception If instance cannot be returned
+     * @throws MailException If instance cannot be returned
      */
-    public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws POP3Exception {
+    public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws MailException {
         final Session session = pop3Access.getSession();
         final String key = PropertyNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
@@ -97,17 +99,17 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     /**
      * Initializes a new {@link SessionPOP3StorageUIDLMap}.
      * 
-     * @throws POP3Exception If initialization fails
+     * @throws MailException If initialization fails
      */
-    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee) throws POP3Exception {
+    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee) throws MailException {
         super();
         this.delegatee = delegatee;
-        this.pair2uidl = new HashMap<FullnameUIDPair, String>();
-        this.uidl2pair = new HashMap<String, FullnameUIDPair>();
+        this.pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
+        this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
         init();
     }
 
-    private void init() throws POP3Exception {
+    private void init() throws MailException {
         final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
         final int size = all.size();
         final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
@@ -118,7 +120,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
+    public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
         delegatee.addMappings(uidls, fullnameUIDPairs);
         for (int i = 0; i < fullnameUIDPairs.length; i++) {
             final String uidl = uidls[i];
@@ -156,6 +158,26 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         final Map<String, FullnameUIDPair> copy = new HashMap<String, FullnameUIDPair>();
         copy.putAll(uidl2pair);
         return copy;
+    }
+
+    public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
+        for (int i = 0; i < fullnameUIDPairs.length; i++) {
+            final String uidl = pair2uidl.remove(fullnameUIDPairs[i]);
+            if (null != uidl) {
+                uidl2pair.remove(uidl);
+            }
+        }
+        delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
+    }
+
+    public void deleteUIDLMappings(final String[] uidls) throws MailException {
+        for (int i = 0; i < uidls.length; i++) {
+            final FullnameUIDPair pair = uidl2pair.remove(uidls[i]);
+            if (null != pair) {
+                pair2uidl.remove(pair);
+            }
+        }
+        delegatee.deleteUIDLMappings(uidls);
     }
 
 }

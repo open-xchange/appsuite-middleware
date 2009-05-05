@@ -50,7 +50,7 @@
 package com.openexchange.pop3.storage;
 
 import java.util.Map;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.mail.MailException;
 
 /**
  * {@link POP3StorageUIDLMap} - Maps POP3 UIDL to a fullname-UID-pair.
@@ -64,51 +64,67 @@ public interface POP3StorageUIDLMap {
      * 
      * @param uidls The POP3 UIDLs
      * @return The fullname-UID-pairs to specified POP3 UIDLs. If no mapping could be found the corresponding entry is <code>null</code>
-     * @throws POP3Exception If mapping retrieval fails
+     * @throws MailException If mapping retrieval fails
      */
-    public FullnameUIDPair[] getFullnameUIDPairs(String[] uidls) throws POP3Exception;
+    public FullnameUIDPair[] getFullnameUIDPairs(String[] uidls) throws MailException;
 
     /**
      * Gets the fullname-UID-pair to specified POP3 UIDL.
      * 
      * @param uidls The POP3 UIDL
      * @return The fullname-UID-pair to specified POP3 UIDL or <code>null</code> if no such mapping exists
-     * @throws POP3Exception If mapping retrieval fails
+     * @throws MailException If mapping retrieval fails
      */
-    public FullnameUIDPair getFullnameUIDPair(String uidl) throws POP3Exception;
+    public FullnameUIDPair getFullnameUIDPair(String uidl) throws MailException;
 
     /**
      * Gets the POP3 UIDLs to specified fullname-UID-pairs.
      * 
      * @param fullnameUIDPairs The fullname-UID-pairs
      * @return The POP3 UIDLs to specified fullname-UID-pairs
-     * @throws POP3Exception If mapping retrieval fails
+     * @throws MailException If mapping retrieval fails
      */
-    public String[] getUIDLs(FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception;
+    public String[] getUIDLs(FullnameUIDPair[] fullnameUIDPairs) throws MailException;
 
     /**
      * Gets the POP3 UIDL to specified fullname-UID-pair.
      * 
      * @param fullnameUIDPairs The fullname-UID-pair
      * @return The POP3 UIDL to specified fullname-UID-pair or <code>null</code> if no such mapping exists
-     * @throws POP3Exception If mapping retrieval fails
+     * @throws MailException If mapping retrieval fails
      */
-    public String getUIDL(FullnameUIDPair fullnameUIDPair) throws POP3Exception;
+    public String getUIDL(FullnameUIDPair fullnameUIDPair) throws MailException;
 
     /**
      * Adds specified mappings to this map.
      * 
      * @param uidls The POP3 UIDLs
      * @param fullnameUIDPairs The fullname-UID-pairs. If no mapping could be found the corresponding entry is <code>null</code>
-     * @throws POP3Exception If adding mappings fails
+     * @throws MailException If adding mappings fails
      */
-    public void addMappings(String[] uidls, FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception;
+    public void addMappings(String[] uidls, FullnameUIDPair[] fullnameUIDPairs) throws MailException;
 
     /**
      * Gets all mappings known by this UIDL map.
      * 
      * @return All mappings known by this UIDL map
-     * @throws POP3Exception If mapping retrieval fails
+     * @throws MailException If mapping retrieval fails
      */
-    public Map<String, FullnameUIDPair> getAllUIDLs() throws POP3Exception;
+    public Map<String, FullnameUIDPair> getAllUIDLs() throws MailException;
+
+    /**
+     * Deletes the mappings for specified UIDLs.
+     * 
+     * @param uidls The UIDLs to clean from this map
+     * @throws MailException If mapping deletion fails
+     */
+    public void deleteUIDLMappings(String[] uidls) throws MailException;
+
+    /**
+     * Deletes the mappings for specified fullname-UID-pairs.
+     * 
+     * @param fullnameUIDPairs The fullname-UID-pairs to clean from this map
+     * @throws MailException If mapping deletion fails
+     */
+    public void deleteFullnameUIDPairMappings(FullnameUIDPair[] fullnameUIDPairs) throws MailException;
 }

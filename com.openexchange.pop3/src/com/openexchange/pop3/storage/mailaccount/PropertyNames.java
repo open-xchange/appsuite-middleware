@@ -78,4 +78,18 @@ public final class PropertyNames {
         return new StringBuilder(PROP_MAP.length() + 4).append(PROP_MAP).append(accountId).toString();
     }
 
+    /**
+     * Property name prefix for properties.
+     */
+    private static final String PROP_PROPS = "pop3.props";
+
+    /**
+     * Gets the property name for POP3 storage properties.
+     * 
+     * @param accountId The account ID
+     * @return The property name for POP3 storage properties
+     */
+    public static String getStorageProperties(final int accountId) {
+        return new StringBuilder(PROP_PROPS.length() + 4).append(PROP_PROPS).append(accountId).toString();
+    }
 }

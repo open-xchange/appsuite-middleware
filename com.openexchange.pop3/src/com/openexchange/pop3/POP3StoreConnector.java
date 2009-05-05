@@ -76,8 +76,6 @@ public final class POP3StoreConnector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3StoreConnector.class);
 
-    private static final String CHARENC_ISO8859 = "ISO-8859-1";
-
     private static final Map<HostAndPort, Long> timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
 
     private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
@@ -109,7 +107,7 @@ public final class POP3StoreConnector {
             String tmpPass = pop3Config.getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), CHARENC_ISO8859);
+                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), "ISO-8859-1");
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }

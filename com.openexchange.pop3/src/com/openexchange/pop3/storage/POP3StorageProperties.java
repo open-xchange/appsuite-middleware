@@ -47,69 +47,40 @@
  *
  */
 
-package com.openexchange.pop3;
+package com.openexchange.pop3.storage;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.Protocol;
-import com.openexchange.mail.api.AbstractProtocolProperties;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.pop3.config.POP3Properties;
-import com.openexchange.session.Session;
 
 /**
- * {@link POP3Provider} - The provider for POP3 protocol.
+ * {@link POP3StorageProperties} - Properties for a {@link POP3Storage}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Provider extends MailProvider {
+public interface POP3StorageProperties {
 
     /**
-     * POP3 protocol.
-     */
-    public static final Protocol PROTOCOL_POP3 = new Protocol("pop3", "pop3s");
-
-    private static final POP3Provider instance = new POP3Provider();
-
-    /**
-     * Gets the singleton instance of POP3 provider.
+     * Gets the property value associated with specified property name.
      * 
-     * @return The singleton instance of POP3 provider
+     * @param propertyName The property name
+     * @return The property value associated with specified property name or <code>null</code>
+     * @throws MailException If property retrieval fails
      */
-    public static POP3Provider getInstance() {
-        return instance;
-    }
+    public String getProperty(String propertyName) throws MailException;
 
     /**
-     * Initializes a new {@link POP3Provider}.
+     * Maps given property name to given property value.
+     * 
+     * @param propertyName The property name
+     * @param propertyValue The property value
+     * @throws MailException If property mapping cannot be added
      */
-    private POP3Provider() {
-        super();
-    }
+    public void addProperty(String propertyName, String propertyValue) throws MailException;
 
-    @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) throws MailException {
-        return POP3Access.newInstance(session);
-    }
-
-    @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws MailException {
-        return POP3Access.newInstance(session, accountId);
-    }
-
-    @Override
-    public Protocol getProtocol() {
-        return PROTOCOL_POP3;
-    }
-
-    @Override
-    protected AbstractProtocolProperties getProtocolProperties() {
-        return POP3Properties.getInstance();
-    }
-
-    @Override
-    protected String getSpamHandlerName() {
-        return POP3Properties.getInstance().getSpamHandlerName();
-    }
-
+    /**
+     * Removes the property value associated with specified property name.
+     * 
+     * @param propertyName The property name
+     * @throws MailException If property removal fails
+     */
+    public void removeProperty(String propertyName) throws MailException;
 }
