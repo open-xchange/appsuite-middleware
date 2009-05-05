@@ -6,8 +6,10 @@
 
     <!-- Directories -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="commonTmpDir" value="commonTmp"/>
     <property name="adminTmpDir" value="adminTmp"/>
     <property name="conf.dir" value="conf"/>
+    <property name="commonConfDir" location="commonConf"/>
     <property name="adminConfDir" value="adminConf"/>
 
     <!-- Replacements -->
@@ -18,6 +20,7 @@
 
     <target name="prepare">
         <mkdir dir="${tmp.dir}"/>
+        <mkdir dir="${commonTmpDir}"/>
         <mkdir dir="${adminTmpDir}"/>
     </target>
 
@@ -29,6 +32,13 @@
         <antcall target="patchConfigFiles">
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
         </antcall>
+    </target>
+
+    <target name="patchCommonConfig" depends="prepare">
+        <property name="patchConfDir" value="${commonTmpDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${commonConfDir}"/>
+        </copy>
     </target>
 
     <target name="patchAdminConfig" depends="prepare">
@@ -43,6 +53,7 @@
     </target>
 
     <target name="install">
+        <antcall target="patchConfig"/>
         <antcall target="patchConfig"/>
         <antcall target="patchAdminConfig"/>
     </target>

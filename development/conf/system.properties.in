@@ -55,7 +55,6 @@ SESSIONDPROPERTIES:@oxgroupwaresysconfdir@/sessiond.properties
 EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
-FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
 SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
