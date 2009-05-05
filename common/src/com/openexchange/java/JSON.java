@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -62,9 +63,9 @@ import org.json.JSONException;
  */
 public class JSON {
     /**
-     * Takes a JSONAray and transforms it to a list
+     * Takes a JSONArray and transforms it to a list
      * @param array JSONArray to transform
-     * @return list that is result of transformatio
+     * @return list that is result of transformation
      * @throws JSONException in case JSON cannot be read
      */
     public static List<String> jsonArray2list(JSONArray array) throws JSONException {
@@ -74,4 +75,18 @@ public class JSON {
         }
         return list;
     }
+
+    /**
+     * Takes a collection and transforms it to a JSONArray
+     * @param coll Collection to transform
+     * @return array that is result of transformation
+     */
+    public static JSONArray collection2jsonArray(Collection<? extends Object> coll) {
+        JSONArray array = new JSONArray();
+        for(Object obj: coll){
+            array.put(obj);
+        }
+        return array;
+    }
+
 }
