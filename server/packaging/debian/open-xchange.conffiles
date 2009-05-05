@@ -13,7 +13,7 @@
 /opt/open-xchange/etc/groupware/contact.properties
 /opt/open-xchange/etc/groupware/event.properties
 /opt/open-xchange/etc/groupware/file-logging.properties
-/opt/open-xchange/etc/groupware/foldercache.properties
+/opt/open-xchange/etc/common/foldercache.properties
 /opt/open-xchange/etc/groupware/HTMLEntities.properties
 /opt/open-xchange/etc/groupware/imap.properties
 /opt/open-xchange/etc/groupware/infostore.properties

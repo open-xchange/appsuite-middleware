@@ -75,8 +75,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private static OXFolderProperties instance = new OXFolderProperties();
 
-    private static final String PROPFILE = "FOLDERCACHEPROPERTIES";
-
     /**
      * @return The singleton instance of {@link OXFolderProperties}
      */
@@ -95,9 +93,9 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private boolean enableFolderCache = true;
 
-    private boolean ignoreSharedAddressbook;
+    private boolean ignoreSharedAddressbook = false;
 
-    private boolean enableInternalUsersEdit;
+    private boolean enableInternalUsersEdit = false;
 
     private OXFolderProperties() {
         super();
@@ -184,30 +182,43 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             LOG.error("Cannot look-up configuration service");
             return;
         }
-        final String trueStr = "true";
         /*
          * ENABLE_DB_GROUPING
          */
-        enableDBGrouping = trueStr.equalsIgnoreCase(configurationService.getProperty("ENABLE_DB_GROUPING", "true"));
+        String value = configurationService.getProperty("ENABLE_DB_GROUPING");
+        if (null == value) {
+            LOG.warn("Missing property ENABLE_DB_GROUPING.");
+        } else {
+            enableDBGrouping = Boolean.parseBoolean(value);
+        }
         /*
          * ENABLE_FOLDER_CACHE
          */
-        enableFolderCache = trueStr.equalsIgnoreCase(configurationService.getProperty("ENABLE_FOLDER_CACHE", "true"));
+        value = configurationService.getProperty("ENABLE_FOLDER_CACHE");
+        if (null == value) {
+            LOG.warn("Missing property ENABLE_FOLDER_CACHE");
+        } else {
+            enableFolderCache = Boolean.parseBoolean(value);
+        }
         /*
          * IGNORE_SHARED_ADDRESSBOOK
          */
-        ignoreSharedAddressbook = trueStr.equalsIgnoreCase(configurationService.getProperty("IGNORE_SHARED_ADDRESSBOOK", "false"));
+        value = configurationService.getProperty("IGNORE_SHARED_ADDRESSBOOK");
+        if (null == value) {
+            LOG.warn("Missing property IGNORE_SHARED_ADDRESSBOOK");
+        } else {
+            ignoreSharedAddressbook = Boolean.parseBoolean(value);
+        }
         /*
          * ENABLE_INTERNAL_USER_EDIT and add listener
          */
-        enableInternalUsersEdit = trueStr.equalsIgnoreCase(configurationService.getProperty(
+        value = configurationService.getProperty(
             "ENABLE_INTERNAL_USER_EDIT",
-            "false",
             (propertyListener = new PropertyListener() {
 
                 public void onPropertyChange(final PropertyEvent event) {
                     if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                        final boolean enableInternalUsersEditNew = trueStr.equalsIgnoreCase(event.getValue());
+                        final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
                         if (enableInternalUsersEditNew == enableInternalUsersEdit) {
                             /*
                              * Changed to same value; ignore
@@ -240,7 +251,12 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                         }
                     }
                 }
-            })));
+            }));
+        if (null == value) {
+            LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
+        } else {
+            enableInternalUsersEdit = Boolean.parseBoolean(value);
+        }
         /*
          * Log info
          */

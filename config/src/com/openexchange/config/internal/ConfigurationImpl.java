@@ -54,8 +54,10 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
@@ -76,7 +78,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String EXT = ".properties";
 
-    private final File dir;
+    private final File[] dirs;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -98,7 +100,17 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
      */
     public ConfigurationImpl() {
-        this(System.getProperty("openexchange.propdir"));
+        this(getDirectories());
+    }
+
+    private static final String[] getDirectories() {
+        List<String> tmp = new ArrayList<String>();
+        for (String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
+            if (null != System.getProperty(property)) {
+                tmp.add(System.getProperty(property));
+            }
+        }
+        return tmp.toArray(new String[tmp.size()]);
     }
 
     /**
@@ -106,21 +118,27 @@ public final class ConfigurationImpl implements ConfigurationService {
      * 
      * @param directory The directory where property files are located
      */
-    public ConfigurationImpl(final String directory) {
+    public ConfigurationImpl(String[] directories) {
         super();
-        if (null == directory) {
-            throw new IllegalArgumentException("directory is null. Missing system property \"openexchange.propdir\".");
-        }
-        dir = new File(directory);
-        if (!dir.exists()) {
-            throw new IllegalArgumentException("Not found: " + directory);
-        } else if (!dir.isDirectory()) {
-            throw new IllegalArgumentException("Not a directory: " + directory);
+        if (null == directories || directories.length == 0) {
+            throw new IllegalArgumentException("Missing configuration directory path.");
         }
         properties = new HashMap<String, String>();
         propertiesFiles = new HashMap<String, String>();
         final FileFilter fileFilter = new PropertyFileFilter();
-        processDirectory(dir, fileFilter, properties, propertiesFiles);
+        dirs = new File[directories.length];
+        for (int i = 0; i < directories.length; i++) {
+            if (null == directories[i]) {
+                throw new IllegalArgumentException("Given configuration directory path is null.");
+            }
+            dirs[i] = new File(directories[i]);
+            if (!dirs[i].exists()) {
+                throw new IllegalArgumentException("Not found: " + directories[i]);
+            } else if (!dirs[i].isDirectory()) {
+                throw new IllegalArgumentException("Not a directory: " + directories[i]);
+            }
+            processDirectory(dirs[i], fileFilter, properties, propertiesFiles);
+        }
     }
 
     private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
@@ -256,18 +274,20 @@ public final class ConfigurationImpl implements ConfigurationService {
     public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
         final Properties retval = new Properties();
         final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        folderName = dir.getAbsolutePath() + "/" + folderName + "/";
-        while (iter.hasNext()) {
-            final Entry<String, String> entry = iter.next();
-            if (entry.getValue().startsWith(folderName)) {
-                final String value;
-                if (null == listener) {
-                    value = getProperty(entry.getKey());
-                } else {
-                    value = getProperty(entry.getKey(), listener);
-                } // FIXME: this could have been overriden by some property
-                // external to the requested folder.
-                retval.put(entry.getKey(), value);
+        for (File dir : dirs) {
+            folderName = dir.getAbsolutePath() + "/" + folderName + "/";
+            while (iter.hasNext()) {
+                final Entry<String, String> entry = iter.next();
+                if (entry.getValue().startsWith(folderName)) {
+                    final String value;
+                    if (null == listener) {
+                        value = getProperty(entry.getKey());
+                    } else {
+                        value = getProperty(entry.getKey(), listener);
+                    } // FIXME: this could have been overriden by some property
+                    // external to the requested folder.
+                    retval.put(entry.getKey(), value);
+                }
             }
         }
         return retval;

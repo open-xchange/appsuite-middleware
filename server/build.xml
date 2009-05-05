@@ -14,6 +14,7 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf/groupware"/>
+	<property name="commonConfDir" value="conf/common"/>
     <property name="bin.dir" value="sbin"/>
 	<property name="lib.dir" value="lib"/>
 
@@ -38,7 +39,9 @@
     <property name="bundles.install.dir" value="${destdir}${bundlesdir}"/>
     <property name="common.conf.install.dir" value="${prefix}/etc"/>
     <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
+    <property name="confInstallDir2" value="${common.conf.install.dir}/common"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+	<property name="commonConfInstallCopyDir" location="${destdir}${confInstallDir2}"/>
     <property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
     <property name="bin.install.dir" value="${prefix}/sbin/"/>
     <property name="bin.install.copy.dir" location="${destdir}${bin.install.dir}"/>
@@ -183,6 +186,7 @@
         </copy>
         <antcall target="patchConfigFiles">
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
+        	<param name="common.conf.subst.patch" value="${confInstallDir2}"/>
         </antcall>
     </target>
 
@@ -196,6 +200,14 @@
                 <exclude name="osgi/**"/>
             </fileset>
         </copy>
+    	<mkdir dir="${commonConfInstallCopyDir}"/>
+    	<copy todir="${commonConfInstallCopyDir}">
+    		<fileset dir="${commonConfDir}">
+            	<include name="**" />
+                <exclude name="*.in"/>
+                <exclude name="CVS"/>
+    		</fileset>
+    	</copy>
     </target>
 
     <target name="patchScripts" depends="prepare">
@@ -268,6 +280,7 @@
 
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+    	<fail message="Define common.conf.subst.patch." unless="common.conf.subst.patch"/>
         <antcall target="patchOSGiIni"/>
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
@@ -300,6 +313,7 @@
         <move tofile="${patch.conf.dir}/ox-scriptconf.sh" file="${patch.conf.dir}/ox-scriptconf.sh.in" overwrite="true"/>
         <replace file="${patch.conf.dir}/ox-scriptconf.sh">
             <replacefilter token="@propertiesdir@" value="${conf.subst.patch}"/>
+            <replacefilter token="@commonPropertiesDir@" value="${common.conf.subst.patch}"/>
             <replacefilter token="@loggingproperties@" value= "${conf.subst.patch}/file-logging.properties"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value= "${conf.subst.patch}"/>
         </replace>
@@ -321,6 +335,7 @@
 
     <target name="patchBinFiles">
         <fail message="Define conf.subst.patch" unless="conf.subst.patch"/>
+        <fail message="Define common.conf.subst.patch" unless="common.conf.subst.patch"/>
         <fail message="Define lib.subst.patch" unless="lib.subst.patch"/>
         <antcall target="patchConsistencyStart"/>
         <antcall target="patchGroupwareStart"/>

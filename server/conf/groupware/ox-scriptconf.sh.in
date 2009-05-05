@@ -1,5 +1,6 @@
 
 PROPERTIESDIR=@propertiesdir@
+COMMONPROPERTIESDIR=@commonPropertiesDir@
 LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
