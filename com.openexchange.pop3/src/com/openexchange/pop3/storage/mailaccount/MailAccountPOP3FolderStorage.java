@@ -275,7 +275,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                     spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                 }
                 // INBOX
-                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), separator, 1));
+                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), getSeparator(), 1));
                 // Other
                 for (int i = 0; i < defaultFolderNames.length; i++) {
                     final String realFullname;
@@ -289,7 +289,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         if (spamHandler.isCreateConfirmedHam()) {
                             setDefaultMailFolder(i, checkDefaultFolder(
                                 realFullname,
-                                separator,
+                                getSeparator(),
                                 spamHandler.isUnsubscribeSpamFolders() ? 0 : -1));
                         } else if (LOG.isDebugEnabled()) {
                             LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
@@ -298,13 +298,13 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         if (spamHandler.isCreateConfirmedSpam()) {
                             setDefaultMailFolder(i, checkDefaultFolder(
                                 realFullname,
-                                separator,
+                                getSeparator(),
                                 spamHandler.isUnsubscribeSpamFolders() ? 0 : -1));
                         } else if (LOG.isDebugEnabled()) {
                             LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                         }
                     } else {
-                        setDefaultMailFolder(i, checkDefaultFolder(realFullname, separator, 1));
+                        setDefaultMailFolder(i, checkDefaultFolder(realFullname, getSeparator(), 1));
                     }
                 }
                 setDefaultFoldersChecked(true);
@@ -400,28 +400,108 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw new POP3Exception(POP3Exception.Code.NO_DEFAULT_FOLDER_DELETE, fullname);
         }
-        if (hardDelete) {
-            // Add affected UIDLs to trash container
-            final MailMessage[] mails = getMessageStorage().getAllMessages(
-                fullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                FIELDS_ID);
-            final POP3StorageUIDLMap uidlMap = getUIDLMap();
-            final Set<String> knownUIDLs = uidlMap.getAllUIDLs().keySet();
-            final Set<String> uidls2Trash = new HashSet<String>(mails.length);
-            for (int i = 0; i < mails.length; i++) {
-                uidls2Trash.add(mails[i].getMailId());
-            }
-            uidls2Trash.retainAll(knownUIDLs);
-            getTrashContainer().addAllUIDL(uidls2Trash);
-            uidlMap.deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
-            // And finally hard-delete folder
-            return stripPathFromFullname(path, delegatee.deleteFolder(getRealFullname(fullname), true));
+        final String realFullname = prependPath2Fullname(path, getSeparator(), fullname);
+        if (hardDelete || performHardDelete(fullname)) {
+            // Hard-delete
+            hardDeleteFolder(delegatee.getFolder(realFullname));
+            return fullname;
         }
-        // TODO: Update UIDL map for folders moved below trash folder
-        return stripPathFromFullname(path, delegatee.deleteFolder(getRealFullname(fullname), hardDelete));
+        // Load trash subfolders to compose unique name
+        final String realTrashFullname = prependPath2Fullname(path, getSeparator(), getTrashFolder());
+        String newName = delegatee.getFolder(getRealFullname(fullname)).getName();
+        {
+            final StringBuilder tmp = new StringBuilder(32);
+            boolean exists = false;
+            int count = 1;
+            do {
+                tmp.setLength(0);
+                exists = delegatee.exists(tmp.append(realTrashFullname).append(getSeparator()).append(newName).toString());
+                if (exists) {
+                    tmp.setLength(0);
+                    newName = tmp.append(newName).append(" (").append(++count).append(')').toString();
+                }
+            } while (exists);
+        }
+        // Soft-delete
+        softDeleteFolder(delegatee.getFolder(realFullname), realTrashFullname, newName);
+        return fullname;
+    }
+
+    private boolean performHardDelete(final String fullname) throws MailException {
+        final String trashFullname = getTrashFolder();
+        if (fullname.startsWith(trashFullname)) {
+            // A subfolder of trash folder
+            return true;
+        }
+        return !getFolder(trashFullname).isHoldsFolders();
+    }
+
+    private void hardDeleteFolder(final MailFolder realMailFolder) throws MailException {
+        if (realMailFolder.hasSubfolders()) {
+            final MailFolder[] subfolders = delegatee.getSubfolders(realMailFolder.getFullname(), true);
+            for (final MailFolder subfolder : subfolders) {
+                hardDeleteFolder(subfolder);
+            }
+        }
+        final MailMessage[] mails = getMessageStorage().getAllMessages(
+            stripPathFromFullname(path, realMailFolder.getFullname()),
+            null,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            FIELDS_ID);
+        final POP3StorageUIDLMap uidlMap = getUIDLMap();
+        final Set<String> knownUIDLs = uidlMap.getAllUIDLs().keySet();
+        final Set<String> uidls2Trash = new HashSet<String>(mails.length);
+        for (int i = 0; i < mails.length; i++) {
+            uidls2Trash.add(mails[i].getMailId());
+        }
+        uidls2Trash.retainAll(knownUIDLs);
+        getTrashContainer().addAllUIDL(uidls2Trash);
+        uidlMap.deleteUIDLMappings(uidls2Trash.toArray(new String[uidls2Trash.size()]));
+    }
+
+    private void softDeleteFolder(final MailFolder realMailFolder, final String newParent, final String newName) throws MailException {
+        // Create backup folder
+        final String newSubfolderParent;
+        {
+            final MailFolderDescription toCreate = new MailFolderDescription();
+            toCreate.setName(newName);
+            toCreate.setParentFullname(newParent);
+            toCreate.setSeparator(getSeparator());
+            toCreate.setExists(false);
+            toCreate.setSubscribed(true);
+            {
+                final MailPermission mp = new DefaultMailPermission();
+                mp.setEntity(session.getUserId());
+                toCreate.addPermission(mp);
+            }
+            newSubfolderParent = delegatee.createFolder(toCreate);
+        }
+        // Move messages to new folder
+        final String realFullname = realMailFolder.getFullname();
+        final String fullname = stripPathFromFullname(path, realFullname);
+        final MailMessage[] mails = getMessageStorage().getAllMessages(
+            fullname,
+            null,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            FIELDS_ID);
+        final String[] mailIds = new String[mails.length];
+        for (int i = 0; i < mailIds.length; i++) {
+            mailIds[i] = mails[i].getMailId();
+        }
+        final String[] movedIds = getMessageStorage().moveMessages(
+            fullname,
+            stripPathFromFullname(path, newSubfolderParent),
+            mailIds,
+            false);
+        // Iterate possible subfolders
+        final MailFolder[] subfolders = delegatee.getSubfolders(realFullname, true);
+        for (final MailFolder subfolder : subfolders) {
+            softDeleteFolder(subfolder, newSubfolderParent, subfolder.getName());
+        }
+        // Finally delete folder
+        delegatee.deleteFolder(realFullname, true);
     }
 
     public String deleteFolder(final String fullname) throws MailException {
