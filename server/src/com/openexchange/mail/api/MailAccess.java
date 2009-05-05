@@ -415,7 +415,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 /*
                  * Cache connection if desired/possible anymore
                  */
-                if (put && MailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
+                if (put && isCacheable() && MailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
                     /*
                      * Successfully cached: signal & return
                      */
@@ -569,6 +569,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public int getCacheIdleSeconds() {
         return -1;
+    }
+
+    /**
+     * Indicates if this mail access is cacheable.
+     * 
+     * @return <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
+     */
+    public boolean isCacheable() {
+        return true;
     }
 
     /**
