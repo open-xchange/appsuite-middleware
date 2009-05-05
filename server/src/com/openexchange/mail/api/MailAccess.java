@@ -77,7 +77,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage> implements Serializable {
+public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable {
 
     /**
      * Serial version UID
@@ -596,17 +596,17 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     protected abstract void closeInternal();
 
     /**
-     * Gets the appropriate {@link MailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
+     * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
      * 
-     * @return The appropriate {@link MailFolderStorage} implementation
+     * @return The appropriate {@link IMailFolderStorage} implementation
      * @throws MailException If connection is not established
      */
     public abstract F getFolderStorage() throws MailException;
 
     /**
-     * Gets the appropriate {@link MailMessageStorage} implementation that provides necessary message-related operations/methods.
+     * Gets the appropriate {@link IMailMessageStorage} implementation that provides necessary message-related operations/methods.
      * 
-     * @return The appropriate {@link MailMessageStorage} implementation
+     * @return The appropriate {@link IMailMessageStorage} implementation
      * @throws MailException If connection is not established
      */
     public abstract M getMessageStorage() throws MailException;

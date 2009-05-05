@@ -197,8 +197,9 @@ public abstract class MailProvider {
      * 
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @return The newly created {@link MailAccess mail access}.
+     * @throws MailException If new {@link MailAccess mail access} instance cannot be created
      */
-    public abstract MailAccess<?, ?> createNewMailAccess(Session session);
+    public abstract MailAccess<?, ?> createNewMailAccess(Session session) throws MailException;
 
     /**
      * Gets a newly created {@link MailAccess mail access}.
@@ -206,8 +207,9 @@ public abstract class MailProvider {
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @param accountId The account ID
      * @return The newly created {@link MailAccess mail access}.
+     * @throws MailException If new {@link MailAccess mail access} instance cannot be created
      */
-    public abstract MailAccess<?, ?> createNewMailAccess(Session session, int accountId);
+    public abstract MailAccess<?, ?> createNewMailAccess(Session session, int accountId) throws MailException;
 
     /**
      * Gets the protocol properties

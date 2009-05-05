@@ -83,8 +83,8 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -174,7 +174,7 @@ public final class MimeReply {
                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
                 mailAccess.connect();
                 try {
-                    final MailFolderStorage folderStorage = mailAccess.getFolderStorage();
+                    final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                     preferToAsRecipient = originalMailFolder.equals(folderStorage.getSentFolder()) || originalMailFolder.equals(folderStorage.getDraftsFolder());
                 } finally {
                     mailAccess.close(false);
