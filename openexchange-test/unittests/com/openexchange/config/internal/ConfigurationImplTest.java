@@ -145,6 +145,6 @@ public class ConfigurationImplTest extends TestCase {
     }
 
     protected ConfigurationService getConfiguration() {
-        return new ConfigurationImpl(configFolder.getAbsolutePath());
+        return new ConfigurationImpl(new String[] { configFolder.getAbsolutePath() });
     }
 }
