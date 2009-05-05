@@ -1,3 +1,7 @@
+* 2009-05-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #13576: Improved alternative UID look-up if UIDPLUS capability is missing on IMAP server
+
 * 2009-05-02 - thorben.betten@open-xchange.com
 
  - Bugfix #13579: Using more sophisticated (cache) key for MailAccount instances to avoid collisions
