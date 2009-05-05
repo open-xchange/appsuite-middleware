@@ -50,16 +50,16 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 /**
- * {@link PropertyNames} - TODO Short description of this class' purpose.
+ * {@link SessionParameterNames} - Constants for session parameter names.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PropertyNames {
+public final class SessionParameterNames {
 
     /**
-     * Initializes a new {@link PropertyNames}.
+     * Initializes a new {@link SessionParameterNames}.
      */
-    private PropertyNames() {
+    private SessionParameterNames() {
         super();
     }
 

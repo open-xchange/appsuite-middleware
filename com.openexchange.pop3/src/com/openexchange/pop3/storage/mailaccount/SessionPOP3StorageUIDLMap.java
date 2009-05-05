@@ -77,7 +77,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
      */
     public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws MailException {
         final Session session = pop3Access.getSession();
-        final String key = PropertyNames.getUIDLMap(pop3Access.getAccountId());
+        final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
         if (null == cached) {
             cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access));
