@@ -1901,7 +1901,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws AbstractOXException, MessagingException {
         final List<ACL> acls = new ArrayList<ACL>(perms.length);
         for (int i = 0; i < perms.length; i++) {
-            final ACLPermission aclPermission = (ACLPermission) perms[i];
+            final ACLPermission aclPermission = getACLPermission(perms[i]);
             try {
                 acls.add(aclPermission.getPermissionACL(
                     IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig),
@@ -1920,6 +1920,23 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
         }
         return acls.toArray(new ACL[acls.size()]);
+    }
+
+    private ACLPermission getACLPermission(final OCLPermission permission) {
+        if (permission instanceof ACLPermission) {
+            return (ACLPermission) permission;
+        }
+        final ACLPermission retval = new ACLPermission();
+        retval.setEntity(permission.getEntity());
+        retval.setDeleteObjectPermission(permission.getDeletePermission());
+        retval.setFolderAdmin(permission.isFolderAdmin());
+        retval.setFolderPermission(permission.getFolderPermission());
+        retval.setGroupPermission(permission.isGroupPermission());
+        retval.setName(permission.getName());
+        retval.setReadObjectPermission(permission.getReadPermission());
+        retval.setSystem(permission.getSystem());
+        retval.setWriteObjectPermission(permission.getWritePermission());
+        return retval;
     }
 
     private static ACL[] getRemovedACLs(final Map<String, ACL> newACLs, final ACL[] oldACLs) {
