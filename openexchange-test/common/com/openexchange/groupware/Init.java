@@ -51,6 +51,8 @@ import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.push.udp.EventAdminService;
 import com.openexchange.resource.ResourceService;
@@ -297,6 +299,8 @@ public final class Init {
         IMAPServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
         IMAPServiceRegistry.getServiceRegistry().addService(CacheService.class, services.get(CacheService.class));
         IMAPServiceRegistry.getServiceRegistry().addService(UserService.class, services.get(UserService.class));
+        IMAPServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
+        IMAPServiceRegistry.getServiceRegistry().addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
 
         /*
          * Register IMAP bundle
@@ -307,6 +311,8 @@ public final class Init {
     private static void startAndInjectMailAccountStorageService() throws Exception {
         // Initialize mail account storage
         new MailAccountStorageInit().start();
+        services.put(MailAccountStorageService.class, MailAccountStorageInit.newMailAccountStorageService());
+        services.put(UnifiedINBOXManagement.class, MailAccountStorageInit.newUnifiedINBOXManagement());
     }
 
     private static void startAndInjectSpamHandler() {
