@@ -49,12 +49,7 @@
 
 package com.openexchange.passwordchange.service;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.server.ServiceException;
-import com.openexchange.session.Session;
 
 /**
  * Provides a static method for changing a user's password.
@@ -70,24 +65,6 @@ public final class PasswordChange {
      */
     private PasswordChange() {
         super();
-    }
-
-    /**
-     * Performs changing the session user's password
-     * 
-     * @param session The session
-     * @param ctx The context
-     * @param newPassword The new password
-     * @param oldPassword The old password (needed for verification)
-     * @throws ServiceException
-     * @throws UserException
-     */
-    public static void changePassword(final Session session, final Context ctx, final String newPassword, final String oldPassword) throws ServiceException, UserException {
-        final PasswordChangeService change = service;
-        if (null == change) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, PasswordChangeService.class.getName());
-        }
-        change.perform(new PasswordChangeEvent(session, ctx, newPassword, oldPassword));
     }
 
     /**
