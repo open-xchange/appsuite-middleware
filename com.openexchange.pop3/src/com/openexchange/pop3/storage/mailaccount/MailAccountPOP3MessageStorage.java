@@ -50,7 +50,10 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -62,7 +65,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
@@ -113,76 +115,79 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return folderStorage;
     }
 
-    private String[] getMailIDs(final String fullname, final String[] uidls) throws MailException {
-        final String[] mailIds = new String[uidls.length];
-        final FullnameUIDPair[] pairs = uidlMap.getFullnameUIDPairs(uidls);
-        for (int i = 0; i < mailIds.length; i++) {
-            final FullnameUIDPair pair = pairs[i];
-            if (!fullname.equals(pair.getFullname())) {
-                throw new POP3Exception(POP3Exception.Code.UIDL_INCONSISTENCY);
-            }
-            mailIds[i] = pair.getMailId();
-        }
-        return mailIds;
-    }
-
-    private String getMailID(final String fullname, final String uidl) throws MailException {
-        final FullnameUIDPair pair = uidlMap.getFullnameUIDPair(uidl);
-        if (!fullname.equals(pair.getFullname())) {
-            throw new POP3Exception(POP3Exception.Code.UIDL_INCONSISTENCY);
-        }
-        return pair.getMailId();
-    }
-
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws MailException {
+        /*
+         * Append to mail account storage and return storage's IDs, NOT UIDLS!!!
+         */
+        return delegatee.appendMessages(getRealFullname(destFolder), msgs);
+    }
+
+    /**
+     * Appends specified POP3 messages fetched from POP3 account to this storage's INBOX folder.
+     * <p>
+     * The new UIDLs are automatically added to used {@link POP3StorageUIDLMap UIDL map}.
+     * 
+     * @param pop3Messages The POP3 messages
+     * @return The
+     * @throws MailException
+     */
+    public void appendPOP3Messages(final MailMessage[] pop3Messages) throws MailException {
         /*
          * This method has a special meaning since it's called during synchronization of actual POP3 content with storage content
          */
-        final String[] uidls = new String[msgs.length];
+        final String[] uidls = new String[pop3Messages.length];
         for (int i = 0; i < uidls.length; i++) {
-            uidls[i] = msgs[i].getMailId();
+            uidls[i] = pop3Messages[i].getMailId();
         }
         /*
          * Append to mail account storage
          */
-        final String[] uids = delegatee.appendMessages(getRealFullname(destFolder), msgs);
+        final String[] uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Messages);
+        /*
+         * Add mappings
+         */
         final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
         for (int i = 0; i < pairs.length; i++) {
-            pairs[i] = new FullnameUIDPair(destFolder, uids[i]);
+            pairs[i] = FullnameUIDPair.newINBOXInstance(uids[i]);
         }
         uidlMap.addMappings(uidls, pairs);
-        return uidls;
     }
 
-    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] uidls, final boolean fast) throws MailException {
-        /*-
-         * If we allow copy operation, multiple messages of the same POP3 message would exist in storage.
-         * Then no unique mapping 'UIDL <-> fullname-UID-pair' is possible.
-         */
-        throw new POP3Exception(POP3Exception.Code.COPY_MSGS_DENIED);
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIDs, final boolean fast) throws MailException {
+        return delegatee.copyMessages(getRealFullname(sourceFolder), getRealFullname(destFolder), mailIDs, fast);
     }
 
-    public void deleteMessages(final String folder, final String[] uidls, final boolean hardDelete) throws MailException {
-        final String[] mailIds = getMailIDs(folder, uidls);
+    public void deleteMessages(final String folder, final String[] mailIDs, final boolean hardDelete) throws MailException {
         if (hardDelete) {
             // Clean from storage
-            delegatee.deleteMessages(getRealFullname(folder), mailIds, hardDelete);
-            uidlMap.deleteUIDLMappings(uidls);
-            trashContainer.addAllUIDL(Arrays.asList(uidls));
-            // TODO: Remember cleansed UIDLs for later "write-through" to POP3 account if option enabled
+            delegatee.deleteMessages(getRealFullname(folder), mailIDs, true);
+            // Look-up UIDLs for mail IDs
+            final Set<String> cleanedUIDLs = getContainedUIDLs(folder, mailIDs);
+            if (!cleanedUIDLs.isEmpty()) {
+                // Clean from UIDL map
+                uidlMap.deleteUIDLMappings(cleanedUIDLs.toArray(new String[cleanedUIDLs.size()]));
+                trashContainer.addAllUIDL(cleanedUIDLs);
+            }
         } else {
             // Move to trash
             final String realFullname = getRealFullname(folder);
             final String trashFullname = getFolderStorage().getTrashFolder();
             final String realTrashFullname = getRealFullname(trashFullname);
 
-            final String[] newMailIds = delegatee.moveMessages(realFullname, realTrashFullname, mailIds, false);
+            final String[] newMailIds = delegatee.moveMessages(realFullname, realTrashFullname, mailIDs, false);
 
-            final FullnameUIDPair[] newPairs = new FullnameUIDPair[newMailIds.length];
-            for (int i = 0; i < newPairs.length; i++) {
-                newPairs[i] = new FullnameUIDPair(folder, newMailIds[i]);
+            // Update UIDL map
+            final List<String> uidls = new ArrayList<String>(mailIDs.length);
+            final List<FullnameUIDPair> pairs = new ArrayList<FullnameUIDPair>(mailIDs.length);
+            for (int i = 0; i < mailIDs.length; i++) {
+                final String mailID = mailIDs[i];
+                final String uidl = uidlMap.getUIDL(new FullnameUIDPair(folder, mailID));
+                if (null != uidl) {
+                    uidls.add(uidl);
+                    pairs.add(new FullnameUIDPair(trashFullname, newMailIds[i]));
+                }
             }
-            uidlMap.addMappings(uidls, newPairs);
+            uidlMap.addMappings(uidls.toArray(new String[uidls.size()]), pairs.toArray(new FullnameUIDPair[pairs.size()]));
         }
     }
 
@@ -192,41 +197,31 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);
             }
-            if (null != mailMessage.getMailId()) {
-                mailMessage.setMailId(uidlMap.getUIDL(new FullnameUIDPair(folder, mailMessage.getMailId())));
-            }
         }
         return mails;
     }
 
-    public MailPart getAttachment(final String folder, final String uidl, final String sequenceId) throws MailException {
-        return delegatee.getAttachment(getRealFullname(folder), getMailID(folder, uidl), sequenceId);
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+        return delegatee.getAttachment(getRealFullname(folder), mailId, sequenceId);
     }
 
-    public MailPart getImageAttachment(final String folder, final String uidl, final String contentId) throws MailException {
-        return delegatee.getImageAttachment(getRealFullname(folder), getMailID(folder, uidl), contentId);
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
+        return delegatee.getImageAttachment(getRealFullname(folder), mailId, contentId);
     }
 
-    public MailMessage getMessage(final String folder, final String uidl, final boolean markSeen) throws MailException {
-        final MailMessage mail = delegatee.getMessage(getRealFullname(folder), getMailID(folder, uidl), markSeen);
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
+        final MailMessage mail = delegatee.getMessage(getRealFullname(folder), mailId, markSeen);
         if (mail.containsFolder() && null != mail.getFolder()) {
             mail.setFolder(folder);
-        }
-        if (null != mail.getMailId()) {
-            mail.setMailId(uidlMap.getUIDL(new FullnameUIDPair(folder, mail.getMailId())));
         }
         return mail;
     }
 
-    public MailMessage[] getMessages(final String folder, final String[] uidls, final MailField[] fields) throws MailException {
-        final String[] mailIds = getMailIDs(folder, uidls);
+    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
         final MailMessage[] mails = delegatee.getMessages(getRealFullname(folder), mailIds, fields);
         for (final MailMessage mailMessage : mails) {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);
-            }
-            if (null != mailMessage.getMailId()) {
-                mailMessage.setMailId(uidlMap.getUIDL(new FullnameUIDPair(folder, mailMessage.getMailId())));
             }
         }
         return mails;
@@ -238,9 +233,6 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);
             }
-            if (null != mailMessage.getMailId()) {
-                mailMessage.setMailId(uidlMap.getUIDL(new FullnameUIDPair(folder, mailMessage.getMailId())));
-            }
         }
         return mails;
     }
@@ -251,29 +243,30 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);
             }
-            if (null != mailMessage.getMailId()) {
-                mailMessage.setMailId(uidlMap.getUIDL(new FullnameUIDPair(folder, mailMessage.getMailId())));
-            }
         }
         return mails;
     }
 
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] uidls, final boolean fast) throws MailException {
-        final String[] mailIds = getMailIDs(sourceFolder, uidls);
-        final String[] newMailIds = delegatee.moveMessages(
-            getRealFullname(sourceFolder),
-            prependPath2Fullname(path, separator, destFolder),
-            mailIds,
-            fast);
-        final FullnameUIDPair[] newPairs = new FullnameUIDPair[newMailIds.length];
-        for (int i = 0; i < newPairs.length; i++) {
-            newPairs[i] = new FullnameUIDPair(destFolder, newMailIds[i]);
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIDs, final boolean fast) throws MailException {
+        // Move to destination folder
+        final String realSourceFullname = getRealFullname(sourceFolder);
+        final String realDestFullname = getRealFullname(destFolder);
+        // Invoke with fast=false to be able to update UIDLs
+        final String[] newMailIds = delegatee.moveMessages(realSourceFullname, realDestFullname, mailIDs, false);
+        // Update UIDL map
+        final List<String> uidls = new ArrayList<String>(mailIDs.length);
+        final List<FullnameUIDPair> pairs = new ArrayList<FullnameUIDPair>(mailIDs.length);
+        for (int i = 0; i < mailIDs.length; i++) {
+            final String mailID = mailIDs[i];
+            final String uidl = uidlMap.getUIDL(new FullnameUIDPair(sourceFolder, mailID));
+            if (null != uidl) {
+                uidls.add(uidl);
+                pairs.add(new FullnameUIDPair(destFolder, newMailIds[i]));
+            }
         }
-        uidlMap.addMappings(uidls, newPairs);
-        /*
-         * UIDLs never change through move operation
-         */
-        return uidls;
+        uidlMap.addMappings(uidls.toArray(new String[uidls.size()]), pairs.toArray(new FullnameUIDPair[pairs.size()]));
+        // Return
+        return fast ? new String[0] : newMailIds;
     }
 
     public void releaseResources() throws MailException {
@@ -281,11 +274,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     }
 
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
-        /*-
-         * If we allow safe-draft operation, a new message is created in storage without a corresponding POP3 message.
-         * Then no unique mapping 'UIDL <-> fullname-UID-pair' is possible.
-         */
-        throw new POP3Exception(POP3Exception.Code.DRAFTS_NOT_SUPPORTED);
+        return delegatee.saveDraft(getRealFullname(draftFullname), draftMail);
     }
 
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
@@ -294,24 +283,30 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);
             }
-            if (null != mailMessage.getMailId()) {
-                mailMessage.setMailId(uidlMap.getUIDL(new FullnameUIDPair(folder, mailMessage.getMailId())));
-            }
         }
         return mails;
     }
 
-    public void updateMessageColorLabel(final String folder, final String[] uidls, final int colorLabel) throws MailException {
-        final String[] mailIds = getMailIDs(folder, uidls);
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
         delegatee.updateMessageColorLabel(getRealFullname(folder), mailIds, colorLabel);
     }
 
-    public void updateMessageFlags(final String folder, final String[] uidls, final int flags, final boolean set) throws MailException {
-        final String[] mailIds = getMailIDs(folder, uidls);
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws MailException {
         delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, set);
     }
 
-    private String getRealFullname(final String fullname) throws MailException {
+    private String getRealFullname(final String fullname) {
         return prependPath2Fullname(path, separator, fullname);
+    }
+
+    private Set<String> getContainedUIDLs(final String virtualFullname, final String[] mailIDs) throws MailException {
+        final Set<String> retval = new HashSet<String>(mailIDs.length);
+        for (int i = 0; i < mailIDs.length; i++) {
+            final String uidl = uidlMap.getUIDL(new FullnameUIDPair(virtualFullname, mailIDs[i]));
+            if (null != uidl) {
+                retval.add(uidl);
+            }
+        }
+        return retval;
     }
 }

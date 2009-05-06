@@ -202,6 +202,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return messageStorage;
     }
 
+    IMailMessageStorage getInternalMessageStorage() throws MailException {
+        return defaultMailAccess.getMessageStorage();
+    }
+
     public void releaseResources() {
         try {
             IMailFolderStorage folderStorage = getFolderStorage();
@@ -341,7 +345,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 toAppend.add(mm);
             }
         }
-        getMessageStorage().appendMessages("INBOX", toAppend.toArray(new MailMessage[toAppend.size()]));
+        ((MailAccountPOP3MessageStorage) getMessageStorage()).appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
     }
 
     /**

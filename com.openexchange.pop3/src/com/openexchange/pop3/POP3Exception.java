@@ -355,7 +355,11 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Missing POP3 storage path for user %1$s in context %2$s.
          */
-        MISSING_PATH("Missing POP3 storage path for user %1$s in context %2$s.", Category.CODE_ERROR, 2065);
+        MISSING_PATH("Missing POP3 storage path for user %1$s in context %2$s.", Category.CODE_ERROR, 2065),
+        /**
+         * Illegal move operation.
+         */
+        MOVE_ILLEGAL("Illegal move operation.", Category.USER_INPUT, 2066);
 
         private final String message;
 

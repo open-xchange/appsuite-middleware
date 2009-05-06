@@ -56,6 +56,18 @@ package com.openexchange.pop3.storage;
  */
 public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
+    private static final String INBOX = "INBOX";
+
+    /**
+     * Creates a new {@link FullnameUIDPair} with fullname set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID.
+     * 
+     * @param mailId The mail ID
+     * @return A new {@link FullnameUIDPair} with fullname set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID
+     */
+    public static FullnameUIDPair newINBOXInstance(final String mailId) {
+        return new FullnameUIDPair(INBOX, mailId);
+    }
+
     private final String fullname;
 
     private final String mailId;
