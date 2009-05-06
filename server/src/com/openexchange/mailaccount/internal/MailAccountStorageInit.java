@@ -102,7 +102,7 @@ public final class MailAccountStorageInit implements Initialization {
      * 
      * @return A new mail account storage service instance
      */
-    public MailAccountStorageService newMailAccountStorageService() {
+    public static MailAccountStorageService newMailAccountStorageService() {
         return new CachingMailAccountStorage(new RdbMailAccountStorage());
     }
 
@@ -111,7 +111,7 @@ public final class MailAccountStorageInit implements Initialization {
      * 
      * @return A new Unified INBOX management instance
      */
-    public UnifiedINBOXManagement newUnifiedINBOXManagement() {
+    public static UnifiedINBOXManagement newUnifiedINBOXManagement() {
         return new UnifiedINBOXManagementImpl();
     }
 }
