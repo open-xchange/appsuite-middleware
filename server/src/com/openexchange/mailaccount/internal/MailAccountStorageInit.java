@@ -82,10 +82,8 @@ public final class MailAccountStorageInit implements Initialization {
             return;
         }
         // Simulate bundle start
-        ServerServiceRegistry.getInstance().addService(
-            MailAccountStorageService.class,
-            new CachingMailAccountStorage(new RdbMailAccountStorage()));
-        ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, new UnifiedINBOXManagementImpl());
+        ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, newMailAccountStorageService());
+        ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, newUnifiedINBOXManagement());
         LOG.info("MailAccountStorageService successfully injected to server service registry");
     }
 
@@ -99,4 +97,21 @@ public final class MailAccountStorageInit implements Initialization {
         LOG.info("MailAccountStorageService successfully removed from server service registry");
     }
 
+    /**
+     * Creates a new mail account storage service instance.
+     * 
+     * @return A new mail account storage service instance
+     */
+    public MailAccountStorageService newMailAccountStorageService() {
+        return new CachingMailAccountStorage(new RdbMailAccountStorage());
+    }
+
+    /**
+     * Creates a new Unified INBOX management instance.
+     * 
+     * @return A new Unified INBOX management instance
+     */
+    public UnifiedINBOXManagement newUnifiedINBOXManagement() {
+        return new UnifiedINBOXManagementImpl();
+    }
 }
