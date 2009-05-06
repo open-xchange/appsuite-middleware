@@ -187,8 +187,8 @@ public final class JCSCache implements Cache {
         return new CacheKeyImpl(contextId, objectId);
     }
 
-    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
-        return new CacheKeyImpl(contextId, obj);
+    public CacheKey newCacheKey(int contextId, Serializable... objs) {
+        return new CacheKeyImpl(contextId, objs);
     }
 
     public CacheStatistics getStatistics() {

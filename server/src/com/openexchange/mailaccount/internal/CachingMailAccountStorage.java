@@ -103,7 +103,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
-                cache.remove(cache.newCacheKey(cid, id ^ user));
+                cache.remove(cache.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user)));
             } catch (final CacheException e) {
                 throw new MailAccountException(e);
             }
@@ -128,7 +128,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
 
             public Serializable getKey() {
-                return cacheService.newCacheKey(cid, MailAccount.DEFAULT_ID ^ user);
+                return cacheService.newCacheKey(cid, Integer.valueOf(MailAccount.DEFAULT_ID), Integer.valueOf(user));
             }
 
             public MailAccount load() throws MailAccountException {

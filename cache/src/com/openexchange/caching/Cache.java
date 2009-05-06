@@ -230,8 +230,8 @@ public interface Cache {
      * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, Serializable)}.
      * 
      * @param contextId The context ID
-     * @param obj The serializable object
+     * @param objs The serializable objects for the key
      * @return new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, Serializable obj);
+    public CacheKey newCacheKey(int contextId, Serializable... objs);
 }
