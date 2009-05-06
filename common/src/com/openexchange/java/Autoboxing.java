@@ -97,4 +97,30 @@ public final class Autoboxing {
     public static Float F(final float f) {
         return Float.valueOf(f);
     }
+    
+    /**
+     * Converts an int-array into an Integer-array.
+     * @param intArray int[] to be converted to Integer[]
+     * @return Integer[]
+     */
+    public static Integer[] i2I(int[] intArray){
+        Integer[] integerArray = new Integer[intArray.length];
+        for(int i = 0; i < intArray.length; i++){
+            integerArray[i] = I(intArray[0]);
+        }
+        return integerArray;
+    }    
+    
+    /**
+     * Converts a long-array into a Long-array.
+     * @param longArray long[] to be converted to Long[]
+     * @return Long[]
+     */
+    public static Long[] l2L(long[] longArray){
+        Long[] longerArray = new Long[longArray.length];
+        for(int i = 0; i < longArray.length; i++){
+            longerArray[i] = L(longArray[0]);
+        }
+        return longerArray;
+    }
 }
