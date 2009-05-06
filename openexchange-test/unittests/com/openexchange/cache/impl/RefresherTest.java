@@ -139,7 +139,7 @@ public class RefresherTest extends TestCase {
                 public CacheKey newCacheKey(final int contextId, final int objectId) {
                     throw new UnsupportedOperationException();
                 }
-                public CacheKey newCacheKey(final int contextId, final Serializable obj) {
+                public CacheKey newCacheKey(final int contextId, final Serializable... obj) {
                     throw new UnsupportedOperationException();
                 }
                 public void put(final Serializable key, final Serializable obj) throws CacheException {
