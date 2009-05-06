@@ -87,7 +87,7 @@ import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 
 /**
- * {@link MailAccountPOP3Storage} - Mail account POP3 storage.
+ * {@link MailAccountPOP3Storage} - The built-in mail account POP3 storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
