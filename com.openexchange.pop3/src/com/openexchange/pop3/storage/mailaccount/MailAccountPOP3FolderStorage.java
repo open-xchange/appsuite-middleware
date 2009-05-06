@@ -126,6 +126,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private MailPermission getPOP3MailPermission() {
         final MailPermission mp = new DefaultMailPermission();
+        mp.setFolderPermission(MailPermission.CREATE_OBJECTS_IN_FOLDER);
         mp.setEntity(session.getUserId());
         return mp;
     }
@@ -574,7 +575,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         final MailPermission mp = getPOP3MailPermission();
         if (MailFolder.DEFAULT_FOLDER_ID.equals(mailFolder.getFullname())) {
             mp.setAllPermission(
-                MailPermission.CREATE_SUB_FOLDERS,
+                MailPermission.NO_PERMISSIONS,
                 MailPermission.NO_PERMISSIONS,
                 MailPermission.NO_PERMISSIONS,
                 MailPermission.NO_PERMISSIONS);
