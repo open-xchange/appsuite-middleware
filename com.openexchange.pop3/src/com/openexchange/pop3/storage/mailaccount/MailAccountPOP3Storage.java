@@ -113,6 +113,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private MailAccountPOP3FolderStorage folderStorage;
 
+    private char separator;
+
     MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
         super();
         this.pop3Access = pop3Access;
@@ -126,6 +128,29 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
+        separator = 0;
+    }
+
+    /**
+     * Gets the separator character of underlying mail account.
+     * 
+     * @return The separator character of underlying mail account
+     * @throws MailException If separator character cannot be returned
+     */
+    public char getSeparator() throws MailException {
+        if (0 == separator) {
+            separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+        }
+        return separator;
+    }
+
+    /**
+     * Gets the path to virtual root folder.
+     * 
+     * @return The path to virtual root folder
+     */
+    public String getPath() {
+        return path;
     }
 
     public void close() throws MailException {
@@ -137,20 +162,20 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Check path existence
         if (!defaultMailAccess.getFolderStorage().exists(path)) {
             final MailFolderDescription toCreate = new MailFolderDescription();
-            
+
             final MailPermission mp = new DefaultMailPermission();
             mp.setEntity(pop3Access.getSession().getUserId());
-            
+
             toCreate.addPermission(mp);
             toCreate.setExists(false);
-            
+
             final char separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-            
+
             final String[] parentAndName = parseFullname(path, separator);
             toCreate.setName(parentAndName[1]);
             toCreate.setParentFullname(parentAndName[0]);
             toCreate.setSeparator(separator);
-            
+
             defaultMailAccess.getFolderStorage().createFolder(toCreate);
         }
     }
@@ -165,14 +190,14 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public IMailFolderStorage getFolderStorage() throws MailException {
         if (null == folderStorage) {
-            folderStorage = new MailAccountPOP3FolderStorage(defaultMailAccess.getFolderStorage(), this, pop3Access, path);
+            folderStorage = new MailAccountPOP3FolderStorage(defaultMailAccess.getFolderStorage(), this, pop3Access);
         }
         return folderStorage;
     }
 
     public IMailMessageStorage getMessageStorage() throws MailException {
         if (null == messageStorage) {
-            messageStorage = new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this);
+            messageStorage = new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this, pop3Access);
         }
         return messageStorage;
     }
@@ -225,6 +250,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
         try {
             final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
+            inbox.open(POP3Folder.READ_WRITE);
             boolean doExpunge = false;
             try {
                 final Message[] all = inbox.getMessages();

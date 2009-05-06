@@ -61,6 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
@@ -76,7 +77,9 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final IMailMessageStorage delegatee;
 
-    private final MailAccountPOP3FolderStorage folderStorage;
+    private final MailAccountPOP3Storage storage;
+
+    private MailAccountPOP3FolderStorage folderStorage;
 
     private final Session session;
 
@@ -90,16 +93,24 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final POP3StorageTrashContainer trashContainer;
 
-    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage) throws MailException {
+    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage, final POP3Access pop3Access) throws MailException {
         super();
         this.delegatee = delegatee;
+        this.storage = storage;
         this.folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
-        this.path = folderStorage.getPath();
-        this.separator = folderStorage.getSeparator();
-        this.session = folderStorage.getSession();
-        this.accountId = folderStorage.getAccountId();
+        this.path = storage.getPath();
+        this.separator = storage.getSeparator();
+        this.session = pop3Access.getSession();
+        this.accountId = pop3Access.getAccountId();
         this.uidlMap = storage.getUIDLMap();
         this.trashContainer = storage.getTrashContainer();
+    }
+
+    private MailAccountPOP3FolderStorage getFolderStorage() throws MailException {
+        if (null == folderStorage) {
+            folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
+        }
+        return folderStorage;
     }
 
     private String[] getMailIDs(final String fullname, final String[] uidls) throws MailException {
@@ -162,7 +173,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         } else {
             // Move to trash
             final String realFullname = getRealFullname(folder);
-            final String trashFullname = folderStorage.getTrashFolder();
+            final String trashFullname = getFolderStorage().getTrashFolder();
             final String realTrashFullname = getRealFullname(trashFullname);
 
             final String[] newMailIds = delegatee.moveMessages(realFullname, realTrashFullname, mailIds, false);
@@ -300,7 +311,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, set);
     }
 
-    private String getRealFullname(final String fullname) {
+    private String getRealFullname(final String fullname) throws MailException {
         return prependPath2Fullname(path, separator, fullname);
     }
 }

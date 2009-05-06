@@ -55,6 +55,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
@@ -279,6 +280,12 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
+    public MailFolder getRootFolder() throws MailException {
+        pop3Storage.connect();
+        return pop3Storage.getFolderStorage().getRootFolder();
+    }
+
+    @Override
     protected void connectInternal() throws MailException {
         // Connect the storage
         pop3Storage.connect();
@@ -296,9 +303,19 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         /*
          * Is it allowed to connect to real POP3 account to synchronize messages?
          */
-        final long lastAccessed = getLastAccessed();
+        final Long lastAccessed = getLastAccessed();
         final long frequencyMillis = getFrequencyMillis();
-        if ((System.currentTimeMillis() - lastAccessed) >= frequencyMillis) {
+        if ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= frequencyMillis)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Synchronizing messages with POP3 account: " + getPOP3Config().getServer());
+            }
+            /*
+             * Check default folder
+             */
+            getFolderStorage().checkDefaultFolders();
+            /*
+             * Sync messages
+             */
             try {
                 /*
                  * Access POP3 account and synchronize
@@ -312,6 +329,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                     String.valueOf(System.currentTimeMillis()));
             } catch (final MailException e) {
                 LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Synchronization successfully performed for POP3 account: " + getPOP3Config().getServer());
             }
         }
     }
@@ -374,17 +394,17 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         return true;
     }
 
-    private long getLastAccessed() throws MailException {
+    private Long getLastAccessed() throws MailException {
         final String lastAccessedStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
         if (null != lastAccessedStr) {
             try {
-                return Long.parseLong(lastAccessedStr);
+                return Long.valueOf(lastAccessedStr);
             } catch (final NumberFormatException e) {
                 LOG.warn(e.getMessage(), e);
-                return System.currentTimeMillis();
+                return null;
             }
         }
-        return System.currentTimeMillis();
+        return null;
     }
 
     private static final int FALLBACK_MINUTES = 10;
