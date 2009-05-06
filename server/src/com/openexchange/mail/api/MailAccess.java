@@ -350,7 +350,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @throws MailException If the returning the root folder fails
      */
-    public final MailFolder getRootFolder() throws MailException {
+    public MailFolder getRootFolder() throws MailException {
         connect0(false);
         return getFolderStorage().getRootFolder();
     }
