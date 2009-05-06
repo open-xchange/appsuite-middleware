@@ -64,11 +64,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
-import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountPOP3MessageStorage} - TODO Short description of this class' purpose.
@@ -83,10 +81,6 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private MailAccountPOP3FolderStorage folderStorage;
 
-    private final Session session;
-
-    private final int accountId;
-
     private final String path;
 
     private final char separator;
@@ -95,15 +89,13 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final POP3StorageTrashContainer trashContainer;
 
-    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage, final POP3Access pop3Access) throws MailException {
+    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage) throws MailException {
         super();
         this.delegatee = delegatee;
         this.storage = storage;
         this.folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
         this.path = storage.getPath();
         this.separator = storage.getSeparator();
-        this.session = pop3Access.getSession();
-        this.accountId = pop3Access.getAccountId();
         this.uidlMap = storage.getUIDLMap();
         this.trashContainer = storage.getTrashContainer();
     }
@@ -170,24 +162,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             }
         } else {
             // Move to trash
-            final String realFullname = getRealFullname(folder);
-            final String trashFullname = getFolderStorage().getTrashFolder();
-            final String realTrashFullname = getRealFullname(trashFullname);
-
-            final String[] newMailIds = delegatee.moveMessages(realFullname, realTrashFullname, mailIDs, false);
-
-            // Update UIDL map
-            final List<String> uidls = new ArrayList<String>(mailIDs.length);
-            final List<FullnameUIDPair> pairs = new ArrayList<FullnameUIDPair>(mailIDs.length);
-            for (int i = 0; i < mailIDs.length; i++) {
-                final String mailID = mailIDs[i];
-                final String uidl = uidlMap.getUIDL(new FullnameUIDPair(folder, mailID));
-                if (null != uidl) {
-                    uidls.add(uidl);
-                    pairs.add(new FullnameUIDPair(trashFullname, newMailIds[i]));
-                }
-            }
-            uidlMap.addMappings(uidls.toArray(new String[uidls.size()]), pairs.toArray(new FullnameUIDPair[pairs.size()]));
+            moveMessages(folder, getFolderStorage().getTrashFolder(), mailIDs, true);
         }
     }
 

@@ -60,7 +60,6 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -94,8 +93,6 @@ import com.sun.mail.pop3.POP3Store;
 public class MailAccountPOP3Storage implements POP3Storage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountPOP3Storage.class);
-
-    private static final MailField[] FIELDS_ID = { MailField.ID };
 
     /*-
      * Member section
@@ -197,7 +194,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public IMailMessageStorage getMessageStorage() throws MailException {
         if (null == messageStorage) {
-            messageStorage = new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this, pop3Access);
+            messageStorage = new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this);
         }
         return messageStorage;
     }
