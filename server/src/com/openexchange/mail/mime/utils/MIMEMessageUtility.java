@@ -78,6 +78,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -531,7 +532,17 @@ public final class MIMEMessageUtility {
      * @throws AddressException - if parsing fails
      */
     public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) throws AddressException {
-        final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(unfold(addresslist)), strict);
+        final String al = replaceWithComma(unfold(addresslist));
+        InternetAddress[] addrs = null;
+        try {
+            addrs = InternetAddress.parse(al, strict);
+        } catch (final AddressException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
+                    "using plain addresses' string representation instead.").toString(), e);
+            }
+            addrs = PlainTextAddress.getAddresses(al.split(" *, *"));
+        }
         try {
             for (int i = 0; i < addrs.length; i++) {
                 addrs[i].setPersonal(addrs[i].getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
