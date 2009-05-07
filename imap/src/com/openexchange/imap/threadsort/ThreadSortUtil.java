@@ -51,7 +51,6 @@ package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
@@ -84,6 +83,27 @@ public final class ThreadSortUtil {
      * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
      */
     public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
+        final char[] chars = threadResponse.toCharArray();
+        final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
+        final StringBuilder sb = new StringBuilder(8);
+        int i = 0;
+        while (i < chars.length) {
+            char c = chars[i++];
+            while (Character.isDigit(c)) {
+                sb.append(c);
+                c = chars[i++];
+            }
+            if (sb.length() > 0) {
+                tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
+            }
+            sb.setLength(0);
+        }
+        return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
+        /*-
+         * Formerly:
+         * 
+        
+        final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
         final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
         if (m.find()) {
             final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
@@ -93,6 +113,7 @@ public final class ThreadSortUtil {
             return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
         }
         return null;
+         */
     }
 
     /**
