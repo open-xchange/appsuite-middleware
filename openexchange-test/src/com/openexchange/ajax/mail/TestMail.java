@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import static com.openexchange.java.Autoboxing.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,6 +61,7 @@ import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailListField;
 
 /**
  * {@link TestMail} - simulates a mail object, but without the necessary session and whatnot needed that makes for a complicated setup.
@@ -154,30 +156,61 @@ public class TestMail implements IdentitySource<TestMail> {
         this.contentType = contentType;
     }
 
-    public String[] getFolderAndId(){
-        return new String[]{ getFolder(), getId() };
+    public String[] getFolderAndId() {
+        return new String[] { getFolder(), getId() };
     }
+
+    public void setFolderAndID(String[] folderAndID) {
+        setFolder(folderAndID[0]);
+        setId(folderAndID[1]);
+    }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+    
+    
+    
+    
     
     public TestMail() {
     }
-    
-    
 
     public TestMail(JSONObject obj) throws JSONException {
         read(obj);
+    }
+    
+    public TestMail(int[] columns, JSONArray values) throws JSONException{
+        read(columns,values);
     }
 
     public static TestMail create(JSONObject obj) throws JSONException {
         return new TestMail(obj);
     }
 
-    public void read(Map<String,String> map){
-        //TODO find some proper names
-        setFrom( Arrays.asList( map.get( "From" ).split("[,;]") ) );
-        setTo( Arrays.asList( map.get( "To" ).split("[,;]") ) );
-        setSubject(map.get( "Subject") );
-        setBody( map.get("Content") );
-        
+    
+    
+    
+    public void read(Map<String, String> map) {
+        // TODO find some proper names, like from MailJSONFields
+        setFrom(Arrays.asList(map.get("From").split("[,;]")));
+        setTo(Arrays.asList(map.get("To").split("[,;]")));
+        setSubject(map.get("Subject"));
+        setBody(map.get("Content"));
+
     }
 
     public void read(JSONObject json) throws JSONException {
@@ -235,10 +268,90 @@ public class TestMail implements IdentitySource<TestMail> {
         }
     }
 
-    public void read(int[] columns, JSONArray values) {
-        //TODO
+    public void read(int[] columns, JSONArray values) throws JSONException {
+        for(int i = 0; i < columns.length; i++){
+            MailListField field = MailListField.getField(columns[i]);
+            // lists
+            if (field == MailListField.FROM) {
+                setFrom(j2l(values.getJSONArray(i)));
+            }
+            if (field == MailListField.TO) {
+                setTo(j2l(values.getJSONArray(i)));
+            }
+            if (field == MailListField.CC) {
+                setCc(j2l(values.getJSONArray(i)));
+            }
+            if (field == MailListField.BCC) {
+                setBcc(j2l(values.getJSONArray(i)));
+            }
+            // strings
+            if (field == MailListField.SUBJECT) {
+                setSubject(values.getString(i));
+            }
+            //no content_type
+            //no content
+            if (field == MailListField.ID) {
+                setId(values.getString(i));
+            }
+            //difference between folder and folder_id?
+            if (field == MailListField.FOLDER) {
+                setFolder(values.getString(i));
+            }
+            // ints
+            if (field == MailListField.COLOR_LABEL) {
+                setColor(values.getInt(i));
+            }
+            if (field == MailListField.FLAGS) {
+                setFlags(values.getInt(i));
+            }
+            if (field == MailListField.PRIORITY) {
+                setPriority(values.getInt(i));
+            }
+        }
     }
 
+        
+    public Object getBy(MailListField field){
+        if (field == MailListField.FROM) {
+            return getFrom();
+        }
+
+        if (field == MailListField.TO) {
+            return getTo();
+        }
+        if (field == MailListField.CC) {
+            return getCc();
+        }
+        if (field == MailListField.BCC) {
+            return getBcc();
+        }
+        // strings
+        if (field == MailListField.SUBJECT) {
+            return getSubject();
+        }
+        //no content_type
+        //no content
+        if (field == MailListField.ID) {
+            return getId();
+        }
+        //difference between folder and folder_id?
+        if (field == MailListField.FOLDER) {
+            return getFolder();
+        }
+        // ints
+        if (field == MailListField.COLOR_LABEL) {
+            return I(getColor());
+        }
+        if (field == MailListField.FLAGS) {
+            return I(getFlags());
+        }
+        if (field == MailListField.PRIORITY) {
+            return I(getPriority());
+        }
+        return null;
+    }
+    
+    
     /**
      * Converts a JSON array into a string list.
      */
@@ -259,21 +372,65 @@ public class TestMail implements IdentitySource<TestMail> {
      * Transforms this mail into a JSONObject like used by the HTTP API.
      * 
      * @return
+     * @throws JSONException
      */
-    public JSONObject toJSON() {
-        return null;
+    public JSONObject toJSON() throws JSONException {
+        JSONObject result = new JSONObject();
+        result.put(MailJSONField.FROM.getKey(), correctMailAddresses(getFrom()));
+        result.put(MailJSONField.RECIPIENT_TO.getKey(), getTo() != null ? correctMailAddresses(getTo()) : "");
+        result.put(MailJSONField.RECIPIENT_BCC.getKey(), getBcc() != null ? correctMailAddresses(getBcc()) : "");
+        result.put(MailJSONField.RECIPIENT_CC.getKey(), getCc() != null ? correctMailAddresses(getCc()) : "");
+        if (getSubject() != null)
+            result.put(MailJSONField.SUBJECT.getKey(), getSubject());
+
+        if (getBody() != null) {
+            JSONArray attachments = new JSONArray();
+            JSONObject jsonbody = new JSONObject();
+            jsonbody.put(MailJSONField.CONTENT.getKey(), getBody());
+            jsonbody.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
+            attachments.put(jsonbody);
+            result.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+        }
+        result.put(MailJSONField.PRIORITY.getKey(), getPriority());
+        result.put(MailJSONField.CONTENT.getKey(), getBody() != null ? getBody() : "");
+        return result;
+    }
+
+    public JSONArray correctMailAddresses(List<String> list) {
+        JSONArray corrected = new JSONArray();
+        for (String recipient : list) {
+            JSONArray adress = correctMailAdress(recipient);
+            corrected.put(adress);
+        }
+        return corrected;
+    }
+
+    public JSONArray correctMailAdress(String recipient) {
+        JSONArray corrected = new JSONArray();
+        corrected.put(recipient);
+        corrected.put(recipient);
+        return corrected;
     }
 
     public String toString() {
         StringBuilder bob = new StringBuilder();
-        bob.append("From: ");
-        bob.append(Strings.join(from, ", "));
-        bob.append("\nTo: ");
-        bob.append(Strings.join(to, ", "));
-        bob.append("\nCC: ");
-        bob.append(Strings.join(cc, ", "));
-        bob.append("\nBCC: ");
-        bob.append(Strings.join(bcc, ", "));
+        bob.append("Folder = " + getFolder() + ", ID = " + getId() + "\n");
+        if (from != null) {
+            bob.append("From: ");
+            bob.append(Strings.join(from, ", "));
+        }
+        if (from != null) {
+            bob.append("\nTo: ");
+            bob.append(Strings.join(to, ", "));
+        }
+        if (cc != null) {
+            bob.append("\nCC: ");
+            bob.append(Strings.join(cc, ", "));
+        }
+        if (bcc != null) {
+            bob.append("\nBCC: ");
+            bob.append(Strings.join(bcc, ", "));
+        }
         bob.append("\nPriority: ");
         bob.append(getPriority());
         bob.append("\nContent-Type: ");
@@ -285,21 +442,6 @@ public class TestMail implements IdentitySource<TestMail> {
         return bob.toString();
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
-
-    public String getFolder() {
-        return folder;
-    }
 
     public void assumeIdentity(TestMail entry) {
         entry.setId(getId());
@@ -307,7 +449,7 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     public void forgetIdentity(TestMail entry) {
-        
+
     }
 
     public Class<TestMail> getType() {

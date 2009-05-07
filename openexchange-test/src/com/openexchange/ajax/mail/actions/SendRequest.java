@@ -50,9 +50,7 @@
 package com.openexchange.ajax.mail.actions;
 
 import java.io.InputStream;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -62,114 +60,108 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
  * {@link SendRequest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class SendRequest implements AJAXRequest<SendResponse> {
 
-	public static enum BodyContentType {
-		PLAIN_TEXT("text/plain"),
-		HTML("text/html"),
-		ALTERNATIVE("ALTERNATIVE");
-		
-		private final String str;
-		
-		private BodyContentType(final String str) {
-			this.str = str;
-		}
-		
-		public String getStr() {
-			return str;
-		}
-	}
-	
-	/**
-	 * URL of the tasks AJAX interface.
-	 */
-	public static final String MAIL_URL = "/ajax/mail";
+    public static enum BodyContentType {
+        PLAIN_TEXT("text/plain"), HTML("text/html"), ALTERNATIVE("ALTERNATIVE");
 
-	private final String mailStr;
+        private final String str;
 
-	private final InputStream upload;
-	
-	/*
-	 * Mail object settings
-	 */
-	private final BodyContentType contentType = BodyContentType.ALTERNATIVE;
-	
-	private String recipientTo;
+        private BodyContentType(final String str) {
+            this.str = str;
+        }
 
-	/**
-	 * Initializes a new {@link SendRequest}
-	 * 
-	 * @param mailStr
-	 *            The mail string (JSON)
-	 */
-	public SendRequest(final String mailStr) {
-		this(mailStr, null);
-	}
+        public String getStr() {
+            return str;
+        }
+    }
 
-	/**
-	 * Initializes a new {@link SendRequest}
-	 * 
-	 * @param mailStr
-	 *            The mail string (JSON)
-	 * @param upload
-	 *            The upload input stream
-	 */
-	public SendRequest(final String mailStr, final InputStream upload) {
-		super();
-		this.mailStr = mailStr;
-		this.upload = upload;
-	}
+    /**
+     * URL of the tasks AJAX interface.
+     */
+    public static final String MAIL_URL = "/ajax/mail";
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
+    private final String mailStr;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Method getMethod() {
-		return Method.UPLOAD;
-	}
+    private final InputStream upload;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Parameter[] getParameters() {
-		final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
-		retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		retval[1] = new FieldParameter("json_0", mailStr);
-		if (upload != null) {
-			retval[2] = new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii");
-		}
-		return retval;
-	}
+    /*
+     * Mail object settings
+     */
+    private final BodyContentType contentType = BodyContentType.ALTERNATIVE;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getServletPath() {
-		return MAIL_URL;
-	}
+    private String recipientTo;
 
-	public SendParser getParser() {
-		return new SendParser(true);
-	}
+    /**
+     * Initializes a new {@link SendRequest}
+     * 
+     * @param mailStr The mail string (JSON)
+     */
+    public SendRequest(final String mailStr) {
+        this(mailStr, null);
+    }
 
-	class SendParser extends AbstractUploadParser<SendResponse> {
+    /**
+     * Initializes a new {@link SendRequest}
+     * 
+     * @param mailStr The mail string (JSON)
+     * @param upload The upload input stream
+     */
+    public SendRequest(final String mailStr, final InputStream upload) {
+        super();
+        this.mailStr = mailStr;
+        this.upload = upload;
+    }
 
-		public SendParser(final boolean failOnError) {
-			super(failOnError);
-		}
+    /**
+     * {@inheritDoc}
+     */
+    public Object getBody() throws JSONException {
+        return null;
+    }
 
-		@Override
-		protected SendResponse createResponse(final Response response) throws JSONException {
-			return new SendResponse(response);
-		}
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.UPLOAD;
+    }
 
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
+        retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+        retval[1] = new FieldParameter("json_0", mailStr);
+        if (upload != null) {
+            retval[2] = new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii");
+        }
+        return retval;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getServletPath() {
+        return MAIL_URL;
+    }
+
+    public SendParser getParser() {
+        return new SendParser(true);
+    }
+
+    class SendParser extends AbstractUploadParser<SendResponse> {
+
+        public SendParser(final boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected SendResponse createResponse(final Response response) throws JSONException {
+            return new SendResponse(response);
+        }
+
+    }
 }
