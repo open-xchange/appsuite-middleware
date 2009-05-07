@@ -54,6 +54,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.FormElement;
 import com.openexchange.subscribe.SubscriptionFormDescription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -69,9 +70,13 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
 
     private List<SubscriptionSource> sourceList;
 
+    private SubscriptionSource subscriptionSource2;
+
     public void setUp() throws Exception {
         super.setUp();
-
+        
+        Tools.initExceptionFactory();
+        
         FormElement formElementLogin = new FormElement();
         formElementLogin.setName("login");
         formElementLogin.setDisplayName("Login");
@@ -94,6 +99,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         subscriptionSource.setDisplayName("Basic Subscription for Tests");
         subscriptionSource.setIcon("http://path/to/icon");
         subscriptionSource.setFormDescription(formDescription);
+        subscriptionSource.setFolderModule(FolderObject.CONTACT);
 
         FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
@@ -111,12 +117,14 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         formDescription2.addFormElement(formElementLogin2);
         formDescription2.addFormElement(formElementPassword2);
 
-        SubscriptionSource subscriptionSource2 = new SubscriptionSource();
+        subscriptionSource2 = new SubscriptionSource();
         subscriptionSource2.setId("com.openexchange.subscribe.test.basic2");
         subscriptionSource2.setDisplayName("Basic Subscription for Tests 2");
         subscriptionSource2.setIcon("http://path/to/icon 2");
         subscriptionSource2.setFormDescription(formDescription2);
+        subscriptionSource2.setFolderModule(FolderObject.CONTACT);
 
+        
         sourceList = new ArrayList<SubscriptionSource>();
         sourceList.add(subscriptionSource);
         sourceList.add(subscriptionSource2);
@@ -136,18 +144,33 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
 
     public void testListSubscriptionSourceParsing() throws Exception {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
-        JSONArray json = parser.writeJson(sourceList);
-        assertEquals("Length of JSON Array is wrong", 2, json.length());
-        assertFalse("Subscription source is an JSON Array", json.getJSONObject(0).isArray());
-        assertFalse("Subscription source is an JSON Array", json.getJSONObject(1).isArray());
-        boolean foundFirst = false;
-        boolean foundSecond = false;
-        for (int i = 0; i < json.length(); i++) {
-            foundFirst = foundFirst || json.getJSONObject(i).getString("id").equals("com.openexchange.subscribe.test.basic");
-            foundSecond = foundSecond || json.getJSONObject(i).getString("id").equals("com.openexchange.subscribe.test.basic2");
+        JSONArray rows = parser.writeJSONArray(sourceList, new String[]{"id", "displayName", "icon", "module"});
+        assertEquals(2, rows.length());
+        
+        boolean foundFirst = false, foundSecond = false;
+        
+        for(int i = 0; i < 2; i++) {
+            JSONArray row = rows.getJSONArray(i);
+            String id = row.getString(0);
+            if(id.equals(subscriptionSource.getId())) {
+                foundFirst = true;
+                assertRow(row, subscriptionSource.getId(), subscriptionSource.getDisplayName(), subscriptionSource.getIcon(), "contacts");
+            } else if (id.equals(subscriptionSource2.getId())) {
+                foundSecond = true;
+            } else {
+                fail("Got unexpected subscription id: "+id);
+            }
         }
-        assertTrue("First subscription source not found", foundFirst);
-        assertTrue("Second subscription source not found", foundSecond);
+        
+        assertTrue(foundFirst && foundSecond);
+
+    }
+    
+    public static final void assertRow(JSONArray array, Object...values) throws JSONException {
+        assertEquals(array.length(), values.length);
+        for(int i = 0; i < values.length; i++) {
+            assertEquals(values[i], array.get(i));
+        }
     }
     
     public void testMandatoryFieldCheck() throws Exception {
@@ -201,11 +224,13 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         assertTrue("JSON does not contain displayName", json.hasAndNotNull("displayName"));
         assertTrue("JSON does not contain icon", json.hasAndNotNull("icon"));
         assertTrue("JSON does not contain a formDescription", json.hasAndNotNull("formDescription"));
+        assertTrue("JSON does not contain a module", json.hasAndNotNull("module"));
 
         assertEquals("Wrong id", "com.openexchange.subscribe.test.basic", json.getString("id"));
         assertEquals("Wrong displayName", "Basic Subscription for Tests", json.getString("displayName"));
         assertEquals("Wrong icon", "http://path/to/icon", json.getString("icon"));
-
+        assertEquals("Wrong module", "contacts", json.getString("module"));
+        
         JSONArray description = json.getJSONArray("formDescription");
         assertEquals("Wrong size of form descriptions", 2, description.length());
 

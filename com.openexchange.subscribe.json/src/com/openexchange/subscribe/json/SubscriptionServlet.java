@@ -170,6 +170,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         }
         
         executor.executeSubscriptions(subscriptionsToRefresh);
+        writeData(1, resp);
     }
 
     private void listSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {

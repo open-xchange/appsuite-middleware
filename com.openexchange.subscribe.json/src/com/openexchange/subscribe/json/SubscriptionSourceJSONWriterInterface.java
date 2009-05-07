@@ -72,8 +72,10 @@ public interface SubscriptionSourceJSONWriterInterface {
 
     public static final String DEFAULT = "default";
 
+    public static final String MODULE = "module";
+
     public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
 
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    public JSONArray writeJSONArray(List<SubscriptionSource> sourceList, String[] fields) throws SubscriptionJSONException;
 
 }

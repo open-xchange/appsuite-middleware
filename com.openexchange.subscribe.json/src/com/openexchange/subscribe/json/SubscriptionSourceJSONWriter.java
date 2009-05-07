@@ -50,11 +50,13 @@
 package com.openexchange.subscribe.json;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.FormElement;
 import com.openexchange.subscribe.SubscriptionFormDescription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -84,10 +86,28 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.json.SubscriptionSourceJSONWriterInterface#writeJson(java.util.List)
      */
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException {
+    public JSONArray writeJSONArray(List<SubscriptionSource> sourceList, String[] fields) throws SubscriptionJSONException {
         JSONArray retval = new JSONArray();
-        for (Iterator<SubscriptionSource> iter = sourceList.iterator(); iter.hasNext();) {
-            retval.put(writeJSON(iter.next()));
+        for (SubscriptionSource source : sourceList) {
+            JSONArray row = new JSONArray();
+            for(String field : fields) {
+                if(ID.equals(field)) {
+                    row.put(source.getId());
+                } else if (DISPLAY_NAME.equals(field)) {
+                    row.put(source.getDisplayName());
+                } else if (ICON.equals(field)) {
+                    row.put(source.getIcon());
+                } else if (FORM_DESCRIPTION.equals(field)) {
+                    try {
+                        row.put(parseFormElements(source.getFormDescription()));
+                    } catch (JSONException e) {
+                        JSONEXCEPTION.throwException(e);
+                    }
+                } else if (MODULE.equals(field)) {
+                    row.put(getModuleAsString(source));
+                }
+            }
+            retval.put(row);
         }
         return retval;
     }
@@ -101,8 +121,20 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         if (source.getIcon() != null) {
             retval.put(ICON, source.getIcon());
         }
+        retval.put(MODULE, getModuleAsString(source));
 
         return retval;
+    }
+
+    private String getModuleAsString(SubscriptionSource source) {
+        int module = source.getFolderModule();
+        switch(module) {
+        case FolderObject.CONTACT : return "contacts";
+        case FolderObject.CALENDAR : return "calendar";
+        case FolderObject.TASK : return "tasks";
+        case FolderObject.INFOSTORE: return "infostore";
+        default : return null;
+        }
     }
 
     private JSONArray parseFormElements(SubscriptionFormDescription formDescription) throws JSONException {

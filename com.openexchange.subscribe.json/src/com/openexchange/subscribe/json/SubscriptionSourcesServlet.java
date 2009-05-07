@@ -134,11 +134,20 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
     protected void listSources(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException  {
         FolderObject folder = getFolder(req, resp);
         List<SubscriptionSource> sources = discoverer.getSources(folder);
-        JSONArray json = writer.writeJson(sources);
+        String[] columns = getColumns(req);
+        JSONArray json = writer.writeJSONArray(sources, columns);
         writeData(json, resp);
     }
     
     
+    private String[] getColumns(HttpServletRequest req) {
+        String columns = req.getParameter("columns");
+        if(columns == null) {
+            return new String[]{"id", "displayName", "icon", "formDescription"};
+        }
+        return columns.split("\\s*,\\s*"); 
+    }
+
     protected void getSource(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
         String identifier = req.getParameter("id");
         if(identifier == null) {

@@ -81,6 +81,7 @@ public class XingSubscribeService extends AbstractSubscribeService{
         SOURCE.setId("com.openexchange.subscribe.xing");
         SOURCE.setFormDescription(FORM);
         SOURCE.setSubscribeService(this);
+        SOURCE.setFolderModule(FolderObject.CONTACT);
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -96,10 +97,8 @@ public class XingSubscribeService extends AbstractSubscribeService{
         try {
             return Arrays.asList(new XingContactParser().getXingContactsForUser(configuration.get("login"), configuration.get("password")));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SAXException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;
