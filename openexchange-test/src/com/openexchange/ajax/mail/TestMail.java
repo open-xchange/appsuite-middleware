@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -165,7 +166,6 @@ public class TestMail implements IdentitySource<TestMail> {
         setId(folderAndID[1]);
     }
 
-
     public void setId(String id) {
         this.id = id;
     }
@@ -181,36 +181,31 @@ public class TestMail implements IdentitySource<TestMail> {
     public String getFolder() {
         return folder;
     }
-    
-    
-    
-    
-    
+
     public TestMail() {
     }
 
     public TestMail(JSONObject obj) throws JSONException {
         read(obj);
     }
-    
-    public TestMail(int[] columns, JSONArray values) throws JSONException{
-        read(columns,values);
+
+    public TestMail(int[] columns, JSONArray values) throws JSONException {
+        read(columns, values);
     }
 
     public static TestMail create(JSONObject obj) throws JSONException {
         return new TestMail(obj);
     }
 
-    
-    
-    
     public void read(Map<String, String> map) {
-        // TODO find some proper names, like from MailJSONFields
-        setFrom(Arrays.asList(map.get("From").split("[,;]")));
-        setTo(Arrays.asList(map.get("To").split("[,;]")));
-        setSubject(map.get("Subject"));
-        setBody(map.get("Content"));
-
+        Set<String> keys = map.keySet();
+        for (String key : keys) {
+            MailListField field = MailListField.getBy(key);
+            if (key == null)
+                continue;
+            setBy(field, map.get(key));
+        }
+        setBody(map.get("message"));
     }
 
     public void read(JSONObject json) throws JSONException {
@@ -269,7 +264,7 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     public void read(int[] columns, JSONArray values) throws JSONException {
-        for(int i = 0; i < columns.length; i++){
+        for (int i = 0; i < columns.length; i++) {
             MailListField field = MailListField.getField(columns[i]);
             // lists
             if (field == MailListField.FROM) {
@@ -288,12 +283,12 @@ public class TestMail implements IdentitySource<TestMail> {
             if (field == MailListField.SUBJECT) {
                 setSubject(values.getString(i));
             }
-            //no content_type
-            //no content
+            // no content_type
+            // no content
             if (field == MailListField.ID) {
                 setId(values.getString(i));
             }
-            //difference between folder and folder_id?
+            // difference between folder and folder_id?
             if (field == MailListField.FOLDER) {
                 setFolder(values.getString(i));
             }
@@ -310,8 +305,7 @@ public class TestMail implements IdentitySource<TestMail> {
         }
     }
 
-        
-    public Object getBy(MailListField field){
+    public Object getBy(MailListField field) {
         if (field == MailListField.FROM) {
             return getFrom();
         }
@@ -329,12 +323,12 @@ public class TestMail implements IdentitySource<TestMail> {
         if (field == MailListField.SUBJECT) {
             return getSubject();
         }
-        //no content_type
-        //no content
+        // no content_type
+        // no content
         if (field == MailListField.ID) {
             return getId();
         }
-        //difference between folder and folder_id?
+        // difference between folder and folder_id?
         if (field == MailListField.FOLDER) {
             return getFolder();
         }
@@ -350,14 +344,56 @@ public class TestMail implements IdentitySource<TestMail> {
         }
         return null;
     }
-    
-    
+
+    public void setBy(MailListField field, Object value) {
+        if (field == MailListField.FROM) {
+            setFrom( addresses2list((String) value) );
+        }
+        if (field == MailListField.TO) {
+            setTo( addresses2list((String) value) );
+        }
+        if (field == MailListField.CC) {
+            setCc( addresses2list((String) value) );
+        }
+        if (field == MailListField.BCC) {
+            setBcc( addresses2list((String) value) );
+        }
+        // strings
+        if (field == MailListField.SUBJECT) {
+            setSubject((String) value);
+        }
+        // no content_type
+        // no content
+        if (field == MailListField.ID) {
+            setId((String) value);
+        }
+        // difference between folder and folder_id?
+        if (field == MailListField.FOLDER) {
+            setFolder((String) value);
+        }
+        // ints
+        if (field == MailListField.COLOR_LABEL) {
+            setColor(((Integer) value).intValue());
+        }
+        if (field == MailListField.FLAGS) {
+            setFlags(((Integer) value).intValue());
+        }
+        if (field == MailListField.PRIORITY) {
+            setPriority(((Integer) value).intValue());
+        }
+    }
+
     /**
      * Converts a JSON array into a string list.
      */
     protected List<String> j2l(JSONArray array) throws JSONException {
         return JSON.jsonArray2list(array);
     }
+    
+    protected List<String> addresses2list(String mailAddresses){
+        return Arrays.asList(mailAddresses.split(",") );
+    }
+    
 
     /**
      * Makes this mail look properly (e.g. attaching the content as attachment if it is of content_type &quot;alternative&quot;
@@ -442,7 +478,6 @@ public class TestMail implements IdentitySource<TestMail> {
         return bob.toString();
     }
 
-
     public void assumeIdentity(TestMail entry) {
         entry.setId(getId());
         entry.setFolder(getFolder());
@@ -460,5 +495,4 @@ public class TestMail implements IdentitySource<TestMail> {
         setId(entry.getId());
         setFolder(entry.getFolder());
     }
-
 }
