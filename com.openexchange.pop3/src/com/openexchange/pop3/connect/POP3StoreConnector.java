@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pop3;
+package com.openexchange.pop3.connect;
 
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
@@ -61,6 +61,8 @@ import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;

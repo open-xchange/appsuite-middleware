@@ -249,6 +249,17 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
+        try {
+            deleteMailAccount(id, user, cid, deletePrimary, con);
+        } finally {
+            Database.back(cid, true, con);
+        }
+    }
+
+    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
+        if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_DELETE, I(user), I(cid));
+        }
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
@@ -266,7 +277,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
         }
     }
 
@@ -293,14 +303,45 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
+        Connection con = null;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        }
+        try {
+            return getUserMailAccounts(user, cid, con);
+        } finally {
+            Database.back(cid, false, con);
+        }
+    }
+
+    public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws MailAccountException {
+        final int[] ids = getUserMailAccountIDs(user, cid, con);
+        final MailAccount[] retval = new MailAccount[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            retval[i] = getMailAccount(ids[i], user, cid, con);
+        }
+        return retval;
+    }
+
+    int[] getUserMailAccountIDs(final int user, final int cid) throws MailAccountException {
+        Connection con = null;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        }
+        try {
+            return getUserMailAccountIDs(user, cid, con);
+        } finally {
+            Database.back(cid, false, con);
+        }
+    }
+
+    int[] getUserMailAccountIDs(final int user, final int cid, final Connection con) throws MailAccountException {
         final int[] ids;
         {
-            Connection con = null;
-            try {
-                con = Database.get(cid, false);
-            } catch (final DBPoolingException e) {
-                throw new MailAccountException(e);
-            }
             PreparedStatement stmt = null;
             ResultSet result = null;
             final SmartIntArray sia = new SmartIntArray(8);
@@ -310,7 +351,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(2, user);
                 result = stmt.executeQuery();
                 if (!result.next()) {
-                    return new MailAccount[0];
+                    return new int[0];
                 }
                 do {
                     sia.append(result.getInt(1));
@@ -319,18 +360,23 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
-                Database.back(cid, false, con);
             }
             ids = sia.toArray();
         }
-        final MailAccount[] retval = new MailAccount[ids.length];
-        for (int i = 0; i < ids.length; i++) {
-            retval[i] = getMailAccount(ids[i], user, cid);
+        return ids;
+    }
+
+    public MailAccount[] resolveLogin(final String login, final int cid) throws MailAccountException {
+        final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
+        final MailAccount[] retval = new MailAccount[idsAndUsers.length];
+        for (int i = 0; i < idsAndUsers.length; i++) {
+            final int[] idAndUser = idsAndUsers[i];
+            retval[i] = getMailAccount(idAndUser[0], idAndUser[1], cid);
         }
         return retval;
     }
 
-    public MailAccount[] resolveLogin(final String login, final int cid) throws MailAccountException {
+    int[][] resolveLogin2IDs(final String login, final int cid) throws MailAccountException {
         final int[] ids;
         final int[] users;
         {
@@ -350,7 +396,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(2, login);
                 result = stmt.executeQuery();
                 if (!result.next()) {
-                    return new MailAccount[0];
+                    return new int[0][];
                 }
                 do {
                     idsArr.append(result.getInt(1));
@@ -365,26 +411,40 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             ids = idsArr.toArray();
             users = usersArr.toArray();
         }
-        final MailAccount[] retval = new MailAccount[ids.length];
+        final int[][] retval = new int[ids.length][];
         for (int i = 0; i < ids.length; i++) {
-            retval[i] = getMailAccount(ids[i], users[i], cid);
+            retval[i] = new int[] { ids[i], users[i] };
         }
         return retval;
     }
 
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
-        final MailAccount[] tmp = resolveLogin(login, cid);
-        final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
-        for (int i = 0; i < tmp.length; i++) {
-            final MailAccount cur = tmp[i];
-            if (server.equals(toSocketAddr(cur.generateMailServerURL(), 143))) {
-                l.add(cur);
+        final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
+        final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
+        for (int i = 0; i < idsAndUsers.length; i++) {
+            final int[] idAndUser = idsAndUsers[i];
+            final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
+            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+                l.add(candidate);
             }
         }
         return l.toArray(new MailAccount[l.size()]);
     }
 
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {
+        final int[][] idsAndUsers = resolvePrimaryAddr2IDs(primaryAddress, cid);
+        final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
+        for (int i = 0; i < idsAndUsers.length; i++) {
+            final int[] idAndUser = idsAndUsers[i];
+            final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
+            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+                l.add(candidate);
+            }
+        }
+        return l.toArray(new MailAccount[l.size()]);
+    }
+
+    int[][] resolvePrimaryAddr2IDs(final String primaryAddress, final int cid) throws MailAccountException {
         final int[] ids;
         final int[] users;
         {
@@ -404,7 +464,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(2, primaryAddress);
                 result = stmt.executeQuery();
                 if (!result.next()) {
-                    return new MailAccount[0];
+                    return new int[0][];
                 }
                 do {
                     idsArr.append(result.getInt(1));
@@ -419,18 +479,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             ids = idsArr.toArray();
             users = usersArr.toArray();
         }
-        final MailAccount[] tmp = new MailAccount[ids.length];
+        final int[][] idsAndUsers = new int[ids.length][];
         for (int i = 0; i < ids.length; i++) {
-            tmp[i] = getMailAccount(ids[i], users[i], cid);
+            idsAndUsers[i] = new int[] { ids[i], users[i] };
         }
-        final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
-        for (int i = 0; i < tmp.length; i++) {
-            final MailAccount cur = tmp[i];
-            if (server.equals(toSocketAddr(cur.generateMailServerURL(), 143))) {
-                l.add(cur);
-            }
-        }
-        return l.toArray(new MailAccount[l.size()]);
+        return idsAndUsers;
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
@@ -573,11 +626,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             closeSQLStuff(null, stmt);
         }
         /*
-         * TODO: Automatically check Unified INBOX enablement?
+         * Automatically check Unified INBOX enablement
          */
-        if (false && attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
+        if (attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
             final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-            if (null != management && !management.isEnabled(user, cid)) {
+            if (null != management && management.getUnifiedINBOXAccountID(user, cid) == -1) {
                 management.createUnifiedINBOX(user, cid);
             }
         }
@@ -677,11 +730,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             Database.back(cid, true, con);
         }
         /*
-         * TODO: Automatically check Unified INBOX enablement?
+         * Automatically check Unified INBOX enablement
          */
-        if (false && mailAccount.isUnifiedINBOXEnabled()) {
+        if (mailAccount.isUnifiedINBOXEnabled()) {
             final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-            if (null != management && !management.isEnabled(user, cid)) {
+            if (null != management && management.getUnifiedINBOXAccountID(user, cid) == -1) {
                 management.createUnifiedINBOX(user, cid);
             }
         }
@@ -796,11 +849,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             closeSQLStuff(null, stmt);
         }
         /*
-         * TODO: Automatically check Unified INBOX enablement?
+         * Automatically check Unified INBOX enablement
          */
-        if (false && mailAccount.isUnifiedINBOXEnabled()) {
+        if (mailAccount.isUnifiedINBOXEnabled()) {
             final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-            if (null != management && !management.isEnabled(user, cid)) {
+            if (null != management && management.getUnifiedINBOXAccountID(user, cid) == -1) {
                 management.createUnifiedINBOX(user, cid);
             }
         }

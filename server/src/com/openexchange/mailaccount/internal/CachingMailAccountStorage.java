@@ -118,6 +118,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
+        delegate.deleteMailAccount(id, user, cid, deletePrimary, con);
+        invalidateMailAccount(id, user, cid);
+    }
+
     public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
         delegate.deleteMailAccount(id, user, cid, deletePrimary);
         invalidateMailAccount(id, user, cid);
@@ -188,6 +193,15 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {
         return delegate.getByPrimaryAddress(primaryAddress, user, cid);
+    }
+
+    public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws MailAccountException {
+        final int[] ids = delegate.getUserMailAccountIDs(user, cid, con);
+        final MailAccount[] accounts = new MailAccount[ids.length];
+        for (int i = 0; i < accounts.length; i++) {
+            accounts[i] = getMailAccount(ids[i], user, cid);
+        }
+        return accounts;
     }
 
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {

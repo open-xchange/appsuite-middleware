@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.internal;
 
+import java.sql.Connection;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -78,6 +79,10 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
     }
 
     public void createUnifiedINBOX(final int userId, final int contextId) throws MailAccountException {
+        createUnifiedINBOX(userId, contextId, null);
+    }
+
+    public void createUnifiedINBOX(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
@@ -115,7 +120,11 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             // No transport settings
             mailAccountDescription.setTransportServer(null);
             // Create it
-            storageService.insertMailAccount(mailAccountDescription, userId, ctx, null);
+            if (null == con) {
+                storageService.insertMailAccount(mailAccountDescription, userId, ctx, null);
+            } else {
+                storageService.insertMailAccount(mailAccountDescription, userId, ctx, null, con);
+            }
         } catch (final ServiceException e) {
             throw new MailAccountException(e);
         } catch (final MailAccountException e) {
@@ -127,6 +136,10 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
     }
 
     public void deleteUnifiedINBOX(final int userId, final int contextId) throws MailAccountException {
+        deleteUnifiedINBOX(userId, contextId, null);
+    }
+
+    public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
@@ -142,7 +155,11 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             }
             // Delete the Unified INBOX account
             if (id >= 0) {
-                storageService.deleteMailAccount(id, userId, contextId);
+                if (null == con) {
+                    storageService.deleteMailAccount(id, userId, contextId, false);
+                } else {
+                    storageService.deleteMailAccount(id, userId, contextId, false, con);
+                }
             }
         } catch (final ServiceException e) {
             throw new MailAccountException(e);
@@ -152,15 +169,24 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
     }
 
     public boolean isEnabled(final int userId, final int contextId) throws MailAccountException {
+        return isEnabled(userId, contextId, null);
+    }
+
+    public boolean isEnabled(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
             // Look-up the Unified INBOX account for given user
-            final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            final MailAccount[] existingAccounts;
+            if (null == con) {
+                existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            } else {
+                existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
+            }
             for (int i = 0; i < existingAccounts.length; i++) {
                 final MailAccount mailAccount = existingAccounts[i];
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol()) && mailAccount.isUnifiedINBOXEnabled()) {
                     return true;
                 }
             }
@@ -173,12 +199,21 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
     }
 
     public int getUnifiedINBOXAccountID(final int userId, final int contextId) throws MailAccountException {
+        return getUnifiedINBOXAccountID(userId, contextId, null);
+    }
+
+    public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
             // Look-up the Unified INBOX account for given user
-            final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            final MailAccount[] existingAccounts;
+            if (null == con) {
+                existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            } else {
+                existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
+            }
             for (int i = 0; i < existingAccounts.length; i++) {
                 final MailAccount mailAccount = existingAccounts[i];
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {

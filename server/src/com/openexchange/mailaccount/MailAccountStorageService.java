@@ -83,6 +83,17 @@ public interface MailAccountStorageService {
     public MailAccount[] getUserMailAccounts(int user, int cid) throws MailAccountException;
 
     /**
+     * Gets the mail accounts belonging to specified user in given context.
+     * 
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The connection to use
+     * @return The user's mail accounts
+     * @throws MailAccountException If the mail accounts cannot be returned
+     */
+    public MailAccount[] getUserMailAccounts(int user, int cid, Connection con) throws MailAccountException;
+
+    /**
      * Gets the default mail account belonging to specified user in given context.
      * 
      * @param user The user ID
@@ -174,6 +185,18 @@ public interface MailAccountStorageService {
      * @throws MailAccountException If the mail account cannot be deleted
      */
     public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary) throws MailAccountException;
+
+    /**
+     * Deletes the mail account identified by specified ID.
+     * 
+     * @param id The mail account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
+     * @param con The connection to use
+     * @throws MailAccountException If the mail account cannot be deleted
+     */
+    public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary, Connection con) throws MailAccountException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.

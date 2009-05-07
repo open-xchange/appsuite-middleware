@@ -49,6 +49,8 @@
 
 package com.openexchange.mailaccount;
 
+import java.sql.Connection;
+
 /**
  * {@link UnifiedINBOXManagement} - Management for Unified INBOX accounts.
  * 
@@ -71,6 +73,16 @@ public interface UnifiedINBOXManagement {
     public void createUnifiedINBOX(int userId, int contextId) throws MailAccountException;
 
     /**
+     * Creates the Unified INBOX account for given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection to use
+     * @throws MailAccountException If creating the Unified INBOX account fails for given user in specified context
+     */
+    public void createUnifiedINBOX(int userId, int contextId, Connection con) throws MailAccountException;
+
+    /**
      * Deletes the Unified INBOX account for given user in specified context.
      * 
      * @param userId The user ID
@@ -80,7 +92,19 @@ public interface UnifiedINBOXManagement {
     public void deleteUnifiedINBOX(int userId, int contextId) throws MailAccountException;
 
     /**
+     * Deletes the Unified INBOX account for given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection to use
+     * @throws MailAccountException If deleting the Unified INBOX account fails for given user in specified context
+     */
+    public void deleteUnifiedINBOX(int userId, int contextId, Connection con) throws MailAccountException;
+
+    /**
      * Checks if the Unified INBOX account is enabled for given user in specified context.
+     * <p>
+     * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
      * 
      * @param userId The user ID
      * @param contextId The context ID
@@ -88,6 +112,19 @@ public interface UnifiedINBOXManagement {
      * @throws MailAccountException If checking Unified INBOX account's enabled status fails
      */
     public boolean isEnabled(int userId, int contextId) throws MailAccountException;
+
+    /**
+     * Checks if the Unified INBOX account is enabled for given user in specified context.
+     * <p>
+     * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection to use
+     * @return <code>true</code> if the Unified INBOX account is enabled for given user in specified context; otherwise <code>false</code>
+     * @throws MailAccountException If checking Unified INBOX account's enabled status fails
+     */
+    public boolean isEnabled(int userId, int contextId, Connection con) throws MailAccountException;
 
     /**
      * Gets the ID of the mail account denoting the Unified INBOX account.
@@ -98,4 +135,16 @@ public interface UnifiedINBOXManagement {
      * @throws MailAccountException If detecting ID of the Unified INBOX account fails
      */
     public int getUnifiedINBOXAccountID(int userId, int contextId) throws MailAccountException;
+
+    /**
+     * Gets the ID of the mail account denoting the Unified INBOX account.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection to use
+     * @return The ID of the Unified INBOX account or <code>-1</code> if none found
+     * @throws MailAccountException If detecting ID of the Unified INBOX account fails
+     */
+    public int getUnifiedINBOXAccountID(int userId, int contextId, Connection con) throws MailAccountException;
+
 }

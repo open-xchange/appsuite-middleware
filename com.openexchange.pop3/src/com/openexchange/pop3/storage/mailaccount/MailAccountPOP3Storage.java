@@ -75,7 +75,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
-import com.openexchange.pop3.POP3StoreConnector;
+import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;

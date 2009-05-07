@@ -49,20 +49,31 @@
 
 package com.openexchange.pop3;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
+import com.openexchange.pop3.connect.POP3ConnectCallable;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
-import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.util.POP3StorageUtil;
@@ -81,6 +92,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     private static final long serialVersionUID = -7510487764376433468L;
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
+
+    private static final ConcurrentMap<InetSocketAddress, Future<Object>> CONNECT_MAP = new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
 
     /*-
      * Members
@@ -301,39 +314,55 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
          */
         decrement = true;
         /*
-         * Is it allowed to connect to real POP3 account to synchronize messages?
+         * Ensure exclusive connect through future since a POP3 account may only be connected to one client at the same time
          */
-        final Long lastAccessed = getLastAccessed();
-        final long frequencyMillis = getFrequencyMillis();
-        if ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= frequencyMillis)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("\n\tSynchronizing messages with POP3 account: " + getPOP3Config().getServer());
-            }
-            /*
-             * Check default folder
-             */
-            getFolderStorage().checkDefaultFolders();
-            /*
-             * Sync messages
-             */
-            try {
+        final InetSocketAddress server;
+        try {
+            server = new InetSocketAddress(InetAddress.getByName(getPOP3Config().getServer()), getPOP3Config().getPort());
+        } catch (final UnknownHostException e) {
+            throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config());
+        }
+        Future<Object> f = CONNECT_MAP.get(server);
+        if (null == f) {
+            final FutureTask<Object> ft = new FutureTask<Object>(new POP3ConnectCallable(
+                pop3Storage,
+                pop3StorageProperties,
+                getFolderStorage(),
+                getPOP3Config().getServer()));
+            f = CONNECT_MAP.putIfAbsent(server, ft);
+            if (f == null) {
                 /*
-                 * Access POP3 account and synchronize
+                 * Yap, this thread's future task was put to map
                  */
-                pop3Storage.syncMessages(isExpungeOnQuit());
-                /*
-                 * Update last-accessed time stamp
-                 */
-                pop3StorageProperties.addProperty(
-                    POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED,
-                    String.valueOf(System.currentTimeMillis()));
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("\n\tSynchronization successfully performed for POP3 account: " + getPOP3Config().getServer());
-                }
-            } catch (final MailException e) {
-                LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                f = ft;
+                ft.run();
             }
         }
+        /*
+         * Get future's result
+         */
+        try {
+            f.get();
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final CancellationException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
+        }
+        /*
+         * And remove from map
+         */
+        CONNECT_MAP.remove(server);
     }
 
     @Override
@@ -392,45 +421,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected boolean checkMailServerPort() {
         return true;
-    }
-
-    private Long getLastAccessed() throws MailException {
-        final String lastAccessedStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
-        if (null != lastAccessedStr) {
-            try {
-                return Long.valueOf(lastAccessedStr);
-            } catch (final NumberFormatException e) {
-                LOG.warn(e.getMessage(), e);
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private static final int FALLBACK_MINUTES = 10;
-
-    private long getFrequencyMillis() throws MailException {
-        final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_FREQUENCY);
-        if (null != frequencyStr) {
-            int minutes = 0;
-            try {
-                minutes = Integer.parseInt(frequencyStr);
-            } catch (final NumberFormatException e) {
-                LOG.warn(e.getMessage(), e);
-                minutes = FALLBACK_MINUTES;
-            }
-            return minutes * 60 * 1000;
-        }
-        // Fallback to 10 minutes
-        return FALLBACK_MINUTES * 60 * 1000;
-    }
-
-    private boolean isExpungeOnQuit() throws MailException {
-        final String expungeStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_EXPUNGE);
-        if (null != expungeStr) {
-            return Boolean.parseBoolean(expungeStr);
-        }
-        return false;
     }
 
 }
