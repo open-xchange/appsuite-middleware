@@ -62,12 +62,24 @@ import java.util.List;
  */
 public class Strings {
     
+    /**
+     * Joins a collection of objects by connecting the results of
+     * their #toString() method with a connector
+     * 
+     * @param coll Collection to be connected
+     * @param connector Connector place between two objects
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
     public static String join(Collection<? extends Object> coll, String connector){
+        if(coll == null)
+            return null;
         StringBuilder builder = new StringBuilder();
         for(Object obj: coll){
             builder.append(obj.toString());
             builder.append(connector);
         }
+        if(builder.length() == 0)
+            return "";
         return builder.substring(0, builder.length() - connector.length());
     }
     
