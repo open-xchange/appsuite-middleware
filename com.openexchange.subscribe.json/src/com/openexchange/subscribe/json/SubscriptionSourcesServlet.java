@@ -161,7 +161,7 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
     protected FolderObject getFolder(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
         String folderIdAsString = req.getParameter("folder");
         if(folderIdAsString == null) {
-            MISSING_PARAMETER.throwException("folder");
+            return null;
         }
         
         return loadFolder(req, resp, Integer.parseInt(folderIdAsString));
