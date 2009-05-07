@@ -49,23 +49,30 @@
 
 package com.openexchange.ajax.mail;
 
+import javax.mail.internet.InternetAddress;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
+import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link AllTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  * 
  */
 public final class AllTest extends AbstractMailTest {
 
 	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	String mailObject_25kb;
+	
 
 	/**
 	 * Default constructor.
@@ -76,6 +83,31 @@ public final class AllTest extends AbstractMailTest {
 	public AllTest(final String name) {
 		super(name);
 	}
+	
+	public void setUp() throws Exception{
+		super.setUp();
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
+		
+		/*
+		 * Create JSON mail object
+		 */
+		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+	}
+	
+	public void tearDown() throws Exception{
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
+		super.tearDown();
+	}
 
 	/**
 	 * Tests the <code>action=all</code> request on INBOX folder
@@ -83,16 +115,6 @@ public final class AllTest extends AbstractMailTest {
 	 * @throws Throwable
 	 */
 	public void testAll() throws Throwable {
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
 		/*
 		 * Insert <numOfMails> mails through a send request
 		 */
@@ -105,8 +127,8 @@ public final class AllTest extends AbstractMailTest {
 		/*
 		 * Perform all request
 		 */
-		final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null));
+		final AllResponse allR = Executor.execute(getSession(), new AllRequest(
+				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
@@ -116,12 +138,6 @@ public final class AllTest extends AbstractMailTest {
             array.length);
         assertEquals("Number of columns differs from request ones.",
             COLUMNS_DEFAULT_LIST.length, array[0].length);
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
 	}
 
 	/**
@@ -130,16 +146,6 @@ public final class AllTest extends AbstractMailTest {
 	 * @throws Throwable
 	 */
 	public void testAllLimit() throws Throwable {
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
 		/*
 		 * Insert <numOfMails> mails through a send request
 		 */
@@ -154,10 +160,10 @@ public final class AllTest extends AbstractMailTest {
 		 */
 		final int left = 0;
 		final int right = 10;
-		final AllRequest allRequest = new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null);
+		final AllRequest allRequest = new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true);
 		allRequest.setLeftHandLimit(left);
 		allRequest.setRightHandLimit(right);
-		final CommonAllResponse allR = Executor.execute(getSession(), allRequest);
+		final AllResponse allR = Executor.execute(getSession(), allRequest);
 		if (allR.hasError()) {
 		    fail(allR.getException().toString());
 		}
@@ -167,11 +173,29 @@ public final class AllTest extends AbstractMailTest {
             (right - left), array.length);
         assertEquals("Number of columns differs from request ones.",
             COLUMNS_DEFAULT_LIST.length, array[0].length);
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
 	}
+	
+public void testAllResponseGetMailObjects() throws Exception {
+    	
+    	/*
+		 * Insert <numOfMails> mails through a send request
+		 */
+		final int numOfMails = 5;
+		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+		for (int i = 0; i < numOfMails; i++) {
+		    getClient().execute(new SendRequest(mailObject_25kb));
+			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+		}
+    	
+    	AllResponse allR = Executor.execute(getSession(), new AllRequest(
+				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
+        if (allR.hasError()) {
+            fail(allR.getException().toString());
+        }
+        MailMessage[] mailMessages = allR.getMailMessages(COLUMNS_DEFAULT_LIST);
+        for (MailMessage mailMessage : mailMessages){
+        	assertEquals("From is not equal", new InternetAddress(getSendAddress()) ,mailMessage.getFrom()[0]);
+        	assertEquals("Subject is not equal", MAIL_SUBJECT ,mailMessage.getSubject());
+        }
+    }
 }
