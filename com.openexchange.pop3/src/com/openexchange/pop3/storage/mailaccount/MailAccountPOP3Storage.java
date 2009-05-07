@@ -243,7 +243,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
     public void syncMessages(final boolean expunge) throws MailException {
-        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties());
+        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false);
         /*
          * Increase counter
          */

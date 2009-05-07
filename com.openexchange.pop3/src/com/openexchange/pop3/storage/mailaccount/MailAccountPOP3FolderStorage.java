@@ -312,9 +312,16 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 mailIDs[i] = mails[i].getMailId();
             }
         }
-        if (hardDelete) {
+        if (hardDelete || performHardDelete(fullname)) {
             // Delegate delete to message storage which already keeps track of proper mappings
             getMessageStorage().deleteMessages(fullname, mailIDs, true);
+            // Check for trash folder
+            if (getTrashFolder().equals(fullname)) {
+                final MailFolder[] trashSubfolders = getSubfolders(getTrashFolder(), true);
+                for (final MailFolder trashSubfolder : trashSubfolders) {
+                    deleteFolder(trashSubfolder.getFullname(), true);
+                }
+            }
         } else {
             // Clear folder by moving its mails to trash
             final String trashFullname = getTrashFolder();
@@ -330,6 +337,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     public String createFolder(final MailFolderDescription toCreate) throws MailException {
+        toCreate.setParentFullname(getRealFullname(toCreate.getParentFullname()));
         final String realFullname = delegatee.createFolder(toCreate);
         return stripPathFromFullname(path, realFullname);
     }
@@ -358,7 +366,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 exists = delegatee.exists(tmp.append(realTrashFullname).append(storage.getSeparator()).append(newName).toString());
                 if (exists) {
                     tmp.setLength(0);
-                    newName = tmp.append(newName).append(" (").append(++count).append(')').toString();
+                    newName = tmp.append(newName).append('_').append(++count).toString();
                 }
             } while (exists);
         }
@@ -377,14 +385,15 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     private void hardDeleteFolder(final MailFolder realMailFolder) throws MailException {
+        final String realFullname = realMailFolder.getFullname();
         if (realMailFolder.hasSubfolders()) {
-            final MailFolder[] subfolders = delegatee.getSubfolders(realMailFolder.getFullname(), true);
+            final MailFolder[] subfolders = delegatee.getSubfolders(realFullname, true);
             for (final MailFolder subfolder : subfolders) {
                 hardDeleteFolder(subfolder);
             }
         }
         // Get virtual fullname
-        final String fullname = stripPathFromFullname(path, realMailFolder.getFullname());
+        final String fullname = stripPathFromFullname(path, realFullname);
         // Load mail IDs
         final String[] mailIDs;
         {
@@ -401,6 +410,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         }
         // Delegate message deletion to message storage which already keeps track of UIDLs
         getMessageStorage().deleteMessages(fullname, mailIDs, true);
+        // Finally delete folder
+        delegatee.deleteFolder(realFullname, true);
     }
 
     private void moveFolder0(final MailFolder realMailFolder, final String newParent, final String newName) throws MailException {
@@ -574,7 +585,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         final MailPermission mp = getPOP3MailPermission();
         if (MailFolder.DEFAULT_FOLDER_ID.equals(mailFolder.getFullname())) {
             mp.setAllPermission(
-                MailPermission.NO_PERMISSIONS,
+                MailPermission.CREATE_SUB_FOLDERS,
                 MailPermission.NO_PERMISSIONS,
                 MailPermission.NO_PERMISSIONS,
                 MailPermission.NO_PERMISSIONS);

@@ -95,7 +95,7 @@ public final class POP3StoreConnector {
      * @return A connected instance of {@link POP3Store}
      * @throws MailException If establishing a connected instance of {@link POP3Store} fails
      */
-    public static POP3Store getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties) throws MailException {
+    public static POP3Store getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication) throws MailException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -160,10 +160,12 @@ public final class POP3StoreConnector {
             try {
                 pop3Store.connect(server, port, login, tmpPass);
             } catch (final AuthenticationFailedException e) {
-                /*
-                 * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
-                 */
-                failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
+                if (monitorFailedAuthentication) {
+                    /*
+                     * Remember failed authentication's credentials (for a short amount of time) to speed-up subsequent connect trials
+                     */
+                    failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
+                }
                 throw e;
             } catch (final MessagingException e) {
                 /*

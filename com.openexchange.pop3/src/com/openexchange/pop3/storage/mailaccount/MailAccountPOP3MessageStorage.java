@@ -150,7 +150,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     }
 
     public void deleteMessages(final String folder, final String[] mailIDs, final boolean hardDelete) throws MailException {
-        if (hardDelete) {
+        if (hardDelete || performHardDelete(folder)) {
             // Clean from storage
             delegatee.deleteMessages(getRealFullname(folder), mailIDs, true);
             // Look-up UIDLs for mail IDs
@@ -164,6 +164,15 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             // Move to trash
             moveMessages(folder, getFolderStorage().getTrashFolder(), mailIDs, true);
         }
+    }
+
+    private boolean performHardDelete(final String fullname) throws MailException {
+        final String trashFullname = getFolderStorage().getTrashFolder();
+        if (fullname.startsWith(trashFullname)) {
+            // A subfolder of trash folder
+            return true;
+        }
+        return !getFolderStorage().getFolder(trashFullname).isHoldsFolders();
     }
 
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {

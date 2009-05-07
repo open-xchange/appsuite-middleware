@@ -307,7 +307,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final long frequencyMillis = getFrequencyMillis();
         if ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= frequencyMillis)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Synchronizing messages with POP3 account: " + getPOP3Config().getServer());
+                LOG.debug("\n\tSynchronizing messages with POP3 account: " + getPOP3Config().getServer());
             }
             /*
              * Check default folder
@@ -327,11 +327,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 pop3StorageProperties.addProperty(
                     POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED,
                     String.valueOf(System.currentTimeMillis()));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("\n\tSynchronization successfully performed for POP3 account: " + getPOP3Config().getServer());
+                }
             } catch (final MailException e) {
                 LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Synchronization successfully performed for POP3 account: " + getPOP3Config().getServer());
             }
         }
     }
