@@ -49,31 +49,29 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link SubscriptionJSONExceptions}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class SubscriptionJSONExceptions extends Exceptions<SubscriptionJSONException> {
 
-    public static final String DISPLAY_NAME = "displayName";
+    /* (non-Javadoc)
+     * @see com.openexchange.exceptions.Exceptions#createException(com.openexchange.exceptions.ErrorMessage, java.lang.Throwable, java.lang.Object[])
+     */
+    @Override
+    protected SubscriptionJSONException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new SubscriptionJSONException(message, cause, args);
+    }
 
-    public static final String ICON = "icon";
-
-    public static final String FORM_DESCRIPTION = "formDescription";
-
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    @Override
+    protected void knownExceptions() {
+        declareAll(SubscriptionJSONErrorMessages.values());
+    }
 
 }

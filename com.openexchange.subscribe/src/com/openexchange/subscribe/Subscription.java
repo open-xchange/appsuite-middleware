@@ -57,7 +57,9 @@ import java.util.Map;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Subscription {
-
+    
+    private int id;
+    
     private int folderId;
 
     private int contextId;
@@ -66,9 +68,9 @@ public class Subscription {
 
     private Date lastUpdate;
     
+    private SubscriptionSource source;
+    
     private Map<String, String> configuration= new HashMap<String, String>();
-
-    private SubscriptionFormDescription description;
 
     public int getFolderId() {
         return folderId;
@@ -110,11 +112,23 @@ public class Subscription {
         this.configuration = configuration;
     }
     
-    public SubscriptionFormDescription getDescription() {
-        return description;
+    public void setSource(SubscriptionSource source) {
+        this.source = source;
     }
     
-    public void setDescription(SubscriptionFormDescription description) {
-        this.description = description;
+    public SubscriptionSource getSource() {
+        return source;
+    }
+    
+    public SubscriptionFormDescription getDescription() {
+        return source.getFormDescription();
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -47,23 +47,60 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe.internal;
 
-import org.json.JSONException;
+import java.util.List;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SimContextService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class WriteException extends Exception {
+public class SimContextService implements ContextService{
 
-    private static final long serialVersionUID = 5976972835120202376L;
-
-    public WriteException(String string) {
-        super(string);
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getAllContextIds()
+     */
+    public List<Integer> getAllContextIds() throws ContextException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    public WriteException(JSONException e) {
-        super(e);
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getContext(int)
+     */
+    public Context getContext(int contextId) throws ContextException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getContextId(java.lang.String)
+     */
+    public int getContextId(String loginContextInfo) throws ContextException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#invalidateContext(int)
+     */
+    public void invalidateContext(int contextId) throws ContextException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#invalidateLoginInfo(java.lang.String)
+     */
+    public void invalidateLoginInfo(String loginContextInfo) throws ContextException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

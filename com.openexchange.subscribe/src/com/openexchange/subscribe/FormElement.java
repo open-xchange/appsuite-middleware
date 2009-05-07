@@ -126,4 +126,35 @@ public class FormElement {
         this.mandatory = mandatory;
     }
     
+    public static FormElement formElement(String name, String displayName, boolean mandatory, String defaultValue) {
+        FormElement formElement = new FormElement();
+        formElement.setName(name);
+        formElement.setDisplayName(displayName);
+        formElement.setMandatory(mandatory);
+        formElement.setDefaultValue(defaultValue);
+        return formElement;
+    }
+
+    public static FormElement input(String name, String displayName, boolean mandatory, String defaultValue) {
+        FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
+        formElement.setWidget(Widget.INPUT);
+        return formElement;
+    }
+    
+    public static FormElement input(String name, String displayName) {
+        return input(name, displayName, true, null);
+    }
+    
+    public static FormElement password(String name, String displayName, boolean mandatory, String defaultValue) {
+        FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
+        formElement.setWidget(Widget.PASSWORD);
+        return formElement;
+    }
+    
+    public static FormElement password(String name, String displayName) {
+        return password(name, displayName, true, null);
+    }
+    
+    
+    
 }

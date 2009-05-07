@@ -47,33 +47,69 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe.internal;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import java.util.Collection;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.FolderUpdaterService;
+import com.openexchange.subscribe.Subscription;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link StrategyFolderUpdaterService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
 
-    public static final String DISPLAY_NAME = "displayName";
+    
+    private FolderUpdaterStrategy<T> strategy;
 
-    public static final String ICON = "icon";
+    public StrategyFolderUpdaterService(FolderUpdaterStrategy<T> strategy) {
+        this.strategy = strategy;
+    }
+ 
+    public boolean handles(FolderObject folder) {
+        return strategy.handles(folder);
+    }
 
-    public static final String FORM_DESCRIPTION = "formDescription";
+    public void save(Collection<T> data, Subscription subscription) throws AbstractOXException {
+        Object session = strategy.startSession(subscription);
+        
+        Collection<T> dataInFolder = strategy.getData(subscription, session);
+        
+        for(T element : data) {
+            try {
+                T bestMatch = findBestMatch(element, dataInFolder, session);
+                if(bestMatch == null) {
+                    strategy.save(element, session);
+                } else {
+                    strategy.update(bestMatch, element, session);
+                }
+            } catch (AbstractOXException x) {
+                //TODO: Handle this later
+            }
+        }
+        
+        strategy.closeSession(session);
+    }
 
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    private T findBestMatch(T element, Collection<T> dataInFolder, Object session) throws AbstractOXException {
+        // USM for the poor
+        int maxScore = -1;
+        T maxElement = null;
+        for(T elementInFolder : dataInFolder) {
+            int currentScore = strategy.calculateSimilarityScore(elementInFolder, element, session);
+            if(currentScore > maxScore) {
+                maxElement = elementInFolder;
+                maxScore = currentScore;
+            }
+        }
+        if(maxScore > strategy.getThreshhold(session))
+            return maxElement;
+       return null;
+    }
 
 }

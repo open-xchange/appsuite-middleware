@@ -58,22 +58,25 @@ import org.json.JSONObject;
 import com.openexchange.subscribe.FormElement;
 import com.openexchange.subscribe.SubscriptionFormDescription;
 import com.openexchange.subscribe.SubscriptionSource;
+import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.*;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWriterInterface {
 
+    public static final int CLASS_ID = 2;
+    
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.json.SubscriptionSourceJSONWriterInterface#writeJSON(com.openexchange.subscribe.SubscriptionSource)
      */
-    public JSONObject writeJSON(SubscriptionSource source) throws WriteException {
+    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException {
         validate(source);
         JSONObject retval = null;
         try {
             retval = parse(source);
         } catch (JSONException e) {
-            throw new WriteException(e);
+            JSONEXCEPTION.throwException(e);
         }
         return retval;
     }
@@ -81,7 +84,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.json.SubscriptionSourceJSONWriterInterface#writeJson(java.util.List)
      */
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws WriteException {
+    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException {
         JSONArray retval = new JSONArray();
         for (Iterator<SubscriptionSource> iter = sourceList.iterator(); iter.hasNext();) {
             retval.put(writeJSON(iter.next()));
@@ -119,7 +122,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         return retval;
     }
 
-    private void validate(SubscriptionSource source) throws WriteException {
+    private void validate(SubscriptionSource source) throws SubscriptionJSONException {
         List<String> missingFields = new ArrayList<String>();
         if (source.getId() == null) {
             missingFields.add(ID);
@@ -131,7 +134,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             missingFields.add(FORM_DESCRIPTION);
         }
         if (missingFields.size() > 0) {
-            throw new WriteException("Missing field(s): " + buildStringList(missingFields, ", "));
+            MISSING_FIELD.throwException(buildStringList(missingFields,", "));
         }
 
         for (Iterator<FormElement> iter = source.getFormDescription().iterator(); iter.hasNext();) {
@@ -148,7 +151,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             }
             // TODO: check for mandatory field "mandatory"
             if (missingFormFields.size() > 0) {
-                throw new WriteException("Missing form field(s): " + buildStringList(missingFormFields, ", "));
+                MISSING_FORM_FIELD.throwException(buildStringList(missingFormFields, ", "));
             }
         }
     }

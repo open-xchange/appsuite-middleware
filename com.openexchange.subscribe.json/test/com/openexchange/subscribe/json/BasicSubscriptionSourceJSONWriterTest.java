@@ -190,7 +190,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         try {
             parser.writeJSON(source);
             fail("ParseException expected");
-        } catch (WriteException e) {
+        } catch (SubscriptionJSONException e) {
             // expected
         }
     }

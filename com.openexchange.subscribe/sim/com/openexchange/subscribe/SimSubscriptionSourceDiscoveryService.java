@@ -50,7 +50,9 @@
 package com.openexchange.subscribe;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,8 +67,11 @@ import com.openexchange.groupware.container.FolderObject;
 public class SimSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService{
 
     private Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>();
+    private List<String> loadedSources = new LinkedList<String>();
+    private String lookupIdentifier;
     
     public SubscriptionSource getSource(String identifier) {
+        loadedSources.add(identifier);
         return sources.get(identifier);
     }
 
@@ -80,6 +85,22 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     
     public void addSource(SubscriptionSource source) {
         sources.put(source.getId(), source);
+    }
+
+    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+        return getSource(lookupIdentifier);
+    }
+    
+    public void setLookupIdentifier(String lookupIdentifier) {
+        this.lookupIdentifier = lookupIdentifier;
+    }
+
+    public List<String> getLoadedSources() {
+        return loadedSources;
+    }
+    
+    public void clearSim() {
+        loadedSources.clear();
     }
     
 }

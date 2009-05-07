@@ -47,33 +47,22 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import java.util.Collection;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link FolderUpdaterService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public interface FolderUpdaterService<T> {
+    public boolean handles(FolderObject folder);
 
-    public static final String DISPLAY_NAME = "displayName";
-
-    public static final String ICON = "icon";
-
-    public static final String FORM_DESCRIPTION = "formDescription";
-
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
-
+    public void save(Collection<T> data, Subscription subscription) throws OXException, AbstractOXException;
 }

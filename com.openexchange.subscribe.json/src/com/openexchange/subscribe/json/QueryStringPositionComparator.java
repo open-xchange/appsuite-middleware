@@ -49,31 +49,28 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import java.util.Comparator;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link QueryStringPositionComparator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class QueryStringPositionComparator implements Comparator<String> {
 
-    public static final String DISPLAY_NAME = "displayName";
+    private String queryString;
 
-    public static final String ICON = "icon";
+    public QueryStringPositionComparator(String queryString) {
+        this.queryString = queryString;
+    }
 
-    public static final String FORM_DESCRIPTION = "formDescription";
+    public int compare(String o1, String o2) {
+        int p1 = queryString.indexOf(o1);
+        int p2 = queryString.indexOf(o2);
+        return p1 - p2;
+    }
 
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
 
 }

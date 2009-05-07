@@ -50,36 +50,40 @@
 package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.subscribe.CompositeSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
-
 /**
- * {@link OSGiSubscriptionSourceDiscoverer}
- *
- * An OSGiSubscriptionSourceDiscoverer compounds subscription source discoverers known in the OSGi system.
- *
+ * {@link OSGiSubscriptionSourceDiscoverer} An OSGiSubscriptionSourceDiscoverer compounds subscription source discoverers known in the OSGi
+ * system.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class OSGiSubscriptionSourceDiscoverer extends CompositeSubscriptionSourceDiscoveryService implements ServiceTrackerCustomizer {
 
     private BundleContext context;
+
     private ServiceTracker tracker;
 
-    public OSGiSubscriptionSourceDiscoverer(BundleContext context) {
+    public OSGiSubscriptionSourceDiscoverer(BundleContext context) throws InvalidSyntaxException {
         this.context = context;
         tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
-        
+        ServiceReference[] serviceReferences = context.getAllServiceReferences(SubscriptionSourceDiscoveryService.class.getName(), null);
+        if (serviceReferences != null) {
+            for (ServiceReference reference : serviceReferences) {
+                addingService(reference);
+            }
+        }
     }
-    
+
     public void close() {
         tracker.close();
     }
-    
+
     public Object addingService(ServiceReference reference) {
         SubscriptionSourceDiscoveryService discoverer = (SubscriptionSourceDiscoveryService) context.getService(reference);
         addSubscriptionSourceDiscoveryService(discoverer);
@@ -94,6 +98,5 @@ public class OSGiSubscriptionSourceDiscoverer extends CompositeSubscriptionSourc
         removeSubscriptionSourceDiscoveryService((SubscriptionSourceDiscoveryService) service);
         context.ungetService(reference);
     }
-    
 
 }

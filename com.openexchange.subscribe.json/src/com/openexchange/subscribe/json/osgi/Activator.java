@@ -51,12 +51,17 @@ package com.openexchange.subscribe.json.osgi;
 
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpService;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.ExternalSubscriptionHandler;
-import com.openexchange.subscribe.ExternalSubscriptionService;
 import com.openexchange.subscribe.json.SubscribeJSONServlet;
+import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
+import com.openexchange.subscribe.json.SubscriptionJSONWriter;
+import com.openexchange.subscribe.json.SubscriptionServlet;
+import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
+import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -65,11 +70,19 @@ public class Activator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
 
-    private static final String ALIAS = "ajax/subscriptions";
+    private static final String SUBSCRIPTION_ALIAS = "ajax/subscriptions";
 
-    private Servlet subscribeServlet;
+    private static final String SUBSCRIPTION_SOURCES_ALIAS = "ajax/subscriptionSources";
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscribeService.class, SubscriptionHandler.class, ExternalSubscriptionService.class, ExternalSubscriptionHandler.class };
+    private Servlet subscriptionSources;
+
+    private Servlet subscriptions;
+
+    private OSGiSubscriptionSourceDiscoverer discoverer;
+
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
+
+    private ComponentRegistration componentRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -78,83 +91,73 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        SubscribeService subscribeService = getService(SubscribeService.class);
-        SubscribeJSONServlet.setSubscribeService(subscribeService);
-        
-        SubscriptionHandler subscriptionHandler = getService(SubscriptionHandler.class);
-        SubscribeJSONServlet.setSubscriptionHandler(subscriptionHandler);
-        
-        ExternalSubscriptionService xingSubscriptionService = getService(ExternalSubscriptionService.class);
-        SubscribeJSONServlet.setExternalSubscribeService(xingSubscriptionService);
-        
-        ExternalSubscriptionHandler xingSubscriptionHandler = getService(ExternalSubscriptionHandler.class);
-        SubscribeJSONServlet.setExternalSubscriptionHandler(xingSubscriptionHandler);
-        
-        
         final HttpService httpService = getService(HttpService.class);
+        registerServlets(httpService);
+    }
+
+    private void registerServlets(HttpService httpService) {
         try {
-            httpService.registerServlet(ALIAS, (subscribeServlet = new SubscribeJSONServlet()), null, null);
-            LOG.info(SubscribeJSONServlet.class.getName() + " successfully re-registered due to re-appearing of " + clazz.getName());
+            SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
+            SubscriptionServlet.setSubscriptionExecutionService(subscriptionExecutionService);
+            
+            httpService.registerServlet(SUBSCRIPTION_SOURCES_ALIAS, (subscriptionSources = new SubscriptionSourcesServlet()), null, null);
+            httpService.registerServlet(SUBSCRIPTION_ALIAS, (subscriptions = new SubscriptionServlet()), null, null);
+            LOG.info("Registered Servlets for Subscriptions");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
+    }
 
+    private void deregisterServlets(HttpService httpService) {
+        if (subscriptionSources != null) {
+            httpService.unregister(SUBSCRIPTION_SOURCES_ALIAS);
+            subscriptionSources = null;
+        }
+        if (subscriptions != null) {
+            httpService.unregister(SUBSCRIPTION_ALIAS);
+            subscriptions = null;
+        }
+        LOG.info("Deregistered Servlets for Subscriptions");
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         final HttpService httpService = getService(HttpService.class);
-        if (httpService != null && subscribeServlet != null) {
-            httpService.unregister(ALIAS);
-            subscribeServlet = null;
-            LOG.info(SubscribeJSONServlet.class.getName() + " unregistered due to disappearing of " + clazz.getName());
-        }
+        SubscriptionServlet.setSubscriptionExecutionService(null);
+        deregisterServlets(httpService);
     }
 
     @Override
     protected void startBundle() throws Exception {
-        SubscribeService subscribeService = getService(SubscribeService.class);
-        SubscribeJSONServlet.setSubscribeService(subscribeService);
-
-        if (subscribeService == null) {
-            return;
-        }
-
-        SubscriptionHandler subscriptionHandler = getService(SubscriptionHandler.class);
-        SubscribeJSONServlet.setSubscriptionHandler(subscriptionHandler);
+        discoverer = new OSGiSubscriptionSourceDiscoverer(context);
+        componentRegistration = new ComponentRegistration(context, "SUBH","com.openexchange.subscribe.json", SubscriptionJSONErrorMessages.FACTORY);
         
-        ExternalSubscriptionService xingSubscriptionService = getService(ExternalSubscriptionService.class);
-        SubscribeJSONServlet.setExternalSubscribeService(xingSubscriptionService);
-        
-        ExternalSubscriptionHandler xingSubscriptionHandler = getService(ExternalSubscriptionHandler.class);
-        SubscribeJSONServlet.setExternalSubscriptionHandler(xingSubscriptionHandler);
+        SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
+        SubscriptionServlet.setSubscriptionExecutionService(subscriptionExecutionService);
         
         
-        try {
-            final HttpService httpService = getService(HttpService.class);
-            if (httpService == null) {
-                return;
-            }
-            httpService.registerServlet(ALIAS, (subscribeServlet = new SubscribeJSONServlet()), null, null);
-            LOG.info(SubscribeJSONServlet.class.getName() + " successfully registered");
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
+        SubscriptionSourcesServlet.setSubscriptionSourceDiscoveryService(discoverer);
+        SubscriptionSourcesServlet.setSubscriptionSourceJSONWriter(new SubscriptionSourceJSONWriter());
+        
+        SubscriptionServlet.setSubscriptionSourceDiscoveryService(discoverer);
+        
+        final HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            registerServlets(httpService);
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        try {
-            final HttpService httpService = getService(HttpService.class);
-            if (httpService != null && subscribeServlet != null) {
-                httpService.unregister(ALIAS);
-                subscribeServlet = null;
-                LOG.info(SubscribeJSONServlet.class.getName() + " unregistered due to bundle stop");
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
+        final HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            deregisterServlets(httpService);
         }
+        SubscriptionServlet.setSubscriptionExecutionService(null);
+        SubscriptionSourcesServlet.setSubscriptionSourceDiscoveryService(null);
+        SubscriptionServlet.setSubscriptionSourceDiscoveryService(null);
+        discoverer.close();
+        componentRegistration.unregister();
+        
     }
 }

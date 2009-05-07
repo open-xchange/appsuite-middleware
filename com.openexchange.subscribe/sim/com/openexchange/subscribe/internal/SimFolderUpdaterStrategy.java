@@ -47,32 +47,87 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.internal;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.Subscription;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SimFolderUpdaterStrategy}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface SubscribeService {
+public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
 
-    public SubscriptionSource getSubscriptionSource();
+    private Set<String> dataSet;
     
-    public boolean handles(FolderObject folder);
+    private Set<String> savedElements = new HashSet<String>();
+    private Map<String, String> updatedElements = new HashMap<String, String>();
     
-    public void subscribe(Subscription subscription);
+    public boolean handles(FolderObject folder) {
+        return true;
+    }
 
-    public Collection<Subscription> loadSubscriptions(int contextId, int folderId);
+    public void setDataSet(String...data) {
+        dataSet = new HashSet<String>(Arrays.asList(data));
+    }
 
-    public Subscription loadSubscription(int contextId, int subscriptionId);
-    
-    public void unsubscribe(Subscription subscription);
+    public boolean wasUpdated(String orig, String update) {
+        if(!updatedElements.containsKey(orig)) {
+            return false;
+        }
+        return updatedElements.get(orig).equals(update);
+    }
 
-    public void update(Subscription subscription);
+    public boolean wasCreated(String string) {
+        return savedElements.contains(string);
+    }
 
-    public Collection getContent(Subscription subscription);
+    public int calculateSimilarityScore(String original, String candidate, Object session) throws AbstractOXException {
+        int counter = 0;
+        for (int i = 0, size = Math.min(original.length(), candidate.length()); i < size; i++) {
+            int cO = original.charAt(i);
+            int cC = candidate.charAt(i);
+            if(cO == cC) {
+                counter++;
+            } else {
+                return counter;
+            }
+        }
+        return counter;
+    }
 
-    public boolean knows(int contextId, int subscriptionId);
-    
+    public void closeSession(Object session) throws AbstractOXException {
+        
+    }
+
+    public Collection<String> getData(Subscription subscription, Object session) throws AbstractOXException {
+        return dataSet;
+    }
+
+    public int getThreshhold(Object session) throws AbstractOXException {
+        return 3;
+    }
+
+    public void save(String newElement, Object session) throws AbstractOXException {
+        savedElements.add(newElement);
+    }
+
+    public Object startSession(Subscription subscription) throws AbstractOXException {
+        return null;
+    }
+
+    public void update(String original, String update, Object session) throws AbstractOXException {
+        updatedElements.put(original, update);
+    }
+
 }

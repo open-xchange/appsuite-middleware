@@ -50,58 +50,80 @@
 package com.openexchange.subscribe;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.container.FolderObject;
+import java.util.Map.Entry;
 
 
 /**
- * {@link SubscriptionSourceCollector}
+ * {@link InMemorySubscriptionStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryService {
-
-    private Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
-
-    public SubscriptionSource getSource(String identifier) {
-        if(!services.containsKey(identifier)) {
-            return null;
+public class InMemorySubscriptionStorage {
+    private Map<Integer, Map<Integer, Subscription>> subscriptions = new HashMap<Integer, Map<Integer, Subscription>>();
+    private Map<Integer, Integer> keys = new HashMap<Integer, Integer>();
+    
+    public void rememberSubscription(int cid, Subscription subscription) {
+        if(-1 == subscription.getId()) {
+            subscription.setId(nextId(cid));
         }
-        return services.get(identifier).getSubscriptionSource();
-    }
-
-    public List<SubscriptionSource> getSources(FolderObject folder) {
-        List<SubscriptionSource> sources = new LinkedList<SubscriptionSource>();
-        for(SubscribeService subscriber : services.values()) {
-            if(subscriber.handles(folder)) {
-                sources.add(subscriber.getSubscriptionSource());
+        Subscription current = subscriptions(cid).get(subscription.getId());
+        if(current == null) {
+            subscriptions(cid).put(subscription.getId(), subscription);
+        } else {
+            if (subscription.getFolderId() != -1) {
+                current.setFolderId(subscription.getFolderId());
+            }
+            
+            if(subscription.getConfiguration() != null && (subscription.getSource() == null || subscription.getSource().equals(current.getSource()))) {
+                current.getConfiguration().putAll(subscription.getConfiguration());
+                for (Entry<String, String> entry : new HashSet<Entry<String, String>>(current.getConfiguration().entrySet())) {
+                    if(entry.getValue() == null) {
+                        current.getConfiguration().remove(entry.getKey());
+                    }
+                }
             }
         }
-        return sources;
     }
-
-    public boolean knowsSource(String identifier) {
-        return services.containsKey(identifier);
+    
+    public void forgetSubscription(int cid, Subscription subscription) {
+        subscriptions(cid).remove(subscription.getId());
     }
-
-    public void addSubscribeService(SubscribeService service) {
-        services.put(service.getSubscriptionSource().getId(), service);
-    }
-
-    public void removeSubscribeService(String identifier) {
-        services.remove(identifier);        
-    }
-
-    public SubscriptionSource getSource(int contextId, int subscriptionId) {
-        for(SubscribeService source : services.values()) {
-            if(source.knows(contextId, subscriptionId)) {
-                return source.getSubscriptionSource();
+    
+    public List<Subscription> getSubscriptions(int cid, int folderId) {
+        List<Subscription> found = new LinkedList<Subscription>();
+        for(Subscription subscription : subscriptions(cid).values()) {
+            if(subscription.getFolderId() == folderId) {
+                found.add(subscription);
             }
         }
-        return null;
+        return found;
     }
-
+    
+    public Subscription getSubscription(int cid, int id) {
+        return subscriptions(cid).get(id);
+    }
+    
+    private int nextId(int cid) {
+        if(keys.containsKey(cid)) {
+            int next = keys.get(cid);
+            keys.put(cid, next+1);
+            return next;
+        } else {
+            keys.put(cid,2);
+            return 1;
+        }
+    }
+    
+    private Map<Integer, Subscription> subscriptions(int cid) {
+        if(!subscriptions.containsKey(cid)) {
+            subscriptions.put(cid, new HashMap<Integer, Subscription>());
+        }
+        return subscriptions.get(cid);
+    }
+    
 }

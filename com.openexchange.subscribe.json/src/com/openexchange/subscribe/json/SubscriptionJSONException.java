@@ -49,31 +49,20 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
-public interface SubscriptionSourceJSONWriterInterface {
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
+public class SubscriptionJSONException extends AbstractOXException {
 
-    public static final String ID = "id";
+    private static final long serialVersionUID = 5976972835120202376L;
 
-    public static final String DISPLAY_NAME = "displayName";
 
-    public static final String ICON = "icon";
-
-    public static final String FORM_DESCRIPTION = "formDescription";
-
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    public SubscriptionJSONException(ErrorMessage message, Throwable cause, Object[] args) {
+        super(message, cause);
+        setMessageArgs(args);
+    }
 
 }

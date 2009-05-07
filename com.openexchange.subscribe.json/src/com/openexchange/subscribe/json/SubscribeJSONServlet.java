@@ -76,9 +76,6 @@ import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.ExternalSubscription;
-import com.openexchange.subscribe.ExternalSubscriptionHandler;
-import com.openexchange.subscribe.ExternalSubscriptionService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.servlet.http.Tools;
@@ -87,281 +84,281 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class SubscribeJSONServlet extends PermissionServlet {
+public class SubscribeJSONServlet {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Log LOG = LogFactory.getLog(SubscribeJSONServlet.class);
-
-    private static final int POST = 0;
-
-    private static final int GET = 1;
-
-    private static final int PUT = 3;
-
-    private static final String SUBSCRIBE_ACTION = "subscribe";
-
-    private static final String UNSUBSCRIBE_ACTION = "unsubscribe";
-    
-    private static final String CLEAR_ACTION = "clear";
-
-    private static final String SUBSCRIBE_EXTERNAL = "subscribeExternal";
-
-    private static final String LOAD_ACTION = "load";
-
-    private static final String LOAD_EXTERNAL = "loadExternal";
-
-    private static final String REFRESH_ACTION = "refresh";
-
-    private static SubscribeService subscribeService;
-
-    private static SubscriptionHandler subscriptionHandler;
-
-    private static ExternalSubscriptionService externalSubscribeService;
-
-    private static ExternalSubscriptionHandler externalSubscriptionHandler;
-
-    public static void setSubscribeService(final SubscribeService subscribeService) {
-        SubscribeJSONServlet.subscribeService = subscribeService;
-    }
-
-    public static void setSubscriptionHandler(SubscriptionHandler subscriptionHandler) {
-        SubscribeJSONServlet.subscriptionHandler = subscriptionHandler;
-    }
-
-    public static void setExternalSubscribeService(ExternalSubscriptionService service) {
-        SubscribeJSONServlet.externalSubscribeService = service;
-    }
-
-    public static void setExternalSubscriptionHandler(ExternalSubscriptionHandler service) {
-        SubscribeJSONServlet.externalSubscriptionHandler = service;
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        perform(req, resp, POST);
-    }
-
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        perform(req, resp, GET);
-    }
-
-    @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        perform(req, resp, PUT);
-    }
-
-    private void perform(final HttpServletRequest req, final HttpServletResponse resp, final int method) throws ServletException, IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        /*
-         * The magic spell to disable caching
-         */
-        Tools.disableCaching(resp);
-        try {
-            final Response response = doAction(req, method);
-            ResponseWriter.write(response, resp.getWriter());
-        } catch (final AbstractOXException e) {
-            LOG.error("perform", e);
-            final Response response = new Response();
-            response.setException(e);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, writer);
-            } catch (final JSONException e1) {
-                final ServletException se = new ServletException(e1);
-                se.initCause(e1);
-                throw se;
-            }
-            writer.flush();
-        } catch (final JSONException e) {
-            LOG.error("perform", e);
-        }
-    }
-
-    private Response doAction(final HttpServletRequest req, final int method) throws AbstractOXException, JSONException, IOException {
-        switch (method) {
-        case PUT:
-        case POST:
-            return writeAction(req);
-        default:
-            return readAction(req);
-        }
-    }
-
-    private Response readAction(final HttpServletRequest req) throws JSONException {
-        final Response response = new Response();
-
-        final String action = req.getParameter("action");
-
-        final Session session = getSessionObject(req);
-
-        if (action.equals(LOAD_ACTION)) {
-            response.setData(load(session));
-        } else if (action.equals(LOAD_EXTERNAL)) {
-            response.setData(loadExternal(session, req.getParameter("service")));
-        }
-
-        return response;
-    }
-
-    private JSONArray load(final Session session) throws JSONException {
-        final JSONArray retval = new JSONArray();
-
-        final Collection<Subscription> subscriptions = subscribeService.loadForUser(session.getContextId(), session.getUserId());
-        for (final Subscription subscription : subscriptions) {
-            retval.put(getJSONObject(subscription, session));
-        }
-
-        return retval;
-    }
-    
-    private JSONObject loadExternal(final Session session, String externalService) throws JSONException {
-        return getJSONObject(externalSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId(), externalService), session);
-    }
-
-    private Response writeAction(final HttpServletRequest req) throws JSONException, IOException {
-        final Response response = new Response();
-        final Session session = getSessionObject(req);
-
-        final String action = req.getParameter("action");
-        if (action.equals(SUBSCRIBE_ACTION)) {
-            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
-            final Subscription subscription = getSubscription(objectToSubscribe, session);
-            subscribe(subscription);
-        } else if (action.equals(UNSUBSCRIBE_ACTION)) {
-            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
-            final Subscription subscription = getSubscription(objectToSubscribe, session);
-            unsubscribe(subscription);
-        } else if (action.equals(REFRESH_ACTION)) {
-            int folderId = Integer.parseInt(req.getParameter("folderId"));
-            refresh(session, folderId);
-        } else if (action.equals(SUBSCRIBE_EXTERNAL)) {
-            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
-            final ExternalSubscription subscription = getXingSubscription(objectToSubscribe, session);
-            saveExternalSubscription(subscription);
-        } else if (action.equals(CLEAR_ACTION)) {
-            clearAllSubscriptions(session);
-        }
-
-        response.setData(1);
-        return response;
-    }
-
-    private void refresh(Session session, int folderId) {
-        Collection<Subscription> subscriptions = subscribeService.load(session.getContextId(), folderId);
-        for (Subscription subscription : subscriptions) {
-            subscriptionHandler.handleSubscription(subscription);
-        }
-        for(String service : externalSubscriptionHandler.getServices()) {
-            ExternalSubscription subscriptionForUser = externalSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId(), service);
-            if (subscriptionForUser != null && subscriptionForUser.getTargetFolder() == folderId) {
-                externalSubscriptionHandler.handleSubscription(subscriptionForUser);
-            }
-        }
-    }
-
-    private Subscription getSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
-        final Subscription subscription = new Subscription();
-        subscription.setContextId(session.getContextId());
-        subscription.setUserId(session.getUserId());
-        subscription.setFolderId(objectToSubscribe.getInt("folder"));
-        //subscription.setUrl(objectToSubscribe.optString("url"));
-        subscription.setLastUpdate(new Date(0));
-
-        return subscription;
-    }
-
-    private ExternalSubscription getXingSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
-        ExternalSubscription subscription = new ExternalSubscription();
-        subscription.setContextId(session.getContextId());
-        subscription.setUserId(session.getUserId());
-        subscription.setTargetFolder(resolveFolder(objectToSubscribe.getString("folder"), session));
-        subscription.setUserName(objectToSubscribe.getString("user"));
-        subscription.setPassword(objectToSubscribe.getString("password"));
-        subscription.setExternalService(objectToSubscribe.getString("service"));
-        return subscription;
-    }
-
-    private JSONObject getJSONObject(final Subscription subscription, Session session) throws JSONException {
-        final JSONObject subscriptionObject = new JSONObject();
-        subscriptionObject.put("folder", subscription.getFolderId());
-        subscriptionObject.put("last_update", subscription.getLastUpdate().getTime());
-        //subscriptionObject.put("url", subscription.getUrl());
-        return subscriptionObject;
-    }
-    
-    private JSONObject getJSONObject(final ExternalSubscription subscription, Session session) throws JSONException {
-        final JSONObject subscriptionObject = new JSONObject();
-        
-        if(subscription == null) {
-            subscriptionObject.put("folder", "");
-            subscriptionObject.put("user", "");
-            subscriptionObject.put("password", "");
-            subscriptionObject.put("service", "");
-            return subscriptionObject;
-        }
-        
-        subscriptionObject.put("folder", getName(subscription.getTargetFolder(), session));
-        subscriptionObject.put("user", subscription.getUserName());
-        subscriptionObject.put("password", subscription.getPassword());
-        subscriptionObject.put("service", subscription.getExternalService());
-        return subscriptionObject;
-    }
-
-    private void subscribe(final Subscription subscription) {
-        subscribeService.subscribe(subscription);
-    }
-
-    private void unsubscribe(final Subscription subscription) {
-        subscribeService.unsubscribe(subscription);
-    }
-
-    private void clearAllSubscriptions(Session session) {
-        Collection<Subscription> subscriptionsForUser = subscribeService.loadForUser(session.getContextId(), session.getUserId());
-        for (Subscription subscription : subscriptionsForUser) {
-            subscribeService.unsubscribe(subscription);
-        }
-    }
-    
-    private void saveExternalSubscription(final ExternalSubscription subscription) {
-        externalSubscribeService.saveSubscription(subscription);
-    }
-
-    private int resolveFolder(String fname, Session session) {
-        try {
-            Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            User user = UserStorage.getStorageUser(session.getUserId(), ctx);
-            UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
-            
-            final SearchIterator iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(session.getUserId(), user
-                .getGroups(), userConfig.getAccessibleModules(), FolderObject.CONTACT, ctx);
-
-           while(iter.hasNext()) {
-               FolderObject folder = (FolderObject) iter.next();
-               if(folder.getFolderName().equals(fname)) {
-                   return folder.getObjectID();
-               }
-           }
-        } catch (Exception x) {
-            x.printStackTrace();
-        }
-        return 0;
-    }
-    
-    private String getName(int folderId, Session session) {
-        try {
-            Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx).getFolderName();
-        } catch (Exception x) {
-            return "";
-        }
-    }
-
-    @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        // TODO Auto-generated method stub
-        return false;
-    }
+//    private static final long serialVersionUID = 1L;
+//
+//    private static final Log LOG = LogFactory.getLog(SubscribeJSONServlet.class);
+//
+//    private static final int POST = 0;
+//
+//    private static final int GET = 1;
+//
+//    private static final int PUT = 3;
+//
+//    private static final String SUBSCRIBE_ACTION = "subscribe";
+//
+//    private static final String UNSUBSCRIBE_ACTION = "unsubscribe";
+//    
+//    private static final String CLEAR_ACTION = "clear";
+//
+//    private static final String SUBSCRIBE_EXTERNAL = "subscribeExternal";
+//
+//    private static final String LOAD_ACTION = "load";
+//
+//    private static final String LOAD_EXTERNAL = "loadExternal";
+//
+//    private static final String REFRESH_ACTION = "refresh";
+//
+//    private static SubscribeService subscribeService;
+//
+//    private static SubscriptionHandler subscriptionHandler;
+//
+//    private static ExternalSubscriptionService externalSubscribeService;
+//
+//    private static ExternalSubscriptionHandler externalSubscriptionHandler;
+//
+//    public static void setSubscribeService(final SubscribeService subscribeService) {
+//        SubscribeJSONServlet.subscribeService = subscribeService;
+//    }
+//
+//    public static void setSubscriptionHandler(SubscriptionHandler subscriptionHandler) {
+//        SubscribeJSONServlet.subscriptionHandler = subscriptionHandler;
+//    }
+//
+//    public static void setExternalSubscribeService(ExternalSubscriptionService service) {
+//        SubscribeJSONServlet.externalSubscribeService = service;
+//    }
+//
+//    public static void setExternalSubscriptionHandler(ExternalSubscriptionHandler service) {
+//        SubscribeJSONServlet.externalSubscriptionHandler = service;
+//    }
+//
+//    @Override
+//    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+//        perform(req, resp, POST);
+//    }
+//
+//    @Override
+//    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+//        perform(req, resp, GET);
+//    }
+//
+//    @Override
+//    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+//        perform(req, resp, PUT);
+//    }
+//
+//    private void perform(final HttpServletRequest req, final HttpServletResponse resp, final int method) throws ServletException, IOException {
+//        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+//        /*
+//         * The magic spell to disable caching
+//         */
+//        Tools.disableCaching(resp);
+//        try {
+//            final Response response = doAction(req, method);
+//            ResponseWriter.write(response, resp.getWriter());
+//        } catch (final AbstractOXException e) {
+//            LOG.error("perform", e);
+//            final Response response = new Response();
+//            response.setException(e);
+//            final PrintWriter writer = resp.getWriter();
+//            try {
+//                ResponseWriter.write(response, writer);
+//            } catch (final JSONException e1) {
+//                final ServletException se = new ServletException(e1);
+//                se.initCause(e1);
+//                throw se;
+//            }
+//            writer.flush();
+//        } catch (final JSONException e) {
+//            LOG.error("perform", e);
+//        }
+//    }
+//
+//    private Response doAction(final HttpServletRequest req, final int method) throws AbstractOXException, JSONException, IOException {
+//        switch (method) {
+//        case PUT:
+//        case POST:
+//            return writeAction(req);
+//        default:
+//            return readAction(req);
+//        }
+//    }
+//
+//    private Response readAction(final HttpServletRequest req) throws JSONException {
+//        final Response response = new Response();
+//
+//        final String action = req.getParameter("action");
+//
+//        final Session session = getSessionObject(req);
+//
+//        if (action.equals(LOAD_ACTION)) {
+//            response.setData(load(session));
+//        } else if (action.equals(LOAD_EXTERNAL)) {
+//            response.setData(loadExternal(session, req.getParameter("service")));
+//        }
+//
+//        return response;
+//    }
+//
+//    private JSONArray load(final Session session) throws JSONException {
+//        final JSONArray retval = new JSONArray();
+//
+//        final Collection<Subscription> subscriptions = null; //subscribeService.loadForUser(session.getContextId(), session.getUserId());
+//        for (final Subscription subscription : subscriptions) {
+//            retval.put(getJSONObject(subscription, session));
+//        }
+//
+//        return retval;
+//    }
+//    
+//    private JSONObject loadExternal(final Session session, String externalService) throws JSONException {
+//        return getJSONObject(externalSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId(), externalService), session);
+//    }
+//
+//    private Response writeAction(final HttpServletRequest req) throws JSONException, IOException {
+//        final Response response = new Response();
+//        final Session session = getSessionObject(req);
+//
+//        final String action = req.getParameter("action");
+//        if (action.equals(SUBSCRIBE_ACTION)) {
+//            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
+//            final Subscription subscription = getSubscription(objectToSubscribe, session);
+//            subscribe(subscription);
+//        } else if (action.equals(UNSUBSCRIBE_ACTION)) {
+//            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
+//            final Subscription subscription = getSubscription(objectToSubscribe, session);
+//            unsubscribe(subscription);
+//        } else if (action.equals(REFRESH_ACTION)) {
+//            int folderId = Integer.parseInt(req.getParameter("folderId"));
+//            refresh(session, folderId);
+//        } else if (action.equals(SUBSCRIBE_EXTERNAL)) {
+//            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
+//            final ExternalSubscription subscription = getXingSubscription(objectToSubscribe, session);
+//            saveExternalSubscription(subscription);
+//        } else if (action.equals(CLEAR_ACTION)) {
+//            clearAllSubscriptions(session);
+//        }
+//
+//        response.setData(1);
+//        return response;
+//    }
+//
+//    private void refresh(Session session, int folderId) {
+//        Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContextId(), folderId);
+//        for (Subscription subscription : subscriptions) {
+//            subscriptionHandler.handleSubscription(subscription);
+//        }
+//        for(String service : externalSubscriptionHandler.getServices()) {
+//            ExternalSubscription subscriptionForUser = externalSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId(), service);
+//            if (subscriptionForUser != null && subscriptionForUser.getTargetFolder() == folderId) {
+//                externalSubscriptionHandler.handleSubscription(subscriptionForUser);
+//            }
+//        }
+//    }
+//
+//    private Subscription getSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
+//        final Subscription subscription = new Subscription();
+//        subscription.setContextId(session.getContextId());
+//        subscription.setUserId(session.getUserId());
+//        subscription.setFolderId(objectToSubscribe.getInt("folder"));
+//        //subscription.setUrl(objectToSubscribe.optString("url"));
+//        subscription.setLastUpdate(new Date(0));
+//
+//        return subscription;
+//    }
+//
+//    private ExternalSubscription getXingSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
+//        ExternalSubscription subscription = new ExternalSubscription();
+//        subscription.setContextId(session.getContextId());
+//        subscription.setUserId(session.getUserId());
+//        subscription.setTargetFolder(resolveFolder(objectToSubscribe.getString("folder"), session));
+//        subscription.setUserName(objectToSubscribe.getString("user"));
+//        subscription.setPassword(objectToSubscribe.getString("password"));
+//        subscription.setExternalService(objectToSubscribe.getString("service"));
+//        return subscription;
+//    }
+//
+//    private JSONObject getJSONObject(final Subscription subscription, Session session) throws JSONException {
+//        final JSONObject subscriptionObject = new JSONObject();
+//        subscriptionObject.put("folder", subscription.getFolderId());
+//        subscriptionObject.put("last_update", subscription.getLastUpdate().getTime());
+//        //subscriptionObject.put("url", subscription.getUrl());
+//        return subscriptionObject;
+//    }
+//    
+//    private JSONObject getJSONObject(final ExternalSubscription subscription, Session session) throws JSONException {
+//        final JSONObject subscriptionObject = new JSONObject();
+//        
+//        if(subscription == null) {
+//            subscriptionObject.put("folder", "");
+//            subscriptionObject.put("user", "");
+//            subscriptionObject.put("password", "");
+//            subscriptionObject.put("service", "");
+//            return subscriptionObject;
+//        }
+//        
+//        subscriptionObject.put("folder", getName(subscription.getTargetFolder(), session));
+//        subscriptionObject.put("user", subscription.getUserName());
+//        subscriptionObject.put("password", subscription.getPassword());
+//        subscriptionObject.put("service", subscription.getExternalService());
+//        return subscriptionObject;
+//    }
+//
+//    private void subscribe(final Subscription subscription) {
+//        subscribeService.subscribe(subscription);
+//    }
+//
+//    private void unsubscribe(final Subscription subscription) {
+//        subscribeService.unsubscribe(subscription);
+//    }
+//
+//    private void clearAllSubscriptions(Session session) {
+//        Collection<Subscription> subscriptionsForUser = null; //subscribeService.loadForUser(session.getContextId(), session.getUserId());
+//        for (Subscription subscription : subscriptionsForUser) {
+//            subscribeService.unsubscribe(subscription);
+//        }
+//    }
+//    
+//    private void saveExternalSubscription(final ExternalSubscription subscription) {
+//        externalSubscribeService.saveSubscription(subscription);
+//    }
+//
+//    private int resolveFolder(String fname, Session session) {
+//        try {
+//            Context ctx = ContextStorage.getStorageContext(session.getContextId());
+//            User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+//            UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
+//            
+//            final SearchIterator iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(session.getUserId(), user
+//                .getGroups(), userConfig.getAccessibleModules(), FolderObject.CONTACT, ctx);
+//
+//           while(iter.hasNext()) {
+//               FolderObject folder = (FolderObject) iter.next();
+//               if(folder.getFolderName().equals(fname)) {
+//                   return folder.getObjectID();
+//               }
+//           }
+//        } catch (Exception x) {
+//            x.printStackTrace();
+//        }
+//        return 0;
+//    }
+//    
+//    private String getName(int folderId, Session session) {
+//        try {
+//            Context ctx = ContextStorage.getStorageContext(session.getContextId());
+//            return FolderObject.loadFolderObjectFromDB(folderId, ctx).getFolderName();
+//        } catch (Exception x) {
+//            return "";
+//        }
+//    }
+//
+//    @Override
+//    protected boolean hasModulePermission(ServerSession session) {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
 
 }

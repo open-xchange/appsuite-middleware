@@ -47,47 +47,78 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.json;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
+import static com.openexchange.groupware.AbstractOXException.Category.*;
 
 
 /**
- * {@link SubscriptionFormDescription}
+ * {@link SubscriptionJSONErrorMessages}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SubscriptionFormDescription implements Iterable<FormElement>{
-    private List<FormElement> formElements;
+public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
+
+    MISSING_PARAMETER(SubscriptionSourcesServlet.CLASS_ID*100+1, "Missing parameter %s", "", CODE_ERROR),
+    UNKNOWN_ACTION(SubscriptionSourcesServlet.CLASS_ID*100+2, "Unknown Action: %s", "", CODE_ERROR),
     
-    public SubscriptionFormDescription() {
-        formElements = new ArrayList<FormElement>();
+    JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID*100+1, "Got JSONException", "", CODE_ERROR),
+    MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+2, "Missing Field(s): %s", "", CODE_ERROR),
+    MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+3, "Missing Form Field(s): %s", "", CODE_ERROR),
+    
+    THROWABLE(SubscriptionSourcesServlet.CLASS_ID*100+3, "Got Exception %s", "", CODE_ERROR),
+    
+    ;
+    
+    private AbstractOXException.Category category;
+
+    private String help;
+
+    private String message;
+
+    private int errorCode;
+    
+    public static SubscriptionJSONExceptions FACTORY = new SubscriptionJSONExceptions();
+    
+    /**
+     * Initializes a new {@link SubscriptionJSONErrorMessages}.
+     */
+    private SubscriptionJSONErrorMessages(final int errorCode, final String message, final String help, final AbstractOXException.Category category) {
+        this.category = category;
+        this.help = help;
+        this.message = message;
+        this.errorCode = errorCode;
+    }
+    
+    public int getErrorCode() {
+        return errorCode;
     }
 
-    public Iterator<FormElement> iterator() {
-        return formElements.iterator();
-    }
-    
-    public List<FormElement> getFormElements() {
-        return Collections.unmodifiableList(formElements);
-    }
-    
-    public void addFormElement(FormElement formElement) {
-        formElements.add(formElement);
-    }
-    
-    public void removeFormElement(FormElement formElement) {
-        formElements.remove(formElement);
+    public String getMessage() {
+        return message;
     }
 
-    public SubscriptionFormDescription add(FormElement formElement) {
-        addFormElement(formElement);
-        return this;
+    public String getHelp() {
+        return help;
+    }
+
+    public AbstractOXException.Category getCategory() {
+        return category;
+    }
+
+    public SubscriptionJSONException createException(final Throwable cause, final Object...args) {
+        return FACTORY.create(this, cause, args);
     }
     
+    public void throwException(final Throwable cause, final Object... args) throws SubscriptionJSONException {
+        FACTORY.throwException(this, cause, args);
+    }
+
+    public void throwException(final Object... args) throws SubscriptionJSONException {
+        throwException(null, args);
+    }
+
 }

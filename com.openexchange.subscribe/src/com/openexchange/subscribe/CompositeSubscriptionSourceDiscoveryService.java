@@ -102,4 +102,14 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         services.remove(service);
     }
 
+    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+        for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
+            SubscriptionSource source = subDiscoverer.getSource(contextId, subscriptionId);
+            if(source != null) {
+                return source;
+            }
+        }
+        return null;
+    }
+
 }

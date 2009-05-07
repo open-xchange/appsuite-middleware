@@ -47,32 +47,69 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.internal;
 
-import java.util.Collection;
+import java.util.Date;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import junit.framework.TestCase;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link ContactFolderUpdaterStrategyTest}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface SubscribeService {
-
-    public SubscriptionSource getSubscriptionSource();
+public class ContactFolderUpdaterStrategyTest extends TestCase {
     
-    public boolean handles(FolderObject folder);
+    private FolderUpdaterStrategy<ContactObject> strategy;
     
-    public void subscribe(Subscription subscription);
-
-    public Collection<Subscription> loadSubscriptions(int contextId, int folderId);
-
-    public Subscription loadSubscription(int contextId, int subscriptionId);
+    public void setUp() {
+        this.strategy = new ContactFolderUpdaterStrategy();
+    }
     
-    public void unsubscribe(Subscription subscription);
+    public void testHandles() {
+        FolderObject contactFolder = new FolderObject();
+        contactFolder.setModule(FolderObject.CONTACT);
+        
+        FolderObject infostoreFolder = new FolderObject();
+        infostoreFolder.setModule(FolderObject.INFOSTORE);
+        
+        assertTrue("Should handle contact folders", strategy.handles(contactFolder));
+        assertFalse("Should not handle infostore folders", strategy.handles(infostoreFolder));
+    }
+    
+    public void testScoring() throws AbstractOXException {
+        // First name is not enough
+        ContactObject contact = new ContactObject();
+        contact.setGivenName("Hans");
+        contact.setSurName("Dampf");
+        
+        ContactObject contact2 = new ContactObject();
+        contact2.setGivenName("Hans");
+        contact2.setSurName("Wurst");
 
-    public void update(Subscription subscription);
+        int score = strategy.calculateSimilarityScore(contact, contact2, null);
+        
+        assertTrue("First name should not be enough", score < strategy.getThreshhold(null));
 
-    public Collection getContent(Subscription subscription);
-
-    public boolean knows(int contextId, int subscriptionId);
+        // First Name and Last Name is enough
+        contact2.setSurName("Dampf");
+        
+        score = strategy.calculateSimilarityScore(contact, contact2, null);
+        assertTrue("First name and last name is not enough", score > strategy.getThreshhold(null));
+        
+        // Prefer first name, last name and birth date
+        contact.setBirthday(new Date(2));
+        contact2.setBirthday(new Date(2));
+        
+        int newScore = strategy.calculateSimilarityScore(contact, contact2, null);
+        assertTrue("Similarity score for matching birthdays should be bigger", newScore > score);
+        score = newScore;
+        
+        // To discuss: Email Addresses
+    }
     
 }

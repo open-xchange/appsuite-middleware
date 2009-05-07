@@ -47,33 +47,36 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe.internal;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import java.util.Collection;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.Subscription;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link FolderUpdaterStrategy}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public interface FolderUpdaterStrategy<T> {
 
-    public static final String DISPLAY_NAME = "displayName";
+    boolean handles(FolderObject folder);
 
-    public static final String ICON = "icon";
+    Object startSession(Subscription subscription) throws AbstractOXException;
 
-    public static final String FORM_DESCRIPTION = "formDescription";
+    Collection<T> getData(Subscription subscription, Object session) throws AbstractOXException;
 
-    public static final String NAME = "name";
+    void update(T original, T update, Object session) throws AbstractOXException;
 
-    public static final String WIDGET = "widget";
+    void save(T newElement, Object session) throws AbstractOXException;
 
-    public static final String MANDATORY = "mandatory";
+    int calculateSimilarityScore(T original, T candidate, Object session) throws AbstractOXException;
 
-    public static final String DEFAULT = "default";
+    int getThreshhold(Object session) throws AbstractOXException;
 
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    void closeSession(Object session) throws AbstractOXException;
 
 }

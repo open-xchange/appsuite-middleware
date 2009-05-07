@@ -49,14 +49,74 @@
 
 package com.openexchange.subscribe;
 
+import java.util.Collection;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
+
 
 /**
- * {@link ExternalSubscriptionHandler}
+ * {@link SimFolderUpdaterService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface ExternalSubscriptionHandler {
-    public void handleSubscription(ExternalSubscription subscription);
-    public String[] getServices();
+public class SimFolderUpdaterService implements FolderUpdaterService {
+
+    private Subscription subscription;
+    private Collection data;
+    private FolderObject folder;
+    private boolean handles;
+
+    public boolean handles(FolderObject folder) {
+        this.folder = folder;
+        return handles;
+    }
+
+    public void save(Collection data, Subscription subscription) throws OXException {
+        this.data = data;
+        this.subscription = subscription;
+    }
+
+    
+    public Subscription getSubscription() {
+        return subscription;
+    }
+
+    
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
+
+    
+    public Collection getData() {
+        return data;
+    }
+
+    
+    public void setData(Collection data) {
+        this.data = data;
+    }
+
+    
+    public FolderObject getFolder() {
+        return folder;
+    }
+
+    
+    public void setFolder(FolderObject folder) {
+        this.folder = folder;
+    }
+
+    
+    public boolean isHandles() {
+        return handles;
+    }
+
+    
+    public void setHandles(boolean handles) {
+        this.handles = handles;
+    }
+
+    
+    
 }

@@ -49,31 +49,14 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
 
-public interface SubscriptionSourceJSONWriterInterface {
-
-    public static final String ID = "id";
-
-    public static final String DISPLAY_NAME = "displayName";
-
-    public static final String ICON = "icon";
-
-    public static final String FORM_DESCRIPTION = "formDescription";
-
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
-
+/**
+ * {@link JSONCondition}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public interface JSONCondition {
+    public boolean validate(Object o);
+    public String getComplaint();
 }

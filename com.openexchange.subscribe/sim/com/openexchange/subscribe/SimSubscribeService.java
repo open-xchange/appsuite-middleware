@@ -50,33 +50,47 @@
 package com.openexchange.subscribe;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link SimSubscribeService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SimSubscribeService implements SubscribeService {
-    
+
     private SubscriptionSource source;
+
+    private Subscription subscription;
+
+    private List<Subscription> subscriptionIds = new LinkedList<Subscription>();
+
+    private Collection content;
+
+    public Subscription getSubscription() {
+        return subscription;
+    }
+
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
 
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
-    
-    public void setSource(SubscriptionSource source) {
+
+    public void setSubscriptionSource(SubscriptionSource source) {
         this.source = source;
+
     }
-    
 
     public boolean handles(FolderObject folder) {
         return true;
     }
 
-    public Collection<Subscription> load(int contextId, int folderId) {
+    public Collection<Subscription> loadSubscriptions(int contextId, int folderId) {
         return null;
     }
 
@@ -94,6 +108,34 @@ public class SimSubscribeService implements SubscribeService {
 
     public void update(Subscription subscription) {
 
+    }
+
+    public Collection getContent(Subscription subscription) {
+        return content;
+    }
+
+    public Subscription loadSubscription(int contextId, int subscriptionId) {
+        Subscription subscriptionIdMemo = new Subscription();
+        subscriptionIdMemo.setContextId(contextId);
+        subscriptionIdMemo.setId(subscriptionId);
+        subscriptionIds.add(subscriptionIdMemo);
+        return subscription;
+    }
+
+    public List<Subscription> getSubscriptionIDs() {
+        return subscriptionIds;
+    }
+    
+    public void clearSim() {
+        subscriptionIds.clear();
+    }
+
+    public void setContent(Collection content) {
+        this.content = content;
+    }
+    
+    public boolean knows(int contextId, int subscriptionId) {
+        return true;
     }
 
 }

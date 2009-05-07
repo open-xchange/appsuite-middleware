@@ -49,69 +49,18 @@
 
 package com.openexchange.subscribe;
 
+import java.util.List;
+import com.openexchange.groupware.AbstractOXException;
+
 
 /**
- * {@link ExternalSubscription}
+ * {@link SubscriptionExecutionService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ExternalSubscription {
-    private int userId;
-    private int contextId;
-    private String userName;
-    private String password;
-    private int targetFolder;
-    private String externalService;
-    
-    public int getUserId() {
-        return userId;
-    }
-    
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-    
-    public int getContextId() {
-        return contextId;
-    }
-    
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-    
-    public String getUserName() {
-        return userName;
-    }
-    
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
-    public int getTargetFolder() {
-        return targetFolder;
-    }
-    
-    public void setTargetFolder(int targetFolder) {
-        this.targetFolder = targetFolder;
-    }
-
-    
-    public String getExternalService() {
-        return externalService;
-    }
-
-    
-    public void setExternalService(String externalService) {
-        this.externalService = externalService;
-    }
-    
+public interface SubscriptionExecutionService {
+    public void executeSubscription(String sourceId, int contextId, int subscriptionId) throws AbstractOXException;
+    public void executeSubscription(int contextId, int subscriptionId) throws AbstractOXException;
+    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException;
 }

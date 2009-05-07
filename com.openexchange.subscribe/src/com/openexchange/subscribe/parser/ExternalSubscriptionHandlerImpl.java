@@ -59,109 +59,103 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.ExternalSubscription;
-import com.openexchange.subscribe.ExternalSubscriptionHandler;
 
 /**
  * {@link ExternalSubscriptionHandlerImpl}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ExternalSubscriptionHandlerImpl extends ContactHandler implements ExternalSubscriptionHandler {
+public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 
-    private static final Log LOG = LogFactory.getLog(ExternalSubscriptionHandlerImpl.class);
-
-    public void handleSubscription(ExternalSubscription subscription) {
-        try {
-            System.out.println("Handle subscription: "+subscription.getExternalService()+" "+subscription.getUserName());
-            ContactObject[] contactsForUser = getContacts(subscription);
-            List<ContactObject> contacts = Arrays.asList(contactsForUser);
-            storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (SAXException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (ContextException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private ContactObject[] getContacts(ExternalSubscription subscription) throws IOException, SAXException {
-        if ("xing".equalsIgnoreCase(subscription.getExternalService())) {
-            return new XingContactParser().getXingContactsForUser(subscription.getUserName(), subscription.getPassword());
-        } else if ("linkedin".equalsIgnoreCase(subscription.getExternalService())) {
-            return new LinkedInContactParser().getLinkedInContactsForUser(subscription.getUserName(), subscription.getPassword());
-        } else if ("facebook".equalsIgnoreCase(subscription.getExternalService())) {
-            return new FacebookContactParser().getFacebookContactsForUser(subscription.getUserName(), subscription.getPassword());
-        }
-        return null;
-    }
-    
-    public String[] getServices() {
-        return new String[]{"xing", "linkedin", "facebook"};
-    }
-
-    private static final class XingSubscriptionSession implements Session {
-
-        private ExternalSubscription subscription;
-
-        public XingSubscriptionSession(ExternalSubscription subscription) {
-            this.subscription = subscription;
-        }
-
-        public int getContextId() {
-            return subscription.getContextId();
-        }
-
-        public String getLocalIp() {
-            throw new UnsupportedOperationException();
-        }
-
-        public String getLogin() {
-            throw new UnsupportedOperationException();
-        }
-
-        public String getLoginName() {
-            throw new UnsupportedOperationException();
-        }
-
-        public Object getParameter(String name) {
-            throw new UnsupportedOperationException();
-        }
-
-        public String getPassword() {
-            throw new UnsupportedOperationException();
-        }
-
-        public String getRandomToken() {
-            throw new UnsupportedOperationException();
-        }
-
-        public String getSecret() {
-            throw new UnsupportedOperationException();
-        }
-
-        public String getSessionID() {
-            throw new UnsupportedOperationException();
-        }
-
-        public int getUserId() {
-            return subscription.getUserId();
-        }
-
-        public String getUserlogin() {
-            throw new UnsupportedOperationException();
-        }
-
-        public void removeRandomToken() {
-            throw new UnsupportedOperationException();
-        }
-
-        public void setParameter(String name, Object value) {
-            throw new UnsupportedOperationException();
-        }
-    }
+//    private static final Log LOG = LogFactory.getLog(ExternalSubscriptionHandlerImpl.class);
+//
+//    public void handleSubscription(ExternalSubscription subscription) {
+//        try {
+//            System.out.println("Handle subscription: "+subscription.getExternalService()+" "+subscription.getUserName());
+//            ContactObject[] contactsForUser = null; //getContacts(subscription);
+//            List<ContactObject> contacts = Arrays.asList(contactsForUser);
+//            storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);
+//        } catch (ContextException e) {
+//            LOG.error(e.getMessage(), e);
+//        } catch (OXException e) {
+//            LOG.error(e.getMessage(), e);
+//        }
+//    }
+//
+////    private ContactObject[] getContacts(ExternalSubscription subscription) throws IOException, SAXException {
+////        if ("xing".equalsIgnoreCase(subscription.getExternalService())) {
+////            return new XingContactParser().getXingContactsForUser(subscription.getUserName(), subscription.getPassword());
+////        } else if ("linkedin".equalsIgnoreCase(subscription.getExternalService())) {
+////            return new LinkedInContactParser().getLinkedInContactsForUser(subscription.getUserName(), subscription.getPassword());
+////        } else if ("facebook".equalsIgnoreCase(subscription.getExternalService())) {
+////            return new FacebookContactParser().getFacebookContactsForUser(subscription.getUserName(), subscription.getPassword());
+////        }
+////        return null;
+////    }
+//    
+//    public String[] getServices() {
+//        return new String[]{"xing", "linkedin", "facebook"};
+//    }
+//
+//    private static final class XingSubscriptionSession implements Session {
+//
+//        private ExternalSubscription subscription;
+//
+//        public XingSubscriptionSession(ExternalSubscription subscription) {
+//            this.subscription = subscription;
+//        }
+//
+//        public int getContextId() {
+//            return subscription.getContextId();
+//        }
+//
+//        public String getLocalIp() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public String getLogin() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public String getLoginName() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public Object getParameter(String name) {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public String getPassword() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public String getRandomToken() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public String getSecret() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public String getSessionID() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public int getUserId() {
+//            return subscription.getUserId();
+//        }
+//
+//        public String getUserlogin() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public void removeRandomToken() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public void setParameter(String name, Object value) {
+//            throw new UnsupportedOperationException();
+//        }
+//    }
 
 }

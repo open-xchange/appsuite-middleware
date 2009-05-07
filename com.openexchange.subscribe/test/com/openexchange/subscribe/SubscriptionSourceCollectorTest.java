@@ -67,9 +67,11 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     private List<SubscriptionSource> sources;
 
+    private SubscribeService testService1;
+
     public void setUp() {
         collector = new SubscriptionSourceCollector();
-        collector.addSubscribeService(service("com.openexchange.subscription.test1"));
+        collector.addSubscribeService(testService1 = service("com.openexchange.subscription.test1"));
         collector.addSubscribeService(service("com.openexchange.subscription.test2"));
         collector.addSubscribeService(service("com.openexchange.subscription.test3"));
         collector.addSubscribeService(serviceHandlingNothing("com.openexchange.subscription.testHandlesNoFolder"));
@@ -100,6 +102,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         assertNotNull("Missing com.openexchange.susbscription.test2", collector.getSource("com.openexchange.subscription.test2"));
         assertNotNull("Missing com.openexchange.susbscription.test3", collector.getSource("com.openexchange.subscription.test3"));
         assertNotNull("Missing com.openexchange.susbscription.testHandlesNoFolder", collector.getSource("com.openexchange.subscription.testHandlesNoFolder"));
+        assertEquals("Didn't remember subscribe service", testService1, collector.getSource("com.openexchange.subscription.test1").getSubscribeService());
         assertNull("Got unknown?!?", collector.getSource("unknown"));
     }
     
@@ -119,7 +122,8 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(string);
         SimSubscribeService service = new SimSubscribeService();
-        service.setSource(source);
+        service.setSubscriptionSource(source);
+        source.setSubscribeService(service);
         return service;
     }
 
@@ -134,7 +138,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
             }
 
         };
-        service.setSource(source);
+        service.setSubscriptionSource(source);
         return service;
 
     }

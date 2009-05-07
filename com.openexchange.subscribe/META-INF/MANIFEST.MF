@@ -7,6 +7,8 @@ Bundle-Activator: com.openexchange.subscribe.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.context,
+ com.openexchange.context.osgi,
+ com.openexchange.groupware.contexts,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
  com.openexchange.publish,

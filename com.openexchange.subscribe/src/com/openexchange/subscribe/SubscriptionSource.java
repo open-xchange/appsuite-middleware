@@ -61,6 +61,7 @@ public class SubscriptionSource {
     private String displayName;
     private String icon;
     private SubscriptionFormDescription formDescription;
+    private SubscribeService subscribeService;
     
     public String getId() {
         return id;
@@ -92,6 +93,44 @@ public class SubscriptionSource {
     
     public void setFormDescription(SubscriptionFormDescription formDescription) {
         this.formDescription = formDescription;
+    }
+    
+    public SubscribeService getSubscribeService() {
+        return subscribeService;
+    }
+    
+    public void setSubscribeService(SubscribeService subscribeService) {
+        this.subscribeService = subscribeService;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SubscriptionSource other = (SubscriptionSource) obj;
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        return true;
     }
     
 }

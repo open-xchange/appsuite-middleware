@@ -49,31 +49,56 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.List;
-import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link SubscriptionJSONParser}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class SubscriptionJSONParser {
 
-    public static final String DISPLAY_NAME = "displayName";
+    private SubscriptionSourceDiscoveryService discovery;
 
-    public static final String ICON = "icon";
+    /**
+     * Initializes a new {@link SubscriptionJSONParser}.
+     * @param discovery
+     */
+    public SubscriptionJSONParser(SubscriptionSourceDiscoveryService discovery) {
+        super();
+        this.discovery = discovery;
+    }
 
-    public static final String FORM_DESCRIPTION = "formDescription";
-
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    public Subscription parse(JSONObject object) throws JSONException {
+        Subscription subscription = new Subscription();
+        if(object.has("id")) {
+            subscription.setId(object.getInt("id"));
+        }
+        subscription.setFolderId(object.getInt("folder"));
+        subscription.setSource(discovery.getSource(object.getString("source")));
+        JSONObject config = object.getJSONObject(subscription.getSource().getId());
+        
+        Map<String, String> configurationMap = new HashMap<String, String>();
+        
+        for(String key : config.keySet()) {
+            Object value = config.get(key);
+            if(value == JSONObject.NULL) {
+                value = null;
+                configurationMap.put(key, null);
+            } else {
+                configurationMap.put(key, value.toString());
+            }
+        }
+        
+        subscription.setConfiguration(configurationMap);
+        return subscription;
+    }
 
 }

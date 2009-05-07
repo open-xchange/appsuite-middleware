@@ -47,33 +47,50 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import java.util.Collection;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link AbstractSubscribeService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public abstract class AbstractSubscribeService implements SubscribeService {
 
-    public static final String DISPLAY_NAME = "displayName";
+    private static final InMemorySubscriptionStorage STORAGE = new InMemorySubscriptionStorage();
+    
+    public Collection<Subscription> loadSubscriptions(int contextId, int folderId) {
+        return STORAGE.getSubscriptions(contextId, folderId);
+    }
 
-    public static final String ICON = "icon";
+    public Subscription loadSubscription(int contextId, int subscriptionId) {
+        return STORAGE.getSubscription(contextId, subscriptionId);
+    }
 
-    public static final String FORM_DESCRIPTION = "formDescription";
+    public void subscribe(Subscription subscription) {
+        STORAGE.rememberSubscription(subscription.getContextId(), subscription);
+    }
 
-    public static final String NAME = "name";
+    public void unsubscribe(Subscription subscription) {
+        STORAGE.forgetSubscription(subscription.getContextId(), subscription);
+    }
 
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
+    public void update(Subscription subscription) {
+        STORAGE.rememberSubscription(subscription.getContextId(), subscription);
+    }
+    
+    public boolean knows(int contextId, int subscriptionId) {
+        Subscription subscription = STORAGE.getSubscription(contextId, subscriptionId);
+        if(subscription == null) {
+            return false;
+        }
+        if(subscription.getSource().getId().equals("com.openexchange.subscribe.xing")) {
+            return true;
+        }
+        return false;
+    }
 
 }

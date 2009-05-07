@@ -49,31 +49,49 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.subscribe.SubscriptionSource;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.PermissionServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.tools.session.ServerSession;
 
-public interface SubscriptionSourceJSONWriterInterface {
 
-    public static final String ID = "id";
+/**
+ * {@link AbstractSubscriptionServlet}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public abstract class AbstractSubscriptionServlet extends PermissionServlet {
 
-    public static final String DISPLAY_NAME = "displayName";
-
-    public static final String ICON = "icon";
-
-    public static final String FORM_DESCRIPTION = "formDescription";
-
-    public static final String NAME = "name";
-
-    public static final String WIDGET = "widget";
-
-    public static final String MANDATORY = "mandatory";
-
-    public static final String DEFAULT = "default";
-
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
-
-    public JSONArray writeJson(List<SubscriptionSource> sourceList) throws SubscriptionJSONException;
-
+    protected void writeOXException(AbstractOXException x, HttpServletResponse resp) {
+        getLoggingLogic().log(x);
+        Response response = new Response();
+        response.setException(x);
+        writeResponseSafely(response, resp);
+    }
+    
+    protected void writeData(Object data, HttpServletResponse resp) {
+        Response response = new Response();
+        response.setData(data);
+        writeResponseSafely(response, resp);
+    }
+    
+    protected AbstractOXException wrapThrowable(Throwable t) {
+        return SubscriptionJSONErrorMessages.THROWABLE.createException(t, t.getMessage());
+    }
+    
+    protected void writeResponseSafely(Response response, HttpServletResponse resp) {
+        try {
+            writeResponse(response, resp);
+        } catch (IOException e) {
+            getLog().error(e.getMessage(), e);
+        }
+    }
+    
+    protected abstract LoggingLogic getLoggingLogic();
+    protected abstract Log getLog();
 }

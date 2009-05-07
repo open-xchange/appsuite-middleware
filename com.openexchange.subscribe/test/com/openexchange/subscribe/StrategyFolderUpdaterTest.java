@@ -49,15 +49,33 @@
 
 package com.openexchange.subscribe;
 
+import java.util.Arrays;
+import com.openexchange.subscribe.internal.SimFolderUpdaterStrategy;
+import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
+import junit.framework.TestCase;
+
 
 /**
- * {@link ExternalSubscriptionService}
+ * {@link ContactFolderUpdater}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface ExternalSubscriptionService {
-    public ExternalSubscription getSubscriptionForUser(int contextId, int userId, String externalService);
-    public void saveSubscription(ExternalSubscription subscription);
-    public void removeSubscription(ExternalSubscription subscription);
+public class StrategyFolderUpdaterTest extends TestCase {
+
+    private SimFolderUpdaterStrategy simStrategy;
+    private StrategyFolderUpdaterService<String> updater;
+
+    public void setUp() {
+        simStrategy = new SimFolderUpdaterStrategy();
+        simStrategy.setDataSet("aaaac", "baaaa");
+        updater = new StrategyFolderUpdaterService<String>(simStrategy);
+    }
+    
+    public void testMerging() throws Exception {
+        updater.save(Arrays.asList("aaaab", "baaaa", "new"), null);
+        assertTrue("Expected update to aaaac", simStrategy.wasUpdated("aaaac", "aaaab"));
+        assertTrue("Expected creation of 'new'", simStrategy.wasCreated("new"));
+    }
+    
 }

@@ -49,11 +49,15 @@
 
 package com.openexchange.subscribe.osgi;
 
+import java.util.List;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceCollector;
 
 
@@ -67,10 +71,28 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
 
     private ServiceTracker tracker;
     private BundleContext context;
+    private boolean grabbedAll;
 
-    public OSGiSubscriptionSourceCollector(BundleContext context) {
+    public OSGiSubscriptionSourceCollector(BundleContext context) throws InvalidSyntaxException {
         this.context = context;
         this.tracker = new ServiceTracker(context,SubscribeService.class.getName(), this);
+    }
+
+    private void grabAll() {
+        if(grabbedAll) {
+            return;
+        }
+        try {
+            ServiceReference[] serviceReferences = context.getAllServiceReferences(SubscribeService.class.getName(), null);
+            if(serviceReferences != null) {
+                for (ServiceReference reference : serviceReferences) {
+                    addingService(reference);
+                }
+            }
+            grabbedAll = true;
+        } catch (InvalidSyntaxException x) {
+            // IGNORE, we didn't specify a filter, so won't happen
+        }
     }
     
     public void close() {
@@ -91,4 +113,27 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
         removeSubscribeService(((SubscribeService) reference).getSubscriptionSource().getId());
     }
 
+    @Override
+    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+        grabAll();
+        return super.getSource(contextId, subscriptionId);
+    }
+
+    @Override
+    public SubscriptionSource getSource(String identifier) {
+        grabAll();
+        return super.getSource(identifier);
+    }
+
+    @Override
+    public List<SubscriptionSource> getSources(FolderObject folder) {
+        grabAll();
+        return super.getSources(folder);
+    }
+
+    @Override
+    public boolean knowsSource(String identifier) {
+        grabAll();
+        return super.knowsSource(identifier);
+    }
 }
