@@ -51,7 +51,6 @@ package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -75,7 +74,7 @@ public final class ThreadSortUtil {
         super();
     }
 
-    private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
+    // private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
 
     /**
      * Creates a newly allocated array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
