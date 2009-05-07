@@ -618,14 +618,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);
     }
 
-    private long[] copyOrMoveMessages(final String sourceFullname, final String destFullname, final long[] msgUIDs, final boolean move, final boolean fast) throws MailException {
+    private long[] copyOrMoveMessages(final String sourceFullname, final String destFullname, final long[] mailIds, final boolean move, final boolean fast) throws MailException {
         try {
-            if ((sourceFullname == null) || (sourceFullname.length() == 0)) {
+            if (null == mailIds) {
+                throw new IMAPException(IMAPException.Code.MISSING_PARAMETER, "mailIDs");
+            } else if ((sourceFullname == null) || (sourceFullname.length() == 0)) {
                 throw new IMAPException(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "source");
             } else if ((destFullname == null) || (destFullname.length() == 0)) {
                 throw new IMAPException(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "target");
             } else if (sourceFullname.equals(destFullname) && move) {
                 throw new IMAPException(IMAPException.Code.NO_EQUAL_MOVE, sourceFullname);
+            } else if (0 == mailIds.length) {
+                // Nothing to move
+                return new long[0];
             }
             /*
              * Open and check user rights on source folder
@@ -678,7 +683,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Copy operation
              */
-            final long[] result = new long[msgUIDs.length];
+            final long[] result = new long[mailIds.length];
             final int blockSize = IMAPConfig.getBlockSize();
             final StringBuilder debug;
             if (LOG.isDebugEnabled()) {
@@ -689,13 +694,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
             int offset = 0;
             final long[] remain;
-            if (blockSize > 0 && msgUIDs.length > blockSize) {
+            if (blockSize > 0 && mailIds.length > blockSize) {
                 /*
                  * Block-wise deletion
                  */
                 final long[] tmp = new long[blockSize];
-                for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
-                    System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
+                for (int len = mailIds.length; len > blockSize; len -= blockSize) {
+                    System.arraycopy(mailIds, offset, tmp, 0, tmp.length);
                     final long[] uids = copyOrMoveByUID(move, fast, destFullname, tmp, debug);
                     /*
                      * Append UIDs
@@ -703,10 +708,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     System.arraycopy(uids, 0, result, offset, uids.length);
                     offset += blockSize;
                 }
-                remain = new long[msgUIDs.length - offset];
-                System.arraycopy(msgUIDs, offset, remain, 0, remain.length);
+                remain = new long[mailIds.length - offset];
+                System.arraycopy(mailIds, offset, remain, 0, remain.length);
             } else {
-                remain = msgUIDs;
+                remain = mailIds;
             }
             final long[] uids = copyOrMoveByUID(move, fast, destFullname, remain, debug);
             System.arraycopy(uids, 0, result, offset, uids.length);
