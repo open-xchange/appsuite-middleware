@@ -49,46 +49,25 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.ajax.framework.AbstractAllRequest;
-import com.openexchange.ajax.framework.CommonAllParser;
-import com.openexchange.ajax.framework.CommonAllRequest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAllParser;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.mail.MailListField;
 
 /**
- * {@link AllRequest}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
- *
- */
-public class AllRequest  extends AbstractAllRequest<AllResponse> {
+* @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
+*/
+public class AllParser extends AbstractAllParser<AllResponse> {
 
     /**
      * Default constructor.
      */
-    public AllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super(servletPath, folderId, columns, sort, order, failOnError);
+    protected AllParser(final boolean failOnError, final int[] columns) {
+        super(failOnError,columns);
     }
 
-    /**
-     * Default constructor.
-     */
-    public AllRequest(final String folderPath,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+    protected AllResponse instanciateResponse(final Response response) {
+        return new AllResponse(response);
     }
 
 }

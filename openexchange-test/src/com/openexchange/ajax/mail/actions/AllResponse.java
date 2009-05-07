@@ -49,46 +49,67 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.ajax.framework.AbstractAllRequest;
-import com.openexchange.ajax.framework.CommonAllParser;
-import com.openexchange.ajax.framework.CommonAllRequest;
+import java.util.TimeZone;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.mail.MailListField;
 
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.parser.MessageParser;
+import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 /**
- * {@link AllRequest}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
- *
- */
-public class AllRequest  extends AbstractAllRequest<AllResponse> {
-
-    /**
-     * Default constructor.
-     */
-    public AllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super(servletPath, folderId, columns, sort, order, failOnError);
+* @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
+*/
+public class AllResponse extends CommonAllResponse {
+	protected AllResponse(final Response response) {
+        super(response);
     }
-
-    /**
-     * Default constructor.
-     */
-    public AllRequest(final String folderPath,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
-    }
-
+	
+	public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, MailException{		
+		final JSONArray objectsArray = (JSONArray) getData();
+		MailMessage[] messages = new MailMessage[objectsArray.length()];
+		for (int i=0; i<objectsArray.length(); i++){
+			JSONArray oneMailAsArray = objectsArray.getJSONArray(i);
+			MailMessage message = parse(oneMailAsArray, columns);
+			messages[i] = message;
+		}
+		
+		return messages;
+	}
+	
+	private MailMessage parse(JSONArray mailAsArray, int[] columns) throws JSONException, AddressException{		
+		MIMEMailMessage message = new MIMEMailMessage();
+		
+		for (int i=0; i<mailAsArray.length() && i<columns.length; i++){
+			// MailID
+			if (columns[i] == 600) message.setMailId((String)mailAsArray.get(i));
+			// FROM
+			else if (columns[i] == 603){
+				JSONArray innerArray = (JSONArray)(mailAsArray.get(i));
+				for (int a=0; a<innerArray.length(); a++){
+					JSONArray secondInnerArray = (JSONArray) innerArray.get(a);
+					for (int x=0; x<secondInnerArray.length(); x++){
+						String string ="";
+						if (null!= secondInnerArray.getString(x) && !"null".equals(secondInnerArray.getString(x))){ 
+							System.out.println("***** " + secondInnerArray.getString(x));
+							string = secondInnerArray.getString(x);
+							message.addFrom(new InternetAddress(string));
+						}
+					}
+				}				
+			}
+			// Subject
+			else if (columns[i] == 607) message.setSubject((String)mailAsArray.get(i));
+		}
+		
+		return message;
+	}
 }

@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.mail.MailJSONField;
 
 

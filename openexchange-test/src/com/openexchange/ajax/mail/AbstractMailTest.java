@@ -196,7 +196,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	protected final String[][] getFolderAndIDs(final String folder) throws AjaxException, IOException, SAXException,
 			JSONException {
 		final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folder,
-				COLUMNS_FOLDER_ID, 0, null));
+				COLUMNS_FOLDER_ID, 0, null, true));
 		final Object[][] array = allR.getArray();
 		final String[][] folderAndIDs = new String[array.length][];
 		for (int i = 0; i < array.length; i++) {
@@ -256,7 +256,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     
 
     protected JSONObject getFirstMailInFolder(String inboxFolder) throws AjaxException, IOException, SAXException, JSONException {
-        CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null));
+        CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
         JSONArray arr = (JSONArray) response.getData();
         JSONArray mailFields = arr.getJSONArray(0);
         String id = mailFields.getString(0);
