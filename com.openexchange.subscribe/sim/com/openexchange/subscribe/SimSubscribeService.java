@@ -86,7 +86,7 @@ public class SimSubscribeService implements SubscribeService {
 
     }
 
-    public boolean handles(FolderObject folder) {
+    public boolean handles(int folderModule) {
         return true;
     }
 

@@ -132,8 +132,8 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
     
     
     protected void listSources(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException  {
-        FolderObject folder = getFolder(req, resp);
-        List<SubscriptionSource> sources = discoverer.getSources(folder);
+        int module = getModule(req, resp);
+        List<SubscriptionSource> sources = discoverer.getSources(module);
         String[] columns = getColumns(req);
         JSONArray json = writer.writeJSONArray(sources, columns);
         writeData(json, resp);
@@ -158,19 +158,23 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
         writeData(data, resp);
     }
     
-    protected FolderObject getFolder(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
-        String folderIdAsString = req.getParameter("folder");
-        if(folderIdAsString == null) {
-            return null;
+    protected int getModule(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
+        String moduleAsString = req.getParameter("module");
+        if(moduleAsString == null) {
+            return -1;
         }
-        
-        return loadFolder(req, resp, Integer.parseInt(folderIdAsString));
+        if(moduleAsString.equals("contacts")) {
+            return FolderObject.CONTACT;
+        } else if (moduleAsString.equals("calendar")) {
+            return FolderObject.CALENDAR;
+        } else if (moduleAsString.equals("tasks")) {
+            return FolderObject.TASK;
+        } else if (moduleAsString.equals("infostore")) {
+            return FolderObject.INFOSTORE;
+        }
+        return -1;
     }
 
-    private FolderObject loadFolder(HttpServletRequest req, HttpServletResponse resp, int folderId) throws OXException {
-        OXFolderAccess ofa = new OXFolderAccess(getSessionObject(req).getContext());
-        return ofa.getFolderObject(folderId);
-    }
 
     @Override
     protected Log getLog() {

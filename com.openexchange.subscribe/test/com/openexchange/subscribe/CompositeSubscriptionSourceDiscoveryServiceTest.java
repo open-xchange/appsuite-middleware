@@ -81,7 +81,7 @@ public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
     }
     
     public void testCompositeList() {
-        List<SubscriptionSource> allSources = compositeDiscoverer.getSources(null);
+        List<SubscriptionSource> allSources = compositeDiscoverer.getSources(-1);
         assertNotNull("compositeDiscoverer returned null!", allSources);
         assertSources(allSources, "com.openexchange.example.source1.1", "com.openexchange.example.source1.2", "com.openexchange.example.source2.1", "com.openexchange.example.source2.2", "com.openexchange.example.source2.3");
     }

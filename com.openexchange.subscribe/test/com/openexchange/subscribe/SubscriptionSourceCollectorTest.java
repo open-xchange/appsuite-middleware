@@ -79,7 +79,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
     }
 
     public void testGetSources() {
-        sources = collector.getSources(null);
+        sources = collector.getSources(2);
         assertNotNull("Sources was null!", sources);
         assertSources(
             sources,
@@ -108,7 +108,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
     
     public void testRemove() {
         collector.removeSubscribeService("com.openexchange.subscription.test1");
-        sources = collector.getSources(null);
+        sources = collector.getSources(2);
         assertNotNull("Sources was null!", sources);
         assertSources(
             sources,
@@ -133,7 +133,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         SimSubscribeService service = new SimSubscribeService() {
 
             @Override
-            public boolean handles(FolderObject folder) {
+            public boolean handles(int folderModule) {
                 return false;
             }
 

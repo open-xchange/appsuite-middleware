@@ -126,9 +126,9 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
     }
 
     @Override
-    public List<SubscriptionSource> getSources(FolderObject folder) {
+    public List<SubscriptionSource> getSources(int folderModule) {
         grabAll();
-        return super.getSources(folder);
+        return super.getSources(folderModule);
     }
 
     @Override

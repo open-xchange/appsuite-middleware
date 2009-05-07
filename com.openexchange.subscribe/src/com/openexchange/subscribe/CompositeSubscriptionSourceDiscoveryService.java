@@ -77,12 +77,16 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return null;
     }
 
-    public List<SubscriptionSource> getSources(FolderObject folder) {
+    public List<SubscriptionSource> getSources(int folderModule) {
         List<SubscriptionSource> allSources = new LinkedList<SubscriptionSource>();
         for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
-            allSources.addAll(subDiscoverer.getSources(folder));
+            allSources.addAll(subDiscoverer.getSources(folderModule));
         }
         return allSources;
+    }
+    
+    public List<SubscriptionSource> getSources() {
+        return getSources(-1);
     }
 
     public boolean knowsSource(String identifier) {

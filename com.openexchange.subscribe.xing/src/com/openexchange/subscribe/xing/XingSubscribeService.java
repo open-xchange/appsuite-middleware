@@ -88,8 +88,8 @@ public class XingSubscribeService extends AbstractSubscribeService{
         return SOURCE;
     }
 
-    public boolean handles(FolderObject folder) {
-        return folder.getModule() == FolderObject.CONTACT;
+    public boolean handles(int folderModule) {
+        return folderModule == FolderObject.CONTACT;
     }
 
     public Collection getContent(Subscription subscription) {

@@ -75,7 +75,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
         return sources.get(identifier);
     }
 
-    public List<SubscriptionSource> getSources(FolderObject folder) {
+    public List<SubscriptionSource> getSources(int folderModule) {
         return new ArrayList<SubscriptionSource>(sources.values());
     }
 
@@ -101,6 +101,10 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     
     public void clearSim() {
         loadedSources.clear();
+    }
+
+    public List<SubscriptionSource> getSources() {
+        return getSources(-1);
     }
     
 }

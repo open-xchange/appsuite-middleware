@@ -73,14 +73,18 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         return services.get(identifier).getSubscriptionSource();
     }
 
-    public List<SubscriptionSource> getSources(FolderObject folder) {
+    public List<SubscriptionSource> getSources(int folderModule) {
         List<SubscriptionSource> sources = new LinkedList<SubscriptionSource>();
         for(SubscribeService subscriber : services.values()) {
-            if(folder == null || subscriber.handles(folder)) {
+            if(folderModule == -1 || subscriber.handles(folderModule)) {
                 sources.add(subscriber.getSubscriptionSource());
             }
         }
         return sources;
+    }
+    
+    public List<SubscriptionSource> getSources() {
+        return getSources(-1);
     }
 
     public boolean knowsSource(String identifier) {

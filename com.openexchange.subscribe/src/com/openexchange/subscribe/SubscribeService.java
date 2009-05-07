@@ -59,7 +59,7 @@ public interface SubscribeService {
 
     public SubscriptionSource getSubscriptionSource();
     
-    public boolean handles(FolderObject folder);
+    public boolean handles(int folderModule);
     
     public void subscribe(Subscription subscription);
 

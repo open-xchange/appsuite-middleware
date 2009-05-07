@@ -60,7 +60,8 @@ import com.openexchange.groupware.container.FolderObject;
  *
  */
 public interface SubscriptionSourceDiscoveryService {
-    public List<SubscriptionSource> getSources(FolderObject folder);
+    public List<SubscriptionSource> getSources();
+    public List<SubscriptionSource> getSources(int folderModule);
     public SubscriptionSource getSource(String identifier);
     public SubscriptionSource getSource(int contextId, int subscriptionId);
     public boolean knowsSource(String identifier);
