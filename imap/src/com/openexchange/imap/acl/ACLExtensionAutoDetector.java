@@ -50,17 +50,13 @@
 package com.openexchange.imap.acl;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 
 /**
  * {@link ACLExtensionAutoDetector} - Auto-detects IMAP server's ACL extension.
@@ -71,9 +67,7 @@ final class ACLExtensionAutoDetector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ACLExtensionAutoDetector.class);
 
-    private static final Map<InetAddress, ACLExtension> map = new ConcurrentHashMap<InetAddress, ACLExtension>();
-
-    private static final int BUFSIZE = 512;
+    private static final ConcurrentMap<InetSocketAddress, ACLExtension> map = new ConcurrentHashMap<InetSocketAddress, ACLExtension>();
 
     /**
      * Prevent instantiation
@@ -102,170 +96,77 @@ final class ACLExtensionAutoDetector {
      * @throws IOException If an I/O error occurs
      */
     public static ACLExtension getACLExtension(final InetAddress imapServer, final int imapPort, final boolean isSecure) throws IOException {
-        final ACLExtension cached = map.get(imapServer);
+        final InetSocketAddress key = new InetSocketAddress(imapServer, imapPort);
+        final ACLExtension cached = map.get(key);
         if (null != cached) {
             return cached;
         }
-        putACLExtension(imapServer, imapPort, isSecure);
-        return map.get(imapServer);
+        putACLExtension(key, isSecure);
+        return map.get(key);
+    }
+
+    /**
+     * Determines the ACL extension dependent on IMAP server's capabilities.
+     * <p>
+     * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
+     * IP address.
+     * 
+     * @param address The IMAP server's address
+     * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
+     * @return The IMAP server's ACL extension.
+     * @throws IOException If an I/O error occurs
+     */
+    public static ACLExtension getACLExtension(final InetSocketAddress address, final boolean isSecure) throws IOException {
+        final ACLExtension cached = map.get(address);
+        if (null != cached) {
+            return cached;
+        }
+        putACLExtension(address, isSecure);
+        return map.get(address);
     }
 
     private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
 
     private static final Pattern PAT_RIGHTS = Pattern.compile("(?:^|\\s)(?:RIGHTS=)([a-zA-Z0-9]+)(?:\\s+|$)");
 
-    private static void putACLExtension(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        synchronized (ACLExtensionAutoDetector.class) {
-            if (map.containsKey(inetAddress)) {
-                return;
+    private static void putACLExtension(final InetSocketAddress key, final boolean isSecure) throws IOException {
+        if (map.containsKey(key)) {
+            return;
+        }
+        final String capabilities = IMAPCapabilityAndGreetingCache.getCapability(key, isSecure);
+        /*
+         * Examine CAPABILITY response
+         */
+        final boolean hasACL = PAT_ACL.matcher(capabilities).find();
+        if (!hasACL) {
+            map.put(key, NoACLExtension.getInstance());
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
+                    "] CAPABILITY response indicates no support of ACL extension."));
             }
-            Socket s = null;
-            try {
-                try {
-                    if (isSecure) {
-                        s = TrustAllSSLSocketFactory.getDefault().createSocket();
-                    } else {
-                        s = new Socket();
-                    }
-                    /*
-                     * Set connect timeout
-                     */
-                    if (IMAPConfig.getImapConnectionTimeout() > 0) {
-                        s.connect(new InetSocketAddress(inetAddress, imapPort), IMAPConfig.getImapConnectionTimeout());
-                    } else {
-                        s.connect(new InetSocketAddress(inetAddress, imapPort));
-                    }
-                    if (IMAPConfig.getImapTimeout() > 0) {
-                        /*
-                         * Define timeout for blocking operations
-                         */
-                        s.setSoTimeout(IMAPConfig.getImapTimeout());
-                    }
-                } catch (final IOException e) {
-                    throw e;
-                    // throw new Entity2ACLException(
-                    // Entity2ACLException.Code.CREATING_SOCKET_FAILED,
-                    // e,
-                    // address2String(inetAddress),
-                    // e.getMessage());
-                }
-                final InputStream in = s.getInputStream();
-                final OutputStream out = s.getOutputStream();
-                boolean skipLF = false;
-                /*
-                 * Skip IMAP server greeting on connect
-                 */
-                boolean eol = false;
-                int i = -1;
-                while (!eol && ((i = in.read()) != -1)) {
-                    final char c = (char) i;
-                    if ((c == '\n') || (c == '\r')) {
-                        if (c == '\r') {
-                            skipLF = true;
-                        }
-                        eol = true;
-                    }
-                }
-                /*
-                 * Request capabilities through CAPABILITY command
-                 */
-                out.write("A10 CAPABILITY\r\n".getBytes());
-                out.flush();
-                /*
-                 * Read CAPABILITY response
-                 */
-                final String capabilities;
-                {
-                    final StringBuilder sb = new StringBuilder(BUFSIZE);
-                    boolean nextLine = false;
-                    NextLoop: do {
-                        eol = false;
-                        i = in.read();
-                        if (i != -1) {
-                            /*
-                             * Character '*' (whose integer value is 42) indicates an untagged response; meaning subsequent response lines
-                             * will follow
-                             */
-                            nextLine = (i == 42);
-                            do {
-                                final char c = (char) i;
-                                if ((c == '\n') || (c == '\r')) {
-                                    if ((c == '\n') && skipLF) {
-                                        // Discard remaining LF
-                                        skipLF = false;
-                                        nextLine = true;
-                                        continue NextLoop;
-                                    }
-                                    if (c == '\r') {
-                                        skipLF = true;
-                                    }
-                                    eol = true;
-                                } else {
-                                    sb.append(c);
-                                }
-                            } while (!eol && ((i = in.read()) != -1));
-                        }
-                        if (nextLine) {
-                            sb.append('\n');
-                        }
-                    } while (nextLine);
-                    capabilities = sb.toString();
-                }
-                /*
-                 * Close connection through LOGOUT command
-                 */
-                out.write("A11 LOGOUT\r\n".getBytes());
-                out.flush();
-                /*
-                 * Consume until socket closure
-                 */
-                i = in.read();
-                while (i != -1) {
-                    i = in.read();
-                }
-                /*
-                 * Examine CAPABILITY response
-                 */
-                final boolean hasACL = PAT_ACL.matcher(capabilities).find();
-                if (!hasACL) {
-                    map.put(inetAddress, NoACLExtension.getInstance());
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(address2String(inetAddress)).append(
-                            "] CAPABILITY response indicates no support of ACL extension."));
-                    }
-                    return;
-                }
-                final Matcher m = PAT_RIGHTS.matcher(capabilities);
-                if (m.find()) {
-                    final String allowedRights = m.group(1);
-                    /*
-                     * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
-                     */
-                    final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
-                    map.put(inetAddress, containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension());
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(address2String(inetAddress)).append(
-                            "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
-                            "\" capability.").append("\n\tACL extension according to ").append(
-                            containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(" is going to be used.\n"));
-                    }
-                    return;
-                }
-                map.put(inetAddress, new RFC2086ACLExtension());
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(address2String(inetAddress)).append(
-                        "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
-                        "\n\tACL extension according to RFC 2086 is going to be used.\n"));
-                }
-            } finally {
-                if (s != null) {
-                    try {
-                        s.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+            return;
+        }
+        final Matcher m = PAT_RIGHTS.matcher(capabilities);
+        if (m.find()) {
+            final String allowedRights = m.group(1);
+            /*
+             * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
+             */
+            final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
+            map.put(key, containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension());
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
+                    "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
+                    "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
+                    " is going to be used.\n"));
             }
+            return;
+        }
+        map.putIfAbsent(key, new RFC2086ACLExtension());
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
+                "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
+                "\n\tACL extension according to RFC 2086 is going to be used.\n"));
         }
     }
 
@@ -277,13 +178,5 @@ final class ACLExtensionAutoDetector {
             found = (allowedRights.indexOf(RFC4314_CARACTERS[i]) >= 0);
         }
         return found;
-    }
-
-    private static String address2String(final InetAddress inetAddress) {
-        final String hostname = inetAddress.getHostName();
-        if (null == hostname) {
-            return inetAddress.getHostAddress();
-        }
-        return new StringBuilder(hostname).append('/').append(inetAddress.getHostAddress()).toString();
     }
 }

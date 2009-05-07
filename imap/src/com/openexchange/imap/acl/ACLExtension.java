@@ -61,6 +61,13 @@ import com.sun.mail.imap.Rights;
 public interface ACLExtension {
 
     /**
+     * Indicates if this extension actually represents an ACL implementation or not.
+     * 
+     * @return <code>true</code> if this extension actually represents an ACL implementation; otherwise <code>false</code>
+     */
+    public boolean aclSupport();
+
+    /**
      * Checks if specified rights allow to administer; meaning to perform SETACL/DELETEACL.
      * 
      * @param rights The rights to check

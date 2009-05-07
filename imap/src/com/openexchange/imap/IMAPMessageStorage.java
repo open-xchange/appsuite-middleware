@@ -348,7 +348,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 throw new IMAPException(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-            final MailFields usedFields = new MailFields();
             /*
              * Shall a search be performed?
              */
@@ -370,24 +369,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Sort messages by thread reference
                  */
-                final StringBuilder sortRange;
+                final String sortRange;
                 if (null == filter) {
                     /*
                      * Select all messages
                      */
-                    sortRange = new StringBuilder(3).append("ALL");
+                    sortRange = "ALL";
                 } else {
                     /*
                      * Define sequence of valid message numbers: e.g.: 2,34,35,43,51
                      */
-                    sortRange = new StringBuilder(filter.length << 1);
-                    sortRange.append(filter[0]);
+                    final StringBuilder tmp = new StringBuilder(filter.length << 2);
+                    tmp.append(filter[0]);
                     for (int i = 1; i < filter.length; i++) {
-                        sortRange.append(filter[i]).append(',');
+                        tmp.append(',').append(filter[i]);
                     }
+                    sortRange = tmp.toString();
                 }
+                /*
+                 * Get THREAD response; e.g: "((1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13))"
+                 */
                 final long start = System.currentTimeMillis();
-                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange.toString());
+                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 /*
                  * Parse THREAD response
@@ -398,6 +401,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Fetch messages
              */
+            final MailFields usedFields = new MailFields();
             final FetchProfile fetchProfile = getFetchProfile(fields, null, IMAPConfig.isFastFetch());
             usedFields.addAll(Arrays.asList(fields));
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);

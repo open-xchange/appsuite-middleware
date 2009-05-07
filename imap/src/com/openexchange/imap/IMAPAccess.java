@@ -64,6 +64,7 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
+import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
@@ -415,6 +416,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void startup() throws MailException {
+        IMAPCapabilityAndGreetingCache.init();
         try {
             ACLExtensionInit.getInstance().start();
         } catch (final MailException e) {
@@ -451,6 +453,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         } catch (final AbstractOXException e) {
             throw new MailException(e);
         }
+        IMAPCapabilityAndGreetingCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
     }
 

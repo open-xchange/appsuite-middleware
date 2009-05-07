@@ -78,6 +78,10 @@ abstract class AbstractACLExtension implements ACLExtension {
         super();
     }
 
+    public boolean aclSupport() {
+        return true;
+    }
+
     public boolean canRead(final Rights rights) {
         return rights.contains(Rights.Right.READ);
     }

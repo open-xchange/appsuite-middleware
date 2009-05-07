@@ -219,4 +219,8 @@ public final class NoACLExtension implements ACLExtension {
         return true;
     }
 
+    public boolean aclSupport() {
+        return false;
+    }
+
 }

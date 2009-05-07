@@ -69,13 +69,39 @@ public final class IMAPCapabilityAndGreetingCache {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class);
 
-    private static final Map<InetSocketAddress, CapabilityAndGreeting> MAP = new ConcurrentHashMap<InetSocketAddress, CapabilityAndGreeting>();
+    private static Map<InetSocketAddress, CapabilityAndGreeting> MAP;
 
     /**
      * Initializes a new {@link IMAPCapabilityAndGreetingCache}.
      */
     private IMAPCapabilityAndGreetingCache() {
         super();
+    }
+
+    /**
+     * Initializes this cache.
+     */
+    public static void init() {
+        if (MAP == null) {
+            MAP = new ConcurrentHashMap<InetSocketAddress, CapabilityAndGreeting>();
+        }
+    }
+
+    /**
+     * Tear-down for this cache.
+     */
+    public static void tearDown() {
+        if (MAP != null) {
+            clear();
+            MAP = null;
+        }
+    }
+
+    /**
+     * Clears this cache.
+     */
+    public static void clear() {
+        MAP.clear();
     }
 
     /**

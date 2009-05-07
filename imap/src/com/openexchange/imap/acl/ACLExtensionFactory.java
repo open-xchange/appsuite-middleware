@@ -50,6 +50,8 @@
 package com.openexchange.imap.acl;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.config.IMAPConfig;
@@ -102,7 +104,49 @@ public final class ACLExtensionFactory {
     public ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IMAPException {
         if (!instantiated.get()) {
             try {
-                return ACLExtensionAutoDetector.getACLExtension(imapConfig.getImapServerAddress(), imapConfig.getPort(), imapConfig.isSecure());
+                return ACLExtensionAutoDetector.getACLExtension(
+                    imapConfig.getImapServerAddress(),
+                    imapConfig.getPort(),
+                    imapConfig.isSecure());
+            } catch (final IOException e) {
+                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
+            }
+        }
+        return configured;
+    }
+
+    /**
+     * Gets the appropriate ACL extension for the IMAP server addressed by specified parameters.
+     * 
+     * @param serverAddress The server address
+     * @param port The port
+     * @param secure Whether a secure connection shall be established or not
+     * @return The appropriate ACL extension
+     * @throws IMAPException If an I/O error occurs
+     */
+    public ACLExtension getACLExtension(final InetAddress serverAddress, final int port, final boolean secure) throws IMAPException {
+        if (!instantiated.get()) {
+            try {
+                return ACLExtensionAutoDetector.getACLExtension(serverAddress, port, secure);
+            } catch (final IOException e) {
+                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
+            }
+        }
+        return configured;
+    }
+
+    /**
+     * Gets the appropriate ACL extension for the IMAP server addressed by specified parameters.
+     * 
+     * @param serverAddress The server address
+     * @param secure Whether a secure connection shall be established or not
+     * @return The appropriate ACL extension
+     * @throws IMAPException If an I/O error occurs
+     */
+    public ACLExtension getACLExtension(final InetSocketAddress serverAddress, final boolean secure) throws IMAPException {
+        if (!instantiated.get()) {
+            try {
+                return ACLExtensionAutoDetector.getACLExtension(serverAddress, secure);
             } catch (final IOException e) {
                 throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
             }
