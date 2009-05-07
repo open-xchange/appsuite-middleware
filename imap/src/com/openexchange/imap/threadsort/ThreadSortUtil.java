@@ -127,7 +127,13 @@ public final class ThreadSortUtil {
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString(), null);
+                final Response[] r;
+                {
+                    final String commandStart = "THREAD REFERENCES UTF-8 ";
+                    r = p.command(
+                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString(),
+                        null);
+                }
                 final Response response = r[r.length - 1];
                 String retval = null;
                 try {
