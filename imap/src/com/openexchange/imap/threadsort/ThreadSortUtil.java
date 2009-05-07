@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -124,8 +123,8 @@ public final class ThreadSortUtil {
      * @return The thread-sort string.
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getThreadResponse(final Folder folder, final String sortRange) throws MessagingException {
-        final IMAPFolder f = (IMAPFolder) folder;
+    public static String getThreadResponse(final IMAPFolder folder, final String sortRange) throws MessagingException {
+        final IMAPFolder f = folder;
         final Object val = f.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
