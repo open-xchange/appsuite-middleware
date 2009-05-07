@@ -49,15 +49,19 @@
 
 package com.openexchange.mailaccount.internal;
 
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -80,7 +84,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     /**
      * Proxy attribute for the object implementing the persistent methods.
      */
-    private final MailAccountStorageService delegate;
+    private final RdbMailAccountStorage delegate;
 
     /**
      * Lock for the cache.
@@ -90,20 +94,24 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     /**
      * Initializes a new {@link CachingMailAccountStorage}.
      * 
-     * @param delegate
+     * @param delegate The database-backed delegate storage
      */
-    CachingMailAccountStorage(final MailAccountStorageService delegate) {
+    CachingMailAccountStorage(final RdbMailAccountStorage delegate) {
         super();
         this.delegate = delegate;
         cacheLock = new ReentrantLock(true);
     }
 
-    private void invalidateUser(final int id, final int user, final int cid) throws MailAccountException {
+    private static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
+        return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
+    }
+
+    private void invalidateMailAccount(final int id, final int user, final int cid) throws MailAccountException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
-                cache.remove(cache.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user)));
+                cache.remove(newCacheKey(cacheService, id, user, cid));
             } catch (final CacheException e) {
                 throw new MailAccountException(e);
             }
@@ -112,12 +120,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
         delegate.deleteMailAccount(id, user, cid, deletePrimary);
-        invalidateUser(id, user, cid);
+        invalidateMailAccount(id, user, cid);
     }
 
     public void deleteMailAccount(final int id, final int user, final int cid) throws MailAccountException {
         delegate.deleteMailAccount(id, user, cid);
-        invalidateUser(id, user, cid);
+        invalidateMailAccount(id, user, cid);
     }
 
     public MailAccount getDefaultMailAccount(final int user, final int cid) throws MailAccountException {
@@ -128,7 +136,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
 
             public Serializable getKey() {
-                return cacheService.newCacheKey(cid, Integer.valueOf(MailAccount.DEFAULT_ID), Integer.valueOf(user));
+                return newCacheKey(cacheService, MailAccount.DEFAULT_ID, user, cid);
             }
 
             public MailAccount load() throws MailAccountException {
@@ -157,7 +165,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
 
             public Serializable getKey() {
-                return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
+                return newCacheKey(cacheService, id, user, cid);
             }
 
             public MailAccount load() throws MailAccountException {
@@ -183,30 +191,50 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
-        return delegate.getUserMailAccounts(user, cid);
+        final int[] ids = delegate.getUserMailAccountIDs(user, cid);
+        final MailAccount[] accounts = new MailAccount[ids.length];
+        for (int i = 0; i < accounts.length; i++) {
+            accounts[i] = getMailAccount(ids[i], user, cid);
+        }
+        return accounts;
     }
 
     public MailAccount[] resolveLogin(final String login, final int cid) throws MailAccountException {
-        return delegate.resolveLogin(login, cid);
+        final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
+        final MailAccount[] accounts = new MailAccount[idsAndUsers.length];
+        for (int i = 0; i < accounts.length; i++) {
+            final int[] idAndUser = idsAndUsers[i];
+            accounts[i] = getMailAccount(idAndUser[0], idAndUser[1], cid);
+        }
+        return accounts;
     }
 
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
-        return delegate.resolveLogin(login, server, cid);
+        final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
+        final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
+        for (int i = 0; i < idsAndUsers.length; i++) {
+            final int[] idAndUser = idsAndUsers[i];
+            final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
+            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+                l.add(candidate);
+            }
+        }
+        return l.toArray(new MailAccount[l.size()]);
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
-        invalidateUser(mailAccount.getId(), user, cid);
+        invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
-        invalidateUser(mailAccount.getId(), user, cid);
+        invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws MailAccountException {
         delegate.updateMailAccount(mailAccount, user, cid, sessionPassword);
-        invalidateUser(mailAccount.getId(), user, cid);
+        invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws MailAccountException {
@@ -218,7 +246,16 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {
-        return delegate.resolvePrimaryAddr(primaryAddress, server, cid);
+        final int[][] idsAndUsers = delegate.resolvePrimaryAddr2IDs(primaryAddress, cid);
+        final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
+        for (int i = 0; i < idsAndUsers.length; i++) {
+            final int[] idAndUser = idsAndUsers[i];
+            final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
+            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+                l.add(candidate);
+            }
+        }
+        return l.toArray(new MailAccount[l.size()]);
     }
 
 }
