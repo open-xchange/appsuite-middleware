@@ -146,6 +146,8 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
                 return -1;
             }
             return 0;
+        } else if (other.fullname == null) {
+            return 1;
         }
         final int folderComp = fullname.compareTo(other.fullname);
         if (folderComp != 0) {
@@ -156,6 +158,8 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
                 return -1;
             }
             return 0;
+        } else if (other.mailId == null) {
+            return 1;
         }
         return mailId.compareTo(other.mailId);
     }
