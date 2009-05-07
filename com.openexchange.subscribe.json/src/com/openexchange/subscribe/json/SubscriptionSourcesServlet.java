@@ -143,7 +143,7 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
     private String[] getColumns(HttpServletRequest req) {
         String columns = req.getParameter("columns");
         if(columns == null) {
-            return new String[]{"id", "displayName", "icon", "formDescription"};
+            return new String[]{"id", "displayName", "module", "icon",  "formDescription"};
         }
         return columns.split("\\s*,\\s*"); 
     }
