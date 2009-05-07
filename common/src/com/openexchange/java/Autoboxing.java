@@ -106,7 +106,7 @@ public final class Autoboxing {
     public static Integer[] i2I(int[] intArray){
         Integer[] integerArray = new Integer[intArray.length];
         for(int i = 0; i < intArray.length; i++){
-            integerArray[i] = I(intArray[0]);
+            integerArray[i] = I(intArray[i]);
         }
         return integerArray;
     }    
@@ -119,7 +119,7 @@ public final class Autoboxing {
     public static Long[] l2L(long[] longArray){
         Long[] longerArray = new Long[longArray.length];
         for(int i = 0; i < longArray.length; i++){
-            longerArray[i] = L(longArray[0]);
+            longerArray[i] = L(longArray[i]);
         }
         return longerArray;
     }
