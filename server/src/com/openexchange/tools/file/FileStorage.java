@@ -317,7 +317,18 @@ public abstract class FileStorage {
      * @throws FileStorageException if an error occurs.
      */
     public boolean deleteFile(String identifier) throws FileStorageException {
-        return deleteFile(new String[] { identifier }).size() == 0;
+        final boolean retval = delete(new String[] { identifier }).isEmpty();
+        if (retval) {
+            lock(LOCK_TIMEOUT);
+            try {
+                final State state = loadState();
+                state.addUnused(identifier);
+                saveState(state);
+            } finally {
+                unlock();
+            }
+        }
+        return retval;
     }
 
     /**

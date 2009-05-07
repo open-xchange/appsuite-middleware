@@ -199,6 +199,7 @@ public class QuotaFileStorage extends FileStorage {
             name = super.saveNewFile(input);
             length = delegate.length(name);
             delegate.lock(LOCK_TIMEOUT);
+            lockMode.set(new NilLockMode());
             locked = true;
             if (fits(length)) {
                 try {
@@ -211,17 +212,22 @@ public class QuotaFileStorage extends FileStorage {
             super.deleteFile(name);
             quotaException(length);
             return null;
-
         } catch (final FileStorageException x) {
             throw addContextInfo(x, ctx);
         } finally {
             if (locked) {
+                lockMode.set(new NormalLockMode(delegate, ctx));
                 delegate.unlock();
             }
         }
     }
 
 	@Override
+    public boolean deleteFile(String identifier) throws FileStorageException {
+        return deleteFile(new String[] { identifier }).isEmpty();
+    }
+
+    @Override
     public Set<String> deleteFile(String[] identifiers) throws FileStorageException {
         try {
             delegate.lock(LOCK_TIMEOUT);
