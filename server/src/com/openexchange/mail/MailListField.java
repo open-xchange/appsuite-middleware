@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
  * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22" >HTTP API's mail section</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public enum MailListField {
 
@@ -217,5 +218,31 @@ public enum MailListField {
      */
     public static final MailListField getField(final int field) {
         return FIELDS_MAP.get(Integer.valueOf(field));
+    }
+    
+    /**
+     * Returns all field values as an array of integers.
+     * @return
+     */
+    public static final int[] getAllFields(){
+        int[] all = new int[values().length];
+        for(int i = 0; i < all.length; i++){
+            all[i] = values()[i].getField();
+        }
+        return all;
+    }
+    
+    /**
+     * gets a field by the JSON name
+     * @param jsonName identifier
+     * @return MailListField identified by jsonName, null if not found 
+     */
+    public static final MailListField getBy(String jsonName){
+        MailListField[] values = values();
+        for(MailListField field : values){
+            if( jsonName.equals( field.getKey() ) )
+                return field;
+        }
+        return null;
     }
 }
