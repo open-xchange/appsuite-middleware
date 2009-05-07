@@ -117,15 +117,14 @@ public final class ThreadSortUtil {
     /**
      * Executes THREAD command with given arguments.
      * 
-     * @param folder The IMAP folder on which THREAD command shall be executed
+     * @param imapFolder The IMAP folder on which THREAD command shall be executed
      * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or
      *            <code>&quot;12,13,14,24&quot;</code>
      * @return The thread-sort string.
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getThreadResponse(final IMAPFolder folder, final String sortRange) throws MessagingException {
-        final IMAPFolder f = folder;
-        final Object val = f.doCommand(new IMAPFolder.ProtocolCommand() {
+    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange) throws MessagingException {
+        final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString(), null);
