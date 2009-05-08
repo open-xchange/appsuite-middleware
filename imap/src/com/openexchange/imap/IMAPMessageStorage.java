@@ -159,7 +159,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (fieldSet.contains(MailField.FULL)) {
                 final MailMessage[] mails = new MailMessage[mailIds.length];
                 for (int j = 0; j < mails.length; j++) {
-                    mails[j] = getMessageLong(fullname, mailIds[j], true);
+                    mails[j] = getMessageLong(fullname, mailIds[j], false);
                 }
                 return mails;
             }
@@ -903,7 +903,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             long[] retval = new long[0];
             final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
             if (hasUIDPlus) {
+                // Perform append expecting APPENUID response code
                 retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+            } else {
+                // Perform simple append
+                imapFolder.appendMessages(msgs);
             }
             if (retval.length > 0) {
                 /*
