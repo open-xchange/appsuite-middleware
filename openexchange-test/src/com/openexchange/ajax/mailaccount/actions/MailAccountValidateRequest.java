@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -234,6 +235,14 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
 
             public String getTrashFullname() {
                 return acc.getTrashFullname();
+            }
+
+            public void addProperty(final String name, final String value) {
+                acc.addProperty(name, value);
+            }
+
+            public Map<String, String> getProperties() {
+                return acc.getProperties();
             }
         };
     }
