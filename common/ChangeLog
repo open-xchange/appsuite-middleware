@@ -1,3 +1,7 @@
+* 2009-05-08 - carsten.hoeger@open-xchange.com
+
+ - Bugfix #13565: Added script method to wait for process to stop.
+
 * 2009-03-16 - choeger@open-xchange.com
 
  - Bugfix ID#13385: allpluginsloaded does not work with SP5U1RC1
