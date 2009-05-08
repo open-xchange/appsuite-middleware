@@ -50,6 +50,8 @@
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -74,6 +76,7 @@ import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener} whose
@@ -141,6 +144,35 @@ public final class DeleteRegistry implements Initialization {
         registerDeleteListener(new ImageRegistryDeleteListener());
         registerDeleteListener(new UserSettingServerDeleteListener());
         registerDeleteListener(new MailAccountDeleteListener());
+        registerDeleteListener(new DeleteListener() {
+
+            public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+                if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
+                    PreparedStatement stmt = null;
+                    try {
+                        final int contextId = deleteEvent.getContext().getContextId();
+                        final int user = deleteEvent.getId();
+
+                        stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ?");
+                        int pos = 1;
+                        stmt.setInt(pos++, contextId);
+                        stmt.setInt(pos++, user);
+                        stmt.executeUpdate();
+                        DBUtils.closeSQLStuff(stmt);
+
+                        stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_ids WHERE cid = ? AND user = ?");
+                        pos = 1;
+                        stmt.setInt(pos++, contextId);
+                        stmt.setInt(pos++, user);
+                        stmt.executeUpdate();
+                    } catch (final SQLException e) {
+                        throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+                    } finally {
+                        DBUtils.closeSQLStuff(stmt);
+                    }
+                }
+            }
+        });
     }
 
     /**
