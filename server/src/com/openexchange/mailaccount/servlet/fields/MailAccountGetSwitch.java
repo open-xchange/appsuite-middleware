@@ -189,4 +189,23 @@ public class MailAccountGetSwitch implements AttributeSwitch {
         return account.getTrashFullname();
     }
 
+    public Object pop3DeleteWriteThrough() {
+        return account.getProperties().get("pop3.deletewt");
+    }
+
+    public Object pop3ExpungeOnQuit() {
+        return account.getProperties().get("pop3.expunge");
+    }
+
+    public Object pop3RefreshRate() {
+        return account.getProperties().get("pop3.refreshrate");
+    }
+
+    public Object pop3Path() {
+        return account.getProperties().get("pop3.path");
+    }
+
+    public Object pop3Storage() {
+        return account.getProperties().get("pop3.storage");
+    }
 }

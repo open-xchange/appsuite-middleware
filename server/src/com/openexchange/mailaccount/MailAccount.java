@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * {@link MailAccount} - Provides all necessary information for a user's mail account like server, port, login, password, etc.
@@ -281,14 +282,12 @@ public interface MailAccount extends Serializable {
      */
     public String getTrashFullname();
 
-
     /**
      * Gets the sent fullname
      * 
      * @return The sent fullname
      */
     public String getSentFullname();
-
 
     /**
      * Gets the drafts fullname
@@ -297,14 +296,12 @@ public interface MailAccount extends Serializable {
      */
     public String getDraftsFullname();
 
-
     /**
      * Gets the spam fullname
      * 
      * @return The spam fullname
      */
     public String getSpamFullname();
-
 
     /**
      * Gets the confirmed-spam fullname
@@ -319,4 +316,19 @@ public interface MailAccount extends Serializable {
      * @return The confirmed-ham fullname
      */
     public String getConfirmedHamFullname();
+
+    /**
+     * Gets this account's properties.
+     * 
+     * @return Account's properties
+     */
+    public Map<String, String> getProperties();
+
+    /**
+     * Adds specified name-value-pair to properties.
+     * 
+     * @param name The property name
+     * @param value The property value
+     */
+    public void addProperty(String name, String value);
 }

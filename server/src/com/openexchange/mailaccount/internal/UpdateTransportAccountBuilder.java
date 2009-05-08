@@ -223,4 +223,24 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    public Object pop3DeleteWriteThrough() {
+        return null;
+    }
+
+    public Object pop3ExpungeOnQuit() {
+        return null;
+    }
+
+    public Object pop3RefreshRate() {
+        return null;
+    }
+
+    public Object pop3Path() {
+        return null;
+    }
+
+    public Object pop3Storage() {
+        return null;
+    }
+
 }

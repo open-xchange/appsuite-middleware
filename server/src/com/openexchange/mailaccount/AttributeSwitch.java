@@ -88,4 +88,9 @@ public interface AttributeSwitch {
     public Object spamFullname();
     public Object confirmedSpamFullname();
     public Object confirmedHamFullname();
+    public Object pop3RefreshRate();
+    public Object pop3ExpungeOnQuit();
+    public Object pop3DeleteWriteThrough();
+    public Object pop3Storage();
+    public Object pop3Path();
 }

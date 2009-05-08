@@ -49,7 +49,9 @@
 
 package com.openexchange.mailaccount.servlet.parser;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -208,6 +210,28 @@ public class MailAccountParser extends DataParser {
             account.setConfirmedHam(parseString(json, MailAccountFields.CONFIRMED_HAM_FULLNAME));
             attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
         }
+        final Map<String, String> props = new HashMap<String, String>();
+        if (json.has(MailAccountFields.POP3_DELETE_WRITE_THROUGH)) {
+            props.put("pop3.deletewt", json.getString(MailAccountFields.POP3_DELETE_WRITE_THROUGH));
+            attributes.add(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL);
+        }
+        if (json.has(MailAccountFields.POP3_EXPUNGE_ON_QUIT)) {
+            props.put("pop3.expunge", json.getString(MailAccountFields.POP3_EXPUNGE_ON_QUIT));
+            attributes.add(Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL);
+        }
+        if (json.has(MailAccountFields.POP3_REFRESH_RATE)) {
+            props.put("pop3.refreshrate", json.getString(MailAccountFields.POP3_REFRESH_RATE));
+            attributes.add(Attribute.POP3_REFRESH_RATE_LITERAL);
+        }
+        if (json.has(MailAccountFields.POP3_STORAGE)) {
+            props.put("pop3.storage", json.getString(MailAccountFields.POP3_STORAGE));
+            attributes.add(Attribute.POP3_STORAGE_LITERAL);
+        }
+        if (json.has(MailAccountFields.POP3_PATH)) {
+            props.put("pop3.path", json.getString(MailAccountFields.POP3_PATH));
+            attributes.add(Attribute.POP3_PATH_LITERAL);
+        }
+        account.setProperties(props);
         return attributes;
     }
 

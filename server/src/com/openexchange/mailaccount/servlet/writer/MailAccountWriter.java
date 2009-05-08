@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.servlet.writer;
 
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -115,6 +116,23 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, account.getConfirmedHamFullname());
         // Unified INBOX enabled
         json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
+        // Properties
+        final Map<String, String> props = account.getProperties();
+        if (props.containsKey("pop3.deletewt")) {
+            json.put(MailAccountFields.POP3_DELETE_WRITE_THROUGH, props.get("pop3.deletewt"));
+        }
+        if (props.containsKey("pop3.expunge")) {
+            json.put(MailAccountFields.POP3_EXPUNGE_ON_QUIT, props.get("pop3.expunge"));
+        }
+        if (props.containsKey("pop3.refreshrate")) {
+            json.put(MailAccountFields.POP3_REFRESH_RATE, props.get("pop3.refreshrate"));
+        }
+        if (props.containsKey("pop3.storage")) {
+            json.put(MailAccountFields.POP3_STORAGE, props.get("pop3.storage"));
+        }
+        if (props.containsKey("pop3.path")) {
+            json.put(MailAccountFields.POP3_PATH, props.get("pop3.path"));
+        }
         return json;
     }
 

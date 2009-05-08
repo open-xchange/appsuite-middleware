@@ -93,7 +93,13 @@ public enum Attribute {
     DRAFTS_FULLNAME_LITERAL(MailAccountFields.DRAFTS_FULLNAME, 1028),
     SPAM_FULLNAME_LITERAL(MailAccountFields.SPAM_FULLNAME, 1029),
     CONFIRMED_SPAM_FULLNAME_LITERAL(MailAccountFields.CONFIRMED_SPAM_FULLNAME, 1030),
-    CONFIRMED_HAM_FULLNAME_LITERAL(MailAccountFields.CONFIRMED_HAM_FULLNAME, 1031);
+    CONFIRMED_HAM_FULLNAME_LITERAL(MailAccountFields.CONFIRMED_HAM_FULLNAME, 1031),
+    // Now comes the bad stuff which should be handled in another way later on
+    POP3_REFRESH_RATE_LITERAL(MailAccountFields.POP3_REFRESH_RATE, 1032),
+    POP3_EXPUNGE_ON_QUIT_LITERAL(MailAccountFields.POP3_EXPUNGE_ON_QUIT, 1033),
+    POP3_DELETE_WRITE_THROUGH_LITERAL(MailAccountFields.POP3_DELETE_WRITE_THROUGH, 1034),
+    POP3_STORAGE_LITERAL(MailAccountFields.POP3_STORAGE, 1035),
+    POP3_PATH_LITERAL(MailAccountFields.POP3_PATH, 1036);
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
         Attribute.MAIL_PORT_LITERAL,
@@ -180,6 +186,16 @@ public enum Attribute {
             return switcher.confirmedSpamFullname();
         case CONFIRMED_HAM_FULLNAME_LITERAL:
             return switcher.confirmedHamFullname();
+        case POP3_DELETE_WRITE_THROUGH_LITERAL:
+            return switcher.pop3DeleteWriteThrough();
+        case POP3_EXPUNGE_ON_QUIT_LITERAL:
+            return switcher.pop3ExpungeOnQuit();
+        case POP3_REFRESH_RATE_LITERAL:
+            return switcher.pop3RefreshRate();
+        case POP3_STORAGE_LITERAL:
+            return switcher.pop3Storage();
+        case POP3_PATH_LITERAL:
+            return switcher.pop3Path();
         default:
             throw new IllegalArgumentException(this.getName());
         }

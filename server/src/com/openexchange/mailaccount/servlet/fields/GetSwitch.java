@@ -190,5 +190,25 @@ public class GetSwitch implements AttributeSwitch {
     public Object trashFullname() {
         return desc.getTrashFullname();
     }
+
+    public Object pop3DeleteWriteThrough() {
+        return desc.getProperties().get("pop3.deletewt");
+    }
+
+    public Object pop3ExpungeOnQuit() {
+        return desc.getProperties().get("pop3.expunge");
+    }
+
+    public Object pop3RefreshRate() {
+        return desc.getProperties().get("pop3.refreshrate");
+    }
+
+    public Object pop3Path() {
+        return desc.getProperties().get("pop3.path");
+    }
+
+    public Object pop3Storage() {
+        return desc.getProperties().get("pop3.storage");
+    }
     
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.mailaccount.internal;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
@@ -130,11 +133,14 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected String confirmedHamFullname;
 
+    protected Map<String, String> properties;
+
     /**
      * Initializes a new {@link AbstractMailAccount}.
      */
     protected AbstractMailAccount() {
         super();
+        properties = Collections.emptyMap();
         transportPort = 25;
         mailPort = 143;
         transportProtocol = TransportProperties.getInstance().getDefaultTransportProvider();
@@ -643,6 +649,38 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setConfirmedHamFullname(final String confirmedHamFullname) {
         this.confirmedHamFullname = confirmedHamFullname;
+    }
+
+    public Map<String, String> getProperties() {
+        if (properties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> clone = new HashMap<String, String>(properties.size());
+        clone.putAll(properties);
+        return clone;
+    }
+
+    /**
+     * Sets the properties.
+     * 
+     * @param properties The properties to set
+     */
+    public void setProperties(final Map<String, String> properties) {
+        if (null == properties) {
+            this.properties = Collections.emptyMap();
+        } else if (properties.isEmpty()) {
+            this.properties = Collections.emptyMap();
+        } else {
+            this.properties = new HashMap<String, String>(properties.size());
+            this.properties.putAll(properties);
+        }
+    }
+
+    public void addProperty(final String name, final String value) {
+        if (properties.isEmpty()) {
+            properties = new HashMap<String, String>();
+        }
+        properties.put(name, value);
     }
 
     @Override

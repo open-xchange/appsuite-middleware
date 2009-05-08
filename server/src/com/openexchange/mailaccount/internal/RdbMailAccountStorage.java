@@ -64,6 +64,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
@@ -576,7 +577,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
                 stmt.executeUpdate();
-                stmt.close();
+                closeSQLStuff(stmt);
 
             }
 
@@ -617,8 +618,25 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
                 stmt.executeUpdate();
-                stmt.close();
+                closeSQLStuff(stmt);
 
+            }
+
+            final Map<String, String> properties = mailAccount.getProperties();
+            if (attributes.contains(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL)) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+            }
+            if (attributes.contains(Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL)) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+            }
+            if (attributes.contains(Attribute.POP3_REFRESH_RATE_LITERAL)) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+            }
+            if (attributes.contains(Attribute.POP3_STORAGE_LITERAL)) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+            }
+            if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
@@ -633,6 +651,34 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null != management && management.getUnifiedINBOXAccountID(user, cid, con) == -1) {
                 management.createUnifiedINBOX(user, cid, con);
             }
+        }
+    }
+
+    private void updateProperty(final int cid, final int user, final int accountId, final String name, final String newValue, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+
+        try {
+            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, name);
+            stmt.executeUpdate();
+
+            if (null != newValue && newValue.length() > 0) {
+                closeSQLStuff(stmt);
+                stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setInt(pos++, accountId);
+                stmt.setString(pos++, name);
+                stmt.setString(pos++, newValue);
+                stmt.executeUpdate();
+            }
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
@@ -722,6 +768,23 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
                 stmt.executeUpdate();
+            }
+            // Properties
+            final Map<String, String> properties = mailAccount.getProperties();
+            if (properties.containsKey("pop3.deletewt")) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+            }
+            if (properties.containsKey("pop3.expunge")) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+            }
+            if (properties.containsKey("pop3.refreshrate")) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+            }
+            if (properties.containsKey("pop3.storage")) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+            }
+            if (properties.containsKey("pop3.path")) {
+                updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
@@ -842,6 +905,25 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
                 stmt.executeUpdate();
+            }
+            // Properties
+            final Map<String, String> properties = mailAccount.getProperties();
+            if (!properties.isEmpty()) {
+                if (properties.containsKey("pop3.deletewt")) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                }
+                if (properties.containsKey("pop3.expunge")) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+                }
+                if (properties.containsKey("pop3.refreshrate")) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+                }
+                if (properties.containsKey("pop3.storage")) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+                }
+                if (properties.containsKey("pop3.path")) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
+                }
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());

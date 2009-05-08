@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.internal;
 
+import java.util.Map;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.groupware.AbstractOXException;
@@ -266,5 +267,15 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
     public String getTrashFullname() {
         updateDelegate();
         return delegate.getTrashFullname();
+    }
+
+    public void addProperty(final String name, final String value) {
+        updateDelegate();
+        delegate.addProperty(name, value);
+    }
+
+    public Map<String, String> getProperties() {
+        updateDelegate();
+        return delegate.getProperties();
     }
 }

@@ -117,4 +117,14 @@ public final class MailAccountFields {
     public static final String CONFIRMED_SPAM_FULLNAME = "confirmed_spam_fullname";
 
     public static final String CONFIRMED_HAM_FULLNAME = "confirmed_ham_fullname";
+
+    public static final String POP3_REFRESH_RATE = "pop3_refresh_rate";
+
+    public static final String POP3_EXPUNGE_ON_QUIT = "pop3_expunge_on_quit";
+
+    public static final String POP3_DELETE_WRITE_THROUGH = "pop3_delete_write_through";
+    
+    public static final String POP3_STORAGE = "pop3_storage";
+    
+    public static final String POP3_PATH = "pop3_path";
 }

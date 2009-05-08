@@ -50,6 +50,9 @@
 package com.openexchange.mailaccount;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
 
@@ -128,11 +131,14 @@ public final class MailAccountDescription implements Serializable {
 
     private String confirmedHamFullname;
 
+    private Map<String, String> properties;
+
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
     public MailAccountDescription() {
         super();
+        properties = Collections.emptyMap();
         transportPort = 25;
         mailPort = 143;
         transportProtocol = "smtp";
@@ -796,6 +802,49 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setConfirmedHamFullname(final String confirmedHamFullname) {
         this.confirmedHamFullname = confirmedHamFullname;
+    }
+
+    /**
+     * Gets the properties
+     * 
+     * @return The properties
+     */
+    public Map<String, String> getProperties() {
+        if (properties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> clone = new HashMap<String, String>(properties.size());
+        clone.putAll(properties);
+        return clone;
+    }
+
+    /**
+     * Sets the properties
+     * 
+     * @param properties The properties to set
+     */
+    public void setProperties(final Map<String, String> properties) {
+        if (null == properties) {
+            this.properties = Collections.emptyMap();
+        } else if (properties.isEmpty()) {
+            this.properties = Collections.emptyMap();
+        } else {
+            this.properties = new HashMap<String, String>(properties.size());
+            this.properties.putAll(properties);
+        }
+    }
+
+    /**
+     * Adds specified name-value-pair to properties.
+     * 
+     * @param name The property name
+     * @param value The property value
+     */
+    public void addProperty(final String name, final String value) {
+        if (properties.isEmpty()) {
+            properties = new HashMap<String, String>();
+        }
+        properties.put(name, value);
     }
 
     private static Object[] parseServerAndPort(final String server, final int defaultPort) {

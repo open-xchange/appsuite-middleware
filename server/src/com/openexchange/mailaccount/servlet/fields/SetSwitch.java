@@ -227,4 +227,29 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    public Object pop3DeleteWriteThrough() {
+        desc.addProperty("pop3.deletewt", (String) value);
+        return null;
+    }
+
+    public Object pop3ExpungeOnQuit() {
+        desc.addProperty("pop3.expunge", (String) value);
+        return null;
+    }
+
+    public Object pop3RefreshRate() {
+        desc.addProperty("pop3.refreshrate", (String) value);
+        return null;
+    }
+
+    public Object pop3Path() {
+        desc.addProperty("pop3.path", (String) value);
+        return null;
+    }
+
+    public Object pop3Storage() {
+        desc.addProperty("pop3.storage", (String) value);
+        return null;
+    }
+
 }
