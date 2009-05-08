@@ -137,6 +137,30 @@ public class MailAccountCreateTablesTask implements UpdateTask {
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
+    private static final String getCreateMailAccountProperties() {
+        return "CREATE TABLE user_mail_account_properties (" + 
+        		"id INT4 unsigned NOT NULL," + 
+        		"cid INT4 unsigned NOT NULL," + 
+        		"user INT4 unsigned NOT NULL," + 
+        		"name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        		"value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        		"PRIMARY KEY  (cid, id, user, name)," + 
+        		"FOREIGN KEY (cid, id, user) REFERENCES user_mail_account (cid, id, user)" + 
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    }
+
+    private static final String getCreateTransportAccountProperties() {
+        return "CREATE TABLE user_transport_account_properties (" + 
+        		"id INT4 unsigned NOT NULL," + 
+        		"cid INT4 unsigned NOT NULL," + 
+        		"user INT4 unsigned NOT NULL," + 
+        		"name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        		"value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        		"PRIMARY KEY  (cid, id, user, name)," + 
+        		"FOREIGN KEY (cid, id, user) REFERENCES user_transport_account (cid, id, user)" + 
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    }
+
     private static final String getCreateSequence() {
         return "CREATE TABLE sequence_mail_service (" + 
         		"cid INT4 unsigned NOT NULL," + 
@@ -148,7 +172,9 @@ public class MailAccountCreateTablesTask implements UpdateTask {
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         createTable("sequence_mail_service", getCreateSequence(), contextId);
         createTable("user_mail_account", getCreateMailAccount(), contextId);
+        createTable("user_mail_account_properties", getCreateMailAccountProperties(), contextId);
         createTable("user_transport_account", getCreateTransportAccount(), contextId);
+        createTable("user_transport_account_properties", getCreateTransportAccountProperties(), contextId);
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'MailAccountCreateTablesTask' successfully performed!");
         }
