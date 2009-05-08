@@ -506,7 +506,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
         if ((mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) && !changePrimary) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
+            if (attributes.size() > 1 || !attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL)) {
+                throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
+            }
         }
         PreparedStatement stmt = null;
         try {
