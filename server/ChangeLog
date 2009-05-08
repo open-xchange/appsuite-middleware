@@ -1,3 +1,7 @@
+* 2009-05-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #13473: Fixed cookie parsing when an ending ";" is present.
+
 * 2009-04-24 - marcus.klein@open-xchange.com
 
  - Bugfix #13482: Survive empty lock body on WebDAV infostore interface.
