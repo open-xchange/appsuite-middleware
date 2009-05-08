@@ -1334,19 +1334,19 @@ public class Folder extends SessionServlet {
                             /*
                              * Add root folders
                              */
+                            final MailFolder rootFolder;
                             final MailAccess<?, ?> mailAccess;
                             try {
                                 mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                                mailAccess.connect();
+                                rootFolder = mailAccess.getRootFolder();
                             } catch (final MailException e) {
-                                LOG.error("Skipping mail account.", e);
+                                LOG.error(e.getMessage(), e);
                                 continue;
                             }
                             try {
                                 final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                                     columns,
                                     mailAccess.getMailConfig());
-                                final MailFolder rootFolder = mailAccess.getFolderStorage().getRootFolder();
                                 final JSONArray ja = new JSONArray();
                                 if (mailAccount.isDefaultAccount()) {
                                     for (int i = 0; i < mailFolderWriters.length; i++) {
