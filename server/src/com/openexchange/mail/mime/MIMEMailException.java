@@ -78,7 +78,10 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
@@ -191,13 +194,13 @@ public class MIMEMailException extends MailException {
          */
         BIND_ERROR("Could not bind connection to local port %1$s", Category.SETUP_ERROR, 1015),
         /**
-         * Connect error: Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s
+         * Connect error: Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
          * <p>
          * An error occurred while attempting to connect to remote mail server. Typically, the connection was refused remotely (e.g., no
          * process is listening on the remote address/port).
          * </p>
          */
-        CONNECT_ERROR("Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1016),
+        CONNECT_ERROR("Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1016),
         /**
          * Connection was reset
          */
@@ -233,7 +236,19 @@ public class MIMEMailException extends MailException {
         /**
          * The quota on mail server is exceeded
          */
-        QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024);
+        QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024),
+        /**
+         * A command to mail server failed. Server response: %1$s.
+         */
+        COMMAND_FAILED("A command to mail server failed. Server response: %1$s.", Category.CODE_ERROR, 1025),
+        /**
+         * Mail server indicates a bad command. Server response: %1$s.
+         */
+        BAD_COMMAND("Mail server indicates a bad command. Server response: %1$s.", Category.CODE_ERROR, 1026),
+        /**
+         * An error in mail server protocol. Error message: %1$s.
+         */
+        PROTOCOL_ERROR("An error in mail server protocol. Error message: %1$s.", Category.CODE_ERROR, 1027);
 
         private final String message;
 
@@ -430,6 +445,12 @@ public class MIMEMailException extends MailException {
                 return new MIMEMailException(Code.SOCKET_ERROR, e, e.getMessage());
             } else if (nextException instanceof UnknownHostException) {
                 return new MIMEMailException(Code.UNKNOWN_HOST, e, e.getMessage());
+            } else if (nextException instanceof CommandFailedException) {
+                return new MIMEMailException(Code.COMMAND_FAILED, e, nextException.getMessage());
+            } else if (nextException instanceof BadCommandException) {
+                return new MIMEMailException(Code.BAD_COMMAND, e, nextException.getMessage());
+            } else if (nextException instanceof ProtocolException) {
+                return new MIMEMailException(Code.PROTOCOL_ERROR, e, nextException.getMessage());
             } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                 return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
             }
