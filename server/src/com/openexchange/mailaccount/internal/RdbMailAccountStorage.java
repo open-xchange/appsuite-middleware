@@ -268,16 +268,19 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
-            stmt.close();
+            closeSQLStuff(stmt);
             stmt = con.prepareStatement(DELETE_TRANSPORT_ACCOUNT);
             stmt.setLong(1, cid);
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
+            closeSQLStuff(stmt);
+
+            deleteProperties(cid, user, id, con);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
-            closeSQLStuff(null, stmt);
+            closeSQLStuff(stmt);
         }
     }
 
@@ -677,6 +680,21 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, newValue);
                 stmt.executeUpdate();
             }
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void deleteProperties(final int cid, final int user, final int accountId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+
+        try {
+            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.executeUpdate();
         } finally {
             closeSQLStuff(stmt);
         }
