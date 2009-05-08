@@ -54,13 +54,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import org.xml.sax.SAXException;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.FormElement;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionFormDescription;
 import com.openexchange.subscribe.SubscriptionSource;
 
 /**
@@ -72,7 +72,7 @@ public class XingSubscribeService extends AbstractSubscribeService{
 
     private final SubscriptionSource SOURCE = new SubscriptionSource();
 
-    private final SubscriptionFormDescription FORM = new SubscriptionFormDescription();
+    private final DynamicFormDescription FORM = new DynamicFormDescription();
 
     public XingSubscribeService() {
         FORM.add(FormElement.input("login", "Login")).add(FormElement.password("password", "Password"));
@@ -93,9 +93,9 @@ public class XingSubscribeService extends AbstractSubscribeService{
     }
 
     public Collection getContent(Subscription subscription) {
-        Map<String, String> configuration = subscription.getConfiguration();
+        Map<String, Object> configuration = subscription.getConfiguration();
         try {
-            return Arrays.asList(new XingContactParser().getXingContactsForUser(configuration.get("login"), configuration.get("password")));
+            return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SAXException e) {

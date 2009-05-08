@@ -53,7 +53,10 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 
@@ -65,6 +68,8 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class SubscriptionJSONParser {
 
+    private static final FormContentParser formParser = new FormContentParser();
+    
     private SubscriptionSourceDiscoveryService discovery;
 
     /**
@@ -82,22 +87,12 @@ public class SubscriptionJSONParser {
             subscription.setId(object.getInt("id"));
         }
         subscription.setFolderId(object.getInt("folder"));
-        subscription.setSource(discovery.getSource(object.getString("source")));
+        SubscriptionSource source = discovery.getSource(object.getString("source"));
+        subscription.setSource(source);
         JSONObject config = object.getJSONObject(subscription.getSource().getId());
+        Map<String, Object> configuration = formParser.parse(config, source.getFormDescription());
+        subscription.setConfiguration(configuration);
         
-        Map<String, String> configurationMap = new HashMap<String, String>();
-        
-        for(String key : config.keySet()) {
-            Object value = config.get(key);
-            if(value == JSONObject.NULL) {
-                value = null;
-                configurationMap.put(key, null);
-            } else {
-                configurationMap.put(key, value.toString());
-            }
-        }
-        
-        subscription.setConfiguration(configurationMap);
         return subscription;
     }
 

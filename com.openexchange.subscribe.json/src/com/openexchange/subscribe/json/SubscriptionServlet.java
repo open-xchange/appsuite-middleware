@@ -222,7 +222,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         JSONArray rows = new JSONArray();
         SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         for (Subscription subscription : allSubscriptions) {
-            JSONArray row = writer.writeArray(subscription, basicColumns, dynamicColumns, dynamicColumnOrder);
+            JSONArray row = writer.writeArray(subscription, basicColumns, dynamicColumns, dynamicColumnOrder, subscription.getSource().getFormDescription());
             rows.put(row);
         }
         writeData(rows, resp);
@@ -281,7 +281,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     }
 
     private void writeSubscription(Subscription subscription, HttpServletResponse resp) throws JSONException {
-        JSONObject object = new SubscriptionJSONWriter().write(subscription);
+        JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription());
         writeData(object, resp);
     }
 

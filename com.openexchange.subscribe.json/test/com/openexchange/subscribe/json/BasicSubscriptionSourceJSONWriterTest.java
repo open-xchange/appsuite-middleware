@@ -54,11 +54,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.FormElement.Widget;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.FormElement;
-import com.openexchange.subscribe.SubscriptionFormDescription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.FormElement.Widget;
 import junit.framework.TestCase;
 
 /**
@@ -90,7 +90,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         formElementPassword.setMandatory(true);
         formElementPassword.setWidget(FormElement.Widget.PASSWORD);
 
-        SubscriptionFormDescription formDescription = new SubscriptionFormDescription();
+        DynamicFormDescription formDescription = new DynamicFormDescription();
         formDescription.addFormElement(formElementLogin);
         formDescription.addFormElement(formElementPassword);
 
@@ -113,7 +113,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         formElementPassword2.setMandatory(true);
         formElementPassword2.setWidget(FormElement.Widget.PASSWORD);
 
-        SubscriptionFormDescription formDescription2 = new SubscriptionFormDescription();
+        DynamicFormDescription formDescription2 = new DynamicFormDescription();
         formDescription2.addFormElement(formElementLogin2);
         formDescription2.addFormElement(formElementPassword2);
 
@@ -186,7 +186,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.setDisplayName(temp);
         
-        SubscriptionFormDescription dTemp = subscriptionSource.getFormDescription();
+        DynamicFormDescription dTemp = subscriptionSource.getFormDescription();
         subscriptionSource.setFormDescription(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.setFormDescription(dTemp);

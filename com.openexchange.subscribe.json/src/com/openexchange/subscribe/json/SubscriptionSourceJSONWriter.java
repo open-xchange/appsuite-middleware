@@ -56,9 +56,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.FormElement;
-import com.openexchange.subscribe.SubscriptionFormDescription;
 import com.openexchange.subscribe.SubscriptionSource;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.*;
 
@@ -137,7 +137,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         }
     }
 
-    private JSONArray parseFormElements(SubscriptionFormDescription formDescription) throws JSONException {
+    private JSONArray parseFormElements(DynamicFormDescription formDescription) throws JSONException {
         JSONArray retval = new JSONArray();
         for (Iterator<FormElement> iter = formDescription.iterator(); iter.hasNext();) {
             FormElement element = iter.next();

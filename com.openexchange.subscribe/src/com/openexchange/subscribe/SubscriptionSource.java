@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe;
 
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+
 
 /**
  * {@link SubscriptionSource}
@@ -60,7 +62,7 @@ public class SubscriptionSource {
     private String id;
     private String displayName;
     private String icon;
-    private SubscriptionFormDescription formDescription;
+    private DynamicFormDescription formDescription;
     private SubscribeService subscribeService;
     private int folderModule = 0;
     
@@ -88,11 +90,11 @@ public class SubscriptionSource {
         this.icon = icon;
     }
     
-    public SubscriptionFormDescription getFormDescription() {
+    public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
     
-    public void setFormDescription(SubscriptionFormDescription formDescription) {
+    public void setFormDescription(DynamicFormDescription formDescription) {
         this.formDescription = formDescription;
     }
     

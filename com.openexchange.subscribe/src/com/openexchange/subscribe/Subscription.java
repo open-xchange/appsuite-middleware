@@ -52,6 +52,7 @@ package com.openexchange.subscribe;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -70,7 +71,7 @@ public class Subscription {
     
     private SubscriptionSource source;
     
-    private Map<String, String> configuration= new HashMap<String, String>();
+    private Map<String, Object> configuration= new HashMap<String, Object>();
 
     public int getFolderId() {
         return folderId;
@@ -104,11 +105,11 @@ public class Subscription {
         this.lastUpdate = lastUpdate;
     }
     
-    public Map<String, String> getConfiguration() {
+    public Map<String, Object> getConfiguration() {
         return configuration;
     }
     
-    public void setConfiguration(Map<String, String> configuration) {
+    public void setConfiguration(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
     
@@ -120,7 +121,7 @@ public class Subscription {
         return source;
     }
     
-    public SubscriptionFormDescription getDescription() {
+    public DynamicFormDescription getDescription() {
         return source.getFormDescription();
     }
     

@@ -81,7 +81,7 @@ public class InMemorySubscriptionStorage {
             
             if(subscription.getConfiguration() != null && (subscription.getSource() == null || subscription.getSource().equals(current.getSource()))) {
                 current.getConfiguration().putAll(subscription.getConfiguration());
-                for (Entry<String, String> entry : new HashSet<Entry<String, String>>(current.getConfiguration().entrySet())) {
+                for (Entry<String, Object> entry : new HashSet<Entry<String, Object>>(current.getConfiguration().entrySet())) {
                     if(entry.getValue() == null) {
                         current.getConfiguration().remove(entry.getKey());
                     }

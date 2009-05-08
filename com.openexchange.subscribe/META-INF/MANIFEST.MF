@@ -8,18 +8,19 @@ Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.context,
  com.openexchange.context.osgi,
- com.openexchange.groupware.contexts,
+ com.openexchange.datatypes.genericonf,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
+ com.openexchange.groupware.contexts,
  com.openexchange.publish,
  com.openexchange.session,
+ javax.net,
+ javax.net.ssl,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker,
  org.xml.sax,
- org.xml.sax.helpers,
- javax.net.ssl,
- javax.net,
- org.osgi.util.tracker
+ org.xml.sax.helpers
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.subscribe
 Bundle-ClassPath: .,

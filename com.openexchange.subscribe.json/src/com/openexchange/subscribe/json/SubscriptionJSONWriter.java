@@ -54,6 +54,10 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.json.FormContentWriter;
+import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
 import com.openexchange.subscribe.Subscription;
 
 
@@ -65,6 +69,9 @@ import com.openexchange.subscribe.Subscription;
  */
 public class SubscriptionJSONWriter {
 
+    private static final FormContentWriter formContentWriter = new FormContentWriter();
+    private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
+    
     private static final String ID = "id";
     private static final String FOLDER = "folder";
     
@@ -73,40 +80,40 @@ public class SubscriptionJSONWriter {
      * @return
      * @throws JSONException 
      */
-    public JSONObject write(Subscription subscription) throws JSONException {
+    public JSONObject write(Subscription subscription, DynamicFormDescription form) throws JSONException {
         JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
         object.put("source", subscription.getSource().getId());
-        writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration());
+        writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form);
         return object;
     }
 
-    private void writeConfiguration(JSONObject object, String id, Map<String, String> configuration) throws JSONException {
-        JSONObject configJSON = new JSONObject();
-        for(Map.Entry<String, String> entry : configuration.entrySet()) {
-            configJSON.put(entry.getKey(), entry.getValue());
-        }
-        object.put(id, configJSON);
+    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form) throws JSONException {
+        JSONObject config = formContentWriter.write(form, configuration);
+        object.put(id, config);
     }
 
-    public JSONArray writeArray(Subscription subscription, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList) {
+    public JSONArray writeArray(Subscription subscription, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) {
         JSONArray array = new JSONArray();
         writeBasicCols(array, subscription, basicCols);
         for(String identifier : specialsList) {
-            writeSpecialCols(array, subscription, specialCols.get(identifier), identifier);
+            writeSpecialCols(array, subscription, specialCols.get(identifier), identifier, form);
         }
         return array;
     }
 
-    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId) {
+    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId, DynamicFormDescription form) {
         boolean writeNulls = !subscription.getSource().getId().equals(externalId);
-        Map<String, String> configuration  = subscription.getConfiguration();
+        Map<String, Object> configuration  = subscription.getConfiguration();
         for(String col : strings) {
             if(writeNulls) {
                 array.put(JSONObject.NULL);
             } else {
-                array.put(configuration.get(col));
+                Object value = configuration.get(col);
+                FormElement field = form.getField(col);
+                value = field.doSwitch(valueWrite, value);
+                array.put(value);
             }
         }
     }

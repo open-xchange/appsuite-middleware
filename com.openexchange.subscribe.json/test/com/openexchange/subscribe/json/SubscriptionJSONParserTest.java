@@ -52,6 +52,8 @@ package com.openexchange.subscribe.json;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -65,13 +67,11 @@ import junit.framework.TestCase;
  *
  */
 public class SubscriptionJSONParserTest extends TestCase {
-    /**
-     * 
-     */
     private static final String SOURCE_NAME = "com.openexchange.subscribe.test1";
     private JSONObject object;
     private SimSubscriptionSourceDiscoveryService discovery;
-
+    private DynamicFormDescription form = null;
+    
     public void setUp() throws Exception{
         object = new JSONObject();
         object.put("id", 2);
@@ -81,12 +81,16 @@ public class SubscriptionJSONParserTest extends TestCase {
         JSONObject config = new JSONObject();
         config.put("username", "My Username");
         config.put("password", "My Password");
+    
+        form = new DynamicFormDescription();
+        form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
         
         object.put(SOURCE_NAME, config);
     
         discovery = new SimSubscriptionSourceDiscoveryService();
         SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
+        source.setFormDescription(form);
         discovery.addSource(source);
     }
     
@@ -98,7 +102,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
         
-        Map<String, String> configuration = subscription.getConfiguration();
+        Map<String, Object> configuration = subscription.getConfiguration();
     
         assertNotNull("Configuration should not be null", configuration);
         assertEquals("Expected username", "My Username", configuration.get("username"));
@@ -115,7 +119,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
         
-        Map<String, String> configuration = subscription.getConfiguration();
+        Map<String, Object> configuration = subscription.getConfiguration();
     
         assertNotNull("Configuration should not be null", configuration);
         assertEquals("Expected username", "My Username", configuration.get("username"));
