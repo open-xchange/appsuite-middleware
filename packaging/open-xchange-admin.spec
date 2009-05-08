@@ -33,7 +33,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	5
+Release:	6
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -221,6 +221,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri May 08 2009 - carsten.hoeger@open-xchange.com
+ - Bugfix #13565: Added script method to wait for process to stop.
 * Thu Apr 23 2009 - marcus.klein@open-xchange.com
  - Bugfix #13440: Clearing string values with the CLT can be done with an empty string.
 * Tue Feb 24 2009 - choeger@open-xchange.com
