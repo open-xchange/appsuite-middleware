@@ -104,6 +104,7 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -655,17 +656,16 @@ public class Folder extends SessionServlet {
                                  * Iterate sorted mail accounts
                                  */
                                 for (final MailAccount mailAccount : accounts) {
+                                    final MailFolder rootFolder;
                                     final MailAccess<?, ?> mailAccess;
                                     try {
                                         mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                        rootFolder = mailAccess.getRootFolder();
                                     } catch (final MailException e) {
-                                        LOG.warn("Skipping mail account.", e);
+                                        LOG.error(e.getMessage(), e);
                                         continue;
                                     }
-                                    boolean close = false;
                                     try {
-                                        final MailFolder rootFolder = mailAccess.getRootFolder();
-                                        close = true;
                                         final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                                             columns,
                                             mailAccess.getMailConfig());
@@ -701,9 +701,7 @@ public class Folder extends SessionServlet {
                                     } catch (final MailException e) {
                                         LOG.error(e.getMessage(), e);
                                     } finally {
-                                        if (close) {
-                                            mailAccess.close(true);
-                                        }
+                                        mailAccess.close(true);
                                     }
                                 }
                             }
@@ -1321,60 +1319,66 @@ public class Folder extends SessionServlet {
                     }
                     for (final MailAccount mailAccount : accounts) {
                         /*
-                         * Clean session caches
+                         * Check if current account has been initialized before that is if its default folders were checked.
                          */
-                        SessionMailCache.getInstance(session, mailAccount.getId()).clear();
-                        /*
-                         * Add root folders
-                         */
-                        final MailAccess<?, ?> mailAccess;
-                        try {
-                            mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                        } catch (final MailException e) {
-                            LOG.warn("Skipping mail account.", e);
-                            continue;
+                        final boolean initialized;
+                        {
+                            final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(mailAccount.getId()));
+                            initialized = (b != null) && b.booleanValue();
                         }
-                        boolean close = false;
-                        try {
-                            mailAccess.connect();
-                            close = true;
-                            final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                columns,
-                                mailAccess.getMailConfig());
-                            final MailFolder rootFolder = mailAccess.getFolderStorage().getRootFolder();
-                            final JSONArray ja = new JSONArray();
-                            if (mailAccount.isDefaultAccount()) {
-                                for (int i = 0; i < mailFolderWriters.length; i++) {
-                                    mailFolderWriters[i].writeField(
-                                        ja,
-                                        mailAccount.getId(),
-                                        rootFolder,
-                                        false,
-                                        MailFolder.DEFAULT_FOLDER_NAME,
-                                        1,
-                                        MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
-                                        FolderObject.SYSTEM_MODULE,
-                                        false);
-                                }
-                            } else {
-                                for (int i = 0; i < mailFolderWriters.length; i++) {
-                                    mailFolderWriters[i].writeField(
-                                        ja,
-                                        mailAccount.getId(),
-                                        rootFolder,
-                                        false,
-                                        mailAccount.getName(),
-                                        1,
-                                        MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
-                                        FolderObject.SYSTEM_MODULE,
-                                        false);
-                                }
+                        if (initialized) {
+                            /*
+                             * Clean session caches
+                             */
+                            SessionMailCache.getInstance(session, mailAccount.getId()).clear();
+                            /*
+                             * Add root folders
+                             */
+                            final MailAccess<?, ?> mailAccess;
+                            try {
+                                mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                mailAccess.connect();
+                            } catch (final MailException e) {
+                                LOG.error("Skipping mail account.", e);
+                                continue;
                             }
-                            jsonWriter.value(ja);
-                        } catch (final MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        } finally {
-                            if (close) {
+                            try {
+                                final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                    columns,
+                                    mailAccess.getMailConfig());
+                                final MailFolder rootFolder = mailAccess.getFolderStorage().getRootFolder();
+                                final JSONArray ja = new JSONArray();
+                                if (mailAccount.isDefaultAccount()) {
+                                    for (int i = 0; i < mailFolderWriters.length; i++) {
+                                        mailFolderWriters[i].writeField(
+                                            ja,
+                                            mailAccount.getId(),
+                                            rootFolder,
+                                            false,
+                                            MailFolder.DEFAULT_FOLDER_NAME,
+                                            1,
+                                            MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
+                                            FolderObject.SYSTEM_MODULE,
+                                            false);
+                                    }
+                                } else {
+                                    for (int i = 0; i < mailFolderWriters.length; i++) {
+                                        mailFolderWriters[i].writeField(
+                                            ja,
+                                            mailAccount.getId(),
+                                            rootFolder,
+                                            false,
+                                            mailAccount.getName(),
+                                            1,
+                                            MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
+                                            FolderObject.SYSTEM_MODULE,
+                                            false);
+                                    }
+                                }
+                                jsonWriter.value(ja);
+                            } catch (final MailException e) {
+                                LOG.error(e.getMessage(), e);
+                            } finally {
                                 mailAccess.close(true);
                             }
                         }
