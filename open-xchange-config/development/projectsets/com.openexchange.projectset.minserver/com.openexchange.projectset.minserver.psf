@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.conversion,com.openexchange.conversion"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.dataretention,com.openexchange.dataretention"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.xml,com.openexchange.xml"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/common,com.openexchange.common"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/config,com.openexchange.configread"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/global,com.openexchange.global"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/management,com.openexchange.management"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/monitoring,com.openexchange.monitoring"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/server,com.openexchange.server"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/cache,com.openexchange.caching"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.timer,com.openexchange.timer"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/javax.activation,javax.activation"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.conversion,com.openexchange.conversion"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.dataretention,com.openexchange.dataretention"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.xml,com.openexchange.xml"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/common,com.openexchange.common"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/config,com.openexchange.configread"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/global,com.openexchange.global"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/management,com.openexchange.management"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/monitoring,com.openexchange.monitoring"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/server,com.openexchange.server"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/cache,com.openexchange.caching"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.timer,com.openexchange.timer"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/javax.activation,javax.activation"/>
 </provider>
 </psf>
