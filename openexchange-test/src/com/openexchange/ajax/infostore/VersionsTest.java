@@ -55,6 +55,21 @@ public class VersionsTest extends InfostoreAJAXTest {
 		}
 		
 	}
+	// Bug 13627
+	public void testVersionSorting() throws Exception {
+	    final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 1"), upload, "text/plain");
+        assertNoError(res);
+        res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 2"), upload, "text/plain");
+        assertNoError(res);
+        res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 3"), upload, "text/plain");
+        assertNoError(res);
+        
+        res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION}, Metadata.VERSION, "desc");
+        assertNoError(res);
+
+        assureVersions(new Integer[]{3,2,1},res,3);
+	}
 	
 	public void testUniqueVersions() throws Exception{
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
