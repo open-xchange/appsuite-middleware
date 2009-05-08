@@ -218,11 +218,6 @@ public final class IMAPCapabilityAndGreetingCache {
                         }
                     } catch (final IOException e) {
                         throw e;
-                        // throw new Entity2ACLException(
-                        // Entity2ACLException.Code.CREATING_SOCKET_FAILED,
-                        // e,
-                        // address2String(inetAddress),
-                        // e.getMessage());
                     }
                     final InputStream in = s.getInputStream();
                     final OutputStream out = s.getOutputStream();
