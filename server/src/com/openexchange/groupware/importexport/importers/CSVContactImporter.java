@@ -62,6 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -312,9 +313,19 @@ public class CSVContactImporter extends AbstractImporter {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
         
-        dateSwitch.addDateFormat(new SimpleDateFormat("dd.MM.yyyy"));
-        dateSwitch.addDateFormat(new SimpleDateFormat("dd/MM/yyyy"));
-        dateSwitch.addDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+        SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
+        df1.setTimeZone(utc);
+        
+        SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+        df2.setTimeZone(utc);
+        
+        SimpleDateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");
+        df3.setTimeZone(utc);
+        
+        dateSwitch.addDateFormat(df1);
+        dateSwitch.addDateFormat(df2);
+        dateSwitch.addDateFormat(df3);
         
         
         final ContactSwitcherForTimestamp timestampSwitch  = new ContactSwitcherForTimestamp();
