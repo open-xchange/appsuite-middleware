@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -76,6 +76,8 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Fri May 08 2009 - carsten.hoeger@open-xchange.com
+ - Bugfix #13565: Added script method to wait for process to stop.
 * Mon Mar 16 2009 - choeger@open-xchange.com
  - Bugfix ID#13385: allpluginsloaded does not work with SP5U1RC1
    added missing @start to commons logging

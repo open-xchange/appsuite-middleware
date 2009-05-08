@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	5
+Release:	6
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri May 08 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13473: Fixed cookie parsing when an ending ";" is present.
+* Fri May 08 2009 - carsten.hoeger@open-xchange.com
+ - Bugfix #13565: Added script method to wait for process to stop.
 * Fri Apr 24 2009 - marcus.klein@open-xchange.com
  - Bugfix #13482: Survive empty lock body on WebDAV infostore interface.
 * Fri Apr 17 2009 - francisco.laguna@open-xchange.com
