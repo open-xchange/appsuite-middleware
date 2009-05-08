@@ -84,6 +84,12 @@ public final class IMAPCapabilityAndGreetingCache {
     public static void init() {
         if (MAP == null) {
             MAP = new ConcurrentHashMap<InetSocketAddress, CapabilityAndGreeting>();
+            // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
+            try {
+                putCAG(new InetSocketAddress("imap.googlemail.com", 993), true).getCapability();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -319,6 +325,7 @@ public final class IMAPCapabilityAndGreetingCache {
                         }
                     }
                 }
+                LOG.info(new StringBuilder("CAPBILITY response and greeting of IMAP server ").append(key).append(" successfully cached."));
             }
             return cag;
         }
