@@ -1,3 +1,7 @@
+* 2009-05-08 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13627: Fixed sorting in action=versions of infostore.
+
 * 2009-05-05 - thorben.betten@open-xchange.com
 
  - Bugfix #13576: Improved alternative UID look-up if UIDPLUS capability is missing on IMAP server

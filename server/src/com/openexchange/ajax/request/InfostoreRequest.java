@@ -76,6 +76,7 @@ import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -625,19 +626,19 @@ public class InfostoreRequest extends CommonRequest {
 		final InfostoreFacade infostore = getInfostore();
 		TimedResult<DocumentMetadata> result = null;
 		SearchIterator<DocumentMetadata> iter = null;
+		Metadata[] loadCols = addIfNeeded(cols, Metadata.VERSION_LITERAL);
 		try {
 
 			if (sortedBy == null) {
-				result = infostore.getVersions(id, cols, ctx, user, userConfiguration);
+				result = infostore.getVersions(id, loadCols, ctx, user, userConfiguration);
 			} else {
-				result = infostore.getVersions(id, cols, sortedBy, dir, ctx, user,
+				result = infostore.getVersions(id, loadCols, sortedBy, dir, ctx, user,
 						userConfiguration);
 			}
 			iter = result.results();
-			iter.next(); // Skip version zero
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
+			iWriter.writeMetadata(skipVersion0(iter), cols, TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 
 		} catch (final Throwable t) {
@@ -650,7 +651,90 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
+    private Metadata[] addIfNeeded(Metadata[] cols, Metadata column) {
+        List<Metadata> newCols = new ArrayList<Metadata>(cols.length+1);
+        for (Metadata metadata : cols) {
+            if(metadata == column) {
+                return cols;
+            }
+            newCols.add(metadata);
+        }
+        newCols.add(column);
+        return newCols.toArray(new Metadata[cols.length+1]);
+    }
+
+    private SearchIterator<DocumentMetadata> skipVersion0(final SearchIterator<DocumentMetadata> iter) {
+        return new SearchIterator<DocumentMetadata>() {
+
+            private DocumentMetadata next;
+            private SearchIteratorException se;
+            private OXException oxe;
+
+            public void addWarning(AbstractOXException warning) {
+                iter.addWarning(warning);
+            }
+
+            public void close() throws SearchIteratorException {
+                iter.close();
+            }
+
+            public AbstractOXException[] getWarnings() {
+                return iter.getWarnings();
+            }
+
+            public boolean hasNext() {
+                try {
+                    scrollToNext();
+                } catch (SearchIteratorException e) {
+                    se = e;
+                } catch (OXException e) {
+                    oxe = e;
+                }
+                return next != null;
+            }
+
+            public boolean hasSize() {
+                return false;
+            }
+
+            public boolean hasWarnings() {
+                return iter.hasWarnings();
+            }
+
+            public DocumentMetadata next() throws SearchIteratorException, OXException {
+                if(se != null) {
+                    throw se;
+                }
+                if(oxe != null) {
+                    throw oxe;
+                }
+                if(next == null) {
+                    scrollToNext();
+                }
+                DocumentMetadata nextResult = next;
+                next = null;
+                return nextResult;
+            }
+
+            private void scrollToNext() throws SearchIteratorException, OXException {
+                while(iter.hasNext()) {
+                    next = iter.next();
+                    if(next.getVersion() != 0) {
+                        return;
+                    } else {
+                        next = null;
+                    }
+                }
+            }
+
+            public int size() {
+                throw new UnsupportedOperationException("Don't know my size!");
+            }
+            
+        };
+    }
+
+    protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
 			final long timestamp, final boolean ignoreDelete) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore(folderId);
 		Delta<DocumentMetadata> delta = null;
