@@ -80,11 +80,11 @@ public final class POP3StoragePropertyNames {
     public static final String PROPERTY_PATH = "pop3.path";
 
     /**
-     * The frequency or interval in minutes when a new connection to actual POP3 account is (possibly) allowed.
+     * The refresh rate in minutes when a new connection to actual POP3 account is (possibly) allowed.
      * 
      * @type <code>Integer</code>
      */
-    public static final String PROPERTY_FREQUENCY = "pop3.frequency";
+    public static final String PROPERTY_REFRESH_RATE = "pop3.refreshrate";
 
     /**
      * The last-accessed time stamp the last access to actual POP3 account took place.

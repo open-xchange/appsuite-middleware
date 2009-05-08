@@ -94,8 +94,8 @@ public final class POP3ConnectCallable implements Callable<Object> {
          * Is it allowed to connect to real POP3 account to synchronize messages?
          */
         final Long lastAccessed = getLastAccessed();
-        final long frequencyMillis = getFrequencyMillis();
-        if ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= frequencyMillis)) {
+        final long refreshRateMillis = getRefreshRateMillis();
+        if ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= refreshRateMillis)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("\n\tSynchronizing messages with POP3 account: " + server);
             }
@@ -142,8 +142,8 @@ public final class POP3ConnectCallable implements Callable<Object> {
 
     private static final int FALLBACK_MINUTES = 10;
 
-    private long getFrequencyMillis() throws MailException {
-        final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_FREQUENCY);
+    private long getRefreshRateMillis() throws MailException {
+        final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE);
         if (null != frequencyStr) {
             int minutes = 0;
             try {

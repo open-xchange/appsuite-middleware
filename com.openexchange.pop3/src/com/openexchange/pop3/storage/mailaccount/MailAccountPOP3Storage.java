@@ -72,15 +72,19 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.connect.POP3StoreConnector;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
@@ -118,7 +122,21 @@ public class MailAccountPOP3Storage implements POP3Storage {
         final Session session = pop3Access.getSession();
         defaultMailAccess = MailAccess.getInstance(session);
         this.properties = properties;
-        path = properties.getProperty(POP3StoragePropertyNames.PROPERTY_PATH);
+        {
+            String tmp = properties.getProperty(POP3StoragePropertyNames.PROPERTY_PATH);
+            if (null == tmp) {
+                final POP3Exception e = new POP3Exception(
+                    POP3Exception.Code.MISSING_PATH,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+                LOG.warn("Path is null. Error:" + e.getMessage(), e);
+                // Try to compose path
+                tmp = composePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
+                // Add to properties
+                properties.addProperty(POP3StoragePropertyNames.PROPERTY_PATH, tmp);
+            }
+            path = tmp;
+        }
         if (null == path) {
             throw new POP3Exception(
                 POP3Exception.Code.MISSING_PATH,
@@ -126,6 +144,32 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 Integer.valueOf(session.getContextId()));
         }
         separator = 0;
+    }
+
+    private String composePath(final int pop3AccountId, final int user, final int cid) throws MailException {
+        defaultMailAccess.connect();
+        try {
+            final String fn = defaultMailAccess.getFolderStorage().getTrashFolder();
+            final char sep = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+            final int pos = fn.lastIndexOf(sep);
+            final String accoutnName;
+            try {
+                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
+                    MailAccountStorageService.class,
+                    true);
+                accoutnName = storageService.getMailAccount(pop3AccountId, user, cid).getName();
+            } catch (final ServiceException e) {
+                throw new MailException(e);
+            } catch (final MailAccountException e) {
+                throw new MailException(e);
+            }
+            if (pos == -1) {
+                return accoutnName;
+            }
+            return new StringBuilder(16).append(fn.substring(0, pos)).append(sep).append(accoutnName).toString();
+        } finally {
+            defaultMailAccess.close(true);
+        }
     }
 
     /**

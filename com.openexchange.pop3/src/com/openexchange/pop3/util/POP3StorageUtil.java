@@ -81,7 +81,7 @@ public class POP3StorageUtil {
         super();
     }
 
-    private static final String SQL_SELECT_STORAGE_NAME = "SELECT value FROM pop3_storage_data WHERE cid = ? AND user = ? AND id = ? AND name = ?";
+    private static final String SQL_SELECT_STORAGE_NAME = "SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
     /**
      * Gets the POP3 storage provider name of specified user for given account.
@@ -117,6 +117,53 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
+        }
+    }
+
+    private static final String SQL_DELETE_STORAGE_NAME = "DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?";
+
+    private static final String SQL_INSERT_STORAGE_NAME = "INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)";
+
+    /**
+     * Sets the POP3 storage provider name of specified user for given account.
+     * 
+     * @param accountId The POP3 account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param name The provider name
+     * @throws POP3Exception If POP3 storage provider name cannot be set
+     */
+    public static void setPOP3StorageProviderName(final int accountId, final int user, final int cid, final String name) throws POP3Exception {
+        final Connection con;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new POP3Exception(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_DELETE_STORAGE_NAME);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_STORAGE);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+
+            stmt = con.prepareStatement(SQL_INSERT_STORAGE_NAME);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_STORAGE);
+            stmt.setString(pos++, name);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
             Database.back(cid, false, con);
         }
     }

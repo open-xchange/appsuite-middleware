@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
-    private static final String TABLE_NAME = "pop3_storage_data";
+    private static final String TABLE_NAME = "user_mail_account_properties";
 
     private final int cid;
 
