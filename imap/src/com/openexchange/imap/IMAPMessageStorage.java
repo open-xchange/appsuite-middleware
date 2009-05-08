@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import java.io.IOException;
 import java.util.Arrays;
@@ -95,6 +96,7 @@ import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
@@ -894,7 +896,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Mark first message for later lookup
              */
             final String hash = randomUUID();
-            msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, hash);
+            msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
             /*
              * ... and append them to folder
              */
@@ -934,6 +936,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             notifyIMAPFolderModification(destFullname);
             return retval;
         } catch (final MessagingException e) {
+            if (LOG.isDebugEnabled()) {
+                final Exception next = e.getNextException();
+                if (next instanceof CommandFailedException) {
+                    final StringBuilder sb = new StringBuilder(8192);
+                    sb.append("\r\nAPPEND command failed. Printing messages' headers for debugging purpose:\r\n");
+                    for (int i = 0; i < mailMessages.length; i++) {
+                        sb.append("----------------------------------------------------\r\n\r\n");
+                        sb.append(i + 1).append(". message's header:\r\n");
+                        sb.append(mailMessages[i].getHeaders().toString());
+                        sb.append("----------------------------------------------------\r\n\r\n");
+                    }
+                    LOG.debug(sb.toString());
+                }
+            }
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
     }
