@@ -282,7 +282,7 @@ public final class IMAPException extends MIMEMailException {
          */
         READ_ONLY_FOLDER(MIMEMailException.Code.READ_ONLY_FOLDER),
         /**
-         * Connection was refused or timed out while attempting to connect to remote server %1$s for user %1$s
+         * Connect error: Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
          */
         CONNECT_ERROR(MIMEMailException.Code.CONNECT_ERROR),
         /**
