@@ -570,6 +570,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Receive message iterator
                  */
+                final int accountID = mailInterface.getAccountID();
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
                 if (threadSort) {
                     it = mailInterface.getAllThreadedMessages(folderId, columns, fromToIndices);
                     final int size = it.size();
@@ -582,14 +585,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         } else {
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(
-                                    ja,
-                                    mail,
-                                    mail.getThreadLevel(),
-                                    false,
-                                    mailInterface.getAccountID(),
-                                    session.getUserId(),
-                                    session.getContextId());
+                                writer.writeField(ja, mail, mail.getThreadLevel(), false, accountID, userId, contextId);
                             }
                         }
                         jsonWriter.value(ja);
@@ -620,14 +616,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         } else {
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(
-                                    ja,
-                                    mail,
-                                    0,
-                                    false,
-                                    mailInterface.getAccountID(),
-                                    session.getUserId(),
-                                    session.getContextId());
+                                writer.writeField(ja, mail, 0, false, accountID, userId, contextId);
                             }
                         }
                         jsonWriter.value(ja);
@@ -1178,11 +1167,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
                 it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns, limit == ParamContainer.NOT_FOUND ? -1 : limit);
                 final int size = it.size();
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
                 for (int i = 0; i < size; i++) {
                     final MailMessage mail = it.next();
                     final JSONArray ja = new JSONArray();
                     for (final MailFieldWriter writer : writers) {
-                        writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), session.getUserId(), session.getContextId());
+                        writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                     }
                     jsonWriter.value(ja);
                 }
@@ -2110,6 +2101,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Receive message iterator
                      */
+                    final int accountID = mailInterface.getAccountID();
+                    final int userId = session.getUserId();
+                    final int contextId = session.getContextId();
                     if (threadSort) {
                         it = mailInterface.getThreadedMessages(folderId, null, searchCols, searchPats, true, columns);
                         final int size = it.size();
@@ -2117,14 +2111,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final MailMessage mail = it.next();
                             final JSONArray arr = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(
-                                    arr,
-                                    mail,
-                                    0,
-                                    false,
-                                    mailInterface.getAccountID(),
-                                    session.getUserId(),
-                                    session.getContextId());
+                                writer.writeField(arr, mail, 0, false, accountID, userId, contextId);
                             }
                             jsonWriter.value(arr);
                         }
@@ -2146,14 +2133,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final MailMessage mail = it.next();
                             final JSONArray arr = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(
-                                    arr,
-                                    mail,
-                                    0,
-                                    false,
-                                    mailInterface.getAccountID(),
-                                    session.getUserId(),
-                                    session.getContextId());
+                                writer.writeField(arr, mail, 0, false, accountID, userId, contextId);
                             }
                             jsonWriter.value(arr);
                         }
@@ -2267,18 +2247,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                             entry.getKey(),
                             list.toArray(new String[list.size()]),
                             columns);
+                        final int userId = session.getUserId();
+                        final int accountID = mailInterface.getAccountID();
+                        final int contextId = session.getContextId();
                         for (int i = 0; i < mails.length; i++) {
                             if (mails[i] != null) {
                                 final JSONArray ja = new JSONArray();
                                 for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(
-                                        ja,
-                                        mails[i],
-                                        0,
-                                        false,
-                                        mailInterface.getAccountID(),
-                                        session.getUserId(),
-                                        session.getContextId());
+                                    writers[j].writeField(ja, mails[i], 0, false, accountID, userId, contextId);
                                 }
                                 jsonWriter.value(ja);
                             }

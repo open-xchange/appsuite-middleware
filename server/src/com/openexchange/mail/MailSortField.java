@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link MailSortField} - An enumeration of sortable mail list fields
+ * {@link MailSortField} - An enumeration of sortable mail list fields.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -95,6 +95,11 @@ public enum MailSortField {
      * Flag \SEEN
      */
     FLAG_SEEN(MailListField.FLAG_SEEN);
+
+//    /**
+//     * Account name
+//     */
+//    ACCOUNT_NAME(MailListField.ACCOUNT_NAME);
 
     private final int field;
 

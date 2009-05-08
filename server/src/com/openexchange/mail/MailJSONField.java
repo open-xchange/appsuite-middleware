@@ -202,7 +202,11 @@ public enum MailJSONField {
     /**
      * modified
      */
-    MODIFIED("modified");
+    MODIFIED("modified"),
+    /**
+     * Account name
+     */
+    ACCOUNT_NAME("account_name");
 
     private final String key;
 

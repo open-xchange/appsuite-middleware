@@ -157,7 +157,11 @@ public enum MailListField {
     /**
      * Deleted count
      */
-    DELETED(FolderObject.DELETED, MailJSONField.DELETED.getKey());
+    DELETED(FolderObject.DELETED, MailJSONField.DELETED.getKey()),
+    /**
+     * Account name
+     */
+    ACCOUNT_NAME(652, MailJSONField.ACCOUNT_NAME.getKey());
 
     private final int field;
 
@@ -219,29 +223,33 @@ public enum MailListField {
     public static final MailListField getField(final int field) {
         return FIELDS_MAP.get(Integer.valueOf(field));
     }
-    
+
     /**
      * Returns all field values as an array of integers.
+     * 
      * @return
      */
-    public static final int[] getAllFields(){
-        int[] all = new int[values().length];
-        for(int i = 0; i < all.length; i++){
-            all[i] = values()[i].getField();
+    public static final int[] getAllFields() {
+        final MailListField[] values = values();
+        final int[] all = new int[values.length];
+        for (int i = 0; i < all.length; i++) {
+            all[i] = values[i].getField();
         }
         return all;
     }
-    
+
     /**
-     * gets a field by the JSON name
+     * Gets a field by the JSON name
+     * 
      * @param jsonName identifier
-     * @return MailListField identified by jsonName, null if not found 
+     * @return MailListField identified by jsonName, null if not found
      */
-    public static final MailListField getBy(String jsonName){
-        MailListField[] values = values();
-        for(MailListField field : values){
-            if( jsonName.equals( field.getKey() ) )
+    public static final MailListField getBy(final String jsonName) {
+        final MailListField[] values = values();
+        for (final MailListField field : values) {
+            if (jsonName.equals(field.getKey())) {
                 return field;
+            }
         }
         return null;
     }
