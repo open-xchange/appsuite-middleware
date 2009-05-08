@@ -162,6 +162,7 @@ public final class UnifiedINBOXMessageCopier {
         }
         // Proceed
         final String[] retval = new String[mailIds.length];
+        final String[] arr = new String[1];
         for (int i = 0; i < mailIds.length; i++) {
             tmp.setUIDString(mailIds[i]);
             // Check if accounts are equal...
@@ -170,18 +171,11 @@ public final class UnifiedINBOXMessageCopier {
                 mailAccess.connect();
                 try {
                     final String realSource = UnifiedINBOXUtility.determineAccountFullname(mailAccess, sourceFolder);
+                    arr[0] = tmp.getId();
                     if (move) {
-                        retval[i] = mailAccess.getMessageStorage().moveMessages(
-                            realSource,
-                            destFullname,
-                            new String[] { tmp.getId() },
-                            fast)[0];
+                        retval[i] = mailAccess.getMessageStorage().moveMessages(realSource, destFullname, arr, fast)[0];
                     } else {
-                        retval[i] = mailAccess.getMessageStorage().copyMessages(
-                            realSource,
-                            destFullname,
-                            new String[] { tmp.getId() },
-                            fast)[0];
+                        retval[i] = mailAccess.getMessageStorage().copyMessages(realSource, destFullname, arr, fast)[0];
                     }
                 } finally {
                     mailAccess.close(true);

@@ -89,6 +89,8 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
+
     /**
      * Serial version UID
      */
@@ -302,11 +304,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (final MailAccount mailAccount : accounts) {
                 // Ignore the mail account denoting this Unified INBOX account
                 if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                    boolean close = false;
+                    final MailAccess<?, ?> mailAccess;
                     try {
+                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                         mailAccess.connect();
-                        close = true;
+                    } catch (final MailException e) {
+                        LOG.error(e.getMessage(), e);
+                        continue;
+                    }
+                    try {
                         // Get real fullname
                         final String fn = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
                         // Check if denoted account has such a default folder
@@ -326,9 +332,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             }
                         }
                     } finally {
-                        if (close) {
-                            mailAccess.close(true);
-                        }
+                        mailAccess.close(true);
                     }
                 }
             }
@@ -374,11 +378,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (final MailAccount mailAccount : accounts) {
                 // Ignore the mail account denoting this Unified INBOX account
                 if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                    boolean close = false;
+                    final MailAccess<?, ?> mailAccess;
                     try {
+                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                         mailAccess.connect();
-                        close = true;
+                    } catch (final MailException e) {
+                        LOG.error(e.getMessage(), e);
+                        continue;
+                    }
+                    try {
                         // Get real fullname
                         final String fn = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
                         // Check if denoted account has such a default folder
@@ -397,9 +405,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             }
                         }
                     } finally {
-                        if (close) {
-                            mailAccess.close(true);
-                        }
+                        mailAccess.close(true);
                     }
                 }
             }

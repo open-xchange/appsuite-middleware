@@ -72,6 +72,8 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
  */
 public final class UnifiedINBOXFolderConverter {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class);
+
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
     static {
@@ -180,11 +182,15 @@ public final class UnifiedINBOXFolderConverter {
         int newCount = 0;
         for (final MailAccount mailAccount : accounts) {
             if (accountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                boolean close = false;
+                final MailAccess<?, ?> mailAccess;
                 try {
+                    mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                     mailAccess.connect();
-                    close = true;
+                } catch (final MailException e) {
+                    LOG.error(e.getMessage(), e);
+                    continue;
+                }
+                try {
                     final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
                     // Check if account fullname is not null
                     if (null != accountFullname) {
@@ -198,9 +204,7 @@ public final class UnifiedINBOXFolderConverter {
                         retval = true;
                     }
                 } finally {
-                    if (close) {
-                        mailAccess.close(true);
-                    }
+                    mailAccess.close(true);
                 }
             }
         }
