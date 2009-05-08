@@ -55,8 +55,13 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -69,7 +74,7 @@ public final class IMAPCapabilityAndGreetingCache {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class);
 
-    private static Map<InetSocketAddress, CapabilityAndGreeting> MAP;
+    private static ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> MAP;
 
     /**
      * Initializes a new {@link IMAPCapabilityAndGreetingCache}.
@@ -83,10 +88,10 @@ public final class IMAPCapabilityAndGreetingCache {
      */
     public static void init() {
         if (MAP == null) {
-            MAP = new ConcurrentHashMap<InetSocketAddress, CapabilityAndGreeting>();
+            MAP = new ConcurrentHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
             // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
             try {
-                putCAG(new InetSocketAddress("imap.googlemail.com", 993), true).getCapability();
+                getCapabilityAndGreeting(new InetSocketAddress("imap.googlemail.com", 993), true);
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -120,12 +125,7 @@ public final class IMAPCapabilityAndGreetingCache {
      * @throws IOException If an I/O error occurs
      */
     public static String getCapability(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        final InetSocketAddress key = new InetSocketAddress(inetAddress, imapPort);
-        final CapabilityAndGreeting cag = MAP.get(key);
-        if (null != cag) {
-            return cag.getCapability();
-        }
-        return putCAG(key, isSecure).getCapability();
+        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure).getCapability();
     }
 
     /**
@@ -137,11 +137,7 @@ public final class IMAPCapabilityAndGreetingCache {
      * @throws IOException If an I/O error occurs
      */
     public static String getCapability(final InetSocketAddress address, final boolean isSecure) throws IOException {
-        final CapabilityAndGreeting cag = MAP.get(address);
-        if (null != cag) {
-            return cag.getCapability();
-        }
-        return putCAG(address, isSecure).getCapability();
+        return getCapabilityAndGreeting(address, isSecure).getCapability();
     }
 
     /**
@@ -154,12 +150,7 @@ public final class IMAPCapabilityAndGreetingCache {
      * @throws IOException If an I/O error occurs
      */
     public static String getGreeting(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        final InetSocketAddress key = new InetSocketAddress(inetAddress, imapPort);
-        final CapabilityAndGreeting cag = MAP.get(key);
-        if (null != cag) {
-            return cag.getGreeting();
-        }
-        return putCAG(key, isSecure).getGreeting();
+        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure).getGreeting();
     }
 
     /**
@@ -171,11 +162,7 @@ public final class IMAPCapabilityAndGreetingCache {
      * @throws IOException If an I/O error occurs
      */
     public static String getGreeting(final InetSocketAddress address, final boolean isSecure) throws IOException {
-        final CapabilityAndGreeting cag = MAP.get(address);
-        if (null != cag) {
-            return cag.getGreeting();
-        }
-        return putCAG(address, isSecure).getGreeting();
+        return getCapabilityAndGreeting(address, isSecure).getGreeting();
     }
 
     /**
@@ -188,146 +175,181 @@ public final class IMAPCapabilityAndGreetingCache {
      * @throws IOException If an I/O error occurs
      */
     public static String[] getCapabilityAndGreeting(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        final InetSocketAddress key = new InetSocketAddress(inetAddress, imapPort);
-        final CapabilityAndGreeting cag = MAP.get(key);
-        if (null != cag) {
-            return cag.toArray();
-        }
-        return putCAG(key, isSecure).toArray();
+        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure).toArray();
     }
 
-    private static CapabilityAndGreeting putCAG(final InetSocketAddress key, final boolean isSecure) throws IOException {
-        synchronized (IMAPCapabilityAndGreetingCache.class) {
-            CapabilityAndGreeting cag = MAP.get(key);
-            if (null == cag) {
-                Socket s = null;
+    private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure) throws IOException {
+        Future<CapabilityAndGreeting> f = MAP.get(address);
+        if (null == f) {
+            final FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(
+                address,
+                isSecure));
+            f = MAP.putIfAbsent(address, ft);
+            if (null == f) {
+                f = ft;
+                ft.run();
+            }
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw new IOException(e.getMessage());
+        } catch (final CancellationException e) {
+            throw new IOException(e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw ((IOException) cause);
+            }
+            if (cause instanceof RuntimeException) {
+                throw new IOException(e.getMessage());
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
+        }
+    }
+
+    private static final class CapabilityAndGreetingCallable implements Callable<CapabilityAndGreeting> {
+
+        private final InetSocketAddress key;
+
+        private final boolean isSecure;
+
+        public CapabilityAndGreetingCallable(final InetSocketAddress key, final boolean isSecure) {
+            super();
+            this.key = key;
+            this.isSecure = isSecure;
+        }
+
+        public CapabilityAndGreeting call() throws IOException {
+            Socket s = null;
+            try {
                 try {
-                    try {
-                        if (isSecure) {
-                            s = TrustAllSSLSocketFactory.getDefault().createSocket();
-                        } else {
-                            s = new Socket();
-                        }
-                        /*
-                         * Set connect timeout
-                         */
-                        if (IMAPConfig.getImapConnectionTimeout() > 0) {
-                            s.connect(key, IMAPConfig.getImapConnectionTimeout());
-                        } else {
-                            s.connect(key);
-                        }
-                        if (IMAPConfig.getImapTimeout() > 0) {
-                            /*
-                             * Define timeout for blocking operations
-                             */
-                            s.setSoTimeout(IMAPConfig.getImapTimeout());
-                        }
-                    } catch (final IOException e) {
-                        throw e;
+                    if (isSecure) {
+                        s = TrustAllSSLSocketFactory.getDefault().createSocket();
+                    } else {
+                        s = new Socket();
                     }
-                    final InputStream in = s.getInputStream();
-                    final OutputStream out = s.getOutputStream();
-                    final StringBuilder sb = new StringBuilder(512);
                     /*
-                     * Read IMAP server greeting on connect
+                     * Set connect timeout
                      */
-                    boolean skipLF = false;
-                    boolean eol = false;
-                    int i = -1;
-                    while (!eol && ((i = in.read()) != -1)) {
-                        final char c = (char) i;
-                        if (c == '\r') {
-                            eol = true;
-                            skipLF = true;
-                        } else if (c == '\n') {
-                            eol = true;
-                            skipLF = false;
-                        } else {
-                            sb.append(c);
-                        }
+                    if (IMAPConfig.getImapConnectionTimeout() > 0) {
+                        s.connect(key, IMAPConfig.getImapConnectionTimeout());
+                    } else {
+                        s.connect(key);
                     }
-                    final String greeting = sb.toString();
-                    sb.setLength(0);
-                    if (skipLF) {
+                    if (IMAPConfig.getImapTimeout() > 0) {
                         /*
-                         * Consume final LF
+                         * Define timeout for blocking operations
                          */
-                        i = in.read();
+                        s.setSoTimeout(IMAPConfig.getImapTimeout());
+                    }
+                } catch (final IOException e) {
+                    throw e;
+                }
+                final InputStream in = s.getInputStream();
+                final OutputStream out = s.getOutputStream();
+                final StringBuilder sb = new StringBuilder(512);
+                /*
+                 * Read IMAP server greeting on connect
+                 */
+                boolean skipLF = false;
+                boolean eol = false;
+                int i = -1;
+                while (!eol && ((i = in.read()) != -1)) {
+                    final char c = (char) i;
+                    if (c == '\r') {
+                        eol = true;
+                        skipLF = true;
+                    } else if (c == '\n') {
+                        eol = true;
                         skipLF = false;
-                    }
-                    /*
-                     * Request capabilities through CAPABILITY command
-                     */
-                    out.write("A10 CAPABILITY\r\n".getBytes());
-                    out.flush();
-                    /*
-                     * Read CAPABILITY response
-                     */
-                    final String capabilities;
-                    {
-                        boolean nextLine = false;
-                        NextLoop: do {
-                            eol = false;
-                            i = in.read();
-                            if (i != -1) {
-                                /*
-                                 * Character '*' (whose integer value is 42) indicates an untagged response; meaning subsequent response
-                                 * lines will follow
-                                 */
-                                nextLine = (i == 42);
-                                do {
-                                    final char c = (char) i;
-                                    if ((c == '\n') || (c == '\r')) {
-                                        if ((c == '\n') && skipLF) {
-                                            // Discard remaining LF
-                                            skipLF = false;
-                                            nextLine = true;
-                                            continue NextLoop;
-                                        }
-                                        if (c == '\r') {
-                                            skipLF = true;
-                                        }
-                                        eol = true;
-                                    } else {
-                                        sb.append(c);
-                                    }
-                                } while (!eol && ((i = in.read()) != -1));
-                            }
-                            if (nextLine) {
-                                sb.append('\n');
-                            }
-                        } while (nextLine);
-                        capabilities = sb.toString();
-                    }
-                    /*
-                     * Close connection through LOGOUT command
-                     */
-                    out.write("A11 LOGOUT\r\n".getBytes());
-                    out.flush();
-                    /*
-                     * Consume until socket closure
-                     */
-                    i = in.read();
-                    while (i != -1) {
-                        i = in.read();
-                    }
-                    /*
-                     * Create new CAG object
-                     */
-                    cag = new CapabilityAndGreeting(capabilities, greeting);
-                    MAP.put(key, cag);
-                } finally {
-                    if (s != null) {
-                        try {
-                            s.close();
-                        } catch (final IOException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                    } else {
+                        sb.append(c);
                     }
                 }
-                LOG.info(new StringBuilder("CAPBILITY response and greeting of IMAP server ").append(key).append(" successfully cached."));
+                final String greeting = sb.toString();
+                sb.setLength(0);
+                if (skipLF) {
+                    /*
+                     * Consume final LF
+                     */
+                    i = in.read();
+                    skipLF = false;
+                }
+                /*
+                 * Request capabilities through CAPABILITY command
+                 */
+                out.write("A10 CAPABILITY\r\n".getBytes());
+                out.flush();
+                /*
+                 * Read CAPABILITY response
+                 */
+                final String capabilities;
+                {
+                    boolean nextLine = false;
+                    NextLoop: do {
+                        eol = false;
+                        i = in.read();
+                        if (i != -1) {
+                            /*
+                             * Character '*' (whose integer value is 42) indicates an untagged response; meaning subsequent response lines
+                             * will follow
+                             */
+                            nextLine = (i == 42);
+                            do {
+                                final char c = (char) i;
+                                if ((c == '\n') || (c == '\r')) {
+                                    if ((c == '\n') && skipLF) {
+                                        // Discard remaining LF
+                                        skipLF = false;
+                                        nextLine = true;
+                                        continue NextLoop;
+                                    }
+                                    if (c == '\r') {
+                                        skipLF = true;
+                                    }
+                                    eol = true;
+                                } else {
+                                    sb.append(c);
+                                }
+                            } while (!eol && ((i = in.read()) != -1));
+                        }
+                        if (nextLine) {
+                            sb.append('\n');
+                        }
+                    } while (nextLine);
+                    capabilities = sb.toString();
+                }
+                /*
+                 * Close connection through LOGOUT command
+                 */
+                out.write("A11 LOGOUT\r\n".getBytes());
+                out.flush();
+                /*
+                 * Consume until socket closure
+                 */
+                i = in.read();
+                while (i != -1) {
+                    i = in.read();
+                }
+                /*
+                 * Create new CAG object
+                 */
+                return new CapabilityAndGreeting(capabilities, greeting);
+            } finally {
+                if (s != null) {
+                    try {
+                        s.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
             }
-            return cag;
         }
     }
 
