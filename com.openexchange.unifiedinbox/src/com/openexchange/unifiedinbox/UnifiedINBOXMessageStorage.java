@@ -274,6 +274,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             // Get message
             final MailMessage mail = mailAccess.getMessageStorage().getMessage(fa.getFullname(), mailId, markSeen);
             mail.loadContent();
+            mail.setFolder(fullname);
             return mail;
         } finally {
             if (close) {
@@ -348,7 +349,17 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             mailAccess.connect();
             close = true;
             // Get account's messages
-            return mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
+            final MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(
+                fa.getFullname(),
+                indexRange,
+                sortField,
+                order,
+                searchTerm,
+                fields);
+            for (int i = 0; i < mails.length; i++) {
+                mails[i].setFolder(fullname);
+            }
+            return mails;
         } finally {
             if (close) {
                 mailAccess.close(true);
@@ -418,7 +429,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             mailAccess.connect();
             close = true;
             // Get account's messages
-            return mailAccess.getMessageStorage().getUnreadMessages(fa.getFullname(), sortField, order, fields, limit);
+            final MailMessage[] mails = mailAccess.getMessageStorage().getUnreadMessages(fa.getFullname(), sortField, order, fields, limit);
+            for (int i = 0; i < mails.length; i++) {
+                mails[i].setFolder(fullname);
+            }
+            return mails;
         } finally {
             if (close) {
                 mailAccess.close(true);
