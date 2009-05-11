@@ -59,6 +59,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.kata.IdentitySource;
+import com.openexchange.ajax.mail.contenttypes.AlternativeStrategy;
+import com.openexchange.ajax.mail.contenttypes.FallbackStrategy;
+import com.openexchange.ajax.mail.contenttypes.MailTypeStrategy;
 import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
@@ -71,11 +74,37 @@ import com.openexchange.mail.MailListField;
  */
 public class TestMail implements IdentitySource<TestMail> {
 
+    public enum TestMailField {
+        MESSAGE("message");
+
+        private String fitnesse;
+
+        private TestMailField(String fitnesse) {
+            this.fitnesse = fitnesse;
+        }
+
+        public String toString() {
+            return fitnesse;
+        }
+
+        public static TestMailField getBy(String fitnesse) {
+            for (TestMailField field : values()) {
+                if (fitnesse.equals(field.fitnesse))
+                    return field;
+            }
+            return null;
+        }
+    }
+
     private List<String> from, to, cc, bcc;
+
+    private List<JSONObject> attachment;
 
     private String subject, body, contentType, folder, id;
 
     private int priority, flags, color;
+
+    private List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] { new AlternativeStrategy(), new FallbackStrategy() });
 
     public int getFlags() {
         return flags;
@@ -182,6 +211,14 @@ public class TestMail implements IdentitySource<TestMail> {
         return folder;
     }
 
+    public List<JSONObject> getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(List<JSONObject> attachment) {
+        this.attachment = attachment;
+    }
+
     public TestMail() {
     }
 
@@ -197,7 +234,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return new TestMail(obj);
     }
 
-    public void read(Map<String, String> map) {
+    public void read(Map<String, String> map) throws JSONException {
         Set<String> keys = map.keySet();
         for (String key : keys) {
             MailListField field = MailListField.getBy(key);
@@ -206,6 +243,7 @@ public class TestMail implements IdentitySource<TestMail> {
             setBy(field, map.get(key));
         }
         setBody(map.get("message"));
+        sanitize();
     }
 
     public void read(JSONObject json) throws JSONException {
@@ -249,60 +287,89 @@ public class TestMail implements IdentitySource<TestMail> {
             setFolder(json.getString(field));
         }
         // ints
-        field = "color_label";
+        field = MailJSONField.COLOR_LABEL.getKey();
         if (json.has(field)) {
             setColor(json.getInt(field));
         }
-        field = "flags";
+        field = MailJSONField.FLAGS.getKey();
         if (json.has(field)) {
             setFlags(json.getInt(field));
         }
-        field = "priority";
+        field = MailJSONField.PRIORITY.getKey();
         if (json.has(field)) {
             setPriority(json.getInt(field));
         }
+        // attachments
+        field = MailJSONField.ATTACHMENTS.getKey();
+        if (json.has(field)) {
+            JSONArray array = json.getJSONArray(field);
+            attachment = new LinkedList<JSONObject>();
+            for (int i = 0, size = array.length(); i < size; i++) {
+                attachment.add(array.getJSONObject(i));
+            }
+
+        }
+        sanitize();
     }
 
     public void read(int[] columns, JSONArray values) throws JSONException {
-        for (int i = 0; i < columns.length; i++) {
-            MailListField field = MailListField.getField(columns[i]);
+        for (int index = 0; index < columns.length; index++) {
+            MailListField field = MailListField.getField(columns[index]);
             // lists
             if (field == MailListField.FROM) {
-                setFrom(j2l(values.getJSONArray(i)));
+                setFrom(j2l(values.getJSONArray(index)));
             }
             if (field == MailListField.TO) {
-                setTo(j2l(values.getJSONArray(i)));
+                setTo(j2l(values.getJSONArray(index)));
             }
             if (field == MailListField.CC) {
-                setCc(j2l(values.getJSONArray(i)));
+                setCc(j2l(values.getJSONArray(index)));
             }
             if (field == MailListField.BCC) {
-                setBcc(j2l(values.getJSONArray(i)));
+                setBcc(j2l(values.getJSONArray(index)));
             }
             // strings
             if (field == MailListField.SUBJECT) {
-                setSubject(values.getString(i));
+                setSubject(values.getString(index));
             }
             // no content_type
             // no content
             if (field == MailListField.ID) {
-                setId(values.getString(i));
+                setId(values.getString(index));
             }
             // difference between folder and folder_id?
             if (field == MailListField.FOLDER) {
-                setFolder(values.getString(i));
+                setFolder(values.getString(index));
             }
             // ints
             if (field == MailListField.COLOR_LABEL) {
-                setColor(values.getInt(i));
+                setColor(values.getInt(index));
             }
             if (field == MailListField.FLAGS) {
-                setFlags(values.getInt(i));
+                setFlags(values.getInt(index));
             }
             if (field == MailListField.PRIORITY) {
-                setPriority(values.getInt(i));
+                setPriority(values.getInt(index));
+            }
+            // attachment
+            if (field == MailListField.ATTACHMENT) {
+                if (values.getBoolean(index)) {
+                    JSONArray array = values.getJSONArray(index);
+                    attachment = new LinkedList<JSONObject>();
+                    for (int secondIndex = 0, size = array.length(); secondIndex < size; secondIndex++) {
+                        attachment.add(array.getJSONObject(secondIndex));
+                    }
+                }
             }
         }
+        sanitize();
+    }
+
+    public Object getBy(TestMailField field) {
+        if (field == TestMailField.MESSAGE)
+            return getBody();
+
+        return null;
     }
 
     public Object getBy(MailListField field) {
@@ -345,18 +412,24 @@ public class TestMail implements IdentitySource<TestMail> {
         return null;
     }
 
+    public void setBy(TestMailField field, Object value) {
+        if (field == TestMailField.MESSAGE) {
+            setBody((String) value);
+        }
+    }
+
     public void setBy(MailListField field, Object value) {
         if (field == MailListField.FROM) {
-            setFrom( addresses2list((String) value) );
+            setFrom(addresses2list((String) value));
         }
         if (field == MailListField.TO) {
-            setTo( addresses2list((String) value) );
+            setTo(addresses2list((String) value));
         }
         if (field == MailListField.CC) {
-            setCc( addresses2list((String) value) );
+            setCc(addresses2list((String) value));
         }
         if (field == MailListField.BCC) {
-            setBcc( addresses2list((String) value) );
+            setBcc(addresses2list((String) value));
         }
         // strings
         if (field == MailListField.SUBJECT) {
@@ -389,19 +462,23 @@ public class TestMail implements IdentitySource<TestMail> {
     protected List<String> j2l(JSONArray array) throws JSONException {
         return JSON.jsonArray2list(array);
     }
-    
-    protected List<String> addresses2list(String mailAddresses){
-        return Arrays.asList(mailAddresses.split(",") );
+
+    protected List<String> addresses2list(String mailAddresses) {
+        return Arrays.asList(mailAddresses.split(","));
     }
-    
 
     /**
      * Makes this mail look properly (e.g. attaching the content as attachment if it is of content_type &quot;alternative&quot;
      * 
      * @return
+     * @throws JSONException
      */
-    public TestMail sanitize() {
-        return null;
+    public void sanitize() throws JSONException {
+        for (MailTypeStrategy strategy : strategies) {
+            if (strategy.isResponsibleFor(this)) {
+                strategy.sanitize(this);
+            }
+        }
     }
 
     /**
