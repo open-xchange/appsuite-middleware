@@ -55,8 +55,10 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -66,7 +68,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
@@ -74,6 +76,7 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.search.IMAPSearch;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
@@ -94,8 +97,14 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.user.UserService;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -133,6 +142,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     private static final String STR_MSEC = "msec";
 
+    /*-
+     * Members
+     */
+
+    private MailAccount mailAccount;
+
+    private Locale locale;
+
     /**
      * Initializes a new {@link IMAPMessageStorage}.
      * 
@@ -145,26 +162,57 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         super(imapStore, imapAccess, session);
     }
 
+    private MailAccount getMailAccount() throws MailException {
+        if (mailAccount == null) {
+            try {
+                final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+                    MailAccountStorageService.class,
+                    true);
+                mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            } catch (final ServiceException e) {
+                throw new MailException(e);
+            } catch (final MailAccountException e) {
+                throw new MailException(e);
+            }
+        }
+        return mailAccount;
+    }
+
+    private Locale getLocale() throws MailException {
+        if (locale == null) {
+            try {
+                final UserService userService = IMAPServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+                locale = userService.getUser(session.getUserId(), ctx).getLocale();
+            } catch (final ServiceException e) {
+                throw new MailException(e);
+            } catch (final UserException e) {
+                throw new MailException(e);
+            }
+        }
+        return locale;
+    }
+
     @Override
     public MailMessage[] getMessagesLong(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
+        final MailFields fieldSet = new MailFields(fields);
         final boolean body;
-        {
-            final MailFields fieldSet = new MailFields(fields);
-            /*
-             * Check for field FULL
-             */
-            if (fieldSet.contains(MailField.FULL)) {
-                final MailMessage[] mails = new MailMessage[mailIds.length];
-                for (int j = 0; j < mails.length; j++) {
-                    mails[j] = getMessageLong(fullname, mailIds[j], false);
-                }
-                return mails;
+        /*
+         * Check for field FULL
+         */
+        if (fieldSet.contains(MailField.FULL)) {
+            final MailMessage[] mails = new MailMessage[mailIds.length];
+            for (int j = 0; j < mails.length; j++) {
+                mails[j] = getMessageLong(fullname, mailIds[j], false);
             }
-            body = fieldSet.contains(MailField.BODY) || fieldSet.contains(MailField.FULL);
+            return mails;
         }
+        /*
+         * Get messages with given fields filled
+         */
+        body = fieldSet.contains(MailField.BODY) || fieldSet.contains(MailField.FULL);
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
             /*
@@ -196,7 +244,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (lastPos < pos) {
                 fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
             }
-            return MIMEMessageConverter.convertMessages(messages, fields, body);
+            final MailMessage[] mails = MIMEMessageConverter.convertMessages(messages, fields, body);
+            if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
+                setAccountInfo(mails);
+            }
+            return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -270,6 +322,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
                 }
             }
+            setAccountInfo(mail);
             return mail;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
@@ -307,37 +360,111 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     return EMPTY_RETVAL;
                 }
             }
+            MailMessage[] mails = null;
             final MailFields usedFields = new MailFields();
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage.getStorageUser(
-                session.getUserId(),
-                ctx).getLocale(), usedFields, imapConfig);
-            if (indexRange != null) {
-                final int fromIndex = indexRange.start;
-                int toIndex = indexRange.end;
-                if ((msgs == null) || (msgs.length == 0)) {
-                    return EMPTY_RETVAL;
-                }
-                if ((fromIndex) > msgs.length) {
+            Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, getLocale(), usedFields, imapConfig);
+            if (null != msgs) {
+                /*
+                 * Sort was performed on IMAP server
+                 */
+                if (indexRange != null) {
+                    final int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    if (msgs.length == 0) {
+                        return EMPTY_RETVAL;
+                    }
+                    if ((fromIndex) > msgs.length) {
+                        /*
+                         * Return empty iterator if start is out of range
+                         */
+                        return EMPTY_RETVAL;
+                    }
                     /*
-                     * Return empty iterator if start is out of range
+                     * Reset end index if out of range
                      */
-                    return EMPTY_RETVAL;
+                    if (toIndex >= msgs.length) {
+                        toIndex = msgs.length;
+                    }
+                    final Message[] tmp = msgs;
+                    final int retvalLength = toIndex - fromIndex;
+                    msgs = new Message[retvalLength];
+                    System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
+                }
+                mails = MIMEMessageConverter.convertMessages(
+                    msgs,
+                    usedFields.toArray(),
+                    usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
+                if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                    setAccountInfo(mails);
+                }
+            } else {
+                /*
+                 * Do application sort
+                 */
+                final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
+                final MailField sort = MailField.toField(sortField.getListField());
+                final FetchProfile fetchProfile = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
+                usedFields.addAll(fields);
+                usedFields.add(sort);
+                final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+                final long start = System.currentTimeMillis();
+                if (filter == null) {
+                    msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                } else {
+                    msgs = new FetchIMAPCommand(
+                        imapFolder,
+                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                        filter,
+                        fetchProfile,
+                        false,
+                        false,
+                        body).doCommand();
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(
+                        (System.currentTimeMillis() - start)).append("msec").toString());
+                }
+                if ((msgs == null) || (msgs.length == 0)) {
+                    return new MailMessage[0];
+                }
+                mails = MIMEMessageConverter.convertMessages(msgs, fields, body);
+                if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                    setAccountInfo(mails);
                 }
                 /*
-                 * Reset end index if out of range
+                 * Perform sort on temporary list
                  */
-                if (toIndex >= msgs.length) {
-                    toIndex = msgs.length;
+                final List<MailMessage> msgList = Arrays.asList(mails);
+                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+                mails = msgList.toArray(mails);
+                /*
+                 * Get proper sub-array if an index range is specified
+                 */
+                if (indexRange != null) {
+                    final int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    if ((mails == null) || (msgs.length == 0)) {
+                        return EMPTY_RETVAL;
+                    }
+                    if ((fromIndex) > mails.length) {
+                        /*
+                         * Return empty iterator if start is out of range
+                         */
+                        return EMPTY_RETVAL;
+                    }
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= mails.length) {
+                        toIndex = mails.length;
+                    }
+                    final MailMessage[] tmp = mails;
+                    final int retvalLength = toIndex - fromIndex;
+                    mails = new MailMessage[retvalLength];
+                    System.arraycopy(tmp, fromIndex, mails, 0, retvalLength);
                 }
-                final Message[] tmp = msgs;
-                final int retvalLength = toIndex - fromIndex;
-                msgs = new Message[retvalLength];
-                System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
             }
-            return MIMEMessageConverter.convertMessages(
-                msgs,
-                usedFields.toArray(),
-                usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
+            return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -438,7 +565,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 msgs = new ExtendedMimeMessage[retvalLength];
                 System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
             }
-            return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
+            final MailMessage[] mails = MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
+            if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                setAccountInfo(mails);
+            }
+            return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -448,26 +579,38 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     public MailMessage[] getUnreadMessages(final String fullname, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-            /*
-             * Get ( & fetch) new messages
-             */
-            final long start = System.currentTimeMillis();
-            final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(
-                imapFolder,
-                fields,
-                sortField,
-                order,
-                UserStorage.getStorageUser(session.getUserId(), ctx).getLocale());
-            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            if ((msgs == null) || (msgs.length == 0) || limit == 0) {
-                return EMPTY_RETVAL;
-            } else if (limit > 0) {
-                final int newLength = ((limit <= msgs.length) ? limit : msgs.length);
-                final Message[] retval = new Message[newLength];
-                System.arraycopy(msgs, 0, retval, 0, newLength);
-                return MIMEMessageConverter.convertMessages(retval, fields);
+            MailMessage[] mails;
+            {
+                /*
+                 * Get ( & fetch) new messages
+                 */
+                final long start = System.currentTimeMillis();
+                final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                if ((msgs == null) || (msgs.length == 0) || limit == 0) {
+                    return EMPTY_RETVAL;
+                }
+                /*
+                 * Sort
+                 */
+                mails = MIMEMessageConverter.convertMessages(msgs, fields);
+                if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
+                    setAccountInfo(mails);
+                }
+                final List<MailMessage> msgList = Arrays.asList(mails);
+                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+                mails = msgList.toArray(mails);
             }
-            return MIMEMessageConverter.convertMessages(msgs, fields);
+            /*
+             * Check for limit
+             */
+            if (limit > 0) {
+                final int newLength = ((limit <= mails.length) ? limit : mails.length);
+                final MailMessage[] retval = new MailMessage[newLength];
+                System.arraycopy(mails, 0, retval, 0, newLength);
+                mails = retval;
+            }
+            return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -1437,4 +1580,34 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     * Sets account ID and name in given instance of {@link MailMessage}.
+     * 
+     * @param mailMessages The {@link MailMessage} instance
+     * @throws MailException If mail account cannot be obtained
+     */
+    private void setAccountInfo(final MailMessage mailMessage) throws MailException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        mailMessage.setAccountId(id);
+        mailMessage.setAccountName(name);
+    }
+
+    /**
+     * Sets account ID and name in given instances of {@link MailMessage}.
+     * 
+     * @param mailMessages The {@link MailMessage} instances
+     * @throws MailException If mail account cannot be obtained
+     */
+    private void setAccountInfo(final MailMessage[] mailMessages) throws MailException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        for (int i = 0; i < mailMessages.length; i++) {
+            final MailMessage mailMessage = mailMessages[i];
+            mailMessage.setAccountId(id);
+            mailMessage.setAccountName(name);
+        }
+    }
 }

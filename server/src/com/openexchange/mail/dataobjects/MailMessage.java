@@ -290,119 +290,133 @@ public abstract class MailMessage extends MailPart {
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
 
     /**
-     * The flags
+     * The flags.
      */
     private int flags;
 
     private boolean b_flags;
 
     /**
-     * The previous \Seen state
+     * The previous \Seen state.
      */
     private boolean prevSeen;
 
     private boolean b_prevSeen;
 
     /**
-     * From addresses
+     * From addresses.
      */
     private HashSet<InternetAddress> from;
 
     private boolean b_from;
 
     /**
-     * To addresses
+     * To addresses.
      */
     private HashSet<InternetAddress> to;
 
     private boolean b_to;
 
     /**
-     * Cc addresses
+     * Cc addresses.
      */
     private HashSet<InternetAddress> cc;
 
     private boolean b_cc;
 
     /**
-     * Bcc addresses
+     * Bcc addresses.
      */
     private HashSet<InternetAddress> bcc;
 
     private boolean b_bcc;
 
     /**
-     * The level in a communication thread
+     * The level in a communication thread.
      */
     private int threadLevel;
 
     private boolean b_threadLevel;
 
     /**
-     * The subject
+     * The subject.
      */
     private String subject;
 
     private boolean b_subject;
 
     /**
-     * The sent date (the <code>Date</code> header)
+     * The sent date (the <code>Date</code> header).
      */
     private Date sentDate;
 
     private boolean b_sentDate;
 
     /**
-     * The (internal) received date
+     * The (internal) received date.
      */
     private Date receivedDate;
 
     private boolean b_receivedDate;
 
     /**
-     * User flags
+     * User flags.
      */
     private HashSet<HeaderName> userFlags;
 
     private boolean b_userFlags;
 
     /**
-     * The color label (set through an user flag)
+     * The color label (set through an user flag).
      */
     private int colorLabel = COLOR_LABEL_NONE;
 
     private boolean b_colorLabel;
 
     /**
-     * The priority (the <code>X-Priority</code> header)
+     * The priority (the <code>X-Priority</code> header).
      */
     private int priority = PRIORITY_NORMAL;
 
     private boolean b_priority;
 
     /**
-     * The <code>Disposition-Notification-To</code> header
+     * The <code>Disposition-Notification-To</code> header.
      */
     private InternetAddress dispositionNotification;
 
     private boolean b_dispositionNotification;
 
     /**
-     * The message folder fullname/ID
+     * The message folder fullname/ID.
      */
     private String folder;
 
     private boolean b_folder;
 
     /**
-     * Whether an attachment is present or not
+     * The message's account ID.
+     */
+    private int accountId;
+
+    private boolean b_accountId;
+
+    /**
+     * The message account's name.
+     */
+    private String accountName;
+
+    private boolean b_accountName;
+
+    /**
+     * Whether an attachment is present or not.
      */
     private boolean hasAttachment;
 
     private boolean b_hasAttachment;
 
     /**
-     * Whether a VCard should be appended or not
+     * Whether a VCard should be appended or not.
      */
     private boolean appendVCard;
 
@@ -416,7 +430,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Adds an email address to <i>From</i>
+     * Adds an email address to <i>From</i>.
      * 
      * @param addr The address
      */
@@ -432,7 +446,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Adds email addresses to <i>From</i>
+     * Adds email addresses to <i>From</i>.
      * 
      * @param addrs The addresses
      */
@@ -455,7 +469,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Removes the <i>From</i> addresses
+     * Removes the <i>From</i> addresses.
      */
     public void removeFrom() {
         from = null;
@@ -464,7 +478,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return The <i>From</i> addresses
+     * @return The <i>From</i> addresses.
      */
     public InternetAddress[] getFrom() {
         if (!b_from) {
@@ -483,7 +497,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Adds an email address to <i>To</i>
+     * Adds an email address to <i>To</i>.
      * 
      * @param addr The address
      */
@@ -1211,6 +1225,74 @@ public abstract class MailMessage extends MailPart {
     public void setFolder(final String folder) {
         this.folder = folder;
         b_folder = true;
+    }
+
+    /**
+     * Gets the account ID.
+     * 
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * @return <code>true</code> if account ID is set; otherwise <code>false</code>
+     */
+    public boolean containsAccountId() {
+        return b_accountId;
+    }
+
+    /**
+     * Removes the account ID.
+     */
+    public void removeAccountId() {
+        accountId = 0;
+        b_accountId = false;
+    }
+
+    /**
+     * Sets the account ID.
+     * 
+     * @param accountId The account ID
+     */
+    public void setAccountId(final int accountId) {
+        this.accountId = accountId;
+        b_accountId = true;
+    }
+
+    /**
+     * Gets the account Name
+     * 
+     * @return The account name
+     */
+    public String getAccountName() {
+        return accountName;
+    }
+
+    /**
+     * @return <code>true</code> if account name is set; otherwise <code>false</code>
+     */
+    public boolean containsAccountName() {
+        return b_accountName;
+    }
+
+    /**
+     * Removes the account name.
+     */
+    public void removeAccountName() {
+        accountName = null;
+        b_accountName = false;
+    }
+
+    /**
+     * Sets the account Name
+     * 
+     * @param accountName The account name
+     */
+    public void setAccountName(final String accountName) {
+        this.accountName = accountName;
+        b_accountName = true;
     }
 
     /**

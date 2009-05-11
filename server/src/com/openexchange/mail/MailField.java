@@ -147,6 +147,11 @@ public enum MailField {
      */
     COLOR_LABEL(MailListField.COLOR_LABEL),
     /**
+     * Account name<br>
+     * <b>[low cost]</b>
+     */
+    ACCOUNT_NAME(MailListField.ACCOUNT_NAME),
+    /**
      * To peek the mail body (\Seen flag is left unchanged)<br>
      * <b>[high cost]</b>
      */

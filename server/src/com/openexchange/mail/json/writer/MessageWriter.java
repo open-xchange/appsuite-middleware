@@ -79,9 +79,6 @@ import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -486,21 +483,14 @@ public final class MessageWriter {
         WRITERS.put(MailListField.ACCOUNT_NAME, new MailFieldWriter() {
 
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws MailException {
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class);
-                if (null != storageService) {
-                    try {
-                        final String name = storageService.getMailAccount(accountId, user, cid).getName();
-                        if (withKey) {
-                            ((JSONObject) jsonContainer).put(MailJSONField.ACCOUNT_NAME.getKey(), name);
-                        } else {
-                            ((JSONArray) jsonContainer).put(name);
-                        }
-                    } catch (final MailAccountException e) {
-                        throw new MailException(e);
-                    } catch (final JSONException e) {
-                        throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                try {
+                    if (withKey) {
+                        ((JSONObject) jsonContainer).put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
+                    } else {
+                        ((JSONArray) jsonContainer).put(mail.getAccountName());
                     }
+                } catch (final JSONException e) {
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });

@@ -183,6 +183,7 @@ public final class IMAPDefaultFolderChecker {
                         sb.append("\r\n");
                         LOG.debug(sb.toString());
                     }
+                    final long start = System.currentTimeMillis();
                     /*
                      * Get INBOX folder
                      */
@@ -281,6 +282,10 @@ public final class IMAPDefaultFolderChecker {
                             final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
                             setDefaultMailFolder(i, checkDefaultFolder(prefixAndName[0], prefixAndName[1], type, 1, tmp));
                         }
+                    }
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
+                            System.currentTimeMillis() - start).append("msec").toString());
                     }
                     setDefaultFoldersChecked(true);
                 } catch (final MessagingException e) {

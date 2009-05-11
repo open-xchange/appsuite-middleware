@@ -226,6 +226,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
                 jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
+                jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
             }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());

@@ -145,8 +145,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static String getCompareStringFromAddress(final Address addr, final Locale locale) {
         if (addr instanceof PlainTextAddress) {
-            final PlainTextAddress da1 = (PlainTextAddress) addr;
-            return da1.getAddress().toLowerCase(Locale.ENGLISH);
+            return ((PlainTextAddress) addr).getAddress().toLowerCase(Locale.ENGLISH);
         } else if (addr instanceof InternetAddress) {
             final InternetAddress ia1 = (InternetAddress) addr;
             final String personal = ia1.getPersonal();
@@ -273,9 +272,18 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             return new LocalizedFieldComparer(locale) {
 
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                    final String sub1 = msg1.getSubject() == null ? STR_EMPTY : msg1.getSubject();
-                    final String sub2 = msg2.getSubject() == null ? STR_EMPTY : msg2.getSubject();
-                    return collator.compare(sub1, sub2);
+                    final String sub1 = msg1.getSubject();
+                    final String sub2 = msg2.getSubject();
+                    return collator.compare(sub1 == null ? STR_EMPTY : sub1, sub2 == null ? STR_EMPTY : sub2);
+                }
+            };
+        case ACCOUNT_NAME:
+            return new LocalizedFieldComparer(locale) {
+
+                public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                    final String name1 = msg1.getAccountName();
+                    final String name2 = msg2.getAccountName();
+                    return collator.compare(name1 == null ? STR_EMPTY : name1, name2 == null ? STR_EMPTY : name2);
                 }
             };
         default:

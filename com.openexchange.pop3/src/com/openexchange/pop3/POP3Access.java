@@ -387,7 +387,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public POP3MessageStorage getMessageStorage() throws MailException {
         if (connected) {
             if (null == messageStorage) {
-                messageStorage = new POP3MessageStorage(pop3Storage);
+                messageStorage = new POP3MessageStorage(pop3Storage, accountId, session);
             }
             return messageStorage;
         }

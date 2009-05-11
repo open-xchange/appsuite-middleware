@@ -49,9 +49,13 @@
 
 package com.openexchange.pop3;
 
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -60,7 +64,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
 
 /**
  * {@link POP3MessageStorage} - The POP3 message storage implementation.
@@ -80,15 +90,41 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     private final IMailMessageStorage pop3MessageStorage;
 
+    private final int accountId;
+
+    private final Session session;
+
+    private MailAccount mailAccount;
+
     /**
      * Initializes a new {@link POP3MessageStorage}.
      * 
      * @param pop3Storage The POP3 storage
+     * @param accountId The account ID
+     * @param session The session
      * @throws MailException If initialization fails
      */
-    public POP3MessageStorage(final POP3Storage pop3Storage) throws MailException {
+    public POP3MessageStorage(final POP3Storage pop3Storage, final int accountId, final Session session) throws MailException {
         super();
         this.pop3MessageStorage = pop3Storage.getMessageStorage();
+        this.accountId = accountId;
+        this.session = session;
+    }
+
+    private MailAccount getMailAccount() throws MailException {
+        if (mailAccount == null) {
+            try {
+                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
+                    MailAccountStorageService.class,
+                    true);
+                mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            } catch (final ServiceException e) {
+                throw new MailException(e);
+            } catch (final MailAccountException e) {
+                throw new MailException(e);
+            }
+        }
+        return mailAccount;
     }
 
     @Override
@@ -113,7 +149,19 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
-        return pop3MessageStorage.getAllMessages(folder, indexRange, sortField, order, fields);
+        final MailMessage[] mails = pop3MessageStorage.getAllMessages(folder, indexRange, sortField, order, fields);
+        /*
+         * Check for account name in used fields
+         */
+        final MailFields mailFields = new MailFields(fields);
+        final MailField sort = MailField.toField(sortField.getListField());
+        if (null != sort) {
+            mailFields.add(sort);
+        }
+        if (mailFields.contains(MailField.ACCOUNT_NAME)) {
+            setAccountInfo(mails);
+        }
+        return mails;
     }
 
     @Override
@@ -128,22 +176,44 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
-        return pop3MessageStorage.getMessage(folder, mailId, markSeen);
+        final MailMessage mail = pop3MessageStorage.getMessage(folder, mailId, markSeen);
+        setAccountInfo(mail);
+        return mail;
     }
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
-        return pop3MessageStorage.getMessages(folder, mailIds, fields);
+        final MailMessage[] mails = pop3MessageStorage.getMessages(folder, mailIds, fields);
+        if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
+            setAccountInfo(mails);
+        }
+        return mails;
     }
 
     @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
-        return pop3MessageStorage.getThreadSortedMessages(folder, indexRange, searchTerm, fields);
+        final MailMessage[] mails = pop3MessageStorage.getThreadSortedMessages(folder, indexRange, searchTerm, fields);
+        if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
+            setAccountInfo(mails);
+        }
+        return mails;
     }
 
     @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
-        return pop3MessageStorage.getUnreadMessages(folder, sortField, order, fields, limit);
+        final MailMessage[] mails = pop3MessageStorage.getUnreadMessages(folder, sortField, order, fields, limit);
+        /*
+         * Check for account name in used fields
+         */
+        final MailFields mailFields = new MailFields(fields);
+        final MailField sort = MailField.toField(sortField.getListField());
+        if (null != sort) {
+            mailFields.add(sort);
+        }
+        if (mailFields.contains(MailField.ACCOUNT_NAME)) {
+            setAccountInfo(mails);
+        }
+        return mails;
     }
 
     @Override
@@ -158,7 +228,22 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
-        return pop3MessageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        final MailMessage[] mails = pop3MessageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        /*
+         * Check for account name in used fields
+         */
+        final Set<MailField> set = EnumSet.copyOf(Arrays.asList(fields));
+        final MailField sort = MailField.toField(sortField.getListField());
+        if (null != sort) {
+            set.add(sort);
+        }
+        if (null != searchTerm) {
+            searchTerm.addMailField(set);
+        }
+        if (set.contains(MailField.ACCOUNT_NAME)) {
+            setAccountInfo(mails);
+        }
+        return mails;
     }
 
     @Override
@@ -171,4 +256,34 @@ public final class POP3MessageStorage extends MailMessageStorage {
         pop3MessageStorage.updateMessageFlags(folder, mailIds, flags, set);
     }
 
+    /**
+     * Sets account ID and name in given instances of {@link MailMessage}.
+     * 
+     * @param mailMessages The {@link MailMessage} instances
+     * @throws MailException If mail account cannot be obtained
+     */
+    private void setAccountInfo(final MailMessage[] mailMessages) throws MailException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        for (int i = 0; i < mailMessages.length; i++) {
+            final MailMessage mailMessage = mailMessages[i];
+            mailMessage.setAccountId(id);
+            mailMessage.setAccountName(name);
+        }
+    }
+
+    /**
+     * Sets account ID and name in given instance of {@link MailMessage}.
+     * 
+     * @param mailMessages The {@link MailMessage} instance
+     * @throws MailException If mail account cannot be obtained
+     */
+    private void setAccountInfo(final MailMessage mailMessage) throws MailException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        mailMessage.setAccountId(id);
+        mailMessage.setAccountName(name);
+    }
 }

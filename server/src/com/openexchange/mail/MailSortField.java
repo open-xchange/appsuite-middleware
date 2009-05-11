@@ -94,12 +94,11 @@ public enum MailSortField {
     /**
      * Flag \SEEN
      */
-    FLAG_SEEN(MailListField.FLAG_SEEN);
-
-//    /**
-//     * Account name
-//     */
-//    ACCOUNT_NAME(MailListField.ACCOUNT_NAME);
+    FLAG_SEEN(MailListField.FLAG_SEEN),
+    /**
+     * Account name
+     */
+    ACCOUNT_NAME(MailListField.ACCOUNT_NAME);
 
     private final int field;
 

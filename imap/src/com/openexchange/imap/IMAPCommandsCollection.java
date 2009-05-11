@@ -49,7 +49,6 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -60,11 +59,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
@@ -82,7 +81,6 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -877,24 +875,18 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_SEARCH = "SEARCH";
 
     /**
-     * Determines all unseen messages in specified folder and sorts them according to given sort criteria.
+     * Determines all unseen messages in specified folder.
      * 
      * @param folder The IMAP folder
      * @param fields The desired fields
      * @param sortField The sort-by field
-     * @param orderDir The order (ASC or DESC)
-     * @param locale The user's locale
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final Locale locale) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            /*
-             * (non-Javadoc)
-             * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun .mail.imap.protocol.IMAPProtocol)
-             */
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
                 /*
@@ -946,22 +938,24 @@ public final class IMAPCommandsCollection {
                     return null;
                 }
                 /*
-                 * Fetch messages and sort them
+                 * Fetch messages
                  */
                 final Message[] newMsgs;
                 try {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
-                    newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, getFetchProfile(
-                        fields,
-                        MailField.toField(sortField.getListField()),
-                        IMAPConfig.isFastFetch()), false, false, body).doCommand();
+                    final MailField sort = MailField.toField(sortField.getListField());
+                    final FetchProfile fp;
+                    if (null == sort) {
+                        fp = getFetchProfile(fields, IMAPConfig.isFastFetch());
+                    } else {
+                        fp = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
+                    }
+                    newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);
                 }
-                final List<Message> msgList = Arrays.asList(newMsgs);
-                Collections.sort(msgList, getMessageComparator(sortField, orderDir, locale));
-                return msgList.toArray(newMsgs);
+                return newMsgs;
             }
         });
         return val;
