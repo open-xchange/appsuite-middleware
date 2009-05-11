@@ -93,14 +93,12 @@ public final class POP3ConnectCallable implements Callable<Object> {
         /*
          * Is it allowed to connect to real POP3 account to synchronize messages?
          */
-        final Long lastAccessed = getLastAccessed();
-        final long refreshRateMillis = getRefreshRateMillis();
-        if ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= refreshRateMillis)) {
+        if (isConnectable(getRefreshRateMillis())) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("\n\tSynchronizing messages with POP3 account: " + server);
             }
             /*
-             * Check default folder
+             * Check default folders since INBOX folder must be present prior to appending to it
              */
             folderStorage.checkDefaultFolders();
             /*
@@ -127,17 +125,22 @@ public final class POP3ConnectCallable implements Callable<Object> {
         return null;
     }
 
+    private boolean isConnectable(final long refreshRateMillis) throws MailException {
+        final Long lastAccessed = getLastAccessed();
+        return ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= refreshRateMillis));
+    }
+
     private Long getLastAccessed() throws MailException {
         final String lastAccessedStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
-        if (null != lastAccessedStr) {
-            try {
-                return Long.valueOf(lastAccessedStr);
-            } catch (final NumberFormatException e) {
-                LOG.warn(e.getMessage(), e);
-                return null;
-            }
+        if (null == lastAccessedStr) {
+            return null;
         }
-        return null;
+        try {
+            return Long.valueOf(lastAccessedStr);
+        } catch (final NumberFormatException e) {
+            LOG.warn(e.getMessage(), e);
+            return null;
+        }
     }
 
     private static final int FALLBACK_MINUTES = 10;
