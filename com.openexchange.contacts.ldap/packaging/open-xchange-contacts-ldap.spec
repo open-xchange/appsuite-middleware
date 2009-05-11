@@ -33,7 +33,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	    6.8.1
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -72,3 +72,5 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/contacts-ldap
 /opt/open-xchange/etc/groupware/contacts-ldap/*
 %changelog
+* Thu Apr 23 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #13539 Search field in global LDAP contact folder does not work
