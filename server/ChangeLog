@@ -1,3 +1,7 @@
+* 2009-05-11 - francisco.laguna@open-xchange.com
+
+ - Bugfix 13482: Content-Length of 0 means there is no body. Don't use the XML parser on that.
+
 * 2009-05-08 - francisco.laguna@open-xchange.com
 
  - Bugfix #13627: Fixed sorting in action=versions of infostore.
