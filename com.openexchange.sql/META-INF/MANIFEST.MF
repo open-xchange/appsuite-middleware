@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sql Plug-in
+Bundle-SymbolicName: com.openexchange.sql
+Bundle-Version: 1.0.0
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.sql.builder,
+ com.openexchange.sql.grammar,
+ com.openexchange.sql.schema

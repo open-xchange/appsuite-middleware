@@ -1,0 +1,127 @@
+/*
+*    OPEN-XCHANGE legal information
+*
+*    All intellectual property rights in the Software are protected by
+*    international copyright laws.
+*
+*
+*    In some countries OX, OX Open-Xchange, open xchange and OXtender
+*    as well as the corresponding Logos OX Open-Xchange and OX are registered
+*    trademarks of the Open-Xchange, Inc. group of companies.
+*    The use of the Logos is not covered by the GNU General Public License.
+*    Instead, you are allowed to use these Logos according to the terms and
+*    conditions of the Creative Commons License, Version 2.5, Attribution,
+*    Non-commercial, ShareAlike, and the interpretation of the term
+*    Non-commercial applicable to the aforementioned license is published
+*    on the web site http://www.open-xchange.com/EN/legal/index.html.
+*
+*    Please make sure that third-party modules and libraries are used
+*    according to their respective licenses.
+*
+*    Any modifications to this package must retain all copyright notices
+*    of the original copyright holder(s) for the original code used.
+*
+*    After any such modifications, the original and derivative code shall remain
+*    under the copyright of the copyright holder(s) and/or original author(s)per
+*    the Attribution and Assignment Agreement that can be located at
+*    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+*    given Attribution for the derivative code and a license granting use.
+*
+*     Copyright (C) 2004-2006 Open-Xchange, Inc.
+*     Mail: info@open-xchange.com
+*
+*
+*     This program is free software; you can redistribute it and/or modify it
+*     under the terms of the GNU General Public License, Version 2 as published
+*     by the Free Software Foundation.
+*
+*     This program is distributed in the hope that it will be useful, but
+*     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+*     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+*     for more details.
+*
+*     You should have received a copy of the GNU General Public License along
+*     with this program; if not, write to the Free Software Foundation, Inc., 59
+*     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
+package com.openexchange.sql.grammar;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import com.openexchange.sql.builder.IStatementBuilder;
+
+public class INSERT extends ModifyCommand {
+	private INTO into;
+	private List<String> columns;
+	private List<List<Expression>> values;
+	private SELECT subSelect;
+
+	public INSERT() {
+		super();
+		columns = new LinkedList<String>();
+		values = new LinkedList<List<Expression>>();
+	}
+
+	public void build(IStatementBuilder builder) {
+		builder.buildINSERT(this);
+	}
+	
+	public INSERT INTO(String tableName) {
+		into = new INTO(tableName);
+		return this;
+	}
+	
+	public INSERT INTO(Table table) {
+	    into = new INTO(table);
+	    return this;
+	}
+    
+    public INSERT subSelect(SELECT select) {
+        subSelect = select;
+        return this;
+    }
+
+	public List<String> getColumns() {
+		return columns;
+	}
+
+	public INTO getInto() {
+		return into;
+	}
+
+	public List<List<Expression>> getValues() {
+		return values;
+	}
+	
+	public SELECT getSubSelect() {
+	    return subSelect;
+	}
+    
+    public INSERT SET(String columnName, List<Expression> expressions) {
+        columns.add(columnName);
+        if (values.isEmpty()) {
+            for (Expression expression : expressions) {
+                values.add(new LinkedList<Expression>());
+            }
+        }
+        for (int i = 0; i < expressions.size(); i++) {
+            values.get(i).add(expressions.get(i));
+        }
+        return this;
+    }
+    
+    public INSERT SET(Column column, List<Expression> expressions) {
+        return SET(column.getName(), expressions);
+    }
+
+	public INSERT SET(String columnName, Expression... expressions) {
+	    return SET(columnName, Arrays.asList(expressions));
+	}
+	
+	public INSERT SET(Column column, Expression... expressions) {
+	    return SET(column.getName(), expressions);
+	}
+}
