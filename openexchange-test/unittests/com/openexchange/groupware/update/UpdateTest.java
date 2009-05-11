@@ -61,7 +61,7 @@ public class UpdateTest extends TestCase {
                 stmt.setObject(count++,o);
             }
 
-            stmt.executeUpdate();
+            stmt.execute();
         } finally {
 
             if(null != stmt) {
@@ -70,6 +70,17 @@ public class UpdateTest extends TestCase {
             Database.back(existing_ctx_id, true, con);
         }
     }
+    
+    protected final void execSafe(final String sql, final Object...args) {
+        try {
+            exec(sql, args);
+        } catch (DBPoolingException x) {
+            x.printStackTrace();
+        } catch (SQLException x) {
+            x.printStackTrace();
+        }
+    }
+    
 
     protected final void assertNoResults(final String sql, final Object...args) throws DBPoolingException, SQLException {
         Connection con = null;
@@ -85,6 +96,31 @@ public class UpdateTest extends TestCase {
 
             rs = stmt.executeQuery();
             assertFalse("'"+stmt.toString()+"' shouldn't select anything", rs.next());
+        } finally {
+            if(null != rs) {
+                rs.close();
+            }
+            if(null != stmt) {
+                stmt.close();
+            }
+            Database.back(existing_ctx_id, true, con);
+        }
+    }
+    
+    protected final void assertResult(final String sql, final Object...args) throws DBPoolingException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = Database.get(existing_ctx_id, true);
+            stmt = con.prepareStatement(sql);
+            int count = 1;
+            for(final Object o : args) {
+                stmt.setObject(count++,o);
+            }
+
+            rs = stmt.executeQuery();
+            assertTrue("'"+stmt.toString()+"' should select something", rs.next());
         } finally {
             if(null != rs) {
                 rs.close();
