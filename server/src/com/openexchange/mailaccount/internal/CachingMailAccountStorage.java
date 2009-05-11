@@ -272,4 +272,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return l.toArray(new MailAccount[l.size()]);
     }
 
+    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws MailAccountException {
+        final MailAccount account = getMailAccount(id, user, cid);
+        if (null == account.getTransportServer()) {
+            return getDefaultMailAccount(user, cid);
+        }
+        return account;
+    }
+
 }

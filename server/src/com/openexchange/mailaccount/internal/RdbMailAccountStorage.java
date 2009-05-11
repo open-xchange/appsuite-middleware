@@ -1023,6 +1023,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws MailAccountException {
+        final MailAccount account = getMailAccount(id, user, cid);
+        if (null == account.getTransportServer()) {
+            return getDefaultMailAccount(user, cid);
+        }
+        return account;
+    }
+
     /*-
      * ++++++++++++++++++++++++++++++++++++ UTILITY METHOD(S) ++++++++++++++++++++++++++++++++++++
      */
@@ -1038,4 +1046,5 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static String getOptionalString(final String string) {
         return (null == string || string.length() == 0) ? null : string;
     }
+
 }

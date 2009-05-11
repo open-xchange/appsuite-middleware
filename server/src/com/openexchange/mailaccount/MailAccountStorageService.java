@@ -240,4 +240,15 @@ public interface MailAccountStorageService {
      * @throws MailAccountException If look-up by primary address caused a conflict
      */
     public int getByPrimaryAddress(String primaryAddress, int user, int cid) throws MailAccountException;
+
+    /**
+     * Gets the transport account for specified account ID.
+     * 
+     * @param id The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @return The mail account providing the information for the appropriate transport account.
+     * @throws MailAccountException If transport look-up fails
+     */
+    public MailAccount getTransportAccountForID(int id, int user, int cid) throws MailAccountException;
 }
