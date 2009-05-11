@@ -604,10 +604,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Check for limit
              */
-            if (limit > 0) {
-                final int newLength = ((limit <= mails.length) ? limit : mails.length);
-                final MailMessage[] retval = new MailMessage[newLength];
-                System.arraycopy(mails, 0, retval, 0, newLength);
+            if (limit > 0 && limit < mails.length) {
+                final MailMessage[] retval = new MailMessage[limit];
+                System.arraycopy(mails, 0, retval, 0, limit);
                 mails = retval;
             }
             return mails;
