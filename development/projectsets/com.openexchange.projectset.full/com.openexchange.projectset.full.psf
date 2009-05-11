@@ -53,5 +53,7 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe,com.openexchange.subscribe"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.json,com.openexchange.subscribe.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.xing,com.openexchange.subscribe.xing"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf,com.openexchange.datatypes.genericonf"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf.storage,com.openexchange.datatypes.genericonf.storage"/>
 </provider>
 </psf>
