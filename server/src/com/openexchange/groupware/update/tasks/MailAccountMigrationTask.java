@@ -154,7 +154,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            closeSQLStuff(null, stmt);
+            closeSQLStuff(rs, stmt);
             Database.back(contextId, false, writeCon);
         }
     }
@@ -418,7 +418,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            closeSQLStuff(null, stmt);
+            closeSQLStuff(rs, stmt);
             Database.back(cid, true, con);
         }
     }
