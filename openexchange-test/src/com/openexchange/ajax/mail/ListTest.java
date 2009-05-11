@@ -53,73 +53,78 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.ListRequest;
 import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.mail.MailListField;
 
 /**
  * {@link ListTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ListTest extends AbstractMailTest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ListTest.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListTest.class);
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param name
-	 *            Name of this test.
-	 */
-	public ListTest(final String name) {
-		super(name);
-	}
+    /**
+     * Default constructor.
+     * 
+     * @param name Name of this test.
+     */
+    public ListTest(final String name) {
+        super(name);
+    }
 
-	/**
-	 * Tests the <code>action=list</code> request on INBOX folder
-	 * 
-	 * @throws Throwable
-	 */
-	public void testList() throws Throwable {
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-		/*
-		 * Insert 100 mails through a send request
-		 */
-		final int numOfMails = 25;
-		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
-		for (int i = 0; i < numOfMails; i++) {
-			Executor.execute(getSession(), new SendRequest(mailObject_25kb));
-			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
-		}
-		/*
-		 * Get their folder and IDs
-		 */
-		final String[][] folderAndIDs = getFolderAndIDs(getInboxFolder());
-		/*
-		 * Perform list request
-		 */
-		final CommonListResponse response = Executor.execute(getSession(), new ListRequest(
-				folderAndIDs, COLUMNS_DEFAULT_LIST));
-		if (response.hasError()) {
-		    fail(response.getException().toString());
-		}
-        assertNotNull("Array of list request is null.", response.getArray());
-        assertEquals("List request shows different number of mails.",
-            numOfMails, response.getArray().length);
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-	}
+    /**
+     * Tests the <code>action=list</code> request on INBOX folder
+     * 
+     * @throws Throwable
+     */
+    public void testList() throws Throwable {
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+        /*
+         * Insert 100 mails through a send request
+         */
+        final int numOfMails = 25;
+        LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        for (int i = 0; i < numOfMails; i++) {
+            Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+        }
+        /*
+         * Get their folder and IDs
+         */
+        final String[][] folderAndIDs = getFolderAndIDs(getInboxFolder());
+        /*
+         * Perform list request
+         */
+        final int[] columns = new int[COLUMNS_DEFAULT_LIST.length + 1];
+        System.arraycopy(COLUMNS_DEFAULT_LIST, 0, columns, 0, COLUMNS_DEFAULT_LIST.length);
+        columns[columns.length - 1] = MailListField.ACCOUNT_NAME.getField();
+        final CommonListResponse response = Executor.execute(getSession(), new ListRequest(folderAndIDs, columns));
+        if (response.hasError()) {
+            fail(response.getException().toString());
+        }
+        final Object[][] array = response.getArray();
+        assertNotNull("Array of list request is null.", array);
+        assertEquals("List request shows different number of mails.", numOfMails, array.length);
+        for (int i = 0; i < array.length; i++) {
+            final Object[] fields = array[i];
+            final Object accountName = fields[fields.length - 1];
+            assertNotNull("Account name is null.", accountName);
+        }
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+    }
 }
