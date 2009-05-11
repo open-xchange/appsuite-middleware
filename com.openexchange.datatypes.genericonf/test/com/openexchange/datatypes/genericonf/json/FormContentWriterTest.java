@@ -75,10 +75,11 @@ public class FormContentWriterTest extends TestCase {
         content = new HashMap<String, Object>();
         form = new DynamicFormDescription();
         
-        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password"));
+        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox"));
         
         content.put("login", "blupp");
         content.put("password", "geheim");
+        content.put("checkbox", true);
     }
     
     public void testWrite() throws JSONException {
@@ -86,7 +87,8 @@ public class FormContentWriterTest extends TestCase {
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("login").withValue("blupp")
             .hasKey("password").withValue("geheim")
-        .objectEnds();
+            .hasKey("checkbox").withValue(true)
+       .objectEnds();
         
         assertValidates(assertion, object);
     }

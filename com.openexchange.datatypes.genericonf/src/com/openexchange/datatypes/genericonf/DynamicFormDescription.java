@@ -106,6 +106,19 @@ public class DynamicFormDescription implements Iterable<FormElement>{
         return retvals;
     }
     
+    public void iterate(DynamicFormIterator iterator, Map<String, Object> content) {
+        for(FormElement element : formElements) {
+            try {
+                String name = element.getName();
+                if(content.containsKey(name)) {
+                    iterator.handle(element, content.get(name));
+                }
+            } catch (IterationBreak e) {
+                return;
+            }
+        }
+    }
+    
     public Set<String> getMissingMandatoryFields(Map<String, Object> content) {
         Set<String> missing = new HashSet<String>();
         for (FormElement element : formElements) {

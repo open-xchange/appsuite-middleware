@@ -108,4 +108,6 @@ public interface Types {
      * TODO: EXTRACT to admin Used for generating ids for mail service
      */
     public static final int MAIL_SERVICE = 1132;
+    
+    public static final int GENERIC_CONFIGURATION = 1200;
 }

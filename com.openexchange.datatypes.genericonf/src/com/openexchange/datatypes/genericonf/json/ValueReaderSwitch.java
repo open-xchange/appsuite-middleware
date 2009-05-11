@@ -68,4 +68,8 @@ public class ValueReaderSwitch implements WidgetSwitcher {
         return args[0];
     }
 
+    public Object checkbox(Object[] args) {
+        return args[0];
+    }
+
 }

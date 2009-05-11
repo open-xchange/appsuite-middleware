@@ -99,13 +99,33 @@ public class FormDescriptionWriterTest extends TestCase{
         element.setName("password");
         element.setMandatory(false);
         element.setDefaultValue(null);
-    
+        
+        object = new FormDescriptionWriter().write(element);
+        
         assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("password")
             .hasKey("name").withValue("password")
             .hasKey("displayName").withValue("Password")
             .hasKey("mandatory").withValue(false)
         .objectEnds();
+        
+        assertValidates(assertion, object);
+        
+        element.setWidget(FormElement.Widget.CHECKBOX);
+        element.setDisplayName("Checkbox");
+        element.setName("checkbox");
+        
+        object = new FormDescriptionWriter().write(element);
+        
+        assertion = new JSONAssertion().isObject()
+            .hasKey("widget").withValue("checkbox")
+            .hasKey("name").withValue("checkbox")
+            .hasKey("displayName").withValue("Checkbox")
+            .hasKey("mandatory").withValue(false)
+        .objectEnds();
+    
+        assertValidates(assertion, object);
+    
     }
     
     public void testWriteArray() throws JSONException {

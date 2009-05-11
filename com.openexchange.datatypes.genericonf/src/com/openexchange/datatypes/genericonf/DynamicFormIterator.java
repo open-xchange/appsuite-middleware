@@ -47,44 +47,17 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.json;
-
-import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import junit.framework.TestCase;
+package com.openexchange.datatypes.genericonf;
 
 
 /**
- * {@link FormContentParserTest}
+ * {@link DynamicFormIterator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class FormContentParserTest extends TestCase {
-    private JSONObject object = null;
-    private DynamicFormDescription form = null;
-    
-    @Override
-    protected void setUp() throws Exception {
-        object = new JSONObject();
-        object.put("login", "blupp");
-        object.put("password", "secret");
-        object.put("checkbox", true);
-        
-        form = new DynamicFormDescription();
-        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox"));
-    }
-    
-    public void testParsing() throws JSONException {
-        Map<String, Object> content = new FormContentParser().parse(object, form);
-        
-        assertNotNull("Content was null!", content);
-        assertEquals("login was wrong", "blupp", content.get("login"));
-        assertEquals("password was wrong", "secret", content.get("password"));
-        assertEquals("checkbox was wrong", true, content.get("checkbox"));
-               
-    }
+public interface DynamicFormIterator {
+
+    void handle(FormElement element, Object object) throws IterationBreak;
+
 }

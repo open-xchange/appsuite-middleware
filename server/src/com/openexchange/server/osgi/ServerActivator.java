@@ -99,6 +99,8 @@ import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailLoginHandler;
@@ -440,6 +442,11 @@ public final class ServerActivator extends DeferredActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
             registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
         }
+        
+        // Register DBProvider
+        
+        registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
+        
         /*
          * Register components
          */
