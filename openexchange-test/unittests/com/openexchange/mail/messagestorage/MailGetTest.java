@@ -164,6 +164,7 @@ public final class MailGetTest extends AbstractMailTest {
 					assertTrue("Missing Cc", fetchedMails[i].containsCc());
 					assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
 					assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
+					assertTrue("Missing account name", fetchedMails[i].containsAccountName());
 					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
 						assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
 					} else {
