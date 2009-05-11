@@ -88,11 +88,14 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -109,6 +112,9 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -344,6 +350,10 @@ public final class MessageParser {
         try {
             parseBasics(jsonObj, mail, timeZone);
             /*
+             * Prepare msgref
+             */
+            prepareMsgRef(session, mail);
+            /*
              * Parse attachments
              */
             if (mail instanceof ComposedMailMessage) {
@@ -565,7 +575,7 @@ public final class MessageParser {
                     /*
                      * Prefer MSGREF from attachment if present, otherwise get MSGREF from superior mail
                      */
-                    final MailPath msgref;
+                    MailPath msgref;
                     final boolean isMail;
                     if (attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
                         msgref = new MailPath(attachment.get(MailJSONField.MSGREF.getKey()).toString());
@@ -580,6 +590,7 @@ public final class MessageParser {
                          */
                         continue NextAttachment;
                     }
+                    msgref = prepareMsgRef(session, msgref);
                     /*
                      * Decide how to retrieve part
                      */
@@ -592,7 +603,10 @@ public final class MessageParser {
                             access = MailAccess.getInstance(session);
                             access.connect();
                         }
-                        final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
+                        final MailMessage referencedMail = access.getMessageStorage().getMessage(
+                            msgref.getFolder(),
+                            msgref.getMailID(),
+                            false);
                         quotaChecker.addConsumed(referencedMail.getSize(), referencedMail.getFileName());
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
@@ -642,7 +656,10 @@ public final class MessageParser {
         final MailAccess<?, ?> access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
         access.connect();
         try {
-            final MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
+            final MailMessage referencedMail = access.getMessageStorage().getMessage(
+                parentMsgRef.getFolder(),
+                parentMsgRef.getMailID(),
+                false);
             if (null == referencedMail) {
                 throw new MailException(MailException.Code.REFERENCED_MAIL_NOT_FOUND, parentMsgRef.getMailID(), parentMsgRef.getFolder());
             }
@@ -854,5 +871,47 @@ public final class MessageParser {
         }
 
     } // End of quota checker class
+
+    private static void prepareMsgRef(final Session session, final MailMessage mail) throws MailException {
+        final MailPath msgref = mail.getMsgref();
+        if (null == msgref) {
+            // Nothing to do
+            return;
+        }
+        mail.setMsgref(prepareMsgRef(session, msgref));
+    }
+
+    private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws MailException {
+        try {
+            final UnifiedINBOXManagement unifiedINBOXManagement = ServerServiceRegistry.getInstance().getService(
+                UnifiedINBOXManagement.class);
+            if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(
+                session.getUserId(),
+                session.getContextId())) {
+                // Something like: INBOX/default6/INBOX
+                final String nestedFullname = msgref.getFolder();
+                final int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);
+                if (-1 == pos) {
+                    // Return unchanged
+                    return msgref;
+                }
+                int check = pos + MailFolder.DEFAULT_FOLDER_ID.length();
+                while (Character.isDigit(nestedFullname.charAt(check))) {
+                    check++;
+                }
+                if (MailProperties.getInstance().getDefaultSeparator() != nestedFullname.charAt(check)) {
+                    // Unexpected pattern
+                    return msgref;
+                }
+                // Create fullname argument from sub-path
+                final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(nestedFullname.substring(pos));
+                // Adjust msgref
+                return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
+            }
+            return msgref;
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
+    }
 
 }

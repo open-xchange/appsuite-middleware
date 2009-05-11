@@ -3322,7 +3322,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             /*
                              * ... and send message
                              */
-                            final ComposeType sendType = jsonMailObj.has(PARAMETER_SEND_TYPE) && !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                            final ComposeType sendType = jsonMailObj.hasAndNotNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                             msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).sendMessage(
                                 composedMail,
                                 sendType,
@@ -3453,9 +3453,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
-            accountId = storageService.getByPrimaryAddress(from.getAddress(), session.getUserId(), session.getContextId());
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
             if (checkTransportSupport && accountId != -1) {
-                final MailAccount account = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                final MailAccount account = storageService.getMailAccount(accountId, user, cid);
                 // Check if determined account supports mail transport
                 if (null == account.getTransportServer()) {
                     // Account does not support mail transport
