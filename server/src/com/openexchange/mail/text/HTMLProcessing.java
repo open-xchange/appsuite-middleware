@@ -1007,7 +1007,7 @@ public final class HTMLProcessing {
                     final InlineImageDataSource imgSource = new InlineImageDataSource();
                     final DataArguments args = new DataArguments();
                     final String[] argsNames = imgSource.getRequiredArguments();
-                    args.put(argsNames[0], msgUID.getFolder());
+                    args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                     args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                     args.put(argsNames[2], cid);
                     imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args, 60000).getImageURL();
