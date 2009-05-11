@@ -131,6 +131,6 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         } catch (NumberFormatException e) {
             length = -1;
         }
-        return length != -1;
+        return length > 0;
 	}
 }
