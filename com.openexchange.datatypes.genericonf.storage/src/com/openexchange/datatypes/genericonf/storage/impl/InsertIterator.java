@@ -1,0 +1,127 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.datatypes.genericonf.storage.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.EnumMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.datatypes.genericonf.DynamicFormIterator;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.IterationBreak;
+import com.openexchange.datatypes.genericonf.FormElement.Widget;
+
+/**
+ * {@link InsertIterator}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class InsertIterator implements DynamicFormIterator {
+
+    private static final String INSERT_STRING = "INSERT INTO genconf_attributes_strings (id, cid, name, value, widget) VALUES (?,?,?,?,?)";
+    private static final String INSERT_BOOL = "INSERT INTO genconf_attributes_bools (id, cid, name, value, widget) VALUES (?,?,?,?,?)";
+
+    private static final ToSQLType toSQLType = new ToSQLType();
+    
+    
+    private SQLException exception;
+
+    private Map<Widget, PreparedStatement> statementMap = new EnumMap<Widget, PreparedStatement>(Widget.class);
+    
+    public void prepareStatements(TX tx) throws SQLException {
+        
+        PreparedStatement insertString = tx.prepare(INSERT_STRING);
+        PreparedStatement insertBool = tx.prepare(INSERT_BOOL);
+        
+        statementMap.put(Widget.INPUT, insertString);
+        statementMap.put(Widget.CHECKBOX, insertBool);
+    }
+
+    public void setIds(int cid, int id) throws SQLException {
+        for(PreparedStatement stmt : statementMap.values()) {
+            stmt.setInt(1, id);
+            stmt.setInt(2, cid);            
+        }
+    }
+
+    public void handle(FormElement element, Object value) throws IterationBreak {
+        if(exception != null) {
+            return;
+        }
+        value = element.doSwitch(toSQLType, value);
+        
+        String name = element.getName();
+        String widget = element.getWidget().getKeyword();
+        
+        PreparedStatement stmt = statementMap.get(element.getWidget());
+        
+        try {
+            stmt.setString(3, name);
+            stmt.setObject(4, value);
+            stmt.setString(5, widget);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            exception = e;
+            throw new IterationBreak();
+        }
+
+    }
+    
+    public void throwException() throws SQLException {
+        if(exception != null) {
+            throw exception;
+        }
+    }
+
+}

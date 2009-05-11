@@ -1,0 +1,263 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.datatypes.genericonf.storage.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
+
+/**
+ * {@link MySQLGenericConfigurationStorage}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class MySQLGenericConfigurationStorage implements GenericConfigurationStorageService {
+
+    private DBProvider provider;
+
+    public void setDBProvider(DBProvider provider) {
+        this.provider = provider;
+    }
+
+    public int save(Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        return save(null, ctx, content, form);
+    }
+    
+    public int save(Connection con, final Context ctx, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException {
+        return (Integer) write(con, ctx, new TX() {
+
+            public Object perform() throws SQLException {
+                Connection con = getConnection();
+
+                InsertIterator insertIterator = new InsertIterator();
+                insertIterator.prepareStatements(this);
+
+                int id = IDGenerator.getId(ctx, Types.GENERIC_CONFIGURATION, con);
+                int cid = ctx.getContextId();
+                insertIterator.setIds(cid, id);
+
+                form.iterate(insertIterator, content);
+
+                insertIterator.throwException();
+                return id;
+            }
+
+        });
+    }
+
+    private Object write(Connection con, Context ctx, TX tx) throws GenericConfigStorageException {
+        Connection writeCon = con;
+        boolean connectionHandling = con == null;
+        try {
+            if(connectionHandling) {
+                writeCon = provider.getWriteConnection(ctx);
+                writeCon.setAutoCommit(false);
+            }
+            tx.setConnection(writeCon);
+            Object retval = tx.perform();
+            if(connectionHandling) {
+                writeCon.commit();
+            }
+            return retval;
+        } catch (SQLException x) {
+            try {
+                if(connectionHandling) {
+                    writeCon.rollback();
+                }
+            } catch (SQLException e) {
+            }
+            GenericConfigStorageErrorMessage.SQLException.throwException(x, x.getMessage());
+            return null;
+        } catch (TransactionException e) {
+            throw new GenericConfigStorageException(e);
+        } finally {
+            tx.close();
+            if(connectionHandling) {
+                try {
+                    writeCon.setAutoCommit(true);
+                } catch (SQLException e) {
+                }
+                provider.releaseWriteConnection(ctx, writeCon);
+            }
+        }
+    }
+    
+    public void fill(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        fill(null, ctx, id, content, form);
+    }
+
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        Connection readCon = con;
+        boolean connectionHandling = con == null;
+        try {
+            if(connectionHandling) {
+                readCon = provider.getReadConnection(ctx);
+            }
+            loadValues(readCon, ctx, id, content, form, "genconf_attributes_strings");
+            loadValues(readCon, ctx, id, content, form, "genconf_attributes_bools");
+        } catch (TransactionException e) {
+            throw new GenericConfigStorageException(e);
+        } finally {
+            if(connectionHandling) {
+                provider.releaseReadConnection(ctx, readCon);
+            }
+        }
+    }
+
+    private void loadValues(Connection readCon, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form, String tablename) throws GenericConfigStorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        FromSQL fromSQL = new FromSQL();
+        
+        try {
+
+            stmt = readCon.prepareStatement("SELECT name, value, widget FROM "+tablename+" WHERE cid = ? AND id = ?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, id);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String widget = rs.getString("widget");
+
+                FormElement element = new FormElement();
+                element.setName(name);
+                element.setWidget(FormElement.Widget.getWidgetByKeyword(widget));
+                form.add(element);
+
+                content.put(name, element.doSwitch(fromSQL, rs, "value"));
+                fromSQL.throwException();
+            }
+        } catch (SQLException x) {
+            GenericConfigStorageErrorMessage.SQLException.throwException(x, stmt.toString());
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException x) {
+                }
+
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException x) {
+                }
+            }
+        }
+    }
+    
+   
+    public void update(final Context ctx, final int id, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException {
+        update(null, ctx, id, content, form);
+    }
+    
+    public void update(Connection con, final Context ctx, final int id, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException {
+        final Map<String, Object> original = new HashMap<String, Object>();
+        fill(con, ctx, id, original, new DynamicFormDescription());
+
+        write(con, ctx, new TX() {
+
+            public Object perform() throws SQLException {
+                UpdateIterator updateIterator = new UpdateIterator();
+                updateIterator.prepareStatements(this);
+                updateIterator.setIds(ctx.getContextId(), id);
+                updateIterator.setOriginal(original);
+                form.iterate(updateIterator, content);
+                updateIterator.throwException();
+                return null;
+            }
+
+        });
+
+    }
+
+    public void delete(final Context ctx, final int id) throws GenericConfigStorageException {
+        delete(null, ctx, id);
+    }
+    
+    public void delete(Connection con, final Context ctx, final int id) throws GenericConfigStorageException {
+
+        write(con, ctx, new TX() {
+
+            @Override
+            public Object perform() throws SQLException {
+                clearTable("genconf_attributes_strings");
+                clearTable("genconf_attributes_bools");
+                return null;
+            }
+            
+            private void clearTable(String tablename) throws SQLException {
+                PreparedStatement delete = null;
+                delete = prepare("DELETE FROM "+tablename+" WHERE cid = ? AND id = ?");
+                delete.setInt(1, ctx.getContextId());
+                delete.setInt(2, id);
+                delete.executeUpdate();
+
+            }
+
+        });
+
+    }
+
+}
