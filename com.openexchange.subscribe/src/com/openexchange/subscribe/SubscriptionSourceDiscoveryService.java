@@ -50,6 +50,7 @@
 package com.openexchange.subscribe;
 
 import java.util.List;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 
 
@@ -63,6 +64,6 @@ public interface SubscriptionSourceDiscoveryService {
     public List<SubscriptionSource> getSources();
     public List<SubscriptionSource> getSources(int folderModule);
     public SubscriptionSource getSource(String identifier);
-    public SubscriptionSource getSource(int contextId, int subscriptionId);
+    public SubscriptionSource getSource(int contextId, int subscriptionId) throws AbstractOXException;
     public boolean knowsSource(String identifier);
 }

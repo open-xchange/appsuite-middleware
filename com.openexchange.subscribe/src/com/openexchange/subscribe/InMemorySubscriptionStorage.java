@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -63,11 +64,15 @@ import java.util.Map.Entry;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class InMemorySubscriptionStorage {
+public class InMemorySubscriptionStorage implements SubscriptionStorage {
     private Map<Integer, Map<Integer, Subscription>> subscriptions = new HashMap<Integer, Map<Integer, Subscription>>();
     private Map<Integer, Integer> keys = new HashMap<Integer, Integer>();
     
-    public void rememberSubscription(int cid, Subscription subscription) {
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscriptionStorage#rememberSubscription(int, com.openexchange.subscribe.Subscription)
+     */
+    public void rememberSubscription(Subscription subscription) {
+        int cid = subscription.getContext().getContextId();
         if(-1 == subscription.getId()) {
             subscription.setId(nextId(cid));
         }
@@ -90,13 +95,19 @@ public class InMemorySubscriptionStorage {
         }
     }
     
-    public void forgetSubscription(int cid, Subscription subscription) {
-        subscriptions(cid).remove(subscription.getId());
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscriptionStorage#forgetSubscription(int, com.openexchange.subscribe.Subscription)
+     */
+    public void forgetSubscription(Subscription subscription) {
+        subscriptions(subscription.getContext().getContextId()).remove(subscription.getId());
     }
     
-    public List<Subscription> getSubscriptions(int cid, int folderId) {
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscriptionStorage#getSubscriptions(int, int)
+     */
+    public List<Subscription> getSubscriptions(Context ctx, int folderId) {
         List<Subscription> found = new LinkedList<Subscription>();
-        for(Subscription subscription : subscriptions(cid).values()) {
+        for(Subscription subscription : subscriptions(ctx.getContextId()).values()) {
             if(subscription.getFolderId() == folderId) {
                 found.add(subscription);
             }
@@ -104,8 +115,11 @@ public class InMemorySubscriptionStorage {
         return found;
     }
     
-    public Subscription getSubscription(int cid, int id) {
-        return subscriptions(cid).get(id);
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscriptionStorage#getSubscription(int, int)
+     */
+    public Subscription getSubscription(Context ctx, int id) {
+        return subscriptions(ctx.getContextId()).get(id);
     }
     
     private int nextId(int cid) {

@@ -55,6 +55,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -114,7 +115,7 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
     }
 
     @Override
-    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+    public SubscriptionSource getSource(int contextId, int subscriptionId) throws AbstractOXException {
         grabAll();
         return super.getSource(contextId, subscriptionId);
     }

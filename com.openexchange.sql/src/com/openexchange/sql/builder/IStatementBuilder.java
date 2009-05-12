@@ -170,4 +170,6 @@ public interface IStatementBuilder {
 	void buildUPDATE(UPDATE insert);
 
 	void buildWHERE(WHERE where);
+
+    void buildList(LIST element);
 }

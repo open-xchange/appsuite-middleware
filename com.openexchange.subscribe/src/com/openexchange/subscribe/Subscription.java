@@ -49,10 +49,10 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -63,11 +63,11 @@ public class Subscription {
     
     private int folderId;
 
-    private int contextId;
+    private Context context;
 
     private int userId;
 
-    private Date lastUpdate;
+    private long lastUpdate;
     
     private SubscriptionSource source;
     
@@ -81,12 +81,12 @@ public class Subscription {
         this.folderId = folderId;
     }
 
-    public int getContextId() {
-        return contextId;
+    public Context getContext() {
+        return context;
     }
 
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
+    public void setContext(Context context) {
+        this.context = context;
     }
 
     public int getUserId() {
@@ -97,11 +97,11 @@ public class Subscription {
         this.userId = userId;
     }
 
-    public Date getLastUpdate() {
+    public long getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(long lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
     

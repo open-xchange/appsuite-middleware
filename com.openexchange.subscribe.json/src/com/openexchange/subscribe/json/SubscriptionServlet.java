@@ -73,6 +73,7 @@ import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -173,7 +174,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeData(1, resp);
     }
 
-    private void listSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void listSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         JSONArray ids = new JSONArray(getBody(req));
         int contextId = getSessionObject(req).getContextId();
         List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
@@ -192,7 +193,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeSubscriptions(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, resp);
     }
 
-    private void loadAllSubscriptionsInFolder(HttpServletRequest req, HttpServletResponse resp) throws NumberFormatException, OXException {
+    private void loadAllSubscriptionsInFolder(HttpServletRequest req, HttpServletResponse resp) throws NumberFormatException, AbstractOXException {
         int folderId = Integer.parseInt(req.getParameter("folder"));
         int contextId = getSessionObject(req).getContextId();
         
@@ -208,7 +209,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         
     }
 
-    private List<Subscription> getSubscriptionsInFolder(int contextId, FolderObject folder) {
+    private List<Subscription> getSubscriptionsInFolder(int contextId, FolderObject folder) throws AbstractOXException {
         List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
         for (SubscriptionSource subscriptionSource : sources) {
@@ -272,7 +273,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     }
 
 
-    private void loadSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException {
+    private void loadSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, AbstractOXException {
         int id = Integer.parseInt(req.getParameter("id"));
         String source = req.getParameter("source");
         int contextId = getSessionObject(req).getContextId();
@@ -285,7 +286,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeData(object, resp);
     }
 
-    private Subscription loadSubscription(int id, int contextId, String source) {
+    private Subscription loadSubscription(int id, int contextId, String source) throws AbstractOXException {
         SubscribeService service = null;
         if(source != null) {
             service = discovery.getSource(source).getSubscribeService();
@@ -295,21 +296,21 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         return service.loadSubscription(contextId, id);
     }
 
-    private void deleteSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void deleteSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         JSONArray ids = new JSONArray(getBody(req));
-        int contextId = getSessionObject(req).getContextId();
+        Context context = getSessionObject(req).getContext();
         for(int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(contextId, id).getSubscribeService();
+            SubscribeService subscribeService = discovery.getSource(context.getContextId(), id).getSubscribeService();
             Subscription subscription = new Subscription();
-            subscription.setContextId(contextId);
+            subscription.setContext(context);
             subscription.setId(id);
             subscribeService.unsubscribe(subscription);
         }
         writeData(1, resp);
     }
 
-    private void updateSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void updateSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         ServerSession session = getSessionObject(req);
         Subscription subscription = getSubscription(req, session);
         SubscribeService subscribeService = subscription.getSource().getSubscribeService();
@@ -317,7 +318,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeData(1, resp);
     }
 
-    private void createSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void createSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         ServerSession session = getSessionObject(req);
         Subscription subscription = getSubscription(req, session);
         subscription.setId(-1);
@@ -333,7 +334,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     private Subscription getSubscription(HttpServletRequest req, ServerSession session) throws JSONException, IOException {
         JSONObject object = new JSONObject(getBody(req));
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
-        subscription.setContextId(session.getContextId());
+        subscription.setContext(session.getContext());
         subscription.setUserId(session.getUserId());
         return subscription;
     }

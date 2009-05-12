@@ -50,6 +50,8 @@
 package com.openexchange.subscribe;
 
 import java.util.Collection;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -60,30 +62,30 @@ import java.util.Collection;
  */
 public abstract class AbstractSubscribeService implements SubscribeService {
 
-    private static final InMemorySubscriptionStorage STORAGE = new InMemorySubscriptionStorage();
+    private static final SubscriptionStorage STORAGE = new InMemorySubscriptionStorage();
     
-    public Collection<Subscription> loadSubscriptions(int contextId, int folderId) {
-        return STORAGE.getSubscriptions(contextId, folderId);
+    public Collection<Subscription> loadSubscriptions(Context ctx, int folderId) throws AbstractOXException {
+        return STORAGE.getSubscriptions(ctx, folderId);
     }
 
-    public Subscription loadSubscription(int contextId, int subscriptionId) {
-        return STORAGE.getSubscription(contextId, subscriptionId);
+    public Subscription loadSubscription(Context ctx, int subscriptionId) throws AbstractOXException {
+        return STORAGE.getSubscription(ctx, subscriptionId);
     }
 
-    public void subscribe(Subscription subscription) {
-        STORAGE.rememberSubscription(subscription.getContextId(), subscription);
+    public void subscribe(Subscription subscription) throws AbstractOXException {
+        STORAGE.rememberSubscription(subscription);
     }
 
-    public void unsubscribe(Subscription subscription) {
-        STORAGE.forgetSubscription(subscription.getContextId(), subscription);
+    public void unsubscribe(Subscription subscription) throws AbstractOXException {
+        STORAGE.forgetSubscription(subscription);
     }
 
-    public void update(Subscription subscription) {
-        STORAGE.rememberSubscription(subscription.getContextId(), subscription);
+    public void update(Subscription subscription) throws AbstractOXException {
+        STORAGE.rememberSubscription(subscription);
     }
     
-    public boolean knows(int contextId, int subscriptionId) {
-        Subscription subscription = STORAGE.getSubscription(contextId, subscriptionId);
+    public boolean knows(Context ctx, int subscriptionId) throws AbstractOXException {
+        Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
         if(subscription == null) {
             return false;
         }

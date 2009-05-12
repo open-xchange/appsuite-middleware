@@ -112,7 +112,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
         
         // correct subscription loaded?
-        assertEquals("Wrong context", 2, subscribeService.getSubscriptionIDs().get(0).getContextId());
+        assertEquals("Wrong context", 2, subscribeService.getSubscriptionIDs().get(0).getContext().getContextId());
         assertEquals("Wrong id", 12, subscribeService.getSubscriptionIDs().get(0).getId());
         
         // correct data saved?
@@ -128,7 +128,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
         
         // correct subscription loaded?
-        assertEquals("Wrong context", 2, subscribeService.getSubscriptionIDs().get(0).getContextId());
+        assertEquals("Wrong context", 2, subscribeService.getSubscriptionIDs().get(0).getContext().getContextId());
         assertEquals("Wrong id", 12, subscribeService.getSubscriptionIDs().get(0).getId());
         
         // correct data saved?

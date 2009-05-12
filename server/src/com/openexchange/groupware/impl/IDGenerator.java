@@ -396,6 +396,7 @@ public final class IDGenerator {
             tmp.put(I(Types.GID_NUMBER), "CALL get_gid_number_id(?)");
             tmp.put(I(Types.MAIL_SERVICE), "CALL get_mail_service_id(?)");
             tmp.put(I(Types.GENERIC_CONFIGURATION), "CALL get_genconf_id(?)");
+            tmp.put(I(Types.SUBSCRIPTION), "CALL get_subscriptions_id(?)");
             TYPES = tmp;
         }
 
@@ -525,6 +526,7 @@ public final class IDGenerator {
             tmp.put(I(Types.GID_NUMBER), "sequence_gid_number");
             tmp.put(I(Types.MAIL_SERVICE), "sequence_mail_service");
             tmp.put(I(Types.GENERIC_CONFIGURATION), "sequence_genconf");
+            tmp.put(I(Types.SUBSCRIPTION), "sequence_subscriptions");
             TABLES = tmp;
         }
 

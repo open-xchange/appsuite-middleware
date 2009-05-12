@@ -8,4 +8,5 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.sql.builder,
  com.openexchange.sql.grammar,
- com.openexchange.sql.schema
+ com.openexchange.sql.schema,
+ com.openexchange.sql.tools

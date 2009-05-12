@@ -49,12 +49,15 @@
 package com.openexchange.sql.grammar.example;
 
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
+import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.dateRights;
 import static com.openexchange.sql.schema.Tables.dates;
 import java.util.Date;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.COUNT;
 import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.IN;
+import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.NOTNULL;
 import com.openexchange.sql.grammar.SELECT;
 
@@ -63,6 +66,7 @@ public class SelectExample {
     public static void main(String[] args) {
         new SelectExample().simpleSelect();
         new SelectExample().extendedSelect();
+        new SelectExample().selectWithIn();
     }
 
     public void simpleSelect() {
@@ -84,6 +88,13 @@ public class SelectExample {
             FROM(dates).
             JOIN(dateRights, new EQUALS(dates.getColumn("intfield01"), dateRights.getColumn("object_id"))).
             WHERE(new EQUALS(dates.getColumn("intfield01"), dates.getColumn("intfield02")).AND(new NOTNULL(dates.getColumn("field06"))));
+        
+        System.out.println(new StatementBuilder().buildCommand(select));
+    }
+    
+    public void selectWithIn() {
+        SELECT select =
+            new SELECT(new COUNT(ASTERISK)).FROM(dates).WHERE(new IN("intfield01", new LIST(PLACEHOLDER, PLACEHOLDER)));
         
         System.out.println(new StatementBuilder().buildCommand(select));
     }

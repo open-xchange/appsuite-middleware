@@ -2,6 +2,7 @@ package com.openexchange.subscribe;
 
 import java.util.Collection;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.subscribe.parser.MicroformatContactParser;
 import junit.framework.TestCase;
 
@@ -29,7 +30,7 @@ public class MicroformatContactParserTest extends TestCase {
     public void testShouldWorkViaURL(){
         MicroformatContactParser parser = new MicroformatContactParser();
         Subscription subscription = new Subscription();
-        subscription.setContextId(1);
+        subscription.setContext(new SimContext(1));
         subscription.setUserId(8);
         //subscription.setUrl("http://localhost/~development/test/micro.html");
         

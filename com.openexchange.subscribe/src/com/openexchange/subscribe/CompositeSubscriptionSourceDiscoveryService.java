@@ -52,6 +52,7 @@ package com.openexchange.subscribe;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 
 
@@ -106,7 +107,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         services.remove(service);
     }
 
-    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+    public SubscriptionSource getSource(int contextId, int subscriptionId) throws AbstractOXException {
         for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
             SubscriptionSource source = subDiscoverer.getSource(contextId, subscriptionId);
             if(source != null) {

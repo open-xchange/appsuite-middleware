@@ -77,13 +77,13 @@ public class SubscriptionSQL {
         sb.append(")");
 
         Transaction.commitStatement(
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             sb.toString(),
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             subscription.getUserId(),
             //subscription.getUrl(),
             subscription.getFolderId(),
-            subscription.getLastUpdate().getTime());
+            subscription.getLastUpdate());
     }
 
     public static void removeSubscription(Subscription subscription) throws DBPoolingException, SQLException {
@@ -93,9 +93,9 @@ public class SubscriptionSQL {
         sb.append(" WHERE cid = ? AND folder_id = ?");
 
         Transaction.commitStatement(
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             sb.toString(),
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             subscription.getFolderId());
     }
 
@@ -110,9 +110,9 @@ public class SubscriptionSQL {
         List<Subscription> retval = new ArrayList<Subscription>();
         for (Map<String, Object> subscription : subscriptions) {
             Subscription subscriptionObject = new Subscription();
-            subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
+            //subscriptionObject.setContext(((Long) subscription.get("cid")).intValue());
             subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
-            subscriptionObject.setLastUpdate(new Date((Long) subscription.get("last_update")));
+            subscriptionObject.setLastUpdate(((Long) subscription.get("last_update")).longValue());
            // subscriptionObject.setUrl((String) subscription.get("url"));
             subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
             retval.add(subscriptionObject);
@@ -132,9 +132,9 @@ public class SubscriptionSQL {
         List<Subscription> retval = new ArrayList<Subscription>();
         for (Map<String, Object> subscription : subscriptions) {
             Subscription subscriptionObject = new Subscription();
-            subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
+            //subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
             subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
-            subscriptionObject.setLastUpdate(new Date((Long)subscription.get("last_update")));
+            subscriptionObject.setLastUpdate(((Long)subscription.get("last_update")).longValue());
            // subscriptionObject.setUrl((String) subscription.get("url"));
             subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
             retval.add(subscriptionObject);
@@ -155,10 +155,10 @@ public class SubscriptionSQL {
         sb.append("WHERE cid = ? AND user = ? AND url = ? AND folder_id = ?");
 
         Transaction.commitStatement(
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             sb.toString(),
             subscription.getLastUpdate(),
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             subscription.getUserId(),
            // subscription.getUrl(),
             subscription.getFolderId());
@@ -171,9 +171,9 @@ public class SubscriptionSQL {
         sb.append(" WHERE cid = ? AND user = ? AND url = ? AND folder_id = ?");
 
         List<Map<String, Object>> subscriptions = Transaction.commitQuery(
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             sb.toString(),
-            subscription.getContextId(),
+            subscription.getContext().getContextId(),
             subscription.getUserId(),
          //   subscription.getUrl(),
             subscription.getFolderId());

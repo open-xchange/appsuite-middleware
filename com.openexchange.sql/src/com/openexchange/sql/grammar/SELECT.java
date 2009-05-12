@@ -86,6 +86,10 @@ public class SELECT extends Command {
 	    this.expression = count;
 	}
 	
+	public SELECT(Constant constant) {
+	    this(constant.toString());
+	}
+	
 	public void addColumn(String column) {
 		this.columns.add(column);
 	}

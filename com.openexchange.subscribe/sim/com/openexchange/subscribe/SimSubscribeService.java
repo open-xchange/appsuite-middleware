@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.SimContext;
 
 /**
  * {@link SimSubscribeService}
@@ -116,7 +117,7 @@ public class SimSubscribeService implements SubscribeService {
 
     public Subscription loadSubscription(int contextId, int subscriptionId) {
         Subscription subscriptionIdMemo = new Subscription();
-        subscriptionIdMemo.setContextId(contextId);
+        subscriptionIdMemo.setContext(new SimContext(contextId));
         subscriptionIdMemo.setId(subscriptionId);
         subscriptionIds.add(subscriptionIdMemo);
         return subscription;

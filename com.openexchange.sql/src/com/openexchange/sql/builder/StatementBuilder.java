@@ -49,12 +49,14 @@ package com.openexchange.sql.builder;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
 import com.openexchange.sql.grammar.*;
+import com.openexchange.sql.tools.SQLTools;
 
 public class StatementBuilder implements IStatementBuilder {
 	protected StringBuffer fStringBuffer;
@@ -112,6 +114,17 @@ public class StatementBuilder implements IStatementBuilder {
 	        statement.setObject(i+1, values.get(i));
 	    }
 	    return statement;
+	}
+	
+	public void executeStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
+	    PreparedStatement stmt = prepareStatement(con, element, values);
+	    stmt.execute();
+	    SQLTools.closeSQLStuff(null, stmt, null);
+	}
+	
+	public ResultSet executeQuery(Connection con, Command element, List<? extends Object> values) throws SQLException {
+	    PreparedStatement stmt = prepareStatement(con, element, values);
+	    return stmt.executeQuery();
 	}
 
 	public void buildDELETE(DELETE delete) {
@@ -554,7 +567,7 @@ public class StatementBuilder implements IStatementBuilder {
 	public void buildSUM(SUM element) {
 		buildUnaryFunction(element);
 	}
-
+    
 	/*
 	 * Binary Functions
 	 */
@@ -572,4 +585,16 @@ public class StatementBuilder implements IStatementBuilder {
 	public void buildSUBSTRING(SUBSTRING element) {
 		buildTernaryFunction(element);
 	}
+
+    public void buildList(LIST element) {
+        append("(");
+        for (Iterator<Expression> iter = element.getExpressions().iterator(); iter.hasNext();) {
+            Expression expression = iter.next();
+            expression.build(this);
+            if (iter.hasNext()) {
+                append(", ");
+            }
+        }
+        append(")");
+    }
 }

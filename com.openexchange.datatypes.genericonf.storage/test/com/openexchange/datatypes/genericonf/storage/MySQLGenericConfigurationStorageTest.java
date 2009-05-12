@@ -61,6 +61,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.test.sql.SQLTestCase;
@@ -73,8 +74,6 @@ import com.openexchange.test.sql.SQLTestCase;
 public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     private MySQLGenericConfigurationStorage storage = null;
-
-    private Properties properties;
 
     public void setUp() throws Exception {
         GenericConfigStorageErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.genericonf.storage");
@@ -218,39 +217,5 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     // Save encrypted passwords
-
-    private void loadProperties() throws IOException {
-        String filename = System.getProperty("com.openexchange.test.sql.properties", "conf/sql.properties");
-        properties = new Properties();
-        InputStream input = null;
-        try {
-            input = new FileInputStream(filename);
-            properties.load(input);
-        } finally {
-            if (input != null) {
-                input.close();
-            }
-        }
-    }
-
-    @Override
-    public String getDriver() {
-        return properties.getProperty("driver");
-    }
-
-    @Override
-    public String getLogin() {
-        return properties.getProperty("login");
-    }
-
-    @Override
-    public String getPassword() {
-        return properties.getProperty("password");
-    }
-
-    @Override
-    public String getUrl() {
-        return properties.getProperty("url");
-    }
 
 }

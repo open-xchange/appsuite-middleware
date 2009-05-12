@@ -49,31 +49,21 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Collection;
+import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public interface SubscribeService {
+public interface SubscriptionStorage {
 
-    public SubscriptionSource getSubscriptionSource();
-    
-    public boolean handles(int folderModule);
-    
-    public void subscribe(Subscription subscription) throws AbstractOXException;
+    public void rememberSubscription(Subscription subscription) throws AbstractOXException;
 
-    public Collection<Subscription> loadSubscriptions(int contextId, int folderId) throws AbstractOXException;
+    public void forgetSubscription(Subscription subscription) throws AbstractOXException;
 
-    public Subscription loadSubscription(int contextId, int subscriptionId) throws AbstractOXException;
-    
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
+    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws AbstractOXException;
 
-    public void update(Subscription subscription) throws AbstractOXException;
+    public Subscription getSubscription(Context ctx, int id) throws AbstractOXException;
 
-    public Collection getContent(Subscription subscription);
-
-    public boolean knows(int contextId, int subscriptionId) throws AbstractOXException;
-    
 }

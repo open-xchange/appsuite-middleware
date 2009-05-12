@@ -79,6 +79,8 @@ public interface Types {
     public static final int USER = 120;
 
     public static final int GROUP = 125;
+    
+    public static final int SUBSCRIPTION = 126;
 
     /**
      * Identifier for principals. This can be groups and users. This type is used to generate not intersecting identifiers for groups and

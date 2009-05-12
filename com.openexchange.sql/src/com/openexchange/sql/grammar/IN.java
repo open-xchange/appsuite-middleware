@@ -54,6 +54,10 @@ public class IN extends BinaryPredicate {
 	public IN(String column, Expression right) {
 		super(column, right);
 	}
+	
+	public IN(String column, LIST right) {
+	    super(column, right);
+	}
 
 	public IN(String column, Object value) {
 		super(column, value);

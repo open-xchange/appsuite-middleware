@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 
 
@@ -99,7 +100,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         services.remove(identifier);        
     }
 
-    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+    public SubscriptionSource getSource(int contextId, int subscriptionId) throws AbstractOXException {
         for(SubscribeService source : services.values()) {
             if(source.knows(contextId, subscriptionId)) {
                 return source.getSubscriptionSource();

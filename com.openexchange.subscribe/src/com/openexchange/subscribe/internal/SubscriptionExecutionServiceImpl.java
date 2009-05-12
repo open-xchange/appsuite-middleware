@@ -104,7 +104,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * @param subscription
      */
     protected FolderUpdaterService getFolderUpdater(Subscription subscription) throws AbstractOXException {
-        FolderObject folder = getFolder(new SubscriptionSession(subscription), subscription.getContextId(), subscription.getFolderId());
+        FolderObject folder = getFolder(new SubscriptionSession(subscription), subscription.getContext().getContextId(), subscription.getFolderId());
         for (FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 return updater;

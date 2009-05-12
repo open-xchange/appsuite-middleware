@@ -47,64 +47,33 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage;
+package com.openexchange.sql.tools;
 
-import com.openexchange.groupware.contexts.Context;
-
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
- * {@link SimContext}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class SimContext implements Context {
-    
-    private int id;
-    
-    public SimContext(int id) {
-        super();
-        this.id = id;
-    }
-    
-    public int getContextId() {
-        return id;
-    }
+public class SQLTools {
 
-    public String[] getFileStorageAuth() {
-        return null;
+    public static void closeSQLStuff(Connection con, Statement stmt, ResultSet rs) throws SQLException {
+        if (rs != null) {
+            try {
+                rs.close();
+            } finally {
+                if (stmt != null) {
+                    try {
+                        stmt.close();
+                    } finally {
+                        if (con != null) {
+                            con.close();
+                        }
+                    }
+                }
+            }
+        }
     }
-
-    public long getFileStorageQuota() {
-        return 0;
-    }
-
-    public int getFilestoreId() {
-        return 0;
-    }
-
-    public String getFilestoreName() {
-        return null;
-    }
-
-    public String[] getLoginInfo() {
-        return null;
-    }
-
-    public int getMailadmin() {
-        return 0;
-    }
-
-    public String getName() {
-        return null;
-    }
-
-    public boolean isEnabled() {
-        return false;
-    }
-
-    public boolean isUpdating() {
-        return false;
-    }
-
 }

@@ -11,7 +11,7 @@ public class SubscriptionSession implements Session {
     
     //IMPLEMENTED:
     public int getContextId() {
-        return subscription.getContextId();
+        return subscription.getContext().getContextId();
     }
     
     public int getUserId() {

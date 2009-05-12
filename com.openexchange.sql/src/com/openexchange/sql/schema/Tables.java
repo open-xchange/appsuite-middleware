@@ -122,4 +122,6 @@ public class Tables {
     public static final Table delDateRights = new Table("del_date_rights", "ddr");
 
     public static final Table delDatesRights = delDateRights;
+    
+    public static final Table subscriptions = new Table("subscriptions");
 }

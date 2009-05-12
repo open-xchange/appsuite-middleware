@@ -47,33 +47,37 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.sql.grammar;
 
-import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
+import java.util.Arrays;
+import java.util.List;
+import com.openexchange.sql.builder.IStatementBuilder;
 
-/**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- */
-public interface SubscribeService {
 
-    public SubscriptionSource getSubscriptionSource();
+public class LIST extends Expression {
     
-    public boolean handles(int folderModule);
+    private List<Expression> expressions;
     
-    public void subscribe(Subscription subscription) throws AbstractOXException;
-
-    public Collection<Subscription> loadSubscriptions(int contextId, int folderId) throws AbstractOXException;
-
-    public Subscription loadSubscription(int contextId, int subscriptionId) throws AbstractOXException;
+    public LIST(Expression... expressions) {
+        this.expressions = Arrays.asList(expressions);
+    }
     
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
-
-    public void update(Subscription subscription) throws AbstractOXException;
-
-    public Collection getContent(Subscription subscription);
-
-    public boolean knows(int contextId, int subscriptionId) throws AbstractOXException;
+    public LIST(List<Expression> expressions) {
+        this.expressions = expressions;
+    }
     
+    public List<Expression> getExpressions() {
+        return expressions;
+    }
+
+    @Override
+    public String getSqlKeyword() {
+        return "";
+    }
+
+    @Override
+    public void build(IStatementBuilder builder) {
+        builder.buildList(this);
+    }
+
 }
