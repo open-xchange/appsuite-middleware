@@ -218,4 +218,5 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     // Save encrypted passwords
 
+    
 }
