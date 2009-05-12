@@ -51,6 +51,7 @@ package com.openexchange.groupware.update;
 
 import java.sql.SQLException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.tasks.CreateGenconfTablesTask;
 
 /**
  * {@link CreateGenconfTablesTaskTest}
