@@ -53,6 +53,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -71,7 +72,7 @@ public class ForwardMailTest extends AbstractReplyTest {
     public void testShouldForwardWithoutNotifyingFormerRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
         String mail1 = getClient().getValues().getSendAddress();
 
-        JSONObject mySentMail = createEMail(mail1, "Forward test", "ALTERNATIVE", MAIL_TEXT_BODY);
+        JSONObject mySentMail = createEMail(mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
         sendMail(mySentMail.toString());
 
         JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());

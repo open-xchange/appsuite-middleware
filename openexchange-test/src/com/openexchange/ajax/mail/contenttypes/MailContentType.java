@@ -72,7 +72,7 @@ public enum MailContentType {
     public static MailContentType getBy(String text) {
         MailContentType[] values = values();
         for (MailContentType value : values) {
-            if (text.equals(value.toString())) {
+            if (text.equalsIgnoreCase(value.toString())) {
                 return value;
             }
         }

@@ -50,64 +50,52 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.LinkedList;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.MailSearchRequest;
+import com.openexchange.ajax.mail.actions.MailSearchResponse;
+import com.openexchange.mail.MailListField;
 import com.openexchange.tools.servlet.AjaxException;
 
-
 /**
- * {@link ReplyAllTest}
- *
+ * {@link MailTestManager}
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ReplyAllTest extends AbstractReplyTest {
+public class MailTestManager {
 
-    public ReplyAllTest(String name) {
-        super(name);
+    public void deleteSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
+        LinkedList<String[]> similarMails = findSimilarMails(mail, client);
+
+        DeleteRequest deleteRequest = new DeleteRequest(similarMails.toArray(new String[][] {}));
+        client.execute(deleteRequest);
     }
-    
-    public void testShouldReplyToSenderOnly() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
-        AJAXClient client1 = new AJAXClient(User.User1);
-        AJAXClient client2 = new AJAXClient(User.User2);
-        String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
-        String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
-        String anotherMail = "tobias.prinz@open-xchange.com";
-        String yetAnotherMail = "tierlieb@open-xchange.com";
-        
-        this.client = client2;
-        JSONObject mySentMail = createEMail(adresses(mail1, anotherMail, yetAnotherMail), "ReplyAll test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
-        sendMail(mySentMail.toString());
 
-        this.client = client1;
-        JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
-        TestMail myReplyMail = new TestMail(getReplyAllEMail(new TestMail(myReceivedMail)));
+    public LinkedList<String[]> findSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
+        JSONArray pattern = new JSONArray();
+        JSONObject param = new JSONObject();
+        param.put(Mail.PARAMETER_COL, MailListField.SUBJECT.getField());
+        param.put(Mail.PARAMETER_SEARCHPATTERN, mail.getSubject());
+        pattern.put(param);
 
-        assertTrue("Should contain indicator that this is a reply in the subject line", myReplyMail.getSubject().startsWith("Re:"));
+        int[] columns = new int[] { MailListField.ID.getField() };
+        String folder = mail.getFolder();
+        MailSearchRequest searchRequest = new MailSearchRequest(pattern, folder, columns, -1, null, false);
+        MailSearchResponse searchResponse = client.execute(searchRequest);
 
-        List<String> to = myReplyMail.getTo();
-        assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
-        assertTrue("Recipient of original message should still be recipient in reply", contains(to, anotherMail));
-        assertTrue("Recipient of original message should still be recipient in reply", contains(to, yetAnotherMail));
-    }
-    
-    
-    protected String adresses(String... mails){
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        for(String mail: mails){
-            builder.append("[null,");
-            builder.append(mail);
-            builder.append("],");
+        JSONArray ids = searchResponse.getDataAsJSONArray();
+        LinkedList<String[]> FoldersAndIds = new LinkedList<String[]>();
+        for (int i = 0, length = ids.length(); i < length; i++) {
+            JSONArray temp = ids.getJSONArray(i);
+            FoldersAndIds.add(new String[] { folder, temp.getString(0) });
         }
-        builder.deleteCharAt(builder.length() - 1);
-        builder.append("]");
-        return builder.toString();
-    }
 
+        return FoldersAndIds;
+    }
 }

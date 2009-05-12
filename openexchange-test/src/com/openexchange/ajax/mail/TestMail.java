@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.mail.contenttypes.AlternativeStrategy;
 import com.openexchange.ajax.mail.contenttypes.FallbackStrategy;
+import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.contenttypes.MailTypeStrategy;
 import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
@@ -500,7 +501,7 @@ public class TestMail implements IdentitySource<TestMail> {
             JSONArray attachments = new JSONArray();
             JSONObject jsonbody = new JSONObject();
             jsonbody.put(MailJSONField.CONTENT.getKey(), getBody());
-            jsonbody.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
+            jsonbody.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
             attachments.put(jsonbody);
             result.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
         }

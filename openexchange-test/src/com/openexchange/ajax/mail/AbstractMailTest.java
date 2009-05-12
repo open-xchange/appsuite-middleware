@@ -65,6 +65,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
+import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -132,7 +133,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     public static final String MAIL_SUBJECT = "The mail subject";
 
     protected final JSONObject createSelfAddressed25KBMailObject(String subject) throws AjaxException, JSONException, IOException, SAXException {
-        return createEMail(getSendAddress(), subject, "ALTERNATIVE", LARGE_MAIL_TEXT_BODY);
+        return createEMail(getSendAddress(), subject, MailContentType.ALTERNATIVE.toString(), LARGE_MAIL_TEXT_BODY);
     }
     
     protected JSONObject createEMail(String recipient, String subject, String content_type, String text) throws AjaxException, JSONException, IOException, SAXException{

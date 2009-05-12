@@ -18,6 +18,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.groupware.container.ContactObject;
@@ -90,7 +91,7 @@ public class MailTest extends AbstractMailTest {
         mail.put(MailJSONField.PRIORITY.getKey(), "3");
 
         final JSONObject bodyObject = new JSONObject();
-        bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
+        bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
         bodyObject.put(MailJSONField.CONTENT.getKey(), "Bodytext for Contact Collection Mail Test");
 
         final JSONArray attachments = new JSONArray();
