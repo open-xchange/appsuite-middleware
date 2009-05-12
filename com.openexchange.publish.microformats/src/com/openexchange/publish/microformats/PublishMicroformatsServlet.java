@@ -63,7 +63,7 @@ public class PublishMicroformatsServlet extends HttpServlet {
         path.setOwnerId(Integer.parseInt(components[4]));
         path.setSiteName(components[5]);
 
-        return publicationService.getSite(path);
+        return null;//publicationService.getSite(path);
     }
 
     private String writeSite(Site site) {
