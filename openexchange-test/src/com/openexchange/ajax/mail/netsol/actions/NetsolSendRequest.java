@@ -66,20 +66,6 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
  */
 public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
-	public static enum BodyContentType {
-		PLAIN_TEXT("text/plain"), HTML("text/html"), ALTERNATIVE("ALTERNATIVE");
-
-		private final String str;
-
-		private BodyContentType(final String str) {
-			this.str = str;
-		}
-
-		public String getStr() {
-			return str;
-		}
-	}
-
 	/**
 	 * URL of the tasks AJAX interface.
 	 */
@@ -96,8 +82,6 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 	/*
 	 * Mail object settings
 	 */
-	private final BodyContentType contentType = BodyContentType.ALTERNATIVE;
-
 	private String recipientTo;
 
 	/**

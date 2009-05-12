@@ -53,6 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
@@ -93,7 +94,7 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 			mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
 			final JSONObject bodyObject = new JSONObject();
-			bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
+			bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
 			bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
 					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
 					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
