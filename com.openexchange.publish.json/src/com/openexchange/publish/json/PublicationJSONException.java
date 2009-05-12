@@ -47,67 +47,25 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.json;
 
-import java.sql.SQLException;
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link PublicationJSONException}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class PublicationServiceImpl {
-
-    private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
-
-    public void create(Site site) {
-        try {
-            PublicationSQL.addSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during creation of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during creation of a site", e);
-        }
+public class PublicationJSONException extends AbstractOXException {
+    public PublicationJSONException(ErrorMessage message, Throwable cause, Object...args) {
+        super(message, cause);
+        setMessageArgs(args);
     }
-
-    public void delete(Site site) {
-        try {
-            PublicationSQL.removeSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during delete of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during delete of a site", e);
-        }
+    
+    public PublicationJSONException(AbstractOXException x) {
+        super(x);
     }
-
-    public Site getSite(Path path) {
-        try {
-            return PublicationSQL.getSite(path);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
-    }
-
-    public Site getSite(String path) {
-        throw new UnsupportedOperationException("Not yet implemented.");
-    }
-
-    public Collection<Site> getSites(int contextId, int userId) {
-        try {
-            return PublicationSQL.getSites(contextId, userId);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
-    }
-
 }

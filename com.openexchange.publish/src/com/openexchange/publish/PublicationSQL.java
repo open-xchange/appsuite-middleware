@@ -114,6 +114,7 @@ public class PublicationSQL {
             path.getContextId(),
             path.getOwnerId(),
             path.getSiteName());
+        
         Map<String, Object> site = sites.get(0);
 
         Site siteObject = new Site();

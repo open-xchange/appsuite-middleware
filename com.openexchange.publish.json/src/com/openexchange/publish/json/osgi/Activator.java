@@ -5,7 +5,9 @@ import javax.servlet.Servlet;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.publish.PublicationService;
+import com.openexchange.publish.json.PublicationJSONErrorMessage;
 import com.openexchange.publish.json.PublishJSONServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -19,6 +21,8 @@ public class Activator extends DeferredActivator {
     private Servlet publishServlet;
 
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationService.class};
+
+    private ComponentRegistration componentRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -52,6 +56,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        componentRegistration = new ComponentRegistration(context, "PUBH","com.openexchange.publish.json", PublicationJSONErrorMessage.EXCEPTIONS);
         PublicationService publicationService = getService(PublicationService.class);
         PublishJSONServlet.setPublicationService(publicationService);
 
@@ -85,5 +90,6 @@ public class Activator extends DeferredActivator {
             LOG.error(e.getMessage(), e);
             throw e;
         }
+        componentRegistration.unregister();
     }
 }

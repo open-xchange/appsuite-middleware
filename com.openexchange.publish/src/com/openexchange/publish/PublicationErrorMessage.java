@@ -49,65 +49,56 @@
 
 package com.openexchange.publish;
 
-import java.sql.SQLException;
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link PublicationErrorMessage}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class PublicationServiceImpl {
+public enum PublicationErrorMessage implements OXErrorMessage {
+    SQLException(Category.CODE_ERROR, 1, "Please try again later.", "A SQL Error occurred.");
 
-    private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
-
-    public void create(Site site) {
-        try {
-            PublicationSQL.addSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during creation of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during creation of a site", e);
-        }
+    private Category category;
+    private int errorCode;
+    private String help;
+    private String message;
+    
+    public static final PublicationExceptionFactory EXCEPTIONS = new PublicationExceptionFactory();
+    
+    private PublicationErrorMessage(Category category, int errorCode, String help, String message) {
+        this.category = category;
+        this.errorCode = errorCode;
+        this.help = help;
+        this.message = message;
+    }
+    
+    public Category getCategory() {
+        return category;
     }
 
-    public void delete(Site site) {
-        try {
-            PublicationSQL.removeSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during delete of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during delete of a site", e);
-        }
+    public int getErrorCode() {
+        return errorCode;
     }
 
-    public Site getSite(Path path) {
-        try {
-            return PublicationSQL.getSite(path);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
+    public String getHelp() {
+        return help;
     }
 
-    public Site getSite(String path) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    public String getMessage() {
+        return message;
+    }
+    
+    public PublicationException create(Throwable cause, Object...args) {
+        return EXCEPTIONS.create(this,cause, args);
+    }
+    
+    public PublicationException create(Object...args) {
+        return EXCEPTIONS.create(this,args);
     }
 
-    public Collection<Site> getSites(int contextId, int userId) {
-        try {
-            return PublicationSQL.getSites(contextId, userId);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
-    }
 
 }

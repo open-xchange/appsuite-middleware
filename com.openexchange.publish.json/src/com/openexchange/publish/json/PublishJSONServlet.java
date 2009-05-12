@@ -118,13 +118,13 @@ public class PublishJSONServlet extends PermissionServlet {
     private JSONArray list(Session session) throws JSONException {
         JSONArray retval = new JSONArray();
 
-        Collection<Site> sites = publicationService.getSites(session.getContextId(), session.getUserId());
-        if(sites == null) {
+        //Collection<Site> sites = publicationService.getSites(session.getContextId(), session.getUserId());
+        /*if(sites == null) {
             return retval;
         }
         for (Site site : sites) {
             retval.put(getJSONObject(site));
-        }
+        }*/
 
         return retval;
     }
@@ -159,11 +159,11 @@ public class PublishJSONServlet extends PermissionServlet {
     }
 
     private void unpublish(Site site) {
-        publicationService.delete(site);
+        //publicationService.delete(site);
     }
 
     private void publish(Site site) {
-        publicationService.create(site);
+        //publicationService.create(site);
     }
 
     private Site getSite(JSONObject siteToPublish, Session session) throws JSONException {

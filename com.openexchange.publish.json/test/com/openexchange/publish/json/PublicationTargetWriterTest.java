@@ -47,67 +47,60 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.json;
 
-import java.sql.SQLException;
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.server.impl.DBPoolingException;
+import static com.openexchange.test.JSONAssertion.assertValidates;
+import junit.framework.TestCase;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.test.JSONAssertion;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link PublicationTargetWriterTest}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PublicationServiceImpl {
+public class PublicationTargetWriterTest extends TestCase {
 
-    private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
+    private PublicationTarget target;
 
-    public void create(Site site) {
-        try {
-            PublicationSQL.addSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during creation of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during creation of a site", e);
-        }
+    public void setUp() {
+        target = new PublicationTarget();
+        
+        target.setId("com.openexchange.publish.test1");
+        target.setDisplayName("Test 1 PubTarget");
+        target.setIcon("http://example.invalid/icon.png");
+        target.setModule("folder:contacts");
+
+        target.setFormDescription(new DynamicFormDescription());
     }
-
-    public void delete(Site site) {
-        try {
-            PublicationSQL.removeSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during delete of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during delete of a site", e);
-        }
+    
+    public void testWriteObject() throws JSONException {
+        JSONObject object = new PublicationTargetWriter().write(target);
+        
+        JSONAssertion assertion = new JSONAssertion().isObject()
+            .hasKey("id").withValue("com.openexchange.publish.test1")
+            .hasKey("displayName").withValue("Test 1 PubTarget")
+            .hasKey("icon").withValue("http://example.invalid/icon.png")
+            .hasKey("module").withValue("folder:contacts")
+            .hasKey("formDescription").withValueArray()
+       .hasNoMoreKeys();
+        
+        
+        assertValidates(assertion, object);
     }
-
-    public Site getSite(Path path) {
-        try {
-            return PublicationSQL.getSite(path);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
+    
+    public void testWriteArray() throws JSONException {
+        JSONArray array = new PublicationTargetWriter().writeArray(target, new String[]{"id", "displayName", "icon", "module"});
+    
+        JSONAssertion assertion = new JSONAssertion().isArray().withValues(target.getId(), target.getDisplayName(), target.getIcon(), target.getModule());
+        
+        assertValidates(assertion, array);
     }
-
-    public Site getSite(String path) {
-        throw new UnsupportedOperationException("Not yet implemented.");
-    }
-
-    public Collection<Site> getSites(int contextId, int userId) {
-        try {
-            return PublicationSQL.getSites(contextId, userId);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
-    }
+    
+    
 
 }

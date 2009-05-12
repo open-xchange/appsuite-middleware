@@ -49,65 +49,48 @@
 
 package com.openexchange.publish;
 
-import java.sql.SQLException;
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.server.impl.DBPoolingException;
+import java.util.LinkedList;
+import java.util.List;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link CompositePublicationTargetDiscoveryService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class PublicationServiceImpl {
+public class CompositePublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
+    private List<PublicationTargetDiscoveryService> services = new LinkedList<PublicationTargetDiscoveryService>();
 
-    public void create(Site site) {
-        try {
-            PublicationSQL.addSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during creation of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during creation of a site", e);
-        }
+    public void addDiscoveryService(PublicationTargetDiscoveryService discovery) {
+        services.add(discovery);
     }
 
-    public void delete(Site site) {
-        try {
-            PublicationSQL.removeSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during delete of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during delete of a site", e);
+    public List<PublicationTarget> listTargets() {
+        LinkedList<PublicationTarget> targets = new LinkedList<PublicationTarget>();
+        for (PublicationTargetDiscoveryService service : services) {
+            targets.addAll(service.listTargets());
         }
+        return targets;
     }
 
-    public Site getSite(Path path) {
-        try {
-            return PublicationSQL.getSite(path);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
+    public boolean knows(String id) {
+        for (PublicationTargetDiscoveryService service : services) {
+            if(service.knows(id)) {
+                return true;
+            }
         }
+        return false;
     }
-
-    public Site getSite(String path) {
-        throw new UnsupportedOperationException("Not yet implemented.");
-    }
-
-    public Collection<Site> getSites(int contextId, int userId) {
-        try {
-            return PublicationSQL.getSites(contextId, userId);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
+    
+    public PublicationTarget getTarget(String id) {
+        for (PublicationTargetDiscoveryService service : services) {
+            if(service.knows(id)) {
+                return service.getTarget(id);
+            }
         }
+        return null;
     }
 
 }

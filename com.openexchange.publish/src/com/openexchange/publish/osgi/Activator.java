@@ -52,6 +52,8 @@ package com.openexchange.publish.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationServiceImpl;
 
@@ -61,21 +63,16 @@ import com.openexchange.publish.PublicationServiceImpl;
 public class Activator implements BundleActivator {
 
     private ServiceRegistration registryPublish;
+    private ComponentRegistration componentRegistration;
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(BundleContext context) throws Exception {
         registryPublish = context.registerService(PublicationService.class.getName(), new PublicationServiceImpl(), null);
+        componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(BundleContext context) throws Exception {
         registryPublish.unregister();
+        componentRegistration.unregister();
     }
 
 }

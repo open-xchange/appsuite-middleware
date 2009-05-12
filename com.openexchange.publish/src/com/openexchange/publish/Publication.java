@@ -49,65 +49,95 @@
 
 package com.openexchange.publish;
 
-import java.sql.SQLException;
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.server.impl.DBPoolingException;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.groupware.contexts.Context;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link Publication}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class PublicationServiceImpl {
-
-    private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
-
-    public void create(Site site) {
-        try {
-            PublicationSQL.addSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during creation of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during creation of a site", e);
-        }
+public class Publication {
+    private int userId;
+    private Context context;
+    private int id;
+    private int entityId;
+    private String module;
+    private String url;
+    private PublicationTarget target;
+    private Map<String, Object> configuration = new HashMap<String, Object>();
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public int getEntityId() {
+        return entityId;
+    }
+    
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+    
+    public String getModule() {
+        return module;
+    }
+    
+    public void setModule(String module) {
+        this.module = module;
+    }
+    
+    public String getUrl() {
+        return url;
+    }
+    
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    
+    public PublicationTarget getTarget() {
+        return target;
+    }
+    
+    public void setTarget(PublicationTarget target) {
+        this.target = target;
+    }
+    
+    public Map<String, Object> getConfiguration() {
+        return configuration;
+    }
+    
+    public void setConfiguration(Map<String, Object> configuration) {
+        this.configuration = configuration;
     }
 
-    public void delete(Site site) {
-        try {
-            PublicationSQL.removeSite(site);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during delete of a site", e);
-        } catch (SQLException e) {
-            LOG.error("Error during delete of a site", e);
-        }
+    
+    public int getUserId() {
+        return userId;
     }
 
-    public Site getSite(Path path) {
-        try {
-            return PublicationSQL.getSite(path);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
+    
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public Site getSite(String path) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    
+    public Context getContext() {
+        return context;
     }
 
-    public Collection<Site> getSites(int contextId, int userId) {
-        try {
-            return PublicationSQL.getSites(contextId, userId);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
+    
+    public void setContext(Context context) {
+        this.context = context;
     }
-
+    
+    
+    
 }
