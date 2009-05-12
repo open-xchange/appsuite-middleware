@@ -106,6 +106,33 @@ public final class MailMessageParser {
 
     private static final int BUF_SIZE = 8192;
 
+    private static interface InlineDetector {
+
+        public boolean isInline(String disposition, String fileName);
+    }
+
+    /**
+     * If disposition equals ignore-case <code>"INLINE"</code>, then it is treated as inline in any case.<br>
+     * Only if disposition is <code>null</code> the file name is examined.
+     */
+    private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
+
+        public boolean isInline(final String disposition, final String fileName) {
+            return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
+        }
+    };
+
+    /**
+     * Considered as inline if disposition equals ignore-case <code>"INLINE"</code> OR is <code>null</code>, but in any case the file name
+     * must be <code>null</code>.
+     */
+    private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
+
+        public boolean isInline(final String disposition, final String fileName) {
+            return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
+        }
+    };
+
     /*
      * +++++++++++++++++++ TNEF CONSTANTS +++++++++++++++++++
      */
@@ -116,15 +143,30 @@ public final class MailMessageParser {
     /*
      * +++++++++++++++++++ MEMBERS +++++++++++++++++++
      */
+
     private boolean stop;
 
     private boolean multipartDetected;
+
+    private InlineDetector inlineDetector;
 
     /**
      * Constructor
      */
     public MailMessageParser() {
         super();
+        inlineDetector = LENIENT_DETECTOR;
+    }
+
+    /**
+     * Switches the INLINE detector behavior.
+     * 
+     * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
+     * @return This parser with new behavior applied
+     */
+    public MailMessageParser setInlineDetectorBehavior(final boolean strict) {
+        inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
+        return this;
     }
 
     /**
@@ -203,7 +245,7 @@ public final class MailMessageParser {
         /*
          * Parse part dependent on its MIME type
          */
-        final boolean isInline = Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (mailPart.getFileName() == null));
+        final boolean isInline = inlineDetector.isInline(disposition, mailPart.getFileName());
         /*-
          * formerly:
          * final boolean isInline = ((disposition == null

@@ -63,6 +63,7 @@ import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -322,9 +323,12 @@ public final class MimeForward {
              * Add all non-inline parts through a handler to keep original sequence IDs
              */
             final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-            new MailMessageParser().parseMailMessage(MIMEMessageConverter.convertMessage(originalMsg), handler);
+            new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(
+                MIMEMessageConverter.convertMessage(originalMsg),
+                handler);
             final List<MailPart> parts = handler.getNonInlineParts();
             for (final MailPart mailPart : parts) {
+                mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
                 compositeMail.addAdditionalParts(mailPart);
             }
             forwardMail = compositeMail;
