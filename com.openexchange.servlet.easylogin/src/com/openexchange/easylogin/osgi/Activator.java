@@ -107,7 +107,7 @@ public class Activator extends DeferredActivator {
 			/*
 			 * Register servlet
 			 */
-			LOG.info("going to register HolgiServlet.....");
+			LOG.info("going to register EasyLoginServlet.....");
 			final HttpService httpService = getService(HttpService.class);
 			httpService.registerServlet(ALIAS, new EasyLogin(), null, null);
 			LOG.info(EasyLogin.class.getName() + " successfully re-registered");
