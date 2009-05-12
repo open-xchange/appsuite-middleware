@@ -339,7 +339,7 @@ public class TestMail implements IdentitySource<TestMail> {
                 setId(values.getString(index));
             }
             // difference between folder and folder_id?
-            if (field == MailListField.FOLDER) {
+            if (field == MailListField.FOLDER_ID) {
                 setFolder(values.getString(index));
             }
             // ints
