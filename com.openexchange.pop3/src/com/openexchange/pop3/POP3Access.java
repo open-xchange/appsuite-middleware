@@ -69,7 +69,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.POP3Config;
-import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.pop3.connect.POP3ConnectCallable;
 import com.openexchange.pop3.storage.POP3Storage;
@@ -212,11 +211,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         return session;
     }
 
-    @Override
-    public int getCacheIdleSeconds() {
-        return (POP3Properties.getInstance().getPOP3ConnectionIdleTime() / 1000);
-    }
-
+    /**
+     * Since POP3 account's messages are kept in a separate storage, a {@link POP3Access POP3 access} is not supposed to be cached.
+     * 
+     * @see com.openexchange.mail.api.MailAccess#isCacheable()
+     */
     @Override
     public boolean isCacheable() {
         return false;
