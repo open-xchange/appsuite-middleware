@@ -307,7 +307,7 @@ public class Contact extends DataServlet {
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
                     if (obj == null) {
-                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "form");
+                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
                     }
 
                     final ContactObject contactobject = new ContactObject();
