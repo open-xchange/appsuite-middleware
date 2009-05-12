@@ -157,16 +157,16 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     
     private void refreshSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
         List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-        int contextId = getSessionObject(req).getContextId();
+        Context context = getSessionObject(req).getContext();
         if(null != req.getParameter("id")) {
             int id = Integer.parseInt(req.getParameter("id"));
-            Subscription subscription = loadSubscription(id, contextId, req.getParameter("source"));
+            Subscription subscription = loadSubscription(id, context, req.getParameter("source"));
             subscriptionsToRefresh.add(subscription);
         }
         if(null != req.getParameter("folder")) {
             int folderId = Integer.parseInt(req.getParameter("folder"));
             FolderObject folder = loadFolder(req, resp, folderId);
-            List<Subscription> allSubscriptions = getSubscriptionsInFolder(contextId, folder);
+            List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder);
             subscriptionsToRefresh.addAll(allSubscriptions);
         }
         
@@ -176,12 +176,12 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
 
     private void listSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         JSONArray ids = new JSONArray(getBody(req));
-        int contextId = getSessionObject(req).getContextId();
+        Context context = getSessionObject(req).getContext();
         List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
         for(int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(contextId, id).getSubscribeService();
-            Subscription subscription = subscribeService.loadSubscription(contextId, id);
+            SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
+            Subscription subscription = subscribeService.loadSubscription(context, id);
             if(subscription != null) {
                 subscriptions.add(subscription);
             }
@@ -195,11 +195,11 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
 
     private void loadAllSubscriptionsInFolder(HttpServletRequest req, HttpServletResponse resp) throws NumberFormatException, AbstractOXException {
         int folderId = Integer.parseInt(req.getParameter("folder"));
-        int contextId = getSessionObject(req).getContextId();
+        Context context = getSessionObject(req).getContext();
         
         FolderObject folder = loadFolder(req, resp, folderId);
         
-        List<Subscription> allSubscriptions = getSubscriptionsInFolder(contextId, folder);
+        List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder);
         
         String[] basicColumns = getBasicColumns(req);
         Map<String, String[]> dynamicColumns = getDynamicColumns(req);
@@ -209,11 +209,11 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         
     }
 
-    private List<Subscription> getSubscriptionsInFolder(int contextId, FolderObject folder) throws AbstractOXException {
+    private List<Subscription> getSubscriptionsInFolder(Context context, FolderObject folder) throws AbstractOXException {
         List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
         for (SubscriptionSource subscriptionSource : sources) {
-            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(contextId, folder.getObjectID());
+            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder.getObjectID());
             allSubscriptions.addAll(subscriptions);
         }
         return allSubscriptions;
@@ -276,8 +276,8 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     private void loadSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, AbstractOXException {
         int id = Integer.parseInt(req.getParameter("id"));
         String source = req.getParameter("source");
-        int contextId = getSessionObject(req).getContextId();
-        Subscription subscription = loadSubscription(id, contextId, source);
+        Context context = getSessionObject(req).getContext();
+        Subscription subscription = loadSubscription(id, context, source);
         writeSubscription(subscription, resp);
     }
 
@@ -286,14 +286,14 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeData(object, resp);
     }
 
-    private Subscription loadSubscription(int id, int contextId, String source) throws AbstractOXException {
+    private Subscription loadSubscription(int id, Context context, String source) throws AbstractOXException {
         SubscribeService service = null;
         if(source != null) {
             service = discovery.getSource(source).getSubscribeService();
         } else {
-            service = discovery.getSource(contextId, id).getSubscribeService();
+            service = discovery.getSource(context, id).getSubscribeService();
         }
-        return service.loadSubscription(contextId, id);
+        return service.loadSubscription(context, id);
     }
 
     private void deleteSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
@@ -301,7 +301,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         Context context = getSessionObject(req).getContext();
         for(int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(context.getContextId(), id).getSubscribeService();
+            SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
             Subscription subscription = new Subscription();
             subscription.setContext(context);
             subscription.setId(id);

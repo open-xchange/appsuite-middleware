@@ -115,9 +115,9 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
     }
 
     @Override
-    public SubscriptionSource getSource(int contextId, int subscriptionId) throws AbstractOXException {
+    public SubscriptionSource getSource(com.openexchange.groupware.contexts.Context context, int subscriptionId) throws AbstractOXException {
         grabAll();
-        return super.getSource(contextId, subscriptionId);
+        return super.getSource(context, subscriptionId);
     }
 
     @Override

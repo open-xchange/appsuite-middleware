@@ -47,21 +47,56 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.xing;
 
-import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 
 /**
- * {@link SubscriptionExecutionService}
+ * {@link XingSubscriptionErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface SubscriptionExecutionService {
-    public void executeSubscription(String sourceId, Context context, int subscriptionId) throws AbstractOXException;
-    public void executeSubscription(Context context, int subscriptionId) throws AbstractOXException;
-    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException;
+public enum XingSubscriptionErrorMessage implements OXErrorMessage {
+    INVALID_LOGIN(Category.USER_INPUT, 1, "Please correct the password and try again", "The password you entered was wrong");
+
+    private Category category;
+    private int errorCode;
+    private String help;
+    private String message;
+    
+    public static final XingSubscriptionExceptionFactory EXCEPTIONS = new XingSubscriptionExceptionFactory();
+    
+    private XingSubscriptionErrorMessage(Category category, int errorCode, String help, String message) {
+        this.category = category;
+        this.errorCode = errorCode;
+        this.help = help;
+        this.message = message;
+    }
+    
+    public Category getCategory() {
+        return category;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public String getHelp() {
+        return help;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    
+    public XingSubscriptionException create(Throwable cause, Object...args) {
+        return EXCEPTIONS.create(this, cause, args);
+    }
+    
+    public XingSubscriptionException create(Object...args) {
+        return EXCEPTIONS.create(this, args);
+    }
 }

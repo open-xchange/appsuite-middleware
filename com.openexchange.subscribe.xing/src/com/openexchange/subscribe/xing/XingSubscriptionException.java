@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.xing;
 
-import java.util.List;
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link SubscriptionExecutionService}
+ * {@link XingSubscriptionException}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface SubscriptionExecutionService {
-    public void executeSubscription(String sourceId, Context context, int subscriptionId) throws AbstractOXException;
-    public void executeSubscription(Context context, int subscriptionId) throws AbstractOXException;
-    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException;
+public class XingSubscriptionException extends AbstractOXException {
+
+    public XingSubscriptionException(ErrorMessage message, Throwable cause, Object[] args) {
+        super(message, cause);
+        setMessageArgs(args);
+        
+    }
+
 }

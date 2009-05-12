@@ -93,4 +93,12 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     }
     
     
+    public SubscriptionException create(Throwable cause, Object...args) {
+        return EXCEPTIONS.create(this,cause, args);
+    }
+    
+    public SubscriptionException create(Object...args) {
+        return EXCEPTIONS.create(this,args);
+    }
+    
 }

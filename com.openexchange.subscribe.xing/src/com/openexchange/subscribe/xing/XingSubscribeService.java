@@ -56,6 +56,7 @@ import java.util.Map;
 import org.xml.sax.SAXException;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -103,5 +104,5 @@ public class XingSubscribeService extends AbstractSubscribeService{
         }
         return null;
     }
-
+    
 }

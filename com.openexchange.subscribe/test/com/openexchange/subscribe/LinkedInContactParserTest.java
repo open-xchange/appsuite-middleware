@@ -16,7 +16,7 @@ import junit.framework.TestCase;
  */
 public class LinkedInContactParserTest extends TestCase {
 	
-	public void testGetLinkedInContacts() {
+	/*public void testGetLinkedInContacts() {
 		LinkedInContactParser parser = new LinkedInContactParser();
 		// Enter valid credentials for linkedin.com here
 		String linkedInUser = "";
@@ -37,6 +37,6 @@ public class LinkedInContactParserTest extends TestCase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 }

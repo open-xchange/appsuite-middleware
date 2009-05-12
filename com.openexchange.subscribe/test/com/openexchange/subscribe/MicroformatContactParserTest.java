@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 
 public class MicroformatContactParserTest extends TestCase {
-    public String wellBehavedHtml = 
+    /*public String wellBehavedHtml = 
         "<div class=\"ox-contact\">\n" +
         "   <img class=\"image1\" src=\"bla.png\"></img>\n" + 
         "   <span class=\"surname\">Hans</span>\n"+
@@ -42,5 +42,5 @@ public class MicroformatContactParserTest extends TestCase {
         assertEquals("Family name", "Meier", contact.getGivenName() );
         assertEquals("E-Mail", "Hans.Meier@tralala.invalid", contact.getEmail1() );
     }
-
+*/
 }

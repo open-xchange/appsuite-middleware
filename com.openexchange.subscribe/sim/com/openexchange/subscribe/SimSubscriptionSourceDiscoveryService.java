@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -87,7 +88,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
         sources.put(source.getId(), source);
     }
 
-    public SubscriptionSource getSource(int contextId, int subscriptionId) {
+    public SubscriptionSource getSource(Context context, int subscriptionId) {
         return getSource(lookupIdentifier);
     }
     

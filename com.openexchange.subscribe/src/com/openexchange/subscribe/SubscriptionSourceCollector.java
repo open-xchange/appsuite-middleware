@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -100,13 +101,14 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         services.remove(identifier);        
     }
 
-    public SubscriptionSource getSource(int contextId, int subscriptionId) throws AbstractOXException {
+    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
         for(SubscribeService source : services.values()) {
-            if(source.knows(contextId, subscriptionId)) {
+            if(source.knows(context, subscriptionId)) {
                 return source.getSubscriptionSource();
             }
         }
         return null;
     }
+
 
 }

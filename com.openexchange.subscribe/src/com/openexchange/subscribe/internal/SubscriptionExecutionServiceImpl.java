@@ -55,6 +55,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.FolderUpdaterService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -83,9 +84,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         this.contextService = contexts;
     }
 
-    public void executeSubscription(String sourceId, int contextId, int subscriptionId) throws AbstractOXException {
+    public void executeSubscription(String sourceId, Context context, int subscriptionId) throws AbstractOXException {
         SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
-        Subscription subscription = subscribeService.loadSubscription(contextId, subscriptionId);
+        Subscription subscription = subscribeService.loadSubscription(context, subscriptionId);
         Collection data = subscribeService.getContent(subscription);
 
         storeData(data, subscription);
@@ -118,10 +119,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return ofa.getFolderObject(folderId);
     }
 
-    public void executeSubscription(int contextId, int subscriptionId) throws AbstractOXException {
-        SubscriptionSource source = discoverer.getSource(contextId, subscriptionId);
+    public void executeSubscription(Context context, int subscriptionId) throws AbstractOXException {
+        SubscriptionSource source = discoverer.getSource(context, subscriptionId);
         SubscribeService subscribeService = source.getSubscribeService();
-        Subscription subscription = subscribeService.loadSubscription(contextId, subscriptionId);
+        Subscription subscription = subscribeService.loadSubscription(context, subscriptionId);
         Collection data = subscribeService.getContent(subscription);
         storeData(data, subscription);
 

@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 
 /**
@@ -91,11 +92,11 @@ public class SimSubscribeService implements SubscribeService {
         return true;
     }
 
-    public Collection<Subscription> loadSubscriptions(int contextId, int folderId) {
+    public Collection<Subscription> loadSubscriptions(Context context, int folderId) {
         return null;
     }
 
-    public Collection<Subscription> loadForUser(int contextId, int userId) {
+    public Collection<Subscription> loadForUser(Context context, int userId) {
         return null;
     }
 
@@ -115,9 +116,9 @@ public class SimSubscribeService implements SubscribeService {
         return content;
     }
 
-    public Subscription loadSubscription(int contextId, int subscriptionId) {
+    public Subscription loadSubscription(Context context, int subscriptionId) {
         Subscription subscriptionIdMemo = new Subscription();
-        subscriptionIdMemo.setContext(new SimContext(contextId));
+        subscriptionIdMemo.setContext(context);
         subscriptionIdMemo.setId(subscriptionId);
         subscriptionIds.add(subscriptionIdMemo);
         return subscription;
@@ -135,7 +136,7 @@ public class SimSubscribeService implements SubscribeService {
         this.content = content;
     }
     
-    public boolean knows(int contextId, int subscriptionId) {
+    public boolean knows(Context context, int subscriptionId) {
         return true;
     }
 
