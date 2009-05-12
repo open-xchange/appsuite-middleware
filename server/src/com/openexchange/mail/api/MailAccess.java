@@ -216,10 +216,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 return mailAccess;
             }
         }
-        /*
-         * No cached connection available, check for admin login
-         */
-        checkAdminLogin(session, accountId);
+        if (MailAccount.DEFAULT_ID == accountId) {
+            /*
+             * No cached connection available, check for admin login
+             */
+            checkAdminLogin(session, accountId);
+        }
         /*
          * Check if a new connection may be established
          */
@@ -499,6 +501,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private final MailConfig createMailConfig() throws MailException {
         final MailConfig instance = createNewMailConfig();
+        instance.setMailProperties(createNewMailProperties());
         return MailConfig.getConfig(instance.getClass(), instance, session, accountId);
     }
 
@@ -581,11 +584,19 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets a implementation-specific new instance of {@link MailConfig}.
+     * Gets an implementation-specific new instance of {@link MailConfig}.
      * 
-     * @return A implementation-specific new instance of {@link MailConfig}
+     * @return An implementation-specific new instance of {@link MailConfig}
      */
     protected abstract MailConfig createNewMailConfig();
+
+    /**
+     * Gets an implementation-specific new instance of {@link IMailProperties}.
+     * 
+     * @return An implementation-specific new instance of {@link IMailProperties}
+     * @throws MailException If creating a new instance of {@link IMailProperties} fails
+     */
+    protected abstract IMailProperties createNewMailProperties() throws MailException;
 
     /**
      * Defines if mail server port has to be present in provided mail configuration before establishing any connection.

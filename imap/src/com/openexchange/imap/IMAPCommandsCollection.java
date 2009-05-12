@@ -75,7 +75,7 @@ import javax.mail.StoreClosedException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
-import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -880,10 +880,11 @@ public final class IMAPCommandsCollection {
      * @param folder The IMAP folder
      * @param fields The desired fields
      * @param sortField The sort-by field
+     * @param imapProperties The IMAP properties
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final IIMAPProperties imapProperties) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -947,9 +948,9 @@ public final class IMAPCommandsCollection {
                     final MailField sort = MailField.toField(sortField.getListField());
                     final FetchProfile fp;
                     if (null == sort) {
-                        fp = getFetchProfile(fields, IMAPConfig.isFastFetch());
+                        fp = getFetchProfile(fields, imapProperties.isFastFetch());
                     } else {
-                        fp = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
+                        fp = getFetchProfile(fields, sort, imapProperties.isFastFetch());
                     }
                     newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {

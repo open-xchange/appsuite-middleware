@@ -60,19 +60,26 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtensionInit;
+import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
+import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.imap.IMAPStore;
@@ -228,17 +235,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return;
         }
         try {
-            final boolean tmpDownEnabled = (IMAPConfig.getImapTemporaryDown() > 0);
+            final IIMAPProperties imapConfProps = (IIMAPProperties) getMailConfig().getMailProperties();
+            final boolean tmpDownEnabled = (imapConfProps.getImapTemporaryDown() > 0);
             if (tmpDownEnabled) {
                 /*
                  * Check if IMAP server is marked as being (temporary) down since connecting to it failed before
                  */
-                checkTemporaryDown();
+                checkTemporaryDown(imapConfProps);
             }
             String tmpPass = getMailConfig().getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
+                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -254,6 +262,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
             if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
                 imapProps.putAll(getMailProperties());
+            }
+            /*
+             * Set timeouts
+             */
+            if (imapConfProps.getImapTimeout() > 0) {
+                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(imapConfProps.getImapTimeout()));
+            }
+            if (imapConfProps.getImapConnectionTimeout() > 0) {
+                imapProps.put(
+                    MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT,
+                    String.valueOf(imapConfProps.getImapConnectionTimeout()));
             }
             /*
              * Check if a secure IMAP connection should be established
@@ -342,11 +361,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private void checkTemporaryDown() throws MailException, IMAPException {
+    private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws MailException, IMAPException {
         final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
         final Long range = timedOutServers.get(key);
         if (range != null) {
-            if (System.currentTimeMillis() - range.longValue() <= IMAPConfig.getImapTemporaryDown()) {
+            if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
                 /*
                  * Still treated as being temporary broken
                  */
@@ -562,6 +581,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    protected IMailProperties createNewMailProperties() throws MailException {
+        try {
+            final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        } catch (final ServiceException e) {
+            throw new IMAPException(e);
+        } catch (final MailAccountException e) {
+            throw new IMAPException(e);
         }
     }
 

@@ -525,11 +525,6 @@ public final class IMAPFolderConverter {
      * @throws MailException If ACLs cannot be mapped
      */
     private static void applyACL2Permissions(final IMAPFolder imapFolder, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws MailException {
-        if (IMAPConfig.hasNewACLExt(imapConfig.getServer()) && !ownRights.contains(Rights.Right.ADMINISTER)) {
-            // Just add own permission and return
-            addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
-            return;
-        }
         final ACL[] acls;
         try {
             acls = imapFolder.getACL();
@@ -542,10 +537,6 @@ public final class IMAPFolderConverter {
                             ", which denies GETACL command if no ADMINISTER right is granted."),
                         e);
                 }
-                /*
-                 * Remember newer IMAP server's ACL extension
-                 */
-                IMAPConfig.setNewACLExt(imapConfig.getServer(), true);
                 addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
                 return;
             }

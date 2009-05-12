@@ -54,328 +54,326 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link IMAPProperties}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
-public final class IMAPProperties extends AbstractProtocolProperties {
+public final class IMAPProperties extends AbstractProtocolProperties implements IIMAPProperties {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPProperties.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPProperties.class);
 
-	private static final IMAPProperties instance = new IMAPProperties();
+    private static final IMAPProperties instance = new IMAPProperties();
 
-	/**
-	 * Gets the singleton instance of {@link IMAPProperties}
-	 * 
-	 * @return The singleton instance of {@link IMAPProperties}
-	 */
-	public static IMAPProperties getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link IMAPProperties}
+     * 
+     * @return The singleton instance of {@link IMAPProperties}
+     */
+    public static IMAPProperties getInstance() {
+        return instance;
+    }
 
-	/*
-	 * Fields for global properties
-	 */
-	private boolean imapSort;
+    /*-
+     * Fields for global properties
+     */
 
-	private boolean imapSearch;
+    private final IMailProperties mailProperties;
 
-	private boolean fastFetch;
+    private boolean imapSort;
 
-	private BoolCapVal supportsACLs;
+    private boolean imapSearch;
 
-	private int imapTimeout;
+    private boolean fastFetch;
 
-	private int imapConnectionTimeout;
+    private BoolCapVal supportsACLs;
 
-	private int imapConnectionIdleTime;
+    private int imapTimeout;
 
-	private int imapTemporaryDown;
+    private int imapConnectionTimeout;
 
-	private String imapAuthEnc;
+    private int imapConnectionIdleTime;
 
-	private String entity2AclImpl;
+    private int imapTemporaryDown;
 
-	private int blockSize;
+    private String imapAuthEnc;
 
-	private final Map<String, Boolean> newACLExtMap;
+    private String entity2AclImpl;
 
-	private String spamHandlerName;
+    private int blockSize;
 
-	/**
-	 * Initializes a new {@link IMAPProperties}
-	 */
-	private IMAPProperties() {
-		super();
-		newACLExtMap = new ConcurrentHashMap<String, Boolean>();
-	}
+    private final Map<String, Boolean> newACLExtMap;
 
-	@Override
-	protected void loadProperties0() throws MailConfigException {
-		final StringBuilder logBuilder = new StringBuilder(1024);
-		logBuilder.append("\nLoading global IMAP properties...\n");
+    private String spamHandlerName;
 
-		final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
-		{
-			final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application")
-					.trim();
-			imapSort = "imap".equalsIgnoreCase(imapSortStr);
-			logBuilder.append("\tIMAP-Sort: ").append(imapSort).append('\n');
-		}
+    /**
+     * Initializes a new {@link IMAPProperties}
+     */
+    private IMAPProperties() {
+        super();
+        newACLExtMap = new ConcurrentHashMap<String, Boolean>();
+        mailProperties = MailProperties.getInstance();
+    }
 
-		{
-			final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
-			imapSearch = "imap".equalsIgnoreCase(imapSearchStr);
-			logBuilder.append("\tIMAP-Search: ").append(imapSearch).append('\n');
-		}
+    @Override
+    protected void loadProperties0() throws MailConfigException {
+        final StringBuilder logBuilder = new StringBuilder(1024);
+        logBuilder.append("\nLoading global IMAP properties...\n");
 
-		{
-			final String fastFetchStr = configuration.getProperty("com.openexchange.imap.imapFastFetch", STR_TRUE)
-					.trim();
-			fastFetch = Boolean.parseBoolean(fastFetchStr);
-			logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
-		}
+        final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
+        {
+            final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application").trim();
+            imapSort = "imap".equalsIgnoreCase(imapSortStr);
+            logBuilder.append("\tIMAP-Sort: ").append(imapSort).append('\n');
+        }
 
-		{
-			final String supportsACLsStr = configuration
-					.getProperty("com.openexchange.imap.imapSupportsACL", STR_FALSE).trim();
-			supportsACLs = BoolCapVal.parseBoolCapVal(supportsACLsStr);
-			logBuilder.append("\tSupport ACLs: ").append(supportsACLs).append('\n');
-		}
+        {
+            final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
+            imapSearch = "imap".equalsIgnoreCase(imapSearchStr);
+            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append('\n');
+        }
 
-		{
-			final String imapTimeoutStr = configuration.getProperty("com.openexchange.imap.imapTimeout", "0").trim();
-			try {
-				imapTimeout = Integer.parseInt(imapTimeoutStr);
-				logBuilder.append("\tIMAP Timeout: ").append(imapTimeout).append('\n');
-			} catch (final NumberFormatException e) {
-				imapTimeout = 0;
-				logBuilder.append("\tIMAP Timeout: Invalid value \"").append(imapTimeoutStr).append(
-						"\". Setting to fallback: ").append(imapTimeout).append('\n');
-			}
-		}
+        {
+            final String fastFetchStr = configuration.getProperty("com.openexchange.imap.imapFastFetch", STR_TRUE).trim();
+            fastFetch = Boolean.parseBoolean(fastFetchStr);
+            logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
+        }
 
-		{
-			final String imapConTimeoutStr = configuration.getProperty("com.openexchange.imap.imapConnectionTimeout",
-					"0").trim();
-			try {
-				imapConnectionTimeout = Integer.parseInt(imapConTimeoutStr);
-				logBuilder.append("\tIMAP Connection Timeout: ").append(imapConnectionTimeout).append('\n');
-			} catch (final NumberFormatException e) {
-				imapConnectionTimeout = 0;
-				logBuilder.append("\tIMAP Connection Timeout: Invalid value \"").append(imapConTimeoutStr).append(
-						"\". Setting to fallback: ").append(imapConnectionTimeout).append('\n');
-			}
-		}
+        {
+            final String supportsACLsStr = configuration.getProperty("com.openexchange.imap.imapSupportsACL", STR_FALSE).trim();
+            supportsACLs = BoolCapVal.parseBoolCapVal(supportsACLsStr);
+            logBuilder.append("\tSupport ACLs: ").append(supportsACLs).append('\n');
+        }
 
-		{
-			final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0")
-					.trim();
-			try {
-				imapTemporaryDown = Integer.parseInt(imapTempDownStr);
-				logBuilder.append("\tIMAP Temporary Down: ").append(imapTemporaryDown).append('\n');
-			} catch (final NumberFormatException e) {
-				imapTemporaryDown = 0;
-				logBuilder.append("\tIMAP Temporary Down: Invalid value \"").append(imapTempDownStr).append(
-						"\". Setting to fallback: ").append(imapTemporaryDown).append('\n');
-			}
-		}
+        {
+            final String imapTimeoutStr = configuration.getProperty("com.openexchange.imap.imapTimeout", "0").trim();
+            try {
+                imapTimeout = Integer.parseInt(imapTimeoutStr);
+                logBuilder.append("\tIMAP Timeout: ").append(imapTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                imapTimeout = 0;
+                logBuilder.append("\tIMAP Timeout: Invalid value \"").append(imapTimeoutStr).append("\". Setting to fallback: ").append(
+                    imapTimeout).append('\n');
+            }
+        }
 
-		{
-			final String maxConIdleTime = configuration.getProperty("com.openexchange.imap.maxIMAPConnectionIdleTime",
-					"60000").trim();
-			try {
-				imapConnectionIdleTime = Integer.parseInt(maxConIdleTime);
-				logBuilder.append("\tMax IMAP Connection Idle Time: ").append(imapConnectionIdleTime).append('\n');
-			} catch (final NumberFormatException e) {
-				imapConnectionIdleTime = 60000;
-				logBuilder.append("\tMax IMAP Connection Idle Time: Invalid value \"").append(maxConIdleTime).append(
-						"\". Setting to fallback: ").append(imapConnectionIdleTime).append('\n');
-			}
-		}
+        {
+            final String imapConTimeoutStr = configuration.getProperty("com.openexchange.imap.imapConnectionTimeout", "0").trim();
+            try {
+                imapConnectionTimeout = Integer.parseInt(imapConTimeoutStr);
+                logBuilder.append("\tIMAP Connection Timeout: ").append(imapConnectionTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                imapConnectionTimeout = 0;
+                logBuilder.append("\tIMAP Connection Timeout: Invalid value \"").append(imapConTimeoutStr).append(
+                    "\". Setting to fallback: ").append(imapConnectionTimeout).append('\n');
+            }
+        }
 
-		{
-			final String imapAuthEncStr = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8")
-					.trim();
-			if (Charset.isSupported(imapAuthEncStr)) {
-				imapAuthEnc = imapAuthEncStr;
-				logBuilder.append("\tAuthentication Encoding: ").append(imapAuthEnc).append('\n');
-			} else {
-				imapAuthEnc = "UTF-8";
-				logBuilder.append("\tAuthentication Encoding: Unsupported charset \"").append(imapAuthEncStr).append(
-						"\". Setting to fallback: ").append(imapAuthEnc).append('\n');
-			}
-		}
+        {
+            final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0").trim();
+            try {
+                imapTemporaryDown = Integer.parseInt(imapTempDownStr);
+                logBuilder.append("\tIMAP Temporary Down: ").append(imapTemporaryDown).append('\n');
+            } catch (final NumberFormatException e) {
+                imapTemporaryDown = 0;
+                logBuilder.append("\tIMAP Temporary Down: Invalid value \"").append(imapTempDownStr).append("\". Setting to fallback: ").append(
+                    imapTemporaryDown).append('\n');
+            }
+        }
 
-		{
-			entity2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
-			if (null == entity2AclImpl) {
-				throw new MailConfigException("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
-			}
-			entity2AclImpl = entity2AclImpl.trim();
-		}
+        {
+            final String maxConIdleTime = configuration.getProperty("com.openexchange.imap.maxIMAPConnectionIdleTime", "60000").trim();
+            try {
+                imapConnectionIdleTime = Integer.parseInt(maxConIdleTime);
+                logBuilder.append("\tMax IMAP Connection Idle Time: ").append(imapConnectionIdleTime).append('\n');
+            } catch (final NumberFormatException e) {
+                imapConnectionIdleTime = 60000;
+                logBuilder.append("\tMax IMAP Connection Idle Time: Invalid value \"").append(maxConIdleTime).append(
+                    "\". Setting to fallback: ").append(imapConnectionIdleTime).append('\n');
+            }
+        }
 
-		{
-			final String blockSizeStr = configuration.getProperty("com.openexchange.imap.blockSize", "1000").trim();
-			try {
-				blockSize = Integer.parseInt(blockSizeStr);
-				logBuilder.append("\tBlock Size: ").append(blockSize).append('\n');
-			} catch (final NumberFormatException e) {
-				blockSize = 1000;
-				logBuilder.append("\tBlock Size: Invalid value \"").append(blockSizeStr).append(
-						"\". Setting to fallback: ").append(blockSize).append('\n');
-			}
-		}
+        {
+            final String imapAuthEncStr = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
+            if (Charset.isSupported(imapAuthEncStr)) {
+                imapAuthEnc = imapAuthEncStr;
+                logBuilder.append("\tAuthentication Encoding: ").append(imapAuthEnc).append('\n');
+            } else {
+                imapAuthEnc = "UTF-8";
+                logBuilder.append("\tAuthentication Encoding: Unsupported charset \"").append(imapAuthEncStr).append(
+                    "\". Setting to fallback: ").append(imapAuthEnc).append('\n');
+            }
+        }
 
-		spamHandlerName = configuration.getProperty("com.openexchange.imap.spamHandler",
-				SpamHandler.SPAM_HANDLER_FALLBACK).trim();
-		logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
+        {
+            entity2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
+            if (null == entity2AclImpl) {
+                throw new MailConfigException("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
+            }
+            entity2AclImpl = entity2AclImpl.trim();
+        }
 
-		logBuilder.append("Global IMAP properties successfully loaded!");
-		if (LOG.isInfoEnabled()) {
-			LOG.info(logBuilder.toString());
-		}
-	}
+        {
+            final String blockSizeStr = configuration.getProperty("com.openexchange.imap.blockSize", "1000").trim();
+            try {
+                blockSize = Integer.parseInt(blockSizeStr);
+                logBuilder.append("\tBlock Size: ").append(blockSize).append('\n');
+            } catch (final NumberFormatException e) {
+                blockSize = 1000;
+                logBuilder.append("\tBlock Size: Invalid value \"").append(blockSizeStr).append("\". Setting to fallback: ").append(
+                    blockSize).append('\n');
+            }
+        }
 
-	@Override
-	protected void resetFields() {
-		imapSort = false;
-		imapSearch = false;
-		fastFetch = false;
-		supportsACLs = null;
-		imapTimeout = 0;
-		imapConnectionTimeout = 0;
-		imapConnectionIdleTime = 0;
-		imapTemporaryDown = 0;
-		imapAuthEnc = null;
-		entity2AclImpl = null;
-		blockSize = 0;
-		spamHandlerName = null;
-	}
+        spamHandlerName = configuration.getProperty("com.openexchange.imap.spamHandler", SpamHandler.SPAM_HANDLER_FALLBACK).trim();
+        logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
-	/**
-	 * Gets the fastFetch
-	 * 
-	 * @return the fastFetch
-	 */
-	boolean isFastFetch() {
-		return fastFetch;
-	}
+        logBuilder.append("Global IMAP properties successfully loaded!");
+        if (LOG.isInfoEnabled()) {
+            LOG.info(logBuilder.toString());
+        }
+    }
 
-	/**
-	 * Gets the imapAuthEnc
-	 * 
-	 * @return the imapAuthEnc
-	 */
-	String getImapAuthEnc() {
-		return imapAuthEnc;
-	}
+    @Override
+    protected void resetFields() {
+        imapSort = false;
+        imapSearch = false;
+        fastFetch = false;
+        supportsACLs = null;
+        imapTimeout = 0;
+        imapConnectionTimeout = 0;
+        imapConnectionIdleTime = 0;
+        imapTemporaryDown = 0;
+        imapAuthEnc = null;
+        entity2AclImpl = null;
+        blockSize = 0;
+        spamHandlerName = null;
+    }
 
-	/**
-	 * Gets the imapConnectionIdleTime
-	 * 
-	 * @return the imapConnectionIdleTime
-	 */
-	int getImapConnectionIdleTime() {
-		return imapConnectionIdleTime;
-	}
+    public boolean isFastFetch() {
+        return fastFetch;
+    }
 
-	/**
-	 * Gets the imapConnectionTimeout
-	 * 
-	 * @return the imapConnectionTimeout
-	 */
-	int getImapConnectionTimeout() {
-		return imapConnectionTimeout;
-	}
+    public String getImapAuthEnc() {
+        return imapAuthEnc;
+    }
 
-	/**
-	 * Gets the imapTemporaryDown
-	 * 
-	 * @return the imapTemporaryDown
-	 */
-	int getImapTemporaryDown() {
-		return imapTemporaryDown;
-	}
+    public int getImapConnectionIdleTime() {
+        return imapConnectionIdleTime;
+    }
 
-	/**
-	 * Gets the imapSearch
-	 * 
-	 * @return the imapSearch
-	 */
-	boolean isImapSearch() {
-		return imapSearch;
-	}
+    public int getImapConnectionTimeout() {
+        return imapConnectionTimeout;
+    }
 
-	/**
-	 * Gets the imapSort
-	 * 
-	 * @return the imapSort
-	 */
-	boolean isImapSort() {
-		return imapSort;
-	}
+    public int getImapTemporaryDown() {
+        return imapTemporaryDown;
+    }
 
-	/**
-	 * Gets the imapTimeout
-	 * 
-	 * @return the imapTimeout
-	 */
-	int getImapTimeout() {
-		return imapTimeout;
-	}
+    public boolean isImapSearch() {
+        return imapSearch;
+    }
 
-	/**
-	 * Gets the supportsACLs
-	 * 
-	 * @return the supportsACLs
-	 */
-	BoolCapVal getSupportsACLs() {
-		return supportsACLs;
-	}
+    public boolean isImapSort() {
+        return imapSort;
+    }
 
-	/**
-	 * Gets the entity2AclImpl
-	 * 
-	 * @return the entity2AclImpl
-	 */
-	String getEntity2AclImpl() {
-		return entity2AclImpl;
-	}
+    public int getImapTimeout() {
+        return imapTimeout;
+    }
 
-	/**
-	 * Gets the block size in which large IMAP commands' UIDs/sequence numbers
-	 * arguments get splitted
-	 * 
-	 * @return The block size
-	 */
-	int getBlockSize() {
-		return blockSize;
-	}
+    public BoolCapVal getSupportsACLs() {
+        return supportsACLs;
+    }
 
-	/**
-	 * Gets the newACLExtMap
-	 * 
-	 * @return the newACLExtMap
-	 */
-	Map<String, Boolean> getNewACLExtMap() {
-		return newACLExtMap;
-	}
+    /**
+     * Gets the {@link Entity2ACL}.
+     * 
+     * @return The {@link Entity2ACL}
+     */
+    public String getEntity2AclImpl() {
+        return entity2AclImpl;
+    }
 
-	/**
-	 * Gets the spam handler name
-	 * 
-	 * @return The spam handler name
-	 */
-	String getSpamHandlerName() {
-		return spamHandlerName;
-	}
+    public int getBlockSize() {
+        return blockSize;
+    }
+
+    public Map<String, Boolean> getNewACLExtMap() {
+        return newACLExtMap;
+    }
+
+    /**
+     * Gets the spam handler name.
+     * 
+     * @return The spam handler name
+     */
+    public String getSpamHandlerName() {
+        return spamHandlerName;
+    }
+
+    public int getAttachDisplaySize() {
+        return mailProperties.getAttachDisplaySize();
+    }
+
+    public char getDefaultSeparator() {
+        return mailProperties.getDefaultSeparator();
+    }
+
+    public int getMailAccessCacheIdleSeconds() {
+        return mailProperties.getMailAccessCacheIdleSeconds();
+    }
+
+    public int getMailAccessCacheShrinkerSeconds() {
+        return mailProperties.getMailAccessCacheShrinkerSeconds();
+    }
+
+    public int getMailFetchLimit() {
+        return mailProperties.getMailFetchLimit();
+    }
+
+    public int getMaxNumOfConnections() {
+        return mailProperties.getMaxNumOfConnections();
+    }
+
+    public int getWatcherFrequency() {
+        return mailProperties.getWatcherFrequency();
+    }
+
+    public int getWatcherTime() {
+        return mailProperties.getWatcherTime();
+    }
+
+    public boolean isAllowNestedDefaultFolderOnAltNamespace() {
+        return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
+    }
+
+    public boolean isIgnoreSubscription() {
+        return mailProperties.isIgnoreSubscription();
+    }
+
+    public boolean isSupportSubscription() {
+        return mailProperties.isSupportSubscription();
+    }
+
+    public boolean isUserFlagsEnabled() {
+        return mailProperties.isUserFlagsEnabled();
+    }
+
+    public boolean isWatcherEnabled() {
+        return mailProperties.isWatcherEnabled();
+    }
+
+    public boolean isWatcherShallClose() {
+        return mailProperties.isWatcherShallClose();
+    }
+
 }

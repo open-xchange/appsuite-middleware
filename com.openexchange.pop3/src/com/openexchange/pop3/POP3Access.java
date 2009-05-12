@@ -62,20 +62,26 @@ import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.pop3.connect.POP3ConnectCallable;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.util.POP3StorageUtil;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
 /**
@@ -427,6 +433,20 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected boolean checkMailServerPort() {
         return true;
+    }
+
+    @Override
+    protected IMailProperties createNewMailProperties() throws MailException {
+        try {
+            final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        } catch (final ServiceException e) {
+            throw new POP3Exception(e);
+        } catch (final MailAccountException e) {
+            throw new POP3Exception(e);
+        }
     }
 
 }

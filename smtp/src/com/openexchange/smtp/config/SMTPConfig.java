@@ -50,156 +50,113 @@
 package com.openexchange.smtp.config;
 
 import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 
 /**
- * {@link SMTPConfig}
+ * {@link SMTPConfig} - The SMTP configuration.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SMTPConfig extends TransportConfig {
 
-	private static final String PROTOCOL_SMTP_SECURE = "smtps";
+    private static final String PROTOCOL_SMTP_SECURE = "smtps";
 
-	/**
-	 * Gets the smtpAuthEnc
-	 * 
-	 * @return the smtpAuthEnc
-	 */
-	public static String getSmtpAuthEnc() {
-		return SMTPProperties.getInstance().getSmtpAuthEnc();
-	}
+    /*
+     * +++++++++ User-specific fields +++++++++
+     */
 
-	/**
-	 * Gets the smtpConnectionTimeout
-	 * 
-	 * @return the smtpConnectionTimeout
-	 */
-	public static int getSmtpConnectionTimeout() {
-		return SMTPProperties.getInstance().getSmtpConnectionTimeout();
-	}
+    private boolean secure;
 
-	/**
-	 * Gets the smtpLocalhost
-	 * 
-	 * @return the smtpLocalhost
-	 */
-	public static String getSmtpLocalhost() {
-		return SMTPProperties.getInstance().getSmtpLocalhost();
-	}
+    private int smtpPort;
 
-	/**
-	 * Gets the smtpTimeout
-	 * 
-	 * @return the smtpTimeout
-	 */
-	public static int getSmtpTimeout() {
-		return SMTPProperties.getInstance().getSmtpTimeout();
-	}
+    private String smtpServer;
 
-	/**
-	 * Gets the smtpAuth
-	 * 
-	 * @return the smtpAuth
-	 */
-	public static boolean isSmtpAuth() {
-		return SMTPProperties.getInstance().isSmtpAuth();
-	}
+    private ISMTPProperties transportProperties;
 
-	/**
-	 * Gets the smtpEnvelopeFrom
-	 * 
-	 * @return the smtpEnvelopeFrom
-	 */
-	public static boolean isSmtpEnvelopeFrom() {
-		return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
-	}
+    /**
+     * Default constructor
+     */
+    public SMTPConfig() {
+        super();
+    }
 
-	/*
-	 * +++++++++ User-specific fields +++++++++
-	 */
+    @Override
+    public MailCapabilities getCapabilities() {
+        return MailCapabilities.EMPTY_CAPS;
+    }
 
-	private boolean secure;
+    /**
+     * Gets the smtpPort
+     * 
+     * @return the smtpPort
+     */
+    @Override
+    public int getPort() {
+        return smtpPort;
+    }
 
-	private int smtpPort;
+    /**
+     * Gets the smtpServer
+     * 
+     * @return the smtpServer
+     */
+    @Override
+    public String getServer() {
+        return smtpServer;
+    }
 
-	private String smtpServer;
+    @Override
+    public boolean isSecure() {
+        return secure;
+    }
 
-	/**
-	 * Default constructor
-	 */
-	public SMTPConfig() {
-		super();
-	}
+    @Override
+    protected void parseServerURL(final String serverURL) {
+        smtpServer = serverURL;
+        smtpPort = 25;
+        {
+            final String[] parsed = parseProtocol(smtpServer);
+            if (parsed == null) {
+                secure = false;
+            } else {
+                secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
+                smtpServer = parsed[1];
+            }
+            final int pos = smtpServer.indexOf(':');
+            if (pos > -1) {
+                smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
+                smtpServer = smtpServer.substring(0, pos);
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
-	 */
-	@Override
-	public MailCapabilities getCapabilities() {
-		return MailCapabilities.EMPTY_CAPS;
-	}
+    @Override
+    public void setPort(final int smtpPort) {
+        this.smtpPort = smtpPort;
+    }
 
-	/**
-	 * Gets the smtpPort
-	 * 
-	 * @return the smtpPort
-	 */
-	@Override
-	public int getPort() {
-		return smtpPort;
-	}
+    @Override
+    public void setSecure(final boolean secure) {
+        this.secure = secure;
+    }
 
-	/**
-	 * Gets the smtpServer
-	 * 
-	 * @return the smtpServer
-	 */
-	@Override
-	public String getServer() {
-		return smtpServer;
-	}
+    @Override
+    public void setServer(final String smtpServer) {
+        this.smtpServer = smtpServer;
+    }
 
-	@Override
-	public boolean isSecure() {
-		return secure;
-	}
+    @Override
+    public ITransportProperties getTransportProperties() {
+        return transportProperties;
+    }
 
-	@Override
-	protected void parseServerURL(final String serverURL) {
-		smtpServer = serverURL;
-		smtpPort = 25;
-		{
-			final String[] parsed = parseProtocol(smtpServer);
-			if (parsed == null) {
-				secure = false;
-			} else {
-				secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-				smtpServer = parsed[1];
-			}
-			final int pos = smtpServer.indexOf(':');
-			if (pos > -1) {
-				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-				smtpServer = smtpServer.substring(0, pos);
-			}
-		}
-	}
+    public ISMTPProperties getSMTPProperties() {
+        return transportProperties;
+    }
 
-	@Override
-	public void setPort(final int smtpPort) {
-		this.smtpPort = smtpPort;
-	}
-
-	@Override
-	public void setSecure(final boolean secure) {
-		this.secure = secure;
-	}
-
-	@Override
-	public void setServer(final String smtpServer) {
-		this.smtpServer = smtpServer;
-	}
+    @Override
+    public void setTransportProperties(final ITransportProperties transportProperties) {
+        this.transportProperties = (ISMTPProperties) transportProperties;
+    }
 }

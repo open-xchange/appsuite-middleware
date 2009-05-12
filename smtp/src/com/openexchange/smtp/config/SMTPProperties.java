@@ -50,205 +50,164 @@
 package com.openexchange.smtp.config;
 
 import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegistry;
-
 import java.nio.charset.Charset;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.transport.config.ITransportProperties;
+import com.openexchange.mail.transport.config.TransportProperties;
 
 /**
  * {@link SMTPProperties}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
-public final class SMTPProperties extends AbstractProtocolProperties {
+public final class SMTPProperties extends AbstractProtocolProperties implements ISMTPProperties {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SMTPProperties.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SMTPProperties.class);
 
-	private static final SMTPProperties instance = new SMTPProperties();
+    private static final SMTPProperties instance = new SMTPProperties();
 
-	/**
-	 * Gets the singleton instance of {@link SMTPProperties}
-	 * 
-	 * @return The singleton instance of {@link SMTPProperties}
-	 */
-	public static SMTPProperties getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link SMTPProperties}
+     * 
+     * @return The singleton instance of {@link SMTPProperties}
+     */
+    public static SMTPProperties getInstance() {
+        return instance;
+    }
 
-	/*
-	 * Fields for global properties
-	 */
-	private String smtpLocalhost;
+    /*
+     * Fields for global properties
+     */
 
-	private boolean smtpAuth;
+    private final ITransportProperties transportProperties;
 
-	private boolean smtpEnvelopeFrom;
+    private String smtpLocalhost;
 
-	private String smtpAuthEnc;
+    private boolean smtpAuth;
 
-	private int smtpTimeout;
+    private boolean smtpEnvelopeFrom;
 
-	private int smtpConnectionTimeout;
+    private String smtpAuthEnc;
 
-	/**
-	 * Initializes a new {@link SMTPProperties}
-	 */
-	private SMTPProperties() {
-		super();
-	}
+    private int smtpTimeout;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
-	 */
-	@Override
-	protected void loadProperties0() throws MailConfigException {
-		final StringBuilder logBuilder = new StringBuilder(1024);
-		logBuilder.append("\nLoading global SMTP properties...\n");
+    private int smtpConnectionTimeout;
 
-		final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
-		{
-			final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();
-			smtpLocalhost = (smtpLocalhostStr == null) || (smtpLocalhostStr.length() == 0)
-					|| "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
-			logBuilder.append("\tSMTP Localhost: ").append(smtpLocalhost).append('\n');
-		}
+    /**
+     * Initializes a new {@link SMTPProperties}
+     */
+    private SMTPProperties() {
+        super();
+        transportProperties = TransportProperties.getInstance();
+    }
 
-		{
-			final String smtpAuthStr = configuration.getProperty("com.openexchange.smtp.smtpAuthentication", "false")
-					.trim();
-			smtpAuth = Boolean.parseBoolean(smtpAuthStr);
-			logBuilder.append("\tSMTP Authentication: ").append(smtpAuth).append('\n');
-		}
+    @Override
+    protected void loadProperties0() throws MailConfigException {
+        final StringBuilder logBuilder = new StringBuilder(1024);
+        logBuilder.append("\nLoading global SMTP properties...\n");
 
-		{
-			final String smtpEnvFromStr = configuration.getProperty("com.openexchange.smtp.setSMTPEnvelopeFrom",
-					"false").trim();
-			smtpEnvelopeFrom = Boolean.parseBoolean(smtpEnvFromStr);
-			logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(smtpEnvelopeFrom).append('\n');
-		}
+        final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
+        {
+            final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();
+            smtpLocalhost = (smtpLocalhostStr == null) || (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
+            logBuilder.append("\tSMTP Localhost: ").append(smtpLocalhost).append('\n');
+        }
 
-		{
-			final String smtpAuthEncStr = configuration.getProperty("com.openexchange.smtp.smtpAuthEnc", "UTF-8")
-					.trim();
-			if (Charset.isSupported(smtpAuthEncStr)) {
-				smtpAuthEnc = smtpAuthEncStr;
-				logBuilder.append("\tSMTP Auth Encoding: ").append(smtpAuthEnc).append('\n');
-			} else {
-				smtpAuthEnc = "UTF-8";
-				logBuilder.append("\tSMTP Auth Encoding: Unsupported charset \"").append(smtpAuthEncStr).append(
-						"\". Setting to fallback ").append(smtpEnvelopeFrom).append('\n');
-			}
-		}
+        {
+            final String smtpAuthStr = configuration.getProperty("com.openexchange.smtp.smtpAuthentication", "false").trim();
+            smtpAuth = Boolean.parseBoolean(smtpAuthStr);
+            logBuilder.append("\tSMTP Authentication: ").append(smtpAuth).append('\n');
+        }
 
-		{
-			final String smtpTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpTimeout", "5000").trim();
-			try {
-				smtpTimeout = Integer.parseInt(smtpTimeoutStr);
-				logBuilder.append("\tSMTP Timeout: ").append(smtpTimeout).append('\n');
-			} catch (final NumberFormatException e) {
-				smtpTimeout = 5000;
-				logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpTimeoutStr).append(
-						"\". Setting to fallback ").append(smtpTimeout).append('\n');
+        {
+            final String smtpEnvFromStr = configuration.getProperty("com.openexchange.smtp.setSMTPEnvelopeFrom", "false").trim();
+            smtpEnvelopeFrom = Boolean.parseBoolean(smtpEnvFromStr);
+            logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(smtpEnvelopeFrom).append('\n');
+        }
 
-			}
-		}
+        {
+            final String smtpAuthEncStr = configuration.getProperty("com.openexchange.smtp.smtpAuthEnc", "UTF-8").trim();
+            if (Charset.isSupported(smtpAuthEncStr)) {
+                smtpAuthEnc = smtpAuthEncStr;
+                logBuilder.append("\tSMTP Auth Encoding: ").append(smtpAuthEnc).append('\n');
+            } else {
+                smtpAuthEnc = "UTF-8";
+                logBuilder.append("\tSMTP Auth Encoding: Unsupported charset \"").append(smtpAuthEncStr).append("\". Setting to fallback ").append(
+                    smtpEnvelopeFrom).append('\n');
+            }
+        }
 
-		{
-			final String smtpConTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpConnectionTimeout",
-					"10000").trim();
-			try {
-				smtpConnectionTimeout = Integer.parseInt(smtpConTimeoutStr);
-				logBuilder.append("\tSMTP Timeout: ").append(smtpConnectionTimeout).append('\n');
-			} catch (final NumberFormatException e) {
-				smtpConnectionTimeout = 10000;
-				logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpConTimeoutStr).append(
-						"\". Setting to fallback ").append(smtpConnectionTimeout).append('\n');
+        {
+            final String smtpTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpTimeout", "5000").trim();
+            try {
+                smtpTimeout = Integer.parseInt(smtpTimeoutStr);
+                logBuilder.append("\tSMTP Timeout: ").append(smtpTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                smtpTimeout = 5000;
+                logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpTimeoutStr).append("\". Setting to fallback ").append(
+                    smtpTimeout).append('\n');
 
-			}
-		}
+            }
+        }
 
-		logBuilder.append("Global SMTP properties successfully loaded!");
-		if (LOG.isInfoEnabled()) {
-			LOG.info(logBuilder.toString());
-		}
+        {
+            final String smtpConTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpConnectionTimeout", "10000").trim();
+            try {
+                smtpConnectionTimeout = Integer.parseInt(smtpConTimeoutStr);
+                logBuilder.append("\tSMTP Timeout: ").append(smtpConnectionTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                smtpConnectionTimeout = 10000;
+                logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpConTimeoutStr).append("\". Setting to fallback ").append(
+                    smtpConnectionTimeout).append('\n');
 
-	}
+            }
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
-	 */
-	@Override
-	protected void resetFields() {
-		smtpLocalhost = null;
-		smtpAuth = false;
-		smtpEnvelopeFrom = false;
-		smtpAuthEnc = null;
-		smtpTimeout = 0;
-		smtpConnectionTimeout = 0;
-	}
+        logBuilder.append("Global SMTP properties successfully loaded!");
+        if (LOG.isInfoEnabled()) {
+            LOG.info(logBuilder.toString());
+        }
 
-	/**
-	 * Gets the smtpLocalhost
-	 * 
-	 * @return the smtpLocalhost
-	 */
-	String getSmtpLocalhost() {
-		return smtpLocalhost;
-	}
+    }
 
-	/**
-	 * Gets the smtpAuth
-	 * 
-	 * @return the smtpAuth
-	 */
-	boolean isSmtpAuth() {
-		return smtpAuth;
-	}
+    @Override
+    protected void resetFields() {
+        smtpLocalhost = null;
+        smtpAuth = false;
+        smtpEnvelopeFrom = false;
+        smtpAuthEnc = null;
+        smtpTimeout = 0;
+        smtpConnectionTimeout = 0;
+    }
 
-	/**
-	 * Gets the smtpEnvelopeFrom
-	 * 
-	 * @return the smtpEnvelopeFrom
-	 */
-	boolean isSmtpEnvelopeFrom() {
-		return smtpEnvelopeFrom;
-	}
+    public String getSmtpLocalhost() {
+        return smtpLocalhost;
+    }
 
-	/**
-	 * Gets the smtpAuthEnc
-	 * 
-	 * @return the smtpAuthEnc
-	 */
-	String getSmtpAuthEnc() {
-		return smtpAuthEnc;
-	}
+    public boolean isSmtpAuth() {
+        return smtpAuth;
+    }
 
-	/**
-	 * Gets the smtpTimeout
-	 * 
-	 * @return the smtpTimeout
-	 */
-	int getSmtpTimeout() {
-		return smtpTimeout;
-	}
+    public boolean isSmtpEnvelopeFrom() {
+        return smtpEnvelopeFrom;
+    }
 
-	/**
-	 * Gets the smtpConnectionTimeout
-	 * 
-	 * @return the smtpConnectionTimeout
-	 */
-	int getSmtpConnectionTimeout() {
-		return smtpConnectionTimeout;
-	}
+    public String getSmtpAuthEnc() {
+        return smtpAuthEnc;
+    }
+
+    public int getSmtpTimeout() {
+        return smtpTimeout;
+    }
+
+    public int getSmtpConnectionTimeout() {
+        return smtpConnectionTimeout;
+    }
+
+    public int getReferencedPartLimit() {
+        return transportProperties.getReferencedPartLimit();
+    }
 
 }

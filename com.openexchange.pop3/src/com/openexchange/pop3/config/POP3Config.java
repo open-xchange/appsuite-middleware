@@ -52,13 +52,14 @@ package com.openexchange.pop3.config;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.pop3.POP3Capabilities;
 import com.openexchange.pop3.POP3Exception;
 
 /**
- * {@link POP3Config}
+ * {@link POP3Config} - The POP3 configuration.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -75,6 +76,8 @@ public final class POP3Config extends MailConfig {
     private String pop3Server;
 
     private boolean secure;
+
+    private IMailProperties mailProperties;
 
     private InetAddress pop3ServerAddress;
 
@@ -194,5 +197,15 @@ public final class POP3Config extends MailConfig {
             pop3ServerSocketAddress = new InetSocketAddress(getPOP3ServerAddress(), pop3Port);
         }
         return pop3ServerSocketAddress;
+    }
+
+    @Override
+    public IMailProperties getMailProperties() {
+        return mailProperties;
+    }
+
+    @Override
+    public void setMailProperties(final IMailProperties mailProperties) {
+        this.mailProperties = mailProperties;
     }
 }

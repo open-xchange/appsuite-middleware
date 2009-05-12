@@ -50,7 +50,6 @@
 package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -60,7 +59,6 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
-import com.openexchange.mail.api.MailConfig.BoolCapVal;
 
 /**
  * {@link Entity2ACLAutoDetector} - Auto-detects {@link Entity2ACL} implementation.
@@ -103,23 +101,21 @@ public final class Entity2ACLAutoDetector {
      * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
      * IP address.
      * 
-     * @param imapServer The IMAP server's address
-     * @param imapPort The IMAP server's port
-     * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
+     * @param imapConfig The IMAP configuration
      * @return the IMAP server's depending {@link Entity2ACL} implementation
      * @throws IOException - if an I/O error occurs
      * @throws Entity2ACLException - if a server greeting could not be mapped to a supported IMAP server
      */
-    public static Entity2ACL getEntity2ACLImpl(final InetAddress imapServer, final int imapPort, final boolean isSecure) throws IOException, Entity2ACLException {
-        final InetSocketAddress key = new InetSocketAddress(imapServer, imapPort);
+    public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, Entity2ACLException {
+        final InetSocketAddress key = new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort());
         Entity2ACL impl = map.get(key);
         if (impl == null) {
-            impl = loadEntity2ACLImpl(key, isSecure);
+            impl = loadEntity2ACLImpl(key, imapConfig);
         }
         return impl;
     }
 
-    private static IMAPServer mapInfo2IMAPServer(final String info, final InetSocketAddress address, final boolean isSecure) throws IOException, Entity2ACLException {
+    private static IMAPServer mapInfo2IMAPServer(final String info, final InetSocketAddress address, final IMAPConfig imapConfig) throws Entity2ACLException {
         final IMAPServer[] imapServers = IMAPServer.values();
         for (int i = 0; i < imapServers.length; i++) {
             if (toLowerCase(info).indexOf(toLowerCase(imapServers[i].getName())) > -1) {
@@ -130,11 +126,8 @@ public final class Entity2ACLAutoDetector {
          * No known IMAP server found, check if ACLs are disabled anyway. If yes entity2acl is never used and can safely be mapped to
          * default implementation.
          */
-        final BoolCapVal supportsACLs = IMAPConfig.isSupportsACLsConfig();
         try {
-            if (BoolCapVal.FALSE.equals(supportsACLs) || (BoolCapVal.AUTO.equals(supportsACLs) && !ACLExtensionFactory.getInstance().getACLExtension(
-                address,
-                isSecure).aclSupport())) {
+            if (!ACLExtensionFactory.getInstance().getACLExtension(imapConfig).aclSupport()) {
                 /*
                  * Return fallback implementation
                  */
@@ -161,16 +154,16 @@ public final class Entity2ACLAutoDetector {
         return new String(buf);
     }
 
-    private static Entity2ACL loadEntity2ACLImpl(final InetSocketAddress key, final boolean isSecure) throws IOException, Entity2ACLException {
+    private static Entity2ACL loadEntity2ACLImpl(final InetSocketAddress key, final IMAPConfig imapConfig) throws IOException, Entity2ACLException {
         Entity2ACL entity2Acl = map.get(key);
         if (entity2Acl != null) {
             return entity2Acl;
         }
-        final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(key, isSecure);
+        final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
         /*
          * Map greeting to a known IMAP server
          */
-        final IMAPServer imapServer = mapInfo2IMAPServer(greeting, key, isSecure);
+        final IMAPServer imapServer = mapInfo2IMAPServer(greeting, key, imapConfig);
         try {
             entity2Acl = Class.forName(imapServer.getImpl()).asSubclass(Entity2ACL.class).newInstance();
         } catch (final InstantiationException e) {

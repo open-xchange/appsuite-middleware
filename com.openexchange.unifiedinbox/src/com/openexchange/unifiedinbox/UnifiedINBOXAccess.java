@@ -54,11 +54,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
 import com.openexchange.unifiedinbox.config.UnifiedINBOXConfig;
+import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 
 /**
  * {@link UnifiedINBOXAccess} - Access to Unified INBOX.
@@ -246,6 +252,23 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     @Override
     protected void startup() throws MailException {
         // Nothing to start-up
+    }
+
+    @Override
+    protected IMailProperties createNewMailProperties() throws MailException {
+        try {
+            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            return new MailAccountUnifiedINBOXProperties(storageService.getMailAccount(
+                accountId,
+                session.getUserId(),
+                session.getContextId()));
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
     }
 
 }

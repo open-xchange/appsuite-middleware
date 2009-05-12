@@ -54,6 +54,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
@@ -236,4 +237,12 @@ public abstract class MailTransport {
      * @throws MailException If shutdown actions fail
      */
     protected abstract void shutdown() throws MailException;
+
+    /**
+     * Gets an implementation-specific new instance of {@link ITransportProperties}.
+     * 
+     * @return An implementation-specific new instance of {@link ITransportProperties}
+     * @throws MailException If creating a new instance of {@link ITransportProperties} fails
+     */
+    protected abstract ITransportProperties createNewMailProperties() throws MailException;
 }

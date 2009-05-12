@@ -47,85 +47,49 @@
  *
  */
 
-package com.openexchange.imap.acl;
+package com.openexchange.mail.transport.config;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.config.IMAPConfig;
+import java.util.Map;
+import com.openexchange.mailaccount.MailAccount;
 
 /**
- * {@link ACLExtensionFactory} - Factory for ACL extension.
+ * {@link MailAccountTransportProperties} - Transport properties read from mail account with fallback to properties read from properties
+ * file.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ACLExtensionFactory {
+public class MailAccountTransportProperties implements ITransportProperties {
 
-    private static ACLExtensionFactory instance;
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountTransportProperties.class);
 
-    static void createInstance() {
-        instance = new ACLExtensionFactory();
-    }
-
-    static void releaseInstance() {
-        instance = null;
-    }
+    protected final Map<String, String> properties;
 
     /**
-     * Gets the factory instance.
+     * Initializes a new {@link MailAccountTransportProperties}.
      * 
-     * @return The factory instance.
+     * @param mailAccount The mail account providing the properties
+     * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public static ACLExtensionFactory getInstance() {
-        return instance;
-    }
-
-    private final AtomicBoolean instantiated;
-
-    private ACLExtension configured;
-
-    /**
-     * Initializes a new {@link ACLExtensionFactory}.
-     */
-    private ACLExtensionFactory() {
+    public MailAccountTransportProperties(final MailAccount mailAccount) {
         super();
-        instantiated = new AtomicBoolean();
-    }
-
-    /**
-     * Gets the appropriate ACL extension for the IMAP server denoted by specified IMAP configuration.
-     * 
-     * @param imapConfig The IMAP configuration providing needed access data.
-     * @return The appropriate ACL extension
-     * @throws IMAPException If an I/O error occurs
-     */
-    public ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IMAPException {
-        if (!instantiated.get()) {
-            try {
-                return ACLExtensionAutoDetector.getACLExtension(imapConfig);
-            } catch (final IOException e) {
-                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
-            }
+        if (null == mailAccount) {
+            throw new IllegalArgumentException("mail account is null.");
         }
-        return configured;
+        properties = mailAccount.getProperties();
     }
 
-    /**
-     * Resets this factory instance.
-     */
-    void resetACLExtensionFactory() {
-        configured = null;
-        instantiated.set(false);
-        ACLExtensionAutoDetector.resetACLExtensionMappings();
+    public int getReferencedPartLimit() {
+        final String referencedPartLimitStr = properties.get("com.openexchange.mail.transport.referencedPartLimit");
+        if (null == referencedPartLimitStr) {
+            return TransportProperties.getInstance().getReferencedPartLimit();
+        }
+
+        try {
+            return Integer.parseInt(referencedPartLimitStr);
+        } catch (final NumberFormatException e) {
+            LOG.error("Referenced Part Limit: Invalid value.", e);
+            return TransportProperties.getInstance().getReferencedPartLimit();
+        }
     }
 
-    /**
-     * Only invoked if auto-detection is turned off.
-     * 
-     * @param singleton The singleton instance of {@link ACLExtension}
-     */
-    void setACLExtensionInstance(final ACLExtension singleton) {
-        configured = singleton;
-        instantiated.set(true);
-    }
 }

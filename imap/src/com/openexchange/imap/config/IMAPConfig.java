@@ -55,6 +55,7 @@ import java.net.UnknownHostException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -62,7 +63,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link IMAPConfig}
+ * {@link IMAPConfig} - The IMAP configuration.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,119 +73,6 @@ public final class IMAPConfig extends MailConfig {
 
     private static final String PROTOCOL_IMAP_SECURE = "imaps";
 
-    /**
-     * Gets the block size in which large IMAP commands' UIDs/sequence numbers arguments get splitted.
-     * 
-     * @return The block size
-     */
-    public static int getBlockSize() {
-        return IMAPProperties.getInstance().getBlockSize();
-    }
-
-    /**
-     * Gets the spam handler name
-     * 
-     * @return The spam handler name
-     */
-    public static String getSpamHandlerName() {
-        return IMAPProperties.getInstance().getSpamHandlerName();
-    }
-
-    /**
-     * Gets the imapAuthEnc
-     * 
-     * @return the imapAuthEnc
-     */
-    public static String getImapAuthEnc() {
-        return IMAPProperties.getInstance().getImapAuthEnc();
-    }
-
-    /**
-     * Gets the imapConnectionIdleTime
-     * 
-     * @return the imapConnectionIdleTime
-     */
-    public static int getImapConnectionIdleTime() {
-        return IMAPProperties.getInstance().getImapConnectionIdleTime();
-    }
-
-    /**
-     * Gets the imapConnectionTimeout
-     * 
-     * @return the imapConnectionTimeout
-     */
-    public static int getImapConnectionTimeout() {
-        return IMAPProperties.getInstance().getImapConnectionTimeout();
-    }
-
-    /**
-     * Gets the imapTemporaryDown
-     * 
-     * @return the imapTemporaryDown
-     */
-    public static int getImapTemporaryDown() {
-        return IMAPProperties.getInstance().getImapTemporaryDown();
-    }
-
-    /**
-     * Gets the imapTimeout
-     * 
-     * @return the imapTimeout
-     */
-    public static int getImapTimeout() {
-        return IMAPProperties.getInstance().getImapTimeout();
-    }
-
-    /**
-     * Gets the entity2acl implementation's canonical class name
-     * 
-     * @return The entity2acl implementation's canonical class name
-     */
-    public static String getEntity2AclImpl() {
-        return IMAPProperties.getInstance().getEntity2AclImpl();
-    }
-
-    /**
-     * Checks if given IMAP server implements newer ACL extension conforming to RFC 4314
-     * 
-     * @param imapServer The IMAP server's host name or IP address
-     * @return <code>true</code> if newer ACL extension is supported by IMAP server; otherwise <code>false</code>
-     */
-    public static boolean hasNewACLExt(final String imapServer) {
-        if (IMAPProperties.getInstance().getNewACLExtMap().containsKey(imapServer)) {
-            return IMAPProperties.getInstance().getNewACLExtMap().get(imapServer).booleanValue();
-        }
-        return false;
-    }
-
-    /**
-     * Gets the fastFetch
-     * 
-     * @return the fastFetch
-     */
-    public static boolean isFastFetch() {
-        return IMAPProperties.getInstance().isFastFetch();
-    }
-
-    /**
-     * Gets the global supportsACLs
-     * 
-     * @return the global supportsACLs
-     */
-    public static BoolCapVal isSupportsACLsConfig() {
-        return IMAPProperties.getInstance().getSupportsACLs();
-    }
-
-    /**
-     * Remembers if given IMAP server supports newer ACL extension conforming to RFC 4314
-     * 
-     * @param imapServer The IMAP server's host name or IP address
-     * @param newACLExt Whether newer ACL extension is supported or not
-     */
-    public static void setNewACLExt(final String imapServer, final boolean newACLExt) {
-        IMAPProperties.getInstance().getNewACLExtMap().put(imapServer, Boolean.valueOf(newACLExt));
-    }
-
     private volatile IMAPCapabilities imapCapabilities;
 
     private int imapPort;
@@ -192,6 +80,8 @@ public final class IMAPConfig extends MailConfig {
     private String imapServer;
 
     private boolean secure;
+
+    private IIMAPProperties mailProperties;
 
     private InetAddress imapServerAddress;
 
@@ -385,4 +275,19 @@ public final class IMAPConfig extends MailConfig {
         }
         return imapServerSocketAddress;
     }
+
+    @Override
+    public IMailProperties getMailProperties() {
+        return mailProperties;
+    }
+
+    public IIMAPProperties getIMAPProperties() {
+        return mailProperties;
+    }
+
+    @Override
+    public void setMailProperties(final IMailProperties mailProperties) {
+        this.mailProperties = (IIMAPProperties) mailProperties;
+    }
+
 }

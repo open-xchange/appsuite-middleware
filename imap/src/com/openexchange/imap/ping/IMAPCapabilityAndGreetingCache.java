@@ -62,7 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -90,11 +90,6 @@ public final class IMAPCapabilityAndGreetingCache {
         if (MAP == null) {
             MAP = new ConcurrentHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
             // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
-            try {
-                getCapabilityAndGreeting(new InetSocketAddress("imap.googlemail.com", 993), true);
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
         }
     }
 
@@ -121,11 +116,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * @param inetAddress The IMAP server's internet address
      * @param imapPort The IMAP server's port
      * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
      * @return The CAPABILITY from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String getCapability(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure).getCapability();
+    public static String getCapability(final InetAddress inetAddress, final int imapPort, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure, imapProperties).getCapability();
     }
 
     /**
@@ -133,11 +129,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * 
      * @param address The IMAP server's address
      * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
      * @return The CAPABILITY from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String getCapability(final InetSocketAddress address, final boolean isSecure) throws IOException {
-        return getCapabilityAndGreeting(address, isSecure).getCapability();
+    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        return getCapabilityAndGreeting(address, isSecure, imapProperties).getCapability();
     }
 
     /**
@@ -146,11 +143,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * @param inetAddress The IMAP server's internet address
      * @param imapPort The IMAP server's port
      * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
      * @return The greeting from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String getGreeting(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure).getGreeting();
+    public static String getGreeting(final InetAddress inetAddress, final int imapPort, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure, imapProperties).getGreeting();
     }
 
     /**
@@ -158,11 +156,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * 
      * @param address The IMAP server's address
      * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
      * @return The greeting from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String getGreeting(final InetSocketAddress address, final boolean isSecure) throws IOException {
-        return getCapabilityAndGreeting(address, isSecure).getGreeting();
+    public static String getGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        return getCapabilityAndGreeting(address, isSecure, imapProperties).getGreeting();
     }
 
     /**
@@ -171,19 +170,21 @@ public final class IMAPCapabilityAndGreetingCache {
      * @param inetAddress The IMAP server's internet address
      * @param imapPort The IMAP server's port
      * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
      * @return The CAPABILITY and greeting from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String[] getCapabilityAndGreeting(final InetAddress inetAddress, final int imapPort, final boolean isSecure) throws IOException {
-        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure).toArray();
+    public static String[] getCapabilityAndGreeting(final InetAddress inetAddress, final int imapPort, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        return getCapabilityAndGreeting(new InetSocketAddress(inetAddress, imapPort), isSecure, imapProperties).toArray();
     }
 
-    private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure) throws IOException {
+    private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
         Future<CapabilityAndGreeting> f = MAP.get(address);
         if (null == f) {
             final FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(
                 address,
-                isSecure));
+                isSecure,
+                imapProperties));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -219,10 +220,13 @@ public final class IMAPCapabilityAndGreetingCache {
 
         private final boolean isSecure;
 
-        public CapabilityAndGreetingCallable(final InetSocketAddress key, final boolean isSecure) {
+        private final IIMAPProperties imapProperties;
+
+        public CapabilityAndGreetingCallable(final InetSocketAddress key, final boolean isSecure, final IIMAPProperties imapProperties) {
             super();
             this.key = key;
             this.isSecure = isSecure;
+            this.imapProperties = imapProperties;
         }
 
         public CapabilityAndGreeting call() throws IOException {
@@ -237,16 +241,16 @@ public final class IMAPCapabilityAndGreetingCache {
                     /*
                      * Set connect timeout
                      */
-                    if (IMAPConfig.getImapConnectionTimeout() > 0) {
-                        s.connect(key, IMAPConfig.getImapConnectionTimeout());
+                    if (imapProperties.getImapConnectionTimeout() > 0) {
+                        s.connect(key, imapProperties.getImapConnectionTimeout());
                     } else {
                         s.connect(key);
                     }
-                    if (IMAPConfig.getImapTimeout() > 0) {
+                    if (imapProperties.getImapTimeout() > 0) {
                         /*
                          * Define timeout for blocking operations
                          */
-                        s.setSoTimeout(IMAPConfig.getImapTimeout());
+                        s.setSoTimeout(imapProperties.getImapTimeout());
                     }
                 } catch (final IOException e) {
                     throw e;

@@ -89,15 +89,22 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.smtp.config.ISMTPProperties;
+import com.openexchange.smtp.config.MailAccountSMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
+import com.openexchange.smtp.services.SMTPServiceRegistry;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.sun.mail.smtp.SMTPMessage;
@@ -214,6 +221,22 @@ public final class SMTPTransport extends MailTransport {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
                     final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
+                     * Set properties
+                     */
+                    final ISMTPProperties smtpProperties = smtpConfig.getSMTPProperties();
+                    if (smtpProperties.getSmtpLocalhost() != null) {
+                        smtpProps.put(MIMESessionPropertyNames.PROP_SMTPLOCALHOST, smtpProperties.getSmtpLocalhost());
+                    }
+                    if (smtpProperties.getSmtpTimeout() > 0) {
+                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_TIMEOUT, String.valueOf(smtpProperties.getSmtpTimeout()));
+                    }
+                    if (smtpProperties.getSmtpConnectionTimeout() > 0) {
+                        smtpProps.put(
+                            MIMESessionPropertyNames.PROP_MAIL_SMTP_CONNECTIONTIMEOUT,
+                            String.valueOf(smtpProperties.getSmtpConnectionTimeout()));
+                    }
+                    smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_AUTH, smtpProperties.isSmtpAuth() ? "true" : "false");
+                    /*
                      * Check if a secure SMTP connection should be established
                      */
                     if (smtpConfig.isSecure()) {
@@ -256,6 +279,7 @@ public final class SMTPTransport extends MailTransport {
             synchronized (this) {
                 if (smtpConfig == null) {
                     smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
+                    smtpConfig.setTransportProperties(createNewMailProperties());
                 }
             }
         }
@@ -319,7 +343,8 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Set common headers
              */
-            new SMTPMessageFiller(session, ctx, usm).setCommonHeaders(smtpMessage);
+            final SMTPConfig smtpConfig = getTransportConfig0();
+            new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm).setCommonHeaders(smtpMessage);
             /*
              * Compose body
              */
@@ -369,9 +394,12 @@ public final class SMTPTransport extends MailTransport {
              */
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-            if (SMTPConfig.isSmtpAuth()) {
-                final SMTPConfig config = getTransportConfig0();
-                transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config.getPassword()));
+            if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                transport.connect(
+                    smtpConfig.getServer(),
+                    smtpConfig.getPort(),
+                    smtpConfig.getLogin(),
+                    encodePassword(smtpConfig.getPassword()));
             } else {
                 transport.connect();
             }
@@ -402,7 +430,7 @@ public final class SMTPTransport extends MailTransport {
             try {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                if (SMTPConfig.isSmtpAuth()) {
+                if (getTransportConfig0().getSMTPProperties().isSmtpAuth()) {
                     final SMTPConfig config = getTransportConfig0();
                     transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config.getPassword()));
                 } else {
@@ -433,7 +461,8 @@ public final class SMTPTransport extends MailTransport {
              * Fill message dependent on send type
              */
             final long startPrep = System.currentTimeMillis();
-            final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(session, ctx, usm);
+            final SMTPConfig smtpConfig = getTransportConfig0();
+            final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
             composedMail.setFiller(smtpFiller);
             try {
                 smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
@@ -452,10 +481,9 @@ public final class SMTPTransport extends MailTransport {
 
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                if (SMTPConfig.isSmtpAuth()) {
-                    final SMTPConfig config = getTransportConfig0();
-                    final String encPass = encodePassword(config.getPassword());
-                    transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
+                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                    final String encPass = encodePassword(smtpConfig.getPassword());
+                    transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
                 } else {
                     transport.connect();
                 }
@@ -480,11 +508,11 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private static String encodePassword(final String password) {
+    private String encodePassword(final String password) throws MailException {
         String tmpPass = password;
         if (password != null) {
             try {
-                tmpPass = new String(password.getBytes(SMTPConfig.getSmtpAuthEnc()), CHARENC_ISO_8859_1);
+                tmpPass = new String(password.getBytes(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc()), CHARENC_ISO_8859_1);
             } catch (final UnsupportedEncodingException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -531,7 +559,7 @@ public final class SMTPTransport extends MailTransport {
         }
         boolean close = false;
         try {
-            if (SMTPConfig.isSmtpAuth()) {
+            if (getTransportConfig0().getSMTPProperties().isSmtpAuth()) {
                 final SMTPConfig config = getTransportConfig0();
                 final String encPass = encodePassword(config.getPassword());
                 transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
@@ -550,6 +578,20 @@ public final class SMTPTransport extends MailTransport {
                     LOG.error("Closing SMTP transport failed.", e);
                 }
             }
+        }
+    }
+
+    @Override
+    protected ITransportProperties createNewMailProperties() throws MailException {
+        try {
+            final MailAccountStorageService storageService = SMTPServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
         }
     }
 

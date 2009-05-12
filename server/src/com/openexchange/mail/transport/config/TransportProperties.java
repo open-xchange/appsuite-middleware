@@ -58,7 +58,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TransportProperties {
+public final class TransportProperties implements ITransportProperties {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportProperties.class);
 
@@ -75,9 +75,10 @@ public final class TransportProperties {
 
     private final AtomicBoolean loaded;
 
-    /*
+    /*-
      * Fields for global properties
      */
+
     private int referencedPartLimit;
 
     private String defaultTransportProvider;
@@ -155,11 +156,6 @@ public final class TransportProperties {
         }
     }
 
-    /**
-     * Gets the referencedPartLimit
-     * 
-     * @return the referencedPartLimit
-     */
     public int getReferencedPartLimit() {
         return referencedPartLimit;
     }

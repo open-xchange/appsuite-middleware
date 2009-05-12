@@ -128,7 +128,7 @@ public final class IMAPSort {
                 if ((seqNums == null) || (seqNums.length == 0)) {
                     return EMPTY_MSGS;
                 }
-                final FetchProfile fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
+                final FetchProfile fetchProfile = getFetchProfile(fields, imapConfig.getIMAPProperties().isFastFetch());
                 usedFields.addAll(fields);
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 final long start = System.currentTimeMillis();

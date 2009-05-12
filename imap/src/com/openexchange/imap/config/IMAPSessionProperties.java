@@ -51,134 +51,117 @@ package com.openexchange.imap.config;
 
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
 /**
- * {@link IMAPSessionProperties} - Default properties for an IMAP session
- * established via <code>JavaMail</code> API
+ * {@link IMAPSessionProperties} - Default properties for an IMAP session established via <code>JavaMail</code> API
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IMAPSessionProperties {
 
-	private static final String STR_TRUE = "true";
+    private static final String STR_TRUE = "true";
 
-	private static final String STR_FALSE = "false";
+    private static final String STR_FALSE = "false";
 
-	private static Properties imapSessionProperties;
+    private static Properties imapSessionProperties;
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+    private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	/**
-	 * No instantiation
-	 */
-	private IMAPSessionProperties() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private IMAPSessionProperties() {
+        super();
+    }
 
-	/**
-	 * Creates a <b>cloned</b> version of default IMAP session properties
-	 * 
-	 * @return a cloned version of default IMAP session properties
-	 */
-	public static Properties getDefaultSessionProperties() {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (null == imapSessionProperties) {
-					initializeIMAPProperties();
-					initialized.set(true);
-				}
-			}
-		}
-		return (Properties) imapSessionProperties.clone();
-	}
+    /**
+     * Creates a <b>cloned</b> version of default IMAP session properties
+     * 
+     * @return a cloned version of default IMAP session properties
+     */
+    public static Properties getDefaultSessionProperties() {
+        if (!initialized.get()) {
+            synchronized (initialized) {
+                if (null == imapSessionProperties) {
+                    initializeIMAPProperties();
+                    initialized.set(true);
+                }
+            }
+        }
+        return (Properties) imapSessionProperties.clone();
+    }
 
-	/**
-	 * Resets the default IMAP session properties
-	 */
-	public static void resetDefaultSessionProperties() {
-		if (initialized.get()) {
-			synchronized (initialized) {
-				if (null != imapSessionProperties) {
-					imapSessionProperties = null;
-					initialized.set(false);
-				}
-			}
-		}
-	}
+    /**
+     * Resets the default IMAP session properties
+     */
+    public static void resetDefaultSessionProperties() {
+        if (initialized.get()) {
+            synchronized (initialized) {
+                if (null != imapSessionProperties) {
+                    imapSessionProperties = null;
+                    initialized.set(false);
+                }
+            }
+        }
+    }
 
-	/**
-	 * This method can only be exclusively accessed
-	 */
-	private static void initializeIMAPProperties() {
-		/*
-		 * Force initialization of default MIME session
-		 */
-		MIMEDefaultSession.getDefaultSession();
-		/*
-		 * Define imap session properties
-		 */
-		imapSessionProperties = ((Properties) (System.getProperties().clone()));
-		/*
-		 * Set some global JavaMail properties
-		 */
-		if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-		}
-		if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-		}
-		if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-		}
-		if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-		}
-		/*
-		 * A connected IMAPStore maintains a pool of IMAP protocol objects for
-		 * use in communicating with the IMAP server. The IMAPStore will create
-		 * the initial AUTHENTICATED connection and seed the pool with this
-		 * connection. As folders are opened and new IMAP protocol objects are
-		 * needed, the IMAPStore will provide them from the connection pool, or
-		 * create them if none are available. When a folder is closed, its IMAP
-		 * protocol object is returned to the connection pool if the pool is not
-		 * over capacity.
-		 */
-		imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
-		/*
-		 * A mechanism is provided for timing out idle connection pool IMAP
-		 * protocol objects. Timed out connections are closed and removed
-		 * (pruned) from the connection pool.
-		 */
-		imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
-		if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-					MailProperties.getInstance().getDefaultMimeCharset());
-		}
-		if (IMAPConfig.getImapTimeout() > 0) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(IMAPConfig
-					.getImapTimeout()));
-		}
-		if (IMAPConfig.getImapConnectionTimeout() > 0) {
-			imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT, String
-					.valueOf(IMAPConfig.getImapConnectionTimeout()));
-		}
-		if (MailProperties.getInstance().getJavaMailProperties() != null) {
-			/*
-			 * Overwrite current JavaMail-Specific properties with the ones
-			 * defined in javamail.properties
-			 */
-			imapSessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
-		}
-	}
+    /**
+     * This method can only be exclusively accessed
+     */
+    private static void initializeIMAPProperties() {
+        /*
+         * Force initialization of default MIME session
+         */
+        MIMEDefaultSession.getDefaultSession();
+        /*
+         * Define imap session properties
+         */
+        imapSessionProperties = ((Properties) (System.getProperties().clone()));
+        /*
+         * Set some global JavaMail properties
+         */
+        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
+            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+        }
+        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
+            imapSessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+        }
+        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
+            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+        }
+        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
+            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+        }
+        /*
+         * A connected IMAPStore maintains a pool of IMAP protocol objects for use in communicating with the IMAP server. The IMAPStore will
+         * create the initial AUTHENTICATED connection and seed the pool with this connection. As folders are opened and new IMAP protocol
+         * objects are needed, the IMAPStore will provide them from the connection pool, or create them if none are available. When a folder
+         * is closed, its IMAP protocol object is returned to the connection pool if the pool is not over capacity.
+         */
+        imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+        /*
+         * A mechanism is provided for timing out idle connection pool IMAP protocol objects. Timed out connections are closed and removed
+         * (pruned) from the connection pool.
+         */
+        imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
+        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
+            System.getProperties().put(
+                MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
+                MailProperties.getInstance().getDefaultMimeCharset());
+        }
+        if (MailProperties.getInstance().getJavaMailProperties() != null) {
+            /*
+             * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
+             */
+            imapSessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
+        }
+    }
 }

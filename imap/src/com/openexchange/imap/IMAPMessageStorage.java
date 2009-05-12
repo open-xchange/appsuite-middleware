@@ -74,7 +74,7 @@ import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
-import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
@@ -150,6 +150,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     private Locale locale;
 
+    private IIMAPProperties imapProperties;
+
     /**
      * Initializes a new {@link IMAPMessageStorage}.
      * 
@@ -192,6 +194,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return locale;
     }
 
+    private IIMAPProperties getIMAPProperties() {
+        if (null == imapProperties) {
+            imapProperties = imapConfig.getIMAPProperties();
+        }
+        return imapProperties;
+    }
+
     @Override
     public MailMessage[] getMessagesLong(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
         if ((mailIds == null) || (mailIds.length == 0)) {
@@ -221,7 +230,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, mailIds);
             final Message[] messages = new Message[seqNums.length];
-            final FetchProfile fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
+            final FetchProfile fetchProfile = getFetchProfile(fields, getIMAPProperties().isFastFetch());
             final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
             int lastPos = 0;
             int pos = 0;
@@ -401,7 +410,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  */
                 final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
                 final MailField sort = MailField.toField(sortField.getListField());
-                final FetchProfile fetchProfile = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
+                final FetchProfile fetchProfile = getFetchProfile(fields, sort, getIMAPProperties().isFastFetch());
                 usedFields.addAll(fields);
                 usedFields.add(sort);
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
@@ -529,7 +538,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Fetch messages
              */
             final MailFields usedFields = new MailFields();
-            final FetchProfile fetchProfile = getFetchProfile(fields, null, IMAPConfig.isFastFetch());
+            final FetchProfile fetchProfile = getFetchProfile(fields, null, getIMAPProperties().isFastFetch());
             usedFields.addAll(Arrays.asList(fields));
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), msgs, fetchProfile, false, true, body).doCommand();
@@ -582,7 +591,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Get ( & fetch) new messages
                  */
                 final long start = System.currentTimeMillis();
-                final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField);
+                final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, getIMAPProperties());
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;
@@ -652,7 +661,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private void blockwiseDeletion(final long[] msgUIDs, final boolean backup, final String trashFullname) throws MailException, MessagingException {
         final StringBuilder debug = LOG.isDebugEnabled() ? new StringBuilder(128) : null;
         final long[] remain;
-        final int blockSize = IMAPConfig.getBlockSize();
+        final int blockSize = getIMAPProperties().getBlockSize();
         if (blockSize > 0 && msgUIDs.length > blockSize) {
             /*
              * Block-wise deletion
@@ -829,7 +838,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Copy operation
              */
             final long[] result = new long[mailIds.length];
-            final int blockSize = IMAPConfig.getBlockSize();
+            final int blockSize = getIMAPProperties().getBlockSize();
             final StringBuilder debug;
             if (LOG.isDebugEnabled()) {
                 debug = new StringBuilder(128);

@@ -51,6 +51,7 @@ package com.openexchange.mail.transport.config;
 
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
@@ -168,4 +169,27 @@ public abstract class TransportConfig extends MailConfig {
         }
     }
 
+    @Override
+    public IMailProperties getMailProperties() {
+        return null;
+    }
+
+    @Override
+    public void setMailProperties(final IMailProperties mailProperties) {
+        // Nothing to do
+    }
+
+    /**
+     * Gets the transport properties for this transport configuration.
+     * 
+     * @return The transport properties for this transport configuration
+     */
+    public abstract ITransportProperties getTransportProperties();
+
+    /**
+     * Sets the transport properties for this transport configuration.
+     * 
+     * @param transportProperties The transport properties for this transport configuration
+     */
+    public abstract void setTransportProperties(ITransportProperties transportProperties);
 }

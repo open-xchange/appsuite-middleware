@@ -49,7 +49,6 @@
 
 package com.openexchange.imap;
 
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
@@ -115,7 +114,7 @@ public final class IMAPProvider extends MailProvider {
 
     @Override
     protected String getSpamHandlerName() {
-        return IMAPConfig.getSpamHandlerName();
+        return IMAPProperties.getInstance().getSpamHandlerName();
     }
 
 }

@@ -50,12 +50,13 @@
 package com.openexchange.imap.acl;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 
 /**
@@ -89,51 +90,29 @@ final class ACLExtensionAutoDetector {
      * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
      * IP address.
      * 
-     * @param imapServer The IMAP server's address
-     * @param imapPort The IMAP server's port
-     * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
+     * @param imapConfig The IMAP configuration
      * @return The IMAP server's ACL extension.
      * @throws IOException If an I/O error occurs
      */
-    public static ACLExtension getACLExtension(final InetAddress imapServer, final int imapPort, final boolean isSecure) throws IOException {
-        final InetSocketAddress key = new InetSocketAddress(imapServer, imapPort);
+    public static ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IOException {
+        final InetSocketAddress key = new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort());
         final ACLExtension cached = map.get(key);
         if (null != cached) {
             return cached;
         }
-        putACLExtension(key, isSecure);
+        putACLExtension(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
         return map.get(key);
-    }
-
-    /**
-     * Determines the ACL extension dependent on IMAP server's capabilities.
-     * <p>
-     * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
-     * IP address.
-     * 
-     * @param address The IMAP server's address
-     * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
-     * @return The IMAP server's ACL extension.
-     * @throws IOException If an I/O error occurs
-     */
-    public static ACLExtension getACLExtension(final InetSocketAddress address, final boolean isSecure) throws IOException {
-        final ACLExtension cached = map.get(address);
-        if (null != cached) {
-            return cached;
-        }
-        putACLExtension(address, isSecure);
-        return map.get(address);
     }
 
     private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
 
     private static final Pattern PAT_RIGHTS = Pattern.compile("(?:^|\\s)(?:RIGHTS=)([a-zA-Z0-9]+)(?:\\s+|$)");
 
-    private static void putACLExtension(final InetSocketAddress key, final boolean isSecure) throws IOException {
+    private static void putACLExtension(final InetSocketAddress key, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
         if (map.containsKey(key)) {
             return;
         }
-        final String capabilities = IMAPCapabilityAndGreetingCache.getCapability(key, isSecure);
+        final String capabilities = IMAPCapabilityAndGreetingCache.getCapability(key, isSecure, imapProperties);
         /*
          * Examine CAPABILITY response
          */

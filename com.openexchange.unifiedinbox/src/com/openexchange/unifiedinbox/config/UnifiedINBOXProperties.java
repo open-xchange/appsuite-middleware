@@ -50,14 +50,16 @@
 package com.openexchange.unifiedinbox.config;
 
 import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link UnifiedINBOXProperties}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXProperties extends AbstractProtocolProperties {
+public final class UnifiedINBOXProperties extends AbstractProtocolProperties implements IUnifiedINBOXProperties {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXProperties.class);
 
@@ -72,11 +74,14 @@ public final class UnifiedINBOXProperties extends AbstractProtocolProperties {
         return instance;
     }
 
+    private final IMailProperties mailProperties;
+
     /**
      * Initializes a new {@link UnifiedINBOXProperties}
      */
     private UnifiedINBOXProperties() {
         super();
+        mailProperties = MailProperties.getInstance();
     }
 
     @Override
@@ -92,6 +97,62 @@ public final class UnifiedINBOXProperties extends AbstractProtocolProperties {
     @Override
     protected void resetFields() {
         // Nothing to do
+    }
+
+    public int getAttachDisplaySize() {
+        return mailProperties.getAttachDisplaySize();
+    }
+
+    public char getDefaultSeparator() {
+        return mailProperties.getDefaultSeparator();
+    }
+
+    public int getMailAccessCacheIdleSeconds() {
+        return mailProperties.getMailAccessCacheIdleSeconds();
+    }
+
+    public int getMailAccessCacheShrinkerSeconds() {
+        return mailProperties.getMailAccessCacheShrinkerSeconds();
+    }
+
+    public int getMailFetchLimit() {
+        return mailProperties.getMailFetchLimit();
+    }
+
+    public int getMaxNumOfConnections() {
+        return mailProperties.getMaxNumOfConnections();
+    }
+
+    public int getWatcherFrequency() {
+        return mailProperties.getWatcherFrequency();
+    }
+
+    public int getWatcherTime() {
+        return mailProperties.getWatcherTime();
+    }
+
+    public boolean isAllowNestedDefaultFolderOnAltNamespace() {
+        return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
+    }
+
+    public boolean isIgnoreSubscription() {
+        return mailProperties.isIgnoreSubscription();
+    }
+
+    public boolean isSupportSubscription() {
+        return mailProperties.isSupportSubscription();
+    }
+
+    public boolean isUserFlagsEnabled() {
+        return mailProperties.isUserFlagsEnabled();
+    }
+
+    public boolean isWatcherEnabled() {
+        return mailProperties.isWatcherEnabled();
+    }
+
+    public boolean isWatcherShallClose() {
+        return mailProperties.isWatcherShallClose();
     }
 
 }

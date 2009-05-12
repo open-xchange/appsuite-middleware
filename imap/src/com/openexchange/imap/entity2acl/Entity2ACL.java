@@ -50,11 +50,9 @@
 package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -90,20 +88,12 @@ public abstract class Entity2ACL {
              * Auto-detect dependent on user's IMAP settings
              */
             try {
-                return getEntity2ACLImpl(imapConfig.getImapServerAddress(), imapConfig.getPort(), imapConfig.isSecure());
-            } catch (final IMAPException e) {
-                throw new Entity2ACLException(e);
+                return Entity2ACLAutoDetector.getEntity2ACLImpl(imapConfig);
+            } catch (final IOException e) {
+                throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
             }
         }
         return singleton;
-    }
-
-    private static final Entity2ACL getEntity2ACLImpl(final InetAddress imapServer, final int port, final boolean isSecure) throws Entity2ACLException {
-        try {
-            return Entity2ACLAutoDetector.getEntity2ACLImpl(imapServer, port, isSecure);
-        } catch (final IOException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
-        }
     }
 
     /**

@@ -1096,7 +1096,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 } else {
                     debug = null;
                 }
-                final int blockSize = IMAPConfig.getBlockSize();
+                final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
                 final long startClear = System.currentTimeMillis();
                 if (blockSize > 0) {
                     /*

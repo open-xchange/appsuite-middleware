@@ -51,119 +51,102 @@ package com.openexchange.smtp.config;
 
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
 /**
- * {@link SMTPSessionProperties} - Default properties for an SMTP session
- * established via <code>JavaMail</code> API
+ * {@link SMTPSessionProperties} - Default properties for an SMTP session established via <code>JavaMail</code> API
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SMTPSessionProperties {
 
-	private static Properties sessionProperties;
+    private static Properties sessionProperties;
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+    private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static final String STR_TRUE = "true";
+    private static final String STR_TRUE = "true";
 
-	private static final String STR_FALSE = "false";
+    private static final String STR_FALSE = "false";
 
-	/**
-	 * No instantiation
-	 */
-	private SMTPSessionProperties() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private SMTPSessionProperties() {
+        super();
+    }
 
-	/**
-	 * Creates a <b>cloned</b> version of default SMTP session properties
-	 * 
-	 * @return a cloned version of default SMTP session properties
-	 */
-	public static Properties getDefaultSessionProperties() {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (null == sessionProperties) {
-					initializeSMTPProperties();
-					initialized.set(true);
-				}
-			}
-		}
-		return (Properties) sessionProperties.clone();
-	}
+    /**
+     * Creates a <b>cloned</b> version of default SMTP session properties
+     * 
+     * @return a cloned version of default SMTP session properties
+     */
+    public static Properties getDefaultSessionProperties() {
+        if (!initialized.get()) {
+            synchronized (initialized) {
+                if (null == sessionProperties) {
+                    initializeSMTPProperties();
+                    initialized.set(true);
+                }
+            }
+        }
+        return (Properties) sessionProperties.clone();
+    }
 
-	/**
-	 * Resets default SMTP session properties
-	 */
-	public static void resetDefaultSessionProperties() {
-		if (initialized.get()) {
-			synchronized (initialized) {
-				if (null != sessionProperties) {
-					sessionProperties = null;
-					initialized.set(false);
-				}
-			}
-		}
-	}
+    /**
+     * Resets default SMTP session properties
+     */
+    public static void resetDefaultSessionProperties() {
+        if (initialized.get()) {
+            synchronized (initialized) {
+                if (null != sessionProperties) {
+                    sessionProperties = null;
+                    initialized.set(false);
+                }
+            }
+        }
+    }
 
-	/**
-	 * This method can only be exclusively accessed
-	 */
-	private static void initializeSMTPProperties() {
-		/*
-		 * Define imap properties
-		 */
-		MIMEDefaultSession.getDefaultSession();
-		sessionProperties = ((Properties) (System.getProperties().clone()));
-		/*
-		 * Set some global JavaMail properties
-		 */
-		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-		}
-		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-		}
-		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-		}
-		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-		}
-		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
-			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-					MailProperties.getInstance().getDefaultMimeCharset());
-		}
-		if (SMTPConfig.getSmtpLocalhost() != null) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_SMTPLOCALHOST, SMTPConfig.getSmtpLocalhost());
-		}
-		if (SMTPConfig.getSmtpTimeout() > 0) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_TIMEOUT, String.valueOf(SMTPConfig
-					.getSmtpTimeout()));
-		}
-		if (SMTPConfig.getSmtpConnectionTimeout() > 0) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_CONNECTIONTIMEOUT, String.valueOf(SMTPConfig
-					.getSmtpConnectionTimeout()));
-		}
-		sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_AUTH, SMTPConfig.isSmtpAuth() ? STR_TRUE
-				: STR_FALSE);
-		if (MailProperties.getInstance().getJavaMailProperties() != null) {
-			/*
-			 * Overwrite current JavaMail-Specific properties with the ones
-			 * defined in javamail.properties
-			 */
-			sessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
-		}
-	}
+    /**
+     * This method can only be exclusively accessed
+     */
+    private static void initializeSMTPProperties() {
+        /*
+         * Define imap properties
+         */
+        MIMEDefaultSession.getDefaultSession();
+        sessionProperties = ((Properties) (System.getProperties().clone()));
+        /*
+         * Set some global JavaMail properties
+         */
+        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+        }
+        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
+            sessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+        }
+        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+        }
+        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+        }
+        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
+            System.getProperties().put(
+                MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
+                MailProperties.getInstance().getDefaultMimeCharset());
+        }
+        if (MailProperties.getInstance().getJavaMailProperties() != null) {
+            /*
+             * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
+             */
+            sessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
+        }
+    }
 }

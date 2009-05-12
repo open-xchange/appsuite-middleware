@@ -49,6 +49,7 @@
 
 package com.openexchange.unifiedinbox.config;
 
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 
@@ -60,6 +61,8 @@ import com.openexchange.mail.api.MailConfig;
 public final class UnifiedINBOXConfig extends MailConfig {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXConfig.class);
+
+    private IMailProperties mailProperties;
 
     /**
      * Default constructor
@@ -108,6 +111,16 @@ public final class UnifiedINBOXConfig extends MailConfig {
         // Nothing to parse
         login = "dummy";
         password = "secret";
+    }
+
+    @Override
+    public IMailProperties getMailProperties() {
+        return mailProperties;
+    }
+
+    @Override
+    public void setMailProperties(final IMailProperties mailProperties) {
+        this.mailProperties = mailProperties;
     }
 
 }

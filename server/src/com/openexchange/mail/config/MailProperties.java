@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
@@ -69,17 +70,13 @@ import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link MailProperties} - Global mail properties read from configuration file
+ * {@link MailProperties} - Global mail properties read from properties file.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailProperties {
+public final class MailProperties implements IMailProperties {
 
     private static final Log LOG = LogFactory.getLog(MailProperties.class);
-
-    private static final String STR_FALSE = Boolean.FALSE.toString();
-
-    private static final String STR_TRUE = Boolean.TRUE.toString();
 
     private static final MailProperties instance = new MailProperties();
 
@@ -94,9 +91,10 @@ public final class MailProperties {
 
     private final AtomicBoolean loaded;
 
-    /*
+    /*-
      * Fields for global properties
      */
+
     private LoginSource loginSource;
 
     private PasswordSource passwordSource;
@@ -369,15 +367,13 @@ public final class MailProperties {
         }
 
         {
-            final String userFlagsStr = configuration.getProperty("com.openexchange.mail.userFlagsEnabled", STR_FALSE).trim();
+            final String userFlagsStr = configuration.getProperty("com.openexchange.mail.userFlagsEnabled", "false").trim();
             userFlagsEnabled = Boolean.parseBoolean(userFlagsStr);
             logBuilder.append("\tUser Flags Enabled: ").append(userFlagsEnabled).append('\n');
         }
 
         {
-            final String allowNestedStr = configuration.getProperty(
-                "com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace",
-                STR_FALSE).trim();
+            final String allowNestedStr = configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
             allowNestedDefaultFolderOnAltNamespace = Boolean.parseBoolean(allowNestedStr);
             logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(allowNestedDefaultFolderOnAltNamespace).append(
                 '\n');
@@ -410,19 +406,19 @@ public final class MailProperties {
         }
 
         {
-            final String adminMailLoginEnabledStr = configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", STR_FALSE).trim();
+            final String adminMailLoginEnabledStr = configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
             adminMailLoginEnabled = Boolean.parseBoolean(adminMailLoginEnabledStr);
             logBuilder.append("\tAdmin Mail Login Enabled: ").append(adminMailLoginEnabled).append('\n');
         }
 
         {
-            final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription", STR_FALSE).trim();
+            final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription", "false").trim();
             ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
             logBuilder.append("\tIgnore Folder Subscription: ").append(ignoreSubscription).append('\n');
         }
 
         {
-            final String supSubsStr = configuration.getProperty("com.openexchange.mail.supportSubscription", STR_TRUE).trim();
+            final String supSubsStr = configuration.getProperty("com.openexchange.mail.supportSubscription", "true").trim();
             supportSubscription = Boolean.parseBoolean(supSubsStr);
             logBuilder.append("\tSupport Subscription: ").append(supportSubscription).append('\n');
         }
@@ -485,7 +481,7 @@ public final class MailProperties {
         }
 
         {
-            final String watcherEnabledStr = configuration.getProperty("com.openexchange.mail.watcherEnabled", STR_FALSE).trim();
+            final String watcherEnabledStr = configuration.getProperty("com.openexchange.mail.watcherEnabled", "false").trim();
             watcherEnabled = Boolean.parseBoolean(watcherEnabledStr);
             logBuilder.append("\tWatcher Enabled: ").append(watcherEnabled).append('\n');
         }
@@ -515,7 +511,7 @@ public final class MailProperties {
         }
 
         {
-            final String watcherShallCloseStr = configuration.getProperty("com.openexchange.mail.watcherShallClose", STR_FALSE).trim();
+            final String watcherShallCloseStr = configuration.getProperty("com.openexchange.mail.watcherShallClose", "false").trim();
             watcherShallClose = Boolean.parseBoolean(watcherShallCloseStr);
             logBuilder.append("\tWatcher Shall Close: ").append(watcherShallClose).append('\n');
         }
@@ -588,40 +584,27 @@ public final class MailProperties {
         }
     }
 
-    /**
-     * Checks if default folders (e.g. "Sent Mail", "Drafts") are supposed to be created below personal namespace folder (INBOX) even though
-     * mail server indicates to create them on the same level as personal namespace folder.
-     * <p>
-     * <b>Note</b> that personal namespace folder must allow subfolder creation.
-     * 
-     * @return <code>true</code> if default folders are supposed to be created below personal namespace folder; otherwise <code>false</code>
-     */
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return allowNestedDefaultFolderOnAltNamespace;
     }
 
-    /**
-     * Gets the attachDisplaySize
-     * 
-     * @return the attachDisplaySize
-     */
     public int getAttachDisplaySize() {
         return attachDisplaySize;
     }
 
     /**
-     * Gets the defaultMimeCharset
+     * Gets the default MIME charset.
      * 
-     * @return the defaultMimeCharset
+     * @return The default MIME charset
      */
     public String getDefaultMimeCharset() {
         return defaultMimeCharset;
     }
 
     /**
-     * Gets the defaultMailProvider
+     * Gets the default mail provider.
      * 
-     * @return the defaultMailProvider
+     * @return The default mail provider
      */
     public String getDefaultMailProvider() {
         return defaultMailProvider;
@@ -636,179 +619,129 @@ public final class MailProperties {
         return adminMailLoginEnabled;
     }
 
-    /**
-     * Gets the defaultSeparator
-     * 
-     * @return the defaultSeparator
-     */
     public char getDefaultSeparator() {
         return defaultSeparator;
     }
 
-    /**
-     * Gets the ignoreSubscription
-     * 
-     * @return the ignoreSubscription
-     */
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
     }
 
-    /**
-     * Gets the supportSubscription
-     * 
-     * @return the supportSubscription
-     */
     public boolean isSupportSubscription() {
         return supportSubscription;
     }
 
     /**
-     * Gets the javaMailProperties
+     * Gets the JavaMail properties.
      * 
-     * @return the javaMailProperties
+     * @return The JavaMail properties
      */
     public Properties getJavaMailProperties() {
         return javaMailProperties;
     }
 
     /**
-     * Gets the login source
+     * Gets the login source.
      * 
-     * @return the login source
+     * @return The login source
      */
     public LoginSource getLoginSource() {
         return loginSource;
     }
 
     /**
-     * Gets the password source
+     * Gets the password source.
      * 
-     * @return the password source
+     * @return The password source
      */
     public PasswordSource getPasswordSource() {
         return passwordSource;
     }
 
     /**
-     * Gets the mail server source
+     * Gets the mail server source.
      * 
-     * @return the mail server source
+     * @return The mail server source
      */
     public ServerSource getMailServerSource() {
         return mailServerSource;
     }
 
     /**
-     * Gets the transport server source
+     * Gets the transport server source.
      * 
-     * @return the transport server source
+     * @return The transport server source
      */
     public ServerSource getTransportServerSource() {
         return transportServerSource;
     }
 
-    /**
-     * Gets the mailFetchLimit
-     * 
-     * @return the mailFetchLimit
-     */
     public int getMailFetchLimit() {
         return mailFetchLimit;
     }
 
     /**
-     * Gets the mailServer
+     * Gets the global mail server.
      * 
-     * @return the mailServer
+     * @return The global mail server
      */
     public String getMailServer() {
         return mailServer;
     }
 
     /**
-     * Gets the masterPassword
+     * Gets the master password.
      * 
-     * @return the masterPassword
+     * @return The master password
      */
     public String getMasterPassword() {
         return masterPassword;
     }
 
-    /**
-     * Gets the maxNumOfConnections
-     * 
-     * @return the maxNumOfConnections
-     */
     public int getMaxNumOfConnections() {
         return maxNumOfConnections;
     }
 
     /**
-     * Gets the quoteLineColors
+     * Gets the quote line colors.
      * 
-     * @return the quoteLineColors
+     * @return The quote line colors
      */
     public String[] getQuoteLineColors() {
         return quoteLineColors;
     }
 
     /**
-     * Gets the transportServer
+     * Gets the global transport server
      * 
-     * @return the transportServer
+     * @return The global transport server
      */
     public String getTransportServer() {
         return transportServer;
     }
 
-    /**
-     * Gets the userFlagsEnabled
-     * 
-     * @return the userFlagsEnabled
-     */
     public boolean isUserFlagsEnabled() {
         return userFlagsEnabled;
     }
 
-    /**
-     * Gets the watcherEnabled
-     * 
-     * @return the watcherEnabled
-     */
     public boolean isWatcherEnabled() {
         return watcherEnabled;
     }
 
-    /**
-     * Gets the watcherFrequency
-     * 
-     * @return the watcherFrequency
-     */
     public int getWatcherFrequency() {
         return watcherFrequency;
     }
 
-    /**
-     * Gets the watcherShallClose
-     * 
-     * @return the watcherShallClose
-     */
     public boolean isWatcherShallClose() {
         return watcherShallClose;
     }
 
-    /**
-     * Gets the watcherTime
-     * 
-     * @return the watcherTime
-     */
     public int getWatcherTime() {
         return watcherTime;
     }
 
     /**
-     * Gets the phishing headers
+     * Gets the phishing headers.
      * 
      * @return The phishing headers or <code>null</code> if none defined
      */
@@ -821,20 +754,10 @@ public final class MailProperties {
         return retval;
     }
 
-    /**
-     * Gets the mail access cache shrinker-interval seconds.
-     * 
-     * @return The mail access cache shrinker-interval seconds
-     */
     public int getMailAccessCacheShrinkerSeconds() {
         return mailAccessCacheShrinkerSeconds;
     }
 
-    /**
-     * Gets the mail access cache idle seconds.
-     * 
-     * @return The mail access cache idle seconds.
-     */
     public int getMailAccessCacheIdleSeconds() {
         return mailAccessCacheIdleSeconds;
     }

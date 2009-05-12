@@ -63,7 +63,6 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.ProtocolException;
@@ -179,7 +178,7 @@ public final class IMAPSearch {
             final long start = System.currentTimeMillis();
             allMsgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
                 searchFields,
-                IMAPConfig.isFastFetch()), msgCount).doCommand();
+                imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         }
         final SmartIntArray sia = new SmartIntArray(allMsgs.length >> 1);

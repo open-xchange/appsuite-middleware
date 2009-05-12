@@ -53,15 +53,17 @@ import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegis
 import java.nio.charset.Charset;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
- * {@link POP3Properties}
+ * {@link POP3Properties} - POP3 properties loaded from properties file.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Properties extends AbstractProtocolProperties {
+public final class POP3Properties extends AbstractProtocolProperties implements IPOP3Properties {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Properties.class);
 
@@ -80,6 +82,8 @@ public final class POP3Properties extends AbstractProtocolProperties {
      * Fields for global properties
      */
 
+    private final IMailProperties mailProperties;
+
     private int pop3Timeout;
 
     private int pop3ConnectionTimeout;
@@ -97,6 +101,7 @@ public final class POP3Properties extends AbstractProtocolProperties {
      */
     private POP3Properties() {
         super();
+        mailProperties = MailProperties.getInstance();
     }
 
     @Override
@@ -184,47 +189,22 @@ public final class POP3Properties extends AbstractProtocolProperties {
         spamHandlerName = null;
     }
 
-    /**
-     * Gets the POP3 authentication encoding.
-     * 
-     * @return The POP3 authentication encoding
-     */
     public String getPOP3AuthEnc() {
         return pop3AuthEnc;
     }
 
-    /**
-     * Gets the POP3 connection idle time in milliseconds.
-     * 
-     * @return The POP3 connection idle time in milliseconds
-     */
     public int getPOP3ConnectionIdleTime() {
         return pop3ConnectionIdleTime;
     }
 
-    /**
-     * Gets the POP3 connection timeout in milliseconds.
-     * 
-     * @return The POP3 connection timeout in milliseconds
-     */
     public int getPOP3ConnectionTimeout() {
         return pop3ConnectionTimeout;
     }
 
-    /**
-     * Gets the POP3 temporary down in milliseconds.
-     * 
-     * @return The POP3 temporary down in milliseconds
-     */
     public int getPOP3TemporaryDown() {
         return pop3TemporaryDown;
     }
 
-    /**
-     * Gets the POP3 timeout in milliseconds.
-     * 
-     * @return The POP3 timeout in milliseconds
-     */
     public int getPOP3Timeout() {
         return pop3Timeout;
     }
@@ -237,4 +217,61 @@ public final class POP3Properties extends AbstractProtocolProperties {
     public String getSpamHandlerName() {
         return spamHandlerName;
     }
+
+    public int getAttachDisplaySize() {
+        return mailProperties.getAttachDisplaySize();
+    }
+
+    public char getDefaultSeparator() {
+        return mailProperties.getDefaultSeparator();
+    }
+
+    public int getMailAccessCacheIdleSeconds() {
+        return mailProperties.getMailAccessCacheIdleSeconds();
+    }
+
+    public int getMailAccessCacheShrinkerSeconds() {
+        return mailProperties.getMailAccessCacheShrinkerSeconds();
+    }
+
+    public int getMailFetchLimit() {
+        return mailProperties.getMailFetchLimit();
+    }
+
+    public int getMaxNumOfConnections() {
+        return mailProperties.getMaxNumOfConnections();
+    }
+
+    public int getWatcherFrequency() {
+        return mailProperties.getWatcherFrequency();
+    }
+
+    public int getWatcherTime() {
+        return mailProperties.getWatcherTime();
+    }
+
+    public boolean isAllowNestedDefaultFolderOnAltNamespace() {
+        return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
+    }
+
+    public boolean isIgnoreSubscription() {
+        return mailProperties.isIgnoreSubscription();
+    }
+
+    public boolean isSupportSubscription() {
+        return mailProperties.isSupportSubscription();
+    }
+
+    public boolean isUserFlagsEnabled() {
+        return mailProperties.isUserFlagsEnabled();
+    }
+
+    public boolean isWatcherEnabled() {
+        return mailProperties.isWatcherEnabled();
+    }
+
+    public boolean isWatcherShallClose() {
+        return mailProperties.isWatcherShallClose();
+    }
+
 }

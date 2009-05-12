@@ -47,85 +47,16 @@
  *
  */
 
-package com.openexchange.imap.acl;
+package com.openexchange.unifiedinbox.config;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.api.IMailProperties;
+
 
 /**
- * {@link ACLExtensionFactory} - Factory for ACL extension.
- * 
+ * {@link IUnifiedINBOXProperties} - Properties for Unified INBOX.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ACLExtensionFactory {
+public interface IUnifiedINBOXProperties extends IMailProperties {
 
-    private static ACLExtensionFactory instance;
-
-    static void createInstance() {
-        instance = new ACLExtensionFactory();
-    }
-
-    static void releaseInstance() {
-        instance = null;
-    }
-
-    /**
-     * Gets the factory instance.
-     * 
-     * @return The factory instance.
-     */
-    public static ACLExtensionFactory getInstance() {
-        return instance;
-    }
-
-    private final AtomicBoolean instantiated;
-
-    private ACLExtension configured;
-
-    /**
-     * Initializes a new {@link ACLExtensionFactory}.
-     */
-    private ACLExtensionFactory() {
-        super();
-        instantiated = new AtomicBoolean();
-    }
-
-    /**
-     * Gets the appropriate ACL extension for the IMAP server denoted by specified IMAP configuration.
-     * 
-     * @param imapConfig The IMAP configuration providing needed access data.
-     * @return The appropriate ACL extension
-     * @throws IMAPException If an I/O error occurs
-     */
-    public ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IMAPException {
-        if (!instantiated.get()) {
-            try {
-                return ACLExtensionAutoDetector.getACLExtension(imapConfig);
-            } catch (final IOException e) {
-                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
-            }
-        }
-        return configured;
-    }
-
-    /**
-     * Resets this factory instance.
-     */
-    void resetACLExtensionFactory() {
-        configured = null;
-        instantiated.set(false);
-        ACLExtensionAutoDetector.resetACLExtensionMappings();
-    }
-
-    /**
-     * Only invoked if auto-detection is turned off.
-     * 
-     * @param singleton The singleton instance of {@link ACLExtension}
-     */
-    void setACLExtensionInstance(final ACLExtension singleton) {
-        configured = singleton;
-        instantiated.set(true);
-    }
 }
