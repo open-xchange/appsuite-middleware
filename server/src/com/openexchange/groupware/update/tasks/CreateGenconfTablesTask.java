@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,6 +61,8 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
