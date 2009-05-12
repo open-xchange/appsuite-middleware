@@ -49,10 +49,14 @@
 
 package com.openexchange.test.sql;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
@@ -66,8 +70,10 @@ import junit.framework.TestCase;
 public abstract class SQLTestCase extends TestCase {
 
     private ConfigurableDBProvider dbProvider;
+    protected Properties properties;
 
     public void setUp() throws Exception {
+        loadProperties();
         dbProvider = new ConfigurableDBProvider();
         dbProvider.setDriver(getDriver());
         dbProvider.setLogin(getLogin());
@@ -79,13 +85,35 @@ public abstract class SQLTestCase extends TestCase {
         return dbProvider;
     }
 
-    public abstract String getDriver();
+    protected void loadProperties() throws IOException {
+        String filename = System.getProperty("com.openexchange.test.sql.properties", "conf/sql.properties");
+        properties = new Properties();
+        InputStream input = null;
+        try {
+            input = new FileInputStream(filename);
+            properties.load(input);
+        } finally {
+            if (input != null) {
+                input.close();
+            }
+        }
+    }
 
-    public abstract String getLogin();
+    public String getDriver() {
+        return properties.getProperty("driver");
+    }
 
-    public abstract String getPassword();
+    public String getLogin() {
+        return properties.getProperty("login");
+    }
 
-    public abstract String getUrl();
+    public String getPassword() {
+        return properties.getProperty("password");
+    }
+
+    public String getUrl() {
+        return properties.getProperty("url");
+    }
 
     public void assertResult(String sql) throws TransactionException, SQLException {
         Connection con = null;
