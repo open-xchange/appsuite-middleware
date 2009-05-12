@@ -49,6 +49,9 @@
 
 package com.openexchange.java;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Methods helping with Autoboxing to shorten method names and therefore source code.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -124,6 +127,15 @@ public final class Autoboxing {
         return intArray;
     }
 
+    /**
+     * Converts an Integer-list into an int-array.
+     * @param integerList List of Integers to be converted to int[]
+     * @return int[]
+     */
+    public static int[] I2i(Collection<Integer> integerList) {
+        return I2i(integerList.toArray(new Integer[]{}));
+    }
+    
     /**
      * Converts a long-array into a Long-array.
      * @param longArray long[] to be converted to Long[]
