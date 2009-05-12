@@ -244,11 +244,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (lastPos < pos) {
                 fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
             }
-            final MailMessage[] mails = MIMEMessageConverter.convertMessages(messages, fields, body);
             if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
-                setAccountInfo(mails);
+                return setAccountInfo(MIMEMessageConverter.convertMessages(messages, fields, body));
             }
-            return mails;
+            return MIMEMessageConverter.convertMessages(messages, fields, body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -322,8 +321,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
                 }
             }
-            setAccountInfo(mail);
-            return mail;
+            return setAccountInfo(mail);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -565,11 +563,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 msgs = new ExtendedMimeMessage[retvalLength];
                 System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
             }
-            final MailMessage[] mails = MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
             if (usedFields.contains(MailField.ACCOUNT_NAME)) {
-                setAccountInfo(mails);
+                return setAccountInfo(MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body));
             }
-            return mails;
+            return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -1583,23 +1580,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
      * Sets account ID and name in given instance of {@link MailMessage}.
      * 
      * @param mailMessages The {@link MailMessage} instance
+     * @return The given instance of {@link MailMessage} with account ID and name set
      * @throws MailException If mail account cannot be obtained
      */
-    private void setAccountInfo(final MailMessage mailMessage) throws MailException {
+    private MailMessage setAccountInfo(final MailMessage mailMessage) throws MailException {
         final MailAccount account = getMailAccount();
         final String name = account.getName();
         final int id = account.getId();
         mailMessage.setAccountId(id);
         mailMessage.setAccountName(name);
+        return mailMessage;
     }
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
      * 
      * @param mailMessages The {@link MailMessage} instances
+     * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws MailException If mail account cannot be obtained
      */
-    private void setAccountInfo(final MailMessage[] mailMessages) throws MailException {
+    private MailMessage[] setAccountInfo(final MailMessage[] mailMessages) throws MailException {
         final MailAccount account = getMailAccount();
         final String name = account.getName();
         final int id = account.getId();
@@ -1608,5 +1608,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             mailMessage.setAccountId(id);
             mailMessage.setAccountName(name);
         }
+        return mailMessages;
     }
 }
