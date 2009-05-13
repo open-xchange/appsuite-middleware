@@ -376,6 +376,7 @@ public final class MailAccountRequest {
             }
             mailConfig.setServer(server.substring(0, pos));
         }
+        mailAccess.setCacheable(false);
         return mailAccess;
     }
 
