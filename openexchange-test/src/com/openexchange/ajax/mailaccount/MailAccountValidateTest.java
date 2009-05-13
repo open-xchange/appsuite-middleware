@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -147,6 +148,20 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription, true, true));
         assertTrue("Valid access data in mail/transport account do not pass validation but should", response.isValidated());
         final JSONObject tree = response.getTree();
-        System.out.println(tree);
+
+        assertTrue("Root folder has no subfolders but should.", tree.hasAndNotNull("subfolder_array"));
+        final JSONArray subfolders = tree.getJSONArray("subfolder_array");
+        final int len = subfolders.length();
+        for (int i = 0; i < len; i++) {
+            final JSONObject folder = subfolders.getJSONObject(i);
+            assertTrue("Subfolder has no fullname but should.", folder.hasAndNotNull("folder_id"));
+
+            if (folder.hasAndNotNull("subfolders") && folder.getBoolean("subfolders")) {
+                assertTrue(
+                    "Missing subfolder array although JSON folder indicates presence of subfolders.",
+                    folder.hasAndNotNull("subfolder_array"));
+            }
+        }
     }
+
 }
