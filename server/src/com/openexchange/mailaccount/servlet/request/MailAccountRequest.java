@@ -307,7 +307,7 @@ public final class MailAccountRequest {
         }
 
         final JSONArray subfolderArray = new JSONArray();
-        parent.put("subfolders_array", subfolderArray);
+        parent.put("subfolder_array", subfolderArray);
 
         for (final MailFolder subfolder : subfolders) {
             final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig);
