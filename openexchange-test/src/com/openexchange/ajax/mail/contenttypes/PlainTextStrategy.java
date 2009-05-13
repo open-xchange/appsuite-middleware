@@ -52,33 +52,23 @@ package com.openexchange.ajax.mail.contenttypes;
 import org.json.JSONException;
 import com.openexchange.ajax.mail.TestMail;
 
+
 /**
- * {@link AlternativeStrategy}
- * 
+ * {@link PlainTextStrategy}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AlternativeStrategy implements MailTypeStrategy {
+public class PlainTextStrategy implements MailTypeStrategy {
+
+    public boolean isResponsibleFor(TestMail mail) throws JSONException {
+        return MailContentType.PLAIN.toString().equalsIgnoreCase(mail.getContentType());
+
+    }
 
     public void sanitize(TestMail mail) throws JSONException {
-        if (mail.getBody() == null && mail.getAttachment() != null) {
-            String text = mail.getAttachment().get(0).getString("content");
-            if (text.contains("<body>")) {
-                text = text.split("<body>")[1];
-                text = text.split("</body>")[0];
-            }
-            text = text.trim();
-            mail.setBody(text);
-            mail.setContentType(MailContentType.ALTERNATIVE.toString());
-            //TODO: Create text as HTML attachment when in doubt?
+        if(mail.getBody() != null){
+            mail.setBody( mail.getBody().trim() );
         }
     }
 
-    public boolean isResponsibleFor(TestMail mail) {
-        return MailContentType.ALTERNATIVE.toString().equalsIgnoreCase(mail.getContentType());
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName();
-    }
 }

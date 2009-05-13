@@ -63,6 +63,7 @@ import com.openexchange.ajax.mail.contenttypes.AlternativeStrategy;
 import com.openexchange.ajax.mail.contenttypes.FallbackStrategy;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.contenttypes.MailTypeStrategy;
+import com.openexchange.ajax.mail.contenttypes.PlainTextStrategy;
 import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
@@ -105,7 +106,8 @@ public class TestMail implements IdentitySource<TestMail> {
 
     private int priority, flags, color;
 
-    private List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] { new AlternativeStrategy(), new FallbackStrategy() });
+    private List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] {
+        new PlainTextStrategy(), new AlternativeStrategy(), new FallbackStrategy() });
 
     public int getFlags() {
         return flags;
@@ -237,6 +239,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Used for reading from FitNesse tables
+     * 
      * @param map A map, where the keys are taken from MailListField or TestMailField
      * @throws JSONException
      */
@@ -246,14 +249,16 @@ public class TestMail implements IdentitySource<TestMail> {
             MailListField field = MailListField.getBy(key);
             if (key == null)
                 continue;
+
             setBy(field, map.get(key));
         }
-        setBody(map.get( TestMailField.MESSAGE.toString() ));
+        setBody(map.get(TestMailField.MESSAGE.toString()));
         sanitize();
     }
 
     /**
      * Used for reading from a JSONObject like it is returned from a GET request
+     * 
      * @param json
      * @throws JSONException
      */
@@ -325,6 +330,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Used for reading in fields returned by requests such as SEARCH
+     * 
      * @param columns Columns (as in #MailListField) that were requested
      * @param values A JSONArray carrying values for a TestMail
      * @throws JSONException
@@ -368,16 +374,7 @@ public class TestMail implements IdentitySource<TestMail> {
             if (field == MailListField.PRIORITY) {
                 setPriority(values.getInt(index));
             }
-            // attachment
-            if (field == MailListField.ATTACHMENT) {
-                if (values.getBoolean(index)) {
-                    JSONArray array = values.getJSONArray(index);
-                    attachment = new LinkedList<JSONObject>();
-                    for (int secondIndex = 0, size = array.length(); secondIndex < size; secondIndex++) {
-                        attachment.add(array.getJSONObject(secondIndex));
-                    }
-                }
-            }
+            // attachments: requests using columns to select fields cannot require the attachment field.
         }
         sanitize();
     }
