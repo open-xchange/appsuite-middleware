@@ -51,6 +51,7 @@ package com.openexchange.subscribe.sql;
 
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.subscriptions;
+import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -109,15 +110,15 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             try {
                 writeConnection.rollback();
             } catch (SQLException e1) {
-                throw new AbstractOXException("Sql Exception occurred.", e1);
+                throw SQLException.create(e1);
             }
-            throw new AbstractOXException("Sql Exception occurred.", e);
+            throw SQLException.create(e);
         } finally {
             if (writeConnection != null ) {
                 try {
                     writeConnection.setAutoCommit(true);
                 } catch (SQLException e) {
-                    throw new AbstractOXException("Sql Exception occurred.", e);
+                    throw SQLException.create(e);
                 } finally {
                     dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
                 }
@@ -146,14 +147,14 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 retval = subscriptions.get(0);
             }
         } catch (SQLException e) {
-            throw new AbstractOXException("Sql Exception occurred.", e);
+            throw SQLException.create(e);
         } finally {
             try {
                 if (resultSet != null) {
                     resultSet.close();
                 }
             } catch (SQLException e) {
-                throw new AbstractOXException("Sql Exception occurred.", e);
+                throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -179,14 +180,14 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             
             retval = parseResultSet(new StatementBuilder().executeQuery(readConnection, select, values), ctx, readConnection);
         } catch (SQLException e) {
-            throw new AbstractOXException("Sql Exception occurred.", e);
+            throw SQLException.create(e);
         } finally {
             try {
                 if (resultSet != null) {
                     resultSet.close();
                 }
             } catch (SQLException e) {
-                throw new AbstractOXException("Sql Exception occurred.", e);
+                throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -234,15 +235,15 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             try {
                 writeConnection.rollback();
             } catch (SQLException e1) {
-                throw new AbstractOXException("Sql Exception occurred.", e1);
+                throw SQLException.create(e1);
             }
-            throw new AbstractOXException("Sql Exception occurred.", e);
+            throw SQLException.create(e);
         } finally {
             if (writeConnection != null ) {
                 try {
                     writeConnection.setAutoCommit(true);
                 } catch (SQLException e) {
-                    throw new AbstractOXException("Sql Exception occurred.", e);
+                    throw SQLException.create(e);
                 } finally {
                     dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
                 }
@@ -271,14 +272,14 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 retval = resultSet.getInt("configuration_id");
             }
         } catch (SQLException e) {
-            throw new AbstractOXException("Sql Exception occurred.", e);
+            throw SQLException.create(e);
         } finally {
             try {
                 if (resultSet != null) {
                     resultSet.close();
                 }
             } catch (SQLException e) {
-                throw new AbstractOXException("Sql Exception occurred.", e);
+                throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(subscription.getContext(), readConection);
             }
