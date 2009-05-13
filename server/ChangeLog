@@ -1,3 +1,7 @@
+* 2009-05-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #13604: SWitching to strict detection whether a mail part's disposition is "INLINE" or not when generating forward mail
+
 * 2009-05-11 - francisco.laguna@open-xchange.com
 
  - Bugfix 13482: Content-Length of 0 means there is no body. Don't use the XML parser on that.
