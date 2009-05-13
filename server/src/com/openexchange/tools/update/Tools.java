@@ -61,6 +61,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.groupware.contexts.Context;
@@ -226,5 +228,60 @@ public final class Tools {
             final FileStorage fs = FileStorage.getInstance(fileStorageURI, ctx, new SimpleDBProvider(con, con));
             fs.deleteFile(fileStoreLocation);
         }
+    }
+
+    public static boolean hasSequenceEntry(String sequenceTable, Connection con, int ctxId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM " + sequenceTable + " WHERE cid = "+ctxId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            if(rs != null) {
+                rs.close();
+            }
+            if(stmt != null) {
+                stmt.close();
+            }
+        }
+    }
+
+    public static List<Integer> getContextIDs(Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<Integer> contextIds = new LinkedList<Integer>();
+        try {
+            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                contextIds.add(rs.getInt(1));
+            }
+            return contextIds;
+        } finally {
+            if(rs != null) {
+                rs.close();
+            }
+            if(stmt != null) {
+                stmt.close();
+            }
+        }
+    }
+
+    public static void exec(Connection con, String sql, Object...args) throws SQLException {
+        PreparedStatement statement = null;
+        try {
+            statement = con.prepareStatement(sql);
+            int i = 1;
+            for(Object arg : args) {
+                statement.setObject(i++, arg);
+            }
+            statement.execute();
+        } finally {
+            if(statement != null) {
+                statement.close();
+            }
+        }
+        
     }
 }

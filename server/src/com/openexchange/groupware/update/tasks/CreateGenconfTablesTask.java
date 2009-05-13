@@ -51,10 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -63,10 +60,10 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.update.Tools;
 
 
 /**
@@ -117,18 +114,18 @@ public class CreateGenconfTablesTask implements UpdateTask {
         Connection con = null;
         try {
             con = Database.getNoTimeout(contextId, true);
-            if(!existsTable(con, "genconf_attributes_strings")) {
-                exec(con, STRING_TABLE_CREATE);
+            if(!Tools.tableExists(con, "genconf_attributes_strings")) {
+                Tools.exec(con, STRING_TABLE_CREATE);
             }
-            if(!existsTable(con, "genconf_attributes_bools")) {
-                exec(con, BOOL_TABLE_CREATE);
+            if(!Tools.tableExists(con, "genconf_attributes_bools")) {
+                Tools.exec(con, BOOL_TABLE_CREATE);
             }
-            if(!existsTable(con, "sequence_genconf")) {
-                exec(con, SEQUENCE_TABLE_CREATE);
+            if(!Tools.tableExists(con, "sequence_genconf")) {
+                Tools.exec(con, SEQUENCE_TABLE_CREATE);
             }
-            for(int ctxId : getContextIDs(con)) {
-                if(!hasSequenceEntry(con, ctxId)) {
-                    exec(con, INSERT_IN_SEQUENCE, contextId);
+            for(int ctxId : Tools.getContextIDs(con)) {
+                if(!Tools.hasSequenceEntry("sequence_genconf", con, ctxId)) {
+                    Tools.exec(con, INSERT_IN_SEQUENCE, contextId);
                 }
             }
         } catch (SQLException e) {
@@ -138,84 +135,6 @@ public class CreateGenconfTablesTask implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-    }
-    private boolean hasSequenceEntry(Connection con, int ctxId) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT 1 FROM sequence_genconf WHERE cid = "+ctxId);
-            rs = stmt.executeQuery();
-            return rs.next();
-        } finally {
-            if(rs != null) {
-                rs.close();
-            }
-            if(stmt != null) {
-                stmt.close();
-            }
-        }
-
-    }
-
-    private List<Integer> getContextIDs(Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        List<Integer> contextIds = new LinkedList<Integer>();
-        try {
-            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
-            rs = stmt.executeQuery();
-            while(rs.next()) {
-                contextIds.add(rs.getInt(1));
-            }
-            return contextIds;
-        } finally {
-            if(rs != null) {
-                rs.close();
-            }
-            if(stmt != null) {
-                stmt.close();
-            }
-        }
-    }
-
-    private boolean existsTable(Connection con, String tableName) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SHOW TABLES");
-            rs = stmt.executeQuery();
-            while(rs.next()) {
-                String table = rs.getString(1);
-                if(table.equals(tableName)) {
-                    return true;
-                }
-            }
-            return false;
-        } finally {
-            if(rs != null) {
-                rs.close();
-            }
-            if(stmt != null) {
-                stmt.close();
-            }
-        }
-    }
-
-    private void exec(Connection con, String sql, Object...args) throws SQLException {
-        PreparedStatement statement = null;
-        try {
-            statement = con.prepareStatement(sql);
-            int i = 1;
-            for(Object arg : args) {
-                statement.setObject(i++, arg);
-            }
-            statement.execute();
-        } finally {
-            if(statement != null) {
-                statement.close();
-            }
-        }
-        
     }
     
     @OXThrowsMultiple(
