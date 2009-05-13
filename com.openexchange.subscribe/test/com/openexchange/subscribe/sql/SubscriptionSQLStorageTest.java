@@ -98,7 +98,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     
     protected Context ctx = new SimContext(1);
     
-    protected int folderId = 123;
+    protected int folderId = 1;
     
     protected int userId = 44;
     
