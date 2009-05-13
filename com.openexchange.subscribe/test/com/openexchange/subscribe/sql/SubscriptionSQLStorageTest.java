@@ -62,6 +62,7 @@ import com.openexchange.database.Database;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageSerice;
+import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -77,6 +78,7 @@ import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.test.sql.SQLTestCase;
@@ -103,6 +105,9 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     protected long lastUpdate;
     
     public void setUp() throws Exception {
+        SubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
+        SubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("SUBS"));
+        
         loadProperties();
         super.setUp();
         
