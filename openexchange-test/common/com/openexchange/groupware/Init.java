@@ -122,7 +122,7 @@ public final class Init {
         /**
          * Initialization for alias charset provider
          */
-        new com.openexchange.charset.AliasCharsetProviderInit(),
+        new com.openexchange.charset.CustomCharsetProviderInit(),
         /**
          * Starts HTTP servlet manager
          */
