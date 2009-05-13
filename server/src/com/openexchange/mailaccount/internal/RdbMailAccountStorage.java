@@ -118,6 +118,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String INSERT_TRANSPORT_ACCOUNT = "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag) VALUES (?,?,?,?,?,?,?,?,?)";
 
+    private static final String UPDATE_UNIFIED_INBOX_FLAG = "UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
+
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
@@ -505,157 +507,221 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
-        if ((mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) && !changePrimary) {
-            if (attributes.size() > 1 || !attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL)) {
+        if (!changePrimary && mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
+            if (!attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL)) {
+                /*
+                 * An attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL must not be changed
+                 */
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
             }
-        }
-        PreparedStatement stmt = null;
-        try {
-            MailAccount storageVersion = null;
-            if (prepareURL(attributes, Attribute.MAIL_URL_ATTRIBUTES, Attribute.MAIL_URL_LITERAL)) {
-                storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
-                final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);
-                final SetSwitch setSwitch = new SetSwitch(mailAccount);
-
-                for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
-                    if (!attributes.contains(attribute)) {
-                        final Object value = attribute.doSwitch(getSwitch);
-                        setSwitch.setValue(value);
-                        attribute.doSwitch(setSwitch);
+            /*
+             * Ensure only Attribute.UNIFIED_INBOX_ENABLED_LITERAL should really be changed
+             */
+            final MailAccount storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+            /*
+             * Initialize GET switches
+             */
+            final MailAccountGetSwitch storageGetSwitch = new MailAccountGetSwitch(storageVersion);
+            final GetSwitch getSwitch = new GetSwitch(mailAccount);
+            /*
+             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL
+             */
+            for (final Attribute attribute : attributes) {
+                /*
+                 * Check for an attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL
+                 */
+                if (!Attribute.UNIFIED_INBOX_ENABLED_LITERAL.equals(attribute)) {
+                    final Object storageValue = attribute.doSwitch(storageGetSwitch);
+                    final Object newValue = attribute.doSwitch(getSwitch);
+                    if (!storageValue.equals(newValue)) {
+                        /*
+                         * An attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL must not be changed
+                         */
+                        throw MailAccountExceptionFactory.getInstance().create(
+                            MailAccountExceptionMessages.NO_DEFAULT_UPDATE,
+                            I(user),
+                            I(cid));
                     }
                 }
             }
-
-            if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
-                if (storageVersion != null) {
+            /*
+             * OK, update UNIFIED_INBOX_ENABLED flag.
+             */
+            updateUnifiedINBOXEnabled(mailAccount.isUnifiedINBOXEnabled(), MailAccount.DEFAULT_ID, user, cid, con);
+            /*
+             * Automatically check Unified INBOX enablement
+             */
+            if (mailAccount.isUnifiedINBOXEnabled()) {
+                final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                if (null != management && management.getUnifiedINBOXAccountID(user, cid, con) == -1) {
+                    management.createUnifiedINBOX(user, cid, con);
+                }
+            }
+        } else {
+            PreparedStatement stmt = null;
+            try {
+                MailAccount storageVersion = null;
+                if (prepareURL(attributes, Attribute.MAIL_URL_ATTRIBUTES, Attribute.MAIL_URL_LITERAL)) {
                     storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
-                }
-                final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);
-                final SetSwitch setSwitch = new SetSwitch(mailAccount);
+                    final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);
+                    final SetSwitch setSwitch = new SetSwitch(mailAccount);
 
-                for (final Attribute attribute : Attribute.TRANSPORT_URL_ATTRIBUTES) {
-                    if (!attributes.contains(attribute)) {
-                        final Object value = attribute.doSwitch(getSwitch);
-                        setSwitch.setValue(value);
-                        attribute.doSwitch(setSwitch);
-                    }
-                }
-            }
-
-            attributes.removeAll(Attribute.MAIL_URL_ATTRIBUTES);
-            attributes.removeAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
-
-            String encryptedPassword = null; //
-
-            List<Attribute> orderedAttributes = null;
-            if (UpdateMailAccountBuilder.needsUpdate(attributes)) {
-                orderedAttributes = new ArrayList<Attribute>(attributes);
-
-                final UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
-                for (final Attribute attribute : orderedAttributes) {
-                    attribute.doSwitch(sqlBuilder);
-                }
-
-                stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-
-                final GetSwitch getter = new GetSwitch(mailAccount);
-                int pos = 1;
-                for (final Attribute attribute : orderedAttributes) {
-                    if (!sqlBuilder.handles(attribute)) {
-                        continue;
-                    }
-                    final Object value = attribute.doSwitch(getter);
-                    if (Attribute.PASSWORD_LITERAL == attribute) {
-                        try {
-                            encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
-                        } catch (final GeneralSecurityException e) {
-                            throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                    for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
+                        if (!attributes.contains(attribute)) {
+                            final Object value = attribute.doSwitch(getSwitch);
+                            setSwitch.setValue(value);
+                            attribute.doSwitch(setSwitch);
                         }
-                        stmt.setObject(pos++, encryptedPassword);
-                    } else {
-                        stmt.setObject(pos++, value);
                     }
                 }
 
-                stmt.setLong(pos++, cid);
-                stmt.setLong(pos++, mailAccount.getId());
-                stmt.setLong(pos++, user);
-                stmt.executeUpdate();
-                closeSQLStuff(stmt);
+                if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
+                    if (storageVersion != null) {
+                        storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                    }
+                    final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);
+                    final SetSwitch setSwitch = new SetSwitch(mailAccount);
 
-            }
+                    for (final Attribute attribute : Attribute.TRANSPORT_URL_ATTRIBUTES) {
+                        if (!attributes.contains(attribute)) {
+                            final Object value = attribute.doSwitch(getSwitch);
+                            setSwitch.setValue(value);
+                            attribute.doSwitch(setSwitch);
+                        }
+                    }
+                }
 
-            if (UpdateTransportAccountBuilder.needsUpdate(attributes)) {
-                if (orderedAttributes == null) {
+                attributes.removeAll(Attribute.MAIL_URL_ATTRIBUTES);
+                attributes.removeAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
+
+                String encryptedPassword = null; //
+
+                List<Attribute> orderedAttributes = null;
+                if (UpdateMailAccountBuilder.needsUpdate(attributes)) {
                     orderedAttributes = new ArrayList<Attribute>(attributes);
-                }
 
-                final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
-                for (final Attribute attribute : orderedAttributes) {
-                    attribute.doSwitch(sqlBuilder);
-                }
-
-                stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-
-                final GetSwitch getter = new GetSwitch(mailAccount);
-                int pos = 1;
-                for (final Attribute attribute : orderedAttributes) {
-                    if (!sqlBuilder.handles(attribute)) {
-                        continue;
+                    final UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
+                    for (final Attribute attribute : orderedAttributes) {
+                        attribute.doSwitch(sqlBuilder);
                     }
-                    final Object value = attribute.doSwitch(getter);
-                    if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
-                        if (encryptedPassword == null) {
+
+                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+
+                    final GetSwitch getter = new GetSwitch(mailAccount);
+                    int pos = 1;
+                    for (final Attribute attribute : orderedAttributes) {
+                        if (!sqlBuilder.handles(attribute)) {
+                            continue;
+                        }
+                        final Object value = attribute.doSwitch(getter);
+                        if (Attribute.PASSWORD_LITERAL == attribute) {
                             try {
-                                encryptedPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                                encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
                             } catch (final GeneralSecurityException e) {
                                 throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                             }
+                            stmt.setObject(pos++, encryptedPassword);
+                        } else {
+                            stmt.setObject(pos++, value);
                         }
-                        stmt.setObject(pos++, encryptedPassword);
-                    } else {
-                        stmt.setObject(pos++, value);
                     }
+
+                    stmt.setLong(pos++, cid);
+                    stmt.setLong(pos++, mailAccount.getId());
+                    stmt.setLong(pos++, user);
+                    stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+
                 }
 
-                stmt.setLong(pos++, cid);
-                stmt.setLong(pos++, mailAccount.getId());
-                stmt.setLong(pos++, user);
-                stmt.executeUpdate();
-                closeSQLStuff(stmt);
+                if (UpdateTransportAccountBuilder.needsUpdate(attributes)) {
+                    if (orderedAttributes == null) {
+                        orderedAttributes = new ArrayList<Attribute>(attributes);
+                    }
 
-            }
+                    final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                    for (final Attribute attribute : orderedAttributes) {
+                        attribute.doSwitch(sqlBuilder);
+                    }
 
-            final Map<String, String> properties = mailAccount.getProperties();
-            if (attributes.contains(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL)) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+
+                    final GetSwitch getter = new GetSwitch(mailAccount);
+                    int pos = 1;
+                    for (final Attribute attribute : orderedAttributes) {
+                        if (!sqlBuilder.handles(attribute)) {
+                            continue;
+                        }
+                        final Object value = attribute.doSwitch(getter);
+                        if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
+                            if (encryptedPassword == null) {
+                                try {
+                                    encryptedPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                                } catch (final GeneralSecurityException e) {
+                                    throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                                }
+                            }
+                            stmt.setObject(pos++, encryptedPassword);
+                        } else {
+                            stmt.setObject(pos++, value);
+                        }
+                    }
+
+                    stmt.setLong(pos++, cid);
+                    stmt.setLong(pos++, mailAccount.getId());
+                    stmt.setLong(pos++, user);
+                    stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+
+                }
+
+                final Map<String, String> properties = mailAccount.getProperties();
+                if (attributes.contains(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL)) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                }
+                if (attributes.contains(Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL)) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+                }
+                if (attributes.contains(Attribute.POP3_REFRESH_RATE_LITERAL)) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+                }
+                if (attributes.contains(Attribute.POP3_STORAGE_LITERAL)) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+                }
+                if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
+                }
+            } catch (final SQLException e) {
+                throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+            } finally {
+                closeSQLStuff(null, stmt);
             }
-            if (attributes.contains(Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL)) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+            /*
+             * Automatically check Unified INBOX enablement
+             */
+            if (attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
+                final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                if (null != management && management.getUnifiedINBOXAccountID(user, cid, con) == -1) {
+                    management.createUnifiedINBOX(user, cid, con);
+                }
             }
-            if (attributes.contains(Attribute.POP3_REFRESH_RATE_LITERAL)) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
-            }
-            if (attributes.contains(Attribute.POP3_STORAGE_LITERAL)) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
-            }
-            if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
-            }
+        }
+    }
+
+    private void updateUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(UPDATE_UNIFIED_INBOX_FLAG);
+            int pos = 1;
+            stmt.setInt(pos++, unifiedINBOXEnabled ? 1 : 0);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
-            closeSQLStuff(null, stmt);
-        }
-        /*
-         * Automatically check Unified INBOX enablement
-         */
-        if (attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
-            final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-            if (null != management && management.getUnifiedINBOXAccountID(user, cid, con) == -1) {
-                management.createUnifiedINBOX(user, cid, con);
-            }
+            closeSQLStuff(stmt);
         }
     }
 
