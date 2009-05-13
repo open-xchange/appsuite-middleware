@@ -51,6 +51,7 @@ package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
@@ -131,5 +132,21 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
         mailAccountDescription.setTransportSecure(false);
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertTrue("Valid access data in mail/transport account do not pass validation but should", response.isValidated());
+
+        // With tree parameter
+        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+        mailAccountDescription.setMailProtocol("imap");
+        mailAccountDescription.setMailSecure(false);
+        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
+        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
+        mailAccountDescription.setTransportServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setTransportPort(25);
+        mailAccountDescription.setTransportProtocol("smtp");
+        mailAccountDescription.setTransportSecure(false);
+        response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription, true, true));
+        assertTrue("Valid access data in mail/transport account do not pass validation but should", response.isValidated());
+        final JSONObject tree = response.getTree();
+        System.out.println(tree);
     }
 }

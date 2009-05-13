@@ -58,26 +58,33 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
 
-
 /**
  * {@link MailAccountValidateRequest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateRequest implements AJAXRequest<MailAccountValidateResponse> {
 
     private final MailAccountDescription account;
+
     private final boolean failOnError;
+
+    private final boolean tree;
 
     public MailAccountValidateRequest(final MailAccountDescription account) {
         this(account, true);
     }
-    
+
     public MailAccountValidateRequest(final MailAccountDescription account, final boolean failOnError) {
+        this(account, false, failOnError);
+    }
+
+    public MailAccountValidateRequest(final MailAccountDescription account, final boolean tree, final boolean failOnError) {
         this.account = account;
         this.failOnError = failOnError;
+        this.tree = tree;
     }
-    
+
     public Object getBody() throws JSONException {
         final JSONObject json = MailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
@@ -90,7 +97,8 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter("action", "validate")
+            new Parameter("action", "validate"),
+            new Parameter("tree", String.valueOf(tree))
         };
     }
 
@@ -101,10 +109,10 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
     public String getServletPath() {
         return "/ajax/account";
     }
-    
+
     private MailAccount wrap(final MailAccountDescription acc) {
         return new MailAccount() {
-            
+
             public String getConfirmedHam() {
                 return acc.getConfirmedHam();
             }
@@ -128,7 +136,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public String generateMailServerURL() {
                 return acc.generateMailServerURL();
             }
-            
+
             public int getMailPort() {
                 return acc.getMailPort();
             }
@@ -172,7 +180,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public String generateTransportServerURL() {
                 return acc.generateTransportServerURL();
             }
-            
+
             public int getTransportPort() {
                 return acc.getTransportPort();
             }

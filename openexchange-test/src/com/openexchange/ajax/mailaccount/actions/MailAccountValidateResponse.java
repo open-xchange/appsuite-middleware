@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -60,6 +61,8 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public class MailAccountValidateResponse extends AbstractAJAXResponse {
 
     private boolean validated;
+
+    private JSONObject tree;
 
     /**
      * Initializes a new {@link MailAccountValidateResponse}.
@@ -82,4 +85,13 @@ public class MailAccountValidateResponse extends AbstractAJAXResponse {
     public boolean isValidated() {
         return validated;
     }
+
+    public JSONObject getTree() {
+        return tree;
+    }
+
+    public void setTree(final JSONObject tree) {
+        this.tree = tree;
+    }
+
 }

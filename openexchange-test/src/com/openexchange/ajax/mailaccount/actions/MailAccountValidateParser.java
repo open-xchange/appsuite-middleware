@@ -50,12 +50,13 @@
 package com.openexchange.ajax.mailaccount.actions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link MailAccountValidateParser}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateParser extends AbstractAJAXParser<MailAccountValidateResponse> {
@@ -67,8 +68,19 @@ public class MailAccountValidateParser extends AbstractAJAXParser<MailAccountVal
     @Override
     protected MailAccountValidateResponse createResponse(final Response response) throws JSONException {
         final MailAccountValidateResponse resp = new MailAccountValidateResponse(response);
-        final Boolean validated = (Boolean) response.getData();
-        resp.setValidated(validated.booleanValue());
+
+        final Object data = response.getData();
+        if (null == data) {
+            resp.setValidated(false);
+        } else if (data instanceof JSONObject) {
+            final JSONObject tree = (JSONObject) data;
+            resp.setValidated(true);
+            resp.setTree(tree);
+        } else {
+            final Boolean validated = (Boolean) response.getData();
+            resp.setValidated(validated.booleanValue());
+        }
+
         return resp;
     }
 
