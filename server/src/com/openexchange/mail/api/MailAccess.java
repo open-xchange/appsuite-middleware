@@ -100,6 +100,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     protected final int accountId;
 
+    protected boolean cacheable;
+
     private transient MailConfig mailConfig;
 
     private Properties mailProperties;
@@ -127,6 +129,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         super();
         this.session = session;
         this.accountId = accountId;
+        cacheable = true;
     }
 
     /**
@@ -580,7 +583,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
      */
     public boolean isCacheable() {
-        return true;
+        return cacheable;
     }
 
     /**
@@ -589,7 +592,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param cacheable <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
      */
     public void setCacheable(final boolean cacheable) {
-        // Nothing to do
+        this.cacheable = cacheable;
     }
 
     /**
