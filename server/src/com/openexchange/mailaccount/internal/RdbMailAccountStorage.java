@@ -558,6 +558,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
             }
         } else {
+            /*
+             * Perform common update
+             */
             PreparedStatement stmt = null;
             try {
                 MailAccount storageVersion = null;
