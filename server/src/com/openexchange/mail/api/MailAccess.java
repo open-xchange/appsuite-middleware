@@ -584,6 +584,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Sets whether this mail access is cacheable or not.
+     * 
+     * @param cacheable <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
+     */
+    public void setCacheable(final boolean cacheable) {
+        // Nothing to do
+    }
+
+    /**
      * Gets an implementation-specific new instance of {@link MailConfig}.
      * 
      * @return An implementation-specific new instance of {@link MailConfig}
