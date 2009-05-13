@@ -97,9 +97,9 @@ public class Starter implements Initialization {
      */
     com.openexchange.database.DatabaseInit.getInstance(),
     /**
-     * Initialization for alias charset provider
+     * Initialization for custom charset provider
      */
-    new com.openexchange.charset.AliasCharsetProviderInit(),
+    new com.openexchange.charset.CustomCharsetProviderInit(),
     /**
      * Starts AJP server
      */
@@ -226,7 +226,7 @@ public class Starter implements Initialization {
     /**
      * Initialization for alias charset provider
      */
-    new com.openexchange.charset.AliasCharsetProviderInit(),
+    new com.openexchange.charset.CustomCharsetProviderInit(),
     /**
      * Setup of ContextStorage and LoginInfo.
      */

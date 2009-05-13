@@ -49,42 +49,48 @@
 
 package com.openexchange.charset;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 
 /**
- * {@link AliasCharsetProviderInit} - Initialization for alias charset provider.
+ * {@link StartsWithCharset} - A charset that delegates an unknown charset name to a supported charset whose name starts with unknown name.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AliasCharsetProviderInit implements Initialization {
+public final class StartsWithCharset extends Charset {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AliasCharsetProviderInit.class);
+    private final Charset delegate;
 
     /**
-     * Initializes a new {@link AliasCharsetProviderInit}.
+     * Initializes a new starts-with charset.
+     * 
+     * @param canonicalName The canonical name of the starts-with charset
+     * @param delegate The delegate charset
      */
-    public AliasCharsetProviderInit() {
-        super();
+    public StartsWithCharset(final String canonicalName, final Charset delegate) {
+        super(canonicalName, null);
+        this.delegate = delegate;
     }
 
-    public void start() throws AbstractOXException {
-        AliasCharsetProvider.initCharsetMap();
-        final AliasCharsetProvider provider = new AliasCharsetProvider();
-        /*
-         * Add alias charsets
-         */
-        provider.addAliasCharset("BIG5", "BIG-5", "BIG_5");
-        provider.addAliasCharset("UTF-8", "UTF_8");
-        provider.addAliasCharset("US-ASCII", "x-unknown");
-        provider.addAliasCharset("ISO-8859-1", "ISO");
-        provider.addAliasCharset("MacRoman", "MACINTOSH");
-        LOG.info("Alias charsets successfully added to alias charset provider.");
+    @Override
+    public boolean contains(final Charset cs) {
+        return this.getClass().isInstance(cs) || delegate.contains(cs);
     }
 
-    public void stop() throws AbstractOXException {
-        AliasCharsetProvider.releaseCharsetMap();
-        LOG.info("Alias charset provider successfully dropped.");
+    @Override
+    public boolean canEncode() {
+        return delegate.canEncode();
+    }
+
+    @Override
+    public CharsetDecoder newDecoder() {
+        return delegate.newDecoder();
+    }
+
+    @Override
+    public CharsetEncoder newEncoder() {
+        return delegate.newEncoder();
     }
 
 }

@@ -53,21 +53,26 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link AliasCharsetProvider} - An alias charset provider which maps unknown charset names to supported charsets.
+ * {@link CustomCharsetProvider} - A custom charset provider which maps unknown charset names to supported charsets.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AliasCharsetProvider extends CharsetProvider {
+public final class CustomCharsetProvider extends CharsetProvider {
 
     /**
      * The logger instance.
      */
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AliasCharsetProvider.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CustomCharsetProvider.class);
 
     /**
      * The charset map.
@@ -75,26 +80,33 @@ public final class AliasCharsetProvider extends CharsetProvider {
     private static volatile ConcurrentMap<String, Charset> name2charset;
 
     /**
-     * Initializes the charset map.
+     * The charset map for startsWith.
+     */
+    private static volatile ConcurrentMap<String, Charset> startsWith2charset;
+
+    /**
+     * Initializes the charset maps.
      */
     public static void initCharsetMap() {
         if (name2charset == null) {
-            synchronized (AliasCharsetProvider.class) {
+            synchronized (CustomCharsetProvider.class) {
                 if (name2charset == null) {
                     name2charset = new ConcurrentHashMap<String, Charset>(8);
+                    startsWith2charset = new ConcurrentHashMap<String, Charset>(8);
                 }
             }
         }
     }
 
     /**
-     * Frees the charset map.
+     * Frees the charset maps.
      */
     public static void releaseCharsetMap() {
         if (name2charset != null) {
-            synchronized (AliasCharsetProvider.class) {
+            synchronized (CustomCharsetProvider.class) {
                 if (name2charset != null) {
                     name2charset = null;
+                    startsWith2charset = null;
                 }
             }
         }
@@ -107,9 +119,9 @@ public final class AliasCharsetProvider extends CharsetProvider {
     /**
      * Default constructor.
      * <p>
-     * <b>Note</b>: Any instance of {@link AliasCharsetProvider} works on the same charset map.
+     * <b>Note</b>: Any instance of {@link CustomCharsetProvider} works on the same charset map.
      */
-    public AliasCharsetProvider() {
+    public CustomCharsetProvider() {
         super();
     }
 
@@ -151,11 +163,69 @@ public final class AliasCharsetProvider extends CharsetProvider {
      */
     public boolean addAliasCharset(final Charset delegate, final String canonicalName, final String... aliases) {
         final AliasCharset aliasCharset = new AliasCharset(canonicalName, null == aliases || aliases.length == 0 ? null : aliases, delegate);
-        return (name2charset.putIfAbsent(aliasCharset.name().toLowerCase(), aliasCharset) == null);
+        String key = aliasCharset.name().toLowerCase();
+        boolean added = (null == name2charset.putIfAbsent(key, aliasCharset));
+        // Add aliases one-by-one
+        final Set<String> aliasSet = aliasCharset.aliases();
+        if (added && !aliasSet.isEmpty()) {
+            final List<String> addedKeys = new ArrayList<String>(aliasSet.size() + 1);
+            for (final Iterator<String> iter = aliasSet.iterator(); added && iter.hasNext();) {
+                addedKeys.add(key);
+                key = iter.next().toLowerCase();
+                added = (null == name2charset.putIfAbsent(key, aliasCharset));
+            }
+            if (!added) {
+                // Charset could not be added with all its aliases
+                for (final String removeMe : addedKeys) {
+                    name2charset.remove(removeMe);
+                }
+            }
+        }
+        // Indicate if charset was added
+        return added;
     }
 
     /**
-     * Retrieves a charset for the given charset name. </p>
+     * Adds a {@link StartsWithCharset starts-with charset} to this charset provider.
+     * <p>
+     * If charset look-up for given <tt>delegateName</tt> throws an {@link IllegalCharsetNameException} or an
+     * {@link UnsupportedCharsetException}, <code>false</code> is returned and exception is logged.
+     * 
+     * @param delegateName The name of the delegate charset; e.g. <code>&quot;UTF-8&quot;</code>
+     * @param startsWithName The starts-with name of the starts-with charset; e.g. <code>&quot;UTF_8&quot;</code>
+     * @return <code>true</code> if an appropriate starts-with charset could be added to this provider; otherwise <code>false</code>
+     */
+    public boolean addStartsWithCharset(final String delegateName, final String startsWithName) {
+        /*
+         * Look-up charset
+         */
+        final Charset charset;
+        try {
+            charset = Charset.forName(delegateName);
+        } catch (final IllegalCharsetNameException e) {
+            LOG.error(new StringBuilder("Illegal charset name \"").append(e.getCharsetName()).append('"').toString(), e);
+            return false;
+        } catch (final UnsupportedCharsetException e) {
+            LOG.error(new StringBuilder("Detected no support for charset \"").append(e.getCharsetName()).append('"').toString(), e);
+            return false;
+        }
+        return addStartsWithCharset(charset, startsWithName);
+    }
+
+    /**
+     * Adds a {@link StartsWithCharset starts-with charset} to this charset provider.
+     * 
+     * @param delegate The delegate charset
+     * @param startsWithName The starts-with name of the starts-with charset; e.g. <code>&quot;UTF_8&quot;</code>
+     * @return <code>true</code> if an appropriate starts-with charset could be added to this provider; otherwise <code>false</code>
+     */
+    public boolean addStartsWithCharset(final Charset delegate, final String startsWithName) {
+        final StartsWithCharset startsWithCharset = new StartsWithCharset(startsWithName, delegate);
+        return (null == startsWith2charset.putIfAbsent(startsWithName.toLowerCase(), startsWithCharset));
+    }
+
+    /**
+     * Retrieves a charset for the given charset name.
      * 
      * @param charsetName The name of the requested charset; may be either a canonical name or an alias
      * @return A charset object for the named charset, or <tt>null</tt> if the named charset is not supported by this provider
@@ -165,18 +235,36 @@ public final class AliasCharsetProvider extends CharsetProvider {
         /*
          * Get charset instance for given name (case insensitive)
          */
-        return name2charset.get(charsetName.toLowerCase());
+        Charset retval = name2charset.get(charsetName.toLowerCase());
+        if (null != retval) {
+            // Direct hit
+            return retval;
+        }
+        /*
+         * Traverse starts-with charsets
+         */
+        if (!startsWith2charset.isEmpty()) {
+            for (final Iterator<Map.Entry<String, Charset>> iter = startsWith2charset.entrySet().iterator(); (null == retval) && iter.hasNext();) {
+                final Map.Entry<String, Charset> entry = iter.next();
+                if (charsetName.toLowerCase().startsWith(entry.getKey())) {
+                    retval = entry.getValue();
+                }
+            }
+        }
+        return retval;
     }
 
     /**
      * Creates an iterator that iterates over the charsets supported by this provider. This method is used in the implementation of the
-     * {@link java.nio.charset.Charset#availableCharsets Charset.availableCharsets} method. </p>
+     * {@link java.nio.charset.Charset#availableCharsets Charset.availableCharsets} method.
      * 
      * @return The new iterator with the <tt>remove()</tt> functionality stripped.
      */
     @Override
     public Iterator<Charset> charsets() {
-        return unmodifiableIterator(name2charset.values().iterator());
+        final Set<Charset> set = new HashSet<Charset>(name2charset.values());
+        set.addAll(startsWith2charset.values());
+        return unmodifiableIterator(set.iterator());
     }
 
     /**

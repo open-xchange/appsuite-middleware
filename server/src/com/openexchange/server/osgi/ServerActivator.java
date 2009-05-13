@@ -67,7 +67,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
-import com.openexchange.charset.AliasCharsetProvider;
+import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
@@ -383,7 +383,7 @@ public final class ServerActivator extends DeferredActivator {
             tracker.open();
         }
         // Register server's services
-        registrationList.add(context.registerService(CharsetProvider.class.getName(), new AliasCharsetProvider(), null));
+        registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
         registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
         registrationList.add(context.registerService(ResourceService.class.getName(), ResourceServiceImpl.getInstance(), null));
