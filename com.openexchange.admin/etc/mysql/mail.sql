@@ -25,9 +25,9 @@ CREATE TABLE user_mail_account (
  PRIMARY KEY  (cid, id, user),
  INDEX (cid, user),
  FOREIGN KEY (cid, user) REFERENCES user (cid, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
  
- CREATE TABLE user_mail_account_properties (
+CREATE TABLE user_mail_account_properties (
  id INT4 unsigned NOT NULL,
  cid INT4 unsigned NOT NULL,
  user INT4 unsigned NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE user_transport_account (
  PRIMARY KEY  (cid, id, user),
  INDEX (cid, user),
  FOREIGN KEY (cid, user) REFERENCES user (cid, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_transport_account_properties (
  id INT4 unsigned NOT NULL,
@@ -63,7 +63,6 @@ CREATE TABLE user_transport_account_properties (
  PRIMARY KEY  (cid, id, user, name),
  FOREIGN KEY (cid, id, user) REFERENCES user_transport_account (cid, id, user)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE pop3_storage_ids (
  cid INT4 unsigned NOT NULL,
