@@ -37,7 +37,6 @@ CREATE TABLE user_mail_account_properties (
  FOREIGN KEY (cid, id, user) REFERENCES user_mail_account (cid, id, user)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE user_transport_account (
  id INT4 unsigned NOT NULL,
  cid INT4 unsigned NOT NULL,
