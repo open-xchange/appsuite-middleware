@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -235,6 +235,11 @@ public class TestMail implements IdentitySource<TestMail> {
         return new TestMail(obj);
     }
 
+    /**
+     * Used for reading from FitNesse tables
+     * @param map A map, where the keys are taken from MailListField or TestMailField
+     * @throws JSONException
+     */
     public void read(Map<String, String> map) throws JSONException {
         Set<String> keys = map.keySet();
         for (String key : keys) {
@@ -243,10 +248,15 @@ public class TestMail implements IdentitySource<TestMail> {
                 continue;
             setBy(field, map.get(key));
         }
-        setBody(map.get("message"));
+        setBody(map.get( TestMailField.MESSAGE.toString() ));
         sanitize();
     }
 
+    /**
+     * Used for reading from a JSONObject like it is returned from a GET request
+     * @param json
+     * @throws JSONException
+     */
     public void read(JSONObject json) throws JSONException {
         // lists
         String field = MailJSONField.FROM.getKey();
@@ -313,6 +323,12 @@ public class TestMail implements IdentitySource<TestMail> {
         sanitize();
     }
 
+    /**
+     * Used for reading in fields returned by requests such as SEARCH
+     * @param columns Columns (as in #MailListField) that were requested
+     * @param values A JSONArray carrying values for a TestMail
+     * @throws JSONException
+     */
     public void read(int[] columns, JSONArray values) throws JSONException {
         for (int index = 0; index < columns.length; index++) {
             MailListField field = MailListField.getField(columns[index]);
