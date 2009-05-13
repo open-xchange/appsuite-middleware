@@ -566,14 +566,16 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
      * @return The prepared cookie value.
      */
     private static String prepare(final String cookieValue) {
-        if (null == cookieValue || cookieValue.length() == 0) {
+    	if (null == cookieValue || cookieValue.length() == 0) {
             return cookieValue;
         }
         String cv = cookieValue;
         int mlen = cv.length() - 1;
         if (cv.charAt(mlen) == ';') {
+            do {
+                mlen--;
+            } while ((mlen > 0) && (cv.charAt(mlen) == ';'));
             cv = cv.substring(0, mlen);
-            mlen--;
         }
         if ((mlen > 0) && (cv.charAt(0) == '"') && (cv.charAt(mlen) == '"')) {
             cv = cv.substring(1, mlen);

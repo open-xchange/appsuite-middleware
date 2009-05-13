@@ -182,13 +182,13 @@ public final class RFC2616Regex {
      */
     private static final String cookieVersionWithSeperatorRegex = RegexUtility.group(RegexUtility.concat(
         cookieVersionRegex,
-        "(?:;|,)\\p{Blank}*"), false);
+        "(?:;|,)\\p{Space}*"), false);
 
     /**
      * A cookie consists of the cookie itself preceded by its version.
      */
     private static final String oneCookieRegex = RegexUtility.group(RegexUtility.concat(
-        "(?:^|(?:[;,]\\p{Blank}*))",
+        "(?:^|(?:[;,]\\p{Space}*))",
         RegexUtility.optional(cookieVersionWithSeperatorRegex),
         cookieValueRegex), true);
 
