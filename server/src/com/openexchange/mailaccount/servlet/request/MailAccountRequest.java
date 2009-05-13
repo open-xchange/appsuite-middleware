@@ -68,6 +68,8 @@ import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -234,7 +236,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private Boolean actionValidate(final JSONObject jsonObject) throws AjaxException, OXException {
+    private Object actionValidate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
@@ -254,6 +256,73 @@ public final class MailAccountRequest {
                 // Deny validation of Unified INBOX account
                 throw MailAccountExceptionMessages.VALIDATION_FAILED.create();
             }
+            // Check for tree parameter
+            final boolean tree = jsonObject.hasAndNotNull("tree") ? jsonObject.getBoolean("tree") : false;
+            if (tree) {
+                return actionValidateTree(accountDescription);
+            }
+            return actionValidateBoolean(accountDescription);
+        } catch (final AbstractOXException e) {
+            throw new OXException(e);
+        }
+    }
+
+    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, MailException, JSONException {
+        if (!actionValidateBoolean(accountDescription).booleanValue()) {
+            // TODO: How to indicate error if folder tree requested?
+            return null;
+        }
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
+        // Now try to connect
+        boolean close = false;
+        try {
+            mailAccess.connect();
+            close = true;
+            // Compose folder tree
+            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig());
+            // Recursive call
+            addSubfolders(
+                root,
+                mailAccess.getFolderStorage().getSubfolders(MailFolder.DEFAULT_FOLDER_ID, true),
+                mailAccess,
+                mailAccess.getMailConfig());
+            return root;
+        } catch (final AbstractOXException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Composing mail account's folder tree failed.", e);
+            }
+            // TODO: How to indicate error if folder tree requested?
+            return null;
+        } finally {
+            if (close) {
+                mailAccess.close(false);
+            }
+        }
+    }
+
+    private void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig) throws JSONException, MailException {
+        if (subfolders.length == 0) {
+            return;
+        }
+
+        final JSONArray subfolderArray = new JSONArray();
+        parent.put("subfolders_array", subfolderArray);
+
+        for (final MailFolder subfolder : subfolders) {
+            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig);
+            subfolderArray.put(subfolderObject);
+            // Recursive call
+            addSubfolders(
+                subfolderObject,
+                mailAccess.getFolderStorage().getSubfolders(subfolder.getFullname(), true),
+                mailAccess,
+                mailConfig);
+        }
+    }
+
+    private Boolean actionValidateBoolean(final MailAccountDescription accountDescription) throws OXException {
+        try {
             // Validate mail server
             boolean validated = checkMailServerURL(accountDescription);
             // Failed?
@@ -270,7 +339,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException {
+    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws MailException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
@@ -278,7 +347,7 @@ public final class MailAccountRequest {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
             }
-            return false;
+            return null;
         }
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
@@ -307,6 +376,16 @@ public final class MailAccountRequest {
             }
             mailConfig.setServer(server.substring(0, pos));
         }
+        return mailAccess;
+    }
+
+    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException {
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
+        if (null == mailAccess) {
+            return false;
+        }
+        // Validate
         boolean validated = true;
         // Now try to connect
         boolean close = false;
