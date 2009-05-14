@@ -51,16 +51,14 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.io.Serializable;
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
- * {@link UserConfiguration} - Represents an user configuration.
+ * {@link UserConfiguration} - Represents a user configuration.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -113,6 +111,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private static final int EDIT_PASSWORD = 1 << 20;
 
     private static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
+
+    private static final int MULTIPLE_MAIL_ACCOUNTS = 1 << 22;
 
     /*-
      * Field members
@@ -209,8 +209,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
                 System.arraycopy(accessibleModules, 0, clone.accessibleModules, 0, accessibleModules.length);
             }
             /*
-             * if (userSettingMail != null) { clone.userSettingMail =
-             * (UserSettingMail) userSettingMail.clone(); }
+             * if (userSettingMail != null) { clone.userSettingMail = (UserSettingMail) userSettingMail.clone(); }
              */
             return clone;
         } catch (final CloneNotSupportedException e) {
@@ -515,11 +514,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Detects if user configuration allows PIM functionality (Calendar,
-     * Contact, and Task).
+     * Detects if user configuration allows PIM functionality (Calendar, Contact, and Task).
      * 
-     * @return <code>true</code> if PIM functionality (Calendar, Contact, and
-     *         Task) is allowed; otherwise <code>false</code>
+     * @return <code>true</code> if PIM functionality (Calendar, Contact, and Task) is allowed; otherwise <code>false</code>
      */
     public boolean hasPIM() {
         return hasCalendar() && hasContact() && hasTask();
@@ -528,8 +525,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Detects if user configuration allows team view.
      * 
-     * @return <code>true</code> if team view is allowed; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if team view is allowed; otherwise <code>false</code>
      */
     public boolean hasTeamView() {
         return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
@@ -538,8 +534,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Detects if user configuration allows free busy.
      * 
-     * @return <code>true</code> if free busy is allowed; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if free busy is allowed; otherwise <code>false</code>
      */
     public boolean hasFreeBusy() {
         return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
@@ -548,8 +543,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Detects if user configuration allows conflict handling.
      * 
-     * @return <code>true</code> if conflict handling is allowed; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if conflict handling is allowed; otherwise <code>false</code>
      */
     public boolean hasConflictHandling() {
         return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
@@ -567,33 +561,21 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Detects if user configuration allows portal page in GUI.
      * 
-     * @return <code>true</code> if portal page is allowed; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if portal page is allowed; otherwise <code>false</code>
      */
     public boolean hasPortal() {
         return hasCalendar() && hasContact() && hasTask();
     }
 
     /**
-     * Determines all accessible modules as defined in user configuration. The
-     * returned array of <code>int</code> is sorted according to
-     * <code>{@link Arrays#sort(int[])}</code>, thus
-     * <code>{@link Arrays#binarySearch(int[], int)}</code> can be used to
-     * detect if a user holds module access to a certain module (or invoke
-     * <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).
+     * Determines all accessible modules as defined in user configuration. The returned array of <code>int</code> is sorted according to
+     * <code>{@link Arrays#sort(int[])}</code>, thus <code>{@link Arrays#binarySearch(int[], int)}</code> can be used to detect if a user
+     * holds module access to a certain module (or invoke <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).
      * <p>
-     * The <code>int</code> values matches the constants
-     * <code>{@link FolderObject#TASK}</code>,
-     * <code>{@link FolderObject#CALENDAR}</code>,
-     * <code>{@link FolderObject#CONTACT}</code>,
-     * <code>{@link FolderObject#UNBOUND}</code>,
-     * <code>{@link FolderObject#SYSTEM_MODULE}</code>,
-     * <code>{@link FolderObject#PROJECT}</code>,
-     * <code>{@link FolderObject#MAIL}</code>,
-     * <code>{@link FolderObject#INFOSTORE}</code>
+     * The <code>int</code> values matches the constants <code>{@link FolderObject#TASK}</code>, <code>{@link FolderObject#CALENDAR}</code>,
+     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#PROJECT}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
      * 
-     * @return A sorted array of <code>int</code> carrying accessible module
-     *         integer constants
+     * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
         if (accessibleModulesComputed) {
@@ -635,20 +617,17 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Checks if user has access to given module.
      * 
      * @param module The module carrying a value defined in constants <code>
-	 *            {@link FolderObject#TASK}</code>
+	 *            {@link FolderObject#TASK}</code> , <code>
+	 *            {@link FolderObject#CALENDAR}</code>
      *            , <code>
-	 *            {@link FolderObject#CALENDAR}</code>, <code>
-	 *            {@link FolderObject#CONTACT}</code>
-     *            , <code>
+	 *            {@link FolderObject#CONTACT}</code> , <code>
 	 *            {@link FolderObject#UNBOUND}</code>, <code>
 	 *            {@link FolderObject#SYSTEM_MODULE}</code>
      *            , <code>
 	 *            {@link FolderObject#PROJECT}</code>, <code>
-	 *            {@link FolderObject#MAIL}</code>
-     *            , <code>
+	 *            {@link FolderObject#MAIL}</code> , <code>
 	 *            {@link FolderObject#INFOSTORE}</code>
-     * @return <code>true</code> if user configuration permits access to given
-     *         module; otherwise <code>false</code>
+     * @return <code>true</code> if user configuration permits access to given module; otherwise <code>false</code>
      */
     public boolean hasModuleAccess(final int module) {
         return Arrays.binarySearch(getAccessibleModules(), module) >= 0;
@@ -661,12 +640,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * If this permission is not granted, it is prohibited for the user to
-     * create or edit public folders. Existing public folders are visible in any
-     * case.
+     * If this permission is not granted, it is prohibited for the user to create or edit public folders. Existing public folders are
+     * visible in any case.
      * 
-     * @return <code>true</code> full public folder access is granted; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> full public folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullPublicFolderAccess() {
         return hasPermission(EDIT_PUBLIC_FOLDERS);
@@ -682,13 +659,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * If this permission is not granted, neither folders are allowed to be
-     * shared nor shared folders are allowed to be seen by user. Existing
-     * permissions are not removed if user loses this right, but the display of
-     * shared folders is suppressed.
+     * If this permission is not granted, neither folders are allowed to be shared nor shared folders are allowed to be seen by user.
+     * Existing permissions are not removed if user loses this right, but the display of shared folders is suppressed.
      * 
-     * @return <code>true</code> full shared folder access is granted; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> full shared folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullSharedFolderAccess() {
         return hasPermission(READ_CREATE_SHARED_FOLDERS);
@@ -706,8 +680,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Checks if this user configuration allows to delegate tasks.
      * 
-     * @return <code>true</code> if user can delegate tasks; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if user can delegate tasks; otherwise <code>false</code>
      */
     public boolean canDelegateTasks() {
         return hasPermission(DELEGATE_TASKS);
@@ -725,8 +698,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Checks if this user configuration indicates to collect email addresses.
      * 
-     * @return <code>true</code> if this user configuration indicates to collect
-     *         email addresses; otherwise <code>false</code>
+     * @return <code>true</code> if this user configuration indicates to collect email addresses; otherwise <code>false</code>
      */
     public boolean isCollectEmailAddresses() {
         return hasPermission(COLLECT_EMAIL_ADDRESSES);
@@ -735,8 +707,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Sets if this user configuration indicates to collect email addresses.
      * 
-     * @param collectEmailAddresses <code>true</code> if this user configuration
-     *            indicates to collect email addresses; otherwise
+     * @param collectEmailAddresses <code>true</code> if this user configuration indicates to collect email addresses; otherwise
      *            <code>false</code>
      */
     public void setCollectEmailAddresses(final boolean collectEmailAddresses) {
@@ -744,22 +715,37 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Checks if this user configuration indicates that groups are allowed to be
-     * edited.
+     * Checks if this user configuration indicates to enable multiple mail accounts.
      * 
-     * @return <code>true</code> if this user configuration indicates that
-     *         groups are allowed to be edited; otherwise <code>false</code>
+     * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
+     */
+    public boolean isMultipleMailAccounts() {
+        return hasPermission(MULTIPLE_MAIL_ACCOUNTS);
+    }
+
+    /**
+     * Sets if this user configuration indicates to enable multiple mail accounts.
+     * 
+     * @param multipleMailAccounts <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise
+     *            <code>false</code>
+     */
+    public void setMultipleMailAccounts(final boolean multipleMailAccounts) {
+        setPermission(multipleMailAccounts, MULTIPLE_MAIL_ACCOUNTS);
+    }
+
+    /**
+     * Checks if this user configuration indicates that groups are allowed to be edited.
+     * 
+     * @return <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditGroup() {
         return hasPermission(EDIT_GROUP);
     }
 
     /**
-     * Sets if this user configuration indicates that groups are allowed to be
-     * edited.
+     * Sets if this user configuration indicates that groups are allowed to be edited.
      * 
-     * @param editGroup <code>true</code> if this user configuration indicates
-     *            that groups are allowed to be edited; otherwise
+     * @param editGroup <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise
      *            <code>false</code>
      */
     public void setEditGroup(final boolean editGroup) {
@@ -767,22 +753,18 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Checks if this user configuration indicates that resources are allowed to
-     * be edited.
+     * Checks if this user configuration indicates that resources are allowed to be edited.
      * 
-     * @return <code>true</code> if this user configuration indicates that
-     *         resources are allowed to be edited; otherwise <code>false</code>
+     * @return <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditResource() {
         return hasPermission(EDIT_RESOURCE);
     }
 
     /**
-     * Sets if this user configuration indicates that resources are allowed to
-     * be edited.
+     * Sets if this user configuration indicates that resources are allowed to be edited.
      * 
-     * @param editResource <code>true</code> if this user configuration
-     *            indicates that resources are allowed to be edited; otherwise
+     * @param editResource <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise
      *            <code>false</code>
      */
     public void setEditResource(final boolean editResource) {
@@ -790,23 +772,20 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Checks if this user configuration indicates that user password is allowed
-     * to be edited.
+     * Checks if this user configuration indicates that user password is allowed to be edited.
      * 
-     * @return <code>true</code> if this user configuration indicates that user
-     *         password is allowed to be edited; otherwise <code>false</code>
+     * @return <code>true</code> if this user configuration indicates that user password is allowed to be edited; otherwise
+     *         <code>false</code>
      */
     public boolean isEditPassword() {
         return hasPermission(EDIT_PASSWORD);
     }
 
     /**
-     * Sets if this user configuration indicates that user password is allowed
-     * to be edited.
+     * Sets if this user configuration indicates that user password is allowed to be edited.
      * 
-     * @param editPassword <code>true</code> if this user configuration
-     *            indicates that user password is allowed to be edited;
-     *            otherwise <code>false</code>
+     * @param editPassword <code>true</code> if this user configuration indicates that user password is allowed to be edited; otherwise
+     *            <code>false</code>
      */
     public void setEditPassword(final boolean editPassword) {
         setPermission(editPassword, EDIT_PASSWORD);
@@ -857,8 +836,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("UserConfiguration_").append(userId).append('@').append(
-                Integer.toBinaryString(permissionBits)).toString();
+        return new StringBuilder().append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
 
 }

@@ -628,7 +628,7 @@ public class Folder extends SessionServlet {
                              * Get all user mail accounts
                              */
                             final List<MailAccount> accounts;
-                            {
+                            if (session.getUserConfiguration().isMultipleMailAccounts()) {
                                 final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                                     MailAccountStorageService.class,
                                     true);
@@ -640,6 +640,12 @@ public class Folder extends SessionServlet {
                                 // Sort them
                                 Collections.sort(tmp, new MailAccountComparator(locale));
                                 accounts = tmp;
+                            } else {
+                                accounts = new ArrayList<MailAccount>(1);
+                                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                                    MailAccountStorageService.class,
+                                    true);
+                                accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                             }
                             if (!accounts.isEmpty()) {
                                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
@@ -1296,7 +1302,7 @@ public class Folder extends SessionServlet {
                  * Get all user mail accounts
                  */
                 final List<MailAccount> accounts;
-                {
+                if (session.getUserConfiguration().isMultipleMailAccounts()) {
                     final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                         MailAccountStorageService.class,
                         true);
@@ -1306,6 +1312,12 @@ public class Folder extends SessionServlet {
                     // Sort them
                     Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
                     accounts = tmp;
+                } else {
+                    accounts = new ArrayList<MailAccount>(1);
+                    final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                        MailAccountStorageService.class,
+                        true);
+                    accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
                 if (!accounts.isEmpty()) {
                     if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {

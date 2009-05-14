@@ -110,7 +110,11 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * Mail account validation failed.
      */
-    VALIDATION_FAILED(MailAccountExceptionStrings.VALIDATION_FAILED_MSG, Category.CODE_ERROR, 13);
+    VALIDATION_FAILED(MailAccountExceptionStrings.VALIDATION_FAILED_MSG, Category.CODE_ERROR, 13),
+    /**
+     * Multiple mail accounts not enabled for user %1$s in context %2$s.
+     */
+    NOT_ENABLED(MailAccountExceptionStrings.NOT_ENABLED_MSG, Category.USER_CONFIGURATION, 14);
 
     /**
      * Message of the exception.

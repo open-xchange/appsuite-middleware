@@ -144,6 +144,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
@@ -3456,12 +3457,17 @@ public class Mail extends PermissionServlet implements UploadListener {
             final int user = session.getUserId();
             final int cid = session.getContextId();
             accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
-            if (checkTransportSupport && accountId != -1) {
-                final MailAccount account = storageService.getMailAccount(accountId, user, cid);
-                // Check if determined account supports mail transport
-                if (null == account.getTransportServer()) {
-                    // Account does not support mail transport
-                    throw new MailException(MailException.Code.NO_TRANSPORT_SUPPORT, account.getName(), Integer.valueOf(accountId));
+            if (accountId != -1) {
+                if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
+                    throw MailAccountExceptionMessages.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
+                }
+                if (checkTransportSupport) {
+                    final MailAccount account = storageService.getMailAccount(accountId, user, cid);
+                    // Check if determined account supports mail transport
+                    if (null == account.getTransportServer()) {
+                        // Account does not support mail transport
+                        throw new MailException(MailException.Code.NO_TRANSPORT_SUPPORT, account.getName(), Integer.valueOf(accountId));
+                    }
                 }
             }
         } catch (final MailAccountException e) {

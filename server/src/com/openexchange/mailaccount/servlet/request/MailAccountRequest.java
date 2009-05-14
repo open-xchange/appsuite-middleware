@@ -77,6 +77,7 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -163,10 +164,18 @@ public final class MailAccountRequest {
                 true);
 
             final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+
             if (isUnifiedINBOXAccount(mailAccount)) {
                 // Treat as no hit
                 throw MailAccountExceptionMessages.NOT_FOUND.create(
                     Integer.valueOf(id),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -183,6 +192,17 @@ public final class MailAccountRequest {
 
         final JSONArray jsonArray = new JSONArray();
         try {
+            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+                for (int i = 0; i < ids.length; i++) {
+                    if (MailAccount.DEFAULT_ID != ids[i]) {
+                        throw MailAccountExceptionFactory.getInstance().create(
+                            MailAccountExceptionMessages.NOT_ENABLED,
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()));
+                    }
+                }
+            }
+
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
@@ -207,6 +227,13 @@ public final class MailAccountRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
+            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
 
@@ -240,6 +267,13 @@ public final class MailAccountRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
+            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
             // Check needed fields
@@ -469,6 +503,13 @@ public final class MailAccountRequest {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
+            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
@@ -512,10 +553,13 @@ public final class MailAccountRequest {
                 true);
 
             MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+
+            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
             final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
+
             for (int i = 0; i < userMailAccounts.length; i++) {
                 final MailAccount mailAccount = userMailAccounts[i];
-                if (!isUnifiedINBOXAccount(mailAccount)) {
+                if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
                     tmp.add(mailAccount);
                 }
             }
@@ -553,11 +597,14 @@ public final class MailAccountRequest {
                 true);
 
             final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
+
+            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
             final List<MailAccount> accounts = new ArrayList<MailAccount>();
+
             for (int i = 0, size = ids.length(); i < size; i++) {
                 final int id = ids.getInt(i);
                 final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-                if (!isUnifiedINBOXAccount(account)) {
+                if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
                     accounts.add(account);
                 }
             }
@@ -576,4 +623,11 @@ public final class MailAccountRequest {
         return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
+    private static boolean isDefaultMailAccount(final MailAccount mailAccount) {
+        return mailAccount.isDefaultAccount() || MailAccount.DEFAULT_ID == mailAccount.getId();
+    }
+
+    private static boolean isDefaultMailAccount(final MailAccountDescription mailAccount) {
+        return MailAccount.DEFAULT_ID == mailAccount.getId();
+    }
 }

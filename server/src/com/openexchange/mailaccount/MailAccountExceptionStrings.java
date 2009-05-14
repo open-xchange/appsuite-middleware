@@ -97,6 +97,9 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Mail account validation failed.
     public static final String VALIDATION_FAILED_MSG = "Mail account validation failed.";
 
+    // Multiple mail accounts not enabled for user %1$s in context %2$s.
+    public static final String NOT_ENABLED_MSG = "Multiple mail accounts not enabled for user %1$s in context %2$s.";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */
