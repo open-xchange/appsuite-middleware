@@ -52,6 +52,7 @@ package com.openexchange.webdav.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -102,6 +103,7 @@ public class WebdavIfAction extends AbstractAction {
 		try {
 			ifHeader = req.getIfHeader();
 			if(ifHeader != null) {
+			    rememberMentionedLocks(req, ifHeader);
 				checkIfs(ifHeader, req, depth);
 			}
 			final List<LoadingHints> lockHints = new ArrayList<LoadingHints>();
@@ -131,7 +133,19 @@ public class WebdavIfAction extends AbstractAction {
 		
 	}
 	
-	private LoadingHints preloadDestinationLocks(final WebdavRequest req) {
+    private void rememberMentionedLocks(WebdavRequest req, IfHeader ifHeader) {
+        List<String> mentionedLocks = new LinkedList<String>();
+        for(final IfHeaderList list : ifHeader.getLists()) {
+            for(final IfHeaderEntity entity : list) {
+                if(entity.isLockToken()) {
+                    mentionedLocks.add(entity.getPayload());
+                }
+            }
+        }
+        req.getUserInfo().put("mentionedLocks", mentionedLocks);
+    }
+
+    private LoadingHints preloadDestinationLocks(final WebdavRequest req) {
 		final LoadingHints loadingHints = new LoadingHints();
 		loadingHints.setUrl(req.getDestinationUrl());
 		loadingHints.setDepth(0);

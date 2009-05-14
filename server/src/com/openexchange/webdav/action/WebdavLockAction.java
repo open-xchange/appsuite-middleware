@@ -50,6 +50,7 @@
 package com.openexchange.webdav.action;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -89,8 +90,21 @@ public class WebdavLockAction extends AbstractAction {
 		    } else {
 		        defaultLockParams(lock);
 		    }
+		    if(null == lock.getToken() && req.getUserInfo().containsKey("mentionedLocks")) {
+		        List<String> mentionedLocks = (List<String>) req.getUserInfo().get("mentionedLocks");
+		        if(1 == mentionedLocks.size()) {
+		            lock.setToken(mentionedLocks.get(0));
+		        }
+		    }
+		    
 			WebdavResource resource = req.getResource();
-			final int status = HttpServletResponse.SC_OK;
+		       
+            if(null != lock.getToken()) {
+                WebdavLock originalLock = resource.getLock(lock.getToken());
+                copyOldValues(originalLock, lock);
+            }
+    
+            final int status = HttpServletResponse.SC_OK;
 			 
 			
 			resource.lock(lock);
@@ -122,6 +136,12 @@ public class WebdavLockAction extends AbstractAction {
 			LOG.debug("Client gone?", e);
 		}
 	}
+
+    private void copyOldValues(WebdavLock originalLock, WebdavLock lock) {
+        if(lock.getOwner() == null) {
+            lock.setOwner(originalLock.getOwner());
+        }
+    }
 
     /**
      * @param lock

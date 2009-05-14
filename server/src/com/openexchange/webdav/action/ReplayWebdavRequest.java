@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -151,5 +152,9 @@ public class ReplayWebdavRequest implements WebdavRequest{
 	
 	public boolean hasBody() {
 	    return delegate.hasBody();
+	}
+	
+	public Map<String, Object> getUserInfo() {
+	    return delegate.getUserInfo();
 	}
 }
