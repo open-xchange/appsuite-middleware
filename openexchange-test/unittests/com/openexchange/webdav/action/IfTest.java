@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.Protocol;
@@ -90,6 +92,40 @@ public class IfTest extends ActionTestCase {
 			assertFalse(mockAction.wasActivated());
 		}
 	}
+	
+	public void testCaptureLocks() throws Exception {
+	    final WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
+        final WebdavLock lock = new WebdavLock();
+        lock.setDepth(0);
+        lock.setOwner("me");
+        lock.setScope(Scope.EXCLUSIVE_LITERAL);
+        lock.setType(Type.WRITE_LITERAL);
+        lock.setTimeout(WebdavLock.NEVER);
+        resource.lock(lock);
+        
+        MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
+        MockWebdavResponse res = new MockWebdavResponse();
+        
+        req.setUrl(INDEX_HTML_URL);
+        req.setHeader("If", "(<"+lock.getToken()+">)");
+        
+        final WebdavIfAction action = new WebdavIfAction();
+        action.setDefaultDepth(0);
+        action.setNext(mockAction);
+        
+        action.perform(req,res);
+        
+        resource.unlock(lock.getToken());
+
+        assertTrue(mockAction.wasActivated());
+        
+        Map<String, Object> userInfo = req.getUserInfo();
+        
+        List<String> mentionedLocks = (List<String>) userInfo.get("mentionedLocks");
+        assertNotNull(mentionedLocks);
+        assertEquals(1, mentionedLocks.size());
+        assertEquals(lock.getToken(), mentionedLocks.get(0));
+    }
 	
 	public void testOr() throws Exception {
 		final String etag = factory.resolveResource(INDEX_HTML_URL).getETag();

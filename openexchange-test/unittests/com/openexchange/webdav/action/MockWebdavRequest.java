@@ -32,6 +32,8 @@ public class MockWebdavRequest implements WebdavRequest {
 	private WebdavResource res = null;
 	private WebdavResource dest;
 	
+	private Map<String, Object> userInfo = new HashMap<String,Object>();
+	
 	public MockWebdavRequest(final WebdavFactory factory, final String prefix) {
 		this.factory = factory;
 		this.uriPrefix = prefix;
@@ -137,4 +139,7 @@ public class MockWebdavRequest implements WebdavRequest {
         return content != null;
     }
 
+    public Map<String, Object> getUserInfo() {
+        return userInfo;
+    }
 }
