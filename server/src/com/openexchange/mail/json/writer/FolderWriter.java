@@ -119,12 +119,20 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.ID, prepareFullname(
-                            accountId,
-                            fullName == null ? folder.getFullname() : fullName));
+                    if (accountId >= 0) {
+                        if (withKey) {
+                            ((JSONObject) jsonContainer).put(DataFields.ID, prepareFullname(
+                                accountId,
+                                fullName == null ? folder.getFullname() : fullName));
+                        } else {
+                            ((JSONArray) jsonContainer).put(prepareFullname(accountId, fullName == null ? folder.getFullname() : fullName));
+                        }
                     } else {
-                        ((JSONArray) jsonContainer).put(prepareFullname(accountId, fullName == null ? folder.getFullname() : fullName));
+                        if (withKey) {
+                            ((JSONObject) jsonContainer).put(DataFields.ID, fullName == null ? folder.getFullname() : fullName);
+                        } else {
+                            ((JSONArray) jsonContainer).put(fullName == null ? folder.getFullname() : fullName);
+                        }
                     }
                 } catch (final JSONException e) {
                     throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
@@ -200,7 +208,7 @@ public final class FolderWriter {
                     if (null == folder.getParentFullname()) {
                         parent = JSONObject.NULL;
                     } else {
-                        parent = prepareFullname(accountId, folder.getParentFullname());
+                        parent = accountId >= 0 ? prepareFullname(accountId, folder.getParentFullname()) : folder.getParentFullname();
                     }
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, parent);
