@@ -52,6 +52,7 @@ package com.openexchange.webdav.action;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -95,5 +96,7 @@ public interface WebdavRequest {
 	String getCharset();
 
     boolean hasBody();
+    
+    Map<String, Object> getUserInfo();
 	
 }

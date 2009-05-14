@@ -50,6 +50,8 @@
 package com.openexchange.webdav.action;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -68,6 +70,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     private WebdavResource res;
     private WebdavResource dest;
     private final WebdavFactory factory;
+    private Map<String, Object> userInfo = new HashMap<String, Object>();
     
     public AbstractWebdavRequest(final WebdavFactory factory) {
         this.factory = factory;
@@ -132,5 +135,9 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
             length = -1;
         }
         return length > 0;
+    }
+    
+    public Map<String, Object> getUserInfo() {
+        return userInfo;
     }
 }
