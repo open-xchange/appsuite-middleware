@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -210,6 +209,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_EDIT_GROUP = "access-edit-group";
     protected static final String OPT_ACCESS_EDIT_RESOURCE = "access-edit-resource";
     protected static final String OPT_ACCESS_EDIT_PASSWORD = "access-edit-password";
+    protected static final String OPT_ACCESS_COLLECT_EMAIL_ADDRESSES = "access-collect-email-addresses";
+    protected static final String OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS = "access-multiple-mail-accounts";
+    protected static final String OPT_ACCESS_SUBSCRIPTION = "access-subscription";
+    protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     
     
     
@@ -271,6 +274,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessEditGroupOption = null;
     protected Option accessEditResourceOption = null;
     protected Option accessEditPasswordOption = null;
+    protected Option accessCollectEmailAddresses = null;
+    protected Option accessMultipleMailAccounts = null;
+    protected Option accessPublication = null;
+    protected Option accessSubscription = null;
     
     // non-generic extended option
     protected Option addGUISettingOption = null;
@@ -551,6 +558,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setEditGroup(accessOption2BooleanCreate(parser,this.accessEditGroupOption));
         access.setEditResource(accessOption2BooleanCreate(parser,this.accessEditResourceOption));
         access.setEditPassword(accessOption2BooleanCreate(parser,this.accessEditPasswordOption));
+        access.setCollectEmailAddresses(accessOption2BooleanCreate(parser,this.accessCollectEmailAddresses));
+        access.setMultipleMailAccounts(accessOption2BooleanCreate(parser,this.accessMultipleMailAccounts));
+        access.setSubscription(accessOption2BooleanCreate(parser,this.accessSubscription));
+        access.setPublication(accessOption2BooleanCreate(parser,this.accessPublication));
         
     }
     
@@ -561,13 +572,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             // option was not set in create. we return true, because default is
             // on
             return true;
-        } else {
-            if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
-                return true;
-            } else {
-                return false;
-            }
         }
+        if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -661,6 +670,22 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setEditPassword(accessOption2BooleanCreate(parser, this.accessEditPasswordOption));
             changed = true;
         }
+        if ((String) parser.getOptionValue(this.accessCollectEmailAddresses) != null) {
+            access.setCollectEmailAddresses(accessOption2BooleanCreate(parser, this.accessCollectEmailAddresses));
+            changed = true;
+        }
+        if ((String) parser.getOptionValue(this.accessMultipleMailAccounts) != null) {
+            access.setMultipleMailAccounts(accessOption2BooleanCreate(parser, this.accessMultipleMailAccounts));
+            changed = true;
+        }
+        if ((String) parser.getOptionValue(this.accessSubscription) != null) {
+            access.setSubscription(accessOption2BooleanCreate(parser, this.accessSubscription));
+            changed = true;
+        }
+        if ((String) parser.getOptionValue(this.accessPublication) != null) {
+            access.setPublication(accessOption2BooleanCreate(parser, this.accessPublication));
+            changed = true;
+        }
         return changed;
     }
     
@@ -669,9 +694,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final String optionValue = (String) parser.getOptionValue(accessOption);
         if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -739,6 +763,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, false,true);
         this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, false,true);
         this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD,"on/off","Edit Password access (Default is off)", true, false,true);
+        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, false,true);;
+        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, false,true);;
+        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);;
+        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);;
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
@@ -823,7 +851,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             if( ! addguival.contains("=") ) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
             }
-            int idx = addguival.indexOf("=");
+            final int idx = addguival.indexOf("=");
             final String key = addguival.substring(0, idx).trim();
             final String val = addguival.substring(idx+1, addguival.length()).trim();
             if(key.length() == 0 || val.length() == 0) {
@@ -861,17 +889,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
             } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
-                SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
+                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
                 sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
                 try {
-                    String date = (String)parser.getOptionValue(optionAndMethod.getOption());
+                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
                     if( date != null ) {
-                        Date value = sdf.parse(date);
+                        final Date value = sdf.parse(date);
                         if (null != value) {
                             optionAndMethod.getMethod().invoke(usr, value);
                         }
                     }
-                } catch (ParseException e) {
+                } catch (final ParseException e) {
                     throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
                 }
             } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
@@ -887,6 +915,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
     }
     
+    @Override
     protected String getObjectName() {
         return "user";
     }
