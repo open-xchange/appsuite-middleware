@@ -69,8 +69,6 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -86,8 +84,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
@@ -110,8 +106,6 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -156,7 +150,8 @@ public final class MessageParser {
     public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws MailException {
         try {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
-            final QuotaChecker quotaChecker = new QuotaChecker(session);
+            // TODO: Change quota checker appropriate to customer needs
+            final IQuotaChecker quotaChecker = new AbortQuotaChecker(session);
             /*
              * Parse transport message plus its text body
              */
@@ -270,21 +265,7 @@ public final class MessageParser {
         return new StringBuilder(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
     }
 
-    /**
-     * Parses given instance of {@link JSONObject} on send operation and generates a corresponding instance of {@link ComposedMailMessage}.
-     * Moreover the user's quota limitations are considered.
-     * 
-     * @param jsonObj The JSON object
-     * @param session The session
-     * @param accountId The account ID
-     * @return A corresponding instance of {@link ComposedMailMessage}
-     * @throws MailException If parsing fails
-     */
-    public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final int accountId) throws MailException {
-        return parse(jsonObj, session, accountId, null, new QuotaChecker(session));
-    }
-
-    private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final QuotaChecker quotaChecker) throws MailException {
+    private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IQuotaChecker quotaChecker) throws MailException {
         final TransportProvider tp = provider == null ? TransportProviderRegistry.getTransportProviderBySession(session, accountId) : provider;
         final ComposedMailMessage transportMail;
         try {
@@ -343,10 +324,10 @@ public final class MessageParser {
             TransportProviderRegistry.getTransportProviderBySession(session, accountId),
             session,
             accountId,
-            new QuotaChecker(session));
+            new AbortQuotaChecker(session));
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final QuotaChecker quotaChecker) throws MailException {
+    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final IQuotaChecker quotaChecker) throws MailException {
         try {
             parseBasics(jsonObj, mail, timeZone);
             /*
@@ -538,7 +519,7 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final ComposedMailMessage transportMail, final QuotaChecker quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final ComposedMailMessage transportMail, final IQuotaChecker quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
         final int len = attachmentArray.length();
         if (len <= 1) {
             /*
@@ -676,7 +657,7 @@ public final class MessageParser {
         return retval;
     }
 
-    private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final ComposedMailMessage transportMail, final String seqId, final QuotaChecker quotaChecker) throws MailException {
+    private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final ComposedMailMessage transportMail, final String seqId, final IQuotaChecker quotaChecker) throws MailException {
         /*
          * A file reference
          */
@@ -806,71 +787,6 @@ public final class MessageParser {
             return null;
         }
     }
-
-    private static final class QuotaChecker {
-
-        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(QuotaChecker.class);
-
-        private final boolean doAction;
-
-        private final long uploadQuota;
-
-        private final long uploadQuotaPerFile;
-
-        private long consumed;
-
-        public QuotaChecker(final Session session) throws MailException {
-            super();
-            try {
-                final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(
-                    session.getUserId(),
-                    session.getContextId());
-                if (usm.getUploadQuota() >= 0) {
-                    this.uploadQuota = usm.getUploadQuota();
-                } else {
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                    }
-                    long tmp;
-                    try {
-                        tmp = ServerConfig.getInteger(ServerConfig.Property.MAX_UPLOAD_SIZE);
-                    } catch (final ConfigurationException e) {
-                        LOG1.error(e.getMessage(), e);
-                        tmp = 0;
-                    }
-                    this.uploadQuota = tmp;
-                }
-                this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
-                doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
-            } catch (final UserConfigurationException e) {
-                throw new MailException(e);
-            }
-        }
-
-        public void addConsumed(final long size, final String fileName) throws MailException {
-            if (!doAction) {
-                return;
-            }
-            if (size <= 0 && LOG1.isDebugEnabled()) {
-                LOG1.debug(new StringBuilder("Missing size: ").append(size).toString(), new Throwable());
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE, UploadUtility.getSize(
-                    uploadQuotaPerFile,
-                    2,
-                    false,
-                    true), null == fileName ? "" : fileName, UploadUtility.getSize(size, 2, false, true));
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, UploadUtility.getSize(uploadQuota, 2, false, true));
-            }
-        }
-
-    } // End of quota checker class
 
     private static void prepareMsgRef(final Session session, final MailMessage mail) throws MailException {
         final MailPath msgref = mail.getMsgref();
