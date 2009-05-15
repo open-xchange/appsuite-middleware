@@ -67,7 +67,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     private static final long serialVersionUID = 5748081743621854608L;
 
-    private final String mailBody;
+    private final StringBuilder mailBody;
 
     private transient DataSource dataSource;
 
@@ -80,7 +80,28 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      */
     public TextBodyMailPart(final String mailBody) {
         super();
-        this.mailBody = mailBody;
+        this.mailBody = new StringBuilder(mailBody);
+    }
+
+    /**
+     * Sets this part's text.
+     * <p>
+     * The body part is supposed to be HTML content which is ought to be converted to appropriate MIME type on transport.
+     * 
+     * @param mailBody The mail body as HTML content
+     */
+    public void setText(final String mailBody) {
+        this.mailBody.setLength(0);
+        this.mailBody.append(mailBody);
+    }
+
+    /**
+     * Appends specified HTML text to this part.
+     * 
+     * @param text The HTML content to append
+     */
+    public void append(final String text) {
+        mailBody.append(text);
     }
 
     private DataSource getDataSource() throws MailException {
@@ -89,7 +110,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
          */
         if (null == dataSource) {
             try {
-                dataSource = new MessageDataSource(mailBody, getContentType());
+                dataSource = new MessageDataSource(mailBody.toString(), getContentType());
             } catch (final UnsupportedEncodingException e) {
                 throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
             }
@@ -103,7 +124,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      */
     @Override
     public Object getContent() throws MailException {
-        return mailBody;
+        return mailBody.toString();
     }
 
     /*

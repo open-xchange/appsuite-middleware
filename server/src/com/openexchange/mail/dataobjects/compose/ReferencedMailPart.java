@@ -64,7 +64,6 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -123,7 +122,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * @throws MailException If a mail error occurs
      */
     protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
-        isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822);
+        isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822) && !referencedPart.getContentDisposition().isAttachment();
         try {
             handleReferencedPart(referencedPart, session);
         } catch (final IOException e) {
@@ -267,7 +266,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                         /*
                          * Add system charset
                          */
-                        getContentType().setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
+                        getContentType().setCharsetParameter(
+                            System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
                     final InputStreamProvider isp = new InputStreamProvider() {
 
@@ -375,7 +375,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 return file.getInputStream();
             }
             throw new MailException(MailException.Code.NO_CONTENT);
-        } catch (ManagedFileException e) {
+        } catch (final ManagedFileException e) {
             throw new MailException(e);
         }
     }
