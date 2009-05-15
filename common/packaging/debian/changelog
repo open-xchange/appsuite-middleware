@@ -1,3 +1,9 @@
+open-xchange-common (6.8.1-6) unstable; urgency=low
+
+  * another build for PTF 2008110710000282
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 15 May 2009 12:32:19 +0200
+
 open-xchange-common (6.8.1-5) unstable; urgency=low
 
   * build for PTF 2009042810000218
