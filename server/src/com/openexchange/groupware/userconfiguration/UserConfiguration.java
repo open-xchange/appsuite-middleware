@@ -114,6 +114,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final int MULTIPLE_MAIL_ACCOUNTS = 1 << 22;
 
+    private static final int SUBSCRIPTION = 1 << 23;
+
+    private static final int PUBLICATION = 1 << 24;
+
     /*-
      * Field members
      */
@@ -731,6 +735,44 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setMultipleMailAccounts(final boolean multipleMailAccounts) {
         setPermission(multipleMailAccounts, MULTIPLE_MAIL_ACCOUNTS);
+    }
+
+    /**
+     * Checks if this user configuration indicates to enable subscription.
+     * 
+     * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
+     */
+    public boolean isSubscription() {
+        return hasPermission(SUBSCRIPTION);
+    }
+
+    /**
+     * Sets if this user configuration indicates to enable subscription.
+     * 
+     * @param subscription <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
+     */
+    public void setSubscription(final boolean subscription) {
+        setPermission(subscription, SUBSCRIPTION);
+
+    }
+
+    /**
+     * Checks if this user configuration indicates to enable publication.
+     * 
+     * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
+     */
+    public boolean isPublication() {
+        return hasPermission(PUBLICATION);
+    }
+
+    /**
+     * Sets if this user configuration indicates to enable publication.
+     * 
+     * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
+     */
+    public void setPublication(final boolean publication) {
+        setPermission(publication, PUBLICATION);
+
     }
 
     /**
