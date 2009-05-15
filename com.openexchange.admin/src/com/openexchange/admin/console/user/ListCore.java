@@ -61,7 +61,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.Map.Entry;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -142,7 +141,7 @@ public abstract class ListCore extends UserAbstraction {
      * @return the string representation of this date
      */
     protected final String datetostring(final Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
         if (null != date) {
             return sdf.format(date);
@@ -187,8 +186,8 @@ public abstract class ListCore extends UserAbstraction {
 
     protected final String maptostring(final Map<?,?> map) {
         if (null != map && map.size() > 0) {
-            HashMap<String, String> hashMap = (HashMap<String,String>)map;
-            Iterator<Entry<String, String>> i = hashMap.entrySet().iterator(); 
+            final HashMap<String, String> hashMap = (HashMap<String,String>)map;
+            final Iterator<Entry<String, String>> i = hashMap.entrySet().iterator(); 
             final StringBuilder sb = new StringBuilder();
             while( i.hasNext() ) {
                 final Entry<String, String> e = i.next();
@@ -293,6 +292,10 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_GROUP);
             columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_RESOURCE);
             columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PASSWORD);
+            columnnames.add(UserAbstraction.OPT_ACCESS_COLLECT_EMAIL_ADDRESSES);
+            columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
+            columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
+            columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             
             
         }        
@@ -322,9 +325,9 @@ public abstract class ListCore extends UserAbstraction {
                 }
             }
             datarow.addAll(getDataOfAllExtensions(user));
-            
+
             // add module access 
-            UserModuleAccess access = access_map.get(user.getId());
+            final UserModuleAccess access = access_map.get(user.getId());
             datarow.add(String.valueOf(access.getCalendar()));
             datarow.add(String.valueOf(access.getContacts()));
             datarow.add(String.valueOf(access.getDelegateTask()));
@@ -346,7 +349,11 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.getEditGroup()));
             datarow.add(String.valueOf(access.getEditResource()));
             datarow.add(String.valueOf(access.getEditPassword()));
-            
+            datarow.add(String.valueOf(access.isCollectEmailAddresses()));
+            datarow.add(String.valueOf(access.isMultipleMailAccounts()));
+            datarow.add(String.valueOf(access.isSubscription()));
+            datarow.add(String.valueOf(access.isPublication()));
+
             data.add(datarow);
             printExtensionsError(user);
         }
