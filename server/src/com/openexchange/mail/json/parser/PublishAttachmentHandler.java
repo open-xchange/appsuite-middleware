@@ -1,6 +1,7 @@
 
 package com.openexchange.mail.json.parser;
 
+import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.configuration.ConfigurationException;
@@ -79,12 +80,16 @@ final class PublishAttachmentHandler implements IAttachmentHandler {
                 LOG.debug(new StringBuilder("Missing size: ").append(size).toString(), new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                final String fileName = attachment.getFileName();
-                final MailException e = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE, UploadUtility.getSize(
-                    uploadQuotaPerFile,
-                    2,
-                    false,
-                    true), null == fileName ? "" : fileName, UploadUtility.getSize(size, 2, false, true));
+                if (LOG.isDebugEnabled()) {
+                    final String fileName = attachment.getFileName();
+                    final MailException e = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE, UploadUtility.getSize(
+                        uploadQuotaPerFile,
+                        2,
+                        false,
+                        true), null == fileName ? "" : fileName, UploadUtility.getSize(size, 2, false, true));
+                    LOG.debug(new StringBuilder(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
+                        ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(), e);
+                }
                 exceeded = true;
             } else {
                 /*
@@ -92,11 +97,15 @@ final class PublishAttachmentHandler implements IAttachmentHandler {
                  */
                 consumed += size;
                 if (uploadQuota > 0 && consumed > uploadQuota) {
-                    final MailException e = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, UploadUtility.getSize(
-                        uploadQuota,
-                        2,
-                        false,
-                        true));
+                    if (LOG.isDebugEnabled()) {
+                        final MailException e = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, UploadUtility.getSize(
+                            uploadQuota,
+                            2,
+                            false,
+                            true));
+                        LOG.debug(new StringBuilder(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
+                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(), e);
+                    }
                     exceeded = true;
                 }
             }
