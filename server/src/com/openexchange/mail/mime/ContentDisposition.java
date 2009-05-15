@@ -226,7 +226,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
      */
     public boolean isInline() {
-        return Part.INLINE.equals(disposition);
+        return Part.INLINE.equalsIgnoreCase(disposition);
     }
 
     /**
@@ -235,7 +235,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
      */
     public boolean isAttachment() {
-        return Part.ATTACHMENT.equals(disposition);
+        return Part.ATTACHMENT.equalsIgnoreCase(disposition);
     }
 
     /*
