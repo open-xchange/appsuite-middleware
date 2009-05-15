@@ -599,7 +599,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Pool Error", e);
             rollback(write_ox_con);
             throw new StorageException(e);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             log.error("Required service is missing.", e);
             rollback(write_ox_con);
             throw new StorageException(e);
@@ -665,12 +665,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void changePrimaryMailAccount(Context ctx, Connection con, User user, int userId) throws ServiceException, StorageException {
+    private void changePrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws ServiceException, StorageException {
         // Loading a context is not possible if here the primary mail account for the admin is created.
-        int contextId = ctx.getId().intValue();
-        MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        MailAccountDescription account = new MailAccountDescription();
-        Set<Attribute> changed = new HashSet<Attribute>();
+        final int contextId = ctx.getId().intValue();
+        final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountDescription account = new MailAccountDescription();
+        final Set<Attribute> changed = new HashSet<Attribute>();
         account.setDefaultFlag(true);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
         if (user.isImapServerset() || null != user.getImapServer()) {
@@ -717,7 +717,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (!changed.isEmpty()) {
                 mass.updateMailAccount(account, changed, userId, contextId, null, con, true);
             }
-        } catch (MailAccountException e) {
+        } catch (final MailAccountException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
@@ -731,7 +731,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             ps = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
             ps.setInt(1, ctx.getId());
-            ResultSet rs = ps.executeQuery();
+            final ResultSet rs = ps.executeQuery();
             int admin_id = 0;
             boolean mustMapAdmin = false;
             if (rs.next()) {
@@ -1082,7 +1082,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.info("User " + internal_user_id + " created!");
             }
             return internal_user_id;
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             log.error("Required service not found.", e);
             throw new StorageException(e.toString());
         } catch (final DataTruncation dt) {
@@ -1121,17 +1121,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void createPrimaryMailAccount(Context ctx, Connection con, User user, int userId) throws ServiceException, StorageException {
+    private void createPrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws ServiceException, StorageException {
         // Loading a context is not possible if here the primary mail account for the admin is created.
         final com.openexchange.groupware.contexts.Context context = new ContextImpl(ctx.getId().intValue());
-        MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        MailAccountDescription account = new MailAccountDescription();
+        final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
         account.parseMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ":" + user.getImapPort());
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
-        String lang = user.getLanguage();
+        final String lang = user.getLanguage();
         String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
         account.setDrafts(null == user.getMail_folder_drafts_name() ? defaultName : user.getMail_folder_drafts_name());
         defaultName = prop.getUserProp("SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
@@ -1148,13 +1148,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.parseTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
         try {
             mass.insertMailAccount(account, userId, context, null, con);
-        } catch (MailAccountException e) {
+        } catch (final MailAccountException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
     }
 
-    private void storeUISettings(Context ctx, Connection con, User user, int userId) {
+    private void storeUISettings(final Context ctx, final Connection con, final User user, final int userId) {
         final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), userId);
         final Map<String, String> guiPreferences = user.getGuiPreferences();
         if (guiPreferences != null) {
@@ -1934,9 +1934,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id) throws StorageException {
         Connection read_ox_con = null;
         try {
-            read_ox_con = cache.getConnectionForContext(ctx.getId());
+            read_ox_con = cache.getConnectionForContext(ctx.getId().intValue());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id, read_ox_con);
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, ctx.getId(), read_ox_con);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, ctx.getId().intValue(), read_ox_con);
 
             final UserModuleAccess acc = new UserModuleAccess();
 
@@ -1961,7 +1961,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setEditGroup(user.isEditGroup());
             acc.setEditResource(user.isEditResource());
             acc.setEditPassword(user.isEditPassword());
-            
+            acc.setCollectEmailAddresses(user.isCollectEmailAddresses());
+            acc.setMultipleMailAccounts(user.isMultipleMailAccounts());
+            acc.setPublication(user.isPublication());
+            acc.setSubscription(user.isSubscription());
+
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2274,6 +2278,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setEditGroup(access.getEditGroup());
             user.setEditResource(access.getEditResource());
             user.setEditPassword(access.getEditPassword());
+            user.setCollectEmailAddresses(access.isCollectEmailAddresses());
+            user.setMultipleMailAccounts(access.isMultipleMailAccounts());
+            user.setSubscription(access.isSubscription());
+            user.setPublication(access.isPublication());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             

@@ -112,6 +112,14 @@ public class UserModuleAccess implements Serializable {
     private boolean EditResource = true;
     
     private boolean EditPassword = true;
+
+    private boolean CollectEmailAddresses = true;
+
+    private boolean MultipleMailAccounts = true;
+    
+    private boolean Subscription = true;
+    
+    private boolean Publication = true;
     
     /**
      * Creates a new instance of UserModuleAccess
@@ -141,7 +149,8 @@ public class UserModuleAccess implements Serializable {
      * @param webmail
      * @deprecated
      */
-    public UserModuleAccess(boolean calendar, boolean contacts, boolean delegateTask, boolean editPublicFolders, boolean forum, boolean ical, boolean infostore, boolean pinboardWrite, boolean projects, boolean readCreateSharedFolders, boolean rssBookmarks, boolean rssPortal, boolean syncml, boolean tasks, boolean vcard, boolean webdav, boolean webdavXml, boolean webmail) {
+    @Deprecated
+    public UserModuleAccess(final boolean calendar, final boolean contacts, final boolean delegateTask, final boolean editPublicFolders, final boolean forum, final boolean ical, final boolean infostore, final boolean pinboardWrite, final boolean projects, final boolean readCreateSharedFolders, final boolean rssBookmarks, final boolean rssPortal, final boolean syncml, final boolean tasks, final boolean vcard, final boolean webdav, final boolean webdavXml, final boolean webmail) {
         super();
         this.calendar = calendar;
         this.contacts = contacts;
@@ -188,6 +197,10 @@ public class UserModuleAccess implements Serializable {
     	this.EditGroup = true;
     	this.EditResource = true;
     	this.EditPassword = true;
+    	this.CollectEmailAddresses = true;
+    	this.MultipleMailAccounts = true;
+    	this.Subscription = true;
+    	this.Publication = true;
     }
     
     /**
@@ -215,13 +228,17 @@ public class UserModuleAccess implements Serializable {
     	this.EditGroup = false;
     	this.EditResource = false;
     	this.EditPassword = false;
+    	this.CollectEmailAddresses = false;
+        this.MultipleMailAccounts = false;
+        this.Subscription = false;
+        this.Publication = false;
     }
     
     public boolean getEditGroup() {
         return EditGroup;
     }
 
-    public void setEditGroup(boolean editGroup) {
+    public void setEditGroup(final boolean editGroup) {
         EditGroup = editGroup;
     }
 
@@ -229,7 +246,7 @@ public class UserModuleAccess implements Serializable {
         return EditResource;
     }
 
-    public void setEditResource(boolean editResource) {
+    public void setEditResource(final boolean editResource) {
         EditResource = editResource;
     }
 
@@ -237,8 +254,80 @@ public class UserModuleAccess implements Serializable {
         return EditPassword;
     }
 
-    public void setEditPassword(boolean editPassword) {
+    public void setEditPassword(final boolean editPassword) {
         EditPassword = editPassword;
+    }
+    
+    /**
+     * Gets the collect-email-addresses access.
+     *
+     * @return The collect-email-addresses access
+     */
+    public boolean isCollectEmailAddresses() {
+        return CollectEmailAddresses;
+    }
+
+    /**
+     * Sets the collect-email-addresses access.
+     *
+     * @param collectEmailAddresses The collect-email-addresses access to set
+     */
+    public void setCollectEmailAddresses(final boolean collectEmailAddresses) {
+        CollectEmailAddresses = collectEmailAddresses;
+    }
+
+    /**
+     * Gets the multiple-mail-accounts access.
+     *
+     * @return The multiple-mail-accounts access
+     */
+    public boolean isMultipleMailAccounts() {
+        return MultipleMailAccounts;
+    }
+
+    /**
+     * Sets the multiple-mail-accounts access.
+     *
+     * @param multipleMailAccounts The multiple-mail-accounts access to set
+     */
+    public void setMultipleMailAccounts(final boolean multipleMailAccounts) {
+        MultipleMailAccounts = multipleMailAccounts;
+    }
+
+    /**
+     * Gets the subscription access.
+     *
+     * @return The subscription access
+     */
+    public boolean isSubscription() {
+        return Subscription;
+    }
+
+    /**
+     * Sets the subscription access.
+     *
+     * @param subscription The subscription access to set
+     */
+    public void setSubscription(final boolean subscription) {
+        Subscription = subscription;
+    }
+
+    /**
+     * Gets the publication access.
+     *
+     * @return The publication
+     */
+    public boolean isPublication() {
+        return Publication;
+    }
+
+    /**
+     * Sets the publication access.
+     *
+     * @param publication The publication access to set
+     */
+    public void setPublication(final boolean publication) {
+        Publication = publication;
     }
 
     /**
@@ -258,7 +347,7 @@ public class UserModuleAccess implements Serializable {
      *            Set to <CODE>true</CODE> if user should be able to access
      *            the calendar module!
      */
-    public void setCalendar(boolean val) {
+    public void setCalendar(final boolean val) {
         this.calendar = val;
     }
 
@@ -279,7 +368,7 @@ public class UserModuleAccess implements Serializable {
      *            Set to <CODE>true</CODE> if user should be able to access
      *            the contact module!
      */
-    public void setContacts(boolean val) {
+    public void setContacts(final boolean val) {
         this.contacts = val;
     }
 
@@ -301,7 +390,7 @@ public class UserModuleAccess implements Serializable {
      *            Set to <CODE>true</CODE> if user should be able to delegate
      *            tasks in the ox groupware.
      */
-    public void setDelegateTask(boolean val) {
+    public void setDelegateTask(final boolean val) {
         this.delegateTask = val;
     }
 
@@ -309,7 +398,7 @@ public class UserModuleAccess implements Serializable {
         return editPublicFolders;
     }
 
-    public void setEditPublicFolders(boolean val) {
+    public void setEditPublicFolders(final boolean val) {
         this.editPublicFolders = val;
     }
     /**
@@ -321,7 +410,7 @@ public class UserModuleAccess implements Serializable {
     /**
      * Currently NOT in use!
      */
-    public void setForum(boolean val) {
+    public void setForum(final boolean val) {
         this.forum = val;
     }
 
@@ -329,7 +418,7 @@ public class UserModuleAccess implements Serializable {
         return ical;
     }
 
-    public void setIcal(boolean val) {
+    public void setIcal(final boolean val) {
         this.ical = val;
     }
 
@@ -337,7 +426,7 @@ public class UserModuleAccess implements Serializable {
         return infostore;
     }
 
-    public void setInfostore(boolean val) {
+    public void setInfostore(final boolean val) {
         this.infostore = val;
     }
     /**
@@ -349,7 +438,7 @@ public class UserModuleAccess implements Serializable {
     /**
      * Currently NOT in use!
      */
-    public void setPinboardWrite(boolean val) {
+    public void setPinboardWrite(final boolean val) {
         this.PinboardWrite = val;
     }
     
@@ -363,7 +452,7 @@ public class UserModuleAccess implements Serializable {
     /**
      * Currently NOT in use!
      */
-    public void setProjects(boolean val) {
+    public void setProjects(final boolean val) {
         this.Projects = val;
     }
 
@@ -371,7 +460,7 @@ public class UserModuleAccess implements Serializable {
         return readCreateSharedFolders;
     }
 
-    public void setReadCreateSharedFolders(boolean val) {
+    public void setReadCreateSharedFolders(final boolean val) {
         this.readCreateSharedFolders = val;
     }
     /**
@@ -383,7 +472,7 @@ public class UserModuleAccess implements Serializable {
     /**
      * Currently NOT in use!
      */
-    public void setRssBookmarks(boolean val) {
+    public void setRssBookmarks(final boolean val) {
         this.RssBookmarks = val;
     }
     /**
@@ -395,7 +484,7 @@ public class UserModuleAccess implements Serializable {
     /**
      * Currently NOT in use!
      */
-    public void setRssPortal(boolean val) {
+    public void setRssPortal(final boolean val) {
         this.RssPortal = val;
     }
 
@@ -403,7 +492,7 @@ public class UserModuleAccess implements Serializable {
         return Syncml;
     }
 
-    public void setSyncml(boolean val) {
+    public void setSyncml(final boolean val) {
         this.Syncml = val;
     }
 
@@ -411,7 +500,7 @@ public class UserModuleAccess implements Serializable {
         return Tasks;
     }
 
-    public void setTasks(boolean val) {
+    public void setTasks(final boolean val) {
         this.Tasks = val;
     }
 
@@ -419,7 +508,7 @@ public class UserModuleAccess implements Serializable {
         return Vcard;
     }
 
-    public void setVcard(boolean val) {
+    public void setVcard(final boolean val) {
         this.Vcard = val;
     }
 
@@ -427,7 +516,7 @@ public class UserModuleAccess implements Serializable {
         return Webdav;
     }
 
-    public void setWebdav(boolean val) {
+    public void setWebdav(final boolean val) {
         this.Webdav = val;
     }
 
@@ -435,7 +524,7 @@ public class UserModuleAccess implements Serializable {
         return WebdavXml;
     }
 
-    public void setWebdavXml(boolean val) {
+    public void setWebdavXml(final boolean val) {
         this.WebdavXml = val;
     }
 
@@ -443,17 +532,18 @@ public class UserModuleAccess implements Serializable {
         return Webmail;
     }
 
-    public void setWebmail(boolean val) {
+    public void setWebmail(final boolean val) {
         this.Webmail = val;
     }
     
+    @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder();
+        final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
-                Object ob = f.get(this);
-                String tname = f.getName();
+                final Object ob = f.get(this);
+                final String tname = f.getName();
                 if (ob != null && !tname.equals("serialVersionUID")) {
                     ret.append("  ");
                     ret.append(tname);
@@ -461,9 +551,9 @@ public class UserModuleAccess implements Serializable {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }
@@ -500,56 +590,80 @@ public class UserModuleAccess implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         final UserModuleAccess other = (UserModuleAccess) obj;
-        if (PinboardWrite != other.PinboardWrite)
+        if (PinboardWrite != other.PinboardWrite) {
             return false;
-        if (Projects != other.Projects)
+        }
+        if (Projects != other.Projects) {
             return false;
-        if (RssBookmarks != other.RssBookmarks)
+        }
+        if (RssBookmarks != other.RssBookmarks) {
             return false;
-        if (RssPortal != other.RssPortal)
+        }
+        if (RssPortal != other.RssPortal) {
             return false;
-        if (Syncml != other.Syncml)
+        }
+        if (Syncml != other.Syncml) {
             return false;
-        if (Tasks != other.Tasks)
+        }
+        if (Tasks != other.Tasks) {
             return false;
-        if (Vcard != other.Vcard)
+        }
+        if (Vcard != other.Vcard) {
             return false;
-        if (Webdav != other.Webdav)
+        }
+        if (Webdav != other.Webdav) {
             return false;
-        if (WebdavXml != other.WebdavXml)
+        }
+        if (WebdavXml != other.WebdavXml) {
             return false;
-        if (Webmail != other.Webmail)
+        }
+        if (Webmail != other.Webmail) {
             return false;
-        if (calendar != other.calendar)
+        }
+        if (calendar != other.calendar) {
             return false;
-        if (contacts != other.contacts)
+        }
+        if (contacts != other.contacts) {
             return false;
-        if (delegateTask != other.delegateTask)
+        }
+        if (delegateTask != other.delegateTask) {
             return false;
-        if (editPublicFolders != other.editPublicFolders)
+        }
+        if (editPublicFolders != other.editPublicFolders) {
             return false;
-        if (forum != other.forum)
+        }
+        if (forum != other.forum) {
             return false;
-        if (ical != other.ical)
+        }
+        if (ical != other.ical) {
             return false;
-        if (infostore != other.infostore)
+        }
+        if (infostore != other.infostore) {
             return false;
-        if (readCreateSharedFolders != other.readCreateSharedFolders)
+        }
+        if (readCreateSharedFolders != other.readCreateSharedFolders) {
             return false;
-        if (EditGroup != other.EditGroup)
+        }
+        if (EditGroup != other.EditGroup) {
             return false;
-        if (EditPassword != other.EditPassword)
+        }
+        if (EditPassword != other.EditPassword) {
             return false;
-        if (EditResource != other.EditResource)
+        }
+        if (EditResource != other.EditResource) {
             return false;
+        }
         return true;
     }
 }
