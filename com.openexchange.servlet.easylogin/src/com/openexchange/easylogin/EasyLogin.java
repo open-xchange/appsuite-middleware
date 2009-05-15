@@ -427,7 +427,7 @@ public class EasyLogin extends HttpServlet {
 			String password = null;
 				
 			
-			password = req.getParameter(passwordPara).trim().toLowerCase();
+			password = req.getParameter(passwordPara);
 			login = req.getParameter(loginPara).trim().toLowerCase();
 							
 			out.print(RESPONSE1);
@@ -470,7 +470,7 @@ public class EasyLogin extends HttpServlet {
 			LOG.error("Got request without login");
 		} else{
 			
-			password = req.getParameter(passwordPara).trim().toLowerCase();
+			password = req.getParameter(passwordPara);
 			login = req.getParameter(loginPara).trim().toLowerCase();
 			
 			out.print(RESPONSE1);
