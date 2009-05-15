@@ -308,7 +308,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
 
 
 
-    public function atestRegisterDatabase() {
+    public function testRegisterDatabase() {
         srand(microtime()*1000000);
         $random_id = rand(1, 99999);
 
@@ -359,7 +359,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
      * Registerfilestore, change it and load the changed store again and
      * verify the loaded store against the changed
      */
-    public function atestChangeFilestore() {
+    public function testChangeFilestore() {
         srand(microtime()*1000000);
         $random_id = rand(1, 99999);
 
@@ -400,7 +400,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
      *
      *
      */
-    public function atestRegisterFilestore() {
+    public function testRegisterFilestore() {
 
         srand(microtime()*1000000);
         $random_id = rand(1, 99999);
@@ -429,7 +429,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
      *
      *
      */
-    public function atestUnregisterFilestore() {
+    public function testUnregisterFilestore() {
 
         srand(microtime()*1000000);
         $random_id = rand(1, 99999);
@@ -465,7 +465,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
      * - name
      *
      */
-    public function atestRegisterServer() {
+    public function testRegisterServer() {
 
         srand(microtime() * 1000000);
         $random_id = rand(1, 99999);
@@ -487,7 +487,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
      *
      *
      */
-    public function atestUnregisterServer() {
+    public function testUnregisterServer() {
 
         srand(microtime() * 1000000);
         $random_id = rand(1, 99999);
