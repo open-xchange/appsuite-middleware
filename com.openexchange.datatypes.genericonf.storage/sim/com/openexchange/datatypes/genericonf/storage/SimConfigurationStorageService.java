@@ -59,7 +59,7 @@ import com.openexchange.groupware.contexts.Context;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class SimConfigurationStorageSerice implements GenericConfigurationStorageService {
+public class SimConfigurationStorageService implements GenericConfigurationStorageService {
 
     private static int currentId = 0;
 

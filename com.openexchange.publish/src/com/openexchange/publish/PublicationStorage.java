@@ -47,71 +47,23 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.publish;
 
-public interface Types {
+import java.util.List;
+import com.openexchange.groupware.contexts.Context;
 
-    public static final int APPOINTMENT = 1;
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
+public interface PublicationStorage {
 
-    public static final int TASK = 4;
+    public void rememberPublication(Publication publication) throws PublicationException;
 
-    public static final int CONTACT = 7;
+    public void forgetPublication(Publication publication) throws PublicationException;
 
-    // public static final int PROJECT = 13;
-    // public static final int FORUM = 17;
-    // public static final int PINBOARD = 18;
-    public static final int EMAIL = 19;
+    public List<Publication> getPublications(Context ctx, String module, int entityId) throws PublicationException;
 
-    public static final int FOLDER = 20;
+    public List<Publication> getPublications(Context ctx, String publicationTarget) throws PublicationException;
 
-    public static final int USER_SETTING = 31;
-
-    public static final int REMINDER = 55;
-
-    public static final int ICAL = 75;
-
-    public static final int VCARD = 95;
-
-    public static final int PARTICIPANT = 105;
-
-    public static final int GROUPUSER = 115;
-
-    public static final int USER = 120;
-
-    public static final int GROUP = 125;
-    
-    public static final int SUBSCRIPTION = 126;
-    
-    public static final int PUBLICATION = 127;
-
-    /**
-     * Identifier for principals. This can be groups and users. This type is used to generate not intersecting identifiers for groups and
-     * users.
-     */
-    public static final int PRINCIPAL = 130;
-
-    /**
-     * TODO: EXTRACT to admin Used for gid numbers on group create
-     */
-    public static final int GID_NUMBER = 1130;
-
-    /**
-     * TODO: EXTRACT to admin Used for uid numbers on user create
-     */
-    public static final int UID_NUMBER = 1131;
-
-    public static final int RESOURCE = 135;
-
-    public static final int INFOSTORE = 137;
-
-    public static final int ATTACHMENT = 138;
-
-    public static final int WEBDAV = 139;
-
-    /**
-     * TODO: EXTRACT to admin Used for generating ids for mail service
-     */
-    public static final int MAIL_SERVICE = 1132;
-    
-    public static final int GENERIC_CONFIGURATION = 1200;
+    public Publication getPublication(Context ctx, int publicationId) throws PublicationException;
 }

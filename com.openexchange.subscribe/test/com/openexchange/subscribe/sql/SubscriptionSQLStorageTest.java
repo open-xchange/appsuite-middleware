@@ -61,7 +61,7 @@ import java.util.Map;
 import com.openexchange.database.Database;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageSerice;
+import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -191,7 +191,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
         SimSubscriptionSourceDiscoveryService discoveryService = new SimSubscriptionSourceDiscoveryService();
         discoveryService.addSource(subscriptionSource);
         discoveryService.addSource(subscriptionSource2);
-        storage = new SubscriptionSQLStorage(getDBProvider(), new SimConfigurationStorageSerice(), discoveryService);
+        storage = new SubscriptionSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
     }
     
     public void tearDown() throws Exception {
@@ -218,7 +218,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     public void testRemember() throws Exception {
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
-        //subscriptionsToDelete.add(subscription2.getId());
+        subscriptionsToDelete.add(subscription2.getId());
         
         SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
