@@ -50,7 +50,6 @@
 package com.openexchange.subscribe;
 
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -58,12 +57,12 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface SubscriptionStorage {
 
-    public void rememberSubscription(Subscription subscription) throws AbstractOXException;
+    public void rememberSubscription(Subscription subscription) throws SubscriptionException;
 
-    public void forgetSubscription(Subscription subscription) throws AbstractOXException;
+    public void forgetSubscription(Subscription subscription) throws SubscriptionException;
 
-    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws AbstractOXException;
+    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws SubscriptionException;
 
-    public Subscription getSubscription(Context ctx, int id) throws AbstractOXException;
+    public Subscription getSubscription(Context ctx, int id) throws SubscriptionException;
 
 }

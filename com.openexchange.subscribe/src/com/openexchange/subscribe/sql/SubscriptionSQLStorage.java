@@ -73,6 +73,7 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
 
@@ -89,7 +90,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         this.discoveryService = discoveryService;
     }
 
-    public void forgetSubscription(Subscription subscription) throws AbstractOXException {
+    public void forgetSubscription(Subscription subscription) throws SubscriptionException {
         
         Connection writeConnection = null;
         try {
@@ -113,6 +114,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 throw SQLException.create(e1);
             }
             throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new SubscriptionException(e);
         } finally {
             if (writeConnection != null ) {
                 try {
@@ -126,7 +129,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
-    public Subscription getSubscription(Context ctx, int id) throws AbstractOXException {
+    public Subscription getSubscription(Context ctx, int id) throws SubscriptionException {
         Subscription retval = null;
         
         Connection readConnection = null;
@@ -148,6 +151,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             }
         } catch (SQLException e) {
             throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new SubscriptionException(e);
         } finally {
             try {
                 if (resultSet != null) {
@@ -163,7 +168,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws AbstractOXException {
+    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws SubscriptionException {
         List<Subscription> retval = null;
         
         Connection readConnection = null;
@@ -181,6 +186,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             retval = parseResultSet(new StatementBuilder().executeQuery(readConnection, select, values), ctx, readConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            throw new SubscriptionException(e);
         } finally {
             try {
                 if (resultSet != null) {
@@ -196,7 +203,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    public void rememberSubscription(Subscription subscription) throws AbstractOXException {
+    public void rememberSubscription(Subscription subscription) throws SubscriptionException {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
@@ -238,6 +245,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 throw SQLException.create(e1);
             }
             throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new SubscriptionException(e);
         } finally {
             if (writeConnection != null ) {
                 try {
@@ -251,7 +260,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
     
-    private int getConfigurationId(Subscription subscription) throws AbstractOXException {
+    private int getConfigurationId(Subscription subscription) throws SubscriptionException {
         int retval = 0;
         Connection readConection = null;
         ResultSet resultSet = null;
@@ -273,6 +282,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             }
         } catch (SQLException e) {
             throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new SubscriptionException(e);
         } finally {
             try {
                 if (resultSet != null) {
