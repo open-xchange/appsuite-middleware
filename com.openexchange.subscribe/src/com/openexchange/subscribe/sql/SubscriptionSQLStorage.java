@@ -134,6 +134,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         
         Connection readConnection = null;
         ResultSet resultSet = null;
+        StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update").
@@ -144,7 +145,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             values.add(id);
             values.add(ctx.getContextId());
             
-            resultSet = new StatementBuilder().executeQuery(readConnection, select, values);
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
             List<Subscription> subscriptions = parseResultSet(resultSet, ctx, readConnection);
             if (subscriptions.size() != 0) {
                 retval = subscriptions.get(0);
@@ -155,8 +157,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             new SubscriptionException(e);
         } finally {
             try {
-                if (resultSet != null) {
-                    resultSet.close();
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);
@@ -173,6 +175,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         
         Connection readConnection = null;
         ResultSet resultSet = null;
+        StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update").
@@ -183,15 +186,16 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             values.add(ctx.getContextId());
             values.add(folderId);
             
-            retval = parseResultSet(new StatementBuilder().executeQuery(readConnection, select, values), ctx, readConnection);
+            builder = new StatementBuilder();
+            retval = parseResultSet(builder.executeQuery(readConnection, select, values), ctx, readConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
             throw new SubscriptionException(e);
         } finally {
             try {
-                if (resultSet != null) {
-                    resultSet.close();
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);
@@ -264,6 +268,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         int retval = 0;
         Connection readConection = null;
         ResultSet resultSet = null;
+        StatementBuilder builder = null;
         try {
             readConection = dbProvider.getReadConnection(subscription.getContext());
             
@@ -275,7 +280,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             values.add(subscription.getContext().getContextId());
             values.add(subscription.getId());
             
-            resultSet = new StatementBuilder().executeQuery(readConection, select, values);
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConection, select, values);
             
             if (resultSet.next()) {
                 retval = resultSet.getInt("configuration_id");
@@ -286,8 +292,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             new SubscriptionException(e);
         } finally {
             try {
-                if (resultSet != null) {
-                    resultSet.close();
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);

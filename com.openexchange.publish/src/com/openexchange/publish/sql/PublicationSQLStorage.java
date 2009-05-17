@@ -132,6 +132,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         
         Connection readConnection = null;
         ResultSet resultSet = null;
+        StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").
@@ -142,7 +143,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             values.add(ctx.getContextId());
             values.add(publicationId);
             
-            resultSet = new StatementBuilder().executeQuery(readConnection, select, values);
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
             List<Publication> publications = parseResultSet(resultSet, ctx, readConnection);
             
             if (publications.size() > 0) {
@@ -154,8 +156,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             new PublicationException(e);
         } finally {
             try {
-                if (resultSet != null) {
-                    resultSet.close();
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);
@@ -172,6 +174,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         
         Connection readConnection = null;
         ResultSet resultSet = null;
+        StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").
@@ -183,7 +186,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             values.add(module);
             values.add(entityId);
             
-            resultSet = new StatementBuilder().executeQuery(readConnection, select, values);
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -191,8 +195,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             new PublicationException(e);
         } finally {
             try {
-                if (resultSet != null) {
-                    resultSet.close();
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);
@@ -209,6 +213,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         
         Connection readConnection = null;
         ResultSet resultSet = null;
+        StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").
@@ -219,7 +224,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             values.add(ctx.getContextId());
             values.add(publicationTarget);
             
-            resultSet = new StatementBuilder().executeQuery(readConnection, select, values);
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -227,8 +233,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             new PublicationException(e);
         } finally {
             try {
-                if (resultSet != null) {
-                    resultSet.close();
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);

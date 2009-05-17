@@ -53,15 +53,86 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
-
-import com.openexchange.sql.grammar.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.sql.grammar.ABS;
+import com.openexchange.sql.grammar.ALL;
+import com.openexchange.sql.grammar.AND;
+import com.openexchange.sql.grammar.ANY;
+import com.openexchange.sql.grammar.AVG;
+import com.openexchange.sql.grammar.Assignment;
+import com.openexchange.sql.grammar.BETWEEN;
+import com.openexchange.sql.grammar.BinaryArithmeticExpression;
+import com.openexchange.sql.grammar.BinaryFunction;
+import com.openexchange.sql.grammar.BinaryPredicate;
+import com.openexchange.sql.grammar.CONCAT;
+import com.openexchange.sql.grammar.COUNT;
+import com.openexchange.sql.grammar.Column;
+import com.openexchange.sql.grammar.Command;
+import com.openexchange.sql.grammar.Condition;
+import com.openexchange.sql.grammar.Constant;
+import com.openexchange.sql.grammar.DELETE;
+import com.openexchange.sql.grammar.DISTINCT;
+import com.openexchange.sql.grammar.DIVIDE;
+import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.EXISTS;
+import com.openexchange.sql.grammar.Element;
+import com.openexchange.sql.grammar.Expression;
+import com.openexchange.sql.grammar.FROM;
+import com.openexchange.sql.grammar.GREATER;
+import com.openexchange.sql.grammar.GREATEROREQUAL;
+import com.openexchange.sql.grammar.GROUPBY;
+import com.openexchange.sql.grammar.GenericFunction;
+import com.openexchange.sql.grammar.HAVING;
+import com.openexchange.sql.grammar.IN;
+import com.openexchange.sql.grammar.INSERT;
+import com.openexchange.sql.grammar.INTO;
+import com.openexchange.sql.grammar.ISNULL;
+import com.openexchange.sql.grammar.Join;
+import com.openexchange.sql.grammar.LENGTH;
+import com.openexchange.sql.grammar.LIKE;
+import com.openexchange.sql.grammar.LIST;
+import com.openexchange.sql.grammar.LOCATE;
+import com.openexchange.sql.grammar.LeftOuterJoin;
+import com.openexchange.sql.grammar.MAX;
+import com.openexchange.sql.grammar.MIN;
+import com.openexchange.sql.grammar.MINUS;
+import com.openexchange.sql.grammar.NOT;
+import com.openexchange.sql.grammar.NOTEQUALS;
+import com.openexchange.sql.grammar.NOTEXISTS;
+import com.openexchange.sql.grammar.NOTIN;
+import com.openexchange.sql.grammar.NOTLIKE;
+import com.openexchange.sql.grammar.NOTNULL;
+import com.openexchange.sql.grammar.ON;
+import com.openexchange.sql.grammar.OR;
+import com.openexchange.sql.grammar.ORDERBY;
+import com.openexchange.sql.grammar.Operator;
+import com.openexchange.sql.grammar.PLUS;
+import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.grammar.SMALLER;
+import com.openexchange.sql.grammar.SMALLEROREQUAL;
+import com.openexchange.sql.grammar.SQRT;
+import com.openexchange.sql.grammar.SUBSTRING;
+import com.openexchange.sql.grammar.SUM;
+import com.openexchange.sql.grammar.TIMES;
+import com.openexchange.sql.grammar.Table;
+import com.openexchange.sql.grammar.TernaryFunction;
+import com.openexchange.sql.grammar.TernaryPredicate;
+import com.openexchange.sql.grammar.UPDATE;
+import com.openexchange.sql.grammar.UnaryArithmeticExpression;
+import com.openexchange.sql.grammar.UnaryFunction;
+import com.openexchange.sql.grammar.UnaryMINUS;
+import com.openexchange.sql.grammar.UnaryPLUS;
+import com.openexchange.sql.grammar.WHERE;
 import com.openexchange.sql.tools.SQLTools;
 
 public class StatementBuilder implements IStatementBuilder {
 	protected StringBuffer fStringBuffer;
 	protected Command fCommand;
 	protected boolean upperCase = false;
+	protected PreparedStatement stmt = null;
 
 	public StatementBuilder() {
 		super();
@@ -123,8 +194,19 @@ public class StatementBuilder implements IStatementBuilder {
 	}
 	
 	public ResultSet executeQuery(Connection con, Command element, List<? extends Object> values) throws SQLException {
-	    PreparedStatement stmt = prepareStatement(con, element, values);
+	    stmt = prepareStatement(con, element, values);
 	    return stmt.executeQuery();
+	}
+	
+	/**
+	 * Closes the underlying PreparedStatment and also the given Connection and ResultSet in correct order.
+	 * Just set Connection or ResultSet to null, if no closing of them is needed.
+	 * @param con
+	 * @param rs
+	 * @throws SQLException
+	 */
+	public void closePreparedStatement(Connection con, ResultSet rs) throws SQLException {
+	    SQLTools.closeSQLStuff(con, stmt, rs);
 	}
 
 	public void buildDELETE(DELETE delete) {
