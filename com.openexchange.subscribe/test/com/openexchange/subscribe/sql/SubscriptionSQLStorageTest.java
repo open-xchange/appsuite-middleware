@@ -197,8 +197,13 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     public void tearDown() throws Exception {
         if (subscriptionsToDelete.size() > 0) {
             List<Expression> placeholder = new ArrayList<Expression>();
-            for (Integer delId : subscriptionsToDelete) {
+            for (int delId : subscriptionsToDelete) {
                 placeholder.add(PLACEHOLDER);
+                
+                Subscription subscriptionToDelete = new Subscription();
+                subscriptionToDelete.setId(delId);
+                subscriptionToDelete.setContext(ctx);
+                storage.forgetSubscription(subscriptionToDelete);
             }
 
             DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));

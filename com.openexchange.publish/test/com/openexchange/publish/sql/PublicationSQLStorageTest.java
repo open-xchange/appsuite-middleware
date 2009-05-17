@@ -178,8 +178,13 @@ public class PublicationSQLStorageTest extends SQLTestCase {
     public void tearDown() throws Exception {
         if (publicationsToDelete.size() > 0) {
             List<Expression> placeholder = new ArrayList<Expression>();
-            for (Integer delId : publicationsToDelete) {
+            for (int delId : publicationsToDelete) {
                 placeholder.add(PLACEHOLDER);
+                
+                Publication publicationToDelete = new Publication();
+                publicationToDelete.setId(delId);
+                publicationToDelete.setContext(ctx);
+                storage.forgetPublication(publicationToDelete);
             }
             
             DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));
