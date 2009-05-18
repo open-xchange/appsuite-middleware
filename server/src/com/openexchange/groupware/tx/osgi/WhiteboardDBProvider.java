@@ -50,18 +50,35 @@
 package com.openexchange.groupware.tx.osgi;
 
 import java.sql.Connection;
+import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.server.osgiservice.WhiteboardFactoryService;
+import com.openexchange.tools.global.OXCloseable;
 
 /**
  * {@link WhiteboardDBProvider}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class WhiteboardDBProvider implements DBProvider {
+public class WhiteboardDBProvider implements DBProvider{
+
+    
+    public static class Factory implements WhiteboardFactoryService<DBProvider> {
+
+        public DBProvider create(BundleContext context, Collection<OXCloseable> closeables) {
+            WhiteboardDBProvider provider = new WhiteboardDBProvider(context);
+            return provider;
+        }
+
+        public Class<DBProvider> getType() {
+            return DBProvider.class;
+        }
+
+    }
 
     private BundleContext context;
 

@@ -47,75 +47,51 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.server.osgiservice;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.authentication.exception.LoginExceptionFactory;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.server.osgiservice.DynamicWhiteboardFactory;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.global.OXCloseable;
+
 
 /**
- * {@link GlobalActivator} - Activator for global (aka kernel) bundle
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link Whiteboard}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public final class GlobalActivator implements BundleActivator {
+public class Whiteboard implements OXCloseable {
+    
+    private static final Log LOG = LogFactory.getLog(Whiteboard.class);
+    
+    private List<OXCloseable> closeables = new LinkedList<OXCloseable>();
 
-    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
+    private BundleContext context;
 
-    private ServiceRegistration componentRegistryRegistration;
-
-    private ComponentRegistration loginComponent;
-
-
-    /**
-     * Initializes a new {@link GlobalActivator}
-     */
-    public GlobalActivator() {
-        super();
+    private DynamicWhiteboardFactory factory;
+    
+    public Whiteboard(BundleContext context) {
+        this.context = context;
+        this.factory = new DynamicWhiteboardFactory(context);
+        closeables.add(factory);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void start(final BundleContext context) throws Exception {
-        try {
-            ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            loginComponent = new ComponentRegistration(
-                context,
-                EnumComponent.LOGIN.getAbbreviation(),
-                "com.openexchange.authentication",
-                LoginExceptionFactory.getInstance());
-            
-            
-            LOG.debug("Global bundle successfully started");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+    
+    public <T> T getService(Class<T> klass) {
+        return factory.createWhiteboardService(context, klass, closeables);
+    }
+    
+    public void close() throws AbstractOXException {
+        for(OXCloseable closeable : closeables) {
+            try {
+                closeable.close();
+            } catch (AbstractOXException x) {
+                LOG.error(x);
+            }
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void stop(final BundleContext context) throws Exception {
-        try {
-            loginComponent.unregister();
-            componentRegistryRegistration.unregister();
-            ServiceHolderInit.getInstance().stop();
-            LOG.debug("Global bundle successfully stopped");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-        }
-    }
-
 }

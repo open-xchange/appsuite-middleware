@@ -101,6 +101,7 @@ import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailLoginHandler;
@@ -130,6 +131,7 @@ import com.openexchange.server.impl.Starter;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -446,6 +448,7 @@ public final class ServerActivator extends DeferredActivator {
         // Register DBProvider
         
         registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
+        registrationList.add(context.registerService(WhiteboardFactoryService.class.getName(), new WhiteboardDBProvider.Factory(), null));
         
         /*
          * Register components
