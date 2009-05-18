@@ -70,13 +70,14 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		Group group[] = searchGroup(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("no group found in response (group array length == 0)", group.length > 0);
 
-		int posInArray;
-		for (posInArray = 0; posInArray < group.length; posInArray++) {
-			if (group[posInArray].getIdentifier() > 1) {
+		int posInArray = -1;
+		for (int a = 0; a < group.length; a++) {
+			if (group[a].getIdentifier() > 0) {
+			    posInArray = a;
 				break;
 			}
 		}
-
+		assertFalse("No according group found.", -1 == posInArray);
 		final int id = group[posInArray].getIdentifier();
 		final String displayName = group[posInArray].getDisplayName();
 		final Date lastModifed = group[posInArray].getLastModified();
