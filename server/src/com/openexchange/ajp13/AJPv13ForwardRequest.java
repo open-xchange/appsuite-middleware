@@ -509,6 +509,13 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         if ((headerValue.length() > 0) && cookieList.isEmpty()) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
         }
+        if (LOG.isDebugEnabled()) {
+            final StringBuilder sb = new StringBuilder(256).append("Parsed Cookies:\n");
+            for (final Cookie cookie : cookieList) {
+                sb.append('\'').append(cookie.getName()).append("'='").append(cookie.getValue()).append("'\n");
+            }
+            LOG.debug(sb.toString());
+        }
         return cookieList.toArray(new Cookie[cookieList.size()]);
     }
 
@@ -570,6 +577,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         String cv = cookieValue;
         int mlen = cv.length() - 1;
         if (cv.charAt(mlen) == ';') {
+            if (mlen == 0) {
+                return "";
+            }
             do {
                 mlen--;
             } while ((mlen > 0) && (cv.charAt(mlen) == ';'));
