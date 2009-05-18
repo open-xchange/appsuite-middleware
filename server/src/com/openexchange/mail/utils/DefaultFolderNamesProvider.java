@@ -147,7 +147,7 @@ public final class DefaultFolderNamesProvider {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
+                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_DRAFTS));
             }
             names[INDEX_DRAFTS] = fallbackProvider.getDrafts();
@@ -156,7 +156,7 @@ public final class DefaultFolderNamesProvider {
         }
         if ((sent == null) || (sent.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
+                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_SENT));
             }
             names[INDEX_SENT] = fallbackProvider.getSent();
@@ -165,7 +165,7 @@ public final class DefaultFolderNamesProvider {
         }
         if ((spam == null) || (spam.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
+                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_SPAM));
             }
             names[INDEX_SPAM] = fallbackProvider.getSpam();
@@ -174,7 +174,7 @@ public final class DefaultFolderNamesProvider {
         }
         if ((trash == null) || (trash.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
+                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_TRASH));
             }
             names[INDEX_TRASH] = fallbackProvider.getTrash();
@@ -184,7 +184,7 @@ public final class DefaultFolderNamesProvider {
         if (isSpamEnabled) {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
+                    // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_CONFIRMED_SPAM));
                 }
                 names[INDEX_CONFIRMED_SPAM] = fallbackProvider.getConfirmedSpam();
@@ -193,7 +193,7 @@ public final class DefaultFolderNamesProvider {
             }
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
+                    // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_CONFIRMED_HAM));
                 }
                 names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmeHam();
