@@ -2436,9 +2436,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final JSONObject bodyObj = new JSONObject(body);
-            final String destFolder = bodyObj.has(FolderFields.FOLDER_ID) && !bodyObj.isNull(FolderFields.FOLDER_ID) ? bodyObj.getString(FolderFields.FOLDER_ID) : null;
-            final Integer colorLabel = bodyObj.has(CommonFields.COLORLABEL) && !bodyObj.isNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;
-            final Integer flagBits = bodyObj.has(MailJSONField.FLAGS.getKey()) && !bodyObj.isNull(MailJSONField.FLAGS.getKey()) ? Integer.valueOf(bodyObj.getInt(MailJSONField.FLAGS.getKey())) : null;
+            final String destFolder = bodyObj.hasAndNotNull(FolderFields.FOLDER_ID) ? bodyObj.getString(FolderFields.FOLDER_ID) : null;
+            final Integer colorLabel = bodyObj.hasAndNotNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;
+            final Integer flagBits = bodyObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) ? Integer.valueOf(bodyObj.getInt(MailJSONField.FLAGS.getKey())) : null;
             boolean flagVal = false;
             if (flagBits != null) {
                 /*
@@ -2453,30 +2453,29 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                if (destFolder != null) {
-                    /*
-                     * Perform move operation
-                     */
-                    final String id = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, true)[0];
-                    jsonWriter.key(FolderChildFields.FOLDER_ID).value(destFolder);
-                    jsonWriter.key(DataFields.ID).value(id);
-                }
+                String folderId = sourceFolder;
+                String mailId = uid;
                 if (colorLabel != null) {
                     /*
                      * Update color label
                      */
                     mailInterface.updateMessageColorLabel(sourceFolder, new String[] { uid }, colorLabel.intValue());
-                    jsonWriter.key(FolderChildFields.FOLDER_ID).value(sourceFolder);
-                    jsonWriter.key(DataFields.ID).value(uid);
                 }
                 if (flagBits != null) {
                     /*
                      * Update system flags which are allowed to be altered by client
                      */
                     mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, flagBits.intValue(), flagVal);
-                    jsonWriter.key(FolderChildFields.FOLDER_ID).value(sourceFolder);
-                    jsonWriter.key(DataFields.ID).value(uid);
                 }
+                if (destFolder != null) {
+                    /*
+                     * Perform move operation
+                     */
+                    mailId = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, true)[0];
+                    folderId = destFolder;
+                }
+                jsonWriter.key(FolderChildFields.FOLDER_ID).value(folderId);
+                jsonWriter.key(DataFields.ID).value(mailId);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
