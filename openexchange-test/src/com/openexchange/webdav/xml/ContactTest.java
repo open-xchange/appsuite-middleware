@@ -480,10 +480,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT, true);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.CONTACT, true);
 		
 		assertEquals("response length not is 1", 1, response.length);
 		

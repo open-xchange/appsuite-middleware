@@ -2,6 +2,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -438,10 +439,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT, true);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.APPOINTMENT, true);
 		
 		assertEquals("response length not is 1", 1, response.length);
 		
@@ -506,10 +505,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.APPOINTMENT);
 		
 		final AppointmentObject[] appointmentArray = new AppointmentObject[response.length];
 		for (int a = 0; a < appointmentArray.length; a++) {
@@ -574,10 +571,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.APPOINTMENT);
 		
 		assertEquals("check response" , 1, response.length);
 		

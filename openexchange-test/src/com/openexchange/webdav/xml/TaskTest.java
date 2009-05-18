@@ -2,6 +2,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -432,10 +433,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK, true);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK, true);
 		
 		assertEquals("response length not is 1", 1, response.length);
 		
@@ -500,10 +499,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 		
 		final Task[] taskArray = new Task[response.length];
 		for (int a = 0; a < taskArray.length; a++) {
@@ -556,10 +553,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 		
 		assertEquals("check response" , 1, response.length);
 		

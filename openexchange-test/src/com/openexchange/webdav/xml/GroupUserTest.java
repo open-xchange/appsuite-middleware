@@ -4,6 +4,7 @@ import static com.openexchange.webdav.xml.framework.RequestTools.addElement2Prop
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 
@@ -167,14 +168,13 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		bais = new ByteArrayInputStream(responseByte);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
 		
 		if (status != 207) {
-			fail("Invalid response code '" + status + "'. Response code is not 207 as expected. Response data: " + new String(responseByte));
+			fail("Invalid response code '" + status + "'. Response code is not 207 as expected.");
 		}
 
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.GROUPUSER);
 		
 		final ContactObject[] contactArray = new ContactObject[response.length];
 		for (int a = 0; a < contactArray.length; a++) {
@@ -216,9 +216,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+		InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.GROUPUSER);
 		
 		final Group[] groupArray = new Group[response.length];
 		for (int a = 0; a < groupArray.length; a++) {
@@ -259,10 +258,9 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
-		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+
+		InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.GROUPUSER);
 		
 		final Resource[] resourceArray = new Resource[response.length];
 		for (int a = 0; a < resourceArray.length; a++) {
@@ -304,9 +302,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.GROUPUSER);
 		
 		final ResourceGroup[] resourcegroupArray = new ResourceGroup[response.length];
 		for (int a = 0; a < resourcegroupArray.length; a++) {

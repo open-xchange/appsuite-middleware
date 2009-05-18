@@ -2,6 +2,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -313,10 +314,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER, true);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.FOLDER, true);
 		
 		assertEquals("response length not is 1", 1, response.length);
 		
@@ -378,10 +377,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.FOLDER);
 		
 		final FolderObject[] folderArray = new FolderObject[response.length];
 		for (int a = 0; a < folderArray.length; a++) {
@@ -429,10 +426,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check propfind response", 207, status);
 		
-		final byte responseByte[] = propFindMethod.getResponseBody();
-		
-		bais = new ByteArrayInputStream(responseByte);
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER);
+        InputStream body = propFindMethod.getResponseBodyAsStream();
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.FOLDER);
 		
 		assertTrue("no response object found", response.length > 0);
 		
