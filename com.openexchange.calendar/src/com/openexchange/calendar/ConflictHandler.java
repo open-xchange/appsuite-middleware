@@ -291,7 +291,9 @@ public class ConflictHandler {
             prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp);
+            final long startTime = start.getTime();
+            final long endTime = end.getTime();
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp, startTime, endTime);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
@@ -400,7 +402,9 @@ public class ConflictHandler {
             prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp);
+            final long startTime = start.getTime();
+            final long endTime = end.getTime();
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp, startTime, endTime);
             final ArrayList<CalendarDataObject> li = new ArrayList<CalendarDataObject>();
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = si.next();
