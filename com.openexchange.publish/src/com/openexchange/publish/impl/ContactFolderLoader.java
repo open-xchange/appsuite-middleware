@@ -47,60 +47,56 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.api2.ContactSQLFactory;
+import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link ContactFolderLoader}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class ContactFolderLoader implements PublicationDataLoaderService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private ContactSQLFactory factory;
 
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    /**
+     * Initializes a new {@link ContactFolderLoader}.
+     * @param contacts
+     */
+    public ContactFolderLoader(ContactSQLFactory contacts) {
+        super();
+        this.factory = contacts;
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
+     */
+    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+        LinkedList<ContactObject> list = new LinkedList<ContactObject>();
+        try {
+            int folderId = publication.getEntityId();
+            ContactSQLInterface contacts = factory.create(new PublicationSession(publication));
+            int numberOfContacts = contacts.getNumberOfContacts(folderId);
+            SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.GIVEN_NAME, "ASC", ContactObject.ALL_COLUMNS);
+            while(contactsInFolder.hasNext()) {
+                list.add(contactsInFolder.next());
             }
+        } catch (AbstractOXException e) {
+            throw new PublicationException(e);
         }
-        return null;
-    }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+        return list;
     }
 
 }

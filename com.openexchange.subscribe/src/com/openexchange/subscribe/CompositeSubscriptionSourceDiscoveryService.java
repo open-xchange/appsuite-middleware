@@ -118,4 +118,8 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return null;
     }
 
+    public void clear() {
+        services.clear();
+    }
+
 }

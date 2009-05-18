@@ -49,58 +49,81 @@
 
 package com.openexchange.publish;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.contexts.Context;
 
+import junit.framework.TestCase;
+
+import static com.openexchange.publish.Asserts.*;
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link PublicationTargetCollectorTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class PublicationTargetCollectorTest extends TestCase {
+    
+    
+    
+    private PublicationTargetCollector collector;
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
-    }
-
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        collector = new PublicationTargetCollector();
+        
+        PublicationTarget target1 = new PublicationTarget();
+        target1.setModule("Cookies");
+        target1.setId("com.openexchange.publish.test1");
+        
+        PublicationTarget target2 = new PublicationTarget();
+        target2.setId("com.openexchange.publish.test2");
+        target2.setModule("Vegetables");
+        
+        SimPublicationService pubService1 = new SimPublicationService();
+        pubService1.setTarget(target1);
+        target1.setPublicationService(pubService1);
+        
+        SimPublicationService pubService2 = new SimPublicationService() {
+            public boolean knows(Context ctx, int publicationId) {
+                return publicationId == 12;
             }
-        }
-        return null;
+        };
+        pubService2.setTarget(target2);
+        target2.setPublicationService(pubService2);
+        
+        collector.addPublicationService(pubService1);
+        collector.addPublicationService(pubService2);
+        
     }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+    
+    public void testList() {
+        Collection<PublicationTarget> targets = collector.listTargets();
+        assertNotNull("Targets was null", targets);
+        assertEquals("Expected two publication targets", 2, targets.size());
+        assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2");
     }
-
+    
+    public void testGetTarget() {
+        assertGettable(collector, "com.openexchange.publish.test1");
+    }
+    
+    public void testKnows() {
+        assertKnows(collector, "com.openexchange.publish.test1");
+        assertDoesNotKnow(collector, "com.openexchange.publish.unknown");
+    }
+    
+    public void testGetTargetForEntity() {
+        PublicationTarget target = collector.getTarget(new SimContext(1), 12);
+        assertNotNull("Target was null!", target);
+        assertEquals("com.openexchange.publish.test2", target.getId());
+    }
+    
+    public void testGetTargetForModule() {
+        Collection<PublicationTarget> targets = collector.getTargetsForEntityType("Cookies");
+        assertNotNull("targets was null", targets);
+        assertTargets(targets, "com.openexchange.publish.test1");
+    }
 }

@@ -47,60 +47,57 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.subscribe.osgi.tools;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
- *
+ * {@link WhiteboardSubscriptionSourceDiscoveryService}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class WhiteboardSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
+    
+    
+    private ServiceTracker tracker;
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    public WhiteboardSubscriptionSourceDiscoveryService(BundleContext context) {
+        this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), null);
+        tracker.open();
+    }
+    
+    public void close() {
+        tracker.close();
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
+    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
+        return getDelegate().getSource(context, subscriptionId);
     }
 
-    public boolean knows(String id) {
-        return targets.containsKey(id);
+    public SubscriptionSource getSource(String identifier) {
+        return getDelegate().getSource(identifier);
     }
 
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
+    public List<SubscriptionSource> getSources() {
+        return getDelegate().getSources();
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
-        }
-        return null;
+    public List<SubscriptionSource> getSources(int folderModule) {
+        return getDelegate().getSources(folderModule);
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+    public boolean knowsSource(String identifier) {
+        return getDelegate().knowsSource(identifier);
+    }
+    
+    private SubscriptionSourceDiscoveryService getDelegate() {
+        return (SubscriptionSourceDiscoveryService) tracker.getService();
     }
 
 }

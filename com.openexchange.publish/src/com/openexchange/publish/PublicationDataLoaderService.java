@@ -49,58 +49,15 @@
 
 package com.openexchange.publish;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link PublicationDataLoaderService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
-
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
-    }
-
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
-        }
-        return null;
-    }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
-    }
-
+public interface PublicationDataLoaderService {
+    public Collection<? extends Object> load(Publication publication) throws PublicationException;
 }

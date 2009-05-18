@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -213,6 +214,42 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
         assertNoResult("SELECT 1 FROM genconf_attributes_bools WHERE cid = 1002 AND id = " + id);
         assertResult("SELECT 1 FROM genconf_attributes_bools WHERE cid = 1002 AND id = 1004");
+
+    }
+    
+    public void testSearchDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'field', 'value', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'otherField', 'otherValue', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'thirdField', 'thirdValue', 'input')");
+
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1004,'otherID', 'otherID', 'input')");
+
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'bool', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'otherBool', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'thirdBool', 1, 'checkbox')");
+
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1004,'otherBoolID', 1, 'checkbox')");
+
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(FormElement.input("field", "")).add(FormElement.input("otherField", "")).add(FormElement.input("thirdField", "")).add(
+            FormElement.input("fourthField", "")).add(FormElement.checkbox("bool", "")).add(FormElement.checkbox("otherBool", "")).add(
+            FormElement.checkbox("thirdBool", "")).add(FormElement.checkbox("fourthBool", ""));
+        
+        Map<String, Object> query = new HashMap<String, Object>();
+        query.put("field", "value");
+        
+        List<Integer> ids = storage.search(new SimContext(1002), query, form);
+        assertNotNull("ids was null", ids);
+        assertEquals("Wrong size of search result", 1, ids.size());
+        assertEquals("Got wrong ID", new Integer(1001), ids.get(0));
+
+        // Try with join
+        
+        query.put("bool", true);
+        ids = storage.search(new SimContext(1002), query, form);
+        assertNotNull("ids was null", ids);
+        assertEquals("Wrong size of search result", 1, ids.size());
+        assertEquals("Got wrong ID", new Integer(1001), ids.get(0));
 
     }
 

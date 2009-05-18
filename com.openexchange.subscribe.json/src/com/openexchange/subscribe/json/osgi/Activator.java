@@ -62,6 +62,7 @@ import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 import com.openexchange.subscribe.json.SubscriptionServlet;
 import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
 import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
+import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscoveryService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -78,11 +79,11 @@ public class Activator extends DeferredActivator {
 
     private Servlet subscriptions;
 
-    private OSGiSubscriptionSourceDiscoverer discoverer;
-
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
 
     private ComponentRegistration componentRegistration;
+
+    private WhiteboardSubscriptionSourceDiscoveryService discoverer;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -129,7 +130,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        discoverer = new OSGiSubscriptionSourceDiscoverer(context);
+        discoverer = new WhiteboardSubscriptionSourceDiscoveryService(context);
         componentRegistration = new ComponentRegistration(context, "SUBH","com.openexchange.subscribe.json", SubscriptionJSONErrorMessages.FACTORY);
         
         SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);

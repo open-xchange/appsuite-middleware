@@ -14,7 +14,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
-public class LinkedInContactParserTest extends TestCase {
+public class LinkedInContactParserTest  {
 	
 	/*public void testGetLinkedInContacts() {
 		LinkedInContactParser parser = new LinkedInContactParser();

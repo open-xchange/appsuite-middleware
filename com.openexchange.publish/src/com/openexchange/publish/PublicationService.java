@@ -57,12 +57,13 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface PublicationService {
     
-    public void save(Publication publication);
+    public void create(Publication publication);
+    public void update(Publication publication);
     public Collection<Publication> getAllPublications(Context ctx);
     public Collection<Publication> getAllPublications(Context ctx, int entityId);
     public boolean knows(Context ctx, int publicationId);
     public Publication load(Context ctx, int publicationId);
     public void delete(Publication publication);
     public PublicationTarget getTarget();
-  
+    
 }

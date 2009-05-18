@@ -47,60 +47,57 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.json;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import static com.openexchange.publish.json.PublicationJSONErrorMessage.THROWABLE;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.PermissionServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link AbstractPublicationServlet}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public abstract class AbstractPublicationServlet extends PermissionServlet{
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        return true;
+    }
+    
+    protected void writeOXException(AbstractOXException x, HttpServletResponse resp) {
+        getLoggingLogic().log(x);
+        Response response = new Response();
+        response.setException(x);
+        writeResponseSafely(response, resp);
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
+    protected void writeData(Object data, HttpServletResponse resp) {
+        Response response = new Response();
+        response.setData(data);
+        writeResponseSafely(response, resp);
     }
 
-    public boolean knows(String id) {
-        return targets.containsKey(id);
+    protected AbstractOXException wrapThrowable(Throwable t) {
+        return THROWABLE.create(t, t.getMessage());
     }
 
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
+    protected void writeResponseSafely(Response response, HttpServletResponse resp) {
+        try {
+            writeResponse(response, resp);
+        } catch (IOException e) {
+            getLog().error(e.getMessage(), e);
         }
-        return null;
     }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
-    }
-
+    
+    protected abstract Log getLog();
+    protected abstract LoggingLogic getLoggingLogic();
 }

@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class AbstractSubscribeService implements SubscribeService {
 
-    private static final SubscriptionStorage STORAGE = new InMemorySubscriptionStorage();
+    public static SubscriptionStorage STORAGE = null;
     
     public Collection<Subscription> loadSubscriptions(Context ctx, int folderId) throws AbstractOXException {
         return STORAGE.getSubscriptions(ctx, folderId);

@@ -47,88 +47,72 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.datatypes.genericonf.storage.osgi.tools;
 
+import java.sql.Connection;
+import java.util.Map;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link PublicationTarget}
+ * {@link WhiteboardGenericConfigurationStorageService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class PublicationTarget {
-    private String id;
-    private String displayName;
-    private String icon;
-    private String module;
-    
-    private DynamicFormDescription description;
-    private PublicationService publicationService;
+public class WhiteboardGenericConfigurationStorageService implements GenericConfigurationStorageService {
 
-    
-    public String getId() {
-        return id;
-    }
+    private ServiceTracker tracker;
 
-    
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    
-    public String getIcon() {
-        return icon;
-    }
-
-    
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    
-    public String getModule() {
-        return module;
-    }
-
-    
-    public void setModule(String module) {
-        this.module = module;
-    }
-
-    
-    public DynamicFormDescription getFormDescription() {
-        return description;
-    }
-
-    
-    public void setFormDescription(DynamicFormDescription description) {
-        this.description = description;
-    }
-
-
-    public PublicationService getPublicationService() {
-        return this.publicationService;
+    public WhiteboardGenericConfigurationStorageService(BundleContext context) {
+        this.tracker = new ServiceTracker(context, GenericConfigurationStorageService.class.getName(), null);
+        tracker.open();
     }
     
-    public void setPublicationService(PublicationService publicationService) {
-        this.publicationService = publicationService;
+    public void close() {
+        this.tracker.close();
+    }
+    
+    public GenericConfigurationStorageService getDelegate() {
+        return (GenericConfigurationStorageService) tracker.getService();
+    }
+    
+    public void delete(Context ctx, int id) throws GenericConfigStorageException {
+        getDelegate().delete(ctx, id);
     }
 
-
-    public boolean isResponsibleFor(String module) {
-        return this.module.equals(module);
+    public void delete(Connection con, Context ctx, int id) throws GenericConfigStorageException {
+        getDelegate().delete(con, ctx, id);
     }
+
+    public void fill(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        getDelegate().fill(ctx, id, content, form);
+    }
+
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        getDelegate().fill(con, ctx, id, content, form);
+    }
+
+    public int save(Connection con, Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        return getDelegate().save(con, ctx, content, form);
+    }
+
+    public int save(Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        return getDelegate().save(ctx, content, form);
+    }
+
+    public void update(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        getDelegate().update(con, ctx, id, content, form);
+    }
+
+    public void update(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+        getDelegate().update(ctx, id, content, form);
+    }
+
     
 }

@@ -52,34 +52,20 @@ package com.openexchange.publish;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link PublicationTargetCollector}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class PublicationTargetCollector implements PublicationTargetDiscoveryService {
 
     private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
-    }
-
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
+    
     public PublicationTarget getTarget(String id) {
         return targets.get(id);
     }
@@ -94,13 +80,33 @@ public class SimPublicationTargetDiscoveryService implements PublicationTargetDi
     }
 
     public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
+        ArrayList<PublicationTarget> responsible = new ArrayList<PublicationTarget>();
+        for(PublicationTarget target : targets.values()) {
             if(target.isResponsibleFor(module)) {
-                targets.add(target);
+                responsible.add(target);
             }
         }
-        return targets;
+        return responsible;
+    }
+
+    public boolean knows(String id) {
+        return targets.containsKey(id);
+    }
+
+    public Collection<PublicationTarget> listTargets() {
+        return targets.values();
+    }
+
+    public void addPublicationService(PublicationService publicationService) {
+        targets.put(publicationService.getTarget().getId(), publicationService.getTarget());
+    }
+    
+    public void removePublicationService(PublicationService publicationService) {
+        targets.remove(publicationService.getTarget().getId());
+    }
+    
+    public void clear() {
+        targets.clear();
     }
 
 }

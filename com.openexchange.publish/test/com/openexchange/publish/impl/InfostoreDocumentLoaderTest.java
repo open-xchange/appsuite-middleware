@@ -47,60 +47,64 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.impl;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import junit.framework.TestCase;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.services.SimInfostoreFacade;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link InfostoreDocumentLoaderTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class InfostoreDocumentLoaderTest extends TestCase {
+    
+    private SimInfostoreFacade infostoreFacade;
+    private int cid;
+    private int folder;
+    private int id1;
+    private byte[] bytes1;
+    private Publication publication;
+    private InfostoreDocumentLoader loader;
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    public void setUp() {
+        infostoreFacade = new SimInfostoreFacade();
+        
+        cid = 1;
+        folder = 12;
+        id1 = 1337;
+        
+        bytes1 = new byte[]{1,2,3};
+        
+        infostoreFacade.simulateDocument(cid, folder, id1, "Document 1", bytes1);
+        
+        publication = new Publication();
+        publication.setContext(new SimContext(cid));
+        publication.setEntityId(1337);
+        publication.setModule("infostore");
+    
+        loader = new InfostoreDocumentLoader(infostoreFacade);
     }
+    
+    public void testLoadDocument() throws PublicationException, IOException {
+        Collection<? extends Object> loaded = loader.load(publication);
+        assertNotNull("Loaded was null!", loaded);
+        assertEquals("Expected one document", 1, loaded.size());
+        InputStream is = (InputStream) loaded.iterator().next();
+        
+        assertEquals(1, is.read());
+        assertEquals(2, is.read());
+        assertEquals(3, is.read());
+        assertEquals(-1, is.read());
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
     }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
-        }
-        return null;
-    }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
-    }
-
+    
 }

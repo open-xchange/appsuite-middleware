@@ -77,6 +77,8 @@ import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
 
+import static com.openexchange.subscribe.SubscriptionErrorMessage.*;
+
 
 public class SubscriptionSQLStorage implements SubscriptionStorage {
     

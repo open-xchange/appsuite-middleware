@@ -50,6 +50,7 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -65,5 +66,9 @@ public interface PublicationTargetDiscoveryService {
     boolean knows(String id);
 
     PublicationTarget getTarget(String id);
+
+    PublicationTarget getTarget(Context context, int publicationId);
+
+    Collection<PublicationTarget> getTargetsForEntityType(String module);
 
 }

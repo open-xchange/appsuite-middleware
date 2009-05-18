@@ -47,60 +47,67 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.PublicationException;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link InfostoreDocumentLoader}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class InfostoreDocumentLoader implements PublicationDataLoaderService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private InfostoreFacade infostore;
 
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    /**
+     * Initializes a new {@link InfostoreDocumentLoader}.
+     * @param infostoreFacade
+     */
+    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade) {
+        super();
+        this.infostore = infostoreFacade;
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
+    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+        ArrayList<InputStream> documents = new ArrayList<InputStream>();
+        try {
+            InputStream document = infostore.getDocument(publication.getEntityId(), InfostoreFacade.CURRENT_VERSION, publication.getContext(), loadUser(publication.getUserId()), loadUserConfiguration(publication.getUserId()));
+            documents.add(document);
+        } catch (OXException e) {
+            throw new PublicationException(e);
         }
+        return documents;
+    }
+
+    /**
+     * @param userId
+     * @return
+     */
+    private User loadUser(int userId) {
+        // TODO Auto-generated method stub
         return null;
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+    /**
+     * @param userId
+     * @return
+     */
+    private UserConfiguration loadUserConfiguration(int userId) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

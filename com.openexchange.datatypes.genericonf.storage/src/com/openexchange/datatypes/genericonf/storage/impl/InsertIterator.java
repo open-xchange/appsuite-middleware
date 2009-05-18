@@ -84,6 +84,7 @@ public class InsertIterator implements DynamicFormIterator {
         PreparedStatement insertBool = tx.prepare(INSERT_BOOL);
         
         statementMap.put(Widget.INPUT, insertString);
+        statementMap.put(Widget.PASSWORD, insertString);
         statementMap.put(Widget.CHECKBOX, insertBool);
     }
 

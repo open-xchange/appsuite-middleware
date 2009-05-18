@@ -1,11 +1,12 @@
 package com.openexchange.publish;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import junit.framework.TestCase;
 
+import static com.openexchange.publish.Asserts.*;
 
 /*
  *
@@ -76,7 +77,18 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
     
         discovery2.addTarget(target("com.openexchange.publish.test4"));
         discovery2.addTarget(target("com.openexchange.publish.test5"));
-    
+        
+        PublicationTarget publicationTarget = new PublicationTarget();
+        publicationTarget.setId("com.openexchange.publish.knowAll");
+        publicationTarget.setModule("not infostore");
+        publicationTarget.setPublicationService(new SimPublicationService() {
+            @Override
+            public boolean knows(Context ctx, int publicationId) {
+                return true;
+            }
+        });
+        discovery2.addTarget(publicationTarget);
+        
         composite = new CompositePublicationTargetDiscoveryService();
         
         composite.addDiscoveryService(discovery1);
@@ -86,7 +98,7 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
     public void testCompositeList() {
         List<PublicationTarget> targets = composite.listTargets();
         
-        assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5");
+        assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5", "com.openexchange.publish.knowAll");
     }
     
     public void testCompositeKnows() {
@@ -108,48 +120,25 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
     
         assertNotGettable(composite, "com.openexchange.publish.unknown");
     }
+    
+    public void testGetTarget() {
+        PublicationTarget target = composite.getTarget(null, -1);
+        assertNotNull(target);
+        assertEquals("com.openexchange.publish.knowAll", target.getId());
+    }
+    
+    public void testGetResponsibleTargets() {
+        Collection<PublicationTarget> targets = composite.getTargetsForEntityType("infostore");
+        assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5");
 
-    private void assertNotGettable(PublicationTargetDiscoveryService discovery, String id) {
-        assertFalse("Did not expect to find "+id+" in discovery source", discovery.getTarget(id) != null);
     }
 
-    private void assertGettable(PublicationTargetDiscoveryService discovery, String id) {
-        assertNotNull("Could not find "+id+" in discovery source", discovery.getTarget(id));
-    }
-
-    private void assertKnows(PublicationTargetDiscoveryService discovery, String id) {
-        assertTrue("Did not know: "+id, discovery.knows(id));
-    }
-
-    private void assertDoesNotKnow(PublicationTargetDiscoveryService discovery, String id) {
-        assertFalse("Did know: "+id, discovery.knows(id));
-    }
-
-    private void assertTargets(List<PublicationTarget> targets, String...ids) {
-        assertNotNull("Target list was null", targets);
-        
-        Set<String> actualIds = new HashSet<String>();
-        for(PublicationTarget target : targets) {
-            actualIds.add(target.getId());
-        }
-        
-        Set<String> expectedIds = new HashSet<String>();
-        for(String id : ids) {
-            expectedIds.add(id);
-        }
-        
-        String error = "Expected: "+expectedIds+" Got: "+actualIds;
-        
-        assertEquals(error, actualIds.size(), expectedIds.size());
-        
-        for(String expectedId : expectedIds) {
-            assertTrue(error, actualIds.remove(expectedId));
-        }
-    }
-
+    
     private PublicationTarget target(String id) {
         PublicationTarget publicationTarget = new PublicationTarget();
         publicationTarget.setId(id);
+        publicationTarget.setPublicationService(new SimPublicationService());
+        publicationTarget.setModule("infostore");
         return publicationTarget;
     }
     

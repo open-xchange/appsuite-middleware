@@ -14,7 +14,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
-public class FacebookContactParserTest extends TestCase {
+public class FacebookContactParserTest {
 	/*public void testGetFacebookContacts() {
 		FacebookContactParser parser = new FacebookContactParser();
 		// Enter valid credentials for facebook.com here

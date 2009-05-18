@@ -118,12 +118,14 @@ public class UpdateIterator implements DynamicFormIterator {
         PreparedStatement updateBool = tx.prepare(UPDATE_BOOL);
 
         updateStatements.put(Widget.INPUT, updateString);
+        updateStatements.put(Widget.PASSWORD, updateString);
         updateStatements.put(Widget.CHECKBOX, updateBool);
         
         PreparedStatement deleteString = tx.prepare(DELETE_STRING);
         PreparedStatement deleteBool = tx.prepare(DELETE_BOOL);
        
         deleteStatements.put(Widget.INPUT, deleteString);
+        deleteStatements.put(Widget.PASSWORD, deleteString);
         deleteStatements.put(Widget.CHECKBOX, deleteBool);
     }
 

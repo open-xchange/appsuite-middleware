@@ -47,60 +47,81 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.Publication;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link PublicationSession}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class PublicationSession implements Session {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private Publication publication;
 
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    /**
+     * Initializes a new {@link PublicationSession}.
+     * @param publication
+     */
+    public PublicationSession(Publication publication) {
+        super();
+        this.publication = publication;
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
+    public int getContextId() {
+        return publication.getContext().getContextId();
     }
 
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
-        }
+    public String getLocalIp() {
         return null;
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+    public String getLogin() {
+        return null;
+    }
+
+    public String getLoginName() {
+        return null;
+    }
+
+    public Object getParameter(String name) {
+        return null;
+    }
+
+    public String getPassword() {
+        return null;
+    }
+
+    public String getRandomToken() {
+        return null;
+    }
+
+    public String getSecret() {
+        return null;
+    }
+
+    public String getSessionID() {
+        return null;
+    }
+
+    public int getUserId() {
+        return publication.getUserId();
+    }
+
+    public String getUserlogin() {
+        return null;
+    }
+
+    public void removeRandomToken() {
+
+    }
+
+    public void setParameter(String name, Object value) {
+
     }
 
 }

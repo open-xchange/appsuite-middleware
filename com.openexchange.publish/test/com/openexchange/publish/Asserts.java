@@ -47,56 +47,56 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.publish;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.subscribe.CompositeSubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import static org.junit.Assert.*;
 
 /**
- * {@link OSGiSubscriptionSourceDiscoverer} An OSGiSubscriptionSourceDiscoverer compounds subscription source discoverers known in the OSGi
- * system.
- * 
+ * {@link Asserts}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class OSGiSubscriptionSourceDiscoverer extends CompositeSubscriptionSourceDiscoveryService implements ServiceTrackerCustomizer {
+public class Asserts {
+    public static void assertNotGettable(PublicationTargetDiscoveryService discovery, String id) {
+        assertFalse("Did not expect to find "+id+" in discovery source", discovery.getTarget(id) != null);
+    }
 
-    private BundleContext context;
+    public static void assertGettable(PublicationTargetDiscoveryService discovery, String id) {
+        assertNotNull("Could not find "+id+" in discovery source", discovery.getTarget(id));
+    }
 
-    private ServiceTracker tracker;
+    public static void assertKnows(PublicationTargetDiscoveryService discovery, String id) {
+        assertTrue("Did not know: "+id, discovery.knows(id));
+    }
 
-    public OSGiSubscriptionSourceDiscoverer(BundleContext context) throws InvalidSyntaxException {
-        this.context = context;
-        tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
-        ServiceReference[] serviceReferences = context.getAllServiceReferences(SubscriptionSourceDiscoveryService.class.getName(), null);
-        if (serviceReferences != null) {
-            for (ServiceReference reference : serviceReferences) {
-                addingService(reference);
-            }
+    public static void assertDoesNotKnow(PublicationTargetDiscoveryService discovery, String id) {
+        assertFalse("Did know: "+id, discovery.knows(id));
+    }
+
+    public static void assertTargets(Collection<PublicationTarget> targets, String...ids) {
+        assertNotNull("Target list was null", targets);
+        
+        Set<String> actualIds = new HashSet<String>();
+        for(PublicationTarget target : targets) {
+            actualIds.add(target.getId());
         }
-    }
-
-    public void close() {
-        tracker.close();
-    }
-
-    public Object addingService(ServiceReference reference) {
-        SubscriptionSourceDiscoveryService discoverer = (SubscriptionSourceDiscoveryService) context.getService(reference);
-        addSubscriptionSourceDiscoveryService(discoverer);
-        return discoverer;
-    }
-
-    public void modifiedService(ServiceReference reference, Object service) {
-        // Don't care
-    }
-
-    public void removedService(ServiceReference reference, Object service) {
-        removeSubscriptionSourceDiscoveryService((SubscriptionSourceDiscoveryService) service);
-        context.ungetService(reference);
+        
+        Set<String> expectedIds = new HashSet<String>();
+        for(String id : ids) {
+            expectedIds.add(id);
+        }
+        
+        String error = "Expected: "+expectedIds+" Got: "+actualIds;
+        
+        assertEquals(error, actualIds.size(), expectedIds.size());
+        
+        for(String expectedId : expectedIds) {
+            assertTrue(error, actualIds.remove(expectedId));
+        }
     }
 
 }

@@ -47,30 +47,77 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.publish.impl;
 
-import java.util.Comparator;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.api2.ContactSQLFactory;
+import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.services.SimContactSQLInterface;
+import com.openexchange.session.Session;
+import junit.framework.TestCase;
 
 
 /**
- * {@link QueryStringPositionComparator}
+ * {@link ContactFolderLoaderTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class QueryStringPositionComparator implements Comparator<String> {
+public class ContactFolderLoaderTest extends TestCase {
+    private ContactSQLFactory contactSQLFactory;
+    private ContactFolderLoader contactLoader;
+    private int cid;
+    private int folderId;
+    private int id1;
+    private int id2;
+    private Publication publication;
 
-    private String queryString;
+    public void setUp() {
+        final SimContactSQLInterface contacts = new SimContactSQLInterface();
+        
+        cid = 1;
+        folderId = 12;
+        id1 = 1337;
+        id2 = 1338;
 
-    public QueryStringPositionComparator(String queryString) {
-        this.queryString = queryString;
+        publication = new Publication();
+        publication.setEntityId(folderId);
+        publication.setContext(new SimContext(cid));
+        
+        contacts.simulateContact(cid, folderId, id1, "Hans");
+        contacts.simulateContact(cid, folderId, id2, "Peter");
+        
+            
+        contactSQLFactory = new ContactSQLFactory() {
+
+            public ContactSQLInterface create(Session session) throws AbstractOXException {
+                return contacts;
+            }
+            
+        };
+        
+        contactLoader = new ContactFolderLoader(contactSQLFactory);
     }
-
-    public int compare(String o1, String o2) {
-        int p1 = queryString.indexOf(o1);
-        int p2 = queryString.indexOf(o2);
-        return p1 - p2;
+    
+    public void testLoadFolder() throws PublicationException {
+        Collection<? extends Object> collection = contactLoader.load(publication);
+        
+        assertNotNull("Collection was null", collection);
+        
+        assertEquals("Folder should contain two contacts", 2, collection.size());
+        Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
+        for (Object object : collection) {
+            ContactObject contact = (ContactObject) object;
+            assertTrue("Did not expect: "+contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
+        }
     }
-
-
+    
 }

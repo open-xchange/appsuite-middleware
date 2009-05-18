@@ -68,8 +68,12 @@ public enum PublicationErrorMessage implements OXErrorMessage {
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s.");
-
+    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
+    /**
+     * Could not load publications of type %1$s
+     */
+    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", "Could not load publications of type %1$s");
+    
     private Category category;
     private int errorCode;
     private String help;

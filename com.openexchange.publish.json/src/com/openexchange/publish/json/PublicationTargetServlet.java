@@ -74,7 +74,7 @@ import static com.openexchange.publish.json.PublicationJSONErrorMessage.*;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PublicationTargetServlet extends PermissionServlet {
+public class PublicationTargetServlet extends AbstractPublicationServlet {
 
     private static final Log LOG = LogFactory.getLog(PublicationTargetServlet.class);
 
@@ -155,29 +155,6 @@ public class PublicationTargetServlet extends PermissionServlet {
         return LL;
     }
 
-    protected void writeOXException(AbstractOXException x, HttpServletResponse resp) {
-        getLoggingLogic().log(x);
-        Response response = new Response();
-        response.setException(x);
-        writeResponseSafely(response, resp);
-    }
-
-    protected void writeData(Object data, HttpServletResponse resp) {
-        Response response = new Response();
-        response.setData(data);
-        writeResponseSafely(response, resp);
-    }
-
-    protected AbstractOXException wrapThrowable(Throwable t) {
-        return THROWABLE.create(t, t.getMessage());
-    }
-
-    protected void writeResponseSafely(Response response, HttpServletResponse resp) {
-        try {
-            writeResponse(response, resp);
-        } catch (IOException e) {
-            getLog().error(e.getMessage(), e);
-        }
-    }
+    
 
 }

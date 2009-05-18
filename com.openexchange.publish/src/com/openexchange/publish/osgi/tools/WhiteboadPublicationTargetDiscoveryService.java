@@ -47,60 +47,58 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.osgi.tools;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link WhiteboadPublicationTargetDiscoveryService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class WhiteboadPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private ServiceTracker tracker;
 
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    public WhiteboadPublicationTargetDiscoveryService(BundleContext context) {
+        this.tracker = new ServiceTracker(context, PublicationTargetDiscoveryService.class.getName(), null);
+        tracker.open();
     }
-
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
+    
+    public void close() {
+        tracker.close();
     }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
+    
+    public PublicationTarget getTarget(Context context, int publicationId) {
+        return getDelegate().getTarget(context, publicationId);
     }
 
     public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
-        }
-        return null;
+        return getDelegate().getTarget(id);
     }
 
     public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+        return getDelegate().getTargetsForEntityType(module);
     }
+
+    public boolean knows(String id) {
+        return getDelegate().knows(id);
+    }
+
+    public Collection<PublicationTarget> listTargets() {
+        return getDelegate().listTargets();
+    }   
+    
+    private PublicationTargetDiscoveryService getDelegate() {
+        return (PublicationTargetDiscoveryService) tracker.getService();
+    }
+    
 
 }

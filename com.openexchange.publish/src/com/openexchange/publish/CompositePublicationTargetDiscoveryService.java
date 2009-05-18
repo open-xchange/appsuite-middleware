@@ -49,8 +49,11 @@
 
 package com.openexchange.publish;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -65,6 +68,9 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
 
     public void addDiscoveryService(PublicationTargetDiscoveryService discovery) {
         services.add(discovery);
+    }
+    public void removeDiscoveryService(PublicationTargetDiscoveryService service) {
+        services.remove(service);
     }
 
     public List<PublicationTarget> listTargets() {
@@ -92,5 +98,28 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         }
         return null;
     }
+
+    public PublicationTarget getTarget(Context context, int publicationId) {
+        for(PublicationTargetDiscoveryService service : services) {
+            PublicationTarget target = service.getTarget(context, publicationId);
+            if (target != null) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
+        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
+        for(PublicationTargetDiscoveryService service : services) {
+            targets.addAll(service.getTargetsForEntityType(module));
+        }
+        return targets;
+    }
+
+    public void clear() {
+        services.clear();
+    }
+
 
 }

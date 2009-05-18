@@ -49,101 +49,85 @@
 
 package com.openexchange.publish;
 
-import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPoolingException;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SimPublicationService}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class PublicationServiceImpl implements PublicationService {
+public class SimPublicationService implements PublicationService {
 
-    private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
+    private PublicationTarget target;
 
-    public void create(final Site site) {
-        try {
-            PublicationSQL.addSite(site);
-        } catch (final DBPoolingException e) {
-            LOG.error("Error during creation of a site", e);
-        } catch (final SQLException e) {
-            LOG.error("Error during creation of a site", e);
-        }
-    }
-
-    public void delete(final Site site) {
-        try {
-            PublicationSQL.removeSite(site);
-        } catch (final DBPoolingException e) {
-            LOG.error("Error during delete of a site", e);
-        } catch (final SQLException e) {
-            LOG.error("Error during delete of a site", e);
-        }
-    }
-
-    public Site getSite(final Path path) {
-        try {
-            return PublicationSQL.getSite(path);
-        } catch (final DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (final SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
-    }
-
-    public Site getSite(final String path) {
-        throw new UnsupportedOperationException("Not yet implemented.");
-    }
-
-    public Collection<Site> getSites(final int contextId, final int userId) {
-        try {
-            return PublicationSQL.getSites(contextId, userId);
-        } catch (final DBPoolingException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        } catch (final SQLException e) {
-            LOG.error("Error during loading of a site", e);
-            return null;
-        }
-    }
-
-    public void delete(final Publication publication) {
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#create(com.openexchange.publish.Publication)
+     */
+    public void create(Publication publication) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    public Collection<Publication> getAllPublications(final Context ctx) {
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#delete(com.openexchange.publish.Publication)
+     */
+    public void delete(Publication publication) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context)
+     */
+    public Collection<Publication> getAllPublications(Context ctx) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public Collection<Publication> getAllPublications(final Context ctx, final int entityId) {
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context, int)
+     */
+    public Collection<Publication> getAllPublications(Context ctx, int entityId) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#getTarget()
+     */
     public PublicationTarget getTarget() {
-        // TODO Auto-generated method stub
-        return null;
+        return target;
     }
 
-    public boolean knows(final Context ctx, final int publicationId) {
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#knows(com.openexchange.groupware.contexts.Context, int)
+     */
+    public boolean knows(Context ctx, int publicationId) {
         // TODO Auto-generated method stub
         return false;
     }
 
-    public Publication load(final Context ctx, final int publicationId) {
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#load(com.openexchange.groupware.contexts.Context, int)
+     */
+    public Publication load(Context ctx, int publicationId) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public void save(final Publication publication) {
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#update(com.openexchange.publish.Publication)
+     */
+    public void update(Publication publication) {
         // TODO Auto-generated method stub
-        
+
+    }
+
+    public void setTarget(PublicationTarget publicationTarget) {
+        this.target = publicationTarget;
     }
 
 }

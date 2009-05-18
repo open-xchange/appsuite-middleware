@@ -54,6 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -62,6 +64,7 @@ import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageExcepti
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
@@ -258,6 +261,56 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
         });
 
+    }
+
+    public List<Integer> search(Context ctx, Map<String, Object> query, DynamicFormDescription form) throws GenericConfigStorageException {
+        LinkedList<Integer> list = new LinkedList<Integer>();
+        StringBuilder builder = new StringBuilder("SELECT DISTINCT p.id FROM ");
+        SearchIterator whereIterator = new SearchIterator();
+        form.iterate(whereIterator, query);
+        
+        builder.append(whereIterator.getFrom());
+        builder.append(" WHERE ");
+        builder.append("(");
+        builder.append(whereIterator.getWhere());
+        builder.append(") AND p.cid = ?");
+        whereIterator.addReplacement(ctx.getContextId());
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = provider.getReadConnection(ctx);
+            stmt = con.prepareStatement(builder.toString());
+            whereIterator.setReplacements(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()) {
+                list.add(rs.getInt(1));
+            }
+            
+        } catch (TransactionException e) {
+            throw new GenericConfigStorageException(e);
+        } catch (SQLException e) {
+            GenericConfigStorageErrorMessage.SQLException.throwException(e, stmt.toString());
+        } finally {
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException x) {
+                    // Ignore
+                }
+            }
+            if(rs != null) {
+                try {
+                    rs.close(); 
+                } catch (SQLException x) {
+                    // Ignore
+                }
+            }
+            provider.releaseReadConnection(ctx, con);
+        }
+        
+        return list;
     }
 
 }

@@ -47,60 +47,40 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.PublicationErrorMessage;
+import com.openexchange.publish.PublicationException;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link CompositeLoaderService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class CompositeLoaderService implements PublicationDataLoaderService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
+    private Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
+    
+    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+        return getSubLoader(publication.getModule()).load(publication);
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
+    private PublicationDataLoaderService getSubLoader(String module) throws PublicationException {
+        if(!subLoaders.containsKey(module)) {
+            throw PublicationErrorMessage.NoLoaderFound.create(module);
         }
-        return null;
+        return subLoaders.get(module);
     }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+    
+    public void registerLoader(String module, PublicationDataLoaderService service) {
+        subLoaders.put(module, service);
     }
 
 }
