@@ -60,7 +60,15 @@ import com.openexchange.groupware.AbstractOXException.Category;
  *
  */
 public enum PublicationErrorMessage implements OXErrorMessage {
-    SQLException(Category.CODE_ERROR, 1, "Please try again later.", "A SQL Error occurred.");
+
+    /**
+     * A SQL Error occurred.
+     */
+    SQLException(Category.CODE_ERROR, 1, "Please try again later.", "A SQL Error occurred."),
+    /**
+     * A parsing error occurred: %1$s.
+     */
+    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s.");
 
     private Category category;
     private int errorCode;
@@ -69,7 +77,7 @@ public enum PublicationErrorMessage implements OXErrorMessage {
     
     public static final PublicationExceptionFactory EXCEPTIONS = new PublicationExceptionFactory();
     
-    private PublicationErrorMessage(Category category, int errorCode, String help, String message) {
+    private PublicationErrorMessage(final Category category, final int errorCode, final String help, final String message) {
         this.category = category;
         this.errorCode = errorCode;
         this.help = help;
@@ -92,11 +100,11 @@ public enum PublicationErrorMessage implements OXErrorMessage {
         return message;
     }
     
-    public PublicationException create(Throwable cause, Object...args) {
+    public PublicationException create(final Throwable cause, final Object...args) {
         return EXCEPTIONS.create(this,cause, args);
     }
     
-    public PublicationException create(Object...args) {
+    public PublicationException create(final Object...args) {
         return EXCEPTIONS.create(this,args);
     }
 

@@ -47,53 +47,27 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.parser;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.publish.OXMFParser;
 import com.openexchange.publish.OXMFParserFactoryService;
-import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.publish.PublicationService;
-import com.openexchange.publish.PublicationServiceImpl;
-import com.openexchange.publish.parser.OXMFParserFactoryServiceImpl;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link OXMFParserFactoryServiceImpl} - Implementation of {@link OXMFParserFactoryService}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
+public final class OXMFParserFactoryServiceImpl implements OXMFParserFactoryService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
-
-    private ServiceRegistration registryPublish;
-
-    private ServiceRegistration factoryRegistration;
-
-    private ComponentRegistration componentRegistration;
-
-    public void start(final BundleContext context) throws Exception {
-        try {
-            registryPublish = context.registerService(PublicationService.class.getName(), new PublicationServiceImpl(), null);
-            factoryRegistration = context.registerService(
-                OXMFParserFactoryService.class.getName(),
-                new OXMFParserFactoryServiceImpl(),
-                null);
-            componentRegistration = new ComponentRegistration(
-                context,
-                "PUB",
-                "com.openexchange.publish",
-                PublicationErrorMessage.EXCEPTIONS);
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+    /**
+     * Initializes a new {@link OXMFParserFactoryServiceImpl}.
+     */
+    public OXMFParserFactoryServiceImpl() {
+        super();
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        registryPublish.unregister();
-        factoryRegistration.unregister();
-        componentRegistration.unregister();
+    public OXMFParser getParser() {
+        return new OXMFParserImpl();
     }
 
 }

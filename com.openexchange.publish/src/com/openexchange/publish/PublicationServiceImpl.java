@@ -53,61 +53,97 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class PublicationServiceImpl {
+public class PublicationServiceImpl implements PublicationService {
 
     private static final Log LOG = LogFactory.getLog(PublicationServiceImpl.class);
 
-    public void create(Site site) {
+    public void create(final Site site) {
         try {
             PublicationSQL.addSite(site);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error("Error during creation of a site", e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("Error during creation of a site", e);
         }
     }
 
-    public void delete(Site site) {
+    public void delete(final Site site) {
         try {
             PublicationSQL.removeSite(site);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error("Error during delete of a site", e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("Error during delete of a site", e);
         }
     }
 
-    public Site getSite(Path path) {
+    public Site getSite(final Path path) {
         try {
             return PublicationSQL.getSite(path);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error("Error during loading of a site", e);
             return null;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("Error during loading of a site", e);
             return null;
         }
     }
 
-    public Site getSite(String path) {
+    public Site getSite(final String path) {
         throw new UnsupportedOperationException("Not yet implemented.");
     }
 
-    public Collection<Site> getSites(int contextId, int userId) {
+    public Collection<Site> getSites(final int contextId, final int userId) {
         try {
             return PublicationSQL.getSites(contextId, userId);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error("Error during loading of a site", e);
             return null;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("Error during loading of a site", e);
             return null;
         }
+    }
+
+    public void delete(final Publication publication) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public Collection<Publication> getAllPublications(final Context ctx) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Collection<Publication> getAllPublications(final Context ctx, final int entityId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public PublicationTarget getTarget() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean knows(final Context ctx, final int publicationId) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public Publication load(final Context ctx, final int publicationId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void save(final Publication publication) {
+        // TODO Auto-generated method stub
+        
     }
 
 }
