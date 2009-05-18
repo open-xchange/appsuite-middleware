@@ -238,7 +238,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             for (int j = 0; j < groups.length; j++) {
                 if (LOG.isDebugEnabled()) {
                     try {
-                        LOG.debug("Auto-Delete system-folder-read permission for group " + GroupStorage.getInstance(true).getGroup(
+                        LOG.debug("Auto-Delete system-folder-read permission for group " + GroupStorage.getInstance().getGroup(
                             groups[j],
                             ctx).getDisplayName() + " from folder " + fid);
                     } catch (final LdapException e) {

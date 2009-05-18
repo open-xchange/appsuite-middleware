@@ -134,7 +134,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     for (int j = 0; j < groups.length; j++) {
                         if (LOG.isDebugEnabled()) {
                             try {
-                                LOG.debug("Auto-Insert system-folder-read permission for group " + GroupStorage.getInstance(true).getGroup(
+                                LOG.debug("Auto-Insert system-folder-read permission for group " + GroupStorage.getInstance().getGroup(
                                     groups[j],
                                     ctx).getDisplayName() + " to folder " + folderId);
                             } catch (final LdapException e) {

@@ -87,9 +87,7 @@ public final class GroupInit implements Initialization {
         if (initialized.get()) {
             LOG.debug("GroupStorage duplicate initialization.");
         }
-        GroupStorage.setInstance(new RdbGroupStorage());
-        GroupStorage.setInstanceWithZero(new GroupsWithGroupZero(GroupStorage
-            .getInstance()));
+        GroupStorage.setInstance(new GroupsWithGroupZero(new RdbGroupStorage()));
         initialized.set(true);
     }
 
@@ -100,7 +98,6 @@ public final class GroupInit implements Initialization {
         if (!initialized.get()) {
             LOG.debug("GroupStorage duplicate shutdown.");
         }
-        GroupStorage.setInstanceWithZero(null);
         GroupStorage.setInstance(null);
         initialized.set(false);
     }

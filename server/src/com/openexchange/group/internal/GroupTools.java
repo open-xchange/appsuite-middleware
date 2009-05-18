@@ -53,6 +53,7 @@ import java.util.Date;
 
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
@@ -72,7 +73,6 @@ public final class GroupTools {
      * Cloneable object for group 0.
      */
     static final Group GROUP_ZERO;
-
     /**
      * Prevent instantiation
      */
@@ -80,32 +80,28 @@ public final class GroupTools {
         super();
     }
 
-    public static Group getGroupZero(final Context ctx)
-        throws UserException, LdapException {
+    public static Group getGroupZero(final Context ctx) throws UserException, LdapException {
         final Group retval;
         try {
             retval = (Group) GROUP_ZERO.clone();
         } catch (final CloneNotSupportedException e) {
-            throw new UserException(UserException.Code.NOT_CLONEABLE, e,
-                Group.class.getName());
+            throw new UserException(UserException.Code.NOT_CLONEABLE, e, Group.class.getName());
         }
         final UserStorage ustor = UserStorage.getInstance();
         retval.setMember(ustor.listAllUser(ctx));
         retval.setLastModified(new Date());
         final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin
-            .getPreferredLanguage()));
+        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin.getPreferredLanguage()));
         retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));
         return retval;
     }
 
     static {
         GROUP_ZERO = new Group();
-        GROUP_ZERO.setIdentifier(0);
+        GROUP_ZERO.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
     }
 
-    static final void invalidateUser(final Context ctx, final int[] userIds)
-        throws GroupException {
+    static final void invalidateUser(final Context ctx, final int[] userIds) throws GroupException {
         try {
             final UserStorage storage = UserStorage.getInstance();
             for (final int member : userIds) {

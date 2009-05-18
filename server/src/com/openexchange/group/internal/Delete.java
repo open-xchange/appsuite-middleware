@@ -49,6 +49,7 @@
 
 package com.openexchange.group.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -72,7 +73,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -157,15 +157,15 @@ public final class Delete {
                 throw new GroupException(Code.NO_DELETE_PERMISSION);
             }
             if (groupId == GroupTools.GROUP_ZERO.getIdentifier()) {
-            	try {
-					throw new GroupException(Code.NO_GROUP_DELETE, GroupTools.getGroupZero(ctx).getDisplayName());
-				} catch (final UserException e) {
-					LOG.error(e.getMessage(), e);
-					throw new GroupException(Code.NO_GROUP_DELETE, Integer.valueOf(OCLPermission.ALL_GROUPS_AND_USERS));
-				} catch (final LdapException e) {
-					LOG.error(e.getMessage(), e);
-					throw new GroupException(Code.NO_GROUP_DELETE, Integer.valueOf(OCLPermission.ALL_GROUPS_AND_USERS));
-				}
+                try {
+                    throw new GroupException(Code.NO_GROUP_DELETE, GroupTools.getGroupZero(ctx).getDisplayName());
+                } catch (final UserException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new GroupException(Code.NO_GROUP_DELETE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                } catch (final LdapException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new GroupException(Code.NO_GROUP_DELETE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                }
             }
         } catch (final UserConfigurationException e) {
             throw new GroupException(e);
@@ -176,9 +176,8 @@ public final class Delete {
         // Does the group exist?
         getOrig();
         // Group 1 can not be deleted
-        if (0 == groupId || 1 == groupId) {
-            throw new GroupException(Code.NO_GROUP_DELETE, getOrig()
-                .getDisplayName());
+        if (GroupStorage.GROUP_ZERO_IDENTIFIER == groupId || 1 == groupId) {
+            throw new GroupException(Code.NO_GROUP_DELETE, getOrig().getDisplayName());
         }
     }
 

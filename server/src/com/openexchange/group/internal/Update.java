@@ -49,6 +49,7 @@
 
 package com.openexchange.group.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -71,7 +72,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -157,15 +157,15 @@ final class Update {
                 throw new GroupException(Code.NO_MODIFY_PERMISSION);
             }
             if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
-            	try {
-					throw new GroupException(Code.NO_GROUP_UPDATE, GroupTools.getGroupZero(ctx).getDisplayName());
-				} catch (final UserException e) {
-					LOG.error(e.getMessage(), e);
-					throw new GroupException(Code.NO_GROUP_UPDATE, Integer.valueOf(OCLPermission.ALL_GROUPS_AND_USERS));
-				} catch (final LdapException e) {
-					LOG.error(e.getMessage(), e);
-					throw new GroupException(Code.NO_GROUP_UPDATE, Integer.valueOf(OCLPermission.ALL_GROUPS_AND_USERS));
-				}
+                try {
+                    throw new GroupException(Code.NO_GROUP_UPDATE, GroupTools.getGroupZero(ctx).getDisplayName());
+                } catch (final UserException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new GroupException(Code.NO_GROUP_UPDATE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                } catch (final LdapException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new GroupException(Code.NO_GROUP_UPDATE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                }
             }
         } catch (final UserConfigurationException e) {
             throw new GroupException(e);
@@ -176,9 +176,8 @@ final class Update {
         if (null == changed) {
             throw new GroupException(Code.NULL);
         }
-        if (0 == changed.getIdentifier()) {
-            throw new GroupException(Code.NO_GROUP_UPDATE, getOrig()
-                .getDisplayName());
+        if (GroupStorage.GROUP_ZERO_IDENTIFIER == changed.getIdentifier()) {
+            throw new GroupException(Code.NO_GROUP_UPDATE, getOrig().getDisplayName());
         }
         // Does the group exist? Are timestamps okay?
         if (getOrig().getLastModified().after(lastRead)) {
@@ -330,8 +329,7 @@ final class Update {
 
     private void propagate(final Connection con) throws GroupException {
         try {
-            OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(),
-                con, con, ctx.getContextId());
+            OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(), con, con, ctx.getContextId());
         } catch (final SQLException e) {
             throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         }

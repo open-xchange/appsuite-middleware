@@ -52,6 +52,7 @@ package com.openexchange.server.impl;
 import java.io.Serializable;
 import java.security.acl.Permission;
 
+import com.openexchange.group.GroupStorage;
 import com.openexchange.tools.OXCloneable;
 
 /**
@@ -138,7 +139,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     public static final int DELETE_ALL_OBJECTS = 4;
 
-    public static final int ALL_GROUPS_AND_USERS = 0;
+    public static final int ALL_GROUPS_AND_USERS = GroupStorage.GROUP_ZERO_IDENTIFIER;
 
     /**
      * The bit for system flag

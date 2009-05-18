@@ -480,7 +480,7 @@ public final class TaskLogic {
             case Participant.GROUP:
                 final GroupParticipant group = (GroupParticipant) participant;
                 try {
-                    final int[] member = GroupStorage.getInstance(true).getGroup(
+                    final int[] member = GroupStorage.getInstance().getGroup(
                         group.getIdentifier(), ctx).getMember();
                     for (final int userId : member) {
                         final TaskParticipant tParticipant =

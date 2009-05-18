@@ -145,7 +145,7 @@ public final class OXFolderUtility {
                      * Check against group members
                      */
                     try {
-                        final int[] members = GroupStorage.getInstance(true).getGroup(permission.getEntity(), ctx).getMember();
+                        final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
                         for (int j = 0; j < members.length; j++) {
                             final Integer cur = Integer.valueOf(members[j]);
                             if (userIds.contains(cur) && f.getFolderName().equals(folderName)) {
@@ -581,7 +581,7 @@ public final class OXFolderUtility {
              * Resolve group
              */
             try {
-                final int[] members = GroupStorage.getInstance(true).getGroup(permission.getEntity(), ctx).getMember();
+                final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
                 for (int j = 0; j < members.length; j++) {
                     users.add(Integer.valueOf(members[j]));
                 }
@@ -684,7 +684,7 @@ public final class OXFolderUtility {
     public static String getGroupName(final int groupId, final Context ctx) {
         final Group g;
         try {
-            g = GroupStorage.getInstanceWithZero().getGroup(groupId, ctx);
+            g = GroupStorage.getInstance().getGroup(groupId, ctx);
         } catch (final LdapException e) {
             return String.valueOf(groupId);
         }

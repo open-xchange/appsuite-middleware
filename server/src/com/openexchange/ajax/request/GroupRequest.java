@@ -105,8 +105,7 @@ public class GroupRequest {
             /*
              * Look-up manage request
              */
-            final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getHandler(MODULE_GROUP,
-                    action);
+            final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getHandler(MODULE_GROUP, action);
             if (null == handler) {
                 /*
                  * No appropriate handler
@@ -128,12 +127,11 @@ public class GroupRequest {
         timestamp = new Date(0);
         Date lastModified = null;
         final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance(true);
+        final GroupStorage groupStorage = GroupStorage.getInstance();
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < jsonArray.length(); a++) {
             final JSONObject jData = jsonArray.getJSONObject(a);
-            final Group group = groupStorage.getGroup(DataParser.checkInt(jData,
-                    DataFields.ID), session.getContext());
+            final Group group = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID), session.getContext());
             final JSONObject jsonGroupObj = new JSONObject();
             groupWriter.writeGroup(group, jsonGroupObj);
             jsonResponseArray.put(jsonGroupObj);
@@ -145,11 +143,10 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionGet(final JSONObject json) throws JSONException,
-        LdapException, OXJSONException, AjaxException {
+    public JSONObject actionGet(final JSONObject json) throws JSONException, LdapException, OXJSONException, AjaxException {
         final int groupId = DataParser.checkInt(json, PARAMETER_ID);
         timestamp = new Date(0);
-        final GroupStorage groupStorage = GroupStorage.getInstance(true);
+        final GroupStorage groupStorage = GroupStorage.getInstance();
         final Group group = groupStorage.getGroup(groupId, session.getContext());
         final GroupWriter groupWriter = new GroupWriter();
         final JSONObject retval = new JSONObject();
@@ -166,7 +163,7 @@ public class GroupRequest {
         }
         timestamp = new Date(0);
         final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance(true);
+        final GroupStorage groupStorage = GroupStorage.getInstance();
         Group[] groups = null;
         if ("*".equals(searchpattern)) {
             groups = groupStorage.getGroups(session.getContext());

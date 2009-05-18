@@ -168,7 +168,7 @@ public class PushHandler implements EventHandler {
 
     protected int[] getAffectedUsers4Object(final FolderObject folderObj, final Set<Integer> hs, final Context ctx) {
         try {
-            groupStorage = GroupStorage.getInstance(true);
+            groupStorage = GroupStorage.getInstance();
 
             final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
 
@@ -193,7 +193,7 @@ public class PushHandler implements EventHandler {
 
     protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Set<Integer> hs, final Context ctx) {
         try {
-            groupStorage = GroupStorage.getInstance(true);
+            groupStorage = GroupStorage.getInstance();
 
             final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
 

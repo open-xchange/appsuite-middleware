@@ -51,20 +51,20 @@ package com.openexchange.group;
 
 import java.sql.Connection;
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 
 /**
- * This class defines the storage API for groups. This is a low level API for
- * reading and writing groups into some storage - normally databases.
+ * This class defines the storage API for groups. This is a low level API for reading and writing groups into some storage - normally
+ * databases.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class GroupStorage {
 
-    private static GroupStorage instance;
+    public static final int GROUP_ZERO_IDENTIFIER = 0;
 
-    private static GroupStorage instanceWithZero;
+    private static GroupStorage instance;
 
     /**
      * Private constructor to prevent instantiation.
@@ -75,58 +75,56 @@ public abstract class GroupStorage {
 
     /**
      * This method inserts a group without its members into the storage.
+     * 
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group to insert.
      * @throws GroupException if some problem occurs.
      */
-    public final void insertGroup(final Context ctx, final Connection con,
-        final Group group) throws GroupException {
+    public final void insertGroup(final Context ctx, final Connection con, final Group group) throws GroupException {
         insertGroup(ctx, con, group, StorageType.ACTIVE);
     }
 
     /**
      * This method inserts a group without its members into the storage.
+     * 
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group to insert.
      * @param type defines if group is inserted ACTIVE or DELETED.
      * @throws GroupException if some problem occurs.
      */
-    public abstract void insertGroup(Context ctx, Connection con, Group group,
-        StorageType type) throws GroupException;
+    public abstract void insertGroup(Context ctx, Connection con, Group group, StorageType type) throws GroupException;
 
     /**
      * This method updates group field in the storage.
+     * 
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group with fields to update.
      * @param lastRead timestamp when the group has been read last.
      * @throws GroupException if updating does not finish successfully.
      */
-    public abstract void updateGroup(Context ctx, Connection con, Group group,
-        Date lastRead) throws GroupException;
+    public abstract void updateGroup(Context ctx, Connection con, Group group, Date lastRead) throws GroupException;
 
-    public abstract void insertMember(Context ctx, Connection con, Group group,
-        int[] members) throws GroupException;
+    public abstract void insertMember(Context ctx, Connection con, Group group, int[] members) throws GroupException;
 
-    public abstract void deleteMember(Context ctx, Connection con, Group group,
-        int[] members) throws GroupException;
+    public abstract void deleteMember(Context ctx, Connection con, Group group, int[] members) throws GroupException;
 
     /**
-     * This method deletes a group from the database. Before all its members
-     * must be removed.
+     * This method deletes a group from the database. Before all its members must be removed.
+     * 
      * @param ctx Context.
      * @param con writable database connection.
      * @param groupId unique identifier of the group to delete.
      * @param lastRead timestamp when the group has been read last.
      * @throws GroupException if deleting fails.
      */
-    public abstract void deleteGroup(Context ctx, Connection con, int groupId,
-        Date lastRead) throws GroupException;
+    public abstract void deleteGroup(Context ctx, Connection con, int groupId, Date lastRead) throws GroupException;
 
     /**
      * Reads a group from the persistent storage.
+     * 
      * @param gid Unique identifier of the group.
      * @param The context.
      * @return The group data object.
@@ -135,14 +133,12 @@ public abstract class GroupStorage {
     public abstract Group getGroup(int gid, Context context) throws LdapException;
 
     /**
-     * This method implements a universal search for groups. You have to define
-     * additionally to the search pattern the attributes that should be searched
-     * in. You can also name the attributes that values should be returned.
-     * Please insure that returned attributes are strings and not any other data
-     * types. You will get a Set with string arrays. The string arrays contain
-     * the values auf the requested attributes in the same order.
-     * @param pattern this pattern will be searched in the displayName of the
-     * group.
+     * This method implements a universal search for groups. You have to define additionally to the search pattern the attributes that
+     * should be searched in. You can also name the attributes that values should be returned. Please insure that returned attributes are
+     * strings and not any other data types. You will get a Set with string arrays. The string arrays contain the values auf the requested
+     * attributes in the same order.
+     * 
+     * @param pattern this pattern will be searched in the displayName of the group.
      * @param The context.
      * @return an array of groups that match the search pattern.
      * @throws GroupException if searching has some storage related problem.
@@ -150,18 +146,18 @@ public abstract class GroupStorage {
     public abstract Group[] searchGroups(String pattern, Context context) throws GroupException;
 
     /**
-     * This method returns groups that have been modified since the given
-     * timestamp.
+     * This method returns groups that have been modified since the given timestamp.
+     * 
      * @param modifiedSince timestamp after that the groups have been modified.
      * @param The context.
      * @return an array of groups.
      * @throws LdapException if an error occurs.
      */
-    public abstract Group[] listModifiedGroups(Date modifiedSince, Context context)
-        throws LdapException;
+    public abstract Group[] listModifiedGroups(Date modifiedSince, Context context) throws LdapException;
 
     /**
      * Returns the data objects of all groups.
+     * 
      * @param The context.
      * @return all groups.
      * @throws LdapException if an error occurs.
@@ -170,33 +166,15 @@ public abstract class GroupStorage {
 
     /**
      * Creates a new instance implementing the group storage interface.
+     * 
      * @return an instance implementing the group storage interface.
      */
     public static GroupStorage getInstance() {
-        return getInstance(false);
-    }
-
-    /**
-     * Creates a new instance implementing the group storage interface. The
-     * returned instance can also handle the group with identifier 0.
-     * @param group0 <code>true</code> if group with identifier 0 should be
-     * handled.
-     * @return an instance implementing the group storage interface.
-     */
-    public static GroupStorage getInstance(final boolean group0) {
-        return group0 ? getInstanceWithZero() : instance;
+        return instance;
     }
 
     public static void setInstance(final GroupStorage instance) {
         GroupStorage.instance = instance;
-    }
-
-    public static void setInstanceWithZero(final GroupStorage instanceWithZero) {
-        GroupStorage.instanceWithZero = instanceWithZero;
-    }
-
-    public static GroupStorage getInstanceWithZero() {
-        return instanceWithZero;
     }
 
     public static enum StorageType {
@@ -205,8 +183,8 @@ public abstract class GroupStorage {
          */
         ACTIVE,
         /**
-         * Storage type for deleted groups. This must be filled with deleted
-         * groups to inform synchronizing clients about not more existing groups.
+         * Storage type for deleted groups. This must be filled with deleted groups to inform synchronizing clients about not more existing
+         * groups.
          */
         DELETED
     }
