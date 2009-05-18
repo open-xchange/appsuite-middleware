@@ -53,7 +53,6 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	public void testSearchGroup() throws Exception {
 		final Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 		for (int a = 0; a < group.length; a++) {
-			assertTrue("id > 0 expected", group[a].getIdentifier() > 0);
 			assertNotNull("last modified is null", group[a].getLastModified());
 		} 
 	}
@@ -69,25 +68,22 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	public void testSearchGroupWithLastModifed() throws Exception {
 		Group group[] = searchGroup(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("no group found in response (group array length == 0)", group.length > 0);
-		
-		int posInArray = 0;
-		
-		for (int a = 0; a < group.length; a++) {
-			if (group[a].getIdentifier() != 1) {
-				posInArray = a;
+
+		int posInArray;
+		for (posInArray = 0; posInArray < group.length; posInArray++) {
+			if (group[posInArray].getIdentifier() > 1) {
 				break;
 			}
 		}
-		
+
 		final int id = group[posInArray].getIdentifier();
 		final String displayName = group[posInArray].getDisplayName();
 		final Date lastModifed = group[posInArray].getLastModified();
-		
-		
+
 		group = searchGroup(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < group.length; a++) {
 			if (group[a].getIdentifier() == id) {
 				found = true;
