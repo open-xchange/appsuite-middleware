@@ -17,8 +17,8 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 
 /**
- * {@link PublishAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link MailException} on exceeded quota
- * (either overall or per-file quota).
+ * {@link PublishAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that publishes attachments on exceeded quota (either
+ * overall or per-file quota).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
