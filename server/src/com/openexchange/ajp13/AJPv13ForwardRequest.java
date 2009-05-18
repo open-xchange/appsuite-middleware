@@ -572,6 +572,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         String cv = cookieValue;
         int mlen = cv.length() - 1;
         if (cv.charAt(mlen) == ';') {
+        	if (mlen == 0) {
+                return "";
+            }
             do {
                 mlen--;
             } while ((mlen > 0) && (cv.charAt(mlen) == ';'));
