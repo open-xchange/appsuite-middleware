@@ -69,7 +69,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link DefaultFolderNamesProvider} - Provides the default folder names for a certain mail account.
+ * {@link DefaultFolderNamesProvider} - Provides the default folder (full-)names for a certain mail account.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
