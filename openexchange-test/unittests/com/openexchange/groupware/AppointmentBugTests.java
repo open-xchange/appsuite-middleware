@@ -62,6 +62,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -87,7 +88,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;

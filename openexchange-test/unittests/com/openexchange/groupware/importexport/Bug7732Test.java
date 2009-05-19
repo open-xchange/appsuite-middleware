@@ -63,11 +63,11 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug7732Test extends AbstractICalImportTest {
 	//workaround for JUnit 3 runner

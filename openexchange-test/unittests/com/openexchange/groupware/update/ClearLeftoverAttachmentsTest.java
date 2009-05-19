@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
@@ -15,7 +16,6 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 

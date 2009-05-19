@@ -66,6 +66,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -73,7 +74,6 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.impl.DBPoolingException;
 
 public class VCardImportTest extends AbstractVCardTest {
 	//workaround for JUnit 3 runner

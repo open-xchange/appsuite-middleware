@@ -76,10 +76,10 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.database.DBPoolingException;
 
 public class ICalImportTest extends AbstractICalImportTest {
 

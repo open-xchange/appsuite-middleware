@@ -56,7 +56,8 @@ import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.storage.ResourceStorage;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
 
@@ -175,7 +175,7 @@ public final class ResourceDeleteTest extends TestCase {
 			/*
 			 * Check backup table by hand
 			 */
-			final Connection con = Database.get(ctx, true);
+			final Connection con = DatabaseServiceImpl.get(ctx, true);
 			try {
 				PreparedStatement stmt = con.prepareStatement(SQL_SELECT_DELETE);
 				ResultSet rs = null;
@@ -214,7 +214,7 @@ public final class ResourceDeleteTest extends TestCase {
 					}
 				}
 			} finally {
-				Database.back(ctx, true, con);
+				DatabaseServiceImpl.back(ctx, true, con);
 			}
 
 			id = -1;
@@ -262,7 +262,7 @@ public final class ResourceDeleteTest extends TestCase {
 		}
 		final Connection writeCon;
 		try {
-			writeCon = Database.get(cid, true);
+			writeCon = DatabaseServiceImpl.get(cid, true);
 		} catch (final DBPoolingException e) {
 			e.printStackTrace();
 			return;
@@ -284,7 +284,7 @@ public final class ResourceDeleteTest extends TestCase {
 				}
 				stmt = null;
 			}
-			Database.back(cid, true, writeCon);
+			DatabaseServiceImpl.back(cid, true, writeCon);
 		}
 
 	}

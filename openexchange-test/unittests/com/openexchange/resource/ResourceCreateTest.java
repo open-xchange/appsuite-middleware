@@ -55,13 +55,13 @@ import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
 
@@ -290,7 +290,7 @@ public final class ResourceCreateTest extends TestCase {
 		}
 		final Connection writeCon;
 		try {
-			writeCon = Database.get(cid, true);
+			writeCon = DatabaseServiceImpl.get(cid, true);
 		} catch (final DBPoolingException e) {
 			e.printStackTrace();
 			return;
@@ -310,7 +310,7 @@ public final class ResourceCreateTest extends TestCase {
 				}
 				stmt = null;
 			}
-			Database.back(cid, true, writeCon);
+			DatabaseServiceImpl.back(cid, true, writeCon);
 		}
 
 	}

@@ -63,6 +63,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -70,7 +71,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug8527 extends AbstractICalImportTest {
 	

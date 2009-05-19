@@ -56,6 +56,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
@@ -72,7 +73,6 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;

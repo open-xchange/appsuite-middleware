@@ -60,11 +60,11 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -275,7 +275,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
         final String invalidPattern = "t|6|i|1|a|32|b|21|c|3|s|" + (System.currentTimeMillis() + 240 * 3600000) + "|";
         try {
-            con = Database.get(ctx, true);
+            con = DatabaseServiceImpl.get(ctx, true);
             pstmt = con.prepareStatement("UPDATE prg_dates SET field06 = ? WHERE intfield01 = ?");
             pstmt.setString(1, invalidPattern);
             pstmt.setInt(2, cdao.getObjectID());
@@ -292,7 +292,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
                 }
             }
             if (con != null) {
-                Database.back(ctx, true, con);
+                DatabaseServiceImpl.back(ctx, true, con);
             }
         }
     }

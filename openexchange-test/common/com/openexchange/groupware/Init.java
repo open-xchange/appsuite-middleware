@@ -31,6 +31,7 @@ import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
@@ -100,10 +101,6 @@ public final class Init {
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
         /**
-         * Reads configdb.properties.
-         */
-        com.openexchange.configuration.ConfigDB.getInstance(),
-        /**
          * Read in update tasks
          */
         com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
@@ -111,14 +108,6 @@ public final class Init {
          * Reads the calendar.properties.
          */
         com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
-        /**
-         * Sets the caching system JCS up.
-         */
-        // com.openexchange.cache.impl.Configuration.getInstance(),
-        /**
-         * Connection pools for ConfigDB and database assignments for contexts.
-         */
-        com.openexchange.database.DatabaseInit.getInstance(),
         /**
          * Initialization for alias charset provider
          */
@@ -218,6 +207,7 @@ public final class Init {
         startAndInjectTimerBundle();
         startAndInjectConfigBundle();
         startAndInjectConfiguration();
+        startAndInjectDatabaseBundle();
         startAndInjectCache();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
@@ -283,6 +273,11 @@ public final class Init {
     public static void startAndInjectConfiguration() {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         ParticipantConfig.getInstance().initialize(config);
+    }
+
+    public static void startAndInjectDatabaseBundle() throws DBPoolingException {
+        ConfigurationService service = (ConfigurationService) services.get(ConfigurationService.class);
+        com.openexchange.database.internal.Initialization.start(service);
     }
 
     private static void startAndInjectMonitoringBundle() {

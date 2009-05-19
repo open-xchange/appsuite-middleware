@@ -8,6 +8,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -18,7 +19,6 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;

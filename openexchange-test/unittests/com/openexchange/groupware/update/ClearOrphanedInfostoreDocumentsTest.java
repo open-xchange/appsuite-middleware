@@ -48,6 +48,7 @@
  */
 package com.openexchange.groupware.update;
 
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
@@ -57,7 +58,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.update.ForeignKey;
-import com.openexchange.server.impl.DBPoolingException;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
