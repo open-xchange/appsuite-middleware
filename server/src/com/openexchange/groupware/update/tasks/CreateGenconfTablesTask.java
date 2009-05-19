@@ -81,7 +81,6 @@ public class CreateGenconfTablesTask implements UpdateTask {
    "`id` int(10) unsigned NOT NULL,"+
    "`name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,"+
    "`value` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`widget` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,"+
    "KEY (`cid`,`id`,`name`)"+
    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
@@ -90,7 +89,6 @@ public class CreateGenconfTablesTask implements UpdateTask {
    "`id` int(10) unsigned NOT NULL,"+
    "`name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,"+
    "`value` tinyint(1) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`widget` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,"+
    "KEY (`cid`,`id`,`name`)"+
    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
