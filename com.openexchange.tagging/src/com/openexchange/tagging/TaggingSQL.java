@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.publish.Transaction;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.database.DBPoolingException;
 import static com.openexchange.publish.Transaction.INT;
 
 /**
