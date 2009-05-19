@@ -49,27 +49,23 @@
 
 package com.openexchange.subscribe.sql;
 
-import static com.openexchange.sql.schema.Tables.subscriptions;
-import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
+import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import static com.openexchange.sql.schema.Tables.subscriptions;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
 import com.openexchange.exceptions.StringComponent;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.Expression;
