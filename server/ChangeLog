@@ -367,7 +367,7 @@
  - Bugfix #11333: Fix SQL error when generating search string.
  - Bugfix #12790: Update version number first when removing current version.
  
- * 2009-01-16 - marcus.klein@open-xchange.com
+* 2009-01-16 - marcus.klein@open-xchange.com
 
  - Bugfix #12885: Improved message for the delivery receipt email.
  - Bugfix #12971: Setting locale for start and end date in notification mails.
