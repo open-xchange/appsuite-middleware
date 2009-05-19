@@ -50,12 +50,12 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.database.DBPoolingException;
 import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
