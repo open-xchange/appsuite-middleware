@@ -54,7 +54,6 @@ LDAPPROPERTIES:@oxgroupwaresysconfdir@/ldap.properties
 SESSIONDPROPERTIES:@oxgroupwaresysconfdir@/sessiond.properties
 EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
-configDB=@oxgroupwaresysconfdir@/configdb.properties
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
 

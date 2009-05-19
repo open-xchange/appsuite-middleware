@@ -175,16 +175,6 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      */
     public static enum Property {
         /**
-         * TODO remove
-         * Name of the server.
-         */
-        SERVER_NAME("SERVER_NAME"),
-        /**
-         * TODO remove
-         * configdb.properties file.
-         */
-        CONFIGDB("configDB"),
-        /**
          * Properties file for LDAP.
          */
         LDAP("LDAP"),
