@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -61,17 +62,11 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.ajax.request.FolderRequest;
-import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.request.QuotaRequest;
-import com.openexchange.ajax.request.ReminderRequest;
-import com.openexchange.ajax.request.ResourceRequest;
-import com.openexchange.ajax.request.TaskRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.AbstractOXException;
@@ -222,8 +217,9 @@ public class Multiple extends SessionServlet {
                     final JSONValue tmp = multipleHandler.performRequest(action, jsonObj, session);
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(tmp);
-                    if (null != multipleHandler.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(multipleHandler.getTimestamp().getTime());
+                    final Date timestamp = multipleHandler.getTimestamp();
+                    if (null != timestamp) {
+                        jsonWriter.key(ResponseFields.TIMESTAMP).value(timestamp.getTime());
                     }
                 } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
@@ -240,168 +236,6 @@ public class Multiple extends SessionServlet {
                     ResponseWriter.writeException(oje, jsonWriter);
                 } finally {
                     multipleHandler.close();
-                    jsonWriter.endObject();
-                }
-            } else if (MODULE_CALENDAR.equals(module)) {
-                writeMailRequest(req);
-                final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
-                jsonWriter.object();
-                try {
-                    final JSONValue tmp = appointmentRequest.action(action, jsonObj);
-                    jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(tmp);
-                    if (null != appointmentRequest.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(appointmentRequest.getTimestamp().getTime());
-                    }
-                } catch (final AbstractOXException e) {
-                    LOG.error(e.getMessage(), e);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(e, jsonWriter);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(oje, jsonWriter);
-                } finally {
-                    jsonWriter.endObject();
-                }
-            } else if (MODULE_CONTACT.equals(module)) {
-                writeMailRequest(req);
-                final ContactRequest contactRequest = new ContactRequest(session);
-                jsonWriter.object();
-                try {
-                    final JSONValue tmp = contactRequest.action(action, jsonObj);
-                    jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(tmp);
-                    if (null != contactRequest.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(contactRequest.getTimestamp().getTime());
-                    }
-                } catch (final AbstractOXException e) {
-                    LOG.error(e.getMessage(), e);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(e, jsonWriter);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(oje, jsonWriter);
-                } finally {
-                    jsonWriter.endObject();
-                }
-            } else if (MODULE_GROUP.equals(module)) {
-                writeMailRequest(req);
-                final GroupRequest groupRequest = new GroupRequest(session);
-                jsonWriter.object();
-                try {
-                    final JSONValue tmp = groupRequest.action(action, jsonObj);
-                    jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(tmp);
-                    if (null != groupRequest.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(groupRequest.getTimestamp().getTime());
-                    }
-                } catch (final AbstractOXException e) {
-                    LOG.error(e.getMessage(), e);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(e, jsonWriter);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(oje, jsonWriter);
-                } finally {
-                    jsonWriter.endObject();
-                }
-            } else if (MODULE_REMINDER.equals(module)) {
-                writeMailRequest(req);
-                final ReminderRequest reminderRequest = new ReminderRequest(session);
-                jsonWriter.object();
-                try {
-                    final JSONValue tmp = reminderRequest.action(action, jsonObj);
-                    jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(tmp);
-                    if (null != reminderRequest.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(reminderRequest.getTimestamp().getTime());
-                    }
-                } catch (final AbstractOXException e) {
-                    LOG.error(e.getMessage(), e);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(e, jsonWriter);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(oje, jsonWriter);
-                } finally {
-                    jsonWriter.endObject();
-                }
-            } else if (MODULE_RESOURCE.equals(module)) {
-                writeMailRequest(req);
-                final ResourceRequest resourceRequest = new ResourceRequest(session);
-                jsonWriter.object();
-                try {
-                    final JSONValue tmp = resourceRequest.action(action, jsonObj);
-                    jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(tmp);
-                    if (null != resourceRequest.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
-                    }
-                } catch (final AbstractOXException exc) {
-                    LOG.error(exc.getMessage(), exc);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(exc, jsonWriter);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(oje, jsonWriter);
-                } finally {
-                    jsonWriter.endObject();
-                }
-            } else if (MODULE_TASK.equals(module)) {
-                writeMailRequest(req);
-                final TaskRequest taskRequest = new TaskRequest(session);
-                jsonWriter.object();
-                try {
-                    final JSONValue tmp = taskRequest.action(action, jsonObj);
-                    jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(tmp);
-                    if (null != taskRequest.getTimestamp()) {
-                        jsonWriter.key(ResponseFields.TIMESTAMP).value(taskRequest.getTimestamp().getTime());
-                    }
-                } catch (final AbstractOXException e) {
-                    LOG.error(e.getMessage(), e);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(e, jsonWriter);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    if (jsonWriter.isExpectingValue()) {
-                        jsonWriter.value("");
-                    }
-                    ResponseWriter.writeException(oje, jsonWriter);
-                } finally {
                     jsonWriter.endObject();
                 }
             } else if (MODULE_INFOSTORE.equals(module)) {

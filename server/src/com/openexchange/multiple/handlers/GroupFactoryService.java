@@ -47,60 +47,63 @@
  *
  */
 
-package com.openexchange.multiple.internal;
+package com.openexchange.multiple.handlers;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.multiple.handlers.AppointmentFactoryService;
-import com.openexchange.multiple.handlers.ContactsFactoryService;
-import com.openexchange.multiple.handlers.GroupFactoryService;
-import com.openexchange.multiple.handlers.ReminderFactoryService;
-import com.openexchange.multiple.handlers.ResourceFactoryService;
-import com.openexchange.multiple.handlers.TasksFactoryService;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MultipleHandlerInit} - Initialization for multiple handlers.
- * <p>
- * Should be done in activator if refactored to reside in own package.
+ * {@link GroupFactoryService} - Factory service for group module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MultipleHandlerInit implements Initialization {
-
-    private final AtomicBoolean started;
+public final class GroupFactoryService implements MultipleHandlerFactoryService {
 
     /**
-     * Initializes a new {@link MultipleHandlerInit}.
+     * Initializes a new {@link GroupFactoryService}.
      */
-    public MultipleHandlerInit() {
+    public GroupFactoryService() {
         super();
-        started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
-        final MultipleHandlerRegistry registry = new MultipleHandlerRegistryImpl();
-        ServerServiceRegistry.getInstance().addService(MultipleHandlerRegistry.class, registry);
-        /*
-         * Add known handlers
-         */
-        registry.addFactoryService(new AppointmentFactoryService());
-        registry.addFactoryService(new ContactsFactoryService());
-        registry.addFactoryService(new GroupFactoryService());
-        registry.addFactoryService(new ReminderFactoryService());
-        registry.addFactoryService(new ResourceFactoryService());
-        registry.addFactoryService(new TasksFactoryService());
+    public MultipleHandler createMultipleHandler() {
+        return new GroupHandler();
     }
 
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
+    public String getSupportedModule() {
+        return "group";
+    }
+
+    private static final class GroupHandler implements MultipleHandler {
+
+        private Date timestamp;
+
+        public GroupHandler() {
+            super();
         }
-        ServerServiceRegistry.getInstance().removeService(MultipleHandlerRegistry.class);
+
+        public void close() {
+            // Nothing to do
+        }
+
+        public Date getTimestamp() {
+            return timestamp;
+        }
+
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+            final GroupRequest request = new GroupRequest(session);
+            final JSONValue retval = request.action(action, jsonObject);
+            timestamp = request.getTimestamp();
+            return retval;
+        }
+
     }
 
 }
