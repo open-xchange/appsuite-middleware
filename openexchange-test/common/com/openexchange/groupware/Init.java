@@ -277,7 +277,7 @@ public final class Init {
 
     public static void startAndInjectDatabaseBundle() throws DBPoolingException {
         ConfigurationService service = (ConfigurationService) services.get(ConfigurationService.class);
-        com.openexchange.database.internal.Initialization.start(service);
+        com.openexchange.database.internal.Initialization.getInstance().start(service);
     }
 
     private static void startAndInjectMonitoringBundle() {
