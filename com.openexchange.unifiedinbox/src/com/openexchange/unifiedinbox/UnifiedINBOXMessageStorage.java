@@ -672,18 +672,18 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     Thread.currentThread().interrupt();
                 }
             }
-            return;
-        }
-        final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
-        try {
-            mailAccess.connect();
-            close = true;
-            mailAccess.getMessageStorage().deleteMessages(fa.getFullname(), mailIds, hardDelete);
-        } finally {
-            if (close) {
-                mailAccess.close(true);
+        } else {
+            final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            boolean close = false;
+            try {
+                mailAccess.connect();
+                close = true;
+                mailAccess.getMessageStorage().deleteMessages(fa.getFullname(), mailIds, hardDelete);
+            } finally {
+                if (close) {
+                    mailAccess.close(true);
+                }
             }
         }
     }
@@ -773,18 +773,18 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     Thread.currentThread().interrupt();
                 }
             }
-            return;
-        }
-        final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
-        try {
-            mailAccess.connect();
-            close = true;
-            mailAccess.getMessageStorage().updateMessageFlags(fa.getFullname(), mailIds, flags, set);
-        } finally {
-            if (close) {
-                mailAccess.close(true);
+        } else {
+            final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            boolean close = false;
+            try {
+                mailAccess.connect();
+                close = true;
+                mailAccess.getMessageStorage().updateMessageFlags(fa.getFullname(), mailIds, flags, set);
+            } finally {
+                if (close) {
+                    mailAccess.close(true);
+                }
             }
         }
     }
@@ -850,18 +850,18 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     Thread.currentThread().interrupt();
                 }
             }
-            return;
-        }
-        final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
-        try {
-            mailAccess.connect();
-            close = true;
-            mailAccess.getMessageStorage().updateMessageColorLabel(fa.getFullname(), mailIds, colorLabel);
-        } finally {
-            if (close) {
-                mailAccess.close(true);
+        } else {
+            final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            boolean close = false;
+            try {
+                mailAccess.connect();
+                close = true;
+                mailAccess.getMessageStorage().updateMessageColorLabel(fa.getFullname(), mailIds, colorLabel);
+            } finally {
+                if (close) {
+                    mailAccess.close(true);
+                }
             }
         }
     }
