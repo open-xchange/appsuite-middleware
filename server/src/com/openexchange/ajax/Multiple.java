@@ -89,18 +89,6 @@ public class Multiple extends SessionServlet {
 
     protected static final String MODULE = "module";
 
-    protected static final String MODULE_CALENDAR = "calendar";
-
-    protected static final String MODULE_TASK = "tasks";
-
-    protected static final String MODULE_CONTACT = "contacts";
-
-    protected static final String MODULE_GROUP = "group";
-
-    protected static final String MODULE_REMINDER = "reminder";
-
-    protected static final String MODULE_RESOURCE = "resource";
-
     protected static final String MODULE_INFOSTORE = "infostore";
 
     protected static final String MODULE_FOLDER = "folder";
@@ -249,6 +237,7 @@ public class Multiple extends SessionServlet {
                     jsonWriter.endObject();
                 }
             } else if (MODULE_QUOTA.equals(module)) {
+                writeMailRequest(req);
                 final QuotaRequest quotaRequest = new QuotaRequest(session, jsonWriter);
                 quotaRequest.action(action);
             } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
