@@ -49,8 +49,10 @@
 
 package com.openexchange.publish.osgi;
 
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.publish.CompositePublicationTargetDiscoveryService;
@@ -80,7 +82,10 @@ public class Activator implements BundleActivator {
 
         discovererCollector.ignore(compositeDiscovererCollector);
         
-        discoveryRegistration = context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, null);
+        Hashtable discoveryDict = new Hashtable();
+        discoveryDict.put(Constants.SERVICE_RANKING, 256);
+        
+        discoveryRegistration = context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
         
         factoryRegistration = context.registerService(
                 OXMFParserFactoryService.class.getName(),

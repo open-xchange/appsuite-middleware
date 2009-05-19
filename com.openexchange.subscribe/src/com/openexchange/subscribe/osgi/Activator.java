@@ -2,9 +2,11 @@
 package com.openexchange.subscribe.osgi;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
@@ -42,8 +44,9 @@ public class Activator implements BundleActivator {
         whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
         contextService = new WhiteboardContextService(context);
-        
-        discoveryRegistration = context.registerService(SubscriptionSourceDiscoveryService.class.getName(), collector, null);
+        Hashtable discoveryDict = new Hashtable();
+        discoveryDict.put(Constants.SERVICE_RANKING, 256);
+        discoveryRegistration = context.registerService(SubscriptionSourceDiscoveryService.class.getName(), collector, discoveryDict);
         
         componentRegistration = new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
         
