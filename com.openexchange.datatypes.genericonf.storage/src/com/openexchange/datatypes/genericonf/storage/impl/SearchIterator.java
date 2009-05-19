@@ -67,15 +67,13 @@ import com.openexchange.datatypes.genericonf.WidgetSwitcher;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SearchIterator implements DynamicFormIterator, WidgetSwitcher {
-    private static final String STRINGS = "STRINGS";
-    private static final String BOOLS = "BOOLS";
-
+public class SearchIterator implements MapIterator<String, Object> {
+    
     
     private final StringBuilder from = new StringBuilder();
     private final StringBuilder where = new StringBuilder();
     private final List<Object> queryReplacements = new ArrayList<Object>();
-    private final Map<String, String> aliases = new HashMap<String, String>();
+    private final Map<Class, String> aliases = new HashMap<Class, String>();
     
     
     private boolean firstTable = true;
@@ -86,22 +84,20 @@ public class SearchIterator implements DynamicFormIterator, WidgetSwitcher {
     private static final ToSQLType toSQL = new ToSQLType();
 
     
-    public void handle(FormElement element, Object object) throws IterationBreak {
-        String name = element.getName();
-        String widget = element.getWidget().getKeyword();
-        Object value = element.doSwitch(toSQL, object);
+    public void handle(String key, Object object) throws IterationBreak {
         
-        element.doSwitch(this);
-        String prefix = null;
-        switch(element.getWidget()) {
-        case INPUT: case PASSWORD: prefix = getAlias(STRINGS); break;
-        case CHECKBOX : prefix = getAlias(BOOLS); break;
+        if(!stringsIncluded && object.getClass() == String.class) {
+            stringTable();
+        } else if (!boolsIncluded && object.getClass() == Boolean.class) {
+            boolTable();
         }
         
-        where.append("( ").append(prefix).append(".name = ? AND ").append(prefix).append(".widget = ? AND ").append(prefix).append(".value = ? ) AND ");
-        queryReplacements.add(name);
-        queryReplacements.add(widget);
-        queryReplacements.add(value);
+        
+        String prefix = getAlias(object.getClass());
+        
+        where.append("( ").append(prefix).append(".name = ? AND ").append(prefix).append(".value = ? ) AND ");
+        queryReplacements.add(key);
+        queryReplacements.add(object);
     }
 
 
@@ -128,20 +124,6 @@ public class SearchIterator implements DynamicFormIterator, WidgetSwitcher {
         queryReplacements.add(repl);
     }
 
-    public Object checkbox(Object[] args) {
-        boolTable();
-        return null;
-    }
-
-    public Object input(Object... args) {
-        stringTable();
-        return null;
-    }
-
-    public Object password(Object... args) {
-        stringTable();
-        return null;
-    }
 
     private void stringTable() {
         if(stringsIncluded) {
@@ -149,11 +131,11 @@ public class SearchIterator implements DynamicFormIterator, WidgetSwitcher {
         }
         if(firstTable) {
             from.append("genconf_attributes_strings AS p ");
-            registerAlias(STRINGS, "p");
+            registerAlias(String.class, "p");
             firstTable = false;
         } else {
             from.append("JOIN genconf_attributes_strings AS str ON p.cid = str.cid AND p.id = str.id ");
-            registerAlias(STRINGS, "str");
+            registerAlias(String.class, "str");
         }
         stringsIncluded = true;
     }
@@ -164,20 +146,20 @@ public class SearchIterator implements DynamicFormIterator, WidgetSwitcher {
         }
         if(firstTable) {
             from.append("genconf_attributes_bools AS p ");
-            registerAlias(BOOLS, "p");
+            registerAlias(Boolean.class, "p");
             firstTable = false;
         } else {
             from.append("JOIN genconf_attributes_bools AS bool ON p.cid = bool.cid AND p.id = bool.id ");
-            registerAlias(BOOLS, "bool");
+            registerAlias(Boolean.class, "bool");
         }
         boolsIncluded = true;
     }
 
-    private void registerAlias(String type, String alias) {
+    private void registerAlias(Class type, String alias) {
         aliases.put(type, alias);
     }
     
-    private String getAlias(String type) {
+    private String getAlias(Class type) {
         return aliases.get(type);
     }
 

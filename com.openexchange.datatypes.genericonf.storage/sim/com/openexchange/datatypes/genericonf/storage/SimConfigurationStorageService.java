@@ -51,6 +51,7 @@ package com.openexchange.datatypes.genericonf.storage;
 
 import java.sql.Connection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -63,7 +64,7 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
 
     private static int currentId = 0;
 
-    public Map<Integer, Entry> entries = new HashMap<Integer, Entry>();
+    public Map<Integer, Map<String, Object>> entries = new HashMap<Integer, Map<String, Object>>();
 
     public void delete(Context ctx, int id) throws GenericConfigStorageException {
         entries.remove(id);
@@ -73,59 +74,45 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
         entries.remove(id);
     }
 
-    public void fill(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+    public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
         if (!entries.containsKey(id)) {
             return;
         }
-        content.putAll(entries.get(id).content);
-        for (FormElement formElement : entries.get(id).form.getFormElements()) {
-            form.add(formElement);
-        }
+        content.putAll(entries.get(id));
     }
 
-    public void fill(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
         if (!entries.containsKey(id)) {
             return;
         }
-        content.putAll(entries.get(id).content);
-        for (FormElement formElement : entries.get(id).form.getFormElements()) {
-            form.add(formElement);
-        }
+        content.putAll(entries.get(id));
     }
 
-    public int save(Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+    public int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
         int id = currentId++;
-        Entry entry = new Entry(content, form);
-        entries.put(id, entry);
+        entries.put(id, content);
         return id;
     }
 
-    public int save(Connection con, Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+    public int save(Connection con, Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
         int id = currentId++;
-        Entry entry = new Entry(content, form);
-        entries.put(id, entry);
+        entries.put(id, content);
         return id;
     }
 
-    public void update(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        Entry entry = new Entry(content, form);
-        entries.put(id, entry);
+    public void update(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        entries.put(id, content);
     }
 
-    public void update(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        Entry entry = new Entry(content, form);
-        entries.put(id, entry);
+    public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        entries.put(id, content);
     }
 
-    private class Entry {
+    public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+        return null;
+    }
 
-        public Map<String, Object> content;
-
-        public DynamicFormDescription form;
-
-        public Entry(Map<String, Object> content, DynamicFormDescription form) {
-            this.content = content;
-            this.form = form;
-        }
+    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+        return null;
     }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.datatypes.genericonf.storage.osgi.tools;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -90,28 +91,36 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
         getDelegate().delete(con, ctx, id);
     }
 
-    public void fill(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        getDelegate().fill(ctx, id, content, form);
+    public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        getDelegate().fill(ctx, id, content);
     }
 
-    public void fill(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        getDelegate().fill(con, ctx, id, content, form);
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        getDelegate().fill(con, ctx, id, content);
     }
 
-    public int save(Connection con, Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        return getDelegate().save(con, ctx, content, form);
+    public int save(Connection con, Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+        return getDelegate().save(con, ctx, content);
     }
 
-    public int save(Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        return getDelegate().save(ctx, content, form);
+    public int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+        return getDelegate().save(ctx, content);
     }
 
-    public void update(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        getDelegate().update(con, ctx, id, content, form);
+    public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        getDelegate().update(con, ctx, id, content);
     }
 
-    public void update(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        getDelegate().update(ctx, id, content, form);
+    public void update(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        getDelegate().update(ctx, id, content);
+    }
+
+    public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+        return getDelegate().search(ctx, query);
+    }
+
+    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+        return getDelegate().search(con, ctx, query);
     }
 
     

@@ -253,7 +253,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
             writeConnection.setAutoCommit(false);
             
-            int configId = storageService.save(writeConnection, publication.getContext(), publication.getConfiguration(), publication.getTarget().getFormDescription());
+            int configId = storageService.save(writeConnection, publication.getContext(), publication.getConfiguration());
             
             int id = IDGenerator.getId(publication.getContext(), Types.PUBLICATION, writeConnection);
             
@@ -312,7 +312,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             
             DynamicFormDescription form = new DynamicFormDescription();
             Map<String, Object> content = new HashMap<String, Object>();
-            storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content, form);
+            storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
             
             publication.setConfiguration(content);
             publication.setTarget(discoveryService.getTarget(resultSet.getString("target_id")));

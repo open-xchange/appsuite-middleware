@@ -100,44 +100,31 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         content.put("otherValue", "other");
         content.put("booleanValue", true);
 
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("login", "loginname")).add(FormElement.input("otherValue", "Other Value")).add(
-            FormElement.checkbox("booleanValue", ""));
 
         int contextId = 1;
         Context ctx = new SimContext(contextId);
-        int id = storage.save(ctx, content, form);
+        int id = storage.save(ctx, content);
 
         assertTrue("Id should not be 0", id > 0);
 
-        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'login' AND value = 'loginname' AND widget = 'input' AND cid = 1 AND id = " + id);
-        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'otherValue' AND value = 'other' AND widget = 'input' AND cid = 1 AND id = " + id);
-        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'booleanValue' AND value = 1 AND widget = 'checkbox' AND cid = 1 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'login' AND value = 'loginname' AND cid = 1 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'otherValue' AND value = 'other' AND cid = 1 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'booleanValue' AND value = 1 AND cid = 1 AND id = " + id);
 
     }
 
     public void testLoadDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'field', 'value', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'otherField', 'otherValue', 'input')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'booleanField', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'booleanField', 1)");
 
         Map<String, Object> content = new HashMap<String, Object>();
-        DynamicFormDescription form = new DynamicFormDescription();
 
         int contextId = 1002;
         Context ctx = new SimContext(contextId);
 
-        storage.fill(ctx, 1001, content, form);
+        storage.fill(ctx, 1001, content);
 
-        assertNotNull("Expected a form element with the name 'field'", form.getField("field"));
-        assertEquals("Expected input with the name 'field'", form.getField("field").getWidget(), FormElement.Widget.INPUT);
-        assertNotNull("Expected a form element with the name 'otherField'", form.getField("otherField"));
-        assertEquals("Expected input with the name 'otherField'", form.getField("otherField").getWidget(), FormElement.Widget.INPUT);
-        assertNotNull("Expected a form element with the name 'booleanField'", form.getField("booleanField"));
-        assertEquals(
-            "Expected checkbox with the name 'booleanField'",
-            form.getField("booleanField").getWidget(),
-            FormElement.Widget.CHECKBOX);
 
         assertNotNull("Expected a value under key 'field", content.get("field"));
         assertEquals("Excpected value 'value' under key 'field'", "value", content.get("field"));
@@ -149,19 +136,16 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     public void testUpdateDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'field', 'value', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'otherField', 'otherValue', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'thirdField', 'thirdValue', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
 
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'bool', 0, 'checkbox')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'otherBool', 0, 'checkbox')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'thirdBool', 0, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'bool', 0)");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 0)");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 0)");
 
         Map<String, Object> content = new HashMap<String, Object>();
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("field", "")).add(FormElement.input("otherField", "")).add(FormElement.input("thirdField", "")).add(
-            FormElement.input("fourthField", "")).add(FormElement.checkbox("bool", "")).add(FormElement.checkbox("otherBool", "")).add(
-            FormElement.checkbox("thirdBool", "")).add(FormElement.checkbox("fourthBool", ""));
+        
 
         content.put("field", "updatedValue");
         content.put("fourthField", "newValue");
@@ -175,32 +159,32 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         int contextId = 1002;
         Context ctx = new SimContext(contextId);
 
-        storage.update(ctx, id, content, form);
+        storage.update(ctx, id, content);
 
-        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'field' AND value = 'updatedValue' AND widget = 'input' AND cid = 1002 AND id = " + id);
-        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'otherField' AND value = 'otherValue' AND widget = 'input' AND cid = 1002 AND id = " + id);
-        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'fourthField' AND value = 'newValue' AND widget = 'input' AND cid = 1002 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'field' AND value = 'updatedValue' AND cid = 1002 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'otherField' AND value = 'otherValue' AND cid = 1002 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'fourthField' AND value = 'newValue' AND cid = 1002 AND id = " + id);
         assertNoResult("SELECT 1 FROM genconf_attributes_strings WHERE name = 'thirdField' AND cid = 1002 AND id = " + id);
 
-        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'bool' AND value = 1 AND widget = 'checkbox' AND cid = 1002 AND id = " + id);
-        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'otherBool' AND value = 0 AND widget = 'checkbox' AND cid = 1002 AND id = " + id);
-        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'fourthBool' AND value = 1 AND widget = 'checkbox' AND cid = 1002 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'bool' AND value = 1 AND cid = 1002 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'otherBool' AND value = 0 AND cid = 1002 AND id = " + id);
+        assertResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'fourthBool' AND value = 1 AND cid = 1002 AND id = " + id);
         assertNoResult("SELECT 1 FROM genconf_attributes_bools WHERE name = 'thirdBool' AND cid = 1002 AND id = " + id);
 
     }
 
     public void testDeleteDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'field', 'value', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'otherField', 'otherValue', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'thirdField', 'thirdValue', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
 
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1004,'otherID', 'otherID', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1004,'otherID', 'otherID')");
 
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'bool', 1, 'checkbox')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'otherBool', 1, 'checkbox')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'thirdBool', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'bool', 1)");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 1)");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 1)");
 
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1004,'otherBoolID', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
 
         
         int id = 1001;
@@ -218,27 +202,23 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
     
     public void testSearchDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'field', 'value', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'otherField', 'otherValue', 'input')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1001,'thirdField', 'thirdValue', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
 
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, widget) VALUES (1002,1004,'otherID', 'otherID', 'input')");
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1004,'otherID', 'otherID')");
 
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'bool', 1, 'checkbox')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'otherBool', 1, 'checkbox')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1001,'thirdBool', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'bool', 1)");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 1)");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 1)");
 
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, widget) VALUES (1002,1004,'otherBoolID', 1, 'checkbox')");
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
 
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("field", "")).add(FormElement.input("otherField", "")).add(FormElement.input("thirdField", "")).add(
-            FormElement.input("fourthField", "")).add(FormElement.checkbox("bool", "")).add(FormElement.checkbox("otherBool", "")).add(
-            FormElement.checkbox("thirdBool", "")).add(FormElement.checkbox("fourthBool", ""));
         
         Map<String, Object> query = new HashMap<String, Object>();
         query.put("field", "value");
         
-        List<Integer> ids = storage.search(new SimContext(1002), query, form);
+        List<Integer> ids = storage.search(new SimContext(1002), query);
         assertNotNull("ids was null", ids);
         assertEquals("Wrong size of search result", 1, ids.size());
         assertEquals("Got wrong ID", new Integer(1001), ids.get(0));
@@ -246,7 +226,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         // Try with join
         
         query.put("bool", true);
-        ids = storage.search(new SimContext(1002), query, form);
+        ids = storage.search(new SimContext(1002), query);
         assertNotNull("ids was null", ids);
         assertEquals("Wrong size of search result", 1, ids.size());
         assertEquals("Got wrong ID", new Integer(1001), ids.get(0));

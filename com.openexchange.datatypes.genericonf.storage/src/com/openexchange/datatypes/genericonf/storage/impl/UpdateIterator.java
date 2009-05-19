@@ -53,6 +53,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormIterator;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -66,7 +68,7 @@ import com.openexchange.datatypes.genericonf.FormElement.Widget;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UpdateIterator implements DynamicFormIterator {
+public class UpdateIterator implements MapIterator<String, Object> {
 
     private Map<String, Object> original;
 
@@ -77,30 +79,32 @@ public class UpdateIterator implements DynamicFormIterator {
     private static final String DELETE_BOOL = "DELETE FROM genconf_attributes_bools WHERE cid = ? AND id = ? AND name = ?";
     
     
-    private Map<Widget, PreparedStatement> updateStatements = new EnumMap<Widget, PreparedStatement>(Widget.class);
-    private Map<Widget, PreparedStatement> deleteStatements = new EnumMap<Widget, PreparedStatement>(Widget.class);
+    private Map<Class, PreparedStatement> updateStatements = new HashMap<Class, PreparedStatement>();
+    private List<PreparedStatement> deleteStatements = new LinkedList<PreparedStatement>();
     
     private SQLException exception;
     
     private InsertIterator insertIterator = new InsertIterator();
     
-    public void handle(FormElement element, Object value) throws IterationBreak {
+    public void handle(String name, Object value) throws IterationBreak {
         try {
-            String name = element.getName();
             if(original.containsKey(name)) {
                 if(value != null) {
-                    PreparedStatement update = updateStatements.get(element.getWidget());
-                    value = element.doSwitch(new ToSQLType(), value);
+                    PreparedStatement update = updateStatements.get(value.getClass());
                     update.setObject(1, value);
                     update.setString(4, name);
                     update.execute();
                 } else {
-                    PreparedStatement delete = deleteStatements.get(element.getWidget());
-                    delete.setString(3, name);
-                    delete.execute();
+                    for(PreparedStatement delete : deleteStatements) {
+                        delete.setString(3, name);
+                        delete.execute();
+                        if(delete.getUpdateCount() > 0) {
+                            break;
+                        }
+                    }
                 }
             } else {
-                insertIterator.handle(element, value);
+                insertIterator.handle(name, value);
             }
         } catch (SQLException x) {
             exception = x;
@@ -117,16 +121,14 @@ public class UpdateIterator implements DynamicFormIterator {
         PreparedStatement updateString = tx.prepare(UPDATE_STRING);
         PreparedStatement updateBool = tx.prepare(UPDATE_BOOL);
 
-        updateStatements.put(Widget.INPUT, updateString);
-        updateStatements.put(Widget.PASSWORD, updateString);
-        updateStatements.put(Widget.CHECKBOX, updateBool);
+        updateStatements.put(String.class, updateString);
+        updateStatements.put(Boolean.class, updateBool);
         
         PreparedStatement deleteString = tx.prepare(DELETE_STRING);
         PreparedStatement deleteBool = tx.prepare(DELETE_BOOL);
        
-        deleteStatements.put(Widget.INPUT, deleteString);
-        deleteStatements.put(Widget.PASSWORD, deleteString);
-        deleteStatements.put(Widget.CHECKBOX, deleteBool);
+        deleteStatements.add(deleteString);
+        deleteStatements.add(deleteBool);
     }
 
     public void setIds(int contextId, int id) throws SQLException {
@@ -136,7 +138,7 @@ public class UpdateIterator implements DynamicFormIterator {
             updateStatement.setInt(3, id);
         }
 
-        for(PreparedStatement deleteStatement : deleteStatements.values()) {
+        for(PreparedStatement deleteStatement : deleteStatements) {
             deleteStatement.setInt(1, contextId);
             deleteStatement.setInt(2, id);
         }

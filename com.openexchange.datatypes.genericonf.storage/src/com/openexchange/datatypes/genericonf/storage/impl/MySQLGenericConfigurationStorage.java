@@ -82,11 +82,11 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         this.provider = provider;
     }
 
-    public int save(Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        return save(null, ctx, content, form);
+    public int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+        return save(null, ctx, content);
     }
     
-    public int save(Connection con, final Context ctx, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException {
+    public int save(Connection con, final Context ctx, final Map<String, Object> content) throws GenericConfigStorageException {
         return (Integer) write(con, ctx, new TX() {
 
             public Object perform() throws SQLException {
@@ -94,12 +94,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
                 InsertIterator insertIterator = new InsertIterator();
                 insertIterator.prepareStatements(this);
-
+                
                 int id = IDGenerator.getId(ctx, Types.GENERIC_CONFIGURATION, con);
                 int cid = ctx.getContextId();
                 insertIterator.setIds(cid, id);
 
-                form.iterate(insertIterator, content);
+                Tools.iterate(content, insertIterator);
 
                 insertIterator.throwException();
                 return id;
@@ -145,19 +145,19 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         }
     }
     
-    public void fill(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
-        fill(null, ctx, id, content, form);
+    public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+        fill(null, ctx, id, content);
     }
 
-    public void fill(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException {
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
         Connection readCon = con;
         boolean connectionHandling = con == null;
         try {
             if(connectionHandling) {
                 readCon = provider.getReadConnection(ctx);
             }
-            loadValues(readCon, ctx, id, content, form, "genconf_attributes_strings");
-            loadValues(readCon, ctx, id, content, form, "genconf_attributes_bools");
+            loadValues(readCon, ctx, id, content, "genconf_attributes_strings");
+            loadValues(readCon, ctx, id, content, "genconf_attributes_bools");
         } catch (TransactionException e) {
             throw new GenericConfigStorageException(e);
         } finally {
@@ -167,29 +167,21 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         }
     }
 
-    private void loadValues(Connection readCon, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form, String tablename) throws GenericConfigStorageException {
+    private void loadValues(Connection readCon, Context ctx, int id, Map<String, Object> content, String tablename) throws GenericConfigStorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        FromSQL fromSQL = new FromSQL();
-        
         try {
 
-            stmt = readCon.prepareStatement("SELECT name, value, widget FROM "+tablename+" WHERE cid = ? AND id = ?");
+            stmt = readCon.prepareStatement("SELECT name, value FROM "+tablename+" WHERE cid = ? AND id = ?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, id);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 String name = rs.getString("name");
-                String widget = rs.getString("widget");
-
-                FormElement element = new FormElement();
-                element.setName(name);
-                element.setWidget(FormElement.Widget.getWidgetByKeyword(widget));
-                form.add(element);
-
-                content.put(name, element.doSwitch(fromSQL, rs, "value"));
-                fromSQL.throwException();
+                Object value = rs.getObject("value");
+                
+                content.put(name, value);
             }
         } catch (SQLException x) {
             GenericConfigStorageErrorMessage.SQLException.throwException(x, stmt.toString());
@@ -211,13 +203,13 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     }
     
    
-    public void update(final Context ctx, final int id, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException {
-        update(null, ctx, id, content, form);
+    public void update(final Context ctx, final int id, final Map<String, Object> content) throws GenericConfigStorageException {
+        update(null, ctx, id, content);
     }
     
-    public void update(Connection con, final Context ctx, final int id, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException {
+    public void update(Connection con, final Context ctx, final int id, final Map<String, Object> content) throws GenericConfigStorageException {
         final Map<String, Object> original = new HashMap<String, Object>();
-        fill(con, ctx, id, original, new DynamicFormDescription());
+        fill(con, ctx, id, original);
 
         write(con, ctx, new TX() {
 
@@ -226,7 +218,9 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 updateIterator.prepareStatements(this);
                 updateIterator.setIds(ctx.getContextId(), id);
                 updateIterator.setOriginal(original);
-                form.iterate(updateIterator, content);
+                
+                Tools.iterate(content, updateIterator);
+                
                 updateIterator.throwException();
                 return null;
             }
@@ -263,11 +257,18 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
-    public List<Integer> search(Context ctx, Map<String, Object> query, DynamicFormDescription form) throws GenericConfigStorageException {
+    public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+        return search(null, ctx, query);
+    }
+    
+    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+        boolean handleOwnConnections = con == null;
+            
         LinkedList<Integer> list = new LinkedList<Integer>();
         StringBuilder builder = new StringBuilder("SELECT DISTINCT p.id FROM ");
         SearchIterator whereIterator = new SearchIterator();
-        form.iterate(whereIterator, query);
+        Tools.iterate(query, whereIterator);
+        
         
         builder.append(whereIterator.getFrom());
         builder.append(" WHERE ");
@@ -275,11 +276,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         builder.append(whereIterator.getWhere());
         builder.append(") AND p.cid = ?");
         whereIterator.addReplacement(ctx.getContextId());
-        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = provider.getReadConnection(ctx);
+            if(handleOwnConnections) {
+                con = provider.getReadConnection(ctx);
+            }
             stmt = con.prepareStatement(builder.toString());
             whereIterator.setReplacements(stmt);
             rs = stmt.executeQuery();
@@ -307,7 +309,9 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                     // Ignore
                 }
             }
-            provider.releaseReadConnection(ctx, con);
+            if(handleOwnConnections) {
+                provider.releaseReadConnection(ctx, con);
+            }
         }
         
         return list;

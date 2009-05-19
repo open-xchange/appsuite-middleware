@@ -216,7 +216,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             
             writeConnection.setAutoCommit(false);
             
-            int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration(), subscription.getSource().getFormDescription());
+            int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration());
             
             int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
 
@@ -316,9 +316,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             subscription.setLastUpdate(resultSet.getLong("last_update"));
             subscription.setUserId(resultSet.getInt("user_id"));
             
-            DynamicFormDescription form = new DynamicFormDescription();
             Map<String, Object> content = new HashMap<String, Object>();
-            storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content, form);
+            storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
             
             subscription.setConfiguration(content);
             subscription.setSource(discoveryService.getSource(resultSet.getString("source_id")));

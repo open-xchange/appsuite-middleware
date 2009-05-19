@@ -49,72 +49,25 @@
 
 package com.openexchange.datatypes.genericonf.storage.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormIterator;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.IterationBreak;
-import com.openexchange.datatypes.genericonf.FormElement.Widget;
+
 
 /**
- * {@link InsertIterator}
- * 
+ * {@link Tools}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class InsertIterator implements MapIterator<String, Object> {
-
-    private static final String INSERT_STRING = "INSERT INTO genconf_attributes_strings (id, cid, name, value) VALUES (?,?,?,?)";
-    private static final String INSERT_BOOL = "INSERT INTO genconf_attributes_bools (id, cid, name, value) VALUES (?,?,?,?)";
-
-    
-    private SQLException exception;
-
-    private Map<Class, PreparedStatement> statementMap = new HashMap<Class, PreparedStatement>();
-    
-    public void prepareStatements(TX tx) throws SQLException {
-        
-        PreparedStatement insertString = tx.prepare(INSERT_STRING);
-        PreparedStatement insertBool = tx.prepare(INSERT_BOOL);
-        
-        statementMap.put(String.class, insertString);
-        statementMap.put(Boolean.class, insertBool);
-    }
-
-    public void setIds(int cid, int id) throws SQLException {
-        for(PreparedStatement stmt : statementMap.values()) {
-            stmt.setInt(1, id);
-            stmt.setInt(2, cid);            
+public class Tools {
+    public static <K, V> void iterate(Map<K, V> map, MapIterator<K, V> iterator) {
+        for(Map.Entry<K, V> entry : map.entrySet()) {
+            try {
+                iterator.handle(entry.getKey(), entry.getValue());
+            } catch (IterationBreak br) {
+                return;
+            }
         }
+            
     }
-
-    public void handle(String key, Object value) throws IterationBreak {
-        if(exception != null) {
-            return;
-        }
-        
-        PreparedStatement stmt = statementMap.get(value.getClass());
-        
-        try {
-            stmt.setString(3, key);
-            stmt.setObject(4, value);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            exception = e;
-            throw new IterationBreak();
-        }
-
-    }
-    
-    public void throwException() throws SQLException {
-        if(exception != null) {
-            throw exception;
-        }
-    }
-
 }

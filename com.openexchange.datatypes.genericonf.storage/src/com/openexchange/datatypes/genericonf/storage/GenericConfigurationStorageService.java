@@ -50,6 +50,7 @@
 package com.openexchange.datatypes.genericonf.storage;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.contexts.Context;
@@ -62,19 +63,24 @@ import com.openexchange.groupware.contexts.Context;
  *
  */
 public interface GenericConfigurationStorageService {
-    public abstract int save(Context ctx, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException;
+    public abstract int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException;
 
-    public abstract int save(Connection con, final Context ctx, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException;
+    public abstract int save(Connection con, final Context ctx, final Map<String, Object> content) throws GenericConfigStorageException;
 
-    public abstract void fill(Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException;
+    public abstract void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException;
 
-    public abstract void fill(Connection con, Context ctx, int id, Map<String, Object> content, DynamicFormDescription form) throws GenericConfigStorageException;
+    public abstract void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException;
 
-    public abstract void update(final Context ctx, final int id, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException;
+    public abstract void update(final Context ctx, final int id, final Map<String, Object> content ) throws GenericConfigStorageException;
 
-    public abstract void update(Connection con, final Context ctx, final int id, final Map<String, Object> content, final DynamicFormDescription form) throws GenericConfigStorageException;
+    public abstract void update(Connection con, final Context ctx, final int id, final Map<String, Object> content) throws GenericConfigStorageException;
 
     public abstract void delete(final Context ctx, final int id) throws GenericConfigStorageException;
 
     public abstract void delete(Connection con, final Context ctx, final int id) throws GenericConfigStorageException;
+
+    public abstract List<Integer> search(final Context ctx, final Map<String, Object> query) throws GenericConfigStorageException;
+
+    public abstract List<Integer> search(Connection con, final Context ctx, final Map<String, Object> query) throws GenericConfigStorageException;
+
 }
