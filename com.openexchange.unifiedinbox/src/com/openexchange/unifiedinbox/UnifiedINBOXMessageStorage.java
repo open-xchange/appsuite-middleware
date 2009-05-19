@@ -752,8 +752,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
      */
 
     private static void insertMessage(final String[] mailIds, final MailMessage[] toFill, final int accountId, final String folder, final MailMessage[] mails, final String uiFullname) {
+        final UnifiedINBOXUID helper = new UnifiedINBOXUID();
         for (int k = 0; k < mails.length; k++) {
-            final String lookFor = new UnifiedINBOXUID(accountId, folder, mails[k].getMailId()).toString();
+            final String lookFor = helper.setUID(accountId, folder, mails[k].getMailId()).toString();
             int pos = -1;
             for (int l = 0; l < mailIds.length && pos == -1; l++) {
                 final String mailId = mailIds[l];
