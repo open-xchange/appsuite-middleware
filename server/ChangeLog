@@ -6,6 +6,10 @@
 
  - Bugfix 13482: Relock without body needs to update referenced lock from ifheader
 
+* 2009-05-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #13685: More robust parsing of mail account JSON data
+
 * 2009-05-13 - thorben.betten@open-xchange.com
 
  - Bugfix #13604: SWitching to strict detection whether a mail part's disposition is "INLINE" or not when generating forward mail

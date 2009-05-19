@@ -59,6 +59,8 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class SetSwitch implements AttributeSwitch {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SetSwitch.class);
+
     private final MailAccountDescription desc;
 
     private Object value;
@@ -143,7 +145,14 @@ public class SetSwitch implements AttributeSwitch {
     }
 
     public Object mailPort() {
-        desc.setMailPort(((Integer) value).intValue());
+        try {
+            desc.setMailPort(Integer.parseInt(value.toString()));
+        } catch (final NumberFormatException e) {
+            LOG.error(
+                new StringBuilder("Mail port is not a number: ").append(value).append(". Setting to fallback port 143.").toString(),
+                e);
+            desc.setMailPort(143);
+        }
         return null;
     }
 
@@ -153,7 +162,7 @@ public class SetSwitch implements AttributeSwitch {
     }
 
     public Object mailSecure() {
-        desc.setMailSecure(((Boolean) value).booleanValue());
+        desc.setMailSecure(Boolean.parseBoolean(value.toString()));
         return null;
     }
 
@@ -163,7 +172,14 @@ public class SetSwitch implements AttributeSwitch {
     }
 
     public Object transportPort() {
-        desc.setTransportPort(((Integer) value).intValue());
+        try {
+            desc.setTransportPort(Integer.parseInt(value.toString()));
+        } catch (final NumberFormatException e) {
+            LOG.error(
+                new StringBuilder("Transport port is not a number: ").append(value).append(". Setting to fallback port 25.").toString(),
+                e);
+            desc.setTransportPort(25);
+        }
         return null;
     }
 
@@ -173,7 +189,7 @@ public class SetSwitch implements AttributeSwitch {
     }
 
     public Object transportSecure() {
-        desc.setTransportSecure(((Boolean) value).booleanValue());
+        desc.setTransportSecure(Boolean.parseBoolean(value.toString()));
         return null;
     }
 
