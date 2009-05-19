@@ -116,9 +116,9 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
             String action = req.getParameter("action");
             if(null == action) {
                 MISSING_PARAMETER.throwException("action");
-            } else if(action.equals("listSources")) {
+            } else if(action.equals("listSources") || action.equals("all")) {
                 listSources(req, resp);
-            } else if (action.equals("getSource")) {
+            } else if (action.equals("getSource") || action.equals("get")) {
                 getSource(req, resp);
             } else {
                 UNKNOWN_ACTION.throwException(action);
