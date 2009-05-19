@@ -150,10 +150,10 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer 
         } finally {
             lock.unlock();
         }
-        context.ungetService(reference);
         if (null != unregister) {
             LOG.info("Unregistering database authentication service.");
             unregister.unregister();
         }
+        context.ungetService(reference);
     }
 }
