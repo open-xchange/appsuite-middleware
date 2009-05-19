@@ -47,27 +47,52 @@
  *
  */
 
-package com.openexchange.publish.parser;
+package com.openexchange.publish.osgi;
 
-import com.openexchange.publish.OXMFParser;
-import com.openexchange.publish.OXMFParserFactoryService;
+import java.util.Hashtable;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.publish.CompositePublicationTargetDiscoveryService;
+import com.openexchange.publish.PublicationErrorMessage;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 
 /**
- * {@link OXMFParserFactoryServiceImpl} - Implementation of {@link OXMFParserFactoryService}.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public final class OXMFParserFactoryServiceImpl implements OXMFParserFactoryService {
+public class DiscovererActivator implements BundleActivator {
 
-    /**
-     * Initializes a new {@link OXMFParserFactoryServiceImpl}.
-     */
-    public OXMFParserFactoryServiceImpl() {
-        super();
+    private ComponentRegistration componentRegistration;
+    private ServiceRegistration discoveryRegistration;
+    private OSGiPublicationTargetCollector pubServiceCollector;
+    private OSGiPublicationTargetDiscovererCollector discovererCollector;
+
+    public void start(BundleContext context) throws Exception {
+        pubServiceCollector = new OSGiPublicationTargetCollector(context);
+        discovererCollector = new OSGiPublicationTargetDiscovererCollector(context);
+        
+        CompositePublicationTargetDiscoveryService compositeDiscovererCollector = new CompositePublicationTargetDiscoveryService();
+        compositeDiscovererCollector.addDiscoveryService(pubServiceCollector);
+        compositeDiscovererCollector.addDiscoveryService(discovererCollector);
+
+        discovererCollector.ignore(compositeDiscovererCollector);
+        
+        Hashtable discoveryDict = new Hashtable();
+        discoveryDict.put(Constants.SERVICE_RANKING, 256);
+        
+        discoveryRegistration = context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
+        
+        
+        componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
     }
 
-    public OXMFParser getParser() {
-        return new OXMFParserImpl();
+    public void stop(BundleContext context) throws Exception {
+        discoveryRegistration.unregister();
+        componentRegistration.unregister();
+        pubServiceCollector.close();
+        discovererCollector.close();
     }
 
 }

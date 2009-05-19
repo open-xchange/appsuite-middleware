@@ -47,20 +47,43 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.osgi;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.impl.CompositeLoaderService;
+import com.openexchange.publish.impl.InfostoreDocumentLoader;
+import com.openexchange.server.osgiservice.Whiteboard;
+
 
 /**
- * {@link OXMFParserFactoryService} - Factory service for {@link OXMFParser} instances.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link LoaderActivator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface OXMFParserFactoryService {
+public class LoaderActivator implements BundleActivator {
 
-    /**
-     * Returns a new instance of {@link OXMFParser}.
-     * 
-     * @return A new instance of {@link OXMFParser}
-     */
-    public OXMFParser getParser();
+    private Whiteboard whiteboard;
+    private ServiceRegistration dataLoaderRegistration;
+
+    public void start(BundleContext context) throws Exception {
+        whiteboard = new Whiteboard(context);
+        
+        CompositeLoaderService compositeLoader = new CompositeLoaderService();
+        
+        InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);        
+        compositeLoader.registerLoader("infostore", new InfostoreDocumentLoader(infostore));
+    
+        dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), compositeLoader, null);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        dataLoaderRegistration.unregister();
+        whiteboard.close();
+    }
 
 }
