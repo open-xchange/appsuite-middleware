@@ -59,7 +59,7 @@ public enum DisplayMode {
     /**
      * Generate a version as-is.
      */
-    NONE,
+    RAW,
     /**
      * Generate a version for a message forward/reply/draft-edit in front-end
      */

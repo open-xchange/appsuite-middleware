@@ -273,6 +273,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     public static final String PARAMETER_COL = "col";
 
+    private static final String VIEW_RAW = "raw";
+
     private static final String VIEW_TEXT = "text";
 
     private static final String VIEW_HTML = "html";
@@ -979,19 +981,28 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Overwrite settings with request's parameters
                      */
+                    final DisplayMode displayMode;
                     if (null != view) {
-                        if (VIEW_TEXT.equals(view)) {
+                        if (VIEW_RAW.equals(view)) {
+                            displayMode = DisplayMode.RAW;
+                        } else if (VIEW_TEXT.equals(view)) {
                             usmNoSave.setDisplayHtmlInlineContent(false);
+                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
                         } else if (VIEW_HTML.equals(view)) {
                             usmNoSave.setDisplayHtmlInlineContent(true);
                             usmNoSave.setAllowHTMLImages(true);
+                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
                         } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
                             usmNoSave.setDisplayHtmlInlineContent(true);
                             usmNoSave.setAllowHTMLImages(false);
+                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
                         } else {
                             LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(
                                 view).append(". Using user's mail settings as fallback."));
+                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
                         }
+                    } else {
+                        displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
                     }
                     final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
                     final boolean doUnseen = (unseen && wasUnseen);
@@ -1000,12 +1011,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final int unreadMsgs = mail.getUnreadMessages();
                         mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
-                    data = MessageWriter.writeMailMessage(
-                        mailInterface.getAccountID(),
-                        mail,
-                        editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY,
-                        session,
-                        usmNoSave);
+                    data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave);
                     if (doUnseen) {
                         /*
                          * Leave mail as unseen

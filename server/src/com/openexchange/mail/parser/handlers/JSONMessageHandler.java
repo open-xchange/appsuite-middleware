@@ -486,6 +486,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 } else {
                     asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
                 }
+            } else if (DisplayMode.RAW.equals(displayMode)) {
+                /*
+                 * Return HTML content as-is
+                 */
+                asRawContent(id, contentType.getBaseType(), htmlContent);
             } else {
                 try {
                     final JSONObject jsonObject = new JSONObject();
@@ -542,14 +547,19 @@ public final class JSONMessageHandler implements MailMessageHandler {
                             contentType.getBaseType(),
                             getHtmlDisplayVersion(contentType, plainTextContentArg),
                             contentType.getCharsetParameter());
-                        return true;
+                    } else {
+                        asDisplayText(
+                            id,
+                            contentType.getBaseType(),
+                            getHtmlDisplayVersion(contentType, plainTextContentArg),
+                            fileName,
+                            DisplayMode.DISPLAY.equals(displayMode));
                     }
-                    asDisplayText(
-                        id,
-                        contentType.getBaseType(),
-                        getHtmlDisplayVersion(contentType, plainTextContentArg),
-                        fileName,
-                        DisplayMode.DISPLAY.equals(displayMode));
+                } else if (DisplayMode.RAW.equals(displayMode)) {
+                    /*
+                     * Return HTML content as-is
+                     */
+                    asRawContent(id, contentType.getBaseType(), plainTextContentArg);
                 } else {
                     final JSONObject jsonObject = new JSONObject();
                     jsonObject.put(MailListField.ID.getKey(), id);
@@ -902,6 +912,20 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
                 }
             }
+            getAttachmentsArr().put(jsonObject);
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    private void asRawContent(final String id, final String baseContentType, final String content) throws MailException {
+        try {
+            final JSONObject jsonObject = new JSONObject();
+            jsonObject.put(MailListField.ID.getKey(), id);
+            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
+            jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
+            jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
+            jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
