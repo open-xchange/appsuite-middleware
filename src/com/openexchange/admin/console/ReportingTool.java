@@ -18,13 +18,11 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.database.DatabaseInit;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 
 public class ReportingTool extends BasicCommandlineOptions {
 	
@@ -208,15 +206,14 @@ public class ReportingTool extends BasicCommandlineOptions {
 
 	private void shutdown() {
 		// close connections etc
-		DatabaseInit.getInstance().stop();
+	    // FIXME Shutdown database bundle
 	}
 
 	private void start() throws DBPoolingException, ConfigurationException {
 		// init db pool to fetch directly the data
 		SystemConfig.getInstance().start();
-		ConfigDB.getInstance().start();
-		DatabaseInit.getInstance().start();
-		//DatabaseInit.init();
+		// FIXME Setup configuration bundle
+		// FIXME Setup database bundle
 		// fetch data via sql or rmi interface
 		fetchAllSystemContexts();
 		fetchAllUsers();
