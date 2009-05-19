@@ -103,9 +103,9 @@ public final class AssignmentStorage {
     private final Lock cacheLock = new ReentrantLock(true);
 
     /**
-     * Prevent instantiation
+     * Default constructor.
      */
-    private AssignmentStorage() {
+    public AssignmentStorage() {
         super();
     }
 

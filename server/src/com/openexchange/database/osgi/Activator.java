@@ -53,6 +53,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.management.ManagementService;
 
 /**
  * Activator for the database bundle.
@@ -61,20 +62,25 @@ import com.openexchange.config.ConfigurationService;
  */
 public class Activator implements BundleActivator {
 
-    private ServiceTracker configTracker;
+    private ServiceTracker configurationTracker;
+
+    private ServiceTracker managementTracker;
 
     /**
      * {@inheritDoc}
      */
     public void start(BundleContext context) throws Exception {
-        configTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
-        configTracker.open();
+        configurationTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceCustomizer(context));
+        configurationTracker.open();
+        managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
+        managementTracker.open();
     }
 
     /**
      * {@inheritDoc}
      */
     public void stop(BundleContext context) throws Exception {
-        configTracker.close();
+        managementTracker.close();
+        configurationTracker.close();
     }
 }

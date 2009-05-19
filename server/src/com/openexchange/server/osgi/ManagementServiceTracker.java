@@ -55,7 +55,6 @@ import javax.management.MalformedObjectNameException;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.consistency.ConsistencyInit;
-import com.openexchange.database.internal.Pools;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -95,7 +94,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
                 getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true),
                 AJPv13Monitors.getListenerMonitor());
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
-            Pools.getInstance().registerMBeans();
             new ConsistencyInit().start();
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
@@ -115,7 +113,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
-            Pools.getInstance().unregisterMBeans();
             new ConsistencyInit().stop();
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);

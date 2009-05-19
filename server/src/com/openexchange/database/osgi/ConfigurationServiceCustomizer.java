@@ -63,16 +63,16 @@ import com.openexchange.database.internal.Initialization;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
+public class ConfigurationServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ConfigurationCustomizer.class);
+    private static final Log LOG = LogFactory.getLog(ConfigurationServiceCustomizer.class);
 
     private BundleContext context;
 
     /**
-     * Initializes a new {@link ConfigurationCustomizer}.
+     * Initializes a new {@link ConfigurationServiceCustomizer}.
      */
-    public ConfigurationCustomizer(BundleContext context) {
+    public ConfigurationServiceCustomizer(BundleContext context) {
         super();
         this.context = context;
     }
@@ -83,7 +83,7 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
     public Object addingService(ServiceReference reference) {
         ConfigurationService service = (ConfigurationService) context.getService(reference);
         try {
-            Initialization.start(service);
+            Initialization.getInstance().start(service);
         } catch (DBPoolingException e) {
             LOG.error("Starting the database bundle failed.", e);
         }
@@ -101,7 +101,7 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     public void removedService(ServiceReference reference, Object service) {
-        Initialization.stop();
+        Initialization.getInstance().stop();
         context.ungetService(reference);
     }
 }

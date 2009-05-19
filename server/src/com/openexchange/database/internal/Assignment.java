@@ -62,11 +62,11 @@ public class Assignment implements Serializable {
      */
     private static final long serialVersionUID = -3426601066426517436L;
 
-    int contextId;
-    int serverId;
-    public int readPoolId;
-    public int writePoolId;
-    public String schema;
+    private final int contextId;
+    private final int serverId;
+    private final int readPoolId;
+    private final int writePoolId;
+    private final String schema;
 
     /**
      * Default constructor.
@@ -76,13 +76,32 @@ public class Assignment implements Serializable {
      * @param writePoolId
      * @param schema
      */
-    Assignment(final int contextId, final int serverId, final int readPoolId,
-        final int writePoolId, final String schema) {
+    Assignment(final int contextId, final int serverId, final int readPoolId, final int writePoolId, final String schema) {
         super();
         this.contextId = contextId;
         this.serverId = serverId;
         this.readPoolId = readPoolId;
         this.writePoolId = writePoolId;
         this.schema = schema;
+    }
+
+    public int getContextId() {
+        return contextId;
+    }
+
+    public int getServerId() {
+        return serverId;
+    }
+
+    public int getReadPoolId() {
+        return readPoolId;
+    }
+
+    public int getWritePoolId() {
+        return writePoolId;
+    }
+
+    public String getSchema() {
+        return schema;
     }
 }

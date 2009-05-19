@@ -738,5 +738,34 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 throw new Error("Assertion failed!", e);
             }
         }
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Database pooling options:\n\tMinimum idle connections: ");
+            sb.append(minIdle);
+            sb.append("\n\tMaximum idle connections: ");
+            sb.append(maxIdle);
+            sb.append("\n\tMaximum idle time: ");
+            sb.append(maxIdleTime);
+            sb.append("ms\n\tMaximum active connections: ");
+            sb.append(maxActive);
+            sb.append("\n\tMaximum wait time for a connection: ");
+            sb.append(maxWait);
+            sb.append("ms\n\tMaximum life time of a connection: ");
+            sb.append(maxLifeTime);
+            sb.append("ms\n\tAction if connections exhausted: ");
+            sb.append(exhaustedAction.toString());
+            sb.append("\n\tTest connections on activate  : ");
+            sb.append(testOnActivate);
+            sb.append("\n\tTest connections on deactivate: ");
+            sb.append(testOnDeactivate);
+            sb.append("\n\tTest idle connections         : ");
+            sb.append(testOnIdle);
+            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
+            sb.append(testThreads);
+            sb.append("\n\tForce the use of write connections only: ");
+            sb.append(forceWriteOnly);
+            return sb.toString();
+        }
     }
 }

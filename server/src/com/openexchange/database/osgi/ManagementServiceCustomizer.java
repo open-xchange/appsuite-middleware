@@ -47,73 +47,43 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.database.osgi;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.internal.Initialization;
 import com.openexchange.management.ManagementService;
 
 /**
- * {@link Initialization}
+ * Injects the {@link ManagementService} for monitoring.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Initialization {
+public final class ManagementServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
-
-    private static final Initialization SINGLETON = new Initialization();
-
-    private Configuration configuration;
-
-    private Pools pools;
-
-    private AssignmentStorage assignmentStorage;
+    private final BundleContext context;
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private Initialization() {
+    public ManagementServiceCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    public static final Initialization getInstance() {
-        return SINGLETON;
+    public Object addingService(ServiceReference reference) {
+        ManagementService service = (ManagementService) context.getService(reference);
+        Initialization.getInstance().setManagementService(service);
+        return service;
     }
 
-    public void start(ConfigurationService service) throws DBPoolingException {
-        configuration = new Configuration();
-        configuration.readConfiguration(service);
-        pools = new Pools();
-        pools.start(configuration);
-        DatabaseServiceImpl.setPools(pools);
-        assignmentStorage = new AssignmentStorage();
-        assignmentStorage.start();
-        DatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
-        Server.start(service);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
-        }
-        DatabaseServiceImpl.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
     }
 
-    public void stop() {
-        DatabaseServiceImpl.setAssignmentStorage(null);
-        assignmentStorage.stop();
-        DatabaseServiceImpl.setPools(null);
-        pools.stop();
-        configuration.clear();
-    }
-
-    public void setManagementService(ManagementService managementService) {
-        pools.setManagementService(managementService);
-    }
-
-    public void removeManagementService() {
-        pools.removeManagementService();
+    public void removedService(ServiceReference reference, Object service) {
+        Initialization.getInstance().removeManagementService();
+        context.ungetService(reference);
     }
 }
- 

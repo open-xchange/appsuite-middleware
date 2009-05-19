@@ -64,8 +64,6 @@ import com.openexchange.database.DBPoolingException.Code;
  */
 public final class Configuration {
 
-    private static Configuration singleton = new Configuration();
-
     private static final String CONFIG_FILENAME = "configdb.properties";
 
     /**
@@ -80,9 +78,9 @@ public final class Configuration {
     private Properties writeProps = new Properties();
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private Configuration() {
+    public Configuration() {
         super();
     }
 
@@ -154,13 +152,6 @@ public final class Configuration {
                 return Boolean.valueOf(toConvert);
             }
         }).booleanValue();
-    }
-
-    /**
-     * @return the singleton instance.
-     */
-    public static Configuration getInstance() {
-        return singleton;
     }
 
     /**

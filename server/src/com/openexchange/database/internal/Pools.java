@@ -49,11 +49,13 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -66,22 +68,17 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
+import com.openexchange.pooling.ReentrantLockPool.Config;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
 import com.openexchange.database.internal.Configuration.Property;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Pools implements Runnable {
-
-    /**
-     * Singleton.
-     */
-    private static final Pools SINGLETON = new Pools();
 
     /**
      * Logger.
@@ -98,15 +95,16 @@ public final class Pools implements Runnable {
 
     private long cleanerInterval = 10000;
 
-    private final Map<Integer, ConnectionPool> oxPools =
-        new HashMap<Integer, ConnectionPool>();
+    private final Map<Integer, ConnectionPool> oxPools = new HashMap<Integer, ConnectionPool>();
 
     private final Lock poolsLock = new ReentrantLock(true);
 
+    private ManagementService managementService;
+
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private Pools() {
+    public Pools() {
         super();
     }
 
@@ -130,8 +128,7 @@ public final class Pools implements Runnable {
 
     public ConnectionPool getPool(final int poolId) throws DBPoolingException {
         if (null == configDBRead) {
-            throw new DBPoolingException(Code.NOT_INITIALIZED,
-                Pools.class.getName());
+            throw new DBPoolingException(Code.NOT_INITIALIZED, Pools.class.getName());
         }
         ConnectionPool retval;
         switch (poolId) {
@@ -146,19 +143,14 @@ public final class Pools implements Runnable {
             try {
                 retval = oxPools.get(Integer.valueOf(poolId));
                 if (null == retval) {
-                    final ConnectionDataStorage.ConnectionData data =
-                        ConnectionDataStorage.loadPoolData(poolId);
+                    final ConnectionDataStorage.ConnectionData data = ConnectionDataStorage.loadPoolData(poolId);
                     try {
                         Class.forName(data.driverClass);
                     } catch (final ClassNotFoundException e) {
                         throw new DBPoolingException(Code.NO_DRIVER, e);
                     }
-                    retval = new ConnectionPool(data.url, data.props,
-                        getConfig(data));
-                    retval.registerCleaner(ServerTimer.getTimer(),
-                        cleanerInterval);
-                    registerMBean(createMBeanName(poolId), retval);
-                    oxPools.put(Integer.valueOf(poolId), retval);
+                    retval = createPool(poolId, data.url, data.props, getConfig(data));
+                    oxPools.put(I(poolId), retval);
                 }
             } finally {
                 poolsLock.unlock();
@@ -171,7 +163,7 @@ public final class Pools implements Runnable {
 
     private void startCleaner() {
         if (null != cleaner) {
-            throw new IllegalStateException("");
+            throw new IllegalStateException("Pools cleaner is already started.");
         }
         cleaner =  new TimerTask() {
             @Override
@@ -180,18 +172,17 @@ public final class Pools implements Runnable {
                     final Thread thread = new Thread(Pools.this);
                     thread.setName("PoolsCleaner");
                     thread.start();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
         };
-        ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval,
-            cleanerInterval);
+        ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval, cleanerInterval);
     }
 
     private void stopCleaner() {
         if (null == cleaner) {
-            throw new IllegalStateException("");
+            throw new IllegalStateException("Pools cleaner is already stopped.");
         }
         cleaner.cancel();
         cleaner = null;
@@ -206,8 +197,7 @@ public final class Pools implements Runnable {
         }
         poolsLock.lock();
         try {
-            final Iterator<Map.Entry<Integer, ConnectionPool>> iter =
-                oxPools.entrySet().iterator();
+            final Iterator<Map.Entry<Integer, ConnectionPool>> iter = oxPools.entrySet().iterator();
             while (iter.hasNext()) {
                 final Map.Entry<Integer, ConnectionPool> entry = iter.next();
                 final ConnectionPool pool = entry.getValue();
@@ -230,20 +220,25 @@ public final class Pools implements Runnable {
      * @return the name of the mbean for the pool.
      */
     private static String createMBeanName(final int poolId) {
-        return "DB Pool " + poolId;
+        switch (poolId) {
+        case CONFIGDB_READ_ID:
+            return "ConfigDB Read";
+        case CONFIGDB_WRITE_ID:
+            return "ConfigDB Write";
+        default:
+            return "DB Pool " + poolId;
+        }
     }
 
     /**
      * Removes a pool from monitoring.
      * @param name Name of the pool to remove.
      */
-    private static void unregisterMBean(final String name) {
+    private void unregisterMBean(final String name) {
         try {
-            final ObjectName objName = new ObjectName(ConnectionPoolMBean
-                .DOMAIN, "name", name);
-            final ManagementService management = ServerServiceRegistry.getInstance().getService(ManagementService.class);
-            if (null != management) {
-                management.unregisterMBean(objName);
+            if (null != managementService) {
+                final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
+                managementService.unregisterMBean(objName);
             }
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
@@ -259,14 +254,11 @@ public final class Pools implements Runnable {
      * @param name of the pool.
      * @param pool the pool to monitor.
      */
-    private static void registerMBean(final String name,
-        final ConnectionPool pool) {
+    private void registerMBean(final String name, final ConnectionPool pool) {
         try {
-            final ObjectName objName = new ObjectName(ConnectionPoolMBean
-                .DOMAIN, "name", name);
-            final ManagementService management = ServerServiceRegistry.getInstance().getService(ManagementService.class);
-            if (null != management) {
-                management.registerMBean(objName, pool);
+            if (null != managementService) {
+                final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
+                managementService.registerMBean(objName, pool);
             }
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
@@ -282,15 +274,14 @@ public final class Pools implements Runnable {
             // Service appeared before Pools are started.
             return;
         }
-        registerMBean("ConfigDB Read", configDBRead);
+        registerMBean(createMBeanName(CONFIGDB_READ_ID), configDBRead);
         if (configDBWrite != configDBRead) {
-            registerMBean("ConfigDB Write", configDBWrite);
+            registerMBean(createMBeanName(CONFIGDB_WRITE_ID), configDBWrite);
         }
         poolsLock.lock();
         try {
             for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
-                registerMBean(createMBeanName(entry.getKey().intValue()),
-                    entry.getValue());
+                registerMBean(createMBeanName(entry.getKey().intValue()), entry.getValue());
             }
         } finally {
             poolsLock.unlock();
@@ -298,8 +289,10 @@ public final class Pools implements Runnable {
     }
 
     public void unregisterMBeans() {
-        unregisterMBean("ConfigDB Read");
-        unregisterMBean("ConfigDB Write");
+        if (configDBWrite != configDBRead) {
+            unregisterMBean(createMBeanName(CONFIGDB_WRITE_ID));
+        }
+        unregisterMBean(createMBeanName(CONFIGDB_READ_ID));
         poolsLock.lock();
         try {
             for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
@@ -311,40 +304,31 @@ public final class Pools implements Runnable {
     }
 
     /**
-     * @return the singleton instance.
-     */
-    public static Pools getInstance() {
-        return SINGLETON;
-    }
-
-    /**
      * Initializes the default pool configuration and starts read and write
      * pools for ConfigDB.
      * @throws DBPoolingException if starting fails.
      */
-    public void start() {
+    public void start(Configuration configuration) {
         if (null != configDBRead) {
             LOG.error("Duplicate startup of Pools.");
             return;
         }
-        initPoolConfig();
-        final Configuration configDB = Configuration.getInstance();
-        cleanerInterval = configDB.getLong(Property.CLEANER_INTERVAL,
-            cleanerInterval);
+        initPoolConfig(configuration);
+        cleanerInterval = configuration.getLong(Property.CLEANER_INTERVAL, cleanerInterval);
         startCleaner();
-        // TODO write createPool method.
-        configDBRead = new ConnectionPool(configDB.getReadUrl(),
-            configDB.getReadProps(), config);
-        configDBRead.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
-        if (configDB.isWriteDefined()) {
-            configDBWrite = new ConnectionPool(configDB.getWriteUrl(),
-                configDB.getWriteProps(), config);
-            configDBWrite.registerCleaner(ServerTimer.getTimer(),
-                cleanerInterval);
+        configDBRead = createPool(CONFIGDB_READ_ID, configuration.getReadUrl(), configuration.getReadProps(), config);
+        if (configuration.isWriteDefined()) {
+            configDBWrite = createPool(CONFIGDB_WRITE_ID, configuration.getWriteUrl(), configuration.getWriteProps(), config);
         } else {
             configDBWrite = configDBRead;
         }
-        registerMBeans();
+    }
+
+    private ConnectionPool createPool(int poolId, String url, Properties props, Config config) {
+        ConnectionPool retval = new ConnectionPool(url, props, config);
+        retval.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
+        registerMBean(createMBeanName(poolId), retval);
+        return retval;
     }
 
     /**
@@ -353,9 +337,9 @@ public final class Pools implements Runnable {
     public void stop() {
         // TODO write destroyPool method.
         poolsLock.lock();
+        unregisterMBeans();
         try {
             for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
-                unregisterMBean(createMBeanName(entry.getKey().intValue()));
                 final ConnectionPool pool = entry.getValue();
                 pool.getCleanerTask().cancel();
                 pool.destroy();
@@ -364,13 +348,11 @@ public final class Pools implements Runnable {
         } finally {
             poolsLock.unlock();
         }
-        if (Configuration.getInstance().isWriteDefined()) {
-            unregisterMBean("ConfigDB Write");
+        if (configDBWrite != configDBRead) {
             configDBWrite.getCleanerTask().cancel();
             configDBWrite.destroy();
         }
         configDBWrite = null;
-        unregisterMBean("ConfigDB Read");
         configDBRead.getCleanerTask().cancel();
         configDBRead.destroy();
         configDBRead = null;
@@ -386,9 +368,8 @@ public final class Pools implements Runnable {
     /**
      * Reads the pooling configuration from the configdb.properties file.
      */
-    private void initPoolConfig() {
+    private void initPoolConfig(Configuration configuration) {
         config = ConnectionPool.DEFAULT_CONFIG;
-        final Configuration configuration = Configuration.getInstance();
         config.minIdle = configuration.getInt(Property.MIN_IDLE, config.minIdle);
         config.maxIdle = configuration.getInt(Property.MAX_IDLE, config.maxIdle);
         config.maxIdleTime = configuration.getLong(Property.MAX_IDLE_TIME, config.maxIdleTime);
@@ -403,36 +384,7 @@ public final class Pools implements Runnable {
         config.testOnIdle = configuration.getBoolean(Property.TEST_ON_IDLE, config.testOnIdle);
         config.testThreads = configuration.getBoolean(Property.TEST_THREADS, config.testThreads);
         config.forceWriteOnly = configuration.getBoolean(Property.WRITE_ONLY, false);
-        if (LOG.isInfoEnabled()) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Database pooling options:\n");
-            sb.append("\tMinimum idle connections: ");
-            sb.append(config.minIdle);
-            sb.append("\n\tMaximum idle connections: ");
-            sb.append(config.maxIdle);
-            sb.append("\n\tMaximum idle time: ");
-            sb.append(config.maxIdleTime);
-            sb.append("ms\n\tMaximum active connections: ");
-            sb.append(config.maxActive);
-            sb.append("\n\tMaximum wait time for a connection: ");
-            sb.append(config.maxWait);
-            sb.append("ms\n\tMaximum life time of a connection: ");
-            sb.append(config.maxLifeTime);
-            sb.append("ms\n\tAction if connections exhausted: ");
-            sb.append(config.exhaustedAction.toString());
-            sb.append("\n\tTest connections on activate  : ");
-            sb.append(config.testOnActivate);
-            sb.append("\n\tTest connections on deactivate: ");
-            sb.append(config.testOnDeactivate);
-            sb.append("\n\tTest idle connections         : ");
-            sb.append(config.testOnIdle);
-            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
-            sb.append(config.testThreads);
-            sb.append("\n\tForce the use of write connections only: ");
-            sb.append(config.forceWriteOnly);
-
-            LOG.info(sb.toString());
-        }
+        LOG.info(config.toString());
     }
 
     /**
@@ -451,5 +403,15 @@ public final class Pools implements Runnable {
             retval.exhaustedAction = ConnectionPool.ExhaustedActions.GROW;
         }
         return retval;
+    }
+
+    public void setManagementService(ManagementService managementService) {
+        this.managementService = managementService;
+        registerMBeans();
+    }
+
+    public void removeManagementService() {
+        unregisterMBeans();
+        managementService = null;
     }
 }

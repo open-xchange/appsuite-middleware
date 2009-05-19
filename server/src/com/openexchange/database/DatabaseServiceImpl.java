@@ -74,7 +74,12 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(DatabaseServiceImpl.class);
+
     private static boolean forceWriteOnly;
+
+    private static Pools pools;
+
+    private static AssignmentStorage assignmentStorage;
 
     /**
      * Prevent instantiation
@@ -88,9 +93,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
         if (write || forceWriteOnly) {
-            poolId = assign.writePoolId;
+            poolId = assign.getWritePoolId();
         } else {
-            poolId = assign.readPoolId;
+            poolId = assign.getReadPoolId();
         }
         return poolId;
     }
@@ -98,7 +103,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     public static String getSchema(final int contextId)
         throws DBPoolingException {
         final Assignment assign = getAssignmentStorage().getAssignment(contextId);
-        return assign.schema;
+        return assign.getSchema();
     }
 
     /**
@@ -112,9 +117,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         final Assignment assign = getAssignmentStorage().getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
-            poolId = assign.writePoolId;
+            poolId = assign.getWritePoolId();
         } else {
-            poolId = assign.readPoolId;
+            poolId = assign.getReadPoolId();
         }
         try {
             return getPools().getPool(poolId).get();
@@ -166,11 +171,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
         final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
         if (write || forceWriteOnly) {
-            poolId = assign.writePoolId;
+            poolId = assign.getWritePoolId();
         } else {
-            poolId = assign.readPoolId;
+            poolId = assign.getReadPoolId();
         }
-        return get(poolId, assign.schema, noTimeout);
+        return get(poolId, assign.getSchema(), noTimeout);
     }
 
     /**
@@ -225,9 +230,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         final Assignment assign = getAssignmentStorage().getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
-            poolId = assign.writePoolId;
+            poolId = assign.getWritePoolId();
         } else {
-            poolId = assign.readPoolId;
+            poolId = assign.getReadPoolId();
         }
         back(poolId, con, false);
     }
@@ -359,12 +364,20 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return connections;
     }
 
+    public static void setPools(Pools pools) {
+        DatabaseServiceImpl.pools = pools;
+    }
+
     private static Pools getPools() {
-        return Pools.getInstance();
+        return pools;
+    }
+
+    public static void setAssignmentStorage(AssignmentStorage assignementStorage) {
+        DatabaseServiceImpl.assignmentStorage = assignementStorage;
     }
 
     private static AssignmentStorage getAssignmentStorage() {
-        return AssignmentStorage.getInstance();
+        return assignmentStorage;
     }
 
     public static void setForceWrite(final boolean forceWriteOnly) {
