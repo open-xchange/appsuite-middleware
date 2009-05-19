@@ -78,6 +78,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.multiple.internal.MultipleHandlerRegistry;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -207,7 +211,38 @@ public class Multiple extends SessionServlet {
 
     protected static final void doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter) {
         try {
-            if (MODULE_CALENDAR.equals(module)) {
+            /*
+             * Look up appropriate multiple handler first, then step through if-else-statement
+             */
+            final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
+            if (null != multipleHandler) {
+                writeMailRequest(req);
+                jsonWriter.object();
+                try {
+                    final JSONValue tmp = multipleHandler.performRequest(action, jsonObj, session);
+                    jsonWriter.key(ResponseFields.DATA);
+                    jsonWriter.value(tmp);
+                    if (null != multipleHandler.getTimestamp()) {
+                        jsonWriter.key(ResponseFields.TIMESTAMP).value(multipleHandler.getTimestamp().getTime());
+                    }
+                } catch (final AbstractOXException e) {
+                    LOG.error(e.getMessage(), e);
+                    if (jsonWriter.isExpectingValue()) {
+                        jsonWriter.value("");
+                    }
+                    ResponseWriter.writeException(e, jsonWriter);
+                } catch (final JSONException e) {
+                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    LOG.error(oje.getMessage(), oje);
+                    if (jsonWriter.isExpectingValue()) {
+                        jsonWriter.value("");
+                    }
+                    ResponseWriter.writeException(oje, jsonWriter);
+                } finally {
+                    multipleHandler.close();
+                    jsonWriter.endObject();
+                }
+            } else if (MODULE_CALENDAR.equals(module)) {
                 writeMailRequest(req);
                 final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
                 jsonWriter.object();
@@ -462,4 +497,16 @@ public class Multiple extends SessionServlet {
             LOG.error(e.getMessage(), e);
         }
     }
+
+    private static MultipleHandler lookUpMultipleHandler(final String module) {
+        final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
+        if (null != registry) {
+            final MultipleHandlerFactoryService factoryService = registry.getFactoryService(module);
+            if (null != factoryService) {
+                return factoryService.createMultipleHandler();
+            }
+        }
+        return null;
+    }
+
 }

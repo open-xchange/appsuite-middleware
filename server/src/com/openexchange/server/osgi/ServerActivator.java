@@ -122,6 +122,8 @@ import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.management.ManagementService;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -382,6 +384,8 @@ public final class ServerActivator extends DeferredActivator {
                 SearchService.class)));
             // Login handler
             serviceTrackerList.add(new ServiceTracker(context, LoginHandlerService.class.getName(), new LoginHandlerCustomizer(context)));
+            // Multiple handler factory services
+            serviceTrackerList.add(new ServiceTracker(context, MultipleHandlerFactoryService.class.getName(), new MultipleHandlerServiceTracker(context)));
 
             // Start up server the usual way
             starter.start();
