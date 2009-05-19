@@ -68,7 +68,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 import com.openexchange.timer.internal.TimerImpl;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
@@ -260,8 +260,8 @@ public final class Init {
     private static void startAndInjectTimerBundle() {
         final TimerImpl timer = new TimerImpl();
         timer.start();
-        services.put(Timer.class, timer);
-        ServerServiceRegistry.getInstance().addService(Timer.class, timer);
+        services.put(TimerService.class, timer);
+        ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
     }
 
     public static void startAndInjectConfigBundle() {
@@ -276,8 +276,9 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseBundle() throws DBPoolingException {
-        ConfigurationService service = (ConfigurationService) services.get(ConfigurationService.class);
-        com.openexchange.database.internal.Initialization.getInstance().start(service);
+        ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
+        TimerService timerService = (TimerService) services.get(TimerService.class);
+        com.openexchange.database.internal.Initialization.getInstance().start(configurationService, timerService);
     }
 
     private static void startAndInjectMonitoringBundle() {
@@ -337,7 +338,7 @@ public final class Init {
 
     private static void startAndInjectSessiondBundle() {
         SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
-        SessiondServiceRegistry.getServiceRegistry().addService(Timer.class, services.get(Timer.class));
+        SessiondServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
         ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
     }
 
