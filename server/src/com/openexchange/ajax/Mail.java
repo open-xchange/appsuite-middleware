@@ -2452,6 +2452,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                  */
                 flagVal = (bodyObj.has(MailJSONField.VALUE.getKey()) && !bodyObj.isNull(MailJSONField.VALUE.getKey()) ? bodyObj.getBoolean(MailJSONField.VALUE.getKey()) : false);
             }
+
+            final Integer setFlags = bodyObj.hasAndNotNull("set_flags") ? Integer.valueOf(bodyObj.getInt("set_flags")) : null;
+            final Integer clearFlags = bodyObj.hasAndNotNull("clear_flags") ? Integer.valueOf(bodyObj.getInt("clear_flags")) : null;
+
             MailServletInterface mailInterface = mailIntefaceArg;
             boolean closeMailInterface = false;
             try {
@@ -2472,6 +2476,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                      * Update system flags which are allowed to be altered by client
                      */
                     mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, flagBits.intValue(), flagVal);
+                }
+                if (setFlags != null) {
+                    /*
+                     * Add system flags which are allowed to be altered by client
+                     */
+                    mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, setFlags.intValue(), true);
+                }
+                if (clearFlags != null) {
+                    /*
+                     * Remove system flags which are allowed to be altered by client
+                     */
+                    mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, clearFlags.intValue(), false);
                 }
                 if (destFolder != null) {
                     /*
