@@ -72,7 +72,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.Permission;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
@@ -93,13 +92,13 @@ public class AdminDaemon {
     private static PropertyHandler prop = null;
     private AdminCache cache = null;
     private static Registry registry = null;
-    /* 
+    /*
      * Write changes to this list cannot happen at the same time as the BundleListener
      * delivers events in order and not concurrently. So there's no need to deal with
      * concurrency here
-     */ 
+     */
     private static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
-    
+
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
@@ -108,7 +107,7 @@ public class AdminDaemon {
     private static OXTaskMgmtImpl oxtaskmgmt = null;
 
     public class LocalServerFactory implements RMIServerSocketFactory {
-        
+
         public ServerSocket createServerSocket(final int port) throws IOException {
             final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
             if (hostname_property.equalsIgnoreCase("0")) {
@@ -130,7 +129,7 @@ public class AdminDaemon {
      * The problem is that the listener itself will not get any events before this
      * bundle is started, so if any bundles are started beforehand you won't notice
      * this here. The consequence is that we have to build an initial list on startup
-     * 
+     *
      * @param context
      */
     public void getCurrentBundleStatus(BundleContext context) {
@@ -147,15 +146,12 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
             public void bundleChanged(final BundleEvent event) {
-            	
                 if (event.getType() == BundleEvent.STARTED) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                if (log.isInfoEnabled()) {
-                    log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
-                }
+                log.debug(event.getBundle().getSymbolicName() + " changed to " + event.getType());
             }
         };
         context.addBundleListener(bl);
@@ -163,15 +159,15 @@ public class AdminDaemon {
 
     public void initCache(final BundleContext context) throws ClassNotFoundException, OXGenericException {
         this.cache = new AdminCache();
-        
-        this.cache.initCache();  
+
+        this.cache.initCache();
         ClientAdminThread.cache = this.cache;
-        prop = this.cache.getProperties();        
+        prop = this.cache.getProperties();
         log.info("Cache and Pools initialized!");
     }
-    
+
     public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException{
-    	this.cache.initAccessCombinations();
+        this.cache.initAccessCombinations();
     }
 
     public void initRMI(final BundleContext context) {
@@ -197,25 +193,25 @@ public class AdminDaemon {
 
             oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
             final OXResourceInterface oxres_stub_v2 = (OXResourceInterface) UnicastRemoteObject.exportObject(oxres_v2, 0);
-            
+
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
             final OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface)UnicastRemoteObject.exportObject(oxlogin_v2, 0);
-            
+
             oxadmincore = new OXAdminCoreImpl(context);
             final OXAdminCoreInterface oxadmincore_stub = (OXAdminCoreInterface)UnicastRemoteObject.exportObject(oxadmincore, 0);
-            
+
             oxtaskmgmt = new OXTaskMgmtImpl();
             final OXTaskMgmtInterface oxtaskmgmt_stub = (OXTaskMgmtInterface) UnicastRemoteObject.exportObject(oxtaskmgmt, 0);
             // END of NEW export
 
             // bind all NEW Objects to registry
-    	    registry.bind(OXUserInterface.RMI_NAME, oxuser_stub_v2);
-    	    registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
-    	    registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
-    	    registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
-    	    registry.bind(OXAdminCoreInterface.RMI_NAME, oxadmincore_stub);
-    	    registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
-    	} catch (final RemoteException e) {
+            registry.bind(OXUserInterface.RMI_NAME, oxuser_stub_v2);
+            registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
+            registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
+            registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
+            registry.bind(OXAdminCoreInterface.RMI_NAME, oxadmincore_stub);
+            registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
+        } catch (final RemoteException e) {
             log.fatal("Error creating RMI registry!",e);
             System.exit(1);
         } catch (final AlreadyBoundException e) {
@@ -252,83 +248,83 @@ public class AdminDaemon {
     }
 
     public static final ArrayList<Bundle> getBundlelist() {
-		return bundlelist;
-	}
+        return bundlelist;
+    }
 
-	/**
-	 * Looks for a matching service reference inside all bundles provided
-	 * through {@link #getBundlelist()}.
-	 * 
-	 * @param <S>
-	 *            Type of the service
-	 * @param bundleSymbolicName
-	 *            The bundle's symbolic name which offers the service
-	 * @param serviceName
-	 *            The service's name provided through "<i>name</i>" property
-	 * @param context
-	 *            The bundle context (on which
-	 *            {@link BundleContext#getService(ServiceReference)} is invoked)
-	 * @param clazz
-	 *            The service's class
-	 * @return The service if found; otherwise <code>null</code>
-	 */
-	public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName,
-			final BundleContext context, final Class<? extends S> clazz) {
-		for (final Bundle bundle : bundlelist) {
-			if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
-				final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-				if (null != servicereferences) {
-					for (final ServiceReference servicereference : servicereferences) {
-						final Object property = servicereference.getProperty("name");
-						if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
-							final Object obj = context.getService(servicereference);
-							if (null == obj) {
-								log.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
-							}
-							try {
-								return clazz.cast(obj);
-							} catch (final ClassCastException e) {
-								log.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle "
-										+ bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
-								return null;
-							}
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+    /**
+     * Looks for a matching service reference inside all bundles provided
+     * through {@link #getBundlelist()}.
+     *
+     * @param <S>
+     *            Type of the service
+     * @param bundleSymbolicName
+     *            The bundle's symbolic name which offers the service
+     * @param serviceName
+     *            The service's name provided through "<i>name</i>" property
+     * @param context
+     *            The bundle context (on which
+     *            {@link BundleContext#getService(ServiceReference)} is invoked)
+     * @param clazz
+     *            The service's class
+     * @return The service if found; otherwise <code>null</code>
+     */
+    public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName,
+            final BundleContext context, final Class<? extends S> clazz) {
+        for (final Bundle bundle : bundlelist) {
+            if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
+                            final Object obj = context.getService(servicereference);
+                            if (null == obj) {
+                                log.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
+                            }
+                            try {
+                                return clazz.cast(obj);
+                            } catch (final ClassCastException e) {
+                                log.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle "
+                                        + bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Ungets the service identified through given bundle's symbolic name and "<i>name</i>"
-	 * property.
-	 * 
-	 * @param bundleSymbolicName
-	 *            The bundle's symbolic name which offers the service
-	 * @param serviceName
-	 *            The service's name provided through "<i>name</i>" property
-	 * @param context
-	 *            The bundle context (on which
-	 *            {@link BundleContext#ungetService(ServiceReference)} is
-	 *            invoked)
-	 */
-	public static final void ungetService(final String bundleSymbolicName, final String serviceName,
-			final BundleContext context) {
-		for (final Bundle bundle : bundlelist) {
-			if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
-				final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-				if (null != servicereferences) {
-					for (final ServiceReference servicereference : servicereferences) {
-						final Object property = servicereference.getProperty("name");
-						if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
-							context.ungetService(servicereference);
-						}
-					}
-				}
-			}
-		}
-	}
+    /**
+     * Ungets the service identified through given bundle's symbolic name and "<i>name</i>"
+     * property.
+     *
+     * @param bundleSymbolicName
+     *            The bundle's symbolic name which offers the service
+     * @param serviceName
+     *            The service's name provided through "<i>name</i>" property
+     * @param context
+     *            The bundle context (on which
+     *            {@link BundleContext#ungetService(ServiceReference)} is
+     *            invoked)
+     */
+    public static final void ungetService(final String bundleSymbolicName, final String serviceName,
+            final BundleContext context) {
+        for (final Bundle bundle : bundlelist) {
+            if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
+                            context.ungetService(servicereference);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
 }
