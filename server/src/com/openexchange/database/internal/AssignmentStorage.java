@@ -232,11 +232,9 @@ public final class AssignmentStorage {
 
     /**
      * Adds a found cache service to improve performance of this class.
-     * 
-     * @param service
-     *            a found cache service.
+     * @param service a found cache service.
      */
-    public void addCacheService(final CacheService service) {
+    public void setCacheService(final CacheService service) {
         this.cacheService = service;
         try {
             this.cache = service.getCache(CACHE_NAME);

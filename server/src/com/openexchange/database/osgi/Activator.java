@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
@@ -69,6 +70,8 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker managementTracker;
 
+    private ServiceTracker cacheTracker;
+
     /**
      * {@inheritDoc}
      */
@@ -78,12 +81,15 @@ public class Activator implements BundleActivator {
         configurationTracker.open();
         managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
         managementTracker.open();
+        cacheTracker = new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context));
+        cacheTracker.open();
     }
 
     /**
      * {@inheritDoc}
      */
     public void stop(BundleContext context) throws Exception {
+        cacheTracker.close();
         managementTracker.close();
         configurationTracker.close();
     }

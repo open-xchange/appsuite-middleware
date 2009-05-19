@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.database.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.caching.CacheService;
-import com.openexchange.database.internal.AssignmentStorage;
+import com.openexchange.database.internal.Initialization;
 
 /**
- * This customizer adds a discovered cache service to server components to
- * improve their performance.
+ * This customizer adds a discovered cache service to server components to improve their performance.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CacheCustomizer implements ServiceTrackerCustomizer {
+public class CacheServiceCustomizer implements ServiceTrackerCustomizer {
+
+    private static final Log LOG = LogFactory.getLog(CacheServiceCustomizer.class);
 
     private final BundleContext context;
 
@@ -69,35 +72,25 @@ public class CacheCustomizer implements ServiceTrackerCustomizer {
      * Default constructor.
      * @param context bundle context.
      */
-    public CacheCustomizer(final BundleContext context) {
+    public CacheServiceCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object addingService(final ServiceReference reference) {
-        final CacheService cache = (CacheService) context.getService(reference);
-        AssignmentStorage.getInstance().addCacheService(cache);
-        return cache;
+        final CacheService service = (CacheService) context.getService(reference);
+        LOG.info("Injecting CacheService into database bundle.");
+        Initialization.getInstance().setCacheService(service);
+        return service;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void removedService(final ServiceReference reference,
-        final Object service) {
-        AssignmentStorage.getInstance().removeCacheService();
+    public void removedService(final ServiceReference reference, final Object service) {
+        LOG.info("Removing CacheService from database bundle.");
+        Initialization.getInstance().removeCacheService();
         context.ungetService(reference);
     }
-
 }

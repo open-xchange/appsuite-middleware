@@ -51,6 +51,7 @@ package com.openexchange.database.internal;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseServiceImpl;
@@ -67,6 +68,10 @@ public final class Initialization {
     private static final Log LOG = LogFactory.getLog(Initialization.class);
 
     private static final Initialization SINGLETON = new Initialization();
+
+    private ManagementService managementService;
+
+    private CacheService cacheService;
 
     private Configuration configuration;
 
@@ -94,9 +99,15 @@ public final class Initialization {
         configuration.readConfiguration(configurationService);
         pools = new Pools(timerService);
         pools.start(configuration);
+        if (null != managementService) {
+            pools.setManagementService(managementService);
+        }
         DatabaseServiceImpl.setPools(pools);
         assignmentStorage = new AssignmentStorage();
         assignmentStorage.start();
+        if (null != cacheService) {
+            assignmentStorage.setCacheService(cacheService);
+        }
         DatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
         Server.start(configurationService);
         if (LOG.isInfoEnabled()) {
@@ -116,12 +127,31 @@ public final class Initialization {
         configuration = null;
     }
 
-    public void setManagementService(ManagementService managementService) {
-        pools.setManagementService(managementService);
+    public void setManagementService(ManagementService service) {
+        this.managementService = service;
+        if (null != pools) {
+            pools.setManagementService(service);
+        }
     }
 
     public void removeManagementService() {
-        pools.removeManagementService();
+        this.managementService = null;
+        if (null != pools) {
+            pools.removeManagementService();
+        }
+    }
+
+    public void setCacheService(CacheService service) {
+        this.cacheService = service;
+        if (null != pools) {
+            assignmentStorage.setCacheService(service);
+        }
+    }
+
+    public void removeCacheService() {
+        this.cacheService = null;
+        if (null != pools) {
+            assignmentStorage.removeCacheService();
+        }
     }
 }
- 

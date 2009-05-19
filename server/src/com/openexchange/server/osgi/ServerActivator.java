@@ -310,9 +310,6 @@ public final class ServerActivator extends DeferredActivator {
 
         // contacts
         serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(), new ContactServiceListener(context)));
-        // Add cache dynamically to database pooling. it works without, too.
-        serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
         // ICal Parser
         serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
             context,
