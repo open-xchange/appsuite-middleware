@@ -47,30 +47,34 @@
  *
  */
 
+package com.openexchange.database.osgi;
 
-
-package com.openexchange.database;
-
-import com.openexchange.monitoring.MonitorMBean;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Activator for the database bundle.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+public class Activator implements BundleActivator {
+
+    private ServiceTracker configTracker;
 
     /**
-     * Domain for the beans.
+     * {@inheritDoc}
      */
-    String DOMAIN = "com.openexchange.pooling";
+    public void start(BundleContext context) throws Exception {
+        configTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
+        configTracker.open();
+    }
 
     /**
-     * @return the number of threads waiting for a connection.
+     * {@inheritDoc}
      */
-    int getNumWaiting();
-
-    /**
-     * @return the total number of database connections
-     */
-    int getNumberOfDBConnections();
+    public void stop(BundleContext context) throws Exception {
+        configTracker.close();
+    }
 }

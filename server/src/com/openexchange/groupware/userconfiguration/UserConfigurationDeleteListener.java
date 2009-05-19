@@ -52,10 +52,10 @@ package com.openexchange.groupware.userconfiguration;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * {@link UserConfigurationDeleteListener} - The {@link DeleteListener delete

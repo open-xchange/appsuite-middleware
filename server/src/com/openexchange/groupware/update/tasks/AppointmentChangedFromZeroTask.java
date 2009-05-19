@@ -58,7 +58,8 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -68,7 +69,6 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -116,7 +116,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to remove 0 set changed_from in appointments.");
         }
-        final Connection con = Database.get(contextId, true);
+        final Connection con = DatabaseServiceImpl.get(contextId, true);
         Statement st = null;
         try {
             con.setAutoCommit(false);
@@ -130,7 +130,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
             DBUtils.autocommit(con);
             closeSQLStuff(null, st);
             if (con != null) {
-                Database.back(contextId, true, con);
+                DatabaseServiceImpl.back(contextId, true, con);
             }
         }
         if (LOG.isInfoEnabled()) {

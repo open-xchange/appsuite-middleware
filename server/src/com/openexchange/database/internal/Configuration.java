@@ -47,33 +47,33 @@
  *
  */
 
-package com.openexchange.configuration;
+package com.openexchange.database.internal;
 
-import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.server.Initialization;
-import com.openexchange.tools.conf.AbstractConfig;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingException.Code;
 
 /**
- * Contains the settings for the ConfigDB.
+ * Contains the settings to connect to the configuration database.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ConfigDB extends AbstractConfig implements Initialization {
+public final class Configuration {
 
-    private static ConfigDB singleton = new ConfigDB();
+    private static Configuration singleton = new Configuration();
 
-    private static final SystemConfig.Property KEY = SystemConfig.Property
-        .CONFIGDB;
+    private static final String CONFIG_FILENAME = "configdb.properties";
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigDB.class);
+    private static final Log LOG = LogFactory.getLog(Configuration.class);
+
+    private Properties props;
 
     private Properties readProps = new Properties();
 
@@ -82,13 +82,12 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
     /**
      * Prevent instantiation.
      */
-    private ConfigDB() {
+    private Configuration() {
         super();
     }
 
     public boolean isWriteDefined() {
-        return Boolean.parseBoolean(getProperty(Property.SEPERATE_WRITE,
-            "false"));
+        return Boolean.parseBoolean(getProperty(Property.SEPERATE_WRITE, "false"));
     }
 
     public String getReadUrl() {
@@ -115,20 +114,17 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         T convert(String toConvert);
     }
 
-    private <T> T getUniversal(final Property property, final T def,
-        final Convert<T> converter) {
+    private <T> T getUniversal(final Property property, final T def, final Convert<T> converter) {
         final T retval;
-        if (containsPropertyInternal(property.propertyName)) {
-            retval = converter.convert(getPropertyInternal(property
-                .propertyName));
+        if (props != null && props.containsKey(property.propertyName)) {
+            retval = converter.convert(props.getProperty(property.propertyName));
         } else {
             retval = def;
         }
         return retval;
     }
 
-    public String getProperty(final Property property,
-        final String def) {
+    public String getProperty(final Property property, final String def) {
         return getUniversal(property, def, new Convert<String>() {
             public String convert(final String toConvert) {
                 return toConvert;
@@ -163,36 +159,40 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
     /**
      * @return the singleton instance.
      */
-    public static ConfigDB getInstance() {
+    public static Configuration getInstance() {
         return singleton;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void start() throws ConfigurationException {
-        if (isPropertiesLoadInternal()) {
-            LOG.error("Duplicate initialization of ConfigDB.");
+    public void readConfiguration(ConfigurationService service) throws DBPoolingException {
+        if (null != props) {
+            LOG.error("Duplicate initialization of database configuration.");
             return;
+            // TODO throw exception
+            // throw new DBPoolingException(Code.DUPLICATE_INITIALIZATION);
         }
-        loadPropertiesInternal();
+        props = service.getFile(CONFIG_FILENAME);
+        if (props.isEmpty()) {
+            throw new DBPoolingException(Code.MISSING_CONFIGURATION);
+        }
         separateReadWrite();
         loadDrivers();
     }
 
     private void separateReadWrite() {
-        final Iterator<String> iter = keyIterator();
-        while (iter.hasNext()) {
-            final String key = iter.next();
+        for (Object tmp : props.keySet()) {
+            final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {
-                final String value = getPropertyInternal(key);
+                final String value = props.getProperty(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
                 readProps.put(readKey, readValue);
             } else
             if (key.startsWith("writeProperty.")) {
-                final String value = getPropertyInternal(key);
+                final String value = props.getProperty(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
@@ -201,65 +201,43 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         }
     }
 
-    private void loadDrivers() throws ConfigurationException {
+    private void loadDrivers() throws DBPoolingException {
         final String readDriverClass = getProperty(Property.READ_DRIVER_CLASS);
         if (null == readDriverClass) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
-                Property.READ_DRIVER_CLASS.propertyName);
+            throw new DBPoolingException(Code.PROPERTY_MISSING, Property.READ_DRIVER_CLASS.propertyName);
         }
         try {
             Class.forName(readDriverClass);
         } catch (final ClassNotFoundException e) {
-            throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
-                readDriverClass);
+            throw new DBPoolingException(Code.NO_DRIVER, e);
         }
         if (!isWriteDefined()) {
             return;
         }
-        final String writeDriverClass = getProperty(Property
-            .WRITE_DRIVER_CLASS);
+        final String writeDriverClass = getProperty(Property.WRITE_DRIVER_CLASS);
         if (null == writeDriverClass) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
-                Property.WRITE_DRIVER_CLASS.propertyName);
+            throw new DBPoolingException(Code.PROPERTY_MISSING, Property.WRITE_DRIVER_CLASS.propertyName);
         }
         try {
             Class.forName(writeDriverClass);
         } catch (final ClassNotFoundException e) {
-            throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
-                writeDriverClass);
+            throw new DBPoolingException(Code.NO_DRIVER, e);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public void stop() {
-        clearProperties();
-        readProps = new Properties();
-        writeProps = new Properties();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getPropertyFileName() throws ConfigurationException {
-        final String fileName = SystemConfig.getProperty(KEY);
-        if (null == fileName) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
-                KEY.getPropertyName());
-        }
-        return fileName;
+    public void clear() {
+        props = null;
+        readProps.clear();
+        writeProps.clear();
     }
 
     /**
      * Enumeration of all properties in the configdb.properties file.
      */
     public static enum Property {
-        /**
-         * Name of the server.
-         */
-        SERVER_NAME("SERVER_NAME"),
         /**
          * URL for configdb read.
          */

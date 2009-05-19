@@ -54,7 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.caching.CacheService;
-import com.openexchange.database.AssignmentStorage;
+import com.openexchange.database.internal.AssignmentStorage;
 
 /**
  * This customizer adds a discovered cache service to server components to

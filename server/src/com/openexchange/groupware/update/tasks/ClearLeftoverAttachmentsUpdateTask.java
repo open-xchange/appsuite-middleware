@@ -14,7 +14,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -24,7 +25,6 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.LocalFileStorage;
 
@@ -76,7 +76,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 		PreparedStatement stmt = null;
 
 		try {
-			writeCon = Database.get(contextId, true);
+			writeCon = DatabaseServiceImpl.get(contextId, true);
 			writeCon.setAutoCommit(false);
 			stmt = writeCon.prepareStatement(sql);
 			for(int i = 0; i < args.length; i++) {
@@ -109,7 +109,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 				}
 
 				if(writeCon != null) {
-					Database.back(contextId, true, writeCon);
+					DatabaseServiceImpl.back(contextId, true, writeCon);
 				}
 			}   
         }
@@ -145,7 +145,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         ResultSet rs = null;
 
         try {
-			readCon = Database.get(false);
+			readCon = DatabaseServiceImpl.get(false);
             stmt = readCon.prepareStatement("SELECT filestore_id, filestore_name FROM context WHERE cid = ?");
             stmt.setInt(1, ctx_id);
 
@@ -202,7 +202,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
             if(readCon != null) {
 				if(readCon != null) {
-					Database.back(false, readCon);
+					DatabaseServiceImpl.back(false, readCon);
 				}
 			}
         }
@@ -220,7 +220,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         ResultSet rs = null;
 
         try {
-			readCon = Database.get(contextId, false);
+			readCon = DatabaseServiceImpl.get(contextId, false);
             stmt = readCon.prepareStatement(query);
             rs = stmt.executeQuery();
             while(rs.next()) {
@@ -247,7 +247,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
             if(readCon != null) {
 				if(readCon != null) {
-					Database.back(contextId, false, readCon);
+					DatabaseServiceImpl.back(contextId, false, readCon);
 				}
 			}
         }

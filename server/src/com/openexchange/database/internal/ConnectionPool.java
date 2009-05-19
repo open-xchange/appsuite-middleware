@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.database.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
@@ -63,11 +63,12 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.database.DBPoolingException;
 
 /**
  * Extends the pool API especially for database connections.
@@ -160,7 +161,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
      * {@inheritDoc}
      */
     public int getNumberOfDBConnections() {
-        return Database.getNumConnections();
+        return DatabaseServiceImpl.getNumConnections();
     }
     
     /**
@@ -333,7 +334,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
         }
     }
 
-    static final ReentrantLockPool.Config DEFAULT_CONFIG;
+    public static final ReentrantLockPool.Config DEFAULT_CONFIG;
 
     static {
         DEFAULT_CONFIG = new ReentrantLockPool.Config();

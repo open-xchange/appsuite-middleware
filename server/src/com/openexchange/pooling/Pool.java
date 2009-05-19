@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.pooling;
 
 /**

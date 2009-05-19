@@ -58,7 +58,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -118,7 +118,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             Connection writeCon = null;
             PreparedStatement stmt = null;
             try {
-                writeCon = Database.getNoTimeout(contextId, true);
+                writeCon = DatabaseServiceImpl.getNoTimeout(contextId, true);
                 try {
                     stmt = writeCon.prepareStatement(SQL_MODIFY1);
                     stmt.executeUpdate();
@@ -131,7 +131,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             } finally {
                 closeSQLStuff(null, stmt);
                 if (writeCon != null) {
-                    Database.backNoTimeout(contextId, true, writeCon);
+                    DatabaseServiceImpl.backNoTimeout(contextId, true, writeCon);
                 }
             }
         }
@@ -147,7 +147,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             Connection writeCon = null;
             PreparedStatement stmt = null;
             try {
-                writeCon = Database.getNoTimeout(contextId, true);
+                writeCon = DatabaseServiceImpl.getNoTimeout(contextId, true);
                 try {
                     stmt = writeCon.prepareStatement(SQL_MODIFY3);
                     stmt.executeUpdate();
@@ -160,7 +160,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             } finally {
                 closeSQLStuff(null, stmt);
                 if (writeCon != null) {
-                    Database.backNoTimeout(contextId, true, writeCon);
+                    DatabaseServiceImpl.backNoTimeout(contextId, true, writeCon);
                 }
             }
         }
@@ -184,7 +184,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         Connection readCon = null;
         ResultSet rs = null;
         try {
-            readCon = Database.getNoTimeout(contextId, false);
+            readCon = DatabaseServiceImpl.getNoTimeout(contextId, false);
             try {
                 final DatabaseMetaData databaseMetaData = readCon.getMetaData();
                 rs = databaseMetaData.getColumns(null, null, TABLE, COLUMN);
@@ -236,7 +236,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         } finally {
             DBUtils.closeSQLStuff(rs, null);
             if (readCon != null) {
-                Database.backNoTimeout(contextId, false, readCon);
+                DatabaseServiceImpl.backNoTimeout(contextId, false, readCon);
             }
         }
     }
@@ -257,7 +257,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         Connection readCon = null;
         ResultSet rs = null;
         try {
-            readCon = Database.get(contextId, false);
+            readCon = DatabaseServiceImpl.get(contextId, false);
             try {
                 final DatabaseMetaData databaseMetaData = readCon.getMetaData();
                 rs = databaseMetaData.getPrimaryKeys(null, null, TABLE);
@@ -294,7 +294,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         } finally {
             closeSQLStuff(rs, null);
             if (readCon != null) {
-                Database.back(contextId, false, readCon);
+                DatabaseServiceImpl.back(contextId, false, readCon);
             }
         }
     }

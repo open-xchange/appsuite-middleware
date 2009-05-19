@@ -66,11 +66,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**

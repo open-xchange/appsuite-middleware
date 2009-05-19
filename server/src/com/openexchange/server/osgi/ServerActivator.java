@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
@@ -79,6 +80,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.database.osgi.Activator;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
@@ -253,8 +255,12 @@ public final class ServerActivator extends DeferredActivator {
         }
     }
 
+    private BundleActivator databaseActivator;
+    
     @Override
     protected void startBundle() throws Exception {
+        // TODO remove the following line if database bundle is finished.
+        (databaseActivator = new Activator()).start(context);
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
         Version.buildnumber = (String) headers.get("OXVersion") + " Rev" + (String) headers.get("OXRevision");
@@ -514,6 +520,9 @@ public final class ServerActivator extends DeferredActivator {
             started.set(false);
             adminBundleInstalled = null;
         }
+        // TODO remove this lines if database bundle is finished.
+        databaseActivator.stop(context);
+        databaseActivator = null;
     }
 
     /**

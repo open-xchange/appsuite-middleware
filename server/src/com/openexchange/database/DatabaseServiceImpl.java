@@ -55,28 +55,31 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.database.DBPoolingException.Code;
+import com.openexchange.database.internal.Assignment;
+import com.openexchange.database.internal.AssignmentStorage;
+import com.openexchange.database.internal.ConnectionPool;
+import com.openexchange.database.internal.Pools;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.pooling.PoolingException;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.impl.DBPoolingException.Code;
 
 /**
  * Interface class for accessing the database system.
  * TODO test threads.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Database {
+public final class DatabaseServiceImpl implements DatabaseService {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Database.class);
+    private static final Log LOG = LogFactory.getLog(DatabaseServiceImpl.class);
     private static boolean forceWriteOnly;
 
     /**
      * Prevent instantiation
      */
-    private Database() {
+    private DatabaseServiceImpl() {
         super();
     }
 
@@ -365,6 +368,6 @@ public final class Database {
     }
 
     public static void setForceWrite(final boolean forceWriteOnly) {
-        Database.forceWriteOnly = forceWriteOnly;
+        DatabaseServiceImpl.forceWriteOnly = forceWriteOnly;
     }
 }

@@ -59,7 +59,8 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -122,7 +122,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
         }
         final String findBroken = "SELECT cid,intfield01,intfield02 "
             + "FROM prg_dates WHERE intfield01!=intfield02 AND field06 IS NULL";
-        final Connection con = Database.get(contextId, true);
+        final Connection con = DatabaseServiceImpl.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -153,7 +153,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
             DBUtils.autocommit(con);
             closeSQLStuff(result, stmt);
             if (con != null) {
-                Database.back(contextId, true, con);
+                DatabaseServiceImpl.back(contextId, true, con);
             }
         }
         if (LOG.isInfoEnabled()) {

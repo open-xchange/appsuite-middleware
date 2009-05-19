@@ -59,8 +59,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.database.Database;
-import com.openexchange.database.Server;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.internal.Server;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -68,7 +69,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Implements loading and storing the schema version information.
@@ -135,13 +135,13 @@ public class SchemaStoreImpl extends SchemaStore {
 			Connection writeCon = null;
 			PreparedStatement stmt = null;
 			try {
-				writeCon = Database.get(contextId, true);
+				writeCon = DatabaseServiceImpl.get(contextId, true);
 				stmt = writeCon.prepareStatement(CREATE);
 				stmt.executeUpdate();
 			} finally {
 				closeSQLStuff(null, stmt);
 				if (writeCon != null) {
-					Database.back(contextId, true, writeCon);
+					DatabaseServiceImpl.back(contextId, true, writeCon);
 				}
 			}
 		} catch (final SQLException e) {
@@ -162,7 +162,7 @@ public class SchemaStoreImpl extends SchemaStore {
 			Connection writeCon = null;
 			PreparedStatement stmt = null;
 			try {
-				writeCon = Database.get(contextId, true);
+				writeCon = DatabaseServiceImpl.get(contextId, true);
 				stmt = writeCon.prepareStatement(INSERT);
 				stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
 				stmt.setBoolean(2, SchemaImpl.FIRST.isLocked());
@@ -173,7 +173,7 @@ public class SchemaStoreImpl extends SchemaStore {
 			} finally {
 				closeSQLStuff(null, stmt);
 				if (writeCon != null) {
-					Database.back(contextId, true, writeCon);
+					DatabaseServiceImpl.back(contextId, true, writeCon);
 				}
 			}
 		} catch (final SQLException e) {
@@ -214,7 +214,7 @@ public class SchemaStoreImpl extends SchemaStore {
         ResultSet rs = null;
         Connection writeCon = null;
         try {
-            writeCon = Database.get(contextId, true);
+            writeCon = DatabaseServiceImpl.get(contextId, true);
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
             throw new SchemaException(e);
@@ -276,7 +276,7 @@ public class SchemaStoreImpl extends SchemaStore {
 				} catch (final SQLException e) {
 					LOG.error(e.getMessage(), e);
 				}
-				Database.back(contextId, true, writeCon);
+				DatabaseServiceImpl.back(contextId, true, writeCon);
 			}
 		}
 	}
@@ -308,7 +308,7 @@ public class SchemaStoreImpl extends SchemaStore {
 				/*
 				 * Try to obtain exclusive lock on table 'version'
 				 */
-				writeCon = Database.get(contextId, true);
+				writeCon = DatabaseServiceImpl.get(contextId, true);
 				writeCon.setAutoCommit(false); // BEGIN
 				stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
 				rs = stmt.executeQuery();
@@ -362,7 +362,7 @@ public class SchemaStoreImpl extends SchemaStore {
 							LOG.error(e.getMessage(), e);
 						}
 					}
-					Database.back(contextId, true, writeCon);
+					DatabaseServiceImpl.back(contextId, true, writeCon);
 				}
 			}
 		} catch (final DBPoolingException e) {
@@ -390,7 +390,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	private Schema loadSchema(final int contextId) throws SchemaException {
 		Connection con;
 		try {
-			con = Database.get(contextId, true);
+			con = DatabaseServiceImpl.get(contextId, true);
 		} catch (final DBPoolingException e) {
 			throw new SchemaException(e);
 		}
@@ -408,7 +408,7 @@ public class SchemaStoreImpl extends SchemaStore {
 				schema.setGroupwareCompatible(result.getBoolean(pos++));
 				schema.setAdminCompatible(result.getBoolean(pos++));
 				schema.setServer(result.getString(pos++));
-				schema.setSchema(Database.getSchema(contextId));
+				schema.setSchema(DatabaseServiceImpl.getSchema(contextId));
 			} else {
 				throw EXCEPTION.create(2);
 			}
@@ -421,7 +421,7 @@ public class SchemaStoreImpl extends SchemaStore {
 			throw EXCEPTION.create(16, e, e.getMessage());
 		} finally {
 			closeSQLStuff(result, stmt);
-			Database.back(contextId, true, con);
+			DatabaseServiceImpl.back(contextId, true, con);
 		}
 		return schema;
 	}
@@ -442,7 +442,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	private static final boolean existsTable(final int contextId) throws SchemaException {
 		Connection con;
 		try {
-			con = Database.get(contextId, true);
+			con = DatabaseServiceImpl.get(contextId, true);
 		} catch (final DBPoolingException e) {
 			throw new SchemaException(e);
 		}
@@ -450,7 +450,7 @@ public class SchemaStoreImpl extends SchemaStore {
 		ResultSet result = null;
 		try {
 			final DatabaseMetaData meta = con.getMetaData();
-			result = meta.getTables(Database.getSchema(contextId), null, "version", new String[] { "TABLE" });
+			result = meta.getTables(DatabaseServiceImpl.getSchema(contextId), null, "version", new String[] { "TABLE" });
 			if (result.next()) {
 				retval = true;
 			}
@@ -460,7 +460,7 @@ public class SchemaStoreImpl extends SchemaStore {
 			throw EXCEPTION.create(5, e, Integer.valueOf(contextId));
 		} finally {
 			closeSQLStuff(result);
-			Database.back(contextId, true, con);
+			DatabaseServiceImpl.back(contextId, true, con);
 		}
 		return retval;
 	}
@@ -478,7 +478,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	private static final boolean hasEntry(final int contextId) throws SchemaException {
 		Connection con;
 		try {
-			con = Database.get(contextId, true);
+			con = DatabaseServiceImpl.get(contextId, true);
 		} catch (final DBPoolingException e) {
 			throw new SchemaException(e);
 		}
@@ -492,7 +492,7 @@ public class SchemaStoreImpl extends SchemaStore {
 			throw EXCEPTION.create(1, e, e.getMessage());
 		} finally {
 			closeSQLStuff(result, stmt);
-			Database.back(contextId, true, con);
+			DatabaseServiceImpl.back(contextId, true, con);
 		}
 	}
 }

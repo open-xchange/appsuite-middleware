@@ -58,7 +58,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -133,7 +133,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
-			writeCon = Database.get(contextId, true);
+			writeCon = DatabaseServiceImpl.get(contextId, true);
 			try {
 				stmt = writeCon.prepareStatement(SQL_MODIFY);
 				stmt.executeUpdate();
@@ -147,7 +147,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 		} finally {
 			closeSQLStuff(null, stmt);
 			if (writeCon != null) {
-				Database.back(contextId, true, writeCon);
+				DatabaseServiceImpl.back(contextId, true, writeCon);
 			}
 		}
 	}
@@ -171,7 +171,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			readCon = Database.get(contextId, false);
+			readCon = DatabaseServiceImpl.get(contextId, false);
 			try {
 				stmt = readCon.createStatement();
 				rs = stmt.executeQuery(SQL_SELECT_ALL);
@@ -188,7 +188,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 		} finally {
 			closeSQLStuff(rs, stmt);
 			if (readCon != null) {
-				Database.back(contextId, false, readCon);
+				DatabaseServiceImpl.back(contextId, false, readCon);
 			}
 		}
 	}

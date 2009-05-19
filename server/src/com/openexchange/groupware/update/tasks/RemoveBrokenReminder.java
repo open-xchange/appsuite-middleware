@@ -64,7 +64,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -73,7 +74,6 @@ import com.openexchange.groupware.reminder.internal.SQL;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  *
@@ -115,7 +115,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
         LOG.info("Performing update task TaskModifiedByNotNull.");
         Connection con = null;
         try {
-            con = Database.get(contextId, true);
+            con = DatabaseServiceImpl.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
@@ -132,7 +132,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
             throw e;
         } finally {
             autocommit(con);
-            Database.back(contextId, true, con);
+            DatabaseServiceImpl.back(contextId, true, con);
         }
     }
 

@@ -47,69 +47,30 @@
  *
  */
 
-package com.openexchange.server.impl;
 
-import java.sql.Connection;
 
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
-import com.openexchange.groupware.contexts.Context;
+package com.openexchange.database.internal;
+
+import com.openexchange.monitoring.MonitorMBean;
 
 /**
- * DBPool
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * Interface for monitoring object pools.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DBPool  {
-    
-    public static final Connection pickup() throws DBPoolingException {
-        return DatabaseServiceImpl.get(false);
-    }
-    
-    public static final Connection pickup(final Context context) throws DBPoolingException {
-        return DatabaseServiceImpl.get(context, false);
-    }
-    
-    public static final Connection pickupWriteable() throws DBPoolingException {
-        return DatabaseServiceImpl.get(true);
-    }
-    
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
-        return DatabaseServiceImpl.get(context, true);
-    }
-    
-    public static final boolean push(final Connection con) {
-        DatabaseServiceImpl.back(false, con);
-        return true;
-    }
-    
-    public static final boolean push(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, false, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Connection con) {
-        DatabaseServiceImpl.back(true, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, true, con);
-        return true;
-    }
-    
-    public static final void closeReaderSilent(final Connection con) {
-        DatabaseServiceImpl.back(false, con);
-    }
-    
-    public static final void closeReaderSilent(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, false, con);
-    }
-    
-    public static final void closeWriterSilent(final Connection con) {
-        DatabaseServiceImpl.back(true, con);
-    }
-    
-    public static final void closeWriterSilent(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, true, con);
-    }
+public interface ConnectionPoolMBean extends MonitorMBean {
+
+    /**
+     * Domain for the beans.
+     */
+    String DOMAIN = "com.openexchange.pooling";
+
+    /**
+     * @return the number of threads waiting for a connection.
+     */
+    int getNumWaiting();
+
+    /**
+     * @return the total number of database connections
+     */
+    int getNumberOfDBConnections();
 }

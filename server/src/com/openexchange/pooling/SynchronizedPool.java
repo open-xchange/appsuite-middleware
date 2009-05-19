@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.pooling;
 
 import java.util.Iterator;
@@ -278,8 +276,8 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                         sb.append('\n');
                         createStackTrace(sb, thread.getStackTrace());
                         if (LOG.isDebugEnabled()) {
-							LOG.debug(sb.toString());
-						}
+                            LOG.debug(sb.toString());
+                        }
                     }
                 }
                 retval = data.popIdle();
@@ -358,7 +356,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     throw new PoolingException(
                         "Problem while creating new object.");
                 }
-				continue;
+                continue;
             }
             final Thread thread = Thread.currentThread();
             retval.setThread(thread);
@@ -526,9 +524,9 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
      * {@inheritDoc}
      */
     public void run() {
-    	if (LOG.isTraceEnabled()) {
-    		LOG.trace("Starting cleaner run.");
-    	}
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Starting cleaner run.");
+        }
         synchronized (data) {
             try {
             int idleSize = data.numIdle();
@@ -574,7 +572,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
         }
         }
         if (LOG.isTraceEnabled()) {
-        	LOG.trace("Clean run ending.");
+            LOG.trace("Clean run ending.");
         }
     }
 

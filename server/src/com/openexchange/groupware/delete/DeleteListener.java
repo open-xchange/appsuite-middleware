@@ -52,8 +52,8 @@ package com.openexchange.groupware.delete;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EventListener;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * {@link DeleteListener} - Performs the action(s) related to a received delete event

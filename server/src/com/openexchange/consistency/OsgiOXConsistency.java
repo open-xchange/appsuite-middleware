@@ -51,7 +51,8 @@ package com.openexchange.consistency;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.openexchange.database.AssignmentStorage;
+import com.openexchange.database.internal.AssignmentStorage;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 

@@ -91,7 +91,8 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.calendar.CalendarCache;
@@ -122,7 +123,6 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -2869,7 +2869,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = Database.get(contextId, false);
+            readcon = DatabaseServiceImpl.get(contextId, false);
             {
                 final StringBuilder sb = new StringBuilder((FIELDS_ALL.length << 3) + 128);
                 sb.append(StringCollection.getSelect(FIELDS_ALL, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
@@ -2918,7 +2918,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    Database.back(contextId, false, readcon);
+                    DatabaseServiceImpl.back(contextId, false, readcon);
                 }
             }
         }
@@ -2938,7 +2938,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = Database.get(contextId, false);
+            readcon = DatabaseServiceImpl.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
                 final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
@@ -2990,7 +2990,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    Database.back(contextId, false, readcon);
+                    DatabaseServiceImpl.back(contextId, false, readcon);
                 }
             }
         }
@@ -3024,7 +3024,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = Database.get(contextId, false);
+            readcon = DatabaseServiceImpl.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
                 final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
@@ -3068,7 +3068,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    Database.back(contextId, false, readcon);
+                    DatabaseServiceImpl.back(contextId, false, readcon);
                 }
             }
         }
@@ -3091,7 +3091,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = Database.get(contextId, false);
+            readcon = DatabaseServiceImpl.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
                 final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
@@ -3144,7 +3144,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    Database.back(contextId, false, readcon);
+                    DatabaseServiceImpl.back(contextId, false, readcon);
                 }
             }
         }

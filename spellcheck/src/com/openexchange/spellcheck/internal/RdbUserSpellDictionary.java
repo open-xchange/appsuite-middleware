@@ -68,9 +68,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -346,7 +346,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             Connection writeCon = null;
             PreparedStatement stmt = null;
             try {
-                writeCon = Database.get(key.contextId, true);
+                writeCon = DatabaseServiceImpl.get(key.contextId, true);
                 if (exists.get()) {
                     stmt = writeCon.prepareStatement(SQL_UPDATE);
                     stmt.setString(1, getUserWords().toString());
@@ -381,7 +381,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                readCon = Database.get(key.contextId, false);
+                readCon = DatabaseServiceImpl.get(key.contextId, false);
                 stmt = readCon.prepareStatement(SQL_SELECT);
                 stmt.setInt(1, key.contextId);
                 stmt.setInt(2, key.userId);
@@ -407,7 +407,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                readCon = Database.get(key.contextId, false);
+                readCon = DatabaseServiceImpl.get(key.contextId, false);
                 stmt = readCon.prepareStatement(SQL_SELECT);
                 stmt.setInt(1, key.contextId);
                 stmt.setInt(2, key.userId);
@@ -463,7 +463,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
          * Close connection
          */
         if (con != null) {
-            Database.back(cid, !isReadCon, con);
+            DatabaseServiceImpl.back(cid, !isReadCon, con);
         }
     }
 

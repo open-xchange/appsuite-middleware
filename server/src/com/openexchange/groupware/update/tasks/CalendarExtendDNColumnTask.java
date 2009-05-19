@@ -55,7 +55,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -66,7 +67,6 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * {@link CalendarExtendDNColumnTask} - Extends size of <tt>VARCHAR</tt> column <i>dn</i> in both working and backup table of
@@ -120,7 +120,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
              */
             final Connection writeCon;
             try {
-                writeCon = Database.getNoTimeout(contextId, true);
+                writeCon = DatabaseServiceImpl.getNoTimeout(contextId, true);
             } catch (final DBPoolingException e) {
                 throw new UpdateException(e);
             }
@@ -135,7 +135,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             } finally {
                 closeSQLStuff(null, stmt);
                 if (writeCon != null) {
-                    Database.backNoTimeout(contextId, true, writeCon);
+                    DatabaseServiceImpl.backNoTimeout(contextId, true, writeCon);
                 }
             }
             if (LOG.isInfoEnabled()) {
@@ -147,7 +147,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
     private boolean checkColumnInTable(final String tableName, final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = Database.get(contextId, true);
+            writeCon = DatabaseServiceImpl.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -167,7 +167,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             throw wrapSQLException(e);
         } finally {
             closeSQLStuff(rs);
-            Database.back(contextId, true, writeCon);
+            DatabaseServiceImpl.back(contextId, true, writeCon);
         }
     }
 

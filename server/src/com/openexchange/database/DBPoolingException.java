@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.database;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -55,7 +55,7 @@ import com.openexchange.groupware.EnumComponent;
 /**
  * This exception is used if problems occur with the pooling of database
  * connections.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * TODO use new exception framework.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class DBPoolingException extends AbstractOXException {
@@ -173,8 +173,15 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * Parsing problem in URL parameter "%1$s".
          */
-        PARAMETER_PROBLEM("Parsing problem in URL parameter \"%1$s\".", Category
-            .SETUP_ERROR, 15);
+        PARAMETER_PROBLEM("Parsing problem in URL parameter \"%1$s\".", Category.SETUP_ERROR, 15),
+        /**
+         * Configuration file for database configuration is missing.
+         */
+        MISSING_CONFIGURATION("Configuration file for database configuration is missing.", Category.SETUP_ERROR, 16),
+        /**
+         * Property "%1$s" is not defined.
+         */
+        PROPERTY_MISSING("Property \"%1$s\" is not defined.", Category.SETUP_ERROR, 17);
 
         /**
          * Message of the exception.

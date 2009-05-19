@@ -47,9 +47,7 @@
  *
  */
 
-
-
-package com.openexchange.database;
+package com.openexchange.database.internal;
 
 import java.io.Serializable;
 
@@ -66,9 +64,9 @@ public class Assignment implements Serializable {
 
     int contextId;
     int serverId;
-    int readPoolId;
-    int writePoolId;
-    String schema;
+    public int readPoolId;
+    public int writePoolId;
+    public String schema;
 
     /**
      * Default constructor.

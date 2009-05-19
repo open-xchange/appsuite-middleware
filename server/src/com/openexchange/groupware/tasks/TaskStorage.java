@@ -52,11 +52,11 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Interface to different SQL implementations for storing tasks.

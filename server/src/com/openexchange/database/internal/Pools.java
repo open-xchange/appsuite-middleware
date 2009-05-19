@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.database.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,13 +64,12 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigDB;
-import com.openexchange.configuration.ConfigDB.Property;
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServerTimer;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.impl.DBPoolingException.Code;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingException.Code;
+import com.openexchange.database.internal.Configuration.Property;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -114,7 +113,7 @@ public final class Pools implements Runnable {
     /**
      * @return an array with all connection pools.
      */
-    ConnectionPool[] getPools() {
+    public ConnectionPool[] getPools() {
         final List<ConnectionPool> pools = new ArrayList<ConnectionPool>();
         pools.add(configDBRead);
         if (configDBWrite != configDBRead) {
@@ -129,7 +128,7 @@ public final class Pools implements Runnable {
         return pools.toArray(new ConnectionPool[pools.size()]);
     }
 
-    ConnectionPool getPool(final int poolId) throws DBPoolingException {
+    public ConnectionPool getPool(final int poolId) throws DBPoolingException {
         if (null == configDBRead) {
             throw new DBPoolingException(Code.NOT_INITIALIZED,
                 Pools.class.getName());
@@ -299,9 +298,9 @@ public final class Pools implements Runnable {
     }
 
     public void unregisterMBeans() {
-    	unregisterMBean("ConfigDB Read");
-    	unregisterMBean("ConfigDB Write");
-    	poolsLock.lock();
+        unregisterMBean("ConfigDB Read");
+        unregisterMBean("ConfigDB Write");
+        poolsLock.lock();
         try {
             for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
                 unregisterMBean(createMBeanName(entry.getKey().intValue()));
@@ -329,7 +328,7 @@ public final class Pools implements Runnable {
             return;
         }
         initPoolConfig();
-        final ConfigDB configDB = ConfigDB.getInstance();
+        final Configuration configDB = Configuration.getInstance();
         cleanerInterval = configDB.getLong(Property.CLEANER_INTERVAL,
             cleanerInterval);
         startCleaner();
@@ -365,7 +364,7 @@ public final class Pools implements Runnable {
         } finally {
             poolsLock.unlock();
         }
-        if (ConfigDB.getInstance().isWriteDefined()) {
+        if (Configuration.getInstance().isWriteDefined()) {
             unregisterMBean("ConfigDB Write");
             configDBWrite.getCleanerTask().cancel();
             configDBWrite.destroy();
@@ -389,29 +388,21 @@ public final class Pools implements Runnable {
      */
     private void initPoolConfig() {
         config = ConnectionPool.DEFAULT_CONFIG;
-        final ConfigDB configDB = ConfigDB.getInstance();
-        config.minIdle = configDB.getInt(Property.MIN_IDLE, config.minIdle);
-        config.maxIdle = configDB.getInt(Property.MAX_IDLE, config.maxIdle);
-        config.maxIdleTime = configDB.getLong(Property.MAX_IDLE_TIME,
-            config.maxIdleTime);
-        config.maxActive = configDB.getInt(Property.MAX_ACTIVE,
-            config.maxActive);
-        config.maxWait = configDB.getLong(Property.MAX_WAIT,
-            config.maxWait);
-        config.maxLifeTime = configDB.getLong(Property.MAX_LIFE_TIME,
-            config.maxLifeTime);
-        config.exhaustedAction = ConnectionPool.ExhaustedActions.valueOf(
-            configDB.getProperty(Property.EXHAUSTED_ACTION, config
-                .exhaustedAction.name()));
-        config.testOnActivate = configDB.getBoolean(Property.TEST_ON_ACTIVATE,
-            config.testOnActivate);
-        config.testOnDeactivate = configDB.getBoolean(
-            Property.TEST_ON_DEACTIVATE, config.testOnDeactivate);
-        config.testOnIdle = configDB.getBoolean(Property.TEST_ON_IDLE,
-            config.testOnIdle);
-        config.testThreads = configDB.getBoolean(Property.TEST_THREADS,
-            config.testThreads);
-        config.forceWriteOnly = configDB.getBoolean(Property.WRITE_ONLY, false);
+        final Configuration configuration = Configuration.getInstance();
+        config.minIdle = configuration.getInt(Property.MIN_IDLE, config.minIdle);
+        config.maxIdle = configuration.getInt(Property.MAX_IDLE, config.maxIdle);
+        config.maxIdleTime = configuration.getLong(Property.MAX_IDLE_TIME, config.maxIdleTime);
+        config.maxActive = configuration.getInt(Property.MAX_ACTIVE, config.maxActive);
+        config.maxWait = configuration.getLong(Property.MAX_WAIT, config.maxWait);
+        config.maxLifeTime = configuration.getLong(Property.MAX_LIFE_TIME, config.maxLifeTime);
+        config.exhaustedAction = ConnectionPool.ExhaustedActions.valueOf(configuration.getProperty(
+            Property.EXHAUSTED_ACTION,
+            config.exhaustedAction.name()));
+        config.testOnActivate = configuration.getBoolean(Property.TEST_ON_ACTIVATE, config.testOnActivate);
+        config.testOnDeactivate = configuration.getBoolean(Property.TEST_ON_DEACTIVATE, config.testOnDeactivate);
+        config.testOnIdle = configuration.getBoolean(Property.TEST_ON_IDLE, config.testOnIdle);
+        config.testThreads = configuration.getBoolean(Property.TEST_THREADS, config.testThreads);
+        config.forceWriteOnly = configuration.getBoolean(Property.WRITE_ONLY, false);
         if (LOG.isInfoEnabled()) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Database pooling options:\n");

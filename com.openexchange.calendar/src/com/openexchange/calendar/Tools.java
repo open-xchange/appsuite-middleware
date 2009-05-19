@@ -62,7 +62,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -74,7 +75,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -168,7 +168,7 @@ public final class Tools {
     public static String getAppointmentTitle(final int objectId, final Context ctx) throws OXCalendarException {
         final Connection con;
         try {
-            con = Database.get(ctx, false);
+            con = DatabaseServiceImpl.get(ctx, false);
         } catch (final DBPoolingException e) {
             throw new OXCalendarException(e);
         }
@@ -207,7 +207,7 @@ public final class Tools {
     public static int getAppointmentFolder(final int objectId, final int userId, final Context ctx) throws OXException {
         final Connection con;
         try {
-            con = Database.get(ctx, false);
+            con = DatabaseServiceImpl.get(ctx, false);
         } catch (final DBPoolingException e) {
             throw new OXCalendarException(e);
         }

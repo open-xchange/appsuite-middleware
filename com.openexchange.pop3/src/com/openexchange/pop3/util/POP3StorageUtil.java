@@ -61,11 +61,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * {@link POP3StorageUtil} - Utility class for POP3 storage.
@@ -95,7 +95,7 @@ public class POP3StorageUtil {
     public static String getPOP3StorageProviderName(final int accountId, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -117,7 +117,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
     }
 
@@ -137,7 +137,7 @@ public class POP3StorageUtil {
     public static void setPOP3StorageProviderName(final int accountId, final int user, final int cid, final String name) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -164,7 +164,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
     }
 
@@ -244,7 +244,7 @@ public class POP3StorageUtil {
     public static List<String> getUIDLs(final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -264,7 +264,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
         return uidls;
     }
@@ -282,7 +282,7 @@ public class POP3StorageUtil {
     public static void deleteMessagesFromTables(final Collection<String> uidls, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, true);
+            con = DatabaseServiceImpl.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -300,7 +300,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
+            DatabaseServiceImpl.back(cid, true, con);
         }
     }
 
@@ -317,7 +317,7 @@ public class POP3StorageUtil {
     public static void insertMessagesIntoTables(final Collection<String> uidls, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, true);
+            con = DatabaseServiceImpl.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -340,7 +340,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
+            DatabaseServiceImpl.back(cid, true, con);
         }
     }
 
@@ -369,7 +369,7 @@ public class POP3StorageUtil {
     public static Set<String> getUnreadMessages(final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -391,7 +391,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
         return uidls;
     }
@@ -410,7 +410,7 @@ public class POP3StorageUtil {
     public static int getSystemFlags(final String uidl, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -430,7 +430,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
     }
 
@@ -448,7 +448,7 @@ public class POP3StorageUtil {
     public static int getColorFlag(final String uidl, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -468,7 +468,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
     }
 
@@ -486,7 +486,7 @@ public class POP3StorageUtil {
     public static String[] getUserFlags(final String uidl, final int user, final int cid) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = DatabaseServiceImpl.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -510,7 +510,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
+            DatabaseServiceImpl.back(cid, false, con);
         }
     }
 }

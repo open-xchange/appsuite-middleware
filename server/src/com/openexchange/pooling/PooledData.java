@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.pooling;
 
 import java.util.concurrent.atomic.AtomicInteger;

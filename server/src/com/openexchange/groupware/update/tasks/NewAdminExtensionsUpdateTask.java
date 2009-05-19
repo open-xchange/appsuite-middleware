@@ -58,7 +58,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -68,7 +69,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * @author choeger
@@ -146,7 +146,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
         Connection writeCon = null;
         try {
-            writeCon = Database.get(contextId, true);
+            writeCon = DatabaseServiceImpl.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw EXCEPTION.create(1, e);
         }
@@ -167,7 +167,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
-            Database.back(contextId, true, writeCon);
+            DatabaseServiceImpl.back(contextId, true, writeCon);
         }
 
     }
@@ -197,7 +197,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
 
         try {
-            readCon = Database.get(contextId, false);
+            readCon = DatabaseServiceImpl.get(contextId, false);
         } catch (final DBPoolingException e) {
             throw EXCEPTION.create(3, e);
         }
@@ -225,7 +225,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         } finally {
             closeSQLStuff(rs, stmt);
             if (readCon != null) {
-                Database.back(contextId, false, readCon);
+                DatabaseServiceImpl.back(contextId, false, readCon);
             }
         }
     }
@@ -311,8 +311,9 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
     private void updateTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
         PreparedStatement stmt = null;
         try {
-            for(final String table : missingCols.keySet() ) {
-                final ArrayList<String> cols = missingCols.get(table);
+            for(final Map.Entry<String, ArrayList<String>> entry : missingCols.entrySet() ) {
+                final String table = entry.getKey();
+                final ArrayList<String> cols = entry.getValue();
                 if( cols.size() > 0 && 
                         ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
                     for( final String col : cols ) {
@@ -372,7 +373,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         ResultSet rs = null;
 
         try {
-            readCon = Database.get(contextId, false);
+            readCon = DatabaseServiceImpl.get(contextId, false);
         } catch (final DBPoolingException e) {
             throw EXCEPTION.create(8, e);
         }
@@ -395,7 +396,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         } finally {
             closeSQLStuff(rs, stmt);
             if (readCon != null) {
-                Database.back(contextId, false, readCon);
+                DatabaseServiceImpl.back(contextId, false, readCon);
             }
         }
     }

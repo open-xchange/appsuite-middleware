@@ -52,6 +52,7 @@ package com.openexchange.resource.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -65,7 +66,6 @@ import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

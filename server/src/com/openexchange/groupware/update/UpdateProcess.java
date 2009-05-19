@@ -58,13 +58,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.ConfigDBStorage;
-import com.openexchange.database.Database;
+import com.openexchange.database.internal.ConfigDBStorage;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.exception.SchemaException;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * The {@link #run()} method of this class is started in a seperate thread for
@@ -176,7 +176,7 @@ public class UpdateProcess implements Runnable {
     }
 
     private final void removeContexts(final Schema schema) throws DBPoolingException, ContextException {
-        final int[] contextIds = ConfigDBStorage.getContextsFromSchema(schema.getSchema(), Database.resolvePool(
+        final int[] contextIds = ConfigDBStorage.getContextsFromSchema(schema.getSchema(), DatabaseServiceImpl.resolvePool(
                 contextId, true));
         final ContextStorage contextStorage = ContextStorage.getInstance();
         for (final int cid : contextIds) {

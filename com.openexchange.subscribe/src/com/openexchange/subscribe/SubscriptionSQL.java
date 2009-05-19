@@ -54,8 +54,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.publish.Transaction;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

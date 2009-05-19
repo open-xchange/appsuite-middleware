@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -85,7 +85,7 @@ public class AlterMailAddressLength implements UpdateTask {
         Connection writecon = null;
         Statement stmt = null;
         try {
-            writecon = Database.get(contextId, true);
+            writecon = DatabaseServiceImpl.get(contextId, true);
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
@@ -108,7 +108,7 @@ public class AlterMailAddressLength implements UpdateTask {
                 ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).closeStatement(stmt);
             }
             if (writecon != null) {
-                Database.back(contextId, true, writecon);
+                DatabaseServiceImpl.back(contextId, true, writecon);
             }
         }
     }

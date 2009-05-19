@@ -64,7 +64,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -122,7 +122,7 @@ public class CorrectCharsetAndCollationTask implements UpdateTask {
     )
     public void perform(final Schema schema, final int contextId)
         throws AbstractOXException {
-        final Connection con = Database.getNoTimeout(contextId, true);
+        final Connection con = DatabaseServiceImpl.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
             correctDatabase(con);
@@ -135,7 +135,7 @@ public class CorrectCharsetAndCollationTask implements UpdateTask {
             throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
             autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            DatabaseServiceImpl.backNoTimeout(contextId, true, con);
         }
     }
 

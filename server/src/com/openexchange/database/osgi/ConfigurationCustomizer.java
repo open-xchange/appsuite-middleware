@@ -47,59 +47,61 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.database.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.server.Initialization;
-import com.openexchange.server.impl.DBPoolingException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.internal.Initialization;
 
 /**
- * This class contains the initialization for the database system.
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Injects the {@link ConfigurationService} and publishes the DatabaseService.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class DatabaseInit implements Initialization {
+public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
 
-	private static final DatabaseInit singleton = new DatabaseInit();
+    private static final Log LOG = LogFactory.getLog(ConfigurationCustomizer.class);
 
-	/**
-	 * Logger.
-	 */
-	private static final Log LOG = LogFactory.getLog(DatabaseInit.class);
+    private BundleContext context;
 
-	/**
-	 * Prevent instantiation
-	 */
-	private DatabaseInit() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ConfigurationCustomizer}.
+     */
+    public ConfigurationCustomizer(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-	/**
-	 * @return the singleton instance.
-	 */
-	public static DatabaseInit getInstance() {
-		return singleton;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public Object addingService(ServiceReference reference) {
+        ConfigurationService service = (ConfigurationService) context.getService(reference);
+        try {
+            Initialization.start(service);
+        } catch (DBPoolingException e) {
+            LOG.error("Starting the database bundle failed.", e);
+        }
+        return service;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws DBPoolingException {
-		Pools.getInstance().start();
-		AssignmentStorage.getInstance().start();
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
-		}
-        Database.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() {
-		AssignmentStorage.getInstance().stop();
-		Pools.getInstance().stop();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(ServiceReference reference, Object service) {
+        Initialization.stop();
+        context.ungetService(reference);
+    }
 }

@@ -56,7 +56,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.tools.update.Tools;
 import com.openexchange.tools.update.ForeignKey;
 import com.openexchange.tools.sql.DBUtils;
@@ -101,7 +101,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
         ResultSet rs = null;
         try {
             LOG.info("Clearing orphaned infostore document versions");
-            con = Database.getNoTimeout(contextId, true);
+            con = DatabaseServiceImpl.getNoTimeout(contextId, true);
 
             List<ForeignKey> keys = ForeignKey.getForeignKeys(con, "infostore_document");
             ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
@@ -152,7 +152,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             DBUtils.closeSQLStuff(null, delete);
             DBUtils.closeSQLStuff(null, addKey);
             DBUtils.autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            DatabaseServiceImpl.backNoTimeout(contextId, true, con);
         }
     }
 }

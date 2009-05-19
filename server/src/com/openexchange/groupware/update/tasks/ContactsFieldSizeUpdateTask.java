@@ -61,7 +61,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -71,7 +72,6 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * ContactsChangedFromUpdateTask
@@ -232,7 +232,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 		 */
 		final Connection writeCon;
 		try {
-			writeCon = Database.get(contextId, true);
+			writeCon = DatabaseServiceImpl.get(contextId, true);
 		} catch (final DBPoolingException e) {
 			throw new UpdateException(e);
 		}
@@ -270,7 +270,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 			throw EXCEPTION.create(1, e, e.getMessage());
 		} finally {
 			closeSQLStuff(rs);
-			Database.back(contextId, true, writeCon);
+			DatabaseServiceImpl.back(contextId, true, writeCon);
 		}
 	}
 
@@ -349,7 +349,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 		 */
 		final Connection writeCon;
 		try {
-			writeCon = Database.get(contextId, true);
+			writeCon = DatabaseServiceImpl.get(contextId, true);
 		} catch (final DBPoolingException e) {
 			throw new UpdateException(e);
 		}
@@ -364,7 +364,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 			throw EXCEPTION.create(2, e, e.getMessage());
 		} finally {
 			closeSQLStuff(null, st);
-			Database.back(contextId, true, writeCon);
+			DatabaseServiceImpl.back(contextId, true, writeCon);
 		}
 	}
 

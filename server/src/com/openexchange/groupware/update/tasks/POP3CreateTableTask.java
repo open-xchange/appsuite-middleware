@@ -55,7 +55,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -66,7 +67,6 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * {@link POP3CreateTableTask} - Inserts necessary tables to support missing POP3 features.
@@ -125,7 +125,7 @@ public class POP3CreateTableTask implements UpdateTask {
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = Database.get(contextId, true);
+            writeCon = DatabaseServiceImpl.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -142,7 +142,7 @@ public class POP3CreateTableTask implements UpdateTask {
             }
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(contextId, true, writeCon);
+            DatabaseServiceImpl.back(contextId, true, writeCon);
         }
     }
 

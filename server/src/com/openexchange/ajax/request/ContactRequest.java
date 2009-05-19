@@ -74,7 +74,8 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -93,7 +94,6 @@ import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -727,7 +727,7 @@ public class ContactRequest {
          */
         Connection readCon;
         try {
-            readCon = Database.get(ctx, false);
+            readCon = DatabaseServiceImpl.get(ctx, false);
         } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
@@ -738,7 +738,7 @@ public class ContactRequest {
         } catch (final ContextException e) {
             throw new OXException(e);
         } finally {
-            Database.back(ctx, false, readCon);
+            DatabaseServiceImpl.back(ctx, false, readCon);
             readCon = null;
         }
         if (links == null || links.length == 0) {
@@ -749,7 +749,7 @@ public class ContactRequest {
          */
         final Connection writeCon;
         try {
-            writeCon = Database.get(ctx, true);
+            writeCon = DatabaseServiceImpl.get(ctx, true);
         } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
@@ -772,7 +772,7 @@ public class ContactRequest {
         } catch (final ContextException e) {
             throw new OXException(e);
         } finally {
-            Database.back(ctx, true, writeCon);
+            DatabaseServiceImpl.back(ctx, true, writeCon);
         }
     }
 

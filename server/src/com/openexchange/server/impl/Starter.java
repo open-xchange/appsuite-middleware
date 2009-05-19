@@ -81,10 +81,6 @@ public class Starter implements Initialization {
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
     /**
-     * Reads configdb.properties.
-     */
-    com.openexchange.configuration.ConfigDB.getInstance(),
-    /**
      * Read in update tasks
      */
     com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
@@ -92,10 +88,6 @@ public class Starter implements Initialization {
      * Reads the calendar.properties.
      */
     com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
-    /**
-     * Connection pools for ConfigDB and database assignments for contexts.
-     */
-    com.openexchange.database.DatabaseInit.getInstance(),
     /**
      * Initialization for custom charset provider
      */
@@ -212,17 +204,9 @@ public class Starter implements Initialization {
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
     /**
-     * Reads configdb.properties.
-     */
-    com.openexchange.configuration.ConfigDB.getInstance(),
-    /**
      * Read in update tasks
      */
     com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
-    /**
-     * Connection pools for ConfigDB and database assignments for contexts.
-     */
-    com.openexchange.database.DatabaseInit.getInstance(),
     /**
      * Initialization for alias charset provider
      */

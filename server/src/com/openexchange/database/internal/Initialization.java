@@ -47,69 +47,48 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.database.internal;
 
-import java.sql.Connection;
-
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseServiceImpl;
-import com.openexchange.groupware.contexts.Context;
 
 /**
- * DBPool
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * {@link Initialization}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DBPool  {
-    
-    public static final Connection pickup() throws DBPoolingException {
-        return DatabaseServiceImpl.get(false);
+public final class Initialization {
+
+    private static final Log LOG = LogFactory.getLog(Initialization.class);
+
+    private static Configuration configuration;
+
+    /**
+     * Prevent instantiation.
+     */
+    private Initialization() {
+        super();
     }
-    
-    public static final Connection pickup(final Context context) throws DBPoolingException {
-        return DatabaseServiceImpl.get(context, false);
+
+    public static final void start(ConfigurationService service) throws DBPoolingException {
+        configuration = Configuration.getInstance();
+        configuration.readConfiguration(service);
+        Pools.getInstance().start();
+        AssignmentStorage.getInstance().start();
+        Server.start(service);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+        }
+        DatabaseServiceImpl.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
     }
-    
-    public static final Connection pickupWriteable() throws DBPoolingException {
-        return DatabaseServiceImpl.get(true);
-    }
-    
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
-        return DatabaseServiceImpl.get(context, true);
-    }
-    
-    public static final boolean push(final Connection con) {
-        DatabaseServiceImpl.back(false, con);
-        return true;
-    }
-    
-    public static final boolean push(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, false, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Connection con) {
-        DatabaseServiceImpl.back(true, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, true, con);
-        return true;
-    }
-    
-    public static final void closeReaderSilent(final Connection con) {
-        DatabaseServiceImpl.back(false, con);
-    }
-    
-    public static final void closeReaderSilent(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, false, con);
-    }
-    
-    public static final void closeWriterSilent(final Connection con) {
-        DatabaseServiceImpl.back(true, con);
-    }
-    
-    public static final void closeWriterSilent(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, true, con);
+
+    public static final void stop() {
+        AssignmentStorage.getInstance().stop();
+        Pools.getInstance().stop();
+        configuration.clear();
     }
 }
+ 

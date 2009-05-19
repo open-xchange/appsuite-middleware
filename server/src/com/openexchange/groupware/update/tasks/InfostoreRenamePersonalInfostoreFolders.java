@@ -60,7 +60,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -71,7 +72,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 
@@ -130,7 +130,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 			ResultSet rs = null;
 			
 			try {
-				writeCon = Database.get(contextId, true);
+				writeCon = DatabaseServiceImpl.get(contextId, true);
 				writeCon.setAutoCommit(false);
 				stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ? WHERE cid = ? and fuid = ?");
 				stmt.setInt(2, contextId);
@@ -199,7 +199,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 					}
 					
 					if(writeCon != null) {
-						Database.back(contextId, true, writeCon);
+						DatabaseServiceImpl.back(contextId, true, writeCon);
 					}
 				}
 			}
@@ -257,7 +257,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				writeCon = Database.get(contextId, true);
+				writeCon = DatabaseServiceImpl.get(contextId, true);
                 if(parentFolder == -1) {
                     stmt = writeCon.prepareStatement("SELECT fname, cid  FROM oxfolder_tree WHERE module = ? GROUP BY fname,cid,parent HAVING count(*) > 1");
                     stmt.setInt(1, FolderObject.INFOSTORE);
@@ -296,7 +296,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				}
 				
 				if(null != writeCon) {
-					Database.back(contextId, true, writeCon);
+					DatabaseServiceImpl.back(contextId, true, writeCon);
 				}
 			}
 		}

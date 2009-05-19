@@ -47,98 +47,106 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.database.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.impl.DBPoolingException.Code;
+import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingException.Code;
 
 /**
- * This class contains methods for handling the server name and identifier.
+ * Reads a database connection from the config DB.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Server {
+public final class ConnectionDataStorage {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Server.class);
-
-    private static final String SELECT =
-        "SELECT server_id FROM server WHERE name=?";
-
-    private static int serverId = -1;
+    private static final String SELECT = "SELECT "
+        + "url,driver,login,password,hardlimit,max,initial "
+        + "FROM db_pool "
+        + "WHERE db_pool_id=?";
 
     /**
      * Prevent instantiation
      */
-    private Server() {
+    private ConnectionDataStorage() {
         super();
     }
 
-    static int getServerId() throws DBPoolingException {
-        if (-1 == serverId) {
-            synchronized (Server.class) {
-                if (-1 == serverId) {
-                    serverId = Server.loadServerId(getServerName());
-                }
-            }
-            if (-1 == serverId) {
-                LOG.fatal("Cannot resolve server id for server: "
-                    + getServerName());
-            } else  {
-                if (LOG.isTraceEnabled()) {
-					LOG.trace("Got server id: " + serverId);
-				}
-            }
-        }
-        return serverId;
-    }
-
-    public static String getServerName() throws DBPoolingException {
-        String prop = SystemConfig.getProperty(Property.SERVER_NAME);
-        if (null != prop) {
-            prop = prop.trim();
-        }
-        if (null == prop || prop.length() == 0) {
-            throw new DBPoolingException(Code.NO_SERVER_NAME);
-        }
-        return prop;
-    }
-
-    private static int loadServerId(final String name)
+    static ConnectionData loadPoolData(final int poolId)
         throws DBPoolingException {
-        int retval = -1;
-        Connection con = null;
+        ConnectionData retval = null;
+        final Connection con = DatabaseServiceImpl.get(false);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con = Database.get(false);
             stmt = con.prepareStatement(SELECT);
-            stmt.setString(1, name);
+            stmt.setInt(1, poolId);
             result = stmt.executeQuery();
             if (result.next()) {
-                retval = result.getInt(1);
+                retval = new ConnectionData();
+                retval.props = new Properties();
+                int pos = 1;
+                retval.url = result.getString(pos++);
+                retval.driverClass = result.getString(pos++);
+                retval.props.put("user", result.getString(pos++));
+                retval.props.put("password", result.getString(pos++));
+                retval.block = result.getBoolean(pos++);
+                retval.max = result.getInt(pos++);
+                retval.min = result.getInt(pos++);
+            } else {
+                throw new DBPoolingException(Code.NO_DBPOOL, Integer.valueOf(poolId));
             }
         } catch (final SQLException e) {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            if (null != con) {
-                Database.back(false, con);
+            DatabaseServiceImpl.back(false, con);
+        }
+        parseUrlToProperties(retval);
+        return retval;
+    }
+
+    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
+
+    private static void parseUrlToProperties(final ConnectionData retval) throws DBPoolingException {
+        final int paramStart = retval.url.indexOf('?');
+        if (-1 != paramStart) {
+            final Matcher matcher = pattern.matcher(retval.url);
+            retval.url = retval.url.substring(0, paramStart);
+            while (matcher.find()) {
+                final String name = matcher.group(1);
+                final String value = matcher.group(2);
+                if (name != null && name.length() > 0 && value != null && value.length() > 0) {
+                    try {
+                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
+                    } catch (final UnsupportedEncodingException e) {
+                        throw new DBPoolingException(Code.PARAMETER_PROBLEM, e, value);
+                    }
+                }
             }
         }
-        return retval;
+    }
+
+    static class ConnectionData {
+        ConnectionData() {
+            super();
+        }
+        String url;
+        String driverClass;
+        Properties props;
+        boolean block;
+        int max;
+        int min;
     }
 }

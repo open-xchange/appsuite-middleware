@@ -47,69 +47,8 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.database;
 
-import java.sql.Connection;
+public interface DatabaseService {
 
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
-import com.openexchange.groupware.contexts.Context;
-
-/**
- * DBPool
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
- */
-public class DBPool  {
-    
-    public static final Connection pickup() throws DBPoolingException {
-        return DatabaseServiceImpl.get(false);
-    }
-    
-    public static final Connection pickup(final Context context) throws DBPoolingException {
-        return DatabaseServiceImpl.get(context, false);
-    }
-    
-    public static final Connection pickupWriteable() throws DBPoolingException {
-        return DatabaseServiceImpl.get(true);
-    }
-    
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
-        return DatabaseServiceImpl.get(context, true);
-    }
-    
-    public static final boolean push(final Connection con) {
-        DatabaseServiceImpl.back(false, con);
-        return true;
-    }
-    
-    public static final boolean push(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, false, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Connection con) {
-        DatabaseServiceImpl.back(true, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, true, con);
-        return true;
-    }
-    
-    public static final void closeReaderSilent(final Connection con) {
-        DatabaseServiceImpl.back(false, con);
-    }
-    
-    public static final void closeReaderSilent(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, false, con);
-    }
-    
-    public static final void closeWriterSilent(final Connection con) {
-        DatabaseServiceImpl.back(true, con);
-    }
-    
-    public static final void closeWriterSilent(final Context context, final Connection con) {
-        DatabaseServiceImpl.back(context, true, con);
-    }
 }

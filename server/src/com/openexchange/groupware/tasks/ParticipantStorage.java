@@ -59,11 +59,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Interface to different SQL implementations for storing task participants.

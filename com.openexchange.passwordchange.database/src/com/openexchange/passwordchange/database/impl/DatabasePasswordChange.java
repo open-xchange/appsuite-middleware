@@ -54,13 +54,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceException;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -99,7 +99,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
          */
         final Connection writeCon;
         try {
-            writeCon = Database.get(event.getContext(), true);
+            writeCon = DatabaseServiceImpl.get(event.getContext(), true);
         } catch (final DBPoolingException e) {
             throw new UserException(e);
         }
@@ -116,7 +116,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
-            Database.back(event.getContext(), true, writeCon);
+            DatabaseServiceImpl.back(event.getContext(), true, writeCon);
         }
     }
 

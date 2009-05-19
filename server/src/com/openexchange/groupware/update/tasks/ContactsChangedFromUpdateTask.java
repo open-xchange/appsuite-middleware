@@ -58,7 +58,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -123,7 +123,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
-        final Connection con = Database.get(contextId, true);
+        final Connection con = DatabaseServiceImpl.get(contextId, true);
         Statement st = null;
         try {
             con.setAutoCommit(false);
@@ -137,7 +137,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
             DBUtils.autocommit(con);
             closeSQLStuff(null, st);
             if (con != null) {
-                Database.back(contextId, true, con);
+                DatabaseServiceImpl.back(contextId, true, con);
             }
         }
     }

@@ -235,7 +235,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         // checks
         final PooledData <T> metaData;
         if (decrementActive) {
-            metaData = data.getActive(pooled);
+            lock.lock();
+            try {
+                metaData = data.getActive(pooled);
+            } finally {
+                lock.unlock();
+            }
         } else {
             metaData = new PooledData<T>(pooled);
         }
@@ -616,38 +621,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             throw new PoolingException("Cannot create pooled object.", e);
         }
         return back(pooled, false);
-    }
-
-    private void removeIdle() {
-        final PooledData<T> metaData;
-        boolean remove = false;
-        lock.lock();
-        try {
-            final int idleSize = data.numIdle();
-            if (0 == idleSize) {
-                return;
-            }
-            metaData = data.getIdle(0);
-            remove = (
-                    // timeout
-                    maxIdleTime > 0 && metaData.getTimeDiff() > maxIdleTime
-                ) || (
-                    maxLifeTime > 0 && metaData.getLiveTime() > maxLifeTime
-                ) || (
-                    // object not valid anymore
-                    testOnIdle && !(lifecycle.activate(metaData)
-                    && lifecycle.validate(metaData)
-                    && lifecycle.deactivate(metaData))
-                );
-            if (remove) {
-                data.removeIdle(0);
-            }
-        } finally {
-            lock.unlock();
-        }
-        if (remove) {
-            lifecycle.destroy(metaData.getPooled());
-        }
     }
 
     /**
