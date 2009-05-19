@@ -52,7 +52,7 @@ package com.openexchange.timer.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 import com.openexchange.timer.internal.TimerImpl;
 
 /**
@@ -82,7 +82,7 @@ public final class TimerActivator implements BundleActivator {
             }
             timer = new TimerImpl();
             timer.start();
-            timerRegistration = context.registerService(Timer.class.getName(), timer, null);
+            timerRegistration = context.registerService(TimerService.class.getName(), timer, null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

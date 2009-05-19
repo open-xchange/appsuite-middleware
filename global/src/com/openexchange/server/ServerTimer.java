@@ -55,7 +55,7 @@ import java.util.TimerTask;
 /**
  * {@link ServerTimer} - Provides a singleton instance of {@link Timer} that should be used throughout the server to schedule individual
  * instances of {@link TimerTask}.
- * 
+ * TODO remove when push bundle uses timer bundle.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

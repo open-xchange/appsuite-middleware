@@ -74,7 +74,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 import com.swabunga.spell.engine.SpellDictionary;
 
 /**
@@ -508,7 +508,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
     }
 
     static void start() {
-        final Timer timer = SpellCheckServiceRegistry.getServiceRegistry().getService(Timer.class);
+        final TimerService timer = SpellCheckServiceRegistry.getServiceRegistry().getService(TimerService.class);
         if (timer != null) {
             timerTask = timer.scheduleWithFixedDelay(new Runnable() {
 
@@ -532,7 +532,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
         if (null != timerTask) {
             timerTask.cancel(false);
             timerTask = null;
-            final Timer timer = SpellCheckServiceRegistry.getServiceRegistry().getService(Timer.class);
+            final TimerService timer = SpellCheckServiceRegistry.getServiceRegistry().getService(TimerService.class);
             if (timer != null) {
                 timer.purge();
             }

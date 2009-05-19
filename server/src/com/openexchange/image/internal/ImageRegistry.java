@@ -56,7 +56,7 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link ImageRegistry} - The image registry which bounds images to a session or a context. A heart-beat to session service/context storage
@@ -65,6 +65,10 @@ import com.openexchange.timer.Timer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageRegistry {
+
+    private static final int DELAY = 30000;
+
+    private static final int INITIAL_DELAY = 1000;
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class);
 
@@ -101,11 +105,11 @@ public final class ImageRegistry {
         /*
          * Schedule tasks for specified period
          */
-        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
             tasks = new ScheduledTimerTask[2];
-            tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap), 1000, 30000);
-            tasks[1] = timer.scheduleWithFixedDelay(new ContextBoundImagesCleaner(contextBoundImagesMap), 1000, 30000);
+            tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap), INITIAL_DELAY, DELAY);
+            tasks[1] = timer.scheduleWithFixedDelay(new ContextBoundImagesCleaner(contextBoundImagesMap), INITIAL_DELAY, DELAY);
         }
     }
 
@@ -122,7 +126,7 @@ public final class ImageRegistry {
             }
             tasks = null;
         }
-        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
             timer.purge();
         }

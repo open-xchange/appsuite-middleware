@@ -62,7 +62,7 @@ import com.openexchange.sessiond.cache.SessionCacheTimer;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
@@ -112,7 +112,7 @@ public class SessiondInit implements Initialization {
 
             SessionCacheConfiguration.getInstance().start();
             
-            final Timer timer = SessiondServiceRegistry.getServiceRegistry().getService(Timer.class, true);
+            final TimerService timer = SessiondServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
             sessionCacheTimer = timer.scheduleWithFixedDelay(new SessionCacheTimer(), 0, 30000);
         }
     }

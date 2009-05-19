@@ -66,7 +66,7 @@ import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link NotificationPool} - Pools instances of {@link PooledNotification} for a consolidated update notification.
@@ -196,7 +196,7 @@ public final class NotificationPool {
             /*
              * Create timer task and schedule it
              */
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
                 timerTask = timer.scheduleWithFixedDelay(new NotificationPoolTimerTask(map, queue, lock.writeLock()), 1000, 60000);
             }
@@ -209,7 +209,7 @@ public final class NotificationPool {
     public void shutdown() {
         if (started.compareAndSet(true, false)) {
             timerTask.cancel(false);
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
                 timer.purge();
             }

@@ -73,7 +73,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -208,7 +208,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         final String path = cs.getProperty("UPLOAD_DIRECTORY", (propertyListener = new FileManagementPropertyListener(tmpDirReference)));
         tmpDirReference.set(getTmpDirByPath(path));
         // Register timer task
-        final Timer timer = registry.getService(Timer.class);
+        final TimerService timer = registry.getService(TimerService.class);
         if (null == timer) {
             throw new IllegalStateException("Missing timer service");
         }
@@ -362,7 +362,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
         if (timerTask != null) {
             timerTask.cancel(true);
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
                 timer.purge();
             }
@@ -375,7 +375,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     void startUp() {
         if (timerTask == null) {
             // Register timer task
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null == timer) {
                 throw new IllegalStateException("Missing timer service");
             }

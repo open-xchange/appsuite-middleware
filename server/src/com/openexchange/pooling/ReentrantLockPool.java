@@ -52,14 +52,14 @@ package com.openexchange.pooling;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * Implementation of the object pool.
@@ -555,24 +555,25 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return retval / useTimes.length;
     }
 
-    public void registerCleaner(final Timer timer, final long interval) {
-        timer.scheduleAtFixedRate(getCleanerTask(), interval, interval);
+    private ScheduledTimerTask cleaner;
+
+    public void registerCleaner(final TimerService timerService, final long interval) {
+        cleaner = timerService.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                try {
+                    Thread thread = Thread.currentThread();
+                    String origName = thread.getName();
+                    thread.setName("PoolCleaner");
+                    ReentrantLockPool.this.run();
+                    thread.setName(origName);
+                } catch (final Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }, interval, interval);
     }
 
-    private final TimerTask cleaner = new TimerTask() {
-        @Override
-        public void run() {
-            try {
-                final Thread thread = new Thread(ReentrantLockPool.this);
-                thread.setName("PoolCleaner");
-                thread.start();
-            } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-    };
-
-    public TimerTask getCleanerTask() {
+    public ScheduledTimerTask getCleanerTask() {
         return cleaner;
     }
 

@@ -56,7 +56,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link TimeoutConcurrentMap} - A timed concurrent map.
@@ -87,7 +87,7 @@ public final class TimeoutConcurrentMap<K, V> {
         super();
         map = new ConcurrentHashMap<K, ValueWrapper<V>>();
         try {
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class, true);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
             timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
         } catch (final ServiceException e) {
             throw new MailException(e);
@@ -100,7 +100,7 @@ public final class TimeoutConcurrentMap<K, V> {
     public void dispose() {
         timeoutTask.cancel(true);
         try {
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class, true);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
             timer.purge();
         } catch (final ServiceException e) {
             LOG.warn(e.getMessage(), e);

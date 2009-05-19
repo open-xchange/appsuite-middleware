@@ -65,7 +65,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link EventQueue} - The event queue.
@@ -114,7 +114,7 @@ public final class EventQueue {
                 }
                 if (closing.get() && q1.isEmpty() && q2.isEmpty()) {
                     scheduledTimerTask.cancel(false); // Stops this TimerTask
-                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (timer != null) {
                         timer.purge(); // Remove canceled tasks
                     }
@@ -231,7 +231,7 @@ public final class EventQueue {
             noDelay = (delay == 0);
 
             if (!noDelay) {
-                final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                 if (timer != null) {
                     final EventQueueTimerTask task2schedule = new EventQueueTimerTask(
                         ALL_EVENTS_PROCESSED,

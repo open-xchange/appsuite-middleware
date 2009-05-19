@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpSession;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HttpSessionManagement} - Management for HTTP sessions
@@ -82,7 +82,7 @@ public final class HttpSessionManagement {
             synchronized (initialized) {
                 if (!initialized.get()) {
                     sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
-                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (null != timer) {
                         sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(), 100, 3600000);
                     }
@@ -102,7 +102,7 @@ public final class HttpSessionManagement {
                     sessions.clear();
                     sessions = null;
                     sessionRemover.cancel(false);
-                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (null != timer) {
                         timer.purge();
                     }

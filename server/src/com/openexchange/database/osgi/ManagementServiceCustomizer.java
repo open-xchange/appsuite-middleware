@@ -49,6 +49,8 @@
 
 package com.openexchange.database.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -62,6 +64,8 @@ import com.openexchange.management.ManagementService;
  */
 public final class ManagementServiceCustomizer implements ServiceTrackerCustomizer {
 
+    private static final Log LOG = LogFactory.getLog(ManagementServiceCustomizer.class);
+
     private final BundleContext context;
 
     /**
@@ -74,6 +78,7 @@ public final class ManagementServiceCustomizer implements ServiceTrackerCustomiz
 
     public Object addingService(ServiceReference reference) {
         ManagementService service = (ManagementService) context.getService(reference);
+        LOG.info("Injecting ManagementService into database bundle.");
         Initialization.getInstance().setManagementService(service);
         return service;
     }
@@ -83,6 +88,7 @@ public final class ManagementServiceCustomizer implements ServiceTrackerCustomiz
     }
 
     public void removedService(ServiceReference reference, Object service) {
+        LOG.info("Removing ManagementService from database bundle.");
         Initialization.getInstance().removeManagementService();
         context.ungetService(reference);
     }

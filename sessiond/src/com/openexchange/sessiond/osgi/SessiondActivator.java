@@ -78,7 +78,7 @@ import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessiondActivator} - Activator for sessiond bundle.
@@ -105,7 +105,7 @@ public final class SessiondActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, Timer.class };
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class };
     }
 
     @Override

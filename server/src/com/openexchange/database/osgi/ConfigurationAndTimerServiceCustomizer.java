@@ -49,6 +49,8 @@
 
 package com.openexchange.database.osgi;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -57,22 +59,29 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.timer.TimerService;
 
 /**
  * Injects the {@link ConfigurationService} and publishes the DatabaseService.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigurationServiceCustomizer implements ServiceTrackerCustomizer {
+public class ConfigurationAndTimerServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ConfigurationServiceCustomizer.class);
+    private static final Log LOG = LogFactory.getLog(ConfigurationAndTimerServiceCustomizer.class);
 
     private BundleContext context;
 
+    private ConfigurationService configurationService;
+
+    private TimerService timerService;
+
+    private final Lock lock = new ReentrantLock();
+
     /**
-     * Initializes a new {@link ConfigurationServiceCustomizer}.
+     * Initializes a new {@link ConfigurationAndTimerServiceCustomizer}.
      */
-    public ConfigurationServiceCustomizer(BundleContext context) {
+    public ConfigurationAndTimerServiceCustomizer(BundleContext context) {
         super();
         this.context = context;
     }
@@ -81,13 +90,29 @@ public class ConfigurationServiceCustomizer implements ServiceTrackerCustomizer 
      * {@inheritDoc}
      */
     public Object addingService(ServiceReference reference) {
-        ConfigurationService service = (ConfigurationService) context.getService(reference);
+        final Object obj = context.getService(reference);
+        final boolean needsRegistration;
+        lock.lock();
         try {
-            Initialization.getInstance().start(service);
-        } catch (DBPoolingException e) {
-            LOG.error("Starting the database bundle failed.", e);
+            if (obj instanceof ConfigurationService) {
+                configurationService = (ConfigurationService) obj;
+            }
+            if (obj instanceof TimerService) {
+                timerService = (TimerService) obj;
+            }
+            needsRegistration = null != configurationService && null != timerService && !Initialization.getInstance().isStarted();
+        } finally {
+            lock.unlock();
         }
-        return service;
+        if (needsRegistration) {
+            LOG.info("Starting database bundle.");
+            try {
+                Initialization.getInstance().start(configurationService, timerService);
+            } catch (DBPoolingException e) {
+                LOG.error("Starting the database bundle failed.", e);
+            }
+        }
+        return obj;
     }
 
     /**
@@ -101,7 +126,25 @@ public class ConfigurationServiceCustomizer implements ServiceTrackerCustomizer 
      * {@inheritDoc}
      */
     public void removedService(ServiceReference reference, Object service) {
-        Initialization.getInstance().stop();
+        boolean needsShutdown = false;
+        lock.lock();
+        try {
+            if (service instanceof ConfigurationService) {
+                configurationService = null;
+            }
+            if (service instanceof TimerService) {
+                timerService = null;
+            }
+            if (Initialization.getInstance().isStarted() && timerService == null) {
+                needsShutdown = true;
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (needsShutdown) {
+            LOG.info("Stopping database bundle.");
+            Initialization.getInstance().stop();
+        }
         context.ungetService(reference);
     }
 }

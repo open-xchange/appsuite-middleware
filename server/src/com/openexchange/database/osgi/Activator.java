@@ -51,9 +51,12 @@ package com.openexchange.database.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
+import com.openexchange.timer.TimerService;
 
 /**
  * Activator for the database bundle.
@@ -70,7 +73,8 @@ public class Activator implements BundleActivator {
      * {@inheritDoc}
      */
     public void start(BundleContext context) throws Exception {
-        configurationTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceCustomizer(context));
+        Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
+        configurationTracker = new ServiceTracker(context, filter, new ConfigurationAndTimerServiceCustomizer(context));
         configurationTracker.open();
         managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
         managementTracker.open();

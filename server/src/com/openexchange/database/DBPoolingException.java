@@ -181,7 +181,11 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * Property "%1$s" is not defined.
          */
-        PROPERTY_MISSING("Property \"%1$s\" is not defined.", Category.SETUP_ERROR, 17);
+        PROPERTY_MISSING("Property \"%1$s\" is not defined.", Category.SETUP_ERROR, 17),
+        /**
+         * %1$s is already initialized.
+         */
+        ALREADY_INITIALIZED("%1$s is already initialized.", Category.CODE_ERROR, 18);
 
         /**
          * Message of the exception.

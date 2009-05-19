@@ -58,7 +58,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.internal.SpellCheckInit;
 import com.openexchange.spellcheck.internal.SpellCheckServiceImpl;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SpellCheckActivator}
@@ -88,7 +88,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class, Timer.class };
+		return new Class<?>[] { ConfigurationService.class, TimerService.class };
 	}
 
 	@Override

@@ -50,7 +50,7 @@
 package com.openexchange.timer;
 
 /**
- * {@link ScheduledTimerTask} - Represents a cancelable timer task scheduled to a {@link Timer timer}.
+ * {@link ScheduledTimerTask} - Represents a cancelable timer task scheduled to a {@link TimerService timer}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

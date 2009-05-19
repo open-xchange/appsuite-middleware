@@ -55,6 +55,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.management.ManagementService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link Initialization}
@@ -84,16 +85,20 @@ public final class Initialization {
         return SINGLETON;
     }
 
-    public void start(ConfigurationService service) throws DBPoolingException {
+    public boolean isStarted() {
+        return null != configuration;
+    }
+
+    public void start(ConfigurationService configurationService, TimerService timerService) throws DBPoolingException {
         configuration = new Configuration();
-        configuration.readConfiguration(service);
-        pools = new Pools();
+        configuration.readConfiguration(configurationService);
+        pools = new Pools(timerService);
         pools.start(configuration);
         DatabaseServiceImpl.setPools(pools);
         assignmentStorage = new AssignmentStorage();
         assignmentStorage.start();
         DatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
-        Server.start(service);
+        Server.start(configurationService);
         if (LOG.isInfoEnabled()) {
             LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
         }
@@ -103,9 +108,12 @@ public final class Initialization {
     public void stop() {
         DatabaseServiceImpl.setAssignmentStorage(null);
         assignmentStorage.stop();
+        assignmentStorage = null;
         DatabaseServiceImpl.setPools(null);
         pools.stop();
+        pools = null;
         configuration.clear();
+        configuration = null;
     }
 
     public void setManagementService(ManagementService managementService) {

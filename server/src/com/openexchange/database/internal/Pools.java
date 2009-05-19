@@ -56,7 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -69,7 +68,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.pooling.ReentrantLockPool.Config;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
 import com.openexchange.database.internal.Configuration.Property;
@@ -89,6 +89,8 @@ public final class Pools implements Runnable {
 
     public static final int CONFIGDB_WRITE_ID = -2;
 
+    private final TimerService timerService;
+
     private ConnectionPool configDBRead;
 
     private ConnectionPool configDBWrite;
@@ -104,8 +106,9 @@ public final class Pools implements Runnable {
     /**
      * Default constructor.
      */
-    public Pools() {
+    public Pools(TimerService timerService) {
         super();
+        this.timerService = timerService;
     }
 
     /**
@@ -159,32 +162,34 @@ public final class Pools implements Runnable {
         return retval;
     }
 
-    private TimerTask cleaner;
+    private ScheduledTimerTask cleaner;
 
-    private void startCleaner() {
+    private void startCleaner() throws DBPoolingException {
         if (null != cleaner) {
-            throw new IllegalStateException("Pools cleaner is already started.");
+            throw new DBPoolingException(Code.ALREADY_INITIALIZED, "PoolsCleaner");
         }
-        cleaner =  new TimerTask() {
-            @Override
+        cleaner = timerService.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 try {
-                    final Thread thread = new Thread(Pools.this);
+                    Thread thread = Thread.currentThread();
+                    String origName = thread.getName();
                     thread.setName("PoolsCleaner");
-                    thread.start();
+                    Pools.this.run();
+                    thread.setName(origName);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
-        };
-        ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval, cleanerInterval);
+        }, cleanerInterval, cleanerInterval);
     }
 
     private void stopCleaner() {
         if (null == cleaner) {
             throw new IllegalStateException("Pools cleaner is already stopped.");
         }
-        cleaner.cancel();
+        if (!cleaner.cancel()) {
+            LOG.error("Can not stop pools cleaner.");
+        }
         cleaner = null;
     }
 
@@ -192,9 +197,7 @@ public final class Pools implements Runnable {
      * {@inheritDoc}
      */
     public void run() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Starting cleaner run.");
-        }
+        LOG.trace("Starting cleaner run.");
         poolsLock.lock();
         try {
             final Iterator<Map.Entry<Integer, ConnectionPool>> iter = oxPools.entrySet().iterator();
@@ -210,9 +213,7 @@ public final class Pools implements Runnable {
         } finally {
             poolsLock.unlock();
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Cleaner run ending.");
-        }
+        LOG.trace("Cleaner run ending.");
     }
 
     /**
@@ -308,10 +309,9 @@ public final class Pools implements Runnable {
      * pools for ConfigDB.
      * @throws DBPoolingException if starting fails.
      */
-    public void start(Configuration configuration) {
+    public void start(Configuration configuration) throws DBPoolingException {
         if (null != configDBRead) {
-            LOG.error("Duplicate startup of Pools.");
-            return;
+            throw new DBPoolingException(Code.ALREADY_INITIALIZED, Pools.class.getName());
         }
         initPoolConfig(configuration);
         cleanerInterval = configuration.getLong(Property.CLEANER_INTERVAL, cleanerInterval);
@@ -326,35 +326,37 @@ public final class Pools implements Runnable {
 
     private ConnectionPool createPool(int poolId, String url, Properties props, Config config) {
         ConnectionPool retval = new ConnectionPool(url, props, config);
-        retval.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
+        retval.registerCleaner(timerService, cleanerInterval);
         registerMBean(createMBeanName(poolId), retval);
         return retval;
     }
 
+    private void destroyPool(int poolId, ConnectionPool pool) {
+        unregisterMBean(createMBeanName(poolId));
+        if (!pool.getCleanerTask().cancel()) {
+            LOG.error("");
+        }
+        pool.destroy();
+    }
+    
     /**
      * {@inheritDoc}
      */
     public void stop() {
-        // TODO write destroyPool method.
         poolsLock.lock();
-        unregisterMBeans();
         try {
             for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
-                final ConnectionPool pool = entry.getValue();
-                pool.getCleanerTask().cancel();
-                pool.destroy();
+                destroyPool(entry.getKey().intValue(), entry.getValue());
             }
             oxPools.clear();
         } finally {
             poolsLock.unlock();
         }
         if (configDBWrite != configDBRead) {
-            configDBWrite.getCleanerTask().cancel();
-            configDBWrite.destroy();
+            destroyPool(CONFIGDB_WRITE_ID, configDBWrite);
         }
         configDBWrite = null;
-        configDBRead.getCleanerTask().cancel();
-        configDBRead.destroy();
+        destroyPool(CONFIGDB_READ_ID, configDBRead);
         configDBRead = null;
         stopCleaner();
         config = null;

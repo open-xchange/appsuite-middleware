@@ -54,7 +54,7 @@ import com.openexchange.ajp13.timertask.AJPv13JSessionIDCleaner;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13TimerTaskStarter} - Starts timer tasks for AJP module.
@@ -93,7 +93,7 @@ public final class AJPv13TimerTaskStarter implements Initialization {
                     if (instance.task != null && instance.started.compareAndSet(false, true)) {
                         instance.task.cancel(false);
                         instance.task = null;
-                        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                         if (null != timer) {
                             timer.purge();
                         }
@@ -124,7 +124,7 @@ public final class AJPv13TimerTaskStarter implements Initialization {
         if (task != null) {
             return;
         }
-        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
             task = timer.scheduleWithFixedDelay(new AJPv13JSessionIDCleaner(AJPv13ForwardRequest.jsessionids), 1000, 3600000); // every hour
         }
@@ -140,7 +140,7 @@ public final class AJPv13TimerTaskStarter implements Initialization {
         }
         task.cancel(false);
         task = null;
-        final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
             timer.purge();
         }

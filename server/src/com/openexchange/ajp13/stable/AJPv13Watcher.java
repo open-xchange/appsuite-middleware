@@ -57,7 +57,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of their run time.
@@ -77,7 +77,7 @@ final class AJPv13Watcher {
             /*
              * Start task
              */
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (timer != null) {
                 task = timer.scheduleWithFixedDelay(new Task(listeners, LOG), 1000, AJPv13Config.getAJPWatcherFrequency());
             }
@@ -88,7 +88,7 @@ final class AJPv13Watcher {
         if (null != task) {
             task.cancel(false);
             task = null;
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (timer != null) {
                 timer.purge();
             }

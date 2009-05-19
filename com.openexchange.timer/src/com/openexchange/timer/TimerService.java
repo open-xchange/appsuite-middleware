@@ -53,11 +53,11 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A {@link Timer} that can schedule commands to run after a given delay, or to execute periodically.
+ * A {@link TimerService} that can schedule commands to run after a given delay, or to execute periodically.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Timer {
+public interface TimerService {
 
     /**
      * Creates and executes a one-shot action that becomes enabled after the given delay.

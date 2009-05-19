@@ -61,7 +61,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MailAccessWatcher} - Keeps track of connected instances of {@link MailAccess} and allows a forced close if connection time exceeds
@@ -92,7 +92,7 @@ public final class MailAccessWatcher {
                     /*
                      * Start task
                      */
-                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (null != timer) {
                         watcherTask = timer.scheduleWithFixedDelay(
                             new WatcherTask(mailAccesses, LOG),
@@ -119,7 +119,7 @@ public final class MailAccessWatcher {
                 }
                 if (MailProperties.getInstance().isWatcherEnabled()) {
                     watcherTask.cancel(false);
-                    final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (null != timer) {
                         timer.purge();
                     }

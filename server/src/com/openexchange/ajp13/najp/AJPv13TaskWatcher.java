@@ -71,7 +71,7 @@ import com.openexchange.ajp13.najp.threadpool.AJPv13ThreadFactory;
 import com.openexchange.ajp13.najp.threadpool.Java6SynchronousQueue;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13TaskWatcher} - Keeps track of submitted AJP tasks.
@@ -146,7 +146,7 @@ public class AJPv13TaskWatcher {
             /*
              * Start task if enabled
              */
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
                 task = timer.scheduleWithFixedDelay(
                     new Task(listeners.values(), LOG),
@@ -174,7 +174,7 @@ public class AJPv13TaskWatcher {
         if (null != task) {
             task.cancel(true);
             task = null;
-            final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
                 timer.purge();
             }

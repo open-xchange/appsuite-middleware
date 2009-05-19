@@ -58,7 +58,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * ReminderPool - Not used by now.
@@ -81,7 +81,7 @@ public class ReminderPool implements Runnable {
 			
 			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
 
-			final Timer timer = ServerServiceRegistry.getInstance().getService(Timer.class);
+			final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (timer != null) {
                 timer.schedule(this, reminderConfig.getReminderInterval());
             }

@@ -71,7 +71,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionHandler} - Provides access to sessions
@@ -119,7 +119,7 @@ public final class SessionHandler {
 
             noLimit = (config.getMaxSessions() == 0);
 
-            final Timer timer = SessiondServiceRegistry.getServiceRegistry().getService(Timer.class);
+            final TimerService timer = SessiondServiceRegistry.getServiceRegistry().getService(TimerService.class);
             if (timer != null) {
                 sessiondTimer = timer.scheduleWithFixedDelay(
                     new SessiondTimer(),
