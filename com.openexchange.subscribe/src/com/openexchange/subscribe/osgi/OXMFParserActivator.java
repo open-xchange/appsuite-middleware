@@ -50,22 +50,28 @@
 package com.openexchange.subscribe.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.subscribe.OXMFParserFactoryService;
+import com.openexchange.subscribe.parser.OXMFParserFactoryServiceImpl;
 
 
 /**
- * {@link Activator}
+ * {@link OXMFParserActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class OXMFParserActivator implements BundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator(), new OXMFParserActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private ServiceRegistration parserRegistration;
+
+    public void start(BundleContext context) throws Exception {
+        parserRegistration = context.registerService(OXMFParserFactoryService.class.getName(), new OXMFParserFactoryServiceImpl(), null);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        parserRegistration.unregister();
     }
 
 }
