@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-addons/dynamic-net,com.openexchange.authentication.fhtwberlin"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.configjump.netsol,com.openexchange.configjump.netsol"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.mail.netsol,com.openexchange.mail.netsol"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-addons/1und1/server/com.openexchange.mail.oneandone,com.openexchange.mail.oneandone2"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.spamhandler.netsol,com.openexchange.spamhandler.netsol"/>
-<project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange-addons/o3sis,com.openexchange.custom.o3sis"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/dynamic-net,com.openexchange.authentication.fhtwberlin"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.configjump.netsol,com.openexchange.configjump.netsol"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.mail.netsol,com.openexchange.mail.netsol"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/1und1/server/com.openexchange.mail.oneandone,com.openexchange.mail.oneandone2"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.spamhandler.netsol,com.openexchange.spamhandler.netsol"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/o3sis,com.openexchange.custom.o3sis"/>
 </provider>
 </psf>
