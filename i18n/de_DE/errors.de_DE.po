@@ -1,660 +1,25 @@
-# translation of errors.de_DE-new.po to deutsch
-# translation of errors.po to deutsch
 # translation of errors.de_DE.po to deutsch
 # translation of errors.de_DE.po to
 # translation of errors.de-new.po to
 # translation of errors.de.po to
 # translation of errors.po to
 # This file is distributed under the same license as the PACKAGE package.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2006.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
 #
+# Antje Faber, 2006.
+# Antje Faber, 2007.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-02-17 12:20+0100\n"
+"PO-Revision-Date: 2009-05-20 10:52+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.10.2\n"
+"X-Generator: KBabel 1.11.4\n"
 
 msgid "\"%1$s\" is a directory."
 msgstr "\"%1$s\" ist ein Verzeichnis."
@@ -695,12 +60,27 @@ msgstr "Beim Auflösen von Ordnernamen-Konflikten trat ein SQL-Fehler auf: %s"
 msgid "A SQL error occurred while creating table 'version': %1$s."
 msgstr "SQL-Fehler beim Erstellen der Tabellen-'version': %1$s."
 
+msgid "A SQL error occurred while performing task CreateGenconfTablesTask: %1$s."
+msgstr "Beim Ausführen der Aufgabe CreateGenconfTablesTask trat ein SQL-Fehler auf: %1$s."
+
+msgid "A SQL error occurred while performing task CreatePublicationTablesTask: %1$s."
+msgstr "Beim Ausführen der Aufgabe CreatePublicationTablesTask trat ein SQL-Fehler auf: %1$s."
+
+msgid "A SQL error occurred while performing task CreateSubscribeTableTask: %1$s."
+msgstr "Beim Ausführen der Aufgabe CreateSubscribeTableTask trat ein SQL-Fehler auf: %1$s."
+
+msgid "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s."
+msgstr "Beim Ausführen der Aufgabe MailAccountCreateTablesTask trat ein SQL-Fehler auf: %1$s."
+
 msgid ""
 "A SQL error occurred while performing task NewInfostoreFolderTreeUpdateTask: "
 "%1$s."
 msgstr ""
 "Beim Ausführen der Aufgabe NewInfostoreFolderTreeUpdateTask trat ein SQL-"
 "Fehler auf: %1$s."
+
+msgid "A SQL error occurred while performing task POP3CreateTableTask: %1$s."
+msgstr "Beim Ausführen der Aufgabe POP3CreateTableTask trat ein SQL-Fehler auf: %1$s."
 
 msgid "A SQL error occurred while performing task SpellCheckUserDictTableTask: %1$s."
 msgstr ""
@@ -713,6 +93,11 @@ msgstr "SQL-Fehler beim Lesen der Schema-Versionsinformationen: %1$s."
 msgid "A SQL error occurred: %1$s"
 msgstr "Es trat ein SQL-Fehler auf: %1$s"
 
+#. A SQL error occurred: %1$s.
+
+msgid "A SQL error occurred: %1$s."
+msgstr "Es trat ein SQL-Fehler auf: %1$s"
+
 msgid "A SQL exception occurred while checking for schema version table: %1$s."
 msgstr "SQL-Ausnahme bei der Suche nach der Schema-Versionstabelle: %1$s."
 
@@ -721,6 +106,9 @@ msgstr "Es trat ein WebDAV-Fehler auf."
 
 msgid "A cache error occurred: %1$s"
 msgstr "Es trat ein Cache-Fehler auf: %1$s"
+
+msgid "A command to mail server failed. Server response: %1$s."
+msgstr "Ein Befehl an den Mailserver ist fehlgeschlagen. Server-Antwort: %1$s."
 
 msgid ""
 "A contact with private flag cannot be stored in a public folder. Folder: %1"
@@ -752,8 +140,8 @@ msgstr ""
 "versuchen. Ergänzende Informationen: Dateispeicher-ID: %1$s, Kontext-ID: %2"
 "$s, Meldung der low-level Dateispeicher-Klasse: %3$s"
 
-msgid "A folder named %1$s already exists"
-msgstr "Ein Ordner namens %1$s ist bereits vorhanden"
+msgid "A folder named %1$s already exists."
+msgstr "Ein Ordner namens %1$s ist bereits vorhanden."
 
 msgid "A group must not hold admin permission on a private folder"
 msgstr "Eine Gruppe darf keine Administrationsrechte für einen privaten Ordner haben"
@@ -897,6 +285,9 @@ msgid "An attempt was made to open a read-only folder with read-write: %1$s"
 msgstr ""
 "Es wurde versucht, einen nur lesbaren Ordner mit Lese- Schreibrechten zu "
 "öffnen: %1$s"
+
+msgid "An error in mail server protocol. Error message: %1$s."
+msgstr "Fehler im Mailserver-Protokoll. Fehlermeldung: %1$s."
 
 msgid "An error occurred attaching to the given object."
 msgstr "Fehler beim Anhängen an das angegebene Objekt"
@@ -1109,8 +500,8 @@ msgstr "Dateispeicher kann nicht gefunden werden"
 msgid "Cannot find filestore with id %1$d."
 msgstr "Dateispeicher mit ID %1$d konnte nicht gefunden werden."
 
-msgid "Cannot find folder of task participant %1$d."
-msgstr "Ordner des Aufgaben-Teilnehmers %1$d konnte nicht gefunden werden"
+msgid "Cannot find folder for task %2$d and participant %1$d in context %3$d."
+msgstr "Ordner für Aufgabe %2$d und Teilnehmer %1$d im Kontext %3$d konnte nicht gefunden werden"
 
 msgid "Cannot find group with identifier %1$s in context %2$d."
 msgstr "Gruppe mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
@@ -1271,8 +662,14 @@ msgstr "Klasse %s kann nicht geladen werden"
 msgid "Collections must not have bodies."
 msgstr "Sammlungen dürfen keine Bodys haben."
 
+msgid "Column \"dn\" not found in table: %1$s."
+msgstr "Spalte \"dn\" nicht in Tabelle gefunden: %1$s."
+
 msgid "Configuration error: %1$s"
 msgstr "Konfigurationsfehler: %1$s"
+
+msgid "Configuration file for database configuration is missing."
+msgstr "Konfigurationsdatei für Datenbankkonfiguration nicht vorhanden"
 
 msgid "Configuration for user %1$s could not be found in context %2$d"
 msgstr "Konfiguration für Benutzer %1$s konnte nicht im Kontext %2$d gefunden werden."
@@ -1290,7 +687,7 @@ msgstr "Verbindung verwendet für %1$d Millisekunden."
 
 msgid ""
 "Connection was refused or timed out while attempting to connect to remote "
-"server %1$s for user %2$s"
+"server %1$s for user %2$s."
 msgstr ""
 "Verbindung abgelehnt oder Zeitüberschreitung beim Versuch, eine Verbindung "
 "zum entfernten Server %1$s für Benutzer %2$s herzustellen"
@@ -1732,6 +1129,9 @@ msgstr ""
 msgid "Flag %1$s could not be changed due to following reason: %2$s"
 msgstr "Flag %1$s konnte aus folgendem Grund nicht geändert werden: %2$s"
 
+msgid "Folder \"%1$s\" not visible to user %2$s in context %3$s"
+msgstr "Ordner \"%1$s\" ist im Kontext %3$s für Benutzer %2$s nicht sichtbar"
+
 msgid "Folder %1$s (%2$d) is not a task folder."
 msgstr "Der Ordner %1$s (%2$d) ist kein Aufgabenordner."
 
@@ -1779,9 +1179,6 @@ msgid "Folder %1$s must not be moved to one of its subfolders in context %2$s"
 msgstr ""
 "Der Ordner %1$s darf im Kontext %2$s nicht in einen seiner Unterordner "
 "verschoben werden."
-
-msgid "Folder %1$s not visible to user %2$s in context %3$s"
-msgstr "Ordner %1$s ist im Kontext %3$s für Benutzer %2$s nicht sichtbar"
 
 msgid "Folder %d has two subfolders named %s. Your database is not consistent."
 msgstr ""
@@ -2153,6 +1550,9 @@ msgstr "Length ist keine Zahl: %1$s."
 msgid "Magic bytes are not a number: %1$s."
 msgstr "Magic Bytes sind keine Zahl: %1$s."
 
+msgid "Mail account %1$s with ID %2$s does not support mail transport."
+msgstr "Der Mail-Account %1$s mit der ID %2$s unterstützt keine Mail-Weiterleitung."
+
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
 msgstr ""
 "Nachricht kann nicht eingelesen werden. Daten der Nachricht sind "
@@ -2184,6 +1584,9 @@ msgstr ""
 
 msgid "Mail folder could not be found: %1$s."
 msgstr "Der E-Mail-Ordner konnte nicht gefunden werden: %1$s."
+
+msgid "Mail server indicates a bad command. Server response: %1$s."
+msgstr "Der Mailserver zeigt einen fehlerhaften Befehl an. Server-Antwort: %1$s."
 
 msgid "Mail server's quota is exceeded"
 msgstr "Die Quota des Mailserver wurde überschritten"
@@ -2469,7 +1872,7 @@ msgstr "Keine Verbindung für Zugriff auf Mailbox vorhanden"
 msgid "No content available in mail part"
 msgstr "Teil der E-Mail ist leer."
 
-msgid "No create access to mail folder %1$s"
+msgid "No create access on mail folder %1$s."
 msgstr "Kein Anlegezugriff auf E-Mail-Ordner %1$s"
 
 msgid ""
@@ -2755,6 +2158,11 @@ msgstr "Legen in Cache fehlgeschlagen"
 msgid "Recurrence position %1$s does not exist"
 msgstr "Wiederkehrende Position %1$s ist nicht vorhanden"
 
+msgid ""
+"Referenced mail %1$s could not be found in folder %2$s. Therefore reply/"
+"forward operation cannot be performed."
+msgstr "Referenzierte E-Mail %1$s konnte nicht im Ordner %2$s gefunden werden. Deshalb kann der Antwort/Weiterleiten-Vorgang nicht ausgeführt werden."
+
 msgid "Remove on cache failed"
 msgstr "Entfernen aus Cache fehlgeschlagen"
 
@@ -2797,6 +2205,11 @@ msgstr "SQL-Problem: \"%s\""
 
 msgid "SQL Problem: \"%s\"."
 msgstr "SQL-Problem: \"%s\"."
+
+msgid "SQL error occurred while performing task CalendarExtendDNColumnTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe CalendarExtendDNColumnTask "
+"trat ein SQL-Fehler auf: %1$s."
 
 msgid "SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s."
 msgstr ""
@@ -3013,6 +2426,11 @@ msgstr ""
 
 msgid "The document you requested doesn't exist."
 msgstr "Das von Ihnen angeforderte Objekt ist nicht vorhanden"
+
+msgid ""
+"The document you want to change does not exist anymore. It was probably "
+"removed during your update."
+msgstr "Das Dokument, das Sie ändern möchten, ist nicht mehr vorhanden. Es wurde möglicherweise bei Ihrem Update entfernt."
 
 msgid "The element %s is not supported."
 msgstr "Das Element %s wird nicht unterstützt."
@@ -3640,6 +3058,9 @@ msgstr "Upload-Quota (%1$s) für Datei %2$s (Größe=%3$s) überstiegen"
 msgid "Uploaded file is of type %s, cannot handle that"
 msgstr "Hochgeladene Datei ist vom Typ %s. Dieser kann nicht verarbeitet werden."
 
+msgid "User %1$s from context %2$s is not known on IMAP server \"%3$s\"."
+msgstr "Der Benutzer %1$s im Kontext %2$s ist auf dem IMAP-Server \"%3$s\" nicht bekannt."
+
 msgid ""
 "User %1$s grants invalid permissions on shared folder %2$s in context %3$s. "
 "Only owner of parental shared folder %4$s may be folder admin"
@@ -3780,8 +3201,10 @@ msgstr "Ungültiger Dateispeicher %1$d für Kontext %2$d benötigt Dateispeicher
 msgid "Wrong message header: %1$s"
 msgstr "Ungültiger Nachrichten-Header: %1$s"
 
-msgid "Wrong or missing login data to access server %1$s."
-msgstr "Ungültige oder fehlende Login-Daten für den Zugriff auf Server %1$s"
+msgid ""
+"Wrong or missing login data to access server %1$s. Error message from "
+"server: %2$s."
+msgstr "Ungültige oder fehlende Login-Daten für den Zugriff auf Server %1$s. Fehlermeldung von Server: %2$s."
 
 msgid "You are not allowed to change groups."
 msgstr "Sie haben keine Berechtigung zum Ändern von Gruppen."
@@ -3963,7 +3386,6 @@ msgid "Data retention failed: %1$s."
 msgstr "Datenerhaltung fehlgeschlagen: %1$s."
 
 #. AN I/O error occurred: %1$s.
-
 msgid "AN I/O error occurred: %1$s."
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
@@ -4006,7 +3428,6 @@ msgstr ""
 #. Indicates an unresolvable user
 #. %1$s is replaced with the login name of the user.
 #. %1$s is replaced with the unique context identifier.
-
 msgid "User %1$s could not be found in context %2$s."
 msgstr "Benutzer %1$s nicht in Kontext %2$s gefunden."
 
@@ -4047,12 +3468,83 @@ msgstr "Bitte prüfen Sie, ob die Datei korrekt formatiert ist."
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Bitte stellen Sie sicher, dass die Datei für die Groupware lesbar ist."
 
+#. *
+#. * File not found: %1$s
+#.
+msgid "File not found: %1$s"
+msgstr "Datei nicht gefunden. %1$s"
+
+#. *
+#. * I/O error: %1$s
+#.
+msgid "I/O error: %1$s"
+msgstr "E/A-Fehler: %1$s"
+
+#. *
+#. * No such managed file associated with ID: %1$s
+#.
+msgid "No such managed file associated with ID: %1$s"
+msgstr "Keine verwaltete Datei vorhanden mit ID: %1$s"
+
+#. Unknown operation: %1$s.
+msgid "Unknown operation: %1$s."
+msgstr "Unbekannte Aktion: %1$s."
+
+#. Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
+msgid "Cannot find mail account with identifier %1$s for user %2$s in context %3$s."
+msgstr "Kein E-Mail-Account mit der ID %1$s für Benutzer %2$s im Kontext %3$s gefunden"
+
+#. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
+msgid ""
+"Found two mail accounts with same identifier %1$s for user %2$s in context %3"
+"$s."
+msgstr "Zwei E-Mail-Accounts mit gleicher ID %1$s für Benutzer %2$s im Kontext %3$d gefunden"
+
+#. A host could not be resolved: %1$s.
+msgid "A host could not be resolved: %1$s."
+msgstr "Host kann nicht aufgelöst werden: %1$s"
+
+#. Denied deletion of default mail account of user %1$s in context %2$s.
+msgid "Denied deletion of default mail account of user %1$s in context %2$s."
+msgstr "Löschen des Standard-Mail-Accounts für Benutzer %1$s im Kontext %2$s verweigert."
+
+#. Denied update of default mail account of user %1$s in context %2$s.
+msgid "Denied update of default mail account of user %1$s in context %2$s."
+msgstr "Update des Standard-Mail-Accounts für Benutzer %1$s im Kontext %2$s verweigert."
+
+#. No duplicate default account allowed.
+msgid "No duplicate default account allowed."
+msgstr "Duplikat des Standard-Accounts nicht zulässig"
+
+#. Password encryption failed.
+msgid "Password encryption failed."
+msgstr "Passwortverschlüsselung fehlgeschlagen"
+
+#. Password decryption failed.
+msgid "Password decryption failed."
+msgstr "Passwortentschlüsselung fehlgeschlagen"
+
+#. The Unified INBOX account already exists for user %1$s in context %2$s.
+msgid "The Unified INBOX account already exists for user %1$s in context %2$s."
+msgstr "Der Unified INBOX-Account ist bereits für den Benutzer %1$s im Kontext %2$s vorhanden."
+
+#. Mail account creation failed.
+msgid "Mail account creation failed."
+msgstr "E-Mail-Account kann nicht erstellt werden."
+
+#. Mail account validation failed.
+msgid "Mail account validation failed."
+msgstr "Überprüfen des E-Mail-Accounts fehlgeschlagen"
+
+#. Multiple mail accounts not enabled for user %1$s in context %2$s.
+msgid "Multiple mail accounts not enabled for user %1$s in context %2$s."
+msgstr "Multiple E-Mail-Accounts nicht für Benutzer %1$s im Kontext %2$s aktiviert"
+
 #. Search failed: %1$s.
 msgid "Search failed: %1$s."
 msgstr "Suche fehlgeschlagen: %1$s."
 
 #. Missing operation in JSON object.
-
 msgid "Missing operation in JSON object."
 msgstr "Fehlende Aktion im JSON-Objekt."
 
@@ -4067,8 +3559,4 @@ msgstr "Ungültiger Suchbegriff im JSON-Objekt."
 #. Missing field "%1$s" in JSON object.
 msgid "Missing field \"%1$s\" in JSON object."
 msgstr "Fehlendes Feld \"%1$s\" in JSON-Objekt."
-
-#. Unknown operation: %1$s.
-msgid "Unknown operation: %1$s."
-msgstr "Unbekannte Aktion: %1$s."
 
