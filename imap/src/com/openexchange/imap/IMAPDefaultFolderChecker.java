@@ -177,8 +177,7 @@ public final class IMAPDefaultFolderChecker {
                     }
                     if (LOG.isDebugEnabled()) {
                         final StringBuilder sb = new StringBuilder(2048);
-                        sb.append("\n\n[").append(Thread.currentThread().getName()).append("] Default folder check for account ").append(
-                            accountId).append(" (");
+                        sb.append("\n\nDefault folder check for account ").append(accountId).append(" (");
                         sb.append(imapConfig.getServer()).append(")\n");
                         new Throwable().printStackTrace(new java.io.PrintWriter(new StringWriter(sb)));
                         sb.append('\n');
