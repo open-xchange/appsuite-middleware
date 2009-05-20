@@ -57,10 +57,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
@@ -75,7 +75,10 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.Expression;
+import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.INSERT;
+import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
 
 /**
@@ -298,6 +301,54 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
         
     }
+
+    public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException {
+        List<Publication> retval = new ArrayList<Publication>();
+        Connection readConnection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConnection = dbProvider.getReadConnection(ctx);
+            List<Integer> configurationIds = storageService.search(readConnection, ctx, query);
+            
+            if (configurationIds.size() > 0) {
+                List<Expression> placeholder = new ArrayList<Expression>();
+                for (Integer configurationId : configurationIds) {
+                    placeholder.add(PLACEHOLDER);
+                }
+                
+                SELECT select = new SELECT(ASTERISK).
+                FROM(publications).
+                WHERE(new IN("configuration_id", new LIST(placeholder)).
+                    AND(new EQUALS("target_id", PLACEHOLDER)));
+                
+                List<Object> values = new ArrayList<Object>();
+                values.addAll(configurationIds);
+                values.add(targetId);
+                
+                builder = new StatementBuilder();
+                resultSet = builder.executeQuery(readConnection, select, values);
+                
+                retval.addAll(parseResultSet(resultSet, ctx, readConnection));
+            }
+        } catch (AbstractOXException e) {
+            throw new PublicationException(e);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(ctx, readConnection);
+            }
+        }
+        
+        return retval;
+    }
     
     private List<Publication> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws SQLException, GenericConfigStorageException {
         List<Publication> retval = new ArrayList<Publication>();
@@ -310,7 +361,6 @@ public class PublicationSQLStorage implements PublicationStorage {
             publication.setModule(resultSet.getString("module"));
             publication.setUserId(resultSet.getInt("user_id"));
             
-            DynamicFormDescription form = new DynamicFormDescription();
             Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
             

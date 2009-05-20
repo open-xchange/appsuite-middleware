@@ -50,9 +50,12 @@
 package com.openexchange.datatypes.genericonf.storage;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
@@ -109,10 +112,38 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
     }
 
     public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
-        return null;
+        return search(query);
     }
 
     public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
-        return null;
+        return search(query);
+    }
+    
+    private List<Integer> search(Map <String, Object> query) {
+        List<Integer> retval = new ArrayList<Integer>();
+        
+        Set<Integer> keySet = entries.keySet();
+        for (Iterator<Integer> iter = keySet.iterator(); iter.hasNext();) {
+            Set<String> queryKeySet = query.keySet();
+            Integer currentId = iter.next();
+            Map<String, Object> currentMap = entries.get(currentId);
+            if (currentMap.size() != query.size()) {
+                continue;
+            }
+            boolean check = true;
+            for (Iterator<String> queryIterator = queryKeySet.iterator(); iter.hasNext();) {
+                String queryString = queryIterator.next();
+                Object queryObject = query.get(queryString);
+                if (!currentMap.containsKey(queryString) || !currentMap.get(queryString).equals(queryObject)) {
+                    check = false;
+                    break;
+                }
+            }
+            if (check) {
+                retval.add(currentId);
+            }
+        }
+        
+        return retval;
     }
 }

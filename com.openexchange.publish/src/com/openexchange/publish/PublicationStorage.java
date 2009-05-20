@@ -49,7 +49,9 @@
 
 package com.openexchange.publish;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -66,4 +68,6 @@ public interface PublicationStorage {
     public List<Publication> getPublications(Context ctx, String publicationTarget) throws PublicationException;
 
     public Publication getPublication(Context ctx, int publicationId) throws PublicationException;
+    
+    public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException;
 }

@@ -54,7 +54,10 @@ import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
@@ -131,12 +134,17 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         target1.setModule(module1);
         target1.setId("com.openexchange.publication.test.basic1");
 
+        Map<String, Object> config1 = new HashMap<String, Object>();
+        config1.put("key1.1", 123);
+        config1.put("key1.2", "Hello World!");
+        
         pub1 = new Publication();
         pub1.setContext(ctx);
         pub1.setEntityId(entityId1);
         pub1.setModule(module1);
         pub1.setUserId(userId);
         pub1.setTarget(target1);
+        pub1.setConfiguration(config1);
         
         // Second
         FormElement formElementLogin2 = new FormElement();
@@ -262,7 +270,7 @@ public class PublicationSQLStorageTest extends SQLTestCase {
     }
     
     public void testListGet2() throws Exception {
-        removePublicationsForentity(entityId1, module1);
+        removePublicationsForEntity(entityId1, module1);
         
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
@@ -294,6 +302,20 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         Publication publication = storage.getPublication(ctx, pub1.getId());
         
         assertEquals(pub1, publication);
+    }
+    
+    public void testSearch() throws Exception {
+        storage.rememberPublication(pub1);
+        assertTrue("Id should be greater 0", pub1.getId() > 0);
+        publicationsToDelete.add(pub1.getId());
+        storage.rememberPublication(pub2);
+        assertTrue("Id should be greater 0", pub2.getId() > 0);
+        publicationsToDelete.add(pub2.getId());
+        
+        Collection<Publication> publications = storage.search(ctx, pub1.getTarget().getId(), pub1.getConfiguration());
+        assertEquals("Number of expected publications is not correct.", 1, publications.size());
+        Publication foundPublication = publications.iterator().next();
+        assertEquals(pub1, foundPublication);
     }
     
     protected void assertEquals(Publication expected, Publication actual) {
@@ -339,7 +361,7 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
     
-    protected void removePublicationsForentity(int entity, String module) throws Exception {
+    protected void removePublicationsForEntity(int entity, String module) throws Exception {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
         
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("entity", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)));
