@@ -177,10 +177,11 @@ public final class IMAPDefaultFolderChecker {
                     }
                     if (LOG.isDebugEnabled()) {
                         final StringBuilder sb = new StringBuilder(2048);
-                        sb.append("\r\n\r\nDefault folder check for account ").append(accountId).append(" (");
-                        sb.append(imapConfig.getServer()).append(")\r\n");
+                        sb.append("\n\n[").append(Thread.currentThread().getName()).append("] Default folder check for account ").append(
+                            accountId).append(" (");
+                        sb.append(imapConfig.getServer()).append(")\n");
                         new Throwable().printStackTrace(new java.io.PrintWriter(new StringWriter(sb)));
-                        sb.append("\r\n");
+                        sb.append('\n');
                         LOG.debug(sb.toString());
                     }
                     final long start = System.currentTimeMillis();
