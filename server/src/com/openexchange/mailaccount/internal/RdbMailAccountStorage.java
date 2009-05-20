@@ -507,7 +507,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
-        if (!changePrimary && mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
+        if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             if (!attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL)) {
                 /*
                  * An attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL must not be changed
