@@ -239,11 +239,4 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
      */
     public abstract boolean storeInUse(final int store_id) throws StorageException;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#schemaBeingLockedOrNeedsUpdate(com.openexchange.admin.rmi.dataobjects.Context)
-     */
-    public abstract boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException;
-
 }
