@@ -53,19 +53,18 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import java.sql.Connection;
-
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
     
     public OXAdminPoolDBPoolExtension(PropertyHandler prop) {
         super(prop);
     }
-    
+
     public int getDBPoolIdForContextId(int context_id) throws PoolException {
         try{
-            return DatabaseServiceImpl.resolvePool(context_id,true);
+            return Database.resolvePool(context_id,true);
         }catch(DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
@@ -73,19 +72,19 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
 
     public Connection getWRITEConnectionForPoolId(int db_pool_id,String schema_name) throws PoolException {
         try{
-            return DatabaseServiceImpl.get(db_pool_id,schema_name);
+            return Database.get(db_pool_id,schema_name);
         }catch(DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
     }
 
     public void pushWRITEConnectionForPoolId(int db_pool_id,Connection conny) throws PoolException {        
-        DatabaseServiceImpl.back(db_pool_id,conny);
+        Database.back(db_pool_id,conny);
     }
 
     public void resetPoolMappingForContext(int context_id) throws PoolException {
         try{
-            DatabaseServiceImpl.reset(context_id);
+            Database.reset(context_id);
         }catch(DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
@@ -93,7 +92,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
     
    public String getSchemeForContextId(int context_id) throws PoolException{
        try{
-            return DatabaseServiceImpl.getSchema(context_id);
+            return Database.getSchema(context_id);
         }catch(DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
