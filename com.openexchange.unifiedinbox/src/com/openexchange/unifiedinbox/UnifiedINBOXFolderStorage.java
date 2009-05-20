@@ -248,7 +248,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<MailFolder>(session) {
 
-                    public MailFolder call() throws Exception {
+                    @Override
+                    public MailFolder callInternal() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());

@@ -207,7 +207,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (int i = 0; i < size; i++) {
                 completionService.submit(new LoggingCallable<GetMessagesResult>(session) {
 
-                    public GetMessagesResult call() throws Exception {
+                    @Override
+                    public GetMessagesResult callInternal() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -394,7 +395,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
-                    public List<MailMessage> call() throws Exception {
+                    @Override
+                    public List<MailMessage> callInternal() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
@@ -522,7 +524,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
-                    public List<MailMessage> call() throws Exception {
+                    @Override
+                    public List<MailMessage> callInternal() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
@@ -628,7 +631,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
                 collection.add(new LoggingCallable<Object>(session) {
 
-                    public Object call() throws Exception {
+                    @Override
+                    public Object callInternal() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -731,7 +735,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (int i = 0; i < size; i++) {
                 collection.add(new LoggingCallable<Object>(session) {
 
-                    public Object call() throws Exception {
+                    @Override
+                    public Object callInternal() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -807,7 +812,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (int i = 0; i < size; i++) {
                 collection.add(new LoggingCallable<Object>(session) {
 
-                    public Object call() throws Exception {
+                    @Override
+                    public Object callInternal() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access

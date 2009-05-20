@@ -206,36 +206,43 @@ public final class UnifiedINBOXFolderConverter {
         final CompletionService<int[]> completionService = new ExecutorCompletionService<int[]>(executor);
         final AtomicBoolean retval = new AtomicBoolean();
         // Iterate
-        for (final MailAccount mailAccount : accounts) {
-            completionService.submit(new LoggingCallable<int[]>() {
+        {
+            final StringBuilder sb = new StringBuilder(128);
+            for (final MailAccount mailAccount : accounts) {
+                sb.setLength(0);
+                completionService.submit(new LoggingCallable<int[]>(
+                    session,
+                    sb.append("Loading ").append(fullname).append(" from account ").append(mailAccount.getId()).toString()) {
 
-                public int[] call() throws Exception {
-                    final MailAccess<?, ?> mailAccess;
-                    try {
-                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                        mailAccess.connect();
-                    } catch (final MailException e) {
-                        getLogger().error(e.getMessage(), e);
-                        return EMPTY_COUNTS;
-                    }
-                    try {
-                        final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
-                        // Check if account fullname is not null
-                        if (null == accountFullname) {
+                    @Override
+                    public int[] callInternal() throws Exception {
+                        final MailAccess<?, ?> mailAccess;
+                        try {
+                            mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                            mailAccess.connect();
+                        } catch (final MailException e) {
+                            getLogger().error(e.getMessage(), e);
                             return EMPTY_COUNTS;
                         }
-                        // Get counts
-                        final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
-                        final int[] counts = new int[] {
-                            mailFolder.getMessageCount(), mailFolder.getUnreadMessageCount(), mailFolder.getDeletedMessageCount(),
-                            mailFolder.getNewMessageCount() };
-                        retval.set(true);
-                        return counts;
-                    } finally {
-                        mailAccess.close(true);
+                        try {
+                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
+                            // Check if account fullname is not null
+                            if (null == accountFullname) {
+                                return EMPTY_COUNTS;
+                            }
+                            // Get counts
+                            final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
+                            final int[] counts = new int[] {
+                                mailFolder.getMessageCount(), mailFolder.getUnreadMessageCount(), mailFolder.getDeletedMessageCount(),
+                                mailFolder.getNewMessageCount() };
+                            retval.set(true);
+                            return counts;
+                        } finally {
+                            mailAccess.close(true);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
         // Wait for completion of each submitted task
         try {

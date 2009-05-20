@@ -49,11 +49,12 @@
 
 package com.openexchange.unifiedinbox.utility;
 
+import static com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility.appendStackTrace2StringBuilder;
 import java.util.concurrent.Callable;
 import com.openexchange.session.Session;
 
 /**
- * {@link LoggingCallable} - Extends {@link Callable} interface by a {@link #getLogger()} method.
+ * {@link LoggingCallable} - Extends {@link Callable} interface.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -62,6 +63,10 @@ public abstract class LoggingCallable<V> implements Callable<V> {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoggingCallable.class);
 
     private final Session session;
+
+    private final String description;
+
+    private final Throwable trace;
 
     /**
      * Initializes a new {@link LoggingCallable}.
@@ -72,10 +77,24 @@ public abstract class LoggingCallable<V> implements Callable<V> {
 
     /**
      * Initializes a new {@link LoggingCallable}.
+     * 
+     * @param session The session
      */
     public LoggingCallable(final Session session) {
+        this(session, null);
+    }
+
+    /**
+     * Initializes a new {@link LoggingCallable}.
+     * 
+     * @param session The session
+     * @param description A description for this callable task
+     */
+    public LoggingCallable(final Session session, final String description) {
         super();
         this.session = session;
+        this.description = description;
+        this.trace = LOG.isDebugEnabled() ? new Throwable() : null;
     }
 
     /**
@@ -95,5 +114,34 @@ public abstract class LoggingCallable<V> implements Callable<V> {
     public Session getSession() {
         return session;
     }
+
+    public V call() throws Exception {
+        if (LOG.isDebugEnabled()) {
+            final long start = System.currentTimeMillis();
+            final V retval = callInternal();
+            final long dur = System.currentTimeMillis() - start;
+            final StringBuilder sb = new StringBuilder(32).append(Thread.currentThread().getName()).append(" needed ").append(dur).append(
+                "msec to perform task");
+            if (null == description) {
+                sb.append('.');
+            } else {
+                sb.append(" \"").append(description).append("\".");
+            }
+            sb.append('\n');
+            appendStackTrace2StringBuilder(trace, sb);
+            sb.append('\n');
+            LOG.debug(sb.toString());
+            return retval;
+        }
+        return callInternal();
+    }
+
+    /**
+     * Computes a result, or throws an exception if unable to do so.
+     * 
+     * @return The computed result
+     * @throws Exception If unable to compute a result
+     */
+    protected abstract V callInternal() throws Exception;
 
 }
