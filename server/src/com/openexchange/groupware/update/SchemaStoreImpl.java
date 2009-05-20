@@ -386,7 +386,7 @@ public class SchemaStoreImpl extends SchemaStore {
         msg = {
             "A SQL error occurred while reading schema version information: " + "%1$s.",
             "No row found in table update.",
-            "Multiple rows found.",
+            "Multiple rows found."
         })
     private Schema loadSchema(int poolId, String schemaName) throws SchemaException {
         Connection con;
