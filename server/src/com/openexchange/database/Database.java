@@ -71,6 +71,14 @@ public final class Database {
         Database.databaseService = databaseService;
     }
 
+    public static int resolvePool(int contextId, boolean write) throws DBPoolingException {
+        return databaseService.getWritablePool(contextId);
+    }
+
+    public static String getSchema(int contextId) throws DBPoolingException {
+        return databaseService.getSchemaName(contextId);
+    }
+
     /**
      * Returns a connection to the config database.
      * @param write <code>true</code> if you need a writable connection.
@@ -186,25 +194,16 @@ public final class Database {
         databaseService.back(poolId, con);
     }
 
-    public static int resolvePool(int contextId, boolean write) throws DBPoolingException {
-        return databaseService.getWritablePool(contextId);
-    }
-
-    public static String getSchema(int contextId) throws DBPoolingException {
-        return databaseService.getSchemaName(contextId);
-    }
-
-    public static int[] getContextsInSameSchema(int contextId) throws DBPoolingException {
-        return databaseService.getContextsInSameSchema(contextId);
-    }
-
     /**
-     * Resets the database pooling information for a context. This is
-     * especially the assignments to database servers.
+     * Resets the database pooling information for a context. This is especially the assignments to database servers.
      * @param contextId unique identifier of the context.
      * @throws DBPoolingException if resolving the server identifier fails.
      */
     public static void reset(int contextId) throws DBPoolingException {
         databaseService.invalidate(contextId);
+    }
+
+    public static int[] getContextsInSameSchema(int contextId) throws DBPoolingException {
+        return databaseService.getContextsInSameSchema(contextId);
     }
 }
