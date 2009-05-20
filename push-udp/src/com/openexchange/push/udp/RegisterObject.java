@@ -52,11 +52,10 @@ package com.openexchange.push.udp;
 import java.util.Date;
 
 /**
- * RegisterObject
+ * {@link RegisterObject} - Represents a registered client waiting for remote events.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class RegisterObject extends AbstractPushObject {
 
     private final int userId;
@@ -74,7 +73,7 @@ public class RegisterObject extends AbstractPushObject {
         this.contextId = contextId;
         this.hostAddress = hostAddress;
         this.port = port;
-        this.isSync = isSync;
+        this.remote = isSync;
         timestamp = new Date();
     }
 

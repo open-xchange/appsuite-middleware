@@ -70,11 +70,10 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * PushHandler
+ * {@link PushHandler} - The push {@link EventHandler event handler}.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class PushHandler implements EventHandler {
 
     private GroupStorage groupStorage;
@@ -89,11 +88,14 @@ public class PushHandler implements EventHandler {
     }
 
     public void handleEvent(final Event event) {
-        if (event.getProperty(CommonEvent.EVENT_KEY) == null) {
-            return;
+        final CommonEvent genericEvent;
+        {
+            final Object obj = event.getProperty(CommonEvent.EVENT_KEY);
+            if (obj == null) {
+                return;
+            }
+            genericEvent = (CommonEvent) obj;
         }
-
-        final CommonEvent genericEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 
         final int userId = genericEvent.getUserId();
         final int contextId = genericEvent.getContextId();

@@ -53,11 +53,11 @@ import java.net.InetAddress;
 import java.util.Date;
 
 /**
- * PushObject
+ * {@link RemoteHostObject} - Represents a remote Open-Xchange server.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class RemoteHostObject {
+public final class RemoteHostObject {
 
     private InetAddress host;
 
@@ -65,6 +65,9 @@ public class RemoteHostObject {
 
     private Date timer = new Date();
 
+    /**
+     * Initializes a new {@link RemoteHostObject}.
+     */
     public RemoteHostObject() {
         super();
         timer = new Date();

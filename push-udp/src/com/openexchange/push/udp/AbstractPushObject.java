@@ -50,22 +50,67 @@
 package com.openexchange.push.udp;
 
 /**
- * AbstractPushObject
+ * {@link AbstractPushObject} - Abstract push object.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public abstract class AbstractPushObject {
 
     protected int contextId;
 
-    protected boolean isSync;
+    protected boolean remote;
 
+    /**
+     * Initializes a new {@link AbstractPushObject}.
+     */
+    protected AbstractPushObject() {
+        super();
+    }
+
+    /**
+     * Gets the context ID.
+     * 
+     * @return The context ID
+     */
     public int getContextId() {
         return contextId;
     }
 
-    public boolean isSync() {
-        return isSync;
+    /**
+     * Checks if this push object was remotely received.
+     * <p>
+     * If remotely received this push object must not be further distributed among linked hosts.
+     * 
+     * @return <code>true</code> if this push object was remotely received; otherwise <code>false</code>
+     */
+    public boolean isRemote() {
+        return remote;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof AbstractPushObject)) {
+            return false;
+        }
+        final AbstractPushObject other = (AbstractPushObject) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        return true;
+    }
+
 }

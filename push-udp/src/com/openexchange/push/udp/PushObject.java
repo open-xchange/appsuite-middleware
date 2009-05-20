@@ -53,11 +53,10 @@ import java.util.Date;
 import com.openexchange.tools.StringCollection;
 
 /**
- * PushObject
+ * {@link PushObject} - The push object.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class PushObject extends AbstractPushObject {
 
     private final int folderId;
@@ -68,46 +67,100 @@ public class PushObject extends AbstractPushObject {
 
     private final Date creationDate = new Date();
 
-    public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isSync) throws Exception {
+    private final int hash;
+
+    /**
+     * Initializes a new {@link PushObject}.
+     * 
+     * @param folderId The folder ID
+     * @param module The module
+     * @param contextId The context ID
+     * @param users The user IDs as an array
+     * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
+     */
+    public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote) {
+        super();
         this.folderId = folderId;
         this.module = module;
         this.contextId = contextId;
         this.users = users;
-        this.isSync = isSync;
+        this.remote = isRemote;
+        this.hash = hashCode0();
     }
 
+    private int hashCode0() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + folderId;
+        result = prime * result + module;
+        return result;
+    }
+
+    /**
+     * Gets the folder ID.
+     * 
+     * @return The folder ID
+     */
     public int getFolderId() {
         return folderId;
     }
 
+    /**
+     * Gets the module.
+     * 
+     * @return The module
+     */
     public int getModule() {
         return module;
     }
 
+    /**
+     * Gets the user IDs as an array.
+     * 
+     * @return The user IDs as an array
+     */
     public int[] getUsers() {
         return users;
     }
 
+    /**
+     * Gets the creation date.
+     * 
+     * @return The creation date
+     */
     public Date getCreationDate() {
         return creationDate;
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (o.hashCode() == hashCode()) {
-            return true;
-        }
-        return false;
+    public int hashCode() {
+        return hash;
     }
 
     @Override
-    public int hashCode() {
-        return new StringBuilder().append('F').append(folderId).append('M').append(module).append('C').append(contextId).toString().hashCode();
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof PushObject)) {
+            return false;
+        }
+        final PushObject other = (PushObject) obj;
+        if (folderId != other.folderId) {
+            return false;
+        }
+        if (module != other.module) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
         return new StringBuilder().append("FOLDER_ID=").append(folderId).append(",MODULE=").append(module).append(",CONTEXT_ID=").append(
-            contextId).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_SYNC=").append(isSync).toString();
+            contextId).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_SYNC=").append(remote).toString();
     }
 }
