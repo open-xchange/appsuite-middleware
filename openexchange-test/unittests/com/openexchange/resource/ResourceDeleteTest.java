@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -175,7 +175,7 @@ public final class ResourceDeleteTest extends TestCase {
 			/*
 			 * Check backup table by hand
 			 */
-			final Connection con = DatabaseServiceImpl.get(ctx, true);
+			final Connection con = Database.get(ctx, true);
 			try {
 				PreparedStatement stmt = con.prepareStatement(SQL_SELECT_DELETE);
 				ResultSet rs = null;
@@ -214,7 +214,7 @@ public final class ResourceDeleteTest extends TestCase {
 					}
 				}
 			} finally {
-				DatabaseServiceImpl.back(ctx, true, con);
+				Database.back(ctx, true, con);
 			}
 
 			id = -1;
@@ -262,7 +262,7 @@ public final class ResourceDeleteTest extends TestCase {
 		}
 		final Connection writeCon;
 		try {
-			writeCon = DatabaseServiceImpl.get(cid, true);
+			writeCon = Database.get(cid, true);
 		} catch (final DBPoolingException e) {
 			e.printStackTrace();
 			return;
@@ -284,7 +284,7 @@ public final class ResourceDeleteTest extends TestCase {
 				}
 				stmt = null;
 			}
-			DatabaseServiceImpl.back(cid, true, writeCon);
+			Database.back(cid, true, writeCon);
 		}
 
 	}

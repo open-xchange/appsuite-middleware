@@ -66,7 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -242,7 +242,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         final ContextStorage ctxStorage = ContextStorage.getInstance();
         final String context = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
         final int contextId = ctxStorage.getContextId(context);
-        final Connection writeCon = DatabaseServiceImpl.get(contextId, true);
+        final Connection writeCon = Database.get(contextId, true);
         final String sql = "UPDATE prg_dates SET intfield02 = ?, field08 = ? WHERE intfield01 = ?";
         final PreparedStatement pstmt = writeCon.prepareStatement(sql);
         pstmt.setInt(1, dummyId);
@@ -250,7 +250,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         pstmt.setInt(3, objectId);
         pstmt.execute();
         pstmt.close();
-        DatabaseServiceImpl.back(contextId, true, writeCon);
+        Database.back(contextId, true, writeCon);
         
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());

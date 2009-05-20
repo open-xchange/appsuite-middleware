@@ -60,7 +60,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -214,13 +214,13 @@ public class DowngradeTest extends TestCase {
         DowngradeFailedException {
         final UserConfiguration userConfig = new UserConfiguration(
             Integer.MAX_VALUE ^ (1 << 17), user.getId(), user.getGroups(), ctx);
-        final Connection con = DatabaseServiceImpl.get(ctx, true);
+        final Connection con = Database.get(ctx, true);
         try {
             final DowngradeEvent event = new DowngradeEvent(userConfig, con,
                 ctx);
             new TasksDowngrade().downgradePerformed(event);
         } finally {
-            DatabaseServiceImpl.back(ctx, true, con);
+            Database.back(ctx, true, con);
         }
     }
     
@@ -229,13 +229,13 @@ public class DowngradeTest extends TestCase {
         final UserConfiguration userConfig = new UserConfiguration(
             Integer.MAX_VALUE ^ ((1 << 17) + (1 << 3)), user.getId(),
             user.getGroups(), ctx);
-        final Connection con = DatabaseServiceImpl.get(ctx, true);
+        final Connection con = Database.get(ctx, true);
         try {
             final DowngradeEvent event = new DowngradeEvent(userConfig, con,
                 ctx);
             new TasksDowngrade().downgradePerformed(event);
         } finally {
-            DatabaseServiceImpl.back(ctx, true, con);
+            Database.back(ctx, true, con);
         }
     }
 

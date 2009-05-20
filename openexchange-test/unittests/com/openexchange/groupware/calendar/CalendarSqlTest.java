@@ -80,7 +80,6 @@ import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.container.AppointmentObject;

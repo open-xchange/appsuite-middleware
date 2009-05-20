@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders;
@@ -131,7 +131,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		
 		final List<String> names = new ArrayList<String>();
 		try {
-			con = DatabaseServiceImpl.get(existing_ctx_id, true);
+			con = Database.get(existing_ctx_id, true);
 			stmt = con.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? and parent = ? and module = ? and fuid >= ?");
 			stmt.setInt(1,existing_ctx_id);
 			stmt.setInt(2,parent);
@@ -150,7 +150,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 			if(null != stmt) {
 				stmt.close();
 			}
-			DatabaseServiceImpl.back(existing_ctx_id, true, con);
+			Database.back(existing_ctx_id, true, con);
 		}
 		return names;
 	}

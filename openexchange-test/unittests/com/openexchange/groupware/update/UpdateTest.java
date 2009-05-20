@@ -10,7 +10,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
@@ -38,7 +38,7 @@ public class UpdateTest extends TestCase {
         existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
         ctx = ContextStorage.getInstance().getContext(existing_ctx_id);
 
-        schema = SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(existing_ctx_id);
+        schema = SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(ctx);
      
         user_id = ctx.getMailadmin();
         user = UserStorage.getInstance().getUser(user_id, ctx);
@@ -54,7 +54,7 @@ public class UpdateTest extends TestCase {
         PreparedStatement stmt = null;
 
         try {
-            con = DatabaseServiceImpl.get(existing_ctx_id, true);
+            con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
             for(final Object o : args) {
@@ -67,7 +67,7 @@ public class UpdateTest extends TestCase {
             if(null != stmt) {
                 stmt.close();
             }
-            DatabaseServiceImpl.back(existing_ctx_id, true, con);
+            Database.back(existing_ctx_id, true, con);
         }
     }
     
@@ -87,7 +87,7 @@ public class UpdateTest extends TestCase {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = DatabaseServiceImpl.get(existing_ctx_id, true);
+            con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
             for(final Object o : args) {
@@ -103,7 +103,7 @@ public class UpdateTest extends TestCase {
             if(null != stmt) {
                 stmt.close();
             }
-            DatabaseServiceImpl.back(existing_ctx_id, true, con);
+            Database.back(existing_ctx_id, true, con);
         }
     }
     
@@ -112,7 +112,7 @@ public class UpdateTest extends TestCase {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = DatabaseServiceImpl.get(existing_ctx_id, true);
+            con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
             for(final Object o : args) {
@@ -128,7 +128,7 @@ public class UpdateTest extends TestCase {
             if(null != stmt) {
                 stmt.close();
             }
-            DatabaseServiceImpl.back(existing_ctx_id, true, con);
+            Database.back(existing_ctx_id, true, con);
         }
     }
 
@@ -157,26 +157,26 @@ public class UpdateTest extends TestCase {
     private class UpdateTaskDBProvider implements DBProvider {
         public Connection getReadConnection(final Context ctx) throws TransactionException {
             try {
-                return DatabaseServiceImpl.get(ctx, false);
+                return Database.get(ctx, false);
             } catch (final DBPoolingException e) {
                 throw new TransactionException(e);
             }
         }
 
         public void releaseReadConnection(final Context ctx, final Connection con) {
-            DatabaseServiceImpl.back(ctx, false, con);
+            Database.back(ctx, false, con);
         }
 
         public Connection getWriteConnection(final Context ctx) throws TransactionException {
             try {
-                return DatabaseServiceImpl.get(ctx, true);
+                return Database.get(ctx, true);
             } catch (final DBPoolingException e) {
                 throw new TransactionException(e);
             }
         }
 
         public void releaseWriteConnection(final Context ctx, final Connection con) {
-            DatabaseServiceImpl.back(ctx, true, con);
+            Database.back(ctx, true, con);
         }
     }
 }
