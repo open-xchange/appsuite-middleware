@@ -47,69 +47,24 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.database.internal;
 
-import java.sql.Connection;
-
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
-import com.openexchange.groupware.contexts.Context;
+import java.util.Properties;
 
 /**
- * DBPool
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * Data to create connections to some specific database.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DBPool  {
-    
-    public static final Connection pickup() throws DBPoolingException {
-        return Database.get(false);
-    }
-    
-    public static final Connection pickup(final Context context) throws DBPoolingException {
-        return Database.get(context, false);
-    }
-    
-    public static final Connection pickupWriteable() throws DBPoolingException {
-        return Database.get(true);
-    }
-    
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
-        return Database.get(context, true);
-    }
-    
-    public static final boolean push(final Connection con) {
-        Database.back(false, con);
-        return true;
-    }
-    
-    public static final boolean push(final Context context, final Connection con) {
-        Database.back(context, false, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Connection con) {
-        Database.back(true, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Context context, final Connection con) {
-        Database.back(context, true, con);
-        return true;
-    }
-    
-    public static final void closeReaderSilent(final Connection con) {
-        Database.back(false, con);
-    }
-    
-    public static final void closeReaderSilent(final Context context, final Connection con) {
-        Database.back(context, false, con);
-    }
-    
-    public static final void closeWriterSilent(final Connection con) {
-        Database.back(true, con);
-    }
-    
-    public static final void closeWriterSilent(final Context context, final Connection con) {
-        Database.back(context, true, con);
+public class ConnectionData {
+
+    String url;
+    String driverClass;
+    Properties props;
+    boolean block;
+    int max;
+    int min;
+
+    public ConnectionData() {
+        super();
     }
 }

@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -47,7 +47,7 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
         final ResultSet rs = null;
 
         try {
-            writeCon = DatabaseServiceImpl.get(contextId, true);
+            writeCon = Database.get(contextId, true);
             writeCon.setAutoCommit(false);
             stmt = writeCon.prepareStatement("ALTER TABLE infostore_document MODIFY url varchar(256)");
             stmt.executeUpdate();
@@ -87,7 +87,7 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
                 }
 
                 if (writeCon != null) {
-                    DatabaseServiceImpl.back(contextId, true, writeCon);
+                    Database.back(contextId, true, writeCon);
                 }
             }
         }

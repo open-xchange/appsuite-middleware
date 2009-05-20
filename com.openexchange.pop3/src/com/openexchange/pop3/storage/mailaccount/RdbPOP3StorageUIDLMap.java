@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -97,7 +97,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -133,7 +133,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
@@ -142,7 +142,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public FullnameUIDPair getFullnameUIDPair(final String uidl) throws POP3Exception {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -164,7 +164,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -173,7 +173,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws POP3Exception {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -196,7 +196,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -221,7 +221,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public Map<String, FullnameUIDPair> getAllUIDLs() throws POP3Exception {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -244,7 +244,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -253,7 +253,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -275,14 +275,14 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
     public void deleteUIDLMappings(final String[] uidls) throws POP3Exception {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -302,7 +302,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 }

@@ -63,7 +63,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -168,7 +168,7 @@ public final class Tools {
     public static String getAppointmentTitle(final int objectId, final Context ctx) throws OXCalendarException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(ctx, false);
+            con = Database.get(ctx, false);
         } catch (final DBPoolingException e) {
             throw new OXCalendarException(e);
         }
@@ -207,7 +207,7 @@ public final class Tools {
     public static int getAppointmentFolder(final int objectId, final int userId, final Context ctx) throws OXException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(ctx, false);
+            con = Database.get(ctx, false);
         } catch (final DBPoolingException e) {
             throw new OXCalendarException(e);
         }

@@ -58,7 +58,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -120,7 +120,7 @@ public final class AppointmentExceptionRemoveDuplicateDatePosition implements
         LOG.info("Performing update task to remove duplicate date recurrence "
             + "position from appointment change exceptions on schema "
             + schema.getSchema());
-        final Connection con = DatabaseServiceImpl.get(contextId, true);
+        final Connection con = Database.get(contextId, true);
         Statement st = null;
         try {
             con.setAutoCommit(false);
@@ -136,7 +136,7 @@ public final class AppointmentExceptionRemoveDuplicateDatePosition implements
             DBUtils.autocommit(con);
             closeSQLStuff(null, st);
             if (con != null) {
-                DatabaseServiceImpl.back(contextId, true, con);
+                Database.back(contextId, true, con);
             }
         }
         LOG.info("Update task to remove duplicate date recurrence position from"

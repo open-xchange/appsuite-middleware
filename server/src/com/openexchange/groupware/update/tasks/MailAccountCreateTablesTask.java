@@ -56,7 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -183,7 +183,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
     private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.get(contextId, true);
+            writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -200,7 +200,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             }
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(contextId, true, writeCon);
+            Database.back(contextId, true, writeCon);
         }
     }
 

@@ -58,7 +58,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -123,7 +123,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         msg = { "A SQL error occurred: %1$s." }
     )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        final Connection con = DatabaseServiceImpl.getNoTimeout(contextId, true);
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
             correctContacts(con);
@@ -136,7 +136,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         } finally {
             DBUtils.autocommit(con);
             if (con != null) {
-                DatabaseServiceImpl.backNoTimeout(contextId, true, con);
+                Database.backNoTimeout(contextId, true, con);
             }
         }
     }

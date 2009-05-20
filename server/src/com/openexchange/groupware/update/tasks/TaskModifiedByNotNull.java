@@ -57,7 +57,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.SQL;
@@ -112,7 +112,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
         LOG.info("Performing update task TaskModifiedByNotNull.");
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(contextId, true);
+            con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
@@ -129,7 +129,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
             throw new TaskException(TaskException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
-            DatabaseServiceImpl.back(contextId, true, con);
+            Database.back(contextId, true, con);
         }
     }
 

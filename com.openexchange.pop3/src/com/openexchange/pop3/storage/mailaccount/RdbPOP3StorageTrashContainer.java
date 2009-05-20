@@ -58,7 +58,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
@@ -98,7 +98,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
     public void addUIDL(final String uidl) throws MailException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -122,7 +122,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
@@ -131,7 +131,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
     public void clear() throws MailException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -147,7 +147,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
@@ -156,7 +156,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
     public Set<String> getUIDLs() throws MailException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -178,14 +178,14 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
     public void removeUIDL(final String uidl) throws MailException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -202,14 +202,14 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
     public void addAllUIDL(final Collection<? extends String> uidls) throws MailException {
         final Connection con;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -240,7 +240,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 

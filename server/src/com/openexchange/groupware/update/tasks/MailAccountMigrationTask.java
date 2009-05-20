@@ -62,7 +62,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -125,7 +125,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
     private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.get(contextId, false);
+            writeCon = Database.get(contextId, false);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -155,7 +155,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             closeSQLStuff(rs, stmt);
-            DatabaseServiceImpl.back(contextId, false, writeCon);
+            Database.back(contextId, false, writeCon);
         }
     }
 
@@ -331,7 +331,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         final int id = MailAccount.DEFAULT_ID;
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -387,7 +387,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
@@ -395,7 +395,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         final int cid = ctx.getContextId();
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -419,7 +419,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             closeSQLStuff(rs, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 

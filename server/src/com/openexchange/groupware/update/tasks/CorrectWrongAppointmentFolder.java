@@ -62,7 +62,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -121,7 +121,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
             + "FROM prg_dates_members pd JOIN oxfolder_tree f "
             + "ON pd.cid=f.cid AND pd.pfid=f.fuid"
             + " WHERE f.created_from!=pd.member_uid AND f.module=2 AND f.type=1 AND f.default_flag=1";
-        final Connection con = DatabaseServiceImpl.get(contextId, true);
+        final Connection con = Database.get(contextId, true);
         Statement stmt = null;
         ResultSet result = null;
         try {
@@ -152,7 +152,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
         } finally {
             closeSQLStuff(result, stmt);
             autocommit(con);
-            DatabaseServiceImpl.back(contextId, true, con);
+            Database.back(contextId, true, con);
         }
     }
 

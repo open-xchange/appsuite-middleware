@@ -56,13 +56,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
 import com.openexchange.tools.Collections;
 
 /**
- * 
  * ConfigDBStorage
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -70,14 +69,17 @@ import com.openexchange.tools.Collections;
  */
 public class ConfigDBStorage {
 
-    /*
-     * Prevent instantiation
+    private ConfigDatabaseService configDatabaseService;
+
+    /**
+     * Default constructor-
      */
-    private ConfigDBStorage() {
+    public ConfigDBStorage(ConfigDatabaseService configDatabaseService) {
         super();
+        this.configDatabaseService = configDatabaseService;
     }
 
-    private static final String SQL_SELECT_CONTEXTS = "SELECT cid FROM context_server2db_pool WHERE server_id = ? AND write_db_pool_id = ? AND db_schema = ?";
+    private static final String SQL_SELECT_CONTEXTS = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
 
     /**
      * Determines all context IDs which reside in given schema
@@ -90,18 +92,17 @@ public class ConfigDBStorage {
      *         IDs
      * @throws DBPoolingException
      */
-    public static final int[] getContextsFromSchema(final String schema, final int writePoolId)
-            throws DBPoolingException {
+    public final int[] getContextsFromSchema(final String schema, final int writePoolId) throws DBPoolingException {
         try {
-            Connection configDBReadCon = null;
+            Connection con = null;
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
                 /*
                  * Get write pool
                  */
-                configDBReadCon = DatabaseServiceImpl.get(false);
-                stmt = configDBReadCon.prepareStatement(SQL_SELECT_CONTEXTS);
+                con = configDatabaseService.getReadOnly();
+                stmt = con.prepareStatement(SQL_SELECT_CONTEXTS);
                 stmt.setInt(1, Server.getServerId());
                 stmt.setInt(2, writePoolId);
                 stmt.setString(3, schema);
@@ -113,8 +114,8 @@ public class ConfigDBStorage {
                 return intArr.toArray();
             } finally {
                 closeSQLStuff(rs, stmt);
-                if (configDBReadCon != null) {
-                    DatabaseServiceImpl.back(false, configDBReadCon);
+                if (con != null) {
+                    configDatabaseService.backReadOnly(con);
                 }
             }
         } catch (final SQLException e) {
@@ -134,18 +135,18 @@ public class ConfigDBStorage {
      *         context could be found
      * @throws DBPoolingException
      */
-    public static final int getOneContextFromSchema(final String schema, final int writePoolId)
+    public final int getOneContextFromSchema(final String schema, final int writePoolId)
             throws DBPoolingException {
         try {
-            Connection configDBReadCon = null;
+            Connection con = null;
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
                 /*
                  * Get write pool
                  */
-                configDBReadCon = DatabaseServiceImpl.get(false);
-                stmt = configDBReadCon.prepareStatement(SQL_SELECT_CONTEXTS);
+                con = configDatabaseService.getReadOnly();
+                stmt = con.prepareStatement(SQL_SELECT_CONTEXTS);
                 stmt.setInt(1, Server.getServerId());
                 stmt.setInt(2, writePoolId);
                 stmt.setString(3, schema);
@@ -156,8 +157,8 @@ public class ConfigDBStorage {
                 return -1;
             } finally {
                 closeSQLStuff(rs, stmt);
-                if (configDBReadCon != null) {
-                    DatabaseServiceImpl.back(false, configDBReadCon);
+                if (con != null) {
+                    configDatabaseService.backReadOnly(con);
                 }
             }
         } catch (final SQLException e) {

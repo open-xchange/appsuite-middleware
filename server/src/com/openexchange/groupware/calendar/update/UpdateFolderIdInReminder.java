@@ -55,7 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -106,7 +106,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         
         try {
-            writecon = DatabaseServiceImpl.get(contextId, true);
+            writecon = Database.get(contextId, true);
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
@@ -289,7 +289,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             collection.closePreparedStatement(pst6);
             collection.closeStatement(stmt);
             if (writecon != null) {
-                DatabaseServiceImpl.back(contextId, true, writecon);
+                Database.back(contextId, true, writecon);
             }
         }
     }

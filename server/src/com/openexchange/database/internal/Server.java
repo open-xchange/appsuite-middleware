@@ -60,7 +60,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
 
@@ -81,6 +81,8 @@ public final class Server {
 
     private static String serverName;
 
+    private static ConfigDatabaseService configDatabaseService;
+
     private static int serverId = -1;
 
     /**
@@ -88,6 +90,10 @@ public final class Server {
      */
     private Server() {
         super();
+    }
+
+    public static void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
+        Server.configDatabaseService = configDatabaseService;
     }
 
     public static final int getServerId() throws DBPoolingException {
@@ -127,7 +133,7 @@ public final class Server {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con = DatabaseServiceImpl.get(false);
+            con = configDatabaseService.getReadOnly();
             stmt = con.prepareStatement(SELECT);
             stmt.setString(1, name);
             result = stmt.executeQuery();
@@ -139,7 +145,7 @@ public final class Server {
         } finally {
             closeSQLStuff(result, stmt);
             if (null != con) {
-                DatabaseServiceImpl.back(false, con);
+                configDatabaseService.backReadOnly(con);
             }
         }
         return retval;

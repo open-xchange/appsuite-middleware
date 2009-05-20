@@ -15,7 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -76,7 +76,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 		PreparedStatement stmt = null;
 
 		try {
-			writeCon = DatabaseServiceImpl.get(contextId, true);
+			writeCon = Database.get(contextId, true);
 			writeCon.setAutoCommit(false);
 			stmt = writeCon.prepareStatement(sql);
 			for(int i = 0; i < args.length; i++) {
@@ -109,7 +109,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 				}
 
 				if(writeCon != null) {
-					DatabaseServiceImpl.back(contextId, true, writeCon);
+					Database.back(contextId, true, writeCon);
 				}
 			}   
         }
@@ -145,7 +145,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         ResultSet rs = null;
 
         try {
-			readCon = DatabaseServiceImpl.get(false);
+			readCon = Database.get(false);
             stmt = readCon.prepareStatement("SELECT filestore_id, filestore_name FROM context WHERE cid = ?");
             stmt.setInt(1, ctx_id);
 
@@ -202,7 +202,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
             if(readCon != null) {
 				if(readCon != null) {
-					DatabaseServiceImpl.back(false, readCon);
+					Database.back(false, readCon);
 				}
 			}
         }
@@ -220,7 +220,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         ResultSet rs = null;
 
         try {
-			readCon = DatabaseServiceImpl.get(contextId, false);
+			readCon = Database.get(contextId, false);
             stmt = readCon.prepareStatement(query);
             rs = stmt.executeQuery();
             while(rs.next()) {
@@ -247,7 +247,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
             if(readCon != null) {
 				if(readCon != null) {
-					DatabaseServiceImpl.back(contextId, false, readCon);
+					Database.back(contextId, false, readCon);
 				}
 			}
         }

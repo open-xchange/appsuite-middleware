@@ -49,6 +49,7 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
@@ -67,7 +68,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
 
@@ -86,12 +87,13 @@ public final class AssignmentStorage {
      */
     private static final Log LOG = LogFactory.getLog(AssignmentStorage.class);
 
-    private static final String SELECT = "SELECT " + "read_db_pool_id,write_db_pool_id,db_schema "
-            + "FROM context_server2db_pool " + "WHERE server_id=? AND cid=?";
+    private static final Assignment configDB = new Assignment(0, 0, Pools.CONFIGDB_READ_ID, Pools.CONFIGDB_WRITE_ID, null);;
+
+    private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
+
+    private ConfigDatabaseService configDatabaseService;
 
     private static final String CACHE_NAME = "OXDBPoolCache";
-
-    private Assignment configDB;
 
     private CacheService cacheService;
 
@@ -107,6 +109,13 @@ public final class AssignmentStorage {
      */
     public AssignmentStorage() {
         super();
+    }
+
+    /**
+     * TODO remove that method.
+     */
+    public static AssignmentStorage getInstance() {
+        return singleton;
     }
 
     /**
@@ -146,7 +155,7 @@ public final class AssignmentStorage {
 
     private Assignment loadAssignment(final int contextId) throws DBPoolingException {
         Assignment retval = null;
-        final Connection con = DatabaseServiceImpl.get(false);
+        final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -166,17 +175,16 @@ public final class AssignmentStorage {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DatabaseServiceImpl.back(false, con);
+            configDatabaseService.backReadOnly(con);
         }
         return retval;
     }
 
     public List<Integer> listContexts(final int poolid) throws DBPoolingException {
         final List<Integer> retval = new ArrayList<Integer>();
-        final Connection con = DatabaseServiceImpl.get(false);
+        final Connection con = configDatabaseService.getReadOnly();
         // TODO optimize this bad query
-        final String getcid = "SELECT cid FROM context_server2db_pool "
-                + "WHERE read_db_pool_id=? OR write_db_pool_id=?";
+        final String getcid = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -191,7 +199,7 @@ public final class AssignmentStorage {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DatabaseServiceImpl.back(false, con);
+            configDatabaseService.backReadOnly(con);
         }
         return retval;
     }
@@ -207,7 +215,7 @@ public final class AssignmentStorage {
     public void removeAssignments(final int contextId) throws DBPoolingException {
         if (null != cache) {
             try {
-                cache.remove(cache.newCacheKey(contextId, Integer.valueOf(Server.getServerId())));
+                cache.remove(cache.newCacheKey(contextId, I(Server.getServerId())));
             } catch (final CacheException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -218,23 +226,15 @@ public final class AssignmentStorage {
         return configDB;
     }
 
-    public static AssignmentStorage getInstance() {
-        return singleton;
+    public void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
+        this.configDatabaseService = configDatabaseService;
     }
 
-    public void start() {
-        if (null != configDB) {
-            LOG.error("Duplicate AssignmentStorage initialization.");
-            return;
-        }
-        configDB = new Assignment(0, 0, Pools.CONFIGDB_READ_ID, Pools.CONFIGDB_WRITE_ID, null);
+    void stop() {
+        removeCacheService();
     }
 
-    /**
-     * Adds a found cache service to improve performance of this class.
-     * @param service a found cache service.
-     */
-    public void setCacheService(final CacheService service) {
+    void setCacheService(final CacheService service) {
         this.cacheService = service;
         try {
             this.cache = service.getCache(CACHE_NAME);
@@ -243,7 +243,7 @@ public final class AssignmentStorage {
         }
     }
 
-    public void removeCacheService() {
+    void removeCacheService() {
         this.cacheService = null;
         if (null != cache) {
             try {
@@ -253,10 +253,5 @@ public final class AssignmentStorage {
             }
             cache = null;
         }
-    }
-
-    public void stop() {
-        removeCacheService();
-        configDB = null;
     }
 }

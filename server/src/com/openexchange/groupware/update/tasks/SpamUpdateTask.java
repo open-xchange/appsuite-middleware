@@ -58,7 +58,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -140,7 +140,7 @@ public class SpamUpdateTask implements UpdateTask {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
-			writeCon = DatabaseServiceImpl.get(contextId, true);
+			writeCon = Database.get(contextId, true);
 			try {
 				stmt = writeCon.prepareStatement(SQL_MODIFY);
 				stmt.executeUpdate();
@@ -155,7 +155,7 @@ public class SpamUpdateTask implements UpdateTask {
 		} finally {
 			closeSQLStuff(null, stmt);
 			if (writeCon != null) {
-				DatabaseServiceImpl.back(contextId, true, writeCon);
+				Database.back(contextId, true, writeCon);
 			}
 		}
 	}
@@ -173,7 +173,7 @@ public class SpamUpdateTask implements UpdateTask {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			readCon = DatabaseServiceImpl.get(contextId, false);
+			readCon = Database.get(contextId, false);
 			try {
 				stmt = readCon.createStatement();
 				rs = stmt.executeQuery(SQL_SELECT_ALL);
@@ -190,7 +190,7 @@ public class SpamUpdateTask implements UpdateTask {
 		} finally {
 			closeSQLStuff(rs, stmt);
 			if (readCon != null) {
-				DatabaseServiceImpl.back(contextId, false, readCon);
+				Database.back(contextId, false, readCon);
 			}
 		}
 	}

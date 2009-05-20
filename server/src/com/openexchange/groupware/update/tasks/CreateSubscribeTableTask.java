@@ -51,7 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -104,7 +104,7 @@ public class CreateSubscribeTableTask implements UpdateTask {
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.getNoTimeout(contextId, true);
+            con = Database.getNoTimeout(contextId, true);
             if(!Tools.tableExists(con, "subscriptions")) {
                 Tools.exec(con, CREATE_TABLE_SUBSCRIPTIONS);
             }
@@ -120,7 +120,7 @@ public class CreateSubscribeTableTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             if(con != null) {
-                DatabaseServiceImpl.back(contextId, true, con);
+                Database.backNoTimeout(contextId, true, con);
             }
         }
     }

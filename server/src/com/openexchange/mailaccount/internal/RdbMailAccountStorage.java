@@ -67,7 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.mailaccount.Attribute;
@@ -123,14 +123,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
         try {
             fillMailAccount(mailAccount, id, user, cid, con);
         } finally {
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -182,14 +182,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static void fillTransportAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
         try {
             fillTransportAccount(mailAccount, id, user, cid, con);
         } finally {
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -248,14 +248,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
         try {
             deleteMailAccount(id, user, cid, deletePrimary, con);
         } finally {
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
@@ -311,14 +311,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
         try {
             return getUserMailAccounts(user, cid, con);
         } finally {
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -334,14 +334,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     int[] getUserMailAccountIDs(final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
         try {
             return getUserMailAccountIDs(user, cid, con);
         } finally {
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 
@@ -388,7 +388,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         {
             Connection con = null;
             try {
-                con = DatabaseServiceImpl.get(cid, false);
+                con = Database.get(cid, false);
             } catch (final DBPoolingException e) {
                 throw new MailAccountException(e);
             }
@@ -412,7 +412,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
-                DatabaseServiceImpl.back(cid, false, con);
+                Database.back(cid, false, con);
             }
             ids = idsArr.toArray();
             users = usersArr.toArray();
@@ -456,7 +456,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         {
             Connection con = null;
             try {
-                con = DatabaseServiceImpl.get(cid, false);
+                con = Database.get(cid, false);
             } catch (final DBPoolingException e) {
                 throw new MailAccountException(e);
             }
@@ -480,7 +480,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
-                DatabaseServiceImpl.back(cid, false, con);
+                Database.back(cid, false, con);
             }
             ids = idsArr.toArray();
             users = usersArr.toArray();
@@ -495,14 +495,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
         try {
             updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, false);
         } finally {
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
     }
 
@@ -793,7 +793,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
@@ -879,7 +879,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
         /*
          * Automatically check Unified INBOX enablement
@@ -1035,7 +1035,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         final int cid = ctx.getContextId();
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, true);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
@@ -1052,7 +1052,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw e;
         } finally {
             autocommit(con);
-            DatabaseServiceImpl.back(cid, true, con);
+            Database.back(cid, true, con);
         }
         return retval;
     }
@@ -1060,7 +1060,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(cid, false);
+            con = Database.get(cid, false);
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
@@ -1088,7 +1088,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DatabaseServiceImpl.back(cid, false, con);
+            Database.back(cid, false, con);
         }
     }
 

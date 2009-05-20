@@ -77,7 +77,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext context) throws Exception {
         Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        configurationTracker = new ServiceTracker(context, filter, new ConfigurationAndTimerServiceCustomizer(context));
+        configurationTracker = new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context));
         configurationTracker.open();
         managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
         managementTracker.open();

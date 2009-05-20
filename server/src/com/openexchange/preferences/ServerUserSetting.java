@@ -56,7 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.settings.SettingException;
 
 /**
@@ -241,7 +241,7 @@ public class ServerUserSetting {
         final boolean closeCon;
         if (connection == null) {
             try {
-                con = DatabaseServiceImpl.get(cid, false);
+                con = Database.get(cid, false);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
@@ -254,7 +254,7 @@ public class ServerUserSetting {
             return getAttribute(cid, user, attribute, con);
         } finally {
             if (closeCon) {
-                DatabaseServiceImpl.back(cid, false, con);
+                Database.back(cid, false, con);
             }
         }
     }
@@ -264,7 +264,7 @@ public class ServerUserSetting {
         final boolean closeCon;
         if (connection == null) {
             try {
-                con = DatabaseServiceImpl.get(cid, true);
+                con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
@@ -281,7 +281,7 @@ public class ServerUserSetting {
             }
         } finally {
             if (closeCon) {
-                DatabaseServiceImpl.back(cid, true, con);
+                Database.back(cid, true, con);
             }
         }
     }
@@ -293,7 +293,7 @@ public class ServerUserSetting {
         if (connection == null) {
             // Use a writable connection to ensure most up-to-date value is read
             try {
-                con = DatabaseServiceImpl.get(cid, true);
+                con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
@@ -318,7 +318,7 @@ public class ServerUserSetting {
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
-                DatabaseServiceImpl.back(cid, true, con);
+                Database.back(cid, true, con);
             }
         }
         return retval;

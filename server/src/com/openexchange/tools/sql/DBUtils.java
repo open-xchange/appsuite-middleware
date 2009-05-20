@@ -62,7 +62,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -182,9 +182,9 @@ public final class DBUtils {
          */
         if (con != null) {
             if (isReadCon) {
-                DatabaseServiceImpl.back(cid, false, con);
+                Database.back(cid, false, con);
             } else {
-                DatabaseServiceImpl.back(cid, true, con);
+                Database.back(cid, true, con);
             }
         }
     }

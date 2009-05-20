@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -130,7 +130,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 			ResultSet rs = null;
 			
 			try {
-				writeCon = DatabaseServiceImpl.get(contextId, true);
+				writeCon = Database.get(contextId, true);
 				writeCon.setAutoCommit(false);
 				stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ? WHERE cid = ? and fuid = ?");
 				stmt.setInt(2, contextId);
@@ -199,7 +199,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 					}
 					
 					if(writeCon != null) {
-						DatabaseServiceImpl.back(contextId, true, writeCon);
+						Database.back(contextId, true, writeCon);
 					}
 				}
 			}
@@ -257,7 +257,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				writeCon = DatabaseServiceImpl.get(contextId, true);
+				writeCon = Database.get(contextId, true);
                 if(parentFolder == -1) {
                     stmt = writeCon.prepareStatement("SELECT fname, cid  FROM oxfolder_tree WHERE module = ? GROUP BY fname,cid,parent HAVING count(*) > 1");
                     stmt.setInt(1, FolderObject.INFOSTORE);
@@ -296,7 +296,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				}
 				
 				if(null != writeCon) {
-					DatabaseServiceImpl.back(contextId, true, writeCon);
+					Database.back(contextId, true, writeCon);
 				}
 			}
 		}

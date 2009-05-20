@@ -47,69 +47,41 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.database;
 
 import java.sql.Connection;
 
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
-import com.openexchange.groupware.contexts.Context;
-
 /**
- * DBPool
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * {@link ConfigDatabaseService}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DBPool  {
-    
-    public static final Connection pickup() throws DBPoolingException {
-        return Database.get(false);
-    }
-    
-    public static final Connection pickup(final Context context) throws DBPoolingException {
-        return Database.get(context, false);
-    }
-    
-    public static final Connection pickupWriteable() throws DBPoolingException {
-        return Database.get(true);
-    }
-    
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
-        return Database.get(context, true);
-    }
-    
-    public static final boolean push(final Connection con) {
-        Database.back(false, con);
-        return true;
-    }
-    
-    public static final boolean push(final Context context, final Connection con) {
-        Database.back(context, false, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Connection con) {
-        Database.back(true, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Context context, final Connection con) {
-        Database.back(context, true, con);
-        return true;
-    }
-    
-    public static final void closeReaderSilent(final Connection con) {
-        Database.back(false, con);
-    }
-    
-    public static final void closeReaderSilent(final Context context, final Connection con) {
-        Database.back(context, false, con);
-    }
-    
-    public static final void closeWriterSilent(final Connection con) {
-        Database.back(true, con);
-    }
-    
-    public static final void closeWriterSilent(final Context context, final Connection con) {
-        Database.back(context, true, con);
-    }
+public interface ConfigDatabaseService {
+
+    /**
+     * Returns a connection for reading from the config database.
+     * @return a connection for reading from the config database.
+     * @throws DBPoolingException if no connection can be obtained.
+     */
+    Connection getReadOnly() throws DBPoolingException;
+
+    /**
+     * Returns a connection to the config database.
+     * @return a connection to the config database.
+     * @throws DBPoolingException if no connection can be obtained.
+     */
+    Connection getWritable() throws DBPoolingException;
+
+    /**
+     * Returns a read only connection to the config database to the pool.
+     * @param con Connection to return.
+     */
+    void backReadOnly(Connection con);
+
+    /**
+     * Returns a writable connection to the config database to the pool.
+     * @param con Connection to return.
+     */
+    void backWritable(Connection con);
+
 }

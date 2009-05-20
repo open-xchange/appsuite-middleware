@@ -52,7 +52,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -80,7 +80,7 @@ public class AlterDeleteExceptionFieldLength implements UpdateTask {
         Connection writecon = null;
         Statement stmt = null;
         try {
-            writecon = DatabaseServiceImpl.get(contextId, true);
+            writecon = Database.get(contextId, true);
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
@@ -103,7 +103,7 @@ public class AlterDeleteExceptionFieldLength implements UpdateTask {
                 ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).closeStatement(stmt);
             }
             if (writecon != null) {
-                DatabaseServiceImpl.back(contextId, true, writecon);
+                Database.back(contextId, true, writecon);
             }
         }
     }

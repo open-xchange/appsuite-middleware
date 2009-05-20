@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.groupware.update.Schema;
@@ -87,7 +87,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.getNoTimeout(contextId, true);
+            con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
@@ -99,7 +99,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
         } catch (final SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
-                DatabaseServiceImpl.backNoTimeout(contextId, true, con);
+                Database.backNoTimeout(contextId, true, con);
         }
     }
 

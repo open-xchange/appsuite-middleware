@@ -57,7 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -125,7 +125,7 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
-			writeCon = DatabaseServiceImpl.get(contextId, true);
+			writeCon = Database.get(contextId, true);
 			try {
 				if (tableExists("spellcheck_user_dict", writeCon.getMetaData())) {
 					return;
@@ -138,7 +138,7 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 		} finally {
 			closeSQLStuff(null, stmt);
 			if (writeCon != null) {
-				DatabaseServiceImpl.back(contextId, true, writeCon);
+				Database.back(contextId, true, writeCon);
 			}
 		}
 		if (LOG.isInfoEnabled()) {

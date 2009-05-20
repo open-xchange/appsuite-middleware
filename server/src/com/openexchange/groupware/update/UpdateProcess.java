@@ -58,10 +58,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.internal.ConfigDBStorage;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.exception.SchemaException;
@@ -77,15 +77,15 @@ public class UpdateProcess implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(UpdateProcess.class);
 
-    private final int contextId;
+    private final Context context;
 
     private final Lock updateLock;
 
     private final SchemaStore schemaStore;
 
-    public UpdateProcess(final int contextId) throws SchemaException {
+    public UpdateProcess(final Context context) throws SchemaException {
         schemaStore = SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName());
-        this.contextId = contextId;
+        this.context = context;
         this.updateLock = new ReentrantLock();
     }
 
@@ -103,7 +103,7 @@ public class UpdateProcess implements Runnable {
                 /*
                  * Load schema
                  */
-                final Schema schema = schemaStore.getSchema(contextId);
+                final Schema schema = schemaStore.getSchema(context);
                 if (schema.getDBVersion() >= UpdateTaskCollection.getHighestVersion()) {
                     /*
                      * Already been updated before by previous thread
@@ -123,7 +123,7 @@ public class UpdateProcess implements Runnable {
                     /*
                      * Remove affected contexts and kick active sessions
                      */
-                    removeContexts(schema);
+                    removeContexts();
                     /*
                      * Get filtered & sorted list of update tasks
                      */
@@ -140,7 +140,7 @@ public class UpdateProcess implements Runnable {
                             LOG.info("Starting update task "
                                 + taskName + " on schema "
                                 + schema.getSchema() + ".");
-                            task.perform(schema, contextId);
+                            task.perform(schema, context.getContextId());
                         } catch (final AbstractOXException e) {
                             LOG.error(e.getMessage(), e);
                         }
@@ -153,7 +153,7 @@ public class UpdateProcess implements Runnable {
                     }
                     // Remove contexts from cache if they are cached during
                     // update process.
-                    removeContexts(schema);
+                    removeContexts();
                 }
             } catch (final SchemaException e) {
                 LOG.error(e.getMessage(), e);
@@ -168,16 +168,15 @@ public class UpdateProcess implements Runnable {
     }
 
     private final void lockSchema(final Schema schema) throws SchemaException {
-        schemaStore.lockSchema(schema, contextId);
+        schemaStore.lockSchema(schema, context.getContextId());
     }
 
     private final void unlockSchema(final Schema schema) throws SchemaException {
-        schemaStore.unlockSchema(schema, contextId);
+        schemaStore.unlockSchema(schema, context.getContextId());
     }
 
-    private final void removeContexts(final Schema schema) throws DBPoolingException, ContextException {
-        final int[] contextIds = ConfigDBStorage.getContextsFromSchema(schema.getSchema(), DatabaseServiceImpl.resolvePool(
-                contextId, true));
+    private final void removeContexts() throws DBPoolingException, ContextException {
+        final int[] contextIds = Database.getContextsInSameSchema(context.getContextId());
         final ContextStorage contextStorage = ContextStorage.getInstance();
         for (final int cid : contextIds) {
             contextStorage.invalidateContext(cid);

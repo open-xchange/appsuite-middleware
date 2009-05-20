@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -149,7 +149,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
         FolderObject des = null;
         try {
         	
-            writeCon = DatabaseServiceImpl.get(contextId, true);
+            writeCon = Database.get(contextId, true);
             try {
                 st = writeCon.createStatement();
 
@@ -201,7 +201,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
             closeSQLStuff(resultSet, stmt);
             closeSQLStuff(null, st);
             if (writeCon != null) {
-                DatabaseServiceImpl.back(contextId, true, writeCon);
+                Database.back(contextId, true, writeCon);
             }
         }
     }

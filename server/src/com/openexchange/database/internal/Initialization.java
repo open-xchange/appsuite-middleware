@@ -54,7 +54,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
 
@@ -79,6 +78,8 @@ public final class Initialization {
 
     private AssignmentStorage assignmentStorage;
 
+    private ConfigDatabaseServiceImpl configDatabaseService;
+
     /**
      * Prevent instantiation.
      */
@@ -97,22 +98,34 @@ public final class Initialization {
     public void start(ConfigurationService configurationService, TimerService timerService) throws DBPoolingException {
         configuration = new Configuration();
         configuration.readConfiguration(configurationService);
+        // Setting up database connection pools.
         pools = new Pools(timerService);
         pools.start(configuration);
         if (null != managementService) {
             pools.setManagementService(managementService);
         }
-        DatabaseServiceImpl.setPools(pools);
+        // Setting up assignment storage.
         assignmentStorage = new AssignmentStorage();
-        assignmentStorage.start();
         if (null != cacheService) {
             assignmentStorage.setCacheService(cacheService);
         }
-        DatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
+        // Initialize service for connections to config database.
+        configDatabaseService = new ConfigDatabaseServiceImpl();
+        ConfigDatabaseServiceImpl.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+        ConfigDatabaseServiceImpl.setPools(pools);
+        pools.setConnectionDataStorage(new ConnectionDataStorage(configDatabaseService));
+        ConfigDatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
+        assignmentStorage.setConfigDatabaseService(configDatabaseService);
+
         Server.start(configurationService);
+        Server.setConfigDatabaseService(configDatabaseService);
         if (LOG.isInfoEnabled()) {
             LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
         }
+
+        DatabaseServiceImpl.setConfigDatabaseService(configDatabaseService);
+        DatabaseServiceImpl.setPools(pools);
+        DatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
         DatabaseServiceImpl.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
     }
 

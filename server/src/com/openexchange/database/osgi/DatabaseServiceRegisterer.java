@@ -58,6 +58,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.Database;
+import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.timer.TimerService;
 
@@ -66,9 +68,9 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigurationAndTimerServiceCustomizer implements ServiceTrackerCustomizer {
+public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ConfigurationAndTimerServiceCustomizer.class);
+    private static final Log LOG = LogFactory.getLog(DatabaseServiceRegisterer.class);
 
     private BundleContext context;
 
@@ -79,9 +81,9 @@ public class ConfigurationAndTimerServiceCustomizer implements ServiceTrackerCus
     private final Lock lock = new ReentrantLock();
 
     /**
-     * Initializes a new {@link ConfigurationAndTimerServiceCustomizer}.
+     * Initializes a new {@link DatabaseServiceRegisterer}.
      */
-    public ConfigurationAndTimerServiceCustomizer(BundleContext context) {
+    public DatabaseServiceRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
@@ -108,6 +110,7 @@ public class ConfigurationAndTimerServiceCustomizer implements ServiceTrackerCus
             LOG.info("Starting database bundle.");
             try {
                 Initialization.getInstance().start(configurationService, timerService);
+                Database.setDatabaseService(new DatabaseServiceImpl());
             } catch (DBPoolingException e) {
                 LOG.error("Starting the database bundle failed.", e);
             }

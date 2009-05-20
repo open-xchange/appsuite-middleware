@@ -91,15 +91,17 @@ public final class Pools implements Runnable {
 
     private final TimerService timerService;
 
+    private final Lock poolsLock = new ReentrantLock(true);
+
     private ConnectionPool configDBRead;
 
     private ConnectionPool configDBWrite;
 
-    private long cleanerInterval = 10000;
+    private ConnectionDataStorage connectionDataStorage;
 
     private final Map<Integer, ConnectionPool> oxPools = new HashMap<Integer, ConnectionPool>();
 
-    private final Lock poolsLock = new ReentrantLock(true);
+    private long cleanerInterval = 10000;
 
     private ManagementService managementService;
 
@@ -146,7 +148,7 @@ public final class Pools implements Runnable {
             try {
                 retval = oxPools.get(Integer.valueOf(poolId));
                 if (null == retval) {
-                    final ConnectionDataStorage.ConnectionData data = ConnectionDataStorage.loadPoolData(poolId);
+                    final ConnectionData data = connectionDataStorage.loadPoolData(poolId);
                     try {
                         Class.forName(data.driverClass);
                     } catch (final ClassNotFoundException e) {
@@ -160,6 +162,18 @@ public final class Pools implements Runnable {
             }
         }
         return retval;
+    }
+
+    private ConnectionPool createPool(int poolId, String url, Properties props, Config config) {
+        ConnectionPool retval = new ConnectionPool(url, props, config);
+        retval.registerCleaner(timerService, cleanerInterval);
+        registerMBean(createMBeanName(poolId), retval);
+        return retval;
+    }
+
+    private void destroyPool(int poolId, ConnectionPool pool) {
+        unregisterMBean(createMBeanName(poolId));
+        pool.destroy();
     }
 
     private ScheduledTimerTask cleaner;
@@ -185,6 +199,7 @@ public final class Pools implements Runnable {
 
     private void stopCleaner() {
         if (null == cleaner) {
+            // TODO throw DBPoolingException
             throw new IllegalStateException("Pools cleaner is already stopped.");
         }
         if (!cleaner.cancel()) {
@@ -206,8 +221,7 @@ public final class Pools implements Runnable {
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
                     iter.remove();
-                    unregisterMBean(createMBeanName(entry.getKey().intValue()));
-                    pool.destroy();
+                    destroyPool(entry.getKey().intValue(), pool);
                 }
             }
         } finally {
@@ -304,6 +318,16 @@ public final class Pools implements Runnable {
         }
     }
 
+    public void setManagementService(ManagementService managementService) {
+        this.managementService = managementService;
+        registerMBeans();
+    }
+
+    public void removeManagementService() {
+        unregisterMBeans();
+        managementService = null;
+    }
+
     /**
      * Initializes the default pool configuration and starts read and write
      * pools for ConfigDB.
@@ -322,21 +346,6 @@ public final class Pools implements Runnable {
         } else {
             configDBWrite = configDBRead;
         }
-    }
-
-    private ConnectionPool createPool(int poolId, String url, Properties props, Config config) {
-        ConnectionPool retval = new ConnectionPool(url, props, config);
-        retval.registerCleaner(timerService, cleanerInterval);
-        registerMBean(createMBeanName(poolId), retval);
-        return retval;
-    }
-
-    private void destroyPool(int poolId, ConnectionPool pool) {
-        unregisterMBean(createMBeanName(poolId));
-        if (!pool.getCleanerTask().cancel()) {
-            LOG.error("");
-        }
-        pool.destroy();
     }
     
     /**
@@ -360,6 +369,10 @@ public final class Pools implements Runnable {
         configDBRead = null;
         stopCleaner();
         config = null;
+    }
+
+    public void setConnectionDataStorage(ConnectionDataStorage connectionDataStorage) {
+        this.connectionDataStorage = connectionDataStorage;
     }
 
     /**
@@ -395,7 +408,7 @@ public final class Pools implements Runnable {
      * @return pooling configuration.
      */
     private ConnectionPool.Config getConfig(
-        final ConnectionDataStorage.ConnectionData data) {
+        final ConnectionData data) {
         final ConnectionPool.Config retval = config.clone();
         retval.maxActive = data.max;
         retval.minIdle = data.min;
@@ -405,15 +418,5 @@ public final class Pools implements Runnable {
             retval.exhaustedAction = ConnectionPool.ExhaustedActions.GROW;
         }
         return retval;
-    }
-
-    public void setManagementService(ManagementService managementService) {
-        this.managementService = managementService;
-        registerMBeans();
-    }
-
-    public void removeManagementService() {
-        unregisterMBeans();
-        managementService = null;
     }
 }

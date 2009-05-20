@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -113,7 +113,7 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
-			writeCon = DatabaseServiceImpl.get(contextId, true);
+			writeCon = Database.get(contextId, true);
 			try {
 				stmt = writeCon.prepareStatement(SQL_MODIFY);
 				stmt.executeUpdate();
@@ -123,7 +123,7 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 		} finally {
 			closeSQLStuff(null, stmt);
 			if (writeCon != null) {
-				DatabaseServiceImpl.back(contextId, true, writeCon);
+				Database.back(contextId, true, writeCon);
 			}
 		}
 	}

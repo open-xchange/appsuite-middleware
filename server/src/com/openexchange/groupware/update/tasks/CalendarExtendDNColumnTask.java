@@ -56,7 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -120,7 +120,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
              */
             final Connection writeCon;
             try {
-                writeCon = DatabaseServiceImpl.getNoTimeout(contextId, true);
+                writeCon = Database.getNoTimeout(contextId, true);
             } catch (final DBPoolingException e) {
                 throw new UpdateException(e);
             }
@@ -135,7 +135,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             } finally {
                 closeSQLStuff(null, stmt);
                 if (writeCon != null) {
-                    DatabaseServiceImpl.backNoTimeout(contextId, true, writeCon);
+                    Database.backNoTimeout(contextId, true, writeCon);
                 }
             }
             if (LOG.isInfoEnabled()) {
@@ -147,7 +147,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
     private boolean checkColumnInTable(final String tableName, final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.get(contextId, true);
+            writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -167,7 +167,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             throw wrapSQLException(e);
         } finally {
             closeSQLStuff(rs);
-            DatabaseServiceImpl.back(contextId, true, writeCon);
+            Database.back(contextId, true, writeCon);
         }
     }
 

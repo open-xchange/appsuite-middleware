@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
@@ -99,7 +99,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
          */
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.get(event.getContext(), true);
+            writeCon = Database.get(event.getContext(), true);
         } catch (final DBPoolingException e) {
             throw new UserException(e);
         }
@@ -116,7 +116,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
-            DatabaseServiceImpl.back(event.getContext(), true, writeCon);
+            Database.back(event.getContext(), true, writeCon);
         }
     }
 

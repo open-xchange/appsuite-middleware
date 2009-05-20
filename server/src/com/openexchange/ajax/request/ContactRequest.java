@@ -75,7 +75,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -727,7 +727,7 @@ public class ContactRequest {
          */
         Connection readCon;
         try {
-            readCon = DatabaseServiceImpl.get(ctx, false);
+            readCon = Database.get(ctx, false);
         } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
@@ -738,7 +738,7 @@ public class ContactRequest {
         } catch (final ContextException e) {
             throw new OXException(e);
         } finally {
-            DatabaseServiceImpl.back(ctx, false, readCon);
+            Database.back(ctx, false, readCon);
             readCon = null;
         }
         if (links == null || links.length == 0) {
@@ -749,7 +749,7 @@ public class ContactRequest {
          */
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.get(ctx, true);
+            writeCon = Database.get(ctx, true);
         } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
@@ -772,7 +772,7 @@ public class ContactRequest {
         } catch (final ContextException e) {
             throw new OXException(e);
         } finally {
-            DatabaseServiceImpl.back(ctx, true, writeCon);
+            Database.back(ctx, true, writeCon);
         }
     }
 

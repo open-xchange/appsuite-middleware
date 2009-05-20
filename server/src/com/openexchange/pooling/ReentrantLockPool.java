@@ -449,7 +449,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      */
     public void destroy() {
         running = false;
-        cleaner.cancel();
+        if (!cleaner.cancel()) {
+            PoolingException e = new PoolingException("Can not stop pool cleaner.");
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     /**

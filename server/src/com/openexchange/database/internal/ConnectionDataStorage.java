@@ -61,7 +61,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
 
@@ -69,24 +69,24 @@ import com.openexchange.database.DBPoolingException.Code;
  * Reads a database connection from the config DB.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ConnectionDataStorage {
+public class ConnectionDataStorage {
 
-    private static final String SELECT = "SELECT "
-        + "url,driver,login,password,hardlimit,max,initial "
-        + "FROM db_pool "
-        + "WHERE db_pool_id=?";
+    private static final String SELECT = "SELECT url,driver,login,password,hardlimit,max,initial FROM db_pool WHERE db_pool_id=?";
+
+    private final ConfigDatabaseService configDatabaseService;
 
     /**
-     * Prevent instantiation
+     * Default constructor.
      */
-    private ConnectionDataStorage() {
+    public ConnectionDataStorage(ConfigDatabaseService configDatabaseService) {
         super();
+        this.configDatabaseService = configDatabaseService;
     }
 
-    static ConnectionData loadPoolData(final int poolId)
+    public ConnectionData loadPoolData(final int poolId)
         throws DBPoolingException {
         ConnectionData retval = null;
-        final Connection con = DatabaseServiceImpl.get(false);
+        final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -111,7 +111,7 @@ public final class ConnectionDataStorage {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DatabaseServiceImpl.back(false, con);
+            configDatabaseService.backReadOnly(con);
         }
         parseUrlToProperties(retval);
         return retval;
@@ -136,17 +136,5 @@ public final class ConnectionDataStorage {
                 }
             }
         }
-    }
-
-    static class ConnectionData {
-        ConnectionData() {
-            super();
-        }
-        String url;
-        String driverClass;
-        Properties props;
-        boolean block;
-        int max;
-        int min;
     }
 }

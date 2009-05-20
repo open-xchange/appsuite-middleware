@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.database.internal.ConfigDBStorage;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -63,112 +61,100 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * Implementation for the updater interface.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATER_IMPL, component = EnumComponent.UPDATE)
 public class UpdaterImpl extends Updater {
 
-	/**
-	 * For creating exceptions.
-	 */
-	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(UpdaterImpl.class);
+    /**
+     * For creating exceptions.
+     */
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(UpdaterImpl.class);
 
-	/**
-	 * Default constructor.
-	 */
-	public UpdaterImpl() {
-		super();
-	}
+    /**
+     * Default constructor.
+     */
+    public UpdaterImpl() {
+        super();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean isLocked(final Context context) throws UpdateException {
-		return getSchema(context).isLocked();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isLocked(final Context context) throws UpdateException {
+        return getSchema(context).isLocked();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "",
-			exceptionId = 1,
-			msg = "Update process initialization failed: %1$s."
-	)
-	@Override
-	public void startUpdate(final Context context) throws UpdateException {
-		UpdateProcess process;
-		try {
-			process = new UpdateProcess(context.getContextId());
-		} catch (final SchemaException e) {
-			throw EXCEPTION.create(1, e, e.getMessage());
-		}
-		final Thread thread = new Thread(process);
-		thread.start();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @OXThrows(
+            category = Category.CODE_ERROR,
+            desc = "",
+            exceptionId = 1,
+            msg = "Update process initialization failed: %1$s."
+    )
+    @Override
+    public void startUpdate(final Context context) throws UpdateException {
+        UpdateProcess process;
+        try {
+            process = new UpdateProcess(context);
+        } catch (final SchemaException e) {
+            throw EXCEPTION.create(1, e, e.getMessage());
+        }
+        final Thread thread = new Thread(process);
+        thread.start();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean toUpdate(final Context context) throws UpdateException {
-		return toUpdateInternal(getSchema(context));
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean toUpdate(final Context context) throws UpdateException {
+        return toUpdateInternal(getSchema(context));
+    }
 
-	private static final boolean toUpdateInternal(final Schema schema) {
-		return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
-	}
+    private static final boolean toUpdateInternal(final Schema schema) {
+        return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
+    }
 
-	/**
-	 * Loads the schema information from the database.
-	 * 
-	 * @param context
-	 *            the schema in that this context is will be loaded.
-	 * @return the schema information.
-	 * @throws UpdateException
-	 *             if loading the schema information fails.
-	 */
-	private Schema getSchema(final Context context) throws UpdateException {
-		final Schema schema;
-		try {
-			final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
-			schema = store.getSchema(context);
-		} catch (final SchemaException e) {
-			throw new UpdateException(e);
-		}
-		return schema;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final boolean isLocked(final String schema, final int writePoolId) throws UpdateException {
-		try {
-			return SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(
-					ConfigDBStorage.getOneContextFromSchema(schema, writePoolId)).isLocked();
-		} catch (final DBPoolingException e) {
-			throw new UpdateException(e);
-		} catch (final SchemaException e) {
-			throw new UpdateException(e);
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final boolean toUpdate(final String schema, final int writePoolId) throws UpdateException {
-		try {
-			return toUpdateInternal(SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(
-					ConfigDBStorage.getOneContextFromSchema(schema, writePoolId)));
-		} catch (final DBPoolingException e) {
-			throw new UpdateException(e);
-		} catch (final SchemaException e) {
-			throw new UpdateException(e);
-		}
-	}
+    private Schema getSchema(Context context) throws UpdateException {
+        final Schema schema;
+        try {
+            final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
+            schema = store.getSchema(context);
+        } catch (final SchemaException e) {
+            throw new UpdateException(e);
+        }
+        return schema;
+    }
+
+    private Schema getSchema(int poolId, String schemaName) throws UpdateException {
+        final Schema schema;
+        try {
+            final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
+            schema = store.getSchema(poolId, schemaName);
+        } catch (final SchemaException e) {
+            throw new UpdateException(e);
+        }
+        return schema;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isLocked(final String schema, final int writePoolId) throws UpdateException {
+        return getSchema(writePoolId, schema).isLocked();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean toUpdate(final String schema, final int writePoolId) throws UpdateException {
+        return toUpdateInternal(getSchema(writePoolId, schema));
+    }
 }

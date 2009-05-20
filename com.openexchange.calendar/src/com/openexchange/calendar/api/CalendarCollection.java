@@ -92,7 +92,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.calendar.CalendarCache;
@@ -2869,7 +2869,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = DatabaseServiceImpl.get(contextId, false);
+            readcon = Database.get(contextId, false);
             {
                 final StringBuilder sb = new StringBuilder((FIELDS_ALL.length << 3) + 128);
                 sb.append(StringCollection.getSelect(FIELDS_ALL, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
@@ -2918,7 +2918,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    DatabaseServiceImpl.back(contextId, false, readcon);
+                    Database.back(contextId, false, readcon);
                 }
             }
         }
@@ -2938,7 +2938,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = DatabaseServiceImpl.get(contextId, false);
+            readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
                 final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
@@ -2990,7 +2990,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    DatabaseServiceImpl.back(contextId, false, readcon);
+                    Database.back(contextId, false, readcon);
                 }
             }
         }
@@ -3024,7 +3024,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = DatabaseServiceImpl.get(contextId, false);
+            readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
                 final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
@@ -3068,7 +3068,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    DatabaseServiceImpl.back(contextId, false, readcon);
+                    Database.back(contextId, false, readcon);
                 }
             }
         }
@@ -3091,7 +3091,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         PreparedStatement prep = null;
         boolean closeResources = true;
         try {
-            readcon = DatabaseServiceImpl.get(contextId, false);
+            readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
                 final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
@@ -3144,7 +3144,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 closeResultSet(rs);
                 closePreparedStatement(prep);
                 if (readcon != null) {
-                    DatabaseServiceImpl.back(contextId, false, readcon);
+                    Database.back(contextId, false, readcon);
                 }
             }
         }

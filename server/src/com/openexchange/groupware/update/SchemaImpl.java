@@ -66,8 +66,8 @@ public class SchemaImpl implements Schema {
     /**
      * Actual schema after all updates are applied.
      */
-    public static final SchemaImpl ACTUAL = new SchemaImpl(false, UpdateTaskCollection.getHighestVersion(), true, true); 
-	    
+    public static final SchemaImpl ACTUAL = new SchemaImpl(false, UpdateTaskCollection.getHighestVersion(), true, true);
+
     /**
      * Currently locked?
      */
@@ -92,7 +92,7 @@ public class SchemaImpl implements Schema {
      * Hostname of the server that updates the database.
      */
     private String server;
-    
+
     /**
      * Schema name
      */
@@ -104,7 +104,7 @@ public class SchemaImpl implements Schema {
     SchemaImpl() {
         super();
     }
-    
+
     /**
      * @param locked
      * @param dbVersion
@@ -190,19 +190,19 @@ public class SchemaImpl implements Schema {
         this.server = server;
     }
 
-	/* (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.update.Schema#getSchema()
-	 */
-	public String getSchema() {
-		return schema;
-	}
+    /* (non-Javadoc)
+     *
+     * @see com.openexchange.groupware.update.Schema#getSchema()
+     */
+    public String getSchema() {
+        return schema;
+    }
 
-	/**
-	 * @param schema - the schema name
-	 */
-	public void setSchema(final String schema) {
-		this.schema = schema;
-	}
-    
+    /**
+     * @param schema - the schema name
+     */
+    public void setSchema(final String schema) {
+        this.schema = schema;
+    }
+
 }

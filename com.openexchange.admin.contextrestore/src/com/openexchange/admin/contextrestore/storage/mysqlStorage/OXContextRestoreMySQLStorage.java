@@ -25,7 +25,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 
 /**
  * This class contains all the mysql database related code
@@ -49,7 +49,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             File file = new File("/tmp/" + poolidandschema.getSchema() + ".txt");
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String in = null;
-            connection = DatabaseServiceImpl.get(pool_id, poolidandschema.getSchema());
+            connection = Database.get(pool_id, poolidandschema.getSchema());
             connection.setAutoCommit(false);
             while ((in = reader.readLine()) != null) {
                 prepareStatement = connection.prepareStatement(in);
@@ -59,7 +59,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             file = new File("/tmp/configdb.txt");
             reader = new BufferedReader(new FileReader(file));
             in = null;
-            connection2 = DatabaseServiceImpl.get(true);
+            connection2 = Database.get(true);
             connection2.setAutoCommit(false);
             while ((in = reader.readLine()) != null) {
                 prepareStatement2 = connection2.prepareStatement(in);
@@ -98,7 +98,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             closePreparedStatement(prepareStatement2);
             closePreparedStatement(prepareStatement3);
             if (null != connection) {
-                DatabaseServiceImpl.back(pool_id, connection);
+                Database.back(pool_id, connection);
             }
         }
     }
@@ -138,7 +138,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
         PreparedStatement prepareStatement = null;
         final int pool_id = poolIdAndSchema.getPool_id();
         try {
-            connection = DatabaseServiceImpl.get(pool_id, poolIdAndSchema.getSchema());
+            connection = Database.get(pool_id, poolIdAndSchema.getSchema());
             prepareStatement = connection.prepareStatement("SELECT `version`, `locked`, `gw_compatible`, `admin_compatible`, `server` FROM `version`");
             
             final ResultSet result = prepareStatement.executeQuery();
@@ -159,7 +159,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 prepareStatement.close();
             }
             if (null != connection) {
-                DatabaseServiceImpl.back(pool_id, connection);
+                Database.back(pool_id, connection);
             }
         }
     }

@@ -60,7 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -77,7 +77,7 @@ public class Transaction {
 
     public List<Integer> executeStatement(String sql, Object... objects) throws DBPoolingException, SQLException {
         if (connection == null) {
-            connection = DatabaseServiceImpl.get(contextId, true);
+            connection = Database.get(contextId, true);
             connection.setAutoCommit(false);
         }
 
@@ -102,7 +102,7 @@ public class Transaction {
     public List<Map<String, Object>> executeQuery(String sql, Object... objects) throws DBPoolingException, SQLException {
         Connection con;
         if (connection == null) {
-            con = DatabaseServiceImpl.get(contextId, false);
+            con = Database.get(contextId, false);
         } else {
             con = connection;
         }
@@ -128,7 +128,7 @@ public class Transaction {
 
         if (connection == null) {
             closeSQLStuff(con, null, null);
-            DatabaseServiceImpl.back(contextId, false, con);
+            Database.back(contextId, false, con);
         }
 
         return retval;
@@ -152,7 +152,7 @@ public class Transaction {
         }
         connection.commit();
         connection.setAutoCommit(true);
-        DatabaseServiceImpl.back(contextId, true, connection);
+        Database.back(contextId, true, connection);
     }
 
     public void rollback() throws SQLException {
@@ -161,7 +161,7 @@ public class Transaction {
         }
         connection.rollback();
         connection.setAutoCommit(true);
-        DatabaseServiceImpl.back(contextId, true, connection);
+        Database.back(contextId, true, connection);
     }
 
     private void closeSQLStuff(Connection con, Statement stmt, ResultSet rs) throws SQLException {

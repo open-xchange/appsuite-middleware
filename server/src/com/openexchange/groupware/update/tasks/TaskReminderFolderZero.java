@@ -60,7 +60,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -166,7 +166,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             + remove.size() + " not fixable reminder.");
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(contextId, true);
+            con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw EXCEPTION.create(1, e);
         }
@@ -183,7 +183,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
-            DatabaseServiceImpl.back(contextId, true, con);
+            Database.back(contextId, true, con);
         }
         LOG.info("Update task TaskReminderFolderZero all DONE.");
     }
@@ -199,7 +199,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         final List<ReminderData> retval = new ArrayList<ReminderData>();
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(contextId, false);
+            con = Database.get(contextId, false);
         } catch (final DBPoolingException e) {
             throw EXCEPTION.create(2, e);
         }
@@ -222,7 +222,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             throw EXCEPTION.create(4, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
-            DatabaseServiceImpl.back(contextId, false, con);
+            Database.back(contextId, false, con);
         }
         return retval;
     }
@@ -237,7 +237,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         final int userId) throws AbstractOXException {
         Connection con = null;
         try {
-            con = DatabaseServiceImpl.get(contextId, false);
+            con = Database.get(contextId, false);
         } catch (final DBPoolingException e) {
             throw EXCEPTION.create(6, e);
         }
@@ -257,7 +257,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             throw EXCEPTION.create(5, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
-            DatabaseServiceImpl.back(contextId, false, con);
+            Database.back(contextId, false, con);
         }
         return retval;
     }

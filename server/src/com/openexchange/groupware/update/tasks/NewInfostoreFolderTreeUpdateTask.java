@@ -64,7 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseServiceImpl;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -147,7 +147,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.getNoTimeout(cid, true);
+            writeCon = Database.getNoTimeout(cid, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -163,7 +163,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             throw err(e);
         } finally {
             closeSQLStuff(rs, stmt);
-            DatabaseServiceImpl.backNoTimeout(cid, true, writeCon);
+            Database.backNoTimeout(cid, true, writeCon);
         }
     }
 
@@ -171,7 +171,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
         LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context " + cid);
         final Connection writeCon;
         try {
-            writeCon = DatabaseServiceImpl.getNoTimeout(cid, true);
+            writeCon = Database.getNoTimeout(cid, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -213,7 +213,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             throw e;
         } finally {
             autocommit(writeCon);
-            DatabaseServiceImpl.backNoTimeout(cid, true, writeCon);
+            Database.backNoTimeout(cid, true, writeCon);
         }
     }
 
