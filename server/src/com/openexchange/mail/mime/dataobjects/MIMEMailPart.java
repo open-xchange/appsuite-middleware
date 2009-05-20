@@ -85,6 +85,12 @@ public final class MIMEMailPart extends MailPart {
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMailPart.class);
 
+    /**
+     * The max. in-memory size in bytes.
+     */
+    // TODO: Make configurable
+    private static final int MAX_INMEMORY_SIZE = 1048576;
+
     private static final String ERR_NULL_PART = "Underlying part is null";
 
     /**
@@ -118,7 +124,7 @@ public final class MIMEMailPart extends MailPart {
     /**
      * Cached instance of multipart.
      */
-    private transient MIMEMultipartMailPart multipart;
+    private transient MultipartWrapper multipart;
 
     /**
      * Whether this part's content is of MIME type <code>multipart/*</code>.
@@ -284,31 +290,9 @@ public final class MIMEMailPart extends MailPart {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         } else if (isMulti) {
-            try {
-                if (null == multipart) {
-                    createMultipart();
-                }
-                // return MIMEMessageConverter.convertPart(multipart.get);
-                return multipart.getEnclosedMailPart(index);
-            } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-            } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-            }
+            return getMultipartWrapper().getMailPart(index);
         }
         return null;
-    }
-
-    private void createMultipart() throws IOException, MessagingException, MailException {
-        // multipart = (Multipart) part.getContent();
-        final int size = (int) getSize();
-        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size > 0 ? size : 8192);
-        part.writeTo(out);
-        multipart = new MIMEMultipartMailPart(getContentType(), out.toByteArray());
     }
 
     @Override
@@ -316,20 +300,7 @@ public final class MIMEMailPart extends MailPart {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         } else if (isMulti) {
-            try {
-                if (null == multipart) {
-                    createMultipart();
-                }
-                return multipart.getEnclosedCount();
-            } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-            } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-            }
+            return getMultipartWrapper().getCount();
         }
         return NO_ENCLOSED_PARTS;
     }
@@ -654,4 +625,87 @@ public final class MIMEMailPart extends MailPart {
         }
         return data;
     }
+
+    private MultipartWrapper getMultipartWrapper() throws MailException {
+        if (null == multipart) {
+            try {
+                final int size = part.getSize();
+                if (size > 0 && size <= MAX_INMEMORY_SIZE) {
+                    /*
+                     * If size is less than or equal to 1MB, use the in-memory implementation
+                     */
+                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
+                    part.writeTo(out);
+                    multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
+                } else {
+                    /*
+                     * If size is unknwon or exceeds 1MB, use the stream-based implementation
+                     */
+                    multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
+                }
+            } catch (final MessagingException e) {
+                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+        }
+        return multipart;
+    }
+
+    private static interface MultipartWrapper {
+
+        public int getCount() throws MailException;
+
+        public MailPart getMailPart(int index) throws MailException;
+    }
+
+    private static class MIMEMultipartWrapper implements MultipartWrapper {
+
+        private final MIMEMultipartMailPart multipartMailPart;
+
+        public MIMEMultipartWrapper(final MIMEMultipartMailPart multipartMailPart) {
+            super();
+            this.multipartMailPart = multipartMailPart;
+        }
+
+        public int getCount() throws MailException {
+            return multipartMailPart.getEnclosedCount();
+        }
+
+        public MailPart getMailPart(final int index) throws MailException {
+            return multipartMailPart.getEnclosedMailPart(index);
+        }
+
+    } // End of MIMEMultipartWrapper
+
+    private static class JavaMailMultipartWrapper implements MultipartWrapper {
+
+        private final Multipart jmMultipart;
+
+        public JavaMailMultipartWrapper(final Multipart multipart) {
+            super();
+            this.jmMultipart = multipart;
+        }
+
+        public int getCount() throws MailException {
+            try {
+                return jmMultipart.getCount();
+            } catch (final MessagingException e) {
+                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+            }
+        }
+
+        public MailPart getMailPart(final int index) throws MailException {
+            try {
+                return MIMEMessageConverter.convertPart(jmMultipart.getBodyPart(index));
+            } catch (final MessagingException e) {
+                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+            }
+        }
+
+    } // End of JavaMailMultipartWrapper
 }
