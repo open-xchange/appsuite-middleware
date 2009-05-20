@@ -68,12 +68,16 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.server.ServiceException;
 
 /**
  * @author d7
@@ -1331,7 +1335,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextEnabled(int)
      */
     @Override
-	public boolean isContextEnabled(final Context ctx) throws StorageException {
+    public boolean isContextEnabled(final Context ctx) throws StorageException {
         boolean retBool = false;
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
@@ -1447,39 +1451,47 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean checkAndUpdateSchemaIfRequired(final Context ctx) throws StorageException {
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String schema = null;
-        int writePoolId = -1;
+    public boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException {
         try {
-            con = cache.getConnectionForConfigDB();
-            ps = con.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid = ?");
-            ps.setInt(1,ctx.getId().intValue());
-            rs = ps.executeQuery();
-            if( ! rs.next() ) {
-                throw new SQLException("Unable to determine Database update status");
-            }
-            schema = rs.getString("db_schema");
-            writePoolId = rs.getInt("write_db_pool_id");
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e.toString());
-        } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(ps);
-
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox db read connection to pool!", e);
-            }
+            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
+            com.openexchange.groupware.contexts.Context gwContext = contextService.getContext(ctx.getId());
+            return condCheckAndUpdateSchemaIfRequired(gwContext, true);
+        } catch (ServiceException e) {
+            throw new StorageException(e.getMessage(), e);
+        } catch (ContextException e) {
+            throw new StorageException(e.getMessage(), e);
         }
-        return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, true, ctx);
+    }
+
+    private boolean condCheckAndUpdateSchemaIfRequired(com.openexchange.groupware.contexts.Context context, boolean doupdate) throws StorageException {
+        Updater updater;
+        try {
+            updater = Updater.getInstance();
+            if (updater.isLocked(context)) {
+                log.info("Another database update process is already running");
+                return true;
+            }
+            // we only reach this point, if no other thread is already locking us
+            final boolean needupdate = updater.toUpdate(context); 
+            if (!needupdate) {
+                return false;
+            }
+            // we only reach this point, if we need an update
+            if (doupdate) {
+                updater.startUpdate(context);
+            }
+            // either with or without starting an update task, when we reach this point, we
+            // must return true
+            return true;
+        } catch (UpdateException e) {
+            if (e.getDetailNumber() == 102) {
+                // NOTE: this situation should not happen!
+                // it can only happen, when a schema has not been initialized correctly!
+                log.debug("FATAL: this error must not happen",e);
+            }
+            log.error("Error in checking/updating schema",e);
+            throw new StorageException(e.toString());
+        }
     }
 
     private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doupdate, final Context ctx) throws StorageException {

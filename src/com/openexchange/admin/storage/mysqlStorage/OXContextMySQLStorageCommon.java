@@ -287,7 +287,7 @@ public abstract class OXContextMySQLStorageCommon {
     
                         stmt3.close();
                         // tell pool, that database has been removed
-                        com.openexchange.database.DatabaseServiceImpl.reset(context_id);
+                        com.openexchange.database.Database.reset(context_id);
                     }
                     stmt2.close();
                 } catch (final Exception e) {
