@@ -204,21 +204,25 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final int size = parsed.size();
             // Create completion service for simultaneous access
             final ExecutorService executor = Executors.newFixedThreadPool(size, new UnifiedINBOXThreadFactory());
-            final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executor);
+            final CompletionService<GetMessagesResult> completionService = new ExecutorCompletionService<GetMessagesResult>(executor);
             // Iterate parsed map and submit a task for each iteration
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
             for (int i = 0; i < size; i++) {
-                completionService.submit(new LoggingCallable<Object>(session) {
+                completionService.submit(new LoggingCallable<GetMessagesResult>(session) {
 
-                    public MailMessage[] call() throws Exception {
+                    public GetMessagesResult call() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(getSession(), accountId);
-                        boolean close = false;
+                        final MailAccess<?, ?> mailAccess;
                         try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            close = true;
+                        } catch (final MailException e) {
+                            getLogger().error(e.getMessage(), e);
+                            return GetMessagesResult.EMPTY_RESULT;
+                        }
+                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -226,20 +230,17 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 final Map.Entry<String, List<String>> e = inneriter.next();
                                 final String folder = e.getKey();
                                 final List<String> uids = e.getValue();
-                                final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(
+                                // Return object
+                                return new GetMessagesResult(accountId, folder, mailAccess.getMessageStorage().getMessages(
                                     folder,
                                     uids.toArray(new String[uids.size()]),
-                                    fields);
-                                // Now insert mails at proper position
-                                insertMessage(mailIds, messages, accountId, folder, mails, fullname);
+                                    fields));
                             }
                         } finally {
-                            if (close) {
-                                mailAccess.close(true);
-                            }
+                            mailAccess.close(true);
                         }
                         // Return dummy object
-                        return EMPTY_RETVAL;
+                        return GetMessagesResult.EMPTY_RESULT;
                     }
                 });
                 /*-
@@ -276,7 +277,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             // Wait for completion of each submitted task
             try {
                 for (int i = 0; i < size; i++) {
-                    completionService.take().get();
+                    final GetMessagesResult result = completionService.take().get();
+                    insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullname);
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -633,11 +635,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(getSession(), accountId);
-                        boolean close = false;
+                        final MailAccess<?, ?> mailAccess;
                         try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            close = true;
+                        } catch (final MailException e) {
+                            getLogger().error(e.getMessage(), e);
+                            return null;
+                        }
+                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -649,9 +655,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 mailAccess.getMessageStorage().deleteMessages(folder, uids.toArray(new String[uids.size()]), hardDelete);
                             }
                         } finally {
-                            if (close) {
-                                mailAccess.close(true);
-                            }
+                            mailAccess.close(true);
                         }
                         return null;
                     }
@@ -734,11 +738,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(getSession(), accountId);
-                        boolean close = false;
+                        final MailAccess<?, ?> mailAccess;
                         try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            close = true;
+                        } catch (final MailException e) {
+                            getLogger().error(e.getMessage(), e);
+                            return null;
+                        }
+                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -750,9 +758,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
                             }
                         } finally {
-                            if (close) {
-                                mailAccess.close(true);
-                            }
+                            mailAccess.close(true);
                         }
                         return null;
                     }
@@ -808,11 +814,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(getSession(), accountId);
-                        boolean close = false;
+                        final MailAccess<?, ?> mailAccess;
                         try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            close = true;
+                        } catch (final MailException e) {
+                            getLogger().error(e.getMessage(), e);
+                            return null;
+                        }
+                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -827,9 +837,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                     colorLabel);
                             }
                         } finally {
-                            if (close) {
-                                mailAccess.close(true);
-                            }
+                            mailAccess.close(true);
                         }
                         return null;
                     }
@@ -894,6 +902,25 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 mails[k].setFolder(uiFullname);
             }
         }
+    }
+
+    private static class GetMessagesResult {
+
+        public static final GetMessagesResult EMPTY_RESULT = new GetMessagesResult(-1, null, new MailMessage[0]);
+
+        public final MailMessage[] mails;
+
+        public final String folder;
+
+        public final int accountId;
+
+        public GetMessagesResult(final int accountId, final String folder, final MailMessage[] mails) {
+            super();
+            this.mails = mails;
+            this.folder = folder;
+            this.accountId = accountId;
+        }
+
     }
 
 }
