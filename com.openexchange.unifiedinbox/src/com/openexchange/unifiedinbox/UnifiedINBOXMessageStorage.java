@@ -62,7 +62,6 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
@@ -88,7 +87,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXThreadFactory;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
 
@@ -98,8 +97,6 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
 
     /**
      * Serial version UID
@@ -203,7 +200,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
             // Create completion service for simultaneous access
-            final ExecutorService executor = Executors.newFixedThreadPool(size, new UnifiedINBOXThreadFactory());
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             final CompletionService<GetMessagesResult> completionService = new ExecutorCompletionService<GetMessagesResult>(executor);
             // Iterate parsed map and submit a task for each iteration
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
@@ -392,7 +389,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
             // Create completion service for simultaneous access
             final int length = accounts.length;
-            final ExecutorService executor = Executors.newFixedThreadPool(length, new UnifiedINBOXThreadFactory());
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
             final CompletionService<List<MailMessage>> completionService = new ExecutorCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -520,7 +517,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 throw new UnifiedINBOXException(e);
             }
             final int length = accounts.length;
-            final ExecutorService executor = Executors.newFixedThreadPool(length, new UnifiedINBOXThreadFactory());
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
             final CompletionService<List<MailMessage>> completionService = new ExecutorCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -661,7 +658,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ExecutorService executor = Executors.newFixedThreadPool(size, new UnifiedINBOXThreadFactory());
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             try {
                 // Invoke all and wait for being executed
                 executor.invokeAll(collection);
@@ -764,7 +761,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ExecutorService executor = Executors.newFixedThreadPool(size, new UnifiedINBOXThreadFactory());
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             try {
                 // Invoke all and wait for being executed
                 executor.invokeAll(collection);
@@ -843,7 +840,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ExecutorService executor = Executors.newFixedThreadPool(size, new UnifiedINBOXThreadFactory());
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             try {
                 // Invoke all and wait for being executed
                 executor.invokeAll(collection);

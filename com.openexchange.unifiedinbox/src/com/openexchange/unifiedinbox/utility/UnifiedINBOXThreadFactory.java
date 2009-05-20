@@ -67,14 +67,23 @@ public final class UnifiedINBOXThreadFactory implements java.util.concurrent.Thr
     private final int len;
 
     /**
-     * Initializes a new {@link UnifiedINBOXThreadFactory}.
+     * Initializes a new {@link UnifiedINBOXThreadFactory} with default prefix <code>"UnifiedINBOX-"</code> applied to each created thread.
      */
     public UnifiedINBOXThreadFactory() {
+        this("UnifiedINBOX-");
+    }
+
+    /**
+     * Initializes a new {@link UnifiedINBOXThreadFactory} with specified prefix applied to each created thread.
+     * 
+     * @param namePrefix The name prefix
+     */
+    public UnifiedINBOXThreadFactory(final String namePrefix) {
         super();
         // final java.lang.SecurityManager s = System.getSecurityManager();
         // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
-        this.namePrefix = "UnifiedINBOX-";
-        this.len = namePrefix.length() + 7;
+        this.namePrefix = namePrefix;
+        this.len = namePrefix.length() + 4;
     }
 
     public Thread newThread(final Runnable r) {

@@ -51,12 +51,22 @@ package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.MailPath.SEPERATOR;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -71,7 +81,10 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.converters.UnifiedINBOXFolderConverter;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.utility.LoggingCallable;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
+import com.openexchange.user.UserService;
 
 /**
  * {@link UnifiedINBOXFolderStorage} - The Unified INBOX folder storage implementation.
@@ -87,6 +100,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     private final Session session;
 
     private final Context ctx;
+
+    private Locale locale;
 
     /**
      * Initializes a new {@link UnifiedINBOXFolderStorage}
@@ -168,6 +183,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
+            final long start = System.currentTimeMillis();
             final MailFolder[] retval = new MailFolder[5];
             retval[0] = UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
                 access.getAccountId(),
@@ -199,6 +215,10 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 UnifiedINBOXAccess.TRASH,
                 getLocalizedName(UnifiedINBOXAccess.TRASH));
 
+            if (LOG.isDebugEnabled()) {
+                final long dur = System.currentTimeMillis() - start;
+                LOG.debug(new StringBuilder("Creating Unfied INBOX root's subfolders took ").append(dur).append("msec").toString());
+            }
             return retval;
         }
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(parentFullname)) {
@@ -207,28 +227,42 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
                     MailAccountStorageService.class,
                     true);
-                accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
+                for (int i = 0; i < tmp.length; i++) {
+                    final MailAccount mailAccount = tmp[i];
+                    if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
+                        l.add(mailAccount);
+                    }
+                }
+                accounts = l.toArray(new MailAccount[l.size()]);
             } catch (final ServiceException e) {
                 throw new UnifiedINBOXException(e);
             } catch (final MailAccountException e) {
                 throw new UnifiedINBOXException(e);
             }
             final int unifiedInboxAccountId = access.getAccountId();
-            final List<MailFolder> tmp = new ArrayList<MailFolder>(8);
+            final int length = accounts.length;
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
+            final CompletionService<MailFolder> completionService = new ExecutorCompletionService<MailFolder>(executor);
             for (final MailAccount mailAccount : accounts) {
-                if (unifiedInboxAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                    final MailAccess<?, ?> mailAccess;
-                    try {
-                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                        mailAccess.connect();
-                    } catch (final MailException e) {
-                        LOG.error(e.getMessage(), e);
-                        continue;
-                    }
-                    try {
-                        final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, parentFullname);
-                        // Check if account fullname is not null
-                        if (null != accountFullname) {
+                completionService.submit(new LoggingCallable<MailFolder>(session) {
+
+                    public MailFolder call() throws Exception {
+                        final MailAccess<?, ?> mailAccess;
+                        try {
+                            mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
+                            mailAccess.connect();
+                        } catch (final MailException e) {
+                            getLogger().error(e.getMessage(), e);
+                            return null;
+                        }
+                        try {
+                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, parentFullname);
+                            // Check if account fullname is not null
+                            if (null == accountFullname) {
+                                return null;
+                            }
                             // Get mail folder
                             final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
                             mailFolder.setFullname(new StringBuilder(MailFolderUtility.prepareFullname(
@@ -238,14 +272,48 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                             mailFolder.setSubfolders(false);
                             mailFolder.setSubscribedSubfolders(false);
                             mailFolder.setName(mailAccount.getName());
-                            tmp.add(mailFolder);
+                            return mailFolder;
+                        } finally {
+                            mailAccess.close(true);
                         }
-                    } finally {
-                        mailAccess.close(true);
+                    }
+                });
+            }
+            // Wait for completion of each submitted task
+            try {
+                final List<MailFolder> folders = new ArrayList<MailFolder>(length << 2);
+                for (int i = 0; i < length; i++) {
+                    final MailFolder f = completionService.take().get();
+                    if (null != f) {
+                        folders.add(f);
                     }
                 }
+                // Sort them
+                Collections.sort(folders, new MailFolderNameComparator(getLocale()));
+                // Return as array
+                return folders.toArray(new MailFolder[folders.size()]);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            } catch (final ExecutionException e) {
+                final Throwable t = e.getCause();
+                if (MailException.class.isAssignableFrom(t.getClass())) {
+                    throw (MailException) t;
+                } else if (t instanceof RuntimeException) {
+                    throw (RuntimeException) t;
+                } else if (t instanceof Error) {
+                    throw (Error) t;
+                } else {
+                    throw new IllegalStateException("Not unchecked", t);
+                }
+            } finally {
+                try {
+                    executor.shutdownNow();
+                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
-            return tmp.toArray(new MailFolder[tmp.size()]);
         }
         throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, parentFullname);
     }
@@ -339,6 +407,26 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
     }
 
+    /**
+     * Gets session user's locale.
+     * 
+     * @return The session user's locale
+     * @throws UnifiedINBOXException If retrieving user's locale fails
+     */
+    private Locale getLocale() throws UnifiedINBOXException {
+        if (null == locale) {
+            try {
+                final UserService userService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+                locale = userService.getUser(session.getUserId(), ctx).getLocale();
+            } catch (final ServiceException e) {
+                throw new UnifiedINBOXException(e);
+            } catch (final UserException e) {
+                throw new UnifiedINBOXException(e);
+            }
+        }
+        return locale;
+    }
+
     private static String getLocalizedName(final String fullname) throws UnifiedINBOXException {
         // TODO: Return real localized name
         if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
@@ -404,6 +492,24 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         } catch (final MailAccountException e) {
             throw new UnifiedINBOXException(e);
         }
+    }
+
+    private static class MailFolderNameComparator implements Comparator<MailFolder> {
+
+        private final Collator collator;
+
+        public MailFolderNameComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final MailFolder o1, final MailFolder o2) {
+            final String name1 = o1.getName();
+            final String name2 = o2.getName();
+            return collator.compare(name1 == null ? "" : name1, name2 == null ? "" : name2);
+        }
+
     }
 
 }

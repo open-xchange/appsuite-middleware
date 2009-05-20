@@ -55,7 +55,6 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.MailException;
@@ -73,7 +72,7 @@ import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXThreadFactory;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
@@ -82,6 +81,8 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXFolderConverter {
+
+    static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class);
 
@@ -126,9 +127,9 @@ public final class UnifiedINBOXFolderConverter {
     }
 
     /**
-     * Gets the instance of {@link MailFolder} reflcting root folder.
+     * Gets the instance of {@link MailFolder} for root folder.
      * 
-     * @return The instance of {@link MailFolder} reflcting root folder.
+     * @return The instance of {@link MailFolder} for root folder.
      */
     public static MailFolder getRootFolder() {
         return ROOT_UNIFIED_INBOX_FOLDER;
@@ -145,6 +146,7 @@ public final class UnifiedINBOXFolderConverter {
      * @throws MailException If converting mail folder fails
      */
     public static MailFolder getUnifiedINBOXFolder(final int accountId, final Session session, final String fullname, final String localizedName) throws MailException {
+        final long start = System.currentTimeMillis();
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified INBOX, so every folder is "subscribed"
         tmp.setSubscribed(true);
@@ -171,6 +173,10 @@ public final class UnifiedINBOXFolderConverter {
             tmp.setSubfolders(true);
             tmp.setSubscribedSubfolders(true);
         }
+        if (LOG.isDebugEnabled()) {
+            final long dur = System.currentTimeMillis() - start;
+            LOG.debug(new StringBuilder("Creating Unified INBOX folder \"").append(fullname).append("\" took ").append(dur).append("msec").toString());
+        }
         return tmp;
     }
 
@@ -196,7 +202,7 @@ public final class UnifiedINBOXFolderConverter {
         }
         // Create completion service for simultaneous access
         final int length = accounts.length;
-        final ExecutorService executor = Executors.newFixedThreadPool(length, new UnifiedINBOXThreadFactory());
+        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
         final CompletionService<int[]> completionService = new ExecutorCompletionService<int[]>(executor);
         final AtomicBoolean retval = new AtomicBoolean();
         // Iterate
@@ -210,13 +216,13 @@ public final class UnifiedINBOXFolderConverter {
                         mailAccess.connect();
                     } catch (final MailException e) {
                         getLogger().error(e.getMessage(), e);
-                        return new int[] { 0, 0, 0, 0 };
+                        return EMPTY_COUNTS;
                     }
                     try {
                         final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
                         // Check if account fullname is not null
                         if (null == accountFullname) {
-                            return new int[] { 0, 0, 0, 0 };
+                            return EMPTY_COUNTS;
                         }
                         // Get counts
                         final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
