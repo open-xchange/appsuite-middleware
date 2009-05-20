@@ -72,7 +72,7 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link IMAPSort} - Perform the IMAP sort
+ * {@link IMAPSort} - Perform the IMAP sort.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -88,7 +88,7 @@ public final class IMAPSort {
     }
 
     /**
-     * Sorts messages located in given IMAP folder
+     * Sorts messages located in given IMAP folder.
      * 
      * @param imapFolder The IMAP folder
      * @param filter Pre-Selected messages' sequence numbers to sort or <code>null</code> to sort all
