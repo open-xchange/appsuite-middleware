@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventException;
+import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -200,7 +201,7 @@ public class PushOutputQueue implements Runnable {
             /*
              * Distribute to own system
              */
-            final EventAdmin eventAdmin = EventAdminService.getInstance().getService();
+            final EventAdmin eventAdmin = PushServiceRegistry.getServiceRegistry().getService(EventAdmin.class);
             if (null != eventAdmin) {
                 /*-
                  * TODO:

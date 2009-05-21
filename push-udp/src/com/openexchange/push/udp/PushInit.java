@@ -53,8 +53,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.server.Initialization;
 
 /**
@@ -86,8 +86,6 @@ public class PushInit implements Initialization {
 
     private final AtomicBoolean started = new AtomicBoolean();
 
-    private ConfigurationServiceHolder csh;
-
     /**
      * Prevent instantiation.
      */
@@ -102,31 +100,15 @@ public class PushInit implements Initialization {
         return SINGLETON;
     }
 
-    /**
-     * Sets the configuration service holder
-     * 
-     * @param csh The configuration service holder
-     */
-    public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
-        this.csh = csh;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void start() throws AbstractOXException {
-        if (null != config) {
+        if (!started.compareAndSet(false, true)) {
             LOG.error("Duplicate push initialization.");
             return;
         }
 
-        final ConfigurationService conf = csh.getService();
-        try {
-            if (conf != null) {
-                config = new PushConfigInterfaceImpl(conf);
-            }
-        } finally {
-            csh.ungetService(conf);
+        final ConfigurationService conf = PushServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        if (conf != null) {
+            config = new PushConfigInterfaceImpl(conf);
         }
 
         if (LOG.isInfoEnabled()) {
@@ -141,18 +123,14 @@ public class PushInit implements Initialization {
 
         multicast = new PushMulticastSocket(config);
         requestTimer = new PushMulticastRequestTimer(config);
-
-        started.set(true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void stop() {
-        if (null == requestTimer) {
+        if (!started.compareAndSet(true, false)) {
             LOG.error("Duplicate push component shutdown.");
             return;
         }
+
         requestTimer.cancel();
         requestTimer = null;
         multicast.close();
@@ -162,11 +140,6 @@ public class PushInit implements Initialization {
         input.close();
         input = null;
         config = null;
-
-        started.set(false);
     }
 
-    public boolean isStarted() {
-        return started.get();
-    }
 }

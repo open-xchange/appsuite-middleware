@@ -47,33 +47,32 @@
  *
  */
 
-package com.openexchange.push.udp;
+package com.openexchange.push.udp.registry;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.server.ServiceHolder;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link EventAdminService} - The service holder for configuration service
+ * {@link PushServiceRegistry} - A registry for services needed by push bundle
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EventAdminService extends ServiceHolder<EventAdmin> {
+public final class PushServiceRegistry {
 
-    private static final EventAdminService instance = new EventAdminService();
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
     /**
-     * Gets the configuration service instance.
+     * Gets the service registry.
      * 
-     * @return The singleton instance of {@link EventAdminService}
+     * @return The service registry
      */
-    public static EventAdminService getInstance() {
-        return instance;
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
     }
 
     /**
-     * Initializes a new {@link EventAdminService}
+     * Initializes a new {@link PushServiceRegistry}.
      */
-    private EventAdminService() {
+    private PushServiceRegistry() {
         super();
     }
 

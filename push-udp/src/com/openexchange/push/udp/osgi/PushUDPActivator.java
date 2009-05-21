@@ -153,8 +153,7 @@ public class PushUDPActivator extends DeferredActivator {
         final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
         final Hashtable<Object, Object> ht = new Hashtable<Object, Object>();
         ht.put(EventConstants.EVENT_TOPIC, topics);
-        final PushHandler pushHandler = new PushHandler();
-        registration = context.registerService(EventHandler.class.getName(), pushHandler, ht);
+        registration = context.registerService(EventHandler.class.getName(), new PushHandler(), ht);
     }
 
     protected void dropRegisterService() {
