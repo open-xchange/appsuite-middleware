@@ -49,14 +49,13 @@
 
 package com.openexchange.unifiedinbox.utility;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnifiedINBOXExecutors} - Factory and utility methods for {@link Executor} and {@link ExecutorService}.
+ * {@link UnifiedINBOXExecutors} - Factory and utility methods for {@link ExecutorService}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,13 +75,15 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newFixedThreadPool(final int numberOfThreads) {
-        return new ThreadPoolExecutor(
+        final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             numberOfThreads,
             numberOfThreads,
             0L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(),
             new UnifiedINBOXThreadFactory());
+        threadPool.prestartCoreThread();
+        return threadPool;
     }
 
     /**
@@ -92,13 +93,15 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newCachedThreadPool(final int numberOfTasks) {
-        return new ThreadPoolExecutor(
+        final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             divide(numberOfTasks),
             numberOfTasks,
             1L,
             TimeUnit.SECONDS,
             new Java6SynchronousQueue<Runnable>(),
             new UnifiedINBOXThreadFactory());
+        threadPool.prestartAllCoreThreads();
+        return threadPool;
     }
 
     /**
@@ -109,13 +112,15 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newCachedThreadPool(final int numberOfTasks, final String namePrefix) {
-        return new ThreadPoolExecutor(
+        final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             divide(numberOfTasks),
             numberOfTasks,
             1L,
             TimeUnit.SECONDS,
             new Java6SynchronousQueue<Runnable>(),
             new UnifiedINBOXThreadFactory(namePrefix));
+        threadPool.prestartAllCoreThreads();
+        return threadPool;
     }
 
     private static int divide(final int number) {
