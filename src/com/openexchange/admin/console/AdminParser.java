@@ -307,6 +307,27 @@ public class AdminParser extends CmdLineParser {
      * @param extended
      * @return
      */
+    public final Option addIntegerOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
+        if (hasarg) {
+            final Option retval = this.addIntegerOption(longForm);
+            this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
+            return retval;
+        } else {
+            final Option retval = this.addBooleanOption(longForm);
+            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
+            return retval;
+        }
+    }
+    
+    /**
+     * @param longForm
+     * @param longFormParameterDescription
+     * @param description
+     * @param needed
+     * @param hasarg
+     * @param extended
+     * @return
+     */
     private final Option addOption(final String longForm, final String description, final boolean needed, final boolean extended, final boolean hidden) {
         final Option retval = this.addBooleanOption(longForm);
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended, hidden));

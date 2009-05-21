@@ -380,6 +380,12 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
     
+    protected final Option setIntegerLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+        
+        final Option retval = admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
+        return retval;
+    }
+    
     protected final Option setSettableBooleanLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
         final Option retval = admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
