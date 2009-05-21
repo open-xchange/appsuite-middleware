@@ -62,7 +62,7 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see args.examples.gnu.OptionTest
  */
 public class CmdLineParser {
@@ -294,6 +294,9 @@ public class CmdLineParser {
             }
             protected Object parseValue( String arg, Locale locale )
                 throws IllegalOptionValueException {
+                if (null == arg || arg.length() == 0) {
+                    return null;
+                }
                 try {
                     return new Integer(arg);
                 }
