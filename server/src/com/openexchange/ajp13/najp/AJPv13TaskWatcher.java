@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -67,8 +68,8 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.najp.threadpool.AJPv13ThreadFactory;
-import com.openexchange.ajp13.najp.threadpool.Java6SynchronousQueue;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -199,13 +200,9 @@ public class AJPv13TaskWatcher {
             super();
             this.listeners = listeners;
             this.log = log;
-            executorService = new ThreadPoolExecutor(
-                0,
-                Integer.MAX_VALUE,
-                1L,
-                TimeUnit.SECONDS,
-                new Java6SynchronousQueue<Runnable>(),
-                new AJPv13ThreadFactory("AJPTaskWatcher-"));
+            final BlockingQueue<Runnable> queue = AJPv13SynchronousQueueProvider.getInstance().newSynchronousQueue();
+            executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 1L, TimeUnit.SECONDS, queue, new AJPv13ThreadFactory(
+                "AJPTaskWatcher-"));
         }
 
         public void run() {
@@ -360,7 +357,7 @@ public class AJPv13TaskWatcher {
                     int offset = 0;
                     final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
                     while (offset < remainingData.length) {
-                        int b = (remainingData.length - offset);
+                        final int b = (remainingData.length - offset);
                         final int curLen = ((maxLen <= b) ? maxLen : b); // Math.min(int a, int b)
                         out.write(AJPv13Response.getSendBodyChunkBytes(remainingData, offset, curLen));
                         out.flush();

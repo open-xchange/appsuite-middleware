@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
+import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -174,9 +175,27 @@ public final class BackendServicesInit implements Initialization {
             AJPv13Server.setInstrance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
             AJPv13Server.startAJPServer();
+            /*
+             * Proper synchronous queue
+             */
+            String property = System.getProperty("java.specification.version");
+            if (null == property) {
+                property = System.getProperty("java.runtime.version");
+                if (null == property) {
+                    // JRE not detectable, use fallback
+                    AJPv13SynchronousQueueProvider.initInstance(false);
+                } else {
+                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
+                    AJPv13SynchronousQueueProvider.initInstance(!property.startsWith("1.5"));
+                }
+            } else {
+                // "java.specification.version=1.5" OR "java.specification.version=1.6"
+                AJPv13SynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
+            }
         }
 
         public void stop() throws AbstractOXException {
+            AJPv13SynchronousQueueProvider.releaseInstance();
             com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();

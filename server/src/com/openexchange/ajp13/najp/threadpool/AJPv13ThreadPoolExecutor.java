@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13.najp.threadpool;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,7 +76,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             Integer.MAX_VALUE,
             keepAliveTime,
             unit,
-            new Java6SynchronousQueue<Runnable>(),
+            newSynchronousQueue(),
             new AJPv13ThreadFactory("AJPListener-"),
             new AJPv13RejectedExecutionHandler(watcher));
         numRunning = new AtomicInteger();
@@ -91,6 +92,10 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             return minCorePoolSize;
         }
         return desiredCorePoolSize;
+    }
+
+    private static BlockingQueue<Runnable> newSynchronousQueue() {
+        return AJPv13SynchronousQueueProvider.getInstance().newSynchronousQueue();
     }
 
     @Override
