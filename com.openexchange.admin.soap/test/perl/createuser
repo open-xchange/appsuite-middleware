@@ -87,7 +87,9 @@ sub doRequest {
 						SOAP::Data->name("key" => "/fastgui")
 					)
 				)
-			))
+			)),
+			SOAP::Data->name("uploadFileSizeLimit" => "100"),
+			SOAP::Data->name("uploadFileSizeLimitPerFile" => "100")
    	          )),
 		  $inSelf->{'creds'}
 		 );

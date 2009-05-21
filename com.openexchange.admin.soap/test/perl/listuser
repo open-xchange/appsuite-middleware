@@ -117,6 +117,8 @@ sub doRequest {
 		  "Timezone",
 		  "Title",
 		  "Telephone_ttytdd",
+		  "UploadFileSizeLimit",
+		  "UploadFileSizeLimitPerFile",
 		  "Url",
 		  "Userfield01",
 		  "Userfield02",
