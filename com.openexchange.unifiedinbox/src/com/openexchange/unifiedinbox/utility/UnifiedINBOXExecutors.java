@@ -55,7 +55,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnifiedINBOXExecutors} - Factory and utility methods for {@link ExecutorService}.
+ * {@link UnifiedINBOXExecutors} - Factory and utility methods for {@link ExecutorService} for Unified INBOX bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -67,6 +67,10 @@ public final class UnifiedINBOXExecutors {
     private UnifiedINBOXExecutors() {
         super();
     }
+
+    /*-
+     * ##################################### FACTORY METHODS FOR LIMITED FIXED THREAD POOLS #####################################
+     */
 
     /**
      * Creates a thread pool that reuses a fixed set of threads operating off a shared unbounded queue.
@@ -85,6 +89,10 @@ public final class UnifiedINBOXExecutors {
         threadPool.prestartCoreThread();
         return threadPool;
     }
+
+    /*-
+     * ##################################### FACTORY METHODS FOR LIMITED CACHED THREAD POOLS #####################################
+     */
 
     /**
      * Creates a thread pool that creates new threads as needed, but will reuse previously constructed threads when they are available.
@@ -126,4 +134,61 @@ public final class UnifiedINBOXExecutors {
     private static int divide(final int number) {
         return (number / 2);
     }
+
+    /*-
+     * ##################################### FACTORY METHODS FOR UNLIMITED CACHED THREAD POOLS #####################################
+     */
+
+    private static volatile Integer CORE_SIZE;
+
+    private static int getCoreSize() {
+        Integer tmp = CORE_SIZE;
+        if (null == tmp) {
+            synchronized (UnifiedINBOXExecutors.class) {
+                tmp = CORE_SIZE;
+                if (null == tmp) {
+                    tmp = CORE_SIZE = Integer.valueOf(Runtime.getRuntime().availableProcessors() + 1);
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    /**
+     * Creates a thread pool with unlimited max. pool size that creates new threads as needed, but will reuse previously constructed threads
+     * when they are available.
+     * 
+     * @return The newly created thread pool
+     */
+    public static ExecutorService newUnlimitedCachedThreadPool() {
+        final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+            getCoreSize(),
+            Integer.MAX_VALUE,
+            1L,
+            TimeUnit.SECONDS,
+            new Java6SynchronousQueue<Runnable>(),
+            new UnifiedINBOXThreadFactory());
+        threadPool.prestartAllCoreThreads();
+        return threadPool;
+    }
+
+    /**
+     * Creates a thread pool with unlimited max. pool size that creates new threads as needed, but will reuse previously constructed threads
+     * when they are available.
+     * 
+     * @param namePrefix The name prefix applied to newly created threads by returned thread pool
+     * @return The newly created thread pool
+     */
+    public static ExecutorService newUnlimitedCachedThreadPool(final String namePrefix) {
+        final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+            getCoreSize(),
+            Integer.MAX_VALUE,
+            1L,
+            TimeUnit.SECONDS,
+            new Java6SynchronousQueue<Runnable>(),
+            new UnifiedINBOXThreadFactory(namePrefix));
+        threadPool.prestartAllCoreThreads();
+        return threadPool;
+    }
+
 }
