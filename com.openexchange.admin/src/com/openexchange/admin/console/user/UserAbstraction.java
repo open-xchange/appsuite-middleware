@@ -810,7 +810,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                     final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_INTEGER)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true);
+                    final Option option = setIntegerLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
                     final Option option = setSettableBooleanLongOpt(parser, methodandnames.getName().toLowerCase(), "true / false", methodandnames.getName(), true, false, true);

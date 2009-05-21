@@ -546,7 +546,37 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.executeUpdate();
                 folder_update.close();
             }
-
+            final Integer uploadFileSizeLimit = usrdata.getUploadFileSizeLimit();
+            if (null != uploadFileSizeLimit) {
+                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota = ? WHERE cid = ? AND user = ?");
+                folder_update.setInt(1, uploadFileSizeLimit);
+                folder_update.setInt(2, context_id);
+                folder_update.setInt(3, user_id);
+                folder_update.executeUpdate();
+                folder_update.close();
+            } else if (usrdata.isUploadFileSizeLimitset()) {
+                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota = DEFAULT WHERE cid = ? AND user = ?");
+                folder_update.setInt(1, context_id);
+                folder_update.setInt(2, user_id);
+                folder_update.executeUpdate();
+                folder_update.close();
+            }
+            final Integer uploadFileSizeLimitPerFile = usrdata.getUploadFileSizeLimitPerFile();
+            if (null != uploadFileSizeLimitPerFile) {
+                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = ? WHERE cid = ? AND user = ?");
+                folder_update.setInt(1, uploadFileSizeLimitPerFile);
+                folder_update.setInt(2, context_id);
+                folder_update.setInt(3, user_id);
+                folder_update.executeUpdate();
+                folder_update.close();
+            } else if (usrdata.isUploadFileSizeLimitset()) {
+                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = DEFAULT WHERE cid = ? AND user = ?");
+                folder_update.setInt(1, context_id);
+                folder_update.setInt(2, user_id);
+                folder_update.executeUpdate();
+                folder_update.close();
+            }
+            
             if (folder_update != null) {
                 folder_update.close();
             }
@@ -1041,7 +1071,27 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 myChangeInsertModuleAccess(ctx, internal_user_id, moduleAccess, true, write_ox_con, write_ox_con, all_groups);
 
                 // add users standard mail settings
-                stmt = write_ox_con.prepareStatement("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham) VALUES (?,?,?,?,?,?,?,?,?,?)");
+                final StringBuffer sb = new StringBuffer("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham,");
+                final boolean uploadFileSizeLimitset = usrdata.getUploadFileSizeLimit() != null;
+                final boolean uploadFileSizeLimitPerFileset = usrdata.getUploadFileSizeLimitPerFile() != null;
+                if (uploadFileSizeLimitset) {
+                    sb.append("upload_quota,");
+                }
+                if (uploadFileSizeLimitPerFileset) {
+                    sb.append("upload_quota_per_file,");
+                }
+                // Remove comma
+                sb.deleteCharAt(sb.length() - 1);
+                sb.append(") VALUES (?,?,?,?,?,?,?,?,?,?,");
+                if (uploadFileSizeLimitset) {
+                    sb.append("?,");
+                }
+                if (uploadFileSizeLimitPerFileset) {
+                    sb.append("?,");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                sb.append(')');
+                stmt = write_ox_con.prepareStatement(sb.toString());
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, std_mail_folder_trash);
@@ -1060,6 +1110,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(8, flags);
                 stmt.setString(9, std_mail_folder_confirmed_spam);
                 stmt.setString(10, std_mail_folder_confirmed_ham);
+                int index = 11;
+                if (uploadFileSizeLimitset) {
+                    stmt.setInt(index++, usrdata.getUploadFileSizeLimit());
+                }
+                if (uploadFileSizeLimitPerFileset) {
+                    stmt.setInt(index++, usrdata.getUploadFileSizeLimitPerFile());
+                }
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -1481,7 +1538,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmtusername.setInt(1, context_id);
             stmtalias = read_ox_con.prepareStatement("SELECT value FROM user_attribute WHERE cid = ? and id = ? AND name = \"alias\"");
             stmtalias.setInt(1, context_id);
-            stmtstd = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr FROM user_setting_mail WHERE cid = ? and user = ?");
+            stmtstd = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
             stmtstd.setInt(1, context_id);
             ResultSet rs = null;
             for (final User user : users) {
@@ -1589,6 +1646,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         newuser.setGUI_Spam_filter_capabilities_enabled(false);
                     }
                     newuser.setDefaultSenderAddress(rs.getString("send_addr"));
+                    newuser.setUploadFileSizeLimit(rs.getInt("upload_quota"));
+                    newuser.setUploadFileSizeLimitPerFile(rs.getInt("upload_quota_per_file"));
                 }
                 rs.close();
 

@@ -443,11 +443,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private String telephone_ttytdd;
 
     private boolean telephone_ttytddset = false;
+    
+    private Integer uploadFileSizeLimit;
+    
+    private boolean uploadFileSizeLimitset = false;
+    
+    private Integer uploadFileSizeLimitPerFile;
+    
+    private boolean uploadFileSizeLimitPerFileset = false;
 
     private String url;
-
+    
     private boolean urlset = false;
-
+    
     private String userfield01;
 
     private boolean userfield01set = false;
@@ -1359,6 +1367,25 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      **/
     final public boolean isTitleset() {
         return titleset;
+    }
+
+    /**
+     * Used to check if the upload quota of this user object has been changed
+     * 
+     * @return true if set; false if not
+     */
+    public boolean isUploadFileSizeLimitset() {
+        return uploadFileSizeLimitset;
+    }
+
+    
+    /**
+     * Used to check if the upload file size limit per file of this user object has been changed
+     * 
+     * @return true if set; false if not
+     */
+    public boolean isUploadFileSizeLimitPerFileset() {
+        return uploadFileSizeLimitPerFileset;
     }
 
     /**
@@ -3319,6 +3346,48 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             this.telephone_ttytddset = true;
         }
         this.telephone_ttytdd = telephone_ttytdd;
+    }
+
+    /**
+     * Returns the upload file size limit of this user object
+     * 
+     * @return An {@link int} containing the upload file size limit
+     */
+    final public Integer getUploadFileSizeLimit() {
+        return uploadFileSizeLimit;
+    }
+
+    /**
+     * Sets the upload file size limit for this user object
+     * 
+     * @param upload_quota An {@link int} containing the upload file size limit
+     */
+    final public void setUploadFileSizeLimit(final Integer upload_quota) {
+        if (null == upload_quota) {
+            this.uploadFileSizeLimitset = true;
+        }
+        this.uploadFileSizeLimit = upload_quota;
+    }
+
+    /**
+     * Returns the upload file size limit per file of this user object
+     * 
+     * @return An {@link int} containing the upload file size limit per file
+     */
+    final public Integer getUploadFileSizeLimitPerFile() {
+        return uploadFileSizeLimitPerFile;
+    }
+
+    /**
+     * Sets the upload file size limit per file for this user object
+     * 
+     * @param upload_quota_per_file An {@link int} containing the upload file size limit per file
+     */
+    final public void setUploadFileSizeLimitPerFile(final Integer upload_quota_per_file) {
+        if (null == upload_quota_per_file) {
+            this.uploadFileSizeLimitPerFileset = true;
+        }
+        this.uploadFileSizeLimitPerFile = upload_quota_per_file;
     }
 
     /**

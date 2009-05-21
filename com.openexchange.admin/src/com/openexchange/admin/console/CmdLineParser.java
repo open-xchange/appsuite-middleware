@@ -294,6 +294,9 @@ public class CmdLineParser {
             }
             protected Object parseValue( String arg, Locale locale )
                 throws IllegalOptionValueException {
+                if (null == arg || arg.length() == 0) {
+                    return null;
+                }
                 try {
                     return new Integer(arg);
                 }
