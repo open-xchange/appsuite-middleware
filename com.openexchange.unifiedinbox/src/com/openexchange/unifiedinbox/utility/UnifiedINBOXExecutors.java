@@ -49,6 +49,8 @@
 
 package com.openexchange.unifiedinbox.utility;
 
+import static com.openexchange.unifiedinbox.utility.UnifiedINBOXSynchronousQueueProvider.getInstance;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -101,12 +103,13 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newCachedThreadPool(final int numberOfTasks) {
+        final BlockingQueue<Runnable> queue = getInstance().newSynchronousQueue();
         final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             divide(numberOfTasks),
             numberOfTasks,
             1L,
             TimeUnit.SECONDS,
-            new Java6SynchronousQueue<Runnable>(),
+            queue,
             new UnifiedINBOXThreadFactory());
         threadPool.prestartAllCoreThreads();
         return threadPool;
@@ -120,12 +123,13 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newCachedThreadPool(final int numberOfTasks, final String namePrefix) {
+        final BlockingQueue<Runnable> queue = getInstance().newSynchronousQueue();
         final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             divide(numberOfTasks),
             numberOfTasks,
             1L,
             TimeUnit.SECONDS,
-            new Java6SynchronousQueue<Runnable>(),
+            queue,
             new UnifiedINBOXThreadFactory(namePrefix));
         threadPool.prestartAllCoreThreads();
         return threadPool;
@@ -161,12 +165,13 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newUnlimitedCachedThreadPool() {
+        final BlockingQueue<Runnable> queue = getInstance().newSynchronousQueue();
         final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             getCoreSize(),
             Integer.MAX_VALUE,
             1L,
             TimeUnit.SECONDS,
-            new Java6SynchronousQueue<Runnable>(),
+            queue,
             new UnifiedINBOXThreadFactory());
         threadPool.prestartAllCoreThreads();
         return threadPool;
@@ -180,12 +185,13 @@ public final class UnifiedINBOXExecutors {
      * @return The newly created thread pool
      */
     public static ExecutorService newUnlimitedCachedThreadPool(final String namePrefix) {
+        final BlockingQueue<Runnable> queue = getInstance().newSynchronousQueue();
         final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             getCoreSize(),
             Integer.MAX_VALUE,
             1L,
             TimeUnit.SECONDS,
-            new Java6SynchronousQueue<Runnable>(),
+            queue,
             new UnifiedINBOXThreadFactory(namePrefix));
         threadPool.prestartAllCoreThreads();
         return threadPool;

@@ -62,6 +62,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.unifiedinbox.UnifiedINBOXProvider;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXSynchronousQueueProvider;
 import com.openexchange.user.UserService;
 
 /**
@@ -129,6 +130,23 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
                 }
             }
             providerRegistration = context.registerService(MailProvider.class.getName(), UnifiedINBOXProvider.getInstance(), dictionary);
+            /*
+             * Detect what SynchronousQueue to use
+             */
+            String property = System.getProperty("java.specification.version");
+            if (null == property) {
+                property = System.getProperty("java.runtime.version");
+                if (null == property) {
+                    // JRE not detectable, use fallback
+                    UnifiedINBOXSynchronousQueueProvider.initInstance(false);
+                } else {
+                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
+                    UnifiedINBOXSynchronousQueueProvider.initInstance(!property.startsWith("1.5"));
+                }
+            } else {
+                // "java.specification.version=1.5" OR "java.specification.version=1.6"
+                UnifiedINBOXSynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -138,6 +156,7 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            UnifiedINBOXSynchronousQueueProvider.releaseInstance();
             if (null != providerRegistration) {
                 providerRegistration.unregister();
                 providerRegistration = null;
