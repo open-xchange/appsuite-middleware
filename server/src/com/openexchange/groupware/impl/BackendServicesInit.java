@@ -172,9 +172,6 @@ public final class BackendServicesInit implements Initialization {
         }
 
         public void start() throws AbstractOXException {
-            AJPv13Server.setInstrance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
-            AJPv13Config.getInstance().start();
-            AJPv13Server.startAJPServer();
             /*
              * Proper synchronous queue
              */
@@ -192,13 +189,16 @@ public final class BackendServicesInit implements Initialization {
                 // "java.specification.version=1.5" OR "java.specification.version=1.6"
                 AJPv13SynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
+            AJPv13Server.setInstrance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+            AJPv13Config.getInstance().start();
+            AJPv13Server.startAJPServer();
         }
 
         public void stop() throws AbstractOXException {
-            AJPv13SynchronousQueueProvider.releaseInstance();
             com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
+            AJPv13SynchronousQueueProvider.releaseInstance();
         }
     }
 
