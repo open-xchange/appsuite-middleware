@@ -84,12 +84,22 @@ public abstract class AJPv13SynchronousQueueProvider {
                 public <V> BlockingQueue<V> newSynchronousQueue() {
                     return new SynchronousQueue<V>();
                 }
+
+                @Override
+                public <V> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
+                    return new SynchronousQueue<V>();
+                }
             };
         } else {
             instance = new AJPv13SynchronousQueueProvider() {
 
                 @Override
                 public <V> BlockingQueue<V> newSynchronousQueue() {
+                    return new Java6SynchronousQueue<V>();
+                }
+
+                @Override
+                public <V> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
                     return new Java6SynchronousQueue<V>();
                 }
             };
@@ -112,5 +122,20 @@ public abstract class AJPv13SynchronousQueueProvider {
         return instance;
     }
 
+    /**
+     * Gets a newly created synchronous queue.
+     * 
+     * @param <V> The queue's type
+     * @return A newly created synchronous queue
+     */
     public abstract <V> BlockingQueue<V> newSynchronousQueue();
+
+    /**
+     * Gets a newly created synchronous queue.
+     * 
+     * @param <V> The queue's type
+     * @param clazz The queue's type class
+     * @return A newly created synchronous queue
+     */
+    public abstract <V extends Object> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz);
 }

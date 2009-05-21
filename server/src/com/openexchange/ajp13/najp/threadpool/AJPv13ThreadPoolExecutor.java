@@ -49,7 +49,6 @@
 
 package com.openexchange.ajp13.najp.threadpool;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,6 +56,11 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 import com.openexchange.monitoring.MonitoringInfo;
 
+/**
+ * {@link AJPv13ThreadPoolExecutor} - Custom {@link ThreadPoolExecutor} for AJP module.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ThreadPoolExecutor.class);
@@ -69,6 +73,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit The time unit for the <code>keepAliveTime</code> argument.
+     * @param watcher The AJP watcher instance
      */
     public AJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit, final AJPv13TaskWatcher watcher) {
         super(
@@ -76,7 +81,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             Integer.MAX_VALUE,
             keepAliveTime,
             unit,
-            newSynchronousQueue(),
+            AJPv13SynchronousQueueProvider.getInstance().newSynchronousQueue(Runnable.class),
             new AJPv13ThreadFactory("AJPListener-"),
             new AJPv13RejectedExecutionHandler(watcher));
         numRunning = new AtomicInteger();
@@ -92,10 +97,6 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             return minCorePoolSize;
         }
         return desiredCorePoolSize;
-    }
-
-    private static BlockingQueue<Runnable> newSynchronousQueue() {
-        return AJPv13SynchronousQueueProvider.getInstance().newSynchronousQueue();
     }
 
     @Override
