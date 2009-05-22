@@ -139,6 +139,8 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri May 22 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13640: Improved performance of free busy result calculation.
 * Fri Apr 17 2009 - francisco.laguna@open-xchange.com
  - Bugfix #11305: Fixed batching of deletes.
  - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents.
