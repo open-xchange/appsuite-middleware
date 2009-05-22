@@ -68,10 +68,9 @@ import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
-import com.openexchange.sql.grammar.Expression;
 import com.openexchange.sql.grammar.IN;
-import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.tools.SQLTools;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -192,17 +191,14 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     
     public void tearDown() throws Exception {
         if (subscriptionsToDelete.size() > 0) {
-            List<Expression> placeholder = new ArrayList<Expression>();
             for (int delId : subscriptionsToDelete) {
-                placeholder.add(PLACEHOLDER);
-                
                 Subscription subscriptionToDelete = new Subscription();
                 subscriptionToDelete.setId(delId);
                 subscriptionToDelete.setContext(ctx);
                 storage.forgetSubscription(subscriptionToDelete);
             }
 
-            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));
+            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", SQLTools.createLIST(subscriptionsToDelete.size(), PLACEHOLDER))));
 
             Connection writeConnection = getDBProvider().getWriteConnection(ctx);
             List<Integer> values = new ArrayList<Integer>();

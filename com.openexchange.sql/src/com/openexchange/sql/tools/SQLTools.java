@@ -53,6 +53,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.sql.grammar.Expression;
+import com.openexchange.sql.grammar.LIST;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -75,5 +79,13 @@ public class SQLTools {
                 }
             }
         }
+    }
+    
+    public static LIST createLIST(int length, Expression expression) {
+        List<Expression> list = new ArrayList<Expression>();
+        for (int i = 0; i < length; i++) {
+            list.add(expression);
+        }
+        return new LIST(list);
     }
 }

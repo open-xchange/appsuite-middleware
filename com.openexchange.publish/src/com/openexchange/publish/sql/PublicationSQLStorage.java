@@ -75,11 +75,10 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
-import com.openexchange.sql.grammar.Expression;
 import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.INSERT;
-import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.tools.SQLTools;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -312,14 +311,9 @@ public class PublicationSQLStorage implements PublicationStorage {
             List<Integer> configurationIds = storageService.search(readConnection, ctx, query);
             
             if (configurationIds.size() > 0) {
-                List<Expression> placeholder = new ArrayList<Expression>();
-                for (Integer configurationId : configurationIds) {
-                    placeholder.add(PLACEHOLDER);
-                }
-                
                 SELECT select = new SELECT(ASTERISK).
                 FROM(publications).
-                WHERE(new IN("configuration_id", new LIST(placeholder)).
+                WHERE(new IN("configuration_id", SQLTools.createLIST(configurationIds.size(), PLACEHOLDER)).
                     AND(new EQUALS("target_id", PLACEHOLDER)));
                 
                 List<Object> values = new ArrayList<Object>();
