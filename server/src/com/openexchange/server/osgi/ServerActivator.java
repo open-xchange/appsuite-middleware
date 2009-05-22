@@ -64,7 +64,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.api2.ContactSQLFactory;
+import com.openexchange.api2.RdbContactSQLFactory;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
@@ -103,6 +106,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -263,7 +267,7 @@ public final class ServerActivator extends DeferredActivator {
     }
 
     private BundleActivator databaseActivator;
-
+    
     @Override
     protected void startBundle() throws Exception {
         // TODO remove the following line if database bundle is finished.
@@ -470,6 +474,15 @@ public final class ServerActivator extends DeferredActivator {
         
         registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
         registrationList.add(context.registerService(WhiteboardFactoryService.class.getName(), new WhiteboardDBProvider.Factory(), null));
+        
+        // Register Infostore
+        
+        registrationList.add(context.registerService(InfostoreFacade.class.getName(), Infostore.FACADE, null));
+        
+        // Register ContactSQL
+        
+        registrationList.add(context.registerService(ContactSQLFactory.class.getName(), new RdbContactSQLFactory(), null));
+        
 
         // Register event factory service
         registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));
