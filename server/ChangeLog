@@ -1,10 +1,14 @@
+* 2009-05-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #13089: Fixed null pointer access when checking for permission of reading a task through a link.
+
 * 2009-05-18 - marcus.klein@open-xchange.com
 
- - Bugfix 6277: Sending group 0 through WebDAV interface.
+ - Bugfix #6277: Sending group 0 through WebDAV interface.
 
 * 2009-05-14 - francisco.laguna@open-xchange.com
 
- - Bugfix 13482: Relock without body needs to update referenced lock from ifheader
+ - Bugfix #13482: Relock without body needs to update referenced lock from ifheader
 
 * 2009-05-19 - thorben.betten@open-xchange.com
 

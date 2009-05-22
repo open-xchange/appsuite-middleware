@@ -120,7 +120,7 @@ public final class Task2Links {
             LOG.error(e.getMessage(), e);
             return false;
         }
-        return mayRead(ctx, user, userConfig, task, folder);
+        return null == folder ? false : mayRead(ctx, user, userConfig, task, folder);
     }
 
     private static boolean mayRead(final Context ctx, final User user, final UserConfiguration userConfig, final Task task, final Folder folder) {
