@@ -221,7 +221,7 @@ public final class OXMFParserImpl implements OXMFParser {
     /**
      * Checks if specified "class" attribute's value starts with one of this parser's prefixes.
      * 
-     * @param attributeValue The "class" attribute's valu
+     * @param attributeValue The "class" attribute's value
      * @return <code>true</code> if specified "class" attribute's value starts with one of this parser's prefixes; otherwise
      *         <code>false</code>
      */
