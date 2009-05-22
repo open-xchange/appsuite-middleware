@@ -53,7 +53,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import java.sql.Connection;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
