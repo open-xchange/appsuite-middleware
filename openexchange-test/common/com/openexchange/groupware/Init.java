@@ -32,6 +32,8 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.Database;
+import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
@@ -279,6 +281,7 @@ public final class Init {
         ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
         TimerService timerService = (TimerService) services.get(TimerService.class);
         com.openexchange.database.internal.Initialization.getInstance().start(configurationService, timerService);
+        Database.setDatabaseService(new DatabaseServiceImpl());
     }
 
     private static void startAndInjectMonitoringBundle() {
