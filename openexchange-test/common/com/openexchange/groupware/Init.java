@@ -278,8 +278,8 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseBundle() throws DBPoolingException {
-        ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
-        TimerService timerService = (TimerService) services.get(TimerService.class);
+        final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
+        final TimerService timerService = (TimerService) services.get(TimerService.class);
         com.openexchange.database.internal.Initialization.getInstance().start(configurationService, timerService);
         Database.setDatabaseService(new DatabaseServiceImpl());
     }
