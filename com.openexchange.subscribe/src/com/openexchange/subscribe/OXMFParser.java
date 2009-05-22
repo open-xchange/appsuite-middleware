@@ -3,7 +3,6 @@ package com.openexchange.subscribe;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.publish.PublicationException;
 
 /**
  * {@link OXMFParser} - Parses a given HTML content into container elements.
@@ -36,8 +35,8 @@ public interface OXMFParser {
      * 
      * @param html The HTML content to parse
      * @return A list of maps each map backing container element's name-value-pairs
-     * @throws PublicationException If parsing the HTML content fails
+     * @throws SubscriptionException If parsing the HTML content fails
      */
-    public List<Map<String, String>> parse(final String html) throws PublicationException;
+    public List<Map<String, String>> parse(final String html) throws SubscriptionException;
 
 }

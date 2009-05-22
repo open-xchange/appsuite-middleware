@@ -51,8 +51,8 @@ package com.openexchange.subscribe.parser;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.publish.PublicationException;
 import junit.framework.TestCase;
+import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
@@ -65,21 +65,22 @@ public class OXMFParserImplTest extends TestCase {
     
     private OXMFParserImpl parser;
 
+    @Override
     public void setUp() {
         parser = new OXMFParserImpl();
         parser.addContainerElement("ox_contact");
         parser.addAttributePrefix("ox_");
     }
     
-    public void testCollect() throws PublicationException {
-        String text = "<html><head /><body><div class='ox_contact'><span class='ox_bla'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
-        List<Map<String, String>> parsed = parser.parse(text);
+    public void testCollect() throws SubscriptionException {
+        final String text = "<html><head /><body><div class='ox_contact'><span class='ox_bla'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
+        final List<Map<String, String>> parsed = parser.parse(text);
         
         assertNotNull("Parsed was null", parsed);
         assertEquals("Expected two elements", 2, parsed.size());
         
-        Map blaMap = parsed.get(0);
-        Map blaMap2 = parsed.get(1);
+        final Map blaMap = parsed.get(0);
+        final Map blaMap2 = parsed.get(1);
         
         assertEquals("Bla", blaMap.get("ox_bla"));
         assertEquals("Blupp", blaMap.get("ox_blupp"));
@@ -89,15 +90,15 @@ public class OXMFParserImplTest extends TestCase {
         
     }
     
-    public void testCollectDeeplyNested() throws PublicationException {
-        String text = "<html><head /><body><div class='ox_contact'><div><span class='ox_bla'>Bla</span><span class='ox_blupp'>Blupp</span></div></div><div class='ox_contact'><div><div><span class='ox_bla'>Bla2</span></div><span class='ox_blupp'>Blupp2</span></div></div></body></html>";
-        List<Map<String, String>> parsed = parser.parse(text);
+    public void testCollectDeeplyNested() throws SubscriptionException {
+        final String text = "<html><head /><body><div class='ox_contact'><div><span class='ox_bla'>Bla</span><span class='ox_blupp'>Blupp</span></div></div><div class='ox_contact'><div><div><span class='ox_bla'>Bla2</span></div><span class='ox_blupp'>Blupp2</span></div></div></body></html>";
+        final List<Map<String, String>> parsed = parser.parse(text);
         
         assertNotNull("Parsed was null", parsed);
         assertEquals("Expected two elements", 2, parsed.size());
         
-        Map blaMap = parsed.get(0);
-        Map blaMap2 = parsed.get(1);
+        final Map blaMap = parsed.get(0);
+        final Map blaMap2 = parsed.get(1);
         
         assertEquals("Bla", blaMap.get("ox_bla"));
         assertEquals("Blupp", blaMap.get("ox_blupp"));

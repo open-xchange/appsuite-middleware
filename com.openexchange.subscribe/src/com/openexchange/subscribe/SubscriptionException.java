@@ -61,12 +61,14 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public class SubscriptionException extends AbstractOXException {
 
-    public SubscriptionException(ErrorMessage message, Throwable cause, Object[] args) {
+    private static final long serialVersionUID = -2098766458245763667L;
+
+    public SubscriptionException(final ErrorMessage message, final Throwable cause, final Object[] args) {
         super(message, cause);
         setMessageArgs(args);
     }
     
-    public SubscriptionException(AbstractOXException cause) {
+    public SubscriptionException(final AbstractOXException cause) {
         super(cause);
     }
 

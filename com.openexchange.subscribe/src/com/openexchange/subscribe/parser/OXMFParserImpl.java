@@ -61,8 +61,9 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.subscribe.OXMFParser;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionException;
 
 /**
  * {@link OXMFParserImpl} - Implements {@link OXMFParser} based on <a href='http://stax.codehaus.org/'>StAX</a>.
@@ -115,7 +116,7 @@ public final class OXMFParserImpl implements OXMFParser {
         attributePrefixes.add(prefix);
     }
 
-    public List<Map<String, String>> parse(final String html) throws PublicationException {
+    public List<Map<String, String>> parse(final String html) throws SubscriptionException {
         /*
          * Create XMLStreamReader instance
          */
@@ -124,7 +125,7 @@ public final class OXMFParserImpl implements OXMFParser {
         try {
             parser = factory.createXMLStreamReader(new StringReader(html));
         } catch (final XMLStreamException e) {
-            throw PublicationErrorMessage.EXCEPTIONS.create(PublicationErrorMessage.ParseException, e, e.getMessage());
+            throw SubscriptionErrorMessage.EXCEPTIONS.create(PublicationErrorMessage.ParseException, e, e.getMessage());
         }
         try {
             /*
@@ -140,7 +141,7 @@ public final class OXMFParserImpl implements OXMFParser {
             }
             return parsedContainerElements;
         } catch (final XMLStreamException e) {
-            throw PublicationErrorMessage.EXCEPTIONS.create(PublicationErrorMessage.ParseException, e, e.getMessage());
+            throw SubscriptionErrorMessage.EXCEPTIONS.create(PublicationErrorMessage.ParseException, e, e.getMessage());
         } finally {
             try {
                 parser.close();
