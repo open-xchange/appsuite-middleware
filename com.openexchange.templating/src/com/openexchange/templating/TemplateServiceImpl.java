@@ -49,6 +49,7 @@
 
 package com.openexchange.templating;
 
+import static com.openexchange.templating.TemplateErrorMessage.IOException;
 import java.io.File;
 import java.io.IOException;
 import com.openexchange.config.ConfigurationService;
@@ -62,24 +63,26 @@ import freemarker.template.Template;
  */
 public class TemplateServiceImpl implements TemplateService {
 
-    public OXTemplate loadTemplate(String templateName, ConfigurationService config) {
-        String templatePath = config.getProperty("com.openexchange.templating.path");
+    private String PATH_PROPERTY = "com.openexchange.templating.path";
+
+    public OXTemplate loadTemplate(String templateName, ConfigurationService config) throws TemplateException {
+        String templatePath = config.getProperty(PATH_PROPERTY);
         if (templatePath == null) {
             return null;
         }
-        
+
         OXTemplate retval = new OXTemplate();
         retval.setTemplate(loadTemplate(templatePath, templateName));
         return retval;
-        
+
     }
-    
-    protected Template loadTemplate(String templatePath, String templateName) {
+
+    protected Template loadTemplate(String templatePath, String templateName) throws TemplateException {
         File path = new File(templatePath);
         if (!path.exists() || !path.isDirectory() || !path.canRead()) {
             return null;
         }
-        
+
         Template retval = null;
         try {
             TemplateLoader templateLoader = new FileTemplateLoader(path);
@@ -87,12 +90,10 @@ public class TemplateServiceImpl implements TemplateService {
             config.setTemplateLoader(templateLoader);
             retval = config.getTemplate(templateName);
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw IOException.create(e);
         }
-        
+
         return retval;
     }
-
 
 }

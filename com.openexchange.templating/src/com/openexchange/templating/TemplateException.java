@@ -1,3 +1,4 @@
+package com.openexchange.templating;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,14 +48,21 @@
  *
  */
 
-package com.openexchange.templating;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
-import com.openexchange.config.ConfigurationService;
+public class TemplateException extends AbstractOXException {
 
-/**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- */
-public interface TemplateService {
+    private static final long serialVersionUID = 1831208054737931979L;
 
-    public OXTemplate loadTemplate(String templateName, ConfigurationService config) throws TemplateException;
+
+    public TemplateException(final ErrorMessage message, final Throwable cause, final Object[] args) {
+        super(message, cause);
+        setMessageArgs(args);
+    }
+    
+    public TemplateException(final AbstractOXException cause) {
+        super(cause);
+    }
+
 }

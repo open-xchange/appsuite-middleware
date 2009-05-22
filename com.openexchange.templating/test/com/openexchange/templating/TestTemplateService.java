@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import junit.framework.TestCase;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.exceptions.StringComponent;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -66,6 +67,10 @@ public class TestTemplateService extends TestCase {
         configService = new SimConfigurationService();
         configService.stringProperties.put("com.openexchange.templating.path", "test-resources");
         templateService = new TemplateServiceImpl();
+        
+
+        TemplateErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
+        TemplateErrorMessage.EXCEPTIONS.setComponent(new StringComponent("TMPL"));
     }
     
     public void tearDown() throws Exception {

@@ -49,12 +49,51 @@
 
 package com.openexchange.templating;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
-/**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- */
-public interface TemplateService {
 
-    public OXTemplate loadTemplate(String templateName, ConfigurationService config) throws TemplateException;
+public enum TemplateErrorMessage implements OXErrorMessage {
+    
+    IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 1, "Verify file system and templates.", "An IOException occurred.")
+    ;
+
+    private Category category;
+    private int errorCode;
+    private String help;
+    private String message;
+    
+    public static TemplateExceptionFactory EXCEPTIONS = new TemplateExceptionFactory();
+    
+    private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+        this.category = category;
+        this.errorCode = errorCode;
+        this.help = help;
+        this.message = message;
+    }
+    
+    public Category getCategory() {
+        return category;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public String getHelp() {
+        return help;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    
+    public TemplateException create(final Throwable cause, final Object...args) {
+        return EXCEPTIONS.create(this,cause, args);
+    }
+    
+    public TemplateException create(final Object...args) {
+        return EXCEPTIONS.create(this,args);
+    }
+
 }

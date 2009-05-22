@@ -49,12 +49,20 @@
 
 package com.openexchange.templating;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
-/**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- */
-public interface TemplateService {
 
-    public OXTemplate loadTemplate(String templateName, ConfigurationService config) throws TemplateException;
+public class TemplateExceptionFactory extends Exceptions<TemplateException> {
+
+    @Override
+    protected TemplateException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new TemplateException(message, cause, args);
+    }
+
+    @Override
+    protected void knownExceptions() {
+        declareAll(TemplateErrorMessage.values()); 
+    }
+
 }
