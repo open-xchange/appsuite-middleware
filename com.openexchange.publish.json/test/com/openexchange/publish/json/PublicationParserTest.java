@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import junit.framework.TestCase;
@@ -91,8 +92,10 @@ public class PublicationParserTest extends TestCase {
         
         object.put("id", 12);
         object.put("entityId", 23);
+        object.put("entityModule", "oranges");
         object.put("target", "com.openexchange.publish.test");
-   
+        
+        
         JSONObject config = new JSONObject();
         config.put("siteName", "publication");
         config.put("protected", true);
@@ -101,12 +104,13 @@ public class PublicationParserTest extends TestCase {
     
     }
     
-    public void testParse() throws JSONException {
+    public void testParse() throws JSONException, PublicationException {
         Publication publication = new PublicationParser(discovery).parse(object);
         
         assertEquals("id was wrong", 12, publication.getId());
         assertEquals("entityId was wrong", 23, publication.getEntityId());
-        
+        assertEquals("entityModule was wrong", "oranges", publication.getModule());
+
         assertNotNull("target was null", publication.getTarget());
         assertEquals("wrong target", target, publication.getTarget());
         

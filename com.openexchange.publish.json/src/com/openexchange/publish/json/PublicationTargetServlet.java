@@ -108,9 +108,9 @@ public class PublicationTargetServlet extends AbstractPublicationServlet {
             String action = req.getParameter("action");
             if (null == action) {
                 throw MISSING_PARAMETER.create("action");
-            } else if (action.equals("listTargets")) {
+            } else if (action.equals("listTargets") || action.equals("all")) {
                 listTargets(req, resp);
-            } else if (action.equals("getTarget")) {
+            } else if (action.equals("getTarget") || action.equals("get")) {
                 getTarget(req, resp);
             } else {
                 throw UNKNOWN_ACTION.create(action);

@@ -49,10 +49,12 @@
 
 package com.openexchange.publish.json;
 
+import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 
@@ -80,8 +82,9 @@ public class PublicationParser {
      * @param object
      * @return
      * @throws JSONException 
+     * @throws PublicationException 
      */
-    public Publication parse(JSONObject object) throws JSONException {
+    public Publication parse(JSONObject object) throws JSONException, PublicationException {
         Publication publication = new Publication();
         if(object.has(ID)) {
             publication.setId(object.getInt(ID));
@@ -89,11 +92,16 @@ public class PublicationParser {
         if(object.has(ENTITY_ID)) {
             publication.setEntityId(object.getInt(ENTITY_ID));
         }
+        if(object.has(ENTITY_MODULE)) {
+            publication.setModule(object.getString(ENTITY_MODULE));
+        }
         if(object.has(TARGET)) {
             PublicationTarget target = discovery.getTarget(object.getString(TARGET));
             publication.setTarget(target);
             if(object.has(target.getId())) {
                 publication.setConfiguration(formParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
+            } else {
+                publication.setConfiguration(new HashMap<String, Object>());
             }
         }
         return publication;

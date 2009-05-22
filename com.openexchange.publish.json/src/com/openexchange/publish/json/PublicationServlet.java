@@ -51,10 +51,12 @@ package com.openexchange.publish.json;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +71,9 @@ import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
+import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
@@ -146,7 +150,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
         }
     }
 
-    private void createPublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void createPublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
         ServerSession session = getSessionObject(req);
         Publication publication = getPublication(req, session);
         publication.setId(-1);
@@ -158,16 +162,20 @@ public class PublicationServlet extends AbstractPublicationServlet{
         
     }
 
-    private Publication getPublication(HttpServletRequest req, ServerSession session) throws JSONException, IOException {
+    private Publication getPublication(HttpServletRequest req, ServerSession session) throws JSONException, IOException, PublicationException {
         JSONObject object = new JSONObject(getBody(req));
         Publication publication = new PublicationParser(discovery).parse(object);
         publication.setUserId(session.getUserId());
         publication.setContext(session.getContext());
+        if(publication.getTarget() == null && publication.getId() > 0) {
+            PublicationTarget target = discovery.getTarget(publication.getContext(), publication.getId());
+            publication.setTarget(target);
+        }
         return publication;
     }
 
 
-    private void updatePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void updatePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
         ServerSession session = getSessionObject(req);
         Publication publication = getPublication(req, session);
         
@@ -178,7 +186,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-    private void deletePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void deletePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
         JSONArray ids = new JSONArray(getBody(req));
         Context context = getSessionObject(req).getContext();
         for(int i = 0, size = ids.length(); i < size; i++) {
@@ -220,7 +228,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
 
 
-    private void loadAllPublicationsForEntity(HttpServletRequest req, HttpServletResponse resp) throws PublicationJSONException {
+    private void loadAllPublicationsForEntity(HttpServletRequest req, HttpServletResponse resp) throws PublicationJSONException, PublicationException {
         if(null == req.getParameter("entityId")) {
             throw MISSING_PARAMETER.create("entityId");
         }
@@ -240,13 +248,23 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-    private List<Publication> loadAllPublicationsForEntity(Context context, int entityId, String module) {
-        discovery.getTargetsForEntityType(module);
-        return null;
+    private List<Publication> loadAllPublicationsForEntity(Context context, int entityId, String module) throws PublicationException {
+        List<Publication> publications = new LinkedList<Publication>();
+        Collection<PublicationTarget> targetsForEntityType = discovery.getTargetsForEntityType(module);
+        for(PublicationTarget target : targetsForEntityType) {
+            if(target.isResponsibleFor(module)) {
+                PublicationService publicationService = target.getPublicationService();
+                Collection<Publication> allPublicationsForEntity = publicationService.getAllPublications(context, entityId);
+                if(allPublicationsForEntity != null) {
+                    publications.addAll(allPublicationsForEntity);
+                }
+            }
+        }
+        return publications;
     }
 
 
-    private void listPublications(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException {
+    private void listPublications(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
         JSONArray ids = new JSONArray(getBody(req));
         Context context = getSessionObject(req).getContext();
         List<Publication> publications = new ArrayList<Publication>(ids.length());
@@ -286,7 +304,8 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
     
     private static final Set<String> KNOWN_PARAMS = new HashSet<String>() {{
-        add("folder");
+        add("entityId");
+        add("entityModule");
         add("columns");
         add("session");
         add("action");
@@ -308,7 +327,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
     private String[] getBasicColumns(HttpServletRequest req) {
         String columns = req.getParameter("columns");
         if(columns == null) {
-            return new String[]{"id", "folder", "source"};
+            return new String[]{"id", "entityId", "entityModule", "target"};
         }
         return columns.split("\\s*,\\s*");
     }
