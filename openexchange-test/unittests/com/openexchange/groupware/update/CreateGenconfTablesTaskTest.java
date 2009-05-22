@@ -76,7 +76,7 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
     public void testShouldCreateStringAttributeTable() throws AbstractOXException {
         executeTask();
         try {
-            exec("SELECT cid, id, value, name, widget FROM genconf_attributes_strings");
+            exec("SELECT cid, id, value, name FROM genconf_attributes_strings");
         } catch (SQLException x) {
             fail("Expected table genconf_attributes_strings, but doesn't seem to exist: "+x.toString());
         }
@@ -85,7 +85,7 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
     public void testShouldCreateBooleanAttributeTable() throws AbstractOXException {
         executeTask();
         try {
-            exec("SELECT cid, id, value, name, widget FROM genconf_attributes_bools");
+            exec("SELECT cid, id, value, name FROM genconf_attributes_bools");
         } catch (SQLException x) {
             fail("Expected table genconf_attributes_bools, but doesn't seem to exist: "+x.toString());
         }
