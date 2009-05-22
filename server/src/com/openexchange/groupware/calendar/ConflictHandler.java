@@ -193,7 +193,9 @@ public class ConflictHandler {
             prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
             private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getUsers(), private_folder_information, calendarsqlimp);
+            final long startTime = start.getTime();
+            final long endTime = end.getTime();
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getUsers(), private_folder_information, calendarsqlimp, startTime, endTime);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
@@ -208,7 +210,7 @@ public class ConflictHandler {
                                 li.add(conflict_dao);
                                 current_results++;
                             }
-                        } else if (conflict_dao.getRecurrencePosition() > 0 && CalendarCommonCollection.inBetween(start.getTime(), end.getTime(), conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
+                        } else if (conflict_dao.getRecurrencePosition() > 0 && CalendarCommonCollection.inBetween(startTime, endTime, conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
                             if (!CalendarCommonCollection.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                                 li.add(conflict_dao);
                                 current_results++;

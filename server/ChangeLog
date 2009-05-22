@@ -1,3 +1,7 @@
+* 2009-05-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #13640: Improved performance of free busy result calculation.
+
 * 2009-04-17 - francisco.laguna@open-xchange.com
 
  - Bugfix #11305: Fixed batching of deletes.
