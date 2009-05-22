@@ -51,46 +51,113 @@ package com.openexchange.event;
 
 import com.openexchange.session.Session;
 
-
 /**
- * CommonEvent
+ * {@link CommonEvent} - Interface for common event distributed by OSGi's event admin.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public interface CommonEvent {
-	
-	public static final String EVENT_KEY = "OX_EVENT";
-	
-	public static final int INSERT = 1;
 
-	public static final int UPDATE = 2;
+    /**
+     * The event key for common events.
+     */
+    public static final String EVENT_KEY = "OX_EVENT";
 
-	public static final int DELETE = 3;
+    /**
+     * Constant for insert action.
+     */
+    public static final int INSERT = 1;
 
-	public static final int MOVE = 4;
+    /**
+     * Constant for update action.
+     */
+    public static final int UPDATE = 2;
 
-	public static final int CONFIRM_ACCEPTED = 5;
+    /**
+     * Constant for delete action.
+     */
+    public static final int DELETE = 3;
 
-	public static final int CONFIRM_DECLINED = 6;
+    /**
+     * Constant for move action.
+     */
+    public static final int MOVE = 4;
 
-	public static final int CONFIRM_TENTATIVE = 7;
+    /**
+     * Constant for confirm-accepted action.
+     */
+    public static final int CONFIRM_ACCEPTED = 5;
 
-	public int getContextId();
+    /**
+     * Constant for confirm-declined action.
+     */
+    public static final int CONFIRM_DECLINED = 6;
 
-	public int getUserId();
-	
-	public int getModule();
-	
-	public Object getActionObj();
+    /**
+     * Constant for confirm-tentative action.
+     */
+    public static final int CONFIRM_TENTATIVE = 7;
 
-	public Object getOldObj();
+    /**
+     * Gets the context ID.
+     * 
+     * @return The context ID
+     */
+    public int getContextId();
 
-	public Object getSourceFolder();
+    /**
+     * Gets the user ID.
+     * 
+     * @return The user ID
+     */
+    public int getUserId();
 
-	public Object getDestinationFolder();
+    /**
+     * Gets the module.
+     * 
+     * @return The module
+     */
+    public int getModule();
 
-	public int getAction();
+    /**
+     * Gets the action object.
+     * 
+     * @return The action object
+     */
+    public Object getActionObj();
 
-    Session getSession();
+    /**
+     * Gets the old object.
+     * 
+     * @return The old object
+     */
+    public Object getOldObj();
+
+    /**
+     * Gets the source folder object.
+     * 
+     * @return The source folder object
+     */
+    public Object getSourceFolder();
+
+    /**
+     * Gets the destination folder object.
+     * 
+     * @return The destination folder object
+     */
+    public Object getDestinationFolder();
+
+    /**
+     * Gets the action.
+     * 
+     * @return The action
+     */
+    public int getAction();
+
+    /**
+     * Gets the session.
+     * 
+     * @return he session
+     */
+    public Session getSession();
 }
