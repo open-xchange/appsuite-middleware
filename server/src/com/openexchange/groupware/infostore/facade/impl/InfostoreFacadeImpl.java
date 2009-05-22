@@ -136,6 +136,7 @@ import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -956,7 +957,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 set.setValue(metadata.doSwitch(get));
                 metadata.doSwitch(set);
             }
-            ec.modify(docForEvent);
+            OXFolderAccess ofa = new OXFolderAccess(sessionObj.getContext());
+            int folderId = (int) oldDocument.getFolderId();
+            if(updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
+                folderId = (int) docForEvent.getFolderId();
+            }
+            ec.modify(oldDocument, docForEvent, ofa.getFolderObject(folderId));
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
