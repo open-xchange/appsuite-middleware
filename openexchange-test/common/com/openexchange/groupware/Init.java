@@ -55,7 +55,7 @@ import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
-import com.openexchange.push.udp.EventAdminService;
+import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
@@ -344,20 +344,15 @@ public final class Init {
 
     private static void startAndInjectEventBundle() throws Exception {
         EventQueue.setNewEventDispatcher(new EventDispatcher() {
-
             public void addListener(final AppointmentEventInterface listener) {
-
+                // Do nothing.
             }
-
             public void addListener(final TaskEventInterface listener) {
-
+                // Do nothing.
             }
         });
         ServerServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
-        EventAdminService.getInstance().setService(TestEventAdmin.getInstance());
-
-        // SessiondService.getInstance().setService(new
-        // SessiondConnectorImpl());
+        PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
     }
 
     public static void startAndInjectCache() throws CacheException {
