@@ -54,10 +54,15 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.publish.AbstractPublicationService;
 import com.openexchange.publish.CompositePublicationTargetDiscoveryService;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.sql.PublicationSQLStorage;
+import com.openexchange.server.osgiservice.Whiteboard;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -68,10 +73,15 @@ public class DiscovererActivator implements BundleActivator {
     private ServiceRegistration discoveryRegistration;
     private OSGiPublicationTargetCollector pubServiceCollector;
     private OSGiPublicationTargetDiscovererCollector discovererCollector;
+    private Whiteboard whiteboard;
 
     public void start(BundleContext context) throws Exception {
+        whiteboard = new Whiteboard(context);
+        
+        
         pubServiceCollector = new OSGiPublicationTargetCollector(context);
         discovererCollector = new OSGiPublicationTargetDiscovererCollector(context);
+
         
         CompositePublicationTargetDiscoveryService compositeDiscovererCollector = new CompositePublicationTargetDiscoveryService();
         compositeDiscovererCollector.addDiscoveryService(pubServiceCollector);
@@ -84,6 +94,10 @@ public class DiscovererActivator implements BundleActivator {
         
         discoveryRegistration = context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
         
+        DBProvider provider = whiteboard.getService(DBProvider.class);
+        GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
+        
+        AbstractPublicationService.STORAGE = new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector);
         
         componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
     }
@@ -93,6 +107,7 @@ public class DiscovererActivator implements BundleActivator {
         componentRegistration.unregister();
         pubServiceCollector.close();
         discovererCollector.close();
+        whiteboard.close();
     }
 
 }

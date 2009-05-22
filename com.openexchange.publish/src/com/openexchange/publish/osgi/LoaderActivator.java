@@ -53,10 +53,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.impl.CompositeLoaderService;
 import com.openexchange.publish.impl.InfostoreDocumentLoader;
 import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -75,8 +78,10 @@ public class LoaderActivator implements BundleActivator {
         
         CompositeLoaderService compositeLoader = new CompositeLoaderService();
         
-        InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);        
-        compositeLoader.registerLoader("infostore", new InfostoreDocumentLoader(infostore));
+        InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);   
+        UserService users = whiteboard.getService(UserService.class);
+        UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
+        compositeLoader.registerLoader("infostore", new InfostoreDocumentLoader(infostore, users, userConfigs));
     
         dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), compositeLoader, null);
     }

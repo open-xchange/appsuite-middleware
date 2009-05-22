@@ -50,6 +50,7 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
+import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -57,13 +58,14 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface PublicationService {
     
-    public void create(Publication publication);
-    public void update(Publication publication);
-    public Collection<Publication> getAllPublications(Context ctx);
-    public Collection<Publication> getAllPublications(Context ctx, int entityId);
-    public boolean knows(Context ctx, int publicationId);
-    public Publication load(Context ctx, int publicationId);
-    public void delete(Publication publication);
-    public PublicationTarget getTarget();
+    public void create(Publication publication) throws PublicationException;
+    public void update(Publication publication) throws PublicationException;
+    public Collection<Publication> getAllPublications(Context ctx) throws PublicationException;
+    public Collection<Publication> getAllPublications(Context ctx, int entityId) throws PublicationException;
+    public boolean knows(Context ctx, int publicationId) throws PublicationException;
+    public Publication load(Context ctx, int publicationId) throws PublicationException;
+    public void delete(Publication publication) throws PublicationException;
+    public PublicationTarget getTarget() throws PublicationException;
+    
     
 }

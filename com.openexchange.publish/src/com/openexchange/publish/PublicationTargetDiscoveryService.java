@@ -61,14 +61,14 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface PublicationTargetDiscoveryService {
 
-    Collection<PublicationTarget> listTargets();
+    Collection<PublicationTarget> listTargets() throws PublicationException;
 
-    boolean knows(String id);
+    boolean knows(String id) throws PublicationException;
 
-    PublicationTarget getTarget(String id);
+    PublicationTarget getTarget(String id) throws PublicationException;
 
-    PublicationTarget getTarget(Context context, int publicationId);
+    PublicationTarget getTarget(Context context, int publicationId) throws PublicationException;
 
-    Collection<PublicationTarget> getTargetsForEntityType(String module);
+    Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException;
 
 }

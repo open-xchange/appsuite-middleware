@@ -70,7 +70,7 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
         return targets.get(id);
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) {
+    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
         for(PublicationTarget target : targets.values()) {
             if(target.getPublicationService().knows(context, publicationId)) {
                 return target;
@@ -97,11 +97,11 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
         return targets.values();
     }
 
-    public void addPublicationService(PublicationService publicationService) {
+    public void addPublicationService(PublicationService publicationService) throws PublicationException {
         targets.put(publicationService.getTarget().getId(), publicationService.getTarget());
     }
     
-    public void removePublicationService(PublicationService publicationService) {
+    public void removePublicationService(PublicationService publicationService) throws PublicationException {
         targets.remove(publicationService.getTarget().getId());
     }
     

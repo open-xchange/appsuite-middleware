@@ -73,7 +73,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         services.remove(service);
     }
 
-    public List<PublicationTarget> listTargets() {
+    public List<PublicationTarget> listTargets() throws PublicationException {
         LinkedList<PublicationTarget> targets = new LinkedList<PublicationTarget>();
         for (PublicationTargetDiscoveryService service : services) {
             targets.addAll(service.listTargets());
@@ -81,7 +81,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return targets;
     }
 
-    public boolean knows(String id) {
+    public boolean knows(String id) throws PublicationException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {
                 return true;
@@ -90,7 +90,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return false;
     }
     
-    public PublicationTarget getTarget(String id) {
+    public PublicationTarget getTarget(String id) throws PublicationException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {
                 return service.getTarget(id);
@@ -99,7 +99,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return null;
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) {
+    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
         for(PublicationTargetDiscoveryService service : services) {
             PublicationTarget target = service.getTarget(context, publicationId);
             if (target != null) {
@@ -109,7 +109,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return null;
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
         List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
         for(PublicationTargetDiscoveryService service : services) {
             targets.addAll(service.getTargetsForEntityType(module));

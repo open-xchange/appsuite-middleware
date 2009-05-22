@@ -106,16 +106,16 @@ public class PublicationTargetCollectorTest extends TestCase {
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2");
     }
     
-    public void testGetTarget() {
+    public void testGetTarget() throws PublicationException {
         assertGettable(collector, "com.openexchange.publish.test1");
     }
     
-    public void testKnows() {
+    public void testKnows() throws PublicationException {
         assertKnows(collector, "com.openexchange.publish.test1");
         assertDoesNotKnow(collector, "com.openexchange.publish.unknown");
     }
     
-    public void testGetTargetForEntity() {
+    public void testGetTargetForEntity() throws PublicationException {
         PublicationTarget target = collector.getTarget(new SimContext(1), 12);
         assertNotNull("Target was null!", target);
         assertEquals("com.openexchange.publish.test2", target.getId());

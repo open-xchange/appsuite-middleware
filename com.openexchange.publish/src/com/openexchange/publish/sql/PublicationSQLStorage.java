@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
@@ -71,7 +72,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
-import com.openexchange.publish.SimPublicationTargetDiscoveryService;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -86,10 +87,10 @@ import com.openexchange.sql.tools.SQLTools;
 public class PublicationSQLStorage implements PublicationStorage {
 
     private DBProvider dbProvider;
-    private SimPublicationTargetDiscoveryService discoveryService;
-    private SimConfigurationStorageService storageService;
+    private PublicationTargetDiscoveryService discoveryService;
+    private GenericConfigurationStorageService storageService;
 
-    public PublicationSQLStorage(DBProvider provider, SimConfigurationStorageService simConfigurationStorageService, SimPublicationTargetDiscoveryService discoveryService) {
+    public PublicationSQLStorage(DBProvider provider, GenericConfigurationStorageService simConfigurationStorageService, PublicationTargetDiscoveryService discoveryService) {
         this.dbProvider = provider;
         this.storageService = simConfigurationStorageService;
         this.discoveryService = discoveryService;
@@ -105,7 +106,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             
             List<Object> values = new ArrayList<Object>();
             values.add(publication.getId());
-            values.add(publication.getContext().getContextId());
+            values.add( publication.getContext().getContextId());
             
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             
@@ -344,7 +345,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
     
-    private List<Publication> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws SQLException, GenericConfigStorageException {
+    private List<Publication> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws SQLException, GenericConfigStorageException, PublicationException {
         List<Publication> retval = new ArrayList<Publication>();
         
         while (resultSet.next()) {

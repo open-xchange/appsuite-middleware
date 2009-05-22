@@ -53,6 +53,7 @@ import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 
@@ -76,23 +77,23 @@ public class WhiteboadPublicationTargetDiscoveryService implements PublicationTa
         tracker.close();
     }
     
-    public PublicationTarget getTarget(Context context, int publicationId) {
+    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
         return getDelegate().getTarget(context, publicationId);
     }
 
-    public PublicationTarget getTarget(String id) {
+    public PublicationTarget getTarget(String id) throws PublicationException {
         return getDelegate().getTarget(id);
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
         return getDelegate().getTargetsForEntityType(module);
     }
 
-    public boolean knows(String id) {
+    public boolean knows(String id) throws PublicationException {
         return getDelegate().knows(id);
     }
 
-    public Collection<PublicationTarget> listTargets() {
+    public Collection<PublicationTarget> listTargets() throws PublicationException {
         return getDelegate().listTargets();
     }   
     

@@ -61,19 +61,19 @@ import static org.junit.Assert.*;
  *
  */
 public class Asserts {
-    public static void assertNotGettable(PublicationTargetDiscoveryService discovery, String id) {
+    public static void assertNotGettable(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
         assertFalse("Did not expect to find "+id+" in discovery source", discovery.getTarget(id) != null);
     }
 
-    public static void assertGettable(PublicationTargetDiscoveryService discovery, String id) {
+    public static void assertGettable(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
         assertNotNull("Could not find "+id+" in discovery source", discovery.getTarget(id));
     }
 
-    public static void assertKnows(PublicationTargetDiscoveryService discovery, String id) {
+    public static void assertKnows(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
         assertTrue("Did not know: "+id, discovery.knows(id));
     }
 
-    public static void assertDoesNotKnow(PublicationTargetDiscoveryService discovery, String id) {
+    public static void assertDoesNotKnow(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
         assertFalse("Did know: "+id, discovery.knows(id));
     }
 

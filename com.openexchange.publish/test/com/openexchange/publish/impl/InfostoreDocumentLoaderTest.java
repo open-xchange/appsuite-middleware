@@ -53,7 +53,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import junit.framework.TestCase;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.services.SimInfostoreFacade;
@@ -91,7 +94,17 @@ public class InfostoreDocumentLoaderTest extends TestCase {
         publication.setEntityId(1337);
         publication.setModule("infostore");
     
-        loader = new InfostoreDocumentLoader(infostoreFacade);
+        loader = new InfostoreDocumentLoader(infostoreFacade, null, null) {
+            @Override
+            protected User loadUser(Context ctx, int userId) throws PublicationException {
+                return null;
+            }
+            
+            @Override
+            protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws PublicationException {
+                return null;
+            }
+        };
     }
     
     public void testLoadDocument() throws PublicationException, IOException {

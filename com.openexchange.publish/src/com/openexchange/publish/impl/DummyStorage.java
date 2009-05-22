@@ -47,60 +47,71 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationStorage;
 
 
 /**
- * {@link SimPublicationTargetDiscoveryService}
+ * {@link DummyStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class DummyStorage implements PublicationStorage {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#forgetPublication(com.openexchange.publish.Publication)
+     */
+    public void forgetPublication(Publication publication) throws PublicationException {
+        // TODO Auto-generated method stub
 
-    public void addTarget(PublicationTarget target) {
-        targets.put(target.getId(), target);
     }
 
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
-                return target;
-            }
-        }
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#getPublication(com.openexchange.groupware.contexts.Context, int)
+     */
+    public Publication getPublication(Context ctx, int publicationId) throws PublicationException {
+        // TODO Auto-generated method stub
         return null;
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                targets.add(target);
-            }
-        }
-        return targets;
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#getPublications(com.openexchange.groupware.contexts.Context, java.lang.String, int)
+     */
+    public List<Publication> getPublications(Context ctx, String module, int entityId) throws PublicationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#getPublications(com.openexchange.groupware.contexts.Context, java.lang.String)
+     */
+    public List<Publication> getPublications(Context ctx, String publicationTarget) throws PublicationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#rememberPublication(com.openexchange.publish.Publication)
+     */
+    public void rememberPublication(Publication publication) throws PublicationException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#search(com.openexchange.groupware.contexts.Context, java.lang.String, java.util.Map)
+     */
+    public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

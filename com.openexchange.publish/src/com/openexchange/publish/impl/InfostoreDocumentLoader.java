@@ -54,37 +54,52 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
-
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link InfostoreDocumentLoader}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class InfostoreDocumentLoader implements PublicationDataLoaderService {
 
     private InfostoreFacade infostore;
 
+    private UserService users;
+
+    private UserConfigurationService userConfigs;
+
     /**
      * Initializes a new {@link InfostoreDocumentLoader}.
+     * 
      * @param infostoreFacade
      */
-    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade) {
+    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade, UserService userService, UserConfigurationService userConfigService) {
         super();
         this.infostore = infostoreFacade;
+        this.users = userService;
+        this.userConfigs = userConfigService;
     }
 
     public Collection<? extends Object> load(Publication publication) throws PublicationException {
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
         try {
-            InputStream document = infostore.getDocument(publication.getEntityId(), InfostoreFacade.CURRENT_VERSION, publication.getContext(), loadUser(publication.getUserId()), loadUserConfiguration(publication.getUserId()));
+            InputStream document = infostore.getDocument(
+                publication.getEntityId(),
+                InfostoreFacade.CURRENT_VERSION,
+                publication.getContext(),
+                loadUser(publication.getContext(), publication.getUserId()),
+                loadUserConfiguration(publication.getContext(), publication.getUserId()));
             documents.add(document);
         } catch (OXException e) {
             throw new PublicationException(e);
@@ -92,22 +107,20 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
         return documents;
     }
 
-    /**
-     * @param userId
-     * @return
-     */
-    private User loadUser(int userId) {
-        // TODO Auto-generated method stub
-        return null;
+    protected User loadUser(Context ctx, int userId) throws PublicationException {
+        try {
+            return users.getUser(userId, ctx);
+        } catch (UserException e) {
+            throw new PublicationException(e);
+        }
     }
 
-    /**
-     * @param userId
-     * @return
-     */
-    private UserConfiguration loadUserConfiguration(int userId) {
-        // TODO Auto-generated method stub
-        return null;
+    protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws PublicationException {
+        try {
+            return userConfigs.getUserConfiguration(userId, ctx);
+        } catch (UserConfigurationException e) {
+            throw new PublicationException(e);
+        }
     }
 
 }

@@ -61,6 +61,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.CompositePublicationTargetDiscoveryService;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 
@@ -133,35 +134,35 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return discovery;
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) {
+    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTarget(context, publicationId);
     }
 
-    public PublicationTarget getTarget(String id) {
+    public PublicationTarget getTarget(String id) throws PublicationException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTarget(id);
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTargetsForEntityType(module);
     }
 
-    public boolean knows(String id) {
+    public boolean knows(String id) throws PublicationException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.knows(id);
     }
 
-    public List<PublicationTarget> listTargets() {
+    public List<PublicationTarget> listTargets() throws PublicationException {
         if(!grabbedAll) {
             grabAll();
         }

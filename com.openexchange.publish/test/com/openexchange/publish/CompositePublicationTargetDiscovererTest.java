@@ -95,13 +95,13 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
         composite.addDiscoveryService(discovery2);
     }
     
-    public void testCompositeList() {
+    public void testCompositeList() throws PublicationException {
         List<PublicationTarget> targets = composite.listTargets();
         
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5", "com.openexchange.publish.knowAll");
     }
     
-    public void testCompositeKnows() {
+    public void testCompositeKnows() throws PublicationException {
         assertKnows(composite, "com.openexchange.publish.test1");
         assertKnows(composite, "com.openexchange.publish.test2");
         assertKnows(composite, "com.openexchange.publish.test3");
@@ -111,7 +111,7 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
         assertDoesNotKnow(composite, "com.openexchange.publish.unknown");
     }
     
-    public void testCompositeGet() {
+    public void testCompositeGet() throws PublicationException {
         assertGettable(composite, "com.openexchange.publish.test1");
         assertGettable(composite, "com.openexchange.publish.test2");
         assertGettable(composite, "com.openexchange.publish.test3");
@@ -121,13 +121,13 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
         assertNotGettable(composite, "com.openexchange.publish.unknown");
     }
     
-    public void testGetTarget() {
+    public void testGetTarget() throws PublicationException {
         PublicationTarget target = composite.getTarget(null, -1);
         assertNotNull(target);
         assertEquals("com.openexchange.publish.knowAll", target.getId());
     }
     
-    public void testGetResponsibleTargets() {
+    public void testGetResponsibleTargets() throws PublicationException {
         Collection<PublicationTarget> targets = composite.getTargetsForEntityType("infostore");
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5");
 
