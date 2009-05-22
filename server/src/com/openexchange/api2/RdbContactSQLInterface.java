@@ -181,9 +181,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
     public void updateContactObject(final ContactObject co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException {
 
         try{
+            final ContactObject storageVersion = Contacts.getContactById(co.getObjectID(), session);
             Contacts.performContactStorageUpdate(co,fid,d,userId,memberInGroups,ctx,userConfiguration);
             final EventClient ec = new EventClient(session);
-            ec.modify(co);
+            ec.modify(storageVersion, co, new OXFolderAccess(ctx).getFolderObject(co.getParentFolderID()));
         }catch (final ContactException ise){
             throw ise;
         }catch (final EventException ise){
@@ -198,6 +199,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             throw oonfee;
         }catch (final OXException e){
             throw e;
+        } catch (final DBPoolingException e) {
+            throw new ContactException(e);
         }
     }
 

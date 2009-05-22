@@ -109,6 +109,7 @@ public class PushRequest {
             int folderId = 0;
             int module = 0;
             int contextId = 0;
+            long timestamp = 0;
 
             RegisterObject registerObj = null;
 
@@ -153,7 +154,7 @@ public class PushRequest {
                 break;
             case PUSH_SYNC:
                 /*
-                 * ...FolderId\1Module\1ContextId\1Users
+                 * ...FolderId\1Module\1ContextId\1Users\1Timestamp
                  */
                 folderId = parseFolderId(args, pos++);
                 module = parseModule(args, pos++);
@@ -161,7 +162,9 @@ public class PushRequest {
 
                 final int[] users = convertString2UserIDArray(parseString(args, pos++));
 
-                final PushObject pushObject = new PushObject(folderId, module, contextId, users, true);
+                timestamp = parseLong(args, pos++);
+                
+                final PushObject pushObject = new PushObject(folderId, module, contextId, users, true, timestamp);
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("push sync package: " + pushObject);
@@ -309,6 +312,10 @@ public class PushRequest {
             // Not a number...
             throw new PushUDPException(PushUDPException.Code.PORT_NAN, e, s[pos]);
         }
+    }
+
+    private long parseLong(final String[] s, final int pos) {
+        return Long.parseLong(parseString(s, pos));
     }
 
     private int parseInt(final String[] s, final int pos) {

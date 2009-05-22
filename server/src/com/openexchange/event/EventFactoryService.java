@@ -47,81 +47,44 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.event;
 
-import com.openexchange.event.CommonEvent;
 import com.openexchange.session.Session;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link EventFactoryService} - Factory for events, e.g instances of {@link CommonEvent}, {@link RemoteEvent}, etc.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public interface EventFactoryService {
 
-    private final int contextId;
+    /**
+     * Creates a new common event from specified arguments.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param action The action constant (one of {@link GenericEvent#INSERT}, {@link GenericEvent#UPDATE}, etc.)
+     * @param module The module
+     * @param actionObj The action object
+     * @param oldObj The old object
+     * @param sourceFolder The source folder
+     * @param destinationFolder The destination folder (on move)
+     * @param session The session
+     * @return A new common event ready for being distributed
+     */
+    public CommonEvent newCommonEvent(int userId, int contextId, int action, int module, Object actionObj, Object oldObj, Object sourceFolder, Object destinationFolder, Session session);
 
-    private final int userId;
+    /**
+     * Creates a new remote event from specified arguments.
+     * 
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param action The action; either {@link RemoteEvent#FOLDER_CHANGED} or {@link RemoteEvent#FOLDER_CONTENT_CHANGED}
+     * @param module The module
+     * @param timestamp The time stamp of the modification or <code>0</code> if not available
+     * @return A new common event ready for being distributed
+     */
+    public RemoteEvent newRemoteEvent(int folderId, int userId, int contextId, int action, int module, long timestamp);
 
-    private final int module;
-
-    private final Object actionObj;
-
-    private final Object oldObj;
-
-    private final Object sourceFolder;
-
-    private final Object destinationFolder;
-
-    private final int action;
-
-    private final Session session;
-
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
-        this.contextId = contextId;
-        this.action = action;
-        this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public int getModule() {
-        return module;
-    }
-
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
-    public int getAction() {
-        return action;
-    }
-
-    public Session getSession() {
-        return session;
-    }
 }

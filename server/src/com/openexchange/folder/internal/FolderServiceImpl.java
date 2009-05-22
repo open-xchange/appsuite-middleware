@@ -47,81 +47,55 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.folder.internal;
 
-import com.openexchange.event.CommonEvent;
-import com.openexchange.session.Session;
+import com.openexchange.api2.OXException;
+import com.openexchange.folder.FolderException;
+import com.openexchange.folder.FolderService;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link FolderServiceImpl} - TODO Short description of this class' purpose.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public final class FolderServiceImpl implements FolderService {
 
-    private final int contextId;
-
-    private final int userId;
-
-    private final int module;
-
-    private final Object actionObj;
-
-    private final Object oldObj;
-
-    private final Object sourceFolder;
-
-    private final Object destinationFolder;
-
-    private final int action;
-
-    private final Session session;
-
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
-        this.contextId = contextId;
-        this.action = action;
-        this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
+    /**
+     * Initializes a new {@link FolderServiceImpl}.
+     */
+    public FolderServiceImpl() {
+        super();
     }
 
-    public int getContextId() {
-        return contextId;
+    public FolderObject getFolderObject(final int folderId, final int contextId) throws FolderException {
+        try {
+            return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
     }
 
-    public int getUserId() {
-        return userId;
+    public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws FolderException {
+        try {
+            final Context ctx = ContextStorage.getStorageContext(contextId);
+            return new OXFolderAccess(ctx).getFolderPermission(
+                folderId,
+                userId,
+                UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx));
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
     }
 
-    public int getModule() {
-        return module;
-    }
-
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
-    public int getAction() {
-        return action;
-    }
-
-    public Session getSession() {
-        return session;
-    }
 }

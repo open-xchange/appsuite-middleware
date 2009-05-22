@@ -51,6 +51,7 @@ package com.openexchange.event;
 
 import com.openexchange.session.Session;
 
+
 /**
  * {@link CommonEvent} - Interface for common event distributed by OSGi's event admin.
  * 
@@ -160,4 +161,5 @@ public interface CommonEvent {
      * @return he session
      */
     public Session getSession();
+
 }

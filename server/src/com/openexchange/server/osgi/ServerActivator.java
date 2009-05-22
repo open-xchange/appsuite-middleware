@@ -82,12 +82,16 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.osgi.Activator;
 import com.openexchange.dataretention.DataRetentionService;
+import com.openexchange.event.EventFactoryService;
+import com.openexchange.event.impl.EventFactoryServiceImpl;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileExceptionFactory;
+import com.openexchange.folder.FolderService;
+import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
@@ -456,7 +460,13 @@ public final class ServerActivator extends DeferredActivator {
         
         registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
         registrationList.add(context.registerService(WhiteboardFactoryService.class.getName(), new WhiteboardDBProvider.Factory(), null));
-        
+
+        // Register event factory service
+        registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));
+
+        // Register folder service
+        registrationList.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+
         /*
          * Register components
          */

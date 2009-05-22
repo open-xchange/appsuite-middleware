@@ -50,6 +50,7 @@
 package com.openexchange.push.udp;
 
 import java.util.Date;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -69,6 +70,10 @@ public class PushObject extends AbstractPushObject {
 
     private final int hash;
 
+    private final long timestamp;
+
+    private CommonEvent commonEvent;
+
     /**
      * Initializes a new {@link PushObject}.
      * 
@@ -78,7 +83,7 @@ public class PushObject extends AbstractPushObject {
      * @param users The user IDs as an array
      * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
      */
-    public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote) {
+    public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp) {
         super();
         this.folderId = folderId;
         this.module = module;
@@ -86,6 +91,7 @@ public class PushObject extends AbstractPushObject {
         this.users = users;
         this.remote = isRemote;
         this.hash = hashCode0();
+        this.timestamp = timestamp;
     }
 
     private int hashCode0() {
@@ -132,6 +138,15 @@ public class PushObject extends AbstractPushObject {
         return creationDate;
     }
 
+    /**
+     * Gets the time stamp or <code>0</code> if not available.
+     * 
+     * @return The time stamp or <code>0</code> if not available
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     @Override
     public int hashCode() {
         return hash;
@@ -161,6 +176,6 @@ public class PushObject extends AbstractPushObject {
     @Override
     public String toString() {
         return new StringBuilder().append("FOLDER_ID=").append(folderId).append(",MODULE=").append(module).append(",CONTEXT_ID=").append(
-            contextId).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_SYNC=").append(remote).toString();
+            contextId).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_REMOTE=").append(remote).toString();
     }
 }

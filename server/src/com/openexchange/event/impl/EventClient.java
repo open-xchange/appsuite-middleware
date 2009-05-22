@@ -50,12 +50,10 @@
 package com.openexchange.event.impl;
 
 import java.util.Hashtable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventException;
@@ -418,19 +416,9 @@ public class EventClient {
 		final EventObject eventObject = new EventObject(contactObj, CREATED, session);
 		EventQueue.add(eventObject);
 	}
-
-	public void modify(final ContactObject contactObj) throws EventException, OXException, ContextException {
-		final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
-		final int folderId = contactObj.getParentFolderID();
-		if (folderId > 0) {
-			final FolderObject folderObj = getFolder(folderId, ctx);
-			modify(contactObj, folderObj);
-		}
-	}
 	
-	public void modify(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, null, folderObj, null, session);
+	public void modify(final ContactObject oldObj, final ContactObject contactObj, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, oldObj, folderObj, null, session);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -500,19 +488,9 @@ public class EventClient {
 		final EventObject eventObject = new EventObject(folderObj, CREATED, session);
 		EventQueue.add(eventObject);
 	}
-
-	public void modify(final FolderObject folderObj) throws EventException, OXException, ContextException {
-		final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
-		final int folderId = folderObj.getParentFolderID();
-		if (folderId > 0) {
-			final FolderObject parentFolderObj = getFolder(folderId, ctx);
-			modify(folderObj, parentFolderObj);
-		}
-	}
 	
-	public void modify(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.FOLDER, folderObj, null, parentFolder, null, session);
+	public void modify(final FolderObject oldObj, final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.FOLDER, folderObj, oldObj, parentFolder, null, session);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -581,12 +559,12 @@ public class EventClient {
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
 			final FolderObject parentFolderObj = getFolder((int)folderId, ctx);
-			modify(document, parentFolderObj);
+			modify(null, document, parentFolderObj);
 		}
 	}
 	
-	public void modify(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.INFOSTORE, document, null, parentFolder, null, session);
+	public void modify(final DocumentMetadata oldDocument, final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.INFOSTORE, document, oldDocument, parentFolder, null, session);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);

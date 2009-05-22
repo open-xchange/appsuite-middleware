@@ -49,15 +49,14 @@
 
 package com.openexchange.event.impl;
 
-import com.openexchange.event.CommonEvent;
-import com.openexchange.session.Session;
+import com.openexchange.event.RemoteEvent;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link RemoteEventImpl} - Implementation of {@link RemoteEvent}.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public final class RemoteEventImpl implements RemoteEvent {
 
     private final int contextId;
 
@@ -65,28 +64,30 @@ public final class CommonEventImpl implements CommonEvent {
 
     private final int module;
 
-    private final Object actionObj;
-
-    private final Object oldObj;
-
-    private final Object sourceFolder;
-
-    private final Object destinationFolder;
-
     private final int action;
 
-    private final Session session;
+    private final int folderId;
 
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
+    private final long timestamp;
+
+    /**
+     * Initializes a new {@link RemoteEventImpl}.
+     * 
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param action The action; either {@link RemoteEvent#FOLDER_CHANGED} or {@link RemoteEvent#FOLDER_CONTENT_CHANGED}
+     * @param module The module
+     * @param timestamp The time stamp of the modification or <code>0</code> if not available
+     */
+    public RemoteEventImpl(final int folderId, final int userId, final int contextId, final int action, final int module, final long timestamp) {
+        super();
+        this.folderId = folderId;
         this.userId = userId;
         this.contextId = contextId;
         this.action = action;
         this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
+        this.timestamp = timestamp;
     }
 
     public int getContextId() {
@@ -101,27 +102,16 @@ public final class CommonEventImpl implements CommonEvent {
         return module;
     }
 
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
     public int getAction() {
         return action;
     }
 
-    public Session getSession() {
-        return session;
+    public int getFolderId() {
+        return folderId;
     }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
 }

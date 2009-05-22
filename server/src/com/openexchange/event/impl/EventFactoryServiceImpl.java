@@ -50,78 +50,30 @@
 package com.openexchange.event.impl;
 
 import com.openexchange.event.CommonEvent;
+import com.openexchange.event.EventFactoryService;
+import com.openexchange.event.RemoteEvent;
 import com.openexchange.session.Session;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link EventFactoryServiceImpl} - Implementation of {@link EventFactoryService}.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public final class EventFactoryServiceImpl implements EventFactoryService {
 
-    private final int contextId;
-
-    private final int userId;
-
-    private final int module;
-
-    private final Object actionObj;
-
-    private final Object oldObj;
-
-    private final Object sourceFolder;
-
-    private final Object destinationFolder;
-
-    private final int action;
-
-    private final Session session;
-
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
-        this.contextId = contextId;
-        this.action = action;
-        this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
+    /**
+     * Initializes a new {@link EventFactoryServiceImpl}.
+     */
+    public EventFactoryServiceImpl() {
+        super();
     }
 
-    public int getContextId() {
-        return contextId;
+    public CommonEvent newCommonEvent(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
+        return new CommonEventImpl(userId, contextId, action, module, actionObj, oldObj, sourceFolder, destinationFolder, session);
     }
 
-    public int getUserId() {
-        return userId;
+    public RemoteEvent newRemoteEvent(final int folderId, final int userId, final int contextId, final int action, final int module, final long timestamp) {
+        return new RemoteEventImpl(folderId, userId, contextId, action, module, timestamp);
     }
 
-    public int getModule() {
-        return module;
-    }
-
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
-    public int getAction() {
-        return action;
-    }
-
-    public Session getSession() {
-        return session;
-    }
 }

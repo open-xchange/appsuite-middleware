@@ -47,81 +47,70 @@
  *
  */
 
-package com.openexchange.event.impl;
-
-import com.openexchange.event.CommonEvent;
-import com.openexchange.session.Session;
+package com.openexchange.event;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link RemoteEvent} - Interface for remote event distributed by OSGi's event admin.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public interface RemoteEvent {
 
-    private final int contextId;
+    /**
+     * The event key for remote events.
+     */
+    public static final String EVENT_KEY = "OX_REMOTE_EVENT";
 
-    private final int userId;
+    /**
+     * Constant for folder-changed action.
+     */
+    public static final int FOLDER_CHANGED = 1;
 
-    private final int module;
+    /**
+     * Constant for folder-content-changed action.
+     */
+    public static final int FOLDER_CONTENT_CHANGED = 2;
 
-    private final Object actionObj;
+    /**
+     * Gets the action.
+     * 
+     * @return The action
+     */
+    public int getAction();
 
-    private final Object oldObj;
+    /**
+     * Gets the context ID.
+     * 
+     * @return The context ID
+     */
+    public int getContextId();
 
-    private final Object sourceFolder;
+    /**
+     * Gets the folder ID.
+     * 
+     * @return The folder ID
+     */
+    public int getFolderId();
 
-    private final Object destinationFolder;
+    /**
+     * Gets the user ID.
+     * 
+     * @return The user ID
+     */
+    public int getUserId();
 
-    private final int action;
+    /**
+     * Gets the module.
+     * 
+     * @return The module
+     */
+    public int getModule();
 
-    private final Session session;
+    /**
+     * Gets the time stamp of the modification (if not available, <code>0</code> is returned).
+     * 
+     * @return The time stamp of the modification (if not available, <code>0</code> is returned)
+     */
+    public long getTimestamp();
 
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
-        this.contextId = contextId;
-        this.action = action;
-        this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public int getModule() {
-        return module;
-    }
-
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
-    public int getAction() {
-        return action;
-    }
-
-    public Session getSession() {
-        return session;
-    }
 }

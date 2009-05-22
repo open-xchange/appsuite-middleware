@@ -47,81 +47,46 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.push.udp.registry;
 
-import com.openexchange.event.CommonEvent;
-import com.openexchange.session.Session;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link RegistryCustomizer} - Registers/unregisters a certain service in/from {@link PushServiceRegistry}.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
-    private final int contextId;
+    private final BundleContext context;
 
-    private final int userId;
+    private final Class<T> clazz;
 
-    private final int module;
-
-    private final Object actionObj;
-
-    private final Object oldObj;
-
-    private final Object sourceFolder;
-
-    private final Object destinationFolder;
-
-    private final int action;
-
-    private final Session session;
-
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
-        this.contextId = contextId;
-        this.action = action;
-        this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
+    /**
+     * Initializes a new {@link RegistryCustomizer}.
+     * 
+     * @param context The bundle context
+     * @param clazz The class of the service to register
+     */
+    public RegistryCustomizer(final BundleContext context, final Class<T> clazz) {
+        this.context = context;
+        this.clazz = clazz;
     }
 
-    public int getContextId() {
-        return contextId;
+    public Object addingService(final ServiceReference serviceReference) {
+        final Object service = context.getService(serviceReference);
+        PushServiceRegistry.getServiceRegistry().addService(clazz, service);
+        return service;
     }
 
-    public int getUserId() {
-        return userId;
+    public void modifiedService(final ServiceReference serviceReference, final Object o) {
+        // Nothing to do
     }
 
-    public int getModule() {
-        return module;
-    }
-
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
-    public int getAction() {
-        return action;
-    }
-
-    public Session getSession() {
-        return session;
+    public void removedService(final ServiceReference serviceReference, final Object o) {
+        PushServiceRegistry.getServiceRegistry().removeService(clazz);
+        context.ungetService(serviceReference);
     }
 }

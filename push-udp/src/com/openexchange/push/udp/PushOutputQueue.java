@@ -53,14 +53,19 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventException;
+import com.openexchange.event.EventFactoryService;
+import com.openexchange.event.RemoteEvent;
+import com.openexchange.groupware.Types;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.tools.StringCollection;
 
@@ -179,13 +184,14 @@ public class PushOutputQueue implements Runnable {
      */
     private static void createAndDeliverPushPackage(final PushObject pushObject) {
         final int users[] = pushObject.getUsers();
+        final int contextId = pushObject.getContextId();
+        final int folderId = pushObject.getFolderId();
         for (int a = 0; a < users.length; a++) {
-            final int contextId = pushObject.getContextId();
 
             if (RegisterHandler.isRegistered(users[a], contextId)) {
                 final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a], contextId);
                 final StringBuilder sb = new StringBuilder();
-                sb.append(pushObject.getFolderId());
+                sb.append(folderId);
                 sb.append('\1');
                 try {
                     makeAndSendPackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort());
@@ -197,20 +203,34 @@ public class PushOutputQueue implements Runnable {
         /*
          * Distribute
          */
+        final long timestamp = pushObject.getTimestamp();
+        final int module = pushObject.getModule();
         if (pushObject.isRemote()) {
             /*
              * Distribute to own system
              */
             final EventAdmin eventAdmin = PushServiceRegistry.getServiceRegistry().getService(EventAdmin.class);
-            if (null != eventAdmin) {
-                /*-
-                 * TODO:
-                 * 1. Factory to create a CommonEvent instance
-                 * 2. Enhance CommonEvent interface by isRemote() which must be checked throughout usages
-                 * 3. Deliver CommonEvent instance to EventAdmin
-                 * 
-                 * Or completely new interface RemoteCommonObject?
+            final EventFactoryService factoryService = PushServiceRegistry.getServiceRegistry().getService(EventFactoryService.class);
+            if (null != eventAdmin && null != factoryService) {
+                /*
+                 * Create an event from push object for each affected user
                  */
+                final int action;
+                final String topic;
+                if (Types.FOLDER == module) {
+                    action = RemoteEvent.FOLDER_CHANGED;
+                    topic = "com/openexchange/remote/folderchanged";
+                } else {
+                    action = RemoteEvent.FOLDER_CONTENT_CHANGED;
+                    topic = "com/openexchange/remote/foldercontentchanged";
+                }
+
+                for (int a = 0; a < users.length; a++) {
+                    final RemoteEvent remoteEvent = factoryService.newRemoteEvent(folderId, users[a], contextId, action, module, timestamp);
+                    final Hashtable<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
+                    ht.put(RemoteEvent.EVENT_KEY, remoteEvent);
+                    eventAdmin.postEvent(new Event(topic, ht));
+                }
             }
         } else if (pushConfigInterface.isEventDistributionEnabled()) {
             /*-
@@ -229,13 +249,15 @@ public class PushOutputQueue implements Runnable {
                     final StringBuilder data = new StringBuilder();
                     data.append(PushRequest.PUSH_SYNC);
                     data.append('\1');
-                    data.append(pushObject.getFolderId());
+                    data.append(folderId);
                     data.append('\1');
-                    data.append(pushObject.getModule());
+                    data.append(module);
                     data.append('\1');
-                    data.append(pushObject.getContextId());
+                    data.append(contextId);
                     data.append('\1');
                     data.append(StringCollection.convertArray2String(pushObject.getUsers()));
+                    data.append('\1');
+                    data.append(timestamp);
 
                     sb.append(data.length());
                     sb.append('\1');

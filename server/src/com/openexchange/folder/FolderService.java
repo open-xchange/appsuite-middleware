@@ -47,81 +47,37 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.folder;
 
-import com.openexchange.event.CommonEvent;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.EffectivePermission;
 
 /**
- * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
+ * {@link FolderService} - The folder service.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonEventImpl implements CommonEvent {
+public interface FolderService {
 
-    private final int contextId;
+    /**
+     * Gets specified folder from given context.
+     * 
+     * @param folderId The folder ID
+     * @param contextId The context ID
+     * @return The folder object
+     * @throws FolderException If folder cannot be returned
+     */
+    public FolderObject getFolderObject(int folderId, int contextId) throws FolderException;
 
-    private final int userId;
+    /**
+     * Determines specified user's effective permission on the folder matching given folder ID.
+     * 
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The user's effective permission
+     * @throws FolderException If effective permission cannot be determined
+     */
+    public EffectivePermission getFolderPermission(int folderId, int userId, int contextId) throws FolderException;
 
-    private final int module;
-
-    private final Object actionObj;
-
-    private final Object oldObj;
-
-    private final Object sourceFolder;
-
-    private final Object destinationFolder;
-
-    private final int action;
-
-    private final Session session;
-
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
-        this.contextId = contextId;
-        this.action = action;
-        this.module = module;
-        this.actionObj = actionObj;
-        this.oldObj = oldObj;
-        this.sourceFolder = sourceFolder;
-        this.destinationFolder = destinationFolder;
-        this.session = session;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public int getModule() {
-        return module;
-    }
-
-    public Object getActionObj() {
-        return actionObj;
-    }
-
-    public Object getOldObj() {
-        return oldObj;
-    }
-
-    public Object getSourceFolder() {
-        return sourceFolder;
-    }
-
-    public Object getDestinationFolder() {
-        return destinationFolder;
-    }
-
-    public int getAction() {
-        return action;
-    }
-
-    public Session getSession() {
-        return session;
-    }
 }

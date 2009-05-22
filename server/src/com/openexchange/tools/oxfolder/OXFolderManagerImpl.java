@@ -144,7 +144,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * Setter for testing purposes.
      * @param sql
      */
-    public void setCSql(AppointmentSQLInterface sql) {
+    public void setCSql(final AppointmentSQLInterface sql) {
         cSql = sql;
     }
 
@@ -183,7 +183,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * 
      * @throws OXFolderException If instantiation fails
      */
-    OXFolderManagerImpl(Session session, OXFolderAccess oxfolderAccess, Connection readCon, Connection writeCon) throws OXFolderException {
+    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXFolderException {
         super();
         this.session = session;
         try {
@@ -196,7 +196,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         this.readCon = readCon;
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
-        AppointmentSqlFactoryService factory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+        final AppointmentSqlFactoryService factory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
         if (factory != null) {
             this.cSql = factory.createAppointmentSql(session);
         } else {
@@ -504,6 +504,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
         }
+        final FolderObject storageVersion = getFolderFromMaster(fo.getObjectID());
         final boolean performMove = fo.containsParentFolderID();
         if (fo.containsPermissions() || fo.containsModule()) {
             if (performMove) {
@@ -547,10 +548,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
                 try {
-                    new EventClient(session).modify(fo);
+                    new EventClient(session).modify(storageVersion, fo, getFolderFromMaster(fo.getParentFolderID()));
                 } catch (final EventException e) {
-                    LOG.warn("Update event could not be enqueued", e);
-                } catch (final ContextException e) {
                     LOG.warn("Update event could not be enqueued", e);
                 }
                 return fo;
@@ -810,7 +809,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
             try {
                 return calSql.isFolderEmpty(user.getId(), folderId, readCon);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
             }
         } else if (module == FolderObject.CONTACT) {
@@ -936,7 +935,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         /*
          * Load source folder
          */
-        final FolderObject storageSrc = getOXFolderAccess().getFolderObject(folderId);
+        final FolderObject storageSrc = getFolderFromMaster(folderId);
         /*
          * Folder is already in target folder
          */
