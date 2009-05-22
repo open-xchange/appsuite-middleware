@@ -1,0 +1,8 @@
+<html>
+	<head>
+		<title>Template for testing purposes</title>
+	</head>
+	<body>
+		${message}
+	</body>
+</html>
