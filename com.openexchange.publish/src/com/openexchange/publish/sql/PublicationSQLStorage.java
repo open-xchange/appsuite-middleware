@@ -109,7 +109,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             
-            storageService.delete(writeConnection, publication.getContext(), publication.getId());
+            storageService.delete(writeConnection, publication.getContext(), getConfigurationId(publication));
             
             writeConnection.commit();
         } catch (SQLException e) {
@@ -364,6 +364,46 @@ public class PublicationSQLStorage implements PublicationStorage {
             retval.add(publication);
         }
         
+        return retval;
+    }
+    
+    private int getConfigurationId(Publication subscription) throws PublicationException {
+        int retval = 0;
+        Connection readConection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConection = dbProvider.getReadConnection(subscription.getContext());
+            
+            SELECT select = new SELECT("configuration_id").
+            FROM(publications).
+            WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
+            
+            List<Object> values = new ArrayList<Object>();
+            values.add(subscription.getContext().getContextId());
+            values.add(subscription.getId());
+            
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConection, select, values);
+            
+            if (resultSet.next()) {
+                retval = resultSet.getInt("configuration_id");
+            }
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new PublicationException(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(subscription.getContext(), readConection);
+            }
+        }
         return retval;
     }
 
