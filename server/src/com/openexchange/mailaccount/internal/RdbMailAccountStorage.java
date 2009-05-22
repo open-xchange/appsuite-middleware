@@ -500,8 +500,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw new MailAccountException(e);
         }
         try {
+            con.setAutoCommit(false);
             updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, false);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
+            autocommit(con);
             Database.back(cid, true, con);
         }
     }

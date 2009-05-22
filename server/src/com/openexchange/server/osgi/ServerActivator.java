@@ -400,9 +400,16 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
         registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
         registrationList.add(context.registerService(ResourceService.class.getName(), ResourceServiceImpl.getInstance(), null));
-        registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
+        registrationList.add(context.registerService(
+            UserService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(UserService.class, true),
+            null));
         registrationList.add(context.registerService(UserConfigurationService.class.getName(), new UserConfigurationServiceImpl(), null));
-        registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
+        registrationList.add(context.registerService(
+            ContextService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(
+            ContextService.class, true),
+            null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
         // TODO: Register search service here until its encapsulated in an own bundle

@@ -50,6 +50,9 @@
 package com.openexchange.groupware.ldap;
 
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.UserService;
+import com.openexchange.user.internal.UserServiceImpl;
 
 /**
  * {@link UserStorageInit}
@@ -59,35 +62,37 @@ import com.openexchange.server.Initialization;
  */
 public final class UserStorageInit implements Initialization {
 
-	private static final UserStorageInit instance = new UserStorageInit();
+    private static final UserStorageInit instance = new UserStorageInit();
 
-	/**
-	 * Gets the singleton instance of {@link UserStorageInit}
-	 * 
-	 * @return The singleton instance of {@link UserStorageInit}
-	 */
-	public static UserStorageInit getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link UserStorageInit}
+     * 
+     * @return The singleton instance of {@link UserStorageInit}
+     */
+    public static UserStorageInit getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link UserStorageInit}
-	 */
-	private UserStorageInit() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UserStorageInit}
+     */
+    private UserStorageInit() {
+        super();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws UserException {
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws UserException {
         UserStorage.start();
-	}
+        ServerServiceRegistry.getInstance().addService(UserService.class, new UserServiceImpl());
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() throws UserException {
-		UserStorage.stop();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws UserException {
+        ServerServiceRegistry.getInstance().removeService(UserService.class);
+        UserStorage.stop();
+    }
 }

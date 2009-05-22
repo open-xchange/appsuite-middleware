@@ -64,31 +64,31 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  */
 public final class ContextServiceImpl implements ContextService {
 
-	/**
-	 * Initializes a new {@link ContextServiceImpl}
-	 */
-	public ContextServiceImpl() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ContextServiceImpl}
+     */
+    public ContextServiceImpl() {
+        super();
+    }
 
-	public List<Integer> getAllContextIds() throws ContextException {
-		return ContextStorage.getInstance().getAllContextIds();
-	}
+    public List<Integer> getAllContextIds() throws ContextException {
+        return ContextStorage.getInstance().getAllContextIds();
+    }
 
-	public Context getContext(final int contextId) throws ContextException {
-		return ContextStorage.getInstance().getContext(contextId);
-	}
+    public Context getContext(final int contextId) throws ContextException {
+        return ContextStorage.getInstance().getContext(contextId);
+    }
 
-	public int getContextId(final String loginContextInfo) throws ContextException {
-		return ContextStorage.getInstance().getContextId(loginContextInfo);
-	}
+    public int getContextId(final String loginContextInfo) throws ContextException {
+        return ContextStorage.getInstance().getContextId(loginContextInfo);
+    }
 
-	public void invalidateContext(final int contextId) throws ContextException {
-		ContextStorage.getInstance().invalidateContext(contextId);
-	}
+    public void invalidateContext(final int contextId) throws ContextException {
+        ContextStorage.getInstance().invalidateContext(contextId);
+    }
 
-	public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
-		ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
-	}
+    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+        ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
+    }
 
 }
