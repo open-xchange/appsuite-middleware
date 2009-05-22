@@ -52,6 +52,7 @@ package com.openexchange.database.internal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -87,7 +88,7 @@ public final class AssignmentStorage {
      */
     private static final Log LOG = LogFactory.getLog(AssignmentStorage.class);
 
-    private static final Assignment configDB = new Assignment(0, 0, Pools.CONFIGDB_READ_ID, Pools.CONFIGDB_WRITE_ID, null);;
+    private static final Assignment configDB = new Assignment(0, 0, Pools.CONFIGDB_READ_ID, Pools.CONFIGDB_WRITE_ID, null);
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
 
@@ -215,7 +216,7 @@ public final class AssignmentStorage {
     public void removeAssignments(final int contextId) throws DBPoolingException {
         if (null != cache) {
             try {
-                cache.remove(cache.newCacheKey(contextId, I(Server.getServerId())));
+                cache.remove(cache.newCacheKey(contextId, (Serializable) I(Server.getServerId())));
             } catch (final CacheException e) {
                 LOG.error(e.getMessage(), e);
             }

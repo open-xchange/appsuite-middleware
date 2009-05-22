@@ -50,13 +50,18 @@
 package com.openexchange.database;
 
 import java.sql.Connection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceException;
 
 /**
  * Interface class for accessing the database system.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Database {
+
+    private static final Log LOG = LogFactory.getLog(Database.class);
 
     private static DatabaseService databaseService;
 
@@ -71,12 +76,19 @@ public final class Database {
         Database.databaseService = databaseService;
     }
 
+    private static DatabaseService getDatabaseService() throws DBPoolingException {
+        if (null == databaseService) {
+            throw new DBPoolingException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, DatabaseService.class.getName()));
+        }
+        return databaseService;
+    }
+
     public static int resolvePool(int contextId, boolean write) throws DBPoolingException {
-        return databaseService.getWritablePool(contextId);
+        return getDatabaseService().getWritablePool(contextId);
     }
 
     public static String getSchema(int contextId) throws DBPoolingException {
-        return databaseService.getSchemaName(contextId);
+        return getDatabaseService().getSchemaName(contextId);
     }
 
     /**
@@ -86,7 +98,7 @@ public final class Database {
      * @throws DBPoolingException if no connection can be obtained.
      */
     public static Connection get(boolean write) throws DBPoolingException {
-        return write ? databaseService.getWritable() : databaseService.getReadOnly();
+        return write ? getDatabaseService().getWritable() : getDatabaseService().getReadOnly();
     }
 
     /**
@@ -97,7 +109,7 @@ public final class Database {
      * @throws DBPoolingException if no connection can be obtained.
      */
     public static Connection get(Context ctx, boolean write) throws DBPoolingException {
-        return write ? databaseService.getWritable(ctx) : databaseService.getReadOnly(ctx);
+        return write ? getDatabaseService().getWritable(ctx) : getDatabaseService().getReadOnly(ctx);
     }
 
     /**
@@ -108,7 +120,7 @@ public final class Database {
      * @throws DBPoolingException if no connection can be obtained.
      */
     public static Connection get(int contextId, boolean write) throws DBPoolingException {
-        return write ? databaseService.getWritable(contextId) : databaseService.getReadOnly(contextId);
+        return write ? getDatabaseService().getWritable(contextId) : getDatabaseService().getReadOnly(contextId);
     }
 
     /**
@@ -119,7 +131,7 @@ public final class Database {
      * @throws DBPoolingException if no connection can be obtained.
      */
     public static Connection getNoTimeout(int contextId, boolean write) throws DBPoolingException {
-        return databaseService.getForUpdateTask(contextId);
+        return getDatabaseService().getForUpdateTask(contextId);
     }
 
     /**
@@ -130,7 +142,7 @@ public final class Database {
      * @throws DBPoolingException if no connection can be obtained.
      */
     public static Connection get(int poolId, String schema) throws DBPoolingException {
-        return databaseService.get(poolId, schema);
+        return getDatabaseService().get(poolId, schema);
     }
 
     /**
@@ -139,10 +151,14 @@ public final class Database {
      * @param con Connection to return.
      */
     public static void back(boolean write, Connection con) {
-        if (write) {
-            databaseService.backWritable(con);
-        } else {
-            databaseService.backReadOnly(con);
+        try {
+            if (write) {
+                getDatabaseService().backWritable(con);
+            } else {
+                getDatabaseService().backReadOnly(con);
+            }
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -153,10 +169,14 @@ public final class Database {
      * @param con Connection to return.
      */
     public static void back(Context ctx, boolean write, Connection con) {
-        if (write) {
-            databaseService.backWritable(ctx, con);
-        } else {
-            databaseService.backReadOnly(ctx, con);
+        try {
+            if (write) {
+                getDatabaseService().backWritable(ctx, con);
+            } else {
+                getDatabaseService().backReadOnly(ctx, con);
+            }
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -167,10 +187,14 @@ public final class Database {
      * @param con Connection to return.
      */
     public static void back(final int contextId, final boolean write, final Connection con) {
-        if (write) {
-            databaseService.backWritable(contextId, con);
-        } else {
-            databaseService.backReadOnly(contextId, con);
+        try {
+            if (write) {
+                getDatabaseService().backWritable(contextId, con);
+            } else {
+                getDatabaseService().backReadOnly(contextId, con);
+            }
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -182,7 +206,11 @@ public final class Database {
      * @param con Connection to return.
      */
     public static void backNoTimeout(int contextId, boolean write, Connection con) {
-        databaseService.backForUpdateTask(contextId, con);
+        try {
+            getDatabaseService().backForUpdateTask(contextId, con);
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     /**
@@ -191,7 +219,11 @@ public final class Database {
      * @param con connection to return.
      */
     public static void back(int poolId, Connection con) {
-        databaseService.back(poolId, con);
+        try {
+            getDatabaseService().back(poolId, con);
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     /**
@@ -200,10 +232,10 @@ public final class Database {
      * @throws DBPoolingException if resolving the server identifier fails.
      */
     public static void reset(int contextId) throws DBPoolingException {
-        databaseService.invalidate(contextId);
+        getDatabaseService().invalidate(contextId);
     }
 
     public static int[] getContextsInSameSchema(int contextId) throws DBPoolingException {
-        return databaseService.getContextsInSameSchema(contextId);
+        return getDatabaseService().getContextsInSameSchema(contextId);
     }
 }

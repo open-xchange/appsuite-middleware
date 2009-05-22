@@ -55,10 +55,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.timer.TimerService;
@@ -77,6 +78,8 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
     private ConfigurationService configurationService;
 
     private TimerService timerService;
+
+    private ServiceRegistration serviceRegistration;
 
     private final Lock lock = new ReentrantLock();
 
@@ -102,17 +105,17 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
             if (obj instanceof TimerService) {
                 timerService = (TimerService) obj;
             }
-            needsRegistration = null != configurationService && null != timerService && !Initialization.getInstance().isStarted();
+            needsRegistration = null != configurationService && null != timerService && !Initialization.getInstance().isStarted() && serviceRegistration == null;
         } finally {
             lock.unlock();
         }
         if (needsRegistration) {
-            LOG.info("Starting database bundle.");
+            LOG.info("Publishing DatabaseService.");
             try {
                 Initialization.getInstance().start(configurationService, timerService);
-                Database.setDatabaseService(new DatabaseServiceImpl());
+                serviceRegistration = context.registerService(DatabaseService.class.getName(), new DatabaseServiceImpl(), null);
             } catch (DBPoolingException e) {
-                LOG.error("Starting the database bundle failed.", e);
+                LOG.error("Publishing the DatabaseService failed.", e);
             }
         }
         return obj;
@@ -129,7 +132,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     public void removedService(ServiceReference reference, Object service) {
-        boolean needsShutdown = false;
+        ServiceRegistration unregister = null;
         lock.lock();
         try {
             if (service instanceof ConfigurationService) {
@@ -138,14 +141,16 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
             if (service instanceof TimerService) {
                 timerService = null;
             }
-            if (Initialization.getInstance().isStarted() && timerService == null) {
-                needsShutdown = true;
+            if (Initialization.getInstance().isStarted() && timerService == null && serviceRegistration != null) {
+                unregister = serviceRegistration;
+                serviceRegistration = null;
             }
         } finally {
             lock.unlock();
         }
-        if (needsShutdown) {
-            LOG.info("Stopping database bundle.");
+        if (null != unregister) {
+            LOG.info("Unpublishing DatabaseService.");
+            unregister.unregister();
             Initialization.getInstance().stop();
         }
         context.ungetService(reference);

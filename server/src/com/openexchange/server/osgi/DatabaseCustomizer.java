@@ -47,50 +47,44 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.server.osgi;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.timer.TimerService;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.Database;
+import com.openexchange.database.DatabaseService;
 
 /**
- * Activator for the database bundle.
+ * {@link DatabaseCustomizer}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class DatabaseCustomizer implements ServiceTrackerCustomizer {
 
-    private ServiceTracker configurationTimerTracker;
-
-    private ServiceTracker managementTracker;
-
-    private ServiceTracker cacheTracker;
+    private final BundleContext context;
 
     /**
-     * {@inheritDoc}
+     * Default constructor.
+     * @param context bundle context 
      */
-    public void start(BundleContext context) throws Exception {
-        Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        configurationTimerTracker = new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context));
-        configurationTimerTracker.open();
-        managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
-        managementTracker.open();
-        cacheTracker = new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context));
-        cacheTracker.open();
+    public DatabaseCustomizer(BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void stop(BundleContext context) throws Exception {
-        cacheTracker.close();
-        managementTracker.close();
-        configurationTimerTracker.close();
+    public Object addingService(ServiceReference reference) {
+        DatabaseService service = (DatabaseService) context.getService(reference);
+        Database.setDatabaseService(service);
+        return service;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        Database.setDatabaseService(null);
+        context.ungetService(reference);
     }
 }

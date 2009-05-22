@@ -49,17 +49,20 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingException.Code;
-import com.openexchange.tools.Collections;
 
 /**
  * ConfigDBStorage
@@ -107,11 +110,11 @@ public class ConfigDBStorage {
                 stmt.setInt(2, writePoolId);
                 stmt.setString(3, schema);
                 rs = stmt.executeQuery();
-                final Collections.SmartIntArray intArr = new Collections.SmartIntArray(16);
+                List<Integer> tmp = new ArrayList<Integer>();
                 while (rs.next()) {
-                    intArr.append(rs.getInt(1));
+                    tmp.add(I(rs.getInt(1)));
                 }
-                return intArr.toArray();
+                return I2i(tmp);
             } finally {
                 closeSQLStuff(rs, stmt);
                 if (con != null) {

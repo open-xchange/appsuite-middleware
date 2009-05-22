@@ -80,6 +80,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.osgi.Activator;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.EventFactoryService;
@@ -262,7 +263,7 @@ public final class ServerActivator extends DeferredActivator {
     }
 
     private BundleActivator databaseActivator;
-    
+
     @Override
     protected void startBundle() throws Exception {
         // TODO remove the following line if database bundle is finished.
@@ -297,6 +298,8 @@ public final class ServerActivator extends DeferredActivator {
          */
         // Configuration service load
         serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
+        // move this to the required services once the database component gets into its own bundle.
+        serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
         // I18n service load
         serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
 
