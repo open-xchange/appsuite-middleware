@@ -132,6 +132,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
         if (userFlags.length > 0) {
+            if (flagsStrBuilder.length() > 0) {
+                flagsStrBuilder.append(' ');
+            }
             flagsStrBuilder.append(userFlags[0]);
             for (int i = 1; i < userFlags.length; i++) {
                 flagsStrBuilder.append(' ').append(userFlags[i]);
