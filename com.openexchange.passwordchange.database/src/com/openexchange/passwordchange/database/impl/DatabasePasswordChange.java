@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;

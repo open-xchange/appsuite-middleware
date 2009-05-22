@@ -47,11 +47,13 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.databaseold;
 
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceException;
 

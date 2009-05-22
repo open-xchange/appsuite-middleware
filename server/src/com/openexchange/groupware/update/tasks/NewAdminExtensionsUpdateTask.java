@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;

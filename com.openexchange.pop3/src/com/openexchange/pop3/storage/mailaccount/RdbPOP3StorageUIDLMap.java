@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;

@@ -52,8 +52,8 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.database.Database;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
 
 /**
  * {@link DatabaseCustomizer}

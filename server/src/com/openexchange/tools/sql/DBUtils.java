@@ -62,7 +62,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 
 /**

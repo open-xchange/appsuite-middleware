@@ -69,7 +69,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;

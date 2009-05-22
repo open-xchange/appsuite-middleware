@@ -92,7 +92,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.calendar.CalendarCache;

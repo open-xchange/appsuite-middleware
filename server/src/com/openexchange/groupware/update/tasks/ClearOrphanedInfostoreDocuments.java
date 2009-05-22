@@ -56,7 +56,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.tools.update.Tools;
 import com.openexchange.tools.update.ForeignKey;
 import com.openexchange.tools.sql.DBUtils;

@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.groupware.update.Schema;

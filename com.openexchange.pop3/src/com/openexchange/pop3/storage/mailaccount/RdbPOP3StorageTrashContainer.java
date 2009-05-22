@@ -58,7 +58,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
