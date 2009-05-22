@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders;

@@ -10,7 +10,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.Database;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
