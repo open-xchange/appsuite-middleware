@@ -50,7 +50,6 @@
 package com.openexchange.java;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Methods helping with Autoboxing to shorten method names and therefore source code.
@@ -133,7 +132,12 @@ public final class Autoboxing {
      * @return int[]
      */
     public static int[] I2i(Collection<Integer> integerList) {
-        return I2i(integerList.toArray(new Integer[]{}));
+        int[] intArray = new int[integerList.size()];
+        int pos = 0;
+        for (Integer i : integerList) {
+            intArray[pos++] = i.intValue();
+        }
+        return intArray;
     }
     
     /**
