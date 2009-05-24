@@ -265,6 +265,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
+            // First delete properties
+            deleteProperties(cid, user, id, con);
+            // Then delete account data
             stmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
             stmt.setLong(1, cid);
             stmt.setLong(2, id);
@@ -276,9 +279,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
-            closeSQLStuff(stmt);
-
-            deleteProperties(cid, user, id, con);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -503,7 +503,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             con.setAutoCommit(false);
             updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, false);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -764,7 +764,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private void deleteProperties(final int cid, final int user, final int accountId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
-
         try {
             stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
