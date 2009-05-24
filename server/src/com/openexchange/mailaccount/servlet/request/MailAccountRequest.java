@@ -237,6 +237,9 @@ public final class MailAccountRequest {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
 
+            checkNeededFields(accountDescription);
+
+            // Check if account denotes a Unified INBOX account
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny creation of Unified INBOX account
                 throw MailAccountExceptionMessages.CREATION_FAILED.create();
@@ -276,16 +279,8 @@ public final class MailAccountRequest {
 
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
-            // Check needed fields
-            if (null == accountDescription.getMailServer()) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
-            }
-            if (null == accountDescription.getLogin()) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.LOGIN);
-            }
-            if (null == accountDescription.getPassword()) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
-            }
+
+            checkNeededFields(accountDescription);
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny validation of Unified INBOX account
                 throw MailAccountExceptionMessages.VALIDATION_FAILED.create();
@@ -629,5 +624,18 @@ public final class MailAccountRequest {
 
     private static boolean isDefaultMailAccount(final MailAccountDescription mailAccount) {
         return MailAccount.DEFAULT_ID == mailAccount.getId();
+    }
+
+    private static void checkNeededFields(final MailAccountDescription accountDescription) throws AjaxException {
+        // Check needed fields
+        if (null == accountDescription.getMailServer()) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
+        }
+        if (null == accountDescription.getLogin()) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.LOGIN);
+        }
+        if (null == accountDescription.getPassword()) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
+        }
     }
 }

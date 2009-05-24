@@ -1,6 +1,7 @@
 * 2009-05-25 - thorben.betten@open-xchange.com
 
  - Bugfix #13712: Deleting account properties prior to deleting account data
+ - Bugfix #13705: Checking needed fields on insert action
 
 * 2009-05-22 - marcus.klein@open-xchange.com
 
