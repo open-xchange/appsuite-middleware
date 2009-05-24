@@ -808,6 +808,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
+            con.setAutoCommit(false);
             {
                 final String encryptedPassword;
                 try {
@@ -884,20 +885,24 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             if (properties.containsKey("pop3.path")) {
                 updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
             }
+            con.commit();
+            autocommit(con);
+            /*
+             * Automatically check Unified INBOX enablement
+             */
+            if (mailAccount.isUnifiedINBOXEnabled()) {
+                final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                if (null != management && management.getUnifiedINBOXAccountID(user, cid, con) == -1) {
+                    management.createUnifiedINBOX(user, cid, con);
+                }
+            }
         } catch (final SQLException e) {
+            rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
+            autocommit(con);
             Database.back(cid, true, con);
-        }
-        /*
-         * Automatically check Unified INBOX enablement
-         */
-        if (mailAccount.isUnifiedINBOXEnabled()) {
-            final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-            if (null != management && management.getUnifiedINBOXAccountID(user, cid, con) == -1) {
-                management.createUnifiedINBOX(user, cid, con);
-            }
         }
     }
 
