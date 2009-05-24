@@ -265,6 +265,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
+            con.setAutoCommit(false);
             // First delete properties
             deleteProperties(cid, user, id, con);
             // Then delete account data
@@ -279,10 +280,13 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
+            con.commit();
         } catch (final SQLException e) {
+            rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+            autocommit(con);
         }
     }
 
