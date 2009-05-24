@@ -899,6 +899,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws MailAccountException {
         final int cid = ctx.getContextId();
+        // Check for duplicate
+        final String primaryAddress = mailAccount.getPrimaryAddress();
+        if (-1 != getByPrimaryAddress(primaryAddress, user, cid, con)) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.CONFLICT, primaryAddress, I(user), I(cid));
+        }
+        // Get ID
         final int id;
         if (mailAccount.isDefaultFlag()) {
             try {
@@ -946,7 +952,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, encryptedPassword);
                 }
-                stmt.setString(pos++, mailAccount.getPrimaryAddress());
+                stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
                 setOptionalString(stmt, pos++, mailAccount.getTrash());
                 setOptionalString(stmt, pos++, mailAccount.getSent());
@@ -996,7 +1002,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, encryptedTransportPassword);
                 }
-                stmt.setString(pos++, mailAccount.getPrimaryAddress());
+                stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
                 stmt.executeUpdate();
             }
@@ -1069,6 +1075,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
         }
+        try {
+            return getByPrimaryAddress(primaryAddress, user, cid, con);
+        } finally {
+            Database.back(cid, false, con);
+        }
+    }
+
+    private int getByPrimaryAddress(final String primaryAddress, final int user, final int cid, final Connection con) throws MailAccountException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1093,7 +1107,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            Database.back(cid, false, con);
         }
     }
 
