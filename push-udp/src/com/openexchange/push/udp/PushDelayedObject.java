@@ -66,10 +66,16 @@ public class PushDelayedObject implements Delayed {
 
     private long creationTime;
 
+    private final int hash;
+
     public PushDelayedObject(final long delay, final AbstractPushObject abstractPushObject) {
         this.delay = delay;
         this.abstractPushObject = abstractPushObject;
         creationTime = System.currentTimeMillis();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((abstractPushObject == null) ? 0 : abstractPushObject.hashCode());
+        hash = result;
     }
 
     public long getDelay(final TimeUnit timeUnit) {
@@ -89,12 +95,30 @@ public class PushDelayedObject implements Delayed {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        return (o.hashCode() == hashCode());
+    public int hashCode() {
+        return hash;
     }
 
     @Override
-    public int hashCode() {
-        return abstractPushObject.hashCode();
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof PushDelayedObject)) {
+            return false;
+        }
+        final PushDelayedObject other = (PushDelayedObject) obj;
+        if (abstractPushObject == null) {
+            if (other.abstractPushObject != null) {
+                return false;
+            }
+        } else if (!abstractPushObject.equals(other.abstractPushObject)) {
+            return false;
+        }
+        return true;
     }
+
 }
