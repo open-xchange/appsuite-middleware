@@ -62,7 +62,6 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.storage.POP3StorageProvider;
-import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -82,6 +81,10 @@ public final class POP3Activator extends DeferredActivator {
     private ServiceRegistration pop3ServiceRegistration;
 
     private ServiceTracker providerServiceTracker;
+
+    private POP3StorageProviderServiceTrackerCustomizer customizer;
+
+    private MailAccountPOP3StorageProvider builtInProvider;
 
     /**
      * Initializes a new {@link POP3Activator}
@@ -138,15 +141,14 @@ public final class POP3Activator extends DeferredActivator {
             /*
              * Service tracker for possible POP3 storage provider
              */
-            providerServiceTracker = new ServiceTracker(
-                context,
-                POP3StorageProvider.class.getName(),
-                new POP3StorageProviderServiceTrackerCustomizer(context));
+            customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
+            providerServiceTracker = new ServiceTracker(context, POP3StorageProvider.class.getName(), customizer);
             providerServiceTracker.open();
             /*
              * Add built-in mail account POP3 storage provider
              */
-            POP3StorageProviderRegistry.getInstance().addPOP3StorageProvider(new MailAccountPOP3StorageProvider());
+            builtInProvider = new MailAccountPOP3StorageProvider();
+            customizer.addPOP3StorageProvider(builtInProvider);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -156,7 +158,11 @@ public final class POP3Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            POP3StorageProviderRegistry.getInstance().clear();
+            // Remove built-in provider
+            customizer.removePOP3StorageProvider(builtInProvider);
+            builtInProvider = null;
+            // Customizer shut-down
+            customizer.dropAllRegistrations();
             if (null != providerServiceTracker) {
                 /*
                  * Close tracker
@@ -164,6 +170,7 @@ public final class POP3Activator extends DeferredActivator {
                 providerServiceTracker.close();
                 providerServiceTracker = null;
             }
+            customizer = null;
             /*
              * Unregister service
              */

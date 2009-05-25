@@ -266,6 +266,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
+            registry.triggerOnBeforeDeletion(id, user, cid, con);
             // First delete properties
             deleteProperties(cid, user, id, con);
             // Then delete account data
@@ -281,6 +283,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(3, user);
             stmt.executeUpdate();
             con.commit();
+            registry.triggerOnAfterDeletion(id, user, cid, con);
         } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());

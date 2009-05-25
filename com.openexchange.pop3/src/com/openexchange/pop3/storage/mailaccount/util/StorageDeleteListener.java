@@ -47,60 +47,42 @@
  *
  */
 
-package com.openexchange.pop3.storage;
+package com.openexchange.pop3.storage.mailaccount.util;
 
-import java.util.List;
+import java.sql.Connection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.pop3.POP3Access;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageProperties;
+import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageTrashContainer;
+import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageUIDLMap;
 
 /**
- * {@link POP3StorageProvider} - Provider for POP3 storage.
+ * {@link StorageDeleteListener} - Delete listener for mail account POP3 storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface POP3StorageProvider {
+public final class StorageDeleteListener implements MailAccountDeleteListener {
 
     /**
-     * Gets an appropriate POP3 storage.
-     * 
-     * @param pop3Access The POP3 access to which the storage shall be bound
-     * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
-     * @return An appropriate POP3 storage
-     * @throws MailException If no such storage can be found
-     * @see POP3StoragePropertyNames
+     * Initializes a new {@link StorageDeleteListener}.
      */
-    public POP3Storage getPOP3Storage(POP3Access pop3Access, POP3StorageProperties properties) throws MailException;
+    public StorageDeleteListener() {
+        super();
+    }
 
-    /**
-     * Gets the appropriate POP3 storage properties.
-     * 
-     * @param pop3Access The POP3 access to which the storage properties belong
-     * @return The appropriate POP3 storage properties
-     * @throws MailException If no such storage properties can be found
-     */
-    public POP3StorageProperties getPOP3StorageProperties(POP3Access pop3Access) throws MailException;
+    public void onAfterMailAccountDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        // Nothing to do
+    }
 
-    /**
-     * Gets the POP3 storage name.
-     * 
-     * @return The POP3 storage name
-     */
-    public String getPOP3StorageName();
-
-    /**
-     * Gets the {@link MailAccountDeleteListener delete listeners} for this provider.
-     * 
-     * @return The {@link MailAccountDeleteListener delete listeners} or an empty list
-     */
-    public List<MailAccountDeleteListener> getDeleteListeners();
-
-    /**
-     * Indicates whether to unregister {@link MailAccountDeleteListener delete listeners} on provider's absence.
-     * 
-     * @return <code>true</code> to unregister {@link MailAccountDeleteListener delete listeners} on provider's absence; otherwise
-     *         <code>false</code>
-     */
-    public boolean unregisterDeleteListenersOnAbsence();
+    public void onBeforeMailAccountDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        try {
+            RdbPOP3StorageProperties.dropProperties(id, user, cid, con);
+            RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);
+            RdbPOP3StorageUIDLMap.dropIDs(id, user, cid, con);
+        } catch (final MailException e) {
+            throw new MailAccountException(e);
+        }
+    }
 
 }

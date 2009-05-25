@@ -47,60 +47,36 @@
  *
  */
 
-package com.openexchange.pop3.storage;
+package com.openexchange.mailaccount;
 
-import java.util.List;
-import com.openexchange.mail.MailException;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.pop3.POP3Access;
+import java.sql.Connection;
 
 /**
- * {@link POP3StorageProvider} - Provider for POP3 storage.
+ * {@link MailAccountDeleteListener} - Listener interface for mail account deletion.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface POP3StorageProvider {
+public interface MailAccountDeleteListener {
 
     /**
-     * Gets an appropriate POP3 storage.
+     * Handles the event <i>before</i> the denoted mail account is deleted.
      * 
-     * @param pop3Access The POP3 access to which the storage shall be bound
-     * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
-     * @return An appropriate POP3 storage
-     * @throws MailException If no such storage can be found
-     * @see POP3StoragePropertyNames
+     * @param id The mail account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The used connection <i>in transactional state</i>
+     * @throws MailAccountException If a critical error occurs which should abort mail account deletion
      */
-    public POP3Storage getPOP3Storage(POP3Access pop3Access, POP3StorageProperties properties) throws MailException;
+    public void onBeforeMailAccountDeletion(int id, int user, int cid, Connection con) throws MailAccountException;
 
     /**
-     * Gets the appropriate POP3 storage properties.
+     * Handles the event <i>after</i> the denoted mail account is deleted.
      * 
-     * @param pop3Access The POP3 access to which the storage properties belong
-     * @return The appropriate POP3 storage properties
-     * @throws MailException If no such storage properties can be found
+     * @param id The mail account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The used connection <i>in transactional state</i>
+     * @throws MailAccountException If a critical error occurs which should abort mail account deletion
      */
-    public POP3StorageProperties getPOP3StorageProperties(POP3Access pop3Access) throws MailException;
-
-    /**
-     * Gets the POP3 storage name.
-     * 
-     * @return The POP3 storage name
-     */
-    public String getPOP3StorageName();
-
-    /**
-     * Gets the {@link MailAccountDeleteListener delete listeners} for this provider.
-     * 
-     * @return The {@link MailAccountDeleteListener delete listeners} or an empty list
-     */
-    public List<MailAccountDeleteListener> getDeleteListeners();
-
-    /**
-     * Indicates whether to unregister {@link MailAccountDeleteListener delete listeners} on provider's absence.
-     * 
-     * @return <code>true</code> to unregister {@link MailAccountDeleteListener delete listeners} on provider's absence; otherwise
-     *         <code>false</code>
-     */
-    public boolean unregisterDeleteListenersOnAbsence();
-
+    public void onAfterMailAccountDeletion(int id, int user, int cid, Connection con) throws MailAccountException;
 }

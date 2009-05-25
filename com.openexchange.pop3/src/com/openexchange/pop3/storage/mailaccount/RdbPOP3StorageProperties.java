@@ -88,6 +88,33 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         this.accountId = pop3Access.getAccountId();
     }
 
+    private static final String SQL_DROP_PROPERTIES = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
+
+    /**
+     * Drops all properties related to specified POP3 account.
+     * 
+     * @param accountId The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The connection to use
+     * @throws MailException If dropping properties fails
+     */
+    public static void dropProperties(final int accountId, final int user, final int cid, final Connection con) throws MailException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";

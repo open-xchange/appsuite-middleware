@@ -77,7 +77,6 @@ import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
-import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
@@ -155,7 +154,6 @@ import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
-import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
@@ -267,7 +265,7 @@ public final class ServerActivator extends DeferredActivator {
     }
 
     private BundleActivator databaseActivator;
-    
+
     @Override
     protected void startBundle() throws Exception {
         // TODO remove the following line if database bundle is finished.
@@ -306,6 +304,12 @@ public final class ServerActivator extends DeferredActivator {
         serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
         // I18n service load
         serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
+
+        // Mail account delete listener
+        serviceTrackerList.add(new ServiceTracker(
+            context,
+            com.openexchange.mailaccount.MailAccountDeleteListener.class.getName(),
+            new com.openexchange.mailaccount.internal.DeleteListenerServiceTracker(context)));
 
         // Mail provider service tracker
         serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(), new MailProviderServiceTracker(context)));
@@ -393,7 +397,10 @@ public final class ServerActivator extends DeferredActivator {
             // Login handler
             serviceTrackerList.add(new ServiceTracker(context, LoginHandlerService.class.getName(), new LoginHandlerCustomizer(context)));
             // Multiple handler factory services
-            serviceTrackerList.add(new ServiceTracker(context, MultipleHandlerFactoryService.class.getName(), new MultipleHandlerServiceTracker(context)));
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                MultipleHandlerFactoryService.class.getName(),
+                new MultipleHandlerServiceTracker(context)));
 
             // Start up server the usual way
             starter.start();
@@ -407,16 +414,13 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
         registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
         registrationList.add(context.registerService(ResourceService.class.getName(), ResourceServiceImpl.getInstance(), null));
-        registrationList.add(context.registerService(
-            UserService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(UserService.class, true),
-            null));
+        registrationList.add(context.registerService(UserService.class.getName(), ServerServiceRegistry.getInstance().getService(
+            UserService.class,
+            true), null));
         registrationList.add(context.registerService(UserConfigurationService.class.getName(), new UserConfigurationServiceImpl(), null));
-        registrationList.add(context.registerService(
-            ContextService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(
-            ContextService.class, true),
-            null));
+        registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
+            ContextService.class,
+            true), null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
         // TODO: Register search service here until its encapsulated in an own bundle
@@ -469,20 +473,19 @@ public final class ServerActivator extends DeferredActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
             registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
         }
-        
+
         // Register DBProvider
-        
+
         registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
         registrationList.add(context.registerService(WhiteboardFactoryService.class.getName(), new WhiteboardDBProvider.Factory(), null));
-        
+
         // Register Infostore
-        
+
         registrationList.add(context.registerService(InfostoreFacade.class.getName(), Infostore.FACADE, null));
-        
+
         // Register ContactSQL
-        
+
         registrationList.add(context.registerService(ContactSQLFactory.class.getName(), new RdbContactSQLFactory(), null));
-        
 
         // Register event factory service
         registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));

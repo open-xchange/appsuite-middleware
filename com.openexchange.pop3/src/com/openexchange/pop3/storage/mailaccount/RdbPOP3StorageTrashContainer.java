@@ -91,6 +91,33 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         this.accountId = pop3Access.getAccountId();
     }
 
+    private static final String SQL_DROP_PROPERTIES = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
+
+    /**
+     * Drops all trash entries related to specified POP3 account.
+     * 
+     * @param accountId The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The connection to use
+     * @throws MailException If dropping properties fails
+     */
+    public static void dropTrash(final int accountId, final int user, final int cid, final Connection con) throws MailException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND uidl = ?";
 
     private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl) VALUES (?, ?, ?, ?)";

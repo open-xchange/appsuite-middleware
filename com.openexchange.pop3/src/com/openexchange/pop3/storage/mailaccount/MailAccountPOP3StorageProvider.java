@@ -49,11 +49,16 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.mail.MailException;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
+import com.openexchange.pop3.storage.mailaccount.util.StorageDeleteListener;
 
 /**
  * {@link MailAccountPOP3StorageProvider} - Primary mail account POP3 storage provider.
@@ -62,11 +67,16 @@ import com.openexchange.pop3.storage.POP3StorageProvider;
  */
 public final class MailAccountPOP3StorageProvider implements POP3StorageProvider {
 
+    private final List<MailAccountDeleteListener> deleteListeners;
+
     /**
      * Initializes a new {@link MailAccountPOP3StorageProvider}.
      */
     public MailAccountPOP3StorageProvider() {
         super();
+        final List<MailAccountDeleteListener> tmp = new ArrayList<MailAccountDeleteListener>(1);
+        tmp.add(new StorageDeleteListener());
+        deleteListeners = Collections.unmodifiableList(tmp);
     }
 
     public POP3Storage getPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
@@ -79,6 +89,14 @@ public final class MailAccountPOP3StorageProvider implements POP3StorageProvider
 
     public POP3StorageProperties getPOP3StorageProperties(final POP3Access pop3Access) throws MailException {
         return SessionPOP3StorageProperties.getInstance(pop3Access);
+    }
+
+    public List<MailAccountDeleteListener> getDeleteListeners() {
+        return deleteListeners;
+    }
+
+    public boolean unregisterDeleteListenersOnAbsence() {
+        return false;
     }
 
 }

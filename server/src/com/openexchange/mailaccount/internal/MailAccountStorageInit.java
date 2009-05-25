@@ -84,6 +84,7 @@ public final class MailAccountStorageInit implements Initialization {
         // Simulate bundle start
         ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, newMailAccountStorageService());
         ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, newUnifiedINBOXManagement());
+        DeleteListenerRegistry.initInstance();
         LOG.info("MailAccountStorageService successfully injected to server service registry");
     }
 
@@ -92,6 +93,7 @@ public final class MailAccountStorageInit implements Initialization {
             return;
         }
         // Simulate bundle stop
+        DeleteListenerRegistry.releaseInstance();
         ServerServiceRegistry.getInstance().removeService(UnifiedINBOXManagement.class);
         ServerServiceRegistry.getInstance().removeService(MailAccountStorageService.class);
         LOG.info("MailAccountStorageService successfully removed from server service registry");
