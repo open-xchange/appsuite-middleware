@@ -101,7 +101,7 @@ public class UpdateTaskCollection {
     /**
      * Adds specified update task to initial working queue.
      * 
-     * @param updateTask The update task
+     * @param updateTask The update task to add
      * @return <code>true</code> if update task was successfully added to initial working queue; otherwise <code>false</code>
      */
     static boolean addLookedUpUpdateTask(final UpdateTask updateTask) {
@@ -115,7 +115,7 @@ public class UpdateTaskCollection {
     /**
      * Removes specified update task from initial working queue.
      * 
-     * @param updateTask
+     * @param updateTask The update task to remove
      */
     static void removeLookedUpUpdateTask(final UpdateTask updateTask) {
         final BlockingQueue<UpdateTask> queue = updateTaskQueue;
