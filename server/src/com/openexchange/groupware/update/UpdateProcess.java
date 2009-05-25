@@ -54,10 +54,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -67,7 +65,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.exception.SchemaException;
 
 /**
- * The {@link #run()} method of this class is started in a seperate thread for
+ * The {@link #run()} method of this class is started in a separate thread for
  * the update process.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
