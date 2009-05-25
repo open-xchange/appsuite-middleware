@@ -88,10 +88,8 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
         if (null == addedService) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        if (addedService instanceof POP3StorageProvider) {
-            if (addPOP3StorageProvider((POP3StorageProvider) addedService)) {
-                return addedService;
-            }
+        if ((addedService instanceof POP3StorageProvider) && addPOP3StorageProvider((POP3StorageProvider) addedService)) {
+            return addedService;
         }
         // Service needs not to be tracked
         context.ungetService(reference);
@@ -167,8 +165,8 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
      * Drops all tracked {@link ServiceRegistration registrations} for {@link MailAccountDeleteListener delete listeners}.
      */
     public void dropAllRegistrations() {
-        for (final Map.Entry<String, List<ServiceRegistration>> entry : registrationMap.entrySet()) {
-            for (final ServiceRegistration serviceRegistration : entry.getValue()) {
+        for (final List<ServiceRegistration> registrations : registrationMap.values()) {
+            for (final ServiceRegistration serviceRegistration : registrations) {
                 serviceRegistration.unregister();
             }
         }
