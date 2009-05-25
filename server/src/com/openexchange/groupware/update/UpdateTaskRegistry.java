@@ -112,7 +112,7 @@ public final class UpdateTaskRegistry {
     public boolean addUpdateTask(final UpdateTask updateTask) {
         final boolean added = (null == registry.putIfAbsent(updateTask.getClass(), updateTask));
         if (added) {
-            if (!UpdateTaskCollection.addLookedUpUpdateTask(updateTask)) {
+            if (!UpdateTaskCollection.addDiscoveredUpdateTask(updateTask)) {
                 LOG.error(new StringBuilder(64).append("Update task \"").append(updateTask.getClass().getName()).append(
                     "\" could not be successfully added during initialization."));
             }
@@ -128,7 +128,7 @@ public final class UpdateTaskRegistry {
     public void removeUpdateTask(final UpdateTask updateTask) {
         final UpdateTask removed = registry.remove(updateTask.getClass());
         if (null != removed) {
-            UpdateTaskCollection.removeLookedUpUpdateTask(removed);
+            UpdateTaskCollection.removeDiscoveredUpdateTask(removed);
         }
     }
 

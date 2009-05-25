@@ -190,7 +190,7 @@ public class UpdateTaskCollection {
                     try {
                         do {
                             retval.add(task);
-                            // Wait for 2sec for possibly looked-up update task
+                            // Wait for 2sec for possibly discovered update task
                         } while ((task = queue.poll(2000L, TimeUnit.MILLISECONDS)) != null);
                         // The specified waiting time elapses before an element was present
                     } catch (final InterruptedException e) {
