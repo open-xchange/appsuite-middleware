@@ -84,6 +84,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     private final static Log log = LogFactory.getLog(OXUtilMySQLStorage.class);
 
     public OXUtilMySQLStorage() {
+        super();
     }
 
     @Override
