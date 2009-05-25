@@ -212,7 +212,11 @@ public final class SpamHandlerRegistry {
              * 
              * spamHandlerName = mailAccount.getSpamHandler();
              */
-            spamHandlerName = mailProviderGetter.getMailProvider().getSpamHandler().getSpamHandlerName();
+            final MailProvider mailProvider = mailProviderGetter.getMailProvider();
+            if (null == mailProvider) {
+                return NoSpamHandler.getInstance();
+            }
+            spamHandlerName = mailProvider.getSpamHandler().getSpamHandlerName();
         } else {
             spamHandlerName = mailAccount.getSpamHandler();
         }

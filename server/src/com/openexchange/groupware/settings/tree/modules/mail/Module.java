@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.tree.modules.mail;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -97,20 +96,18 @@ public class Module implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                final MailAccess<?,?> mail;
+                MailAccess<?,?> mail = null;
                 try {
                     mail = MailAccess.getInstance(session);
-                } catch (final MailException e) {
-                    throw new SettingException(e);
-                }
-                try {
                     mail.connect();
                     setting.setSingleValue(Boolean.TRUE);
                 } catch (final MailException e) {
                     setting.setSingleValue(Boolean.FALSE);
                     LOG.error(e.getMessage(), e);
                 } finally {
-                    mail.close(true);
+                    if (null != mail) {
+                        mail.close(true);
+                    }
                 }
             }
             /**
