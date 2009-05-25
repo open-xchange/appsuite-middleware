@@ -911,7 +911,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         // Check for duplicate
         final String primaryAddress = mailAccount.getPrimaryAddress();
         if (-1 != getByPrimaryAddress(primaryAddress, user, cid, con)) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.CONFLICT, primaryAddress, I(user), I(cid));
+            throw MailAccountExceptionFactory.getInstance().create(
+                MailAccountExceptionMessages.CONFLICT_ADDR,
+                primaryAddress,
+                I(user),
+                I(cid));
         }
         // Get ID
         final int id;
@@ -1106,7 +1110,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             final int id = result.getInt(1);
             if (result.next()) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.CONFLICT,
+                    MailAccountExceptionMessages.CONFLICT_ADDR,
                     primaryAddress,
                     I(user),
                     I(cid));
