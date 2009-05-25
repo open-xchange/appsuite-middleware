@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -264,58 +265,28 @@ public class TestMail implements IdentitySource<TestMail> {
      */
     public void read(JSONObject json) throws JSONException {
         // lists
-        String field = MailJSONField.FROM.getKey();
-        if (json.has(field)) {
-            setFrom(j2l(json.getJSONArray(field)));
+        MailJSONField[] values = MailJSONField.values();
+        List<Integer> columns = new LinkedList<Integer>();
+        JSONArray jsonArray = new JSONArray();
+
+        for (MailJSONField jsonField : values) {
+            MailListField listField = MailListField.getBy(jsonField.getKey());
+            if (listField == null || !json.has(jsonField.getKey()))
+                continue;
+            columns.add(I(listField.getField()));
+            jsonArray.put(json.get(jsonField.getKey()));
         }
-        field = MailJSONField.RECIPIENT_TO.getKey();
-        if (json.has(field)) {
-            setTo(j2l(json.getJSONArray(field)));
-        }
-        field = MailJSONField.RECIPIENT_CC.getKey();
-        if (json.has(field)) {
-            setCc(j2l(json.getJSONArray(field)));
-        }
-        field = MailJSONField.RECIPIENT_BCC.getKey();
-        if (json.has(field)) {
-            bcc = new LinkedList<String>();
-            setBcc(j2l(json.getJSONArray(field)));
-        }
-        // strings
-        field = MailJSONField.SUBJECT.getKey();
-        if (json.has(field)) {
-            setSubject(json.getString(field));
-        }
-        field = MailJSONField.CONTENT_TYPE.getKey();
-        if (json.has(field)) {
-            setContentType(json.getString(field));
-        }
-        field = MailJSONField.CONTENT.getKey();
-        if (json.has(field)) {
-            setBody(json.getString(field));
-        }
-        field = "id";
+
+        read(I2i(columns), jsonArray);
+        // handle fields that the other method cannot handle, because MailListField does not contain them.
+        String field = "id";
         if (json.has(field)) {
             setId(json.getString(field));
         }
-        field = "folder_id"; //yes, not MailJSONField.FOLDER, don't get any ideas... 
+        field = "folder_id"; // yes, not MailJSONField.FOLDER, don't get any ideas...
         if (json.has(field)) {
             setFolder(json.getString(field));
         }
-        // ints
-        field = MailJSONField.COLOR_LABEL.getKey();
-        if (json.has(field)) {
-            setColor(json.getInt(field));
-        }
-        field = MailJSONField.FLAGS.getKey();
-        if (json.has(field)) {
-            setFlags(json.getInt(field));
-        }
-        field = MailJSONField.PRIORITY.getKey();
-        if (json.has(field)) {
-            setPriority(json.getInt(field));
-        }
-        // attachments
         field = MailJSONField.ATTACHMENTS.getKey();
         if (json.has(field)) {
             JSONArray array = json.getJSONArray(field);
@@ -580,7 +551,7 @@ public class TestMail implements IdentitySource<TestMail> {
     public Class<TestMail> getType() {
         return TestMail.class;
     }
-    
+
     public void rememberIdentityValues(TestMail entry) {
         setId(entry.getId());
         setFolder(entry.getFolder());
