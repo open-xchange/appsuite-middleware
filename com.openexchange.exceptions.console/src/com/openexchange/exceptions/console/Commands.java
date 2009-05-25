@@ -141,7 +141,7 @@ public class Commands implements CommandProvider {
     }
 
     private void appendError(StringBuilder line, ErrorMessage error) {
-        line.append(error.getComponent()).append("-").append(error.getErrorCode()).append(" ").append(error.getMessage()).append(" -- ").append(error.getHelp());
+        line.append(error.getComponent()).append("-").append(error.getDetailNumber()).append(" ").append(error.getMessage()).append(" -- ").append(error.getHelp());
     }
 
     public Object _dumpErrorsToCSV(CommandInterpreter intp) {
@@ -188,7 +188,7 @@ public class Commands implements CommandProvider {
             out.print(';');
             out.print(quote(error.getCategory().name()));
             out.print(';');
-            out.print(quote(String.valueOf(error.getErrorCode())));
+            out.print(quote(String.valueOf(error.getDetailNumber())));
             out.print(";");
             out.print(quote(error.getMessage()));
             out.print(";");
