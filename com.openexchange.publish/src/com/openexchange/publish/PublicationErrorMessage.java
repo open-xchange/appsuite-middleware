@@ -72,7 +72,15 @@ public enum PublicationErrorMessage implements OXErrorMessage {
     /**
      * Could not load publications of type %1$s
      */
-    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", "Could not load publications of type %1$s");
+    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", "Could not load publications of type %1$s"),
+    /**
+     * Can not save a given ID.
+     */
+    IDGiven(Category.CODE_ERROR, 4, "Do not set a ID when saving a publication", "Unable to save a given ID."),
+    /**
+     * Could not find Publication (according ID and Context).
+     */
+    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Publication");
     
     private Category category;
     private int errorCode;

@@ -66,6 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
@@ -316,6 +317,39 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         assertEquals("Number of expected publications is not correct.", 1, publications.size());
         Publication foundPublication = publications.iterator().next();
         assertEquals(pub1, foundPublication);
+    }
+    
+    public void testUpdate() throws Exception {
+        storage.rememberPublication(pub1);
+        assertTrue("Id should be greater 0", pub1.getId() > 0);
+        publicationsToDelete.add(pub1.getId());
+        pub2.setId(pub1.getId());
+        pub2.setModule("newModule");
+        pub2.setEntityId("3546");
+        storage.updatePublication(pub2);
+        assertEquals("Id should not changed", pub1.getId(), pub2.getId());
+        
+        SELECT select = new SELECT(ASTERISK).
+        FROM(publications).
+        WHERE(new EQUALS("id", pub1.getId()).
+            AND(new EQUALS("cid", ctx.getContextId())).
+            AND(new EQUALS("user_id", pub2.getUserId())).
+            AND(new EQUALS("entity", pub2.getEntityId())).
+            AND(new EQUALS("module", pub2.getModule())).
+            AND(new EQUALS("target_id", pub2.getTarget().getId())));
+        
+        assertResult(new StatementBuilder().buildCommand(select));
+    }
+    
+    public void testIDCheckDuringRemember() throws Exception {
+        pub1.setId(123);
+        try {
+            storage.rememberPublication(pub1);
+            publicationsToDelete.add(pub1.getId());
+            fail("Exception expected");
+        } catch (PublicationException e) {
+            assertEquals("Wrong error code", PublicationErrorMessage.IDGiven.getErrorCode(), e.getDetailNumber());
+        }
     }
     
     protected void assertEquals(Publication expected, Publication actual) {

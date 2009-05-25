@@ -70,4 +70,6 @@ public interface PublicationStorage {
     public Publication getPublication(Context ctx, int publicationId) throws PublicationException;
     
     public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException;
+    
+    public void updatePublication(Publication publication) throws PublicationException;
 }

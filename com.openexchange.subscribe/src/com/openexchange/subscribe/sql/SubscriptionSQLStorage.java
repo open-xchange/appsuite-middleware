@@ -51,7 +51,9 @@ package com.openexchange.subscribe.sql;
 
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.subscriptions;
+import static com.openexchange.subscribe.SubscriptionErrorMessage.IDGiven;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
+import static com.openexchange.subscribe.SubscriptionErrorMessage.SubscriptionNotFound;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +61,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
@@ -67,17 +68,21 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
 
-
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
 public class SubscriptionSQLStorage implements SubscriptionStorage {
     
     private DBProvider dbProvider;
@@ -108,17 +113,13 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             
             writeConnection.commit();
         } catch (SQLException e) {
-            try {
-                writeConnection.rollback();
-            } catch (SQLException e1) {
-                throw SQLException.create(e1);
-            }
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
             new SubscriptionException(e);
         } finally {
             if (writeConnection != null ) {
                 try {
+                    writeConnection.rollback();
                     writeConnection.setAutoCommit(true);
                 } catch (SQLException e) {
                     throw SQLException.create(e);
@@ -208,6 +209,10 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
     }
 
     public void rememberSubscription(Subscription subscription) throws SubscriptionException {
+        if (subscription.getId() > 0) {
+            throw IDGiven.create();
+        }
+        
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
@@ -243,17 +248,72 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
             writeConnection.commit();
         } catch (SQLException e) {
-            try {
-                writeConnection.rollback();
-            } catch (SQLException e1) {
-                throw SQLException.create(e1);
-            }
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
             new SubscriptionException(e);
         } finally {
             if (writeConnection != null ) {
                 try {
+                    writeConnection.rollback();
+                    writeConnection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    throw SQLException.create(e);
+                } finally {
+                    dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
+                }
+            }
+        }
+    }
+
+    public void updateSubscription(Subscription subscription) throws SubscriptionException {
+        if (!exist(subscription.getId(), subscription.getContext())) {
+            throw SubscriptionNotFound.create();
+        }
+        
+        Connection writeConnection = null;
+        try {
+            writeConnection = dbProvider.getWriteConnection(subscription.getContext());
+            
+            writeConnection.setAutoCommit(false);
+            
+            if (subscription.getConfiguration() != null) {
+                int configId = getConfigurationId(subscription);
+                storageService.update(writeConnection, subscription.getContext(), configId, subscription.getConfiguration());
+            }
+            
+            UPDATE update = new UPDATE(subscriptions);
+            List<Object> values = new ArrayList<Object>();
+            
+            if (subscription.getUserId() > 0) {
+                update.SET("user_id", PLACEHOLDER);
+                values.add(subscription.getUserId());
+            }
+            if (subscription.getSource() != null) {
+                update.SET("source_id", PLACEHOLDER);
+                values.add(subscription.getSource().getId());
+            }
+            if (subscription.getFolderId() > 0) {
+                update.SET("folder_id", PLACEHOLDER);
+                values.add(subscription.getFolderId());
+            }
+            if (subscription.getLastUpdate() > 0) {
+                update.SET("last_update", PLACEHOLDER);
+                values.add(subscription.getLastUpdate());
+            }
+
+            if (values.size() > 0) {
+                new StatementBuilder().executeStatement(writeConnection, update, values);
+            }
+
+            writeConnection.commit();
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new SubscriptionException(e);
+        } finally {
+            if (writeConnection != null ) {
+                try {
+                    writeConnection.rollback();
                     writeConnection.setAutoCommit(true);
                 } catch (SQLException e) {
                     throw SQLException.create(e);
@@ -322,6 +382,44 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             
             retval.add(subscription);
         }
+        return retval;
+    }
+    
+    private boolean exist(int id, Context ctx) throws SubscriptionException {
+        boolean retval = false;
+        
+        Connection readConnection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConnection = dbProvider.getReadConnection(ctx);
+            SELECT select = new SELECT("id").
+            FROM(subscriptions).
+            WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
+            
+            List<Object> values = new ArrayList<Object>();
+            values.add(ctx.getContextId());
+            values.add(id);
+            
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
+            retval = resultSet.next();
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new PublicationException(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(ctx, readConnection);
+            }
+        }
+        
         return retval;
     }
 

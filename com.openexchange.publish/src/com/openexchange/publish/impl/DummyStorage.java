@@ -114,4 +114,9 @@ public class DummyStorage implements PublicationStorage {
         return null;
     }
 
+    public void updatePublication(Publication publication) throws PublicationException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

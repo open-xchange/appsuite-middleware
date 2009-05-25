@@ -139,5 +139,10 @@ public class InMemorySubscriptionStorage implements SubscriptionStorage {
         }
         return subscriptions.get(cid);
     }
+
+    public void updateSubscription(Subscription subscription) throws SubscriptionException {
+        // TODO Auto-generated method stub
+        
+    }
     
 }

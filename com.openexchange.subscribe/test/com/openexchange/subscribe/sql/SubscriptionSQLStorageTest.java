@@ -74,6 +74,7 @@ import com.openexchange.sql.tools.SQLTools;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.test.sql.SQLTestCase;
@@ -270,6 +271,37 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
             } else {
                 fail("Unexpected subscription loaded");
             }
+        }
+    }    
+    
+    public void testUpdate() throws Exception {
+        storage.rememberSubscription(subscription);
+        assertTrue("Id should be greater 0", subscription.getId() > 0);
+        subscriptionsToDelete.add(subscription.getId());
+        subscription2.setId(subscription.getId());
+        storage.updateSubscription(subscription2);
+        assertEquals("Id should not changed", subscription.getId(), subscription2.getId());
+        
+        SELECT select = new SELECT(ASTERISK).
+        FROM(subscriptions).
+        WHERE(new EQUALS("id", subscription.getId()).
+            AND(new EQUALS("cid", ctx.getContextId())).
+            AND(new EQUALS("user_id", userId)).
+            AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
+            AND(new EQUALS("folder_id", subscription2.getFolderId())).
+            AND(new EQUALS("last_update", subscription2.getLastUpdate())));
+        
+        assertResult(new StatementBuilder().buildCommand(select));
+    }
+    
+    public void testIDCheckDuringRemember() throws Exception {
+        subscription.setId(123);
+        try {
+            storage.rememberSubscription(subscription);
+            subscriptionsToDelete.add(subscription.getId());
+            fail("Exception expected");
+        } catch (SubscriptionException e) {
+            assertEquals("Wrong error code", SubscriptionErrorMessage.IDGiven.getErrorCode(), e.getDetailNumber());
         }
     }
     

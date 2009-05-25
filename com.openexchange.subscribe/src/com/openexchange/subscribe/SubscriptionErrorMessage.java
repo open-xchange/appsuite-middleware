@@ -68,7 +68,15 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s.");
+    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
+    /**
+     * Can not save a given ID.
+     */
+    IDGiven(Category.CODE_ERROR, 3, "Do not set a ID when saving a publication", "Unable to save a given ID."),
+    /**
+     * Could not find Subscription (according ID and Context).
+     */
+    SubscriptionNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Subscription");
 
     private Category category;
     private int errorCode;
