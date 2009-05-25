@@ -50,7 +50,6 @@
 package com.openexchange.push.udp;
 
 import java.util.Date;
-import com.openexchange.event.CommonEvent;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -71,8 +70,6 @@ public class PushObject extends AbstractPushObject {
     private final int hash;
 
     private final long timestamp;
-
-    private CommonEvent commonEvent;
 
     /**
      * Initializes a new {@link PushObject}.
