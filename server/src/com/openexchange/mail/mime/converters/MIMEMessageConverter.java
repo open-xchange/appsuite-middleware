@@ -1412,6 +1412,18 @@ public final class MIMEMessageConverter {
      * @return an instance of <code>{@link MailPart}</code> containing the attributes from given part
      */
     public static MailPart convertPart(final Part part) throws MailException {
+        return convertPart(part, true);
+    }
+
+    /**
+     * Creates a MIME mail part object from given MIME part.
+     * 
+     * @param part The part
+     * @param enforeSize <code>true</code> to ensure size is set in returned mail part; otherwise <code>false</code>. If set given part's
+     *            input stream is examined which might unnecessarily load data from backend.
+     * @return an instance of <code>{@link MailPart}</code> containing the attributes from given part
+     */
+    public static MailPart convertPart(final Part part, final boolean enforeSize) throws MailException {
         try {
             /*
              * Create with reference to content
@@ -1451,7 +1463,7 @@ public final class MIMEMessageConverter {
             }
             mailPart.setFileName(getFileName(mailPart));
             int size = part.getSize();
-            if (size == -1) {
+            if (size == -1 && enforeSize) {
                 /*
                  * Estimate unknown size: The encoded form of the file is expanded by 37% for UU encoding and by 35% for base64 encoding (3
                  * bytes become 4 plus control information).

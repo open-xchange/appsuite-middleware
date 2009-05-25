@@ -1396,8 +1396,8 @@ public abstract class MailMessage extends MailPart {
      * @param accountId The account ID
      * @return The mail path
      */
-    public MailPath getMailPath(final int accountId) {
-        return new MailPath(accountId, getFolder(), getMailId());
+    public MailPath getMailPath() {
+        return new MailPath(getAccountId(), getFolder(), getMailId());
     }
 
     /**

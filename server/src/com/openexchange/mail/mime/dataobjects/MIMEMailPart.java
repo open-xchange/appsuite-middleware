@@ -89,7 +89,7 @@ public final class MIMEMailPart extends MailPart {
      * The max. in-memory size in bytes.
      */
     // TODO: Make configurable
-    private static final int MAX_INMEMORY_SIZE = 1048576;
+    private static final int MAX_INMEMORY_SIZE = 131072; // 128KB
 
     private static final String ERR_NULL_PART = "Underlying part is null";
 
@@ -194,6 +194,15 @@ public final class MIMEMailPart extends MailPart {
         }
     }
 
+    /**
+     * Gets the {@link Part part}.
+     * 
+     * @return The {@link Part part} or <code>null</code>
+     */
+    public Part getPart() {
+        return part;
+    }
+
     @Override
     public Object getContent() throws MailException {
         if (null == part) {
@@ -206,7 +215,7 @@ public final class MIMEMailPart extends MailPart {
             if (obj instanceof MimeMessage) {
                 return MIMEMessageConverter.convertMessage((MimeMessage) obj);
             } else if (obj instanceof Part) {
-                return MIMEMessageConverter.convertPart((Part) obj);
+                return MIMEMessageConverter.convertPart((Part) obj, false);
             } else {
                 return obj;
             }
@@ -701,7 +710,7 @@ public final class MIMEMailPart extends MailPart {
 
         public MailPart getMailPart(final int index) throws MailException {
             try {
-                return MIMEMessageConverter.convertPart(jmMultipart.getBodyPart(index));
+                return MIMEMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);
             } catch (final MessagingException e) {
                 throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
             }

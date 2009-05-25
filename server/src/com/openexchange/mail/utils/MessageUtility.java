@@ -87,6 +87,26 @@ public final class MessageUtility {
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
+     * @throws MailException If part's input stream cannot be obtained
+     */
+    public static String checkCharset(final MailPart p, final ContentType ct) throws MailException {
+        String cs = ct.getCharsetParameter();
+        if (!CharsetDetector.isValid(cs)) {
+            if (cs != null) {
+                LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
+            }
+            cs = CharsetDetector.detectCharset(p.getInputStream());
+        }
+        return cs;
+    }
+
+    /**
+     * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
+     * 
+     * @param p The part to detect a charset for
+     * @param ct The part's content type
+     * @return A valid charset-encoding for specified textual part.
      */
     public static String checkCharset(final Part p, final ContentType ct) {
         String cs = ct.getCharsetParameter();

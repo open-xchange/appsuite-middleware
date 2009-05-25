@@ -52,131 +52,74 @@ package com.openexchange.mail.mime.dataobjects;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataHandler;
-import javax.mail.internet.MimeMessage;
+import javax.mail.Part;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMETypes;
 
 /**
- * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME messages (as per RFC822).
+ * {@link NestedMessageMailPart} - Represents a mail part holding a nested message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMailMessage extends MailMessage {
+public final class NestedMessageMailPart extends MailPart {
 
-    private static final long serialVersionUID = 4593386724062676753L;
+    private static final long serialVersionUID = 7379170932302170388L;
 
-    private MIMEMailPart mailPart;
-
-    private String uid;
-
-    private int unreadMessages;
+    private final MailMessage mailMessage;
 
     /**
-     * Constructor - Constructs an empty mail message
+     * Initializes a new {@link NestedMessageMailPart}.
+     * 
+     * @param mailMessage The nested message
+     * @throws MailException If initialization fails
      */
-    public MIMEMailMessage() {
+    public NestedMessageMailPart(final MailMessage mailMessage) throws MailException {
         super();
-        mailPart = new MIMEMailPart(null);
-    }
-
-    /**
-     * Constructor - Only applies specified message, but does not set any attributes
-     * 
-     * @throws MailException If message's content cannot be applied
-     */
-    public MIMEMailMessage(final MimeMessage msg) throws MailException {
-        super();
-        // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
-        mailPart = new MIMEMailPart(msg);
-    }
-
-    /**
-     * Sets this mail message's content
-     * <p>
-     * Through providing a <code>null</code> reference the body is cleared from this mail.
-     * 
-     * @param msg The MIME message or <code>null</code> to clear any body references
-     * @throws MailException If parsing MIME message fails
-     */
-    public void setContent(final MimeMessage msg) throws MailException {
-        // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
-        mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
-    }
-
-    /**
-     * Gets the {@link MimeMessage MIME message}.
-     * 
-     * @return The {@link MimeMessage MIME message} or <code>null</code>
-     */
-    public MimeMessage getMimeMessage() {
-        return (MimeMessage) mailPart.getPart();
-    }
-
-    @Override
-    public String getMailId() {
-        /*
-         * Mail ID is equal to UID in IMAP
-         */
-        return uid;
-    }
-
-    @Override
-    public void setMailId(final String id) {
-        /*
-         * Mail ID is equal to UID in IMAP
-         */
-        uid = id;
+        this.mailMessage = mailMessage;
+        setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+        setContentDisposition(Part.INLINE);
     }
 
     @Override
     public Object getContent() throws MailException {
-        return mailPart.getContent();
+        return mailMessage;
     }
 
     @Override
     public DataHandler getDataHandler() throws MailException {
-        return mailPart.getDataHandler();
-    }
-
-    @Override
-    public int getEnclosedCount() throws MailException {
-        return mailPart.getEnclosedCount();
-    }
-
-    @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
-        return mailPart.getEnclosedMailPart(index);
+        throw new UnsupportedOperationException("NestedMessageMailPart.getDataHandler()");
     }
 
     @Override
     public InputStream getInputStream() throws MailException {
-        return mailPart.getInputStream();
+        throw new UnsupportedOperationException("NestedMessageMailPart.getInputStream()");
+    }
+
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws MailException {
+        return null;
+    }
+
+    @Override
+    public int getEnclosedCount() throws MailException {
+        return NO_ENCLOSED_PARTS;
     }
 
     @Override
     public void writeTo(final OutputStream out) throws MailException {
-        mailPart.writeTo(out);
-    }
-
-    @Override
-    public void loadContent() throws MailException {
-        mailPart.loadContent();
+        throw new UnsupportedOperationException("NestedMessageMailPart.writeTo()");
     }
 
     @Override
     public void prepareForCaching() {
-        mailPart.prepareForCaching();
+        mailMessage.prepareForCaching();
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
-        this.unreadMessages = unreadMessages;
-    }
-
-    @Override
-    public int getUnreadMessages() {
-        return unreadMessages;
+    public void loadContent() throws MailException {
+        mailMessage.loadContent();
     }
 
 }

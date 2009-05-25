@@ -51,7 +51,9 @@ package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -64,8 +66,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.BodyPart;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Message.RecipientType;
@@ -106,6 +106,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeReply} - MIME message reply.
@@ -151,21 +152,11 @@ public final class MimeReply {
      * @throws MailException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm) throws MailException {
-        final MimeMessage mimeMessage = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail);
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
+        MailPath msgref = null;
         if (originalMail.getMailId() != null && originalMailFolder != null) {
-            try {
-                /*
-                 * Temporary store message reference in MIME message's headers
-                 */
-                mimeMessage.setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(
-                    accountId,
-                    originalMailFolder,
-                    originalMail.getMailId()));
-            } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
-            }
+            msgref = new MailPath(accountId, originalMailFolder, originalMail.getMailId());
             /*
              * Properly set preferToAsRecipient dependent on whether original mail's folder denotes the default sent folder or drafts folder
              */
@@ -183,13 +174,22 @@ public final class MimeReply {
                 preferToAsRecipient = originalMailFolder.equals(arr[StorageUtility.INDEX_SENT]) || originalMailFolder.equals(arr[StorageUtility.INDEX_DRAFTS]);
             }
         }
-        return getReplyMail(mimeMessage, replyAll, preferToAsRecipient, session, accountId, MIMEDefaultSession.getDefaultSession(), usm);
+        return getReplyMail(
+            originalMail,
+            msgref,
+            replyAll,
+            preferToAsRecipient,
+            session,
+            accountId,
+            MIMEDefaultSession.getDefaultSession(),
+            usm);
     }
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
      * 
      * @param originalMsg The referenced original message
+     * @param msgref The message reference
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
      * @param preferToAsRecipient <code>true</code> to prefer header 'To' as recipient; otherwise <code>false</code>
      * @param session The session containing needed user data
@@ -199,7 +199,7 @@ public final class MimeReply {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws MailException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws MailException {
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws MailException {
         try {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(
@@ -249,7 +249,7 @@ public final class MimeReply {
                     /*
                      * Set from as recipient
                      */
-                    recipientAddrs = (InternetAddress[]) originalMsg.getFrom();
+                    recipientAddrs = originalMsg.getFrom();
                 } else {
                     /*
                      * Message holds header 'Reply-To'
@@ -356,16 +356,6 @@ public final class MimeReply {
                 replyMsg.addRecipients(RecipientType.TO, recipientAddrs);
             }
             /*
-             * Check for message reference
-             */
-            final String msgRefStr = originalMsg.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
-            if (null != msgRefStr) {
-                /*
-                 * Remove temporary header
-                 */
-                originalMsg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
-            }
-            /*
              * Set mail text of reply message
              */
             if (usm.isIgnoreOriginalMailTextOnReply()) {
@@ -378,8 +368,8 @@ public final class MimeReply {
                     "#CS#",
                     MailProperties.getInstance().getDefaultMimeCharset()));
                 final MailMessage replyMail = MIMEMessageConverter.convertMessage(replyMsg);
-                if (null != msgRefStr) {
-                    replyMail.setMsgref(new MailPath(msgRefStr));
+                if (null != msgref) {
+                    replyMail.setMsgref(msgref);
                 }
                 return replyMail;
             }
@@ -441,8 +431,8 @@ public final class MimeReply {
                 replyMsg.saveChanges();
                 replyMail = MIMEMessageConverter.convertMessage(replyMsg);
             }
-            if (null != msgRefStr) {
-                replyMail.setMsgref(new MailPath(msgRefStr));
+            if (null != msgref) {
+                replyMail.setMsgref(msgref);
             }
             return replyMail;
         } catch (final MessagingException e) {
@@ -455,8 +445,7 @@ public final class MimeReply {
 
     }
 
-    private static void appendInlineContent(final MimeMessage originalMsg, final CompositeMailMessage replyMail, final List<String> cids) throws MailException {
-        final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
+    private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws MailException {
         final InlineContentHandler handler = new InlineContentHandler(cids);
         new MailMessageParser().parseMailMessage(originalMail, handler);
         final Map<String, MailPart> inlineContents = handler.getInlineContents();
@@ -509,13 +498,13 @@ public final class MimeReply {
      * @throws MessagingException
      * @throws IOException
      */
-    private static boolean generateReplyText(final Message msg, final ContentType retvalContentType, final StringHelper strHelper, final Locale locale, final UserSettingMail usm, final javax.mail.Session mailSession, final List<String> replyTexts) throws MailException, MessagingException, IOException {
+    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final Locale locale, final UserSettingMail usm, final javax.mail.Session mailSession, final List<String> replyTexts) throws MailException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
-        final ContentType contentType = new ContentType(msg.getContentType());
+        final ContentType contentType = msg.getContentType();
         boolean found = false;
         if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
             found |= gatherAllTextContents(
-                (Multipart) msg.getContent(),
+                msg,
                 contentType,
                 retvalContentType,
                 textBuilder,
@@ -561,7 +550,7 @@ public final class MimeReply {
                 }
             }
             {
-                final InternetAddress[] from = (InternetAddress[]) msg.getFrom();
+                final InternetAddress[] from = msg.getFrom();
                 replyPrefix = PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
                     from == null || from.length == 0 ? "" : from[0].toUnicodeString());
             }
@@ -596,7 +585,7 @@ public final class MimeReply {
     /**
      * Gathers all text bodies and appends them to given text builder.
      * 
-     * @param mp The root multipart
+     * @param multipartMail The multipart mail
      * @param retvalContentType The return value's content type
      * @param textBuilder The text builder
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
@@ -604,8 +593,8 @@ public final class MimeReply {
      * @throws MessagingException
      * @throws IOException
      */
-    private static boolean gatherAllTextContents(final Multipart mp, final ContentType mpContentType, final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Locale locale, final List<String> replyTexts) throws MailException, MessagingException, IOException {
-        final int count = mp.getCount();
+    private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Locale locale, final List<String> replyTexts) throws MailException, MessagingException, IOException {
+        final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         boolean found = false;
         if ((mpContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) || mpContentType.isMimeType(MIMETypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
@@ -613,14 +602,14 @@ public final class MimeReply {
              * Get html content
              */
             for (int i = 0; i < count && !found; i++) {
-                final BodyPart part = mp.getBodyPart(i);
+                final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     if (retvalContentType.getPrimaryType() == null) {
                         retvalContentType.setContentType(partContentType);
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         retvalContentType.setCharsetParameter(charset);
-                        textBuilder.append(MessageUtility.readMimePart(part, retvalContentType));
+                        textBuilder.append(MessageUtility.readMailPart(part, charset));
                     } else {
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         partContentType.setCharsetParameter(charset);
@@ -630,7 +619,7 @@ public final class MimeReply {
                     found = true;
                 } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                     found |= gatherAllTextContents(
-                        (Multipart) part.getContent(),
+                        part,
                         partContentType,
                         retvalContentType,
                         textBuilder,
@@ -647,7 +636,7 @@ public final class MimeReply {
              * Get any text content
              */
             for (int i = 0; i < count && !found; i++) {
-                final BodyPart part = mp.getBodyPart(i);
+                final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     if (retvalContentType.getPrimaryType() == null) {
@@ -665,7 +654,7 @@ public final class MimeReply {
                     found = true;
                 } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                     found |= gatherAllTextContents(
-                        (Multipart) part.getContent(),
+                        part,
                         partContentType,
                         retvalContentType,
                         textBuilder,
@@ -681,16 +670,24 @@ public final class MimeReply {
          * Look for enclosed messages in any case
          */
         for (int i = count - 1; i >= 0; i--) {
-            final BodyPart part = mp.getBodyPart(i);
+            final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
             if (partContentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-                final Message enclosedMsg = (Message) part.getContent();
+                final MailMessage enclosedMsg = (MailMessage) part.getContent();
                 found |= generateReplyText(enclosedMsg, retvalContentType, strHelper, locale, usm, mailSession, replyTexts);
             } else if (MimeProcessingUtility.fileNameEndsWith(".eml", part, partContentType)) {
                 /*
                  * Create message from input stream
                  */
-                final Message attachedMsg = new MimeMessage(mailSession, part.getInputStream());
+                final InputStream is = part.getInputStream();
+                final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
+                final byte[] buf = new byte[4096];
+                int read = -1;
+                while ((read = is.read(buf, 0, buf.length)) != -1) {
+                    tmp.write(buf, 0, read);
+                }
+                final MailMessage attachedMsg = MIMEMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
+                // part.getInputStream());
                 found |= generateReplyText(attachedMsg, retvalContentType, strHelper, locale, usm, mailSession, replyTexts);
             }
         }

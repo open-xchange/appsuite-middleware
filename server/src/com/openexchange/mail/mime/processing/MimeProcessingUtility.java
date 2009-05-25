@@ -57,15 +57,16 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 
@@ -91,25 +92,20 @@ public final class MimeProcessingUtility {
      * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
      * @throws MailException If part's headers cannot be accessed or parsed
      */
-    static boolean isInline(final Part part, final ContentType contentType) throws MailException {
-        try {
-            final ContentDisposition cd;
-            final boolean hasDisposition;
-            {
-                final String[] hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
-                if (null == hdr) {
-                    cd = new ContentDisposition();
-                    hasDisposition = false;
-                } else {
-                    cd = new ContentDisposition(hdr[0]);
-                    hasDisposition = true;
-                }
+    static boolean isInline(final MailPart part, final ContentType contentType) throws MailException {
+        final ContentDisposition cd;
+        final boolean hasDisposition;
+        {
+            final String[] hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
+            if (null == hdr) {
+                cd = new ContentDisposition();
+                hasDisposition = false;
+            } else {
+                cd = new ContentDisposition(hdr[0]);
+                hasDisposition = true;
             }
-            return (hasDisposition && Part.INLINE.equalsIgnoreCase(cd.getDisposition()))
-                || (!hasDisposition && !cd.containsFilenameParameter() && !contentType.containsParameter("name"));
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
         }
+        return (hasDisposition && Part.INLINE.equalsIgnoreCase(cd.getDisposition())) || (!hasDisposition && !cd.containsFilenameParameter() && !contentType.containsParameter("name"));
     }
 
     /**
@@ -121,7 +117,7 @@ public final class MimeProcessingUtility {
      * @return <code>true</code> if part's filename is not absent and ends with given suffix; otherwise <code>false</code>
      * @throws MailException If part's filename cannot be determined
      */
-    static boolean fileNameEndsWith(final String suffix, final Part part, final ContentType contentType) throws MailException {
+    static boolean fileNameEndsWith(final String suffix, final MailPart part, final ContentType contentType) throws MailException {
         final String filename = getFileName(part, contentType);
         return null == filename ? false : filename.toLowerCase(Locale.ENGLISH).endsWith(suffix);
     }
@@ -134,25 +130,21 @@ public final class MimeProcessingUtility {
      * @return The filename or <code>null</code>
      * @throws MailException If part's filename cannot be returned
      */
-    private static String getFileName(final Part part, final ContentType contentType) throws MailException {
-        try {
-            final ContentDisposition cd;
-            {
-                final String[] hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
-                if (null == hdr) {
-                    cd = new ContentDisposition();
-                } else {
-                    cd = new ContentDisposition(hdr[0]);
-                }
+    private static String getFileName(final MailPart part, final ContentType contentType) throws MailException {
+        final ContentDisposition cd;
+        {
+            final String[] hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
+            if (null == hdr) {
+                cd = new ContentDisposition();
+            } else {
+                cd = new ContentDisposition(hdr[0]);
             }
-            String filename = cd.getFilenameParameter();
-            if (null == filename) {
-                filename = contentType.getParameter("name");
-            }
-            return MIMEMessageUtility.decodeMultiEncodedHeader(filename);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
         }
+        String filename = cd.getFilenameParameter();
+        if (null == filename) {
+            filename = contentType.getParameter("name");
+        }
+        return MIMEMessageUtility.decodeMultiEncodedHeader(filename);
     }
 
     /**
@@ -165,18 +157,22 @@ public final class MimeProcessingUtility {
      * @throws IOException
      * @throws MailException
      */
-    static String handleInlineTextPart(final Part textPart, final ContentType contentType, final UserSettingMail usm) throws MessagingException, IOException, MailException {
+    static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final UserSettingMail usm) throws MessagingException, IOException, MailException {
+        String charset = contentType.getCharsetParameter();
+        if (null == charset) {
+            charset = CharsetDetector.detectCharset(textPart.getInputStream());
+        }
         if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
             if (usm.isDisplayHtmlInlineContent()) {
-                return MessageUtility.readMimePart(textPart, contentType);
+                return MessageUtility.readMailPart(textPart, charset);
             }
             contentType.setBaseType("text/plain");
-            final HTML2TextHandler handler = new HTML2TextHandler(textPart.getSize(), false);
-            HTMLParser.parse(getConformHTML(MessageUtility.readMimePart(textPart, contentType), contentType), handler);
+            final HTML2TextHandler handler = new HTML2TextHandler((int) textPart.getSize(), false);
+            HTMLParser.parse(getConformHTML(MessageUtility.readMailPart(textPart, charset), contentType), handler);
             return handler.getText();
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
-            final String content = MessageUtility.readMimePart(textPart, contentType);
+            final String content = MessageUtility.readMailPart(textPart, charset);
             final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
             if (uuencodedMP.isUUEncoded()) {
                 /*
@@ -184,9 +180,9 @@ public final class MimeProcessingUtility {
                  */
                 return uuencodedMP.getCleanText();
             }
-            return MessageUtility.readMimePart(textPart, contentType);
+            return content;
         }
-        return MessageUtility.readMimePart(textPart, contentType);
+        return MessageUtility.readMailPart(textPart, charset);
     }
 
     /**

@@ -416,7 +416,7 @@ public final class MailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment

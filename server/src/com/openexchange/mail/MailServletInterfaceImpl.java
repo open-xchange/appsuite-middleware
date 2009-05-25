@@ -1020,8 +1020,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return autosaveDraft(draftMail, accountId);
         }
         initConnection(accountId);
-        return mailAccess.getMessageStorage().saveDraft(mailAccess.getFolderStorage().getDraftsFolder(), draftMail).getMailPath(
-            mailAccess.getAccountId()).toString();
+        return mailAccess.getMessageStorage().saveDraft(mailAccess.getFolderStorage().getDraftsFolder(), draftMail).getMailPath().toString();
     }
 
     private String autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws MailException {
@@ -1082,7 +1081,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == m) {
             throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), draftFullname);
         }
-        return m.getMailPath(mailAccess.getAccountId()).toString();
+        return m.getMailPath().toString();
     }
 
     @Override
