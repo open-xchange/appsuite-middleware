@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.osgi;
 
-import java.security.Permission;
 import java.util.Dictionary;
 import java.util.Stack;
 
@@ -65,6 +64,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 
 public class Activator implements BundleActivator {
@@ -84,6 +84,7 @@ public class Activator implements BundleActivator {
         trackers.push(new ServiceTracker(context, MailAccountStorageService.class.getName(), new AdminServiceRegisterer(
             MailAccountStorageService.class,
             context)));
+        trackers.push(new ServiceTracker(context, CreateTableService.class.getName(), new CreateTableCustomizer(context)));
         for (int i = trackers.size() - 1; i >= 0; i--) {
             trackers.get(i).open();
         }
