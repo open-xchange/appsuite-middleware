@@ -109,9 +109,9 @@ public class AllResponse extends CommonAllResponse {
 			// Size
 			else if (columns[i] == 608) message.setSize((Integer)mailAsArray.get(i));
 			// Sent date
-			else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
+			//else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
 			// Received date
-			else if (columns[i] == 610) message.setReceivedDate(new Date((Long)mailAsArray.get(i)));
+			//else if (columns[i] == 610) message.setReceivedDate(new Date((Long)mailAsArray.get(i)));
 		}
 		
 		return message;
@@ -125,15 +125,17 @@ public class AllResponse extends CommonAllResponse {
 				String string ="";
 				if (null!= secondInnerArray.getString(x) && !"null".equals(secondInnerArray.getString(x))){ 
 					string = secondInnerArray.getString(x);
-					if (type.equals("from")){
-						message.addFrom(new InternetAddress(string));
-					} else if (type.equals("to")){
-						message.addTo(new InternetAddress(string));
-					} else if (type.equals("cc")){
-						message.addCc(new InternetAddress(string));
-					} else if (type.equals("bcc")){
-						message.addBcc(new InternetAddress(string));
-					} 
+					if (string.contains("@")) {
+						if (type.equals("from")){
+							message.addFrom(new InternetAddress(string));
+						} else if (type.equals("to")){
+							message.addTo(new InternetAddress(string));
+						} else if (type.equals("cc")){
+							message.addCc(new InternetAddress(string));
+						} else if (type.equals("bcc")){
+							message.addBcc(new InternetAddress(string));
+						}
+					}
 				}
 			}
 		}
