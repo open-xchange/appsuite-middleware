@@ -1164,30 +1164,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Check for forwarded flag (supported through user flags)
              */
-            if (((flags & MailMessage.FLAG_FORWARDED) == MailMessage.FLAG_FORWARDED) && UserFlagsCache.supportsUserFlags(
-                imapFolder,
-                true,
-                session,
-                accountId)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+            Boolean supportsUserFlags = null;
+            if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                if (supportsUserFlags.booleanValue()) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(MailMessage.USER_FORWARDED);
+                    applyFlags = true;
+                } else if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                        " does not support user flags. Skipping forwarded flag."));
                 }
-                affectedFlags.add(MailMessage.USER_FORWARDED);
-                applyFlags = true;
             }
             /*
              * Check for read acknowledgment flag (supported through user flags)
              */
-            if (((flags & MailMessage.FLAG_READ_ACK) == MailMessage.FLAG_READ_ACK) && UserFlagsCache.supportsUserFlags(
-                imapFolder,
-                true,
-                session,
-                accountId)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+            if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                if (null == supportsUserFlags) {
+                    supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
                 }
-                affectedFlags.add(MailMessage.USER_READ_ACK);
-                applyFlags = true;
+                if (supportsUserFlags.booleanValue()) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(MailMessage.USER_READ_ACK);
+                    applyFlags = true;
+                } else if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                        " does not support user flags. Skipping read-ack flag."));
+                }
             }
             if (applyFlags) {
                 final long start = System.currentTimeMillis();
