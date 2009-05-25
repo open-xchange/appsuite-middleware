@@ -59,8 +59,7 @@ import com.openexchange.groupware.AbstractOXException;
 public interface UpdateTask {
 
     /**
-     * Priorities for update tasks.
-     * TODO remove the int value. this isn't used anywhere. enum itself have an internal order.
+     * Priorities for update tasks. TODO remove the int value. this isn't used anywhere. enum itself have an internal order.
      */
     public static enum UpdateTaskPriority {
         HIGHEST(0), HIGH(1), NORMAL(3), LOW(4), LOWEST(5);
@@ -73,9 +72,13 @@ public interface UpdateTask {
     }
 
     /**
-     * Returns the database schema version with that this update task was introduced. This version is compared with the schema version of
-     * the database. This update will only be applied if the database schema version is lower than this version. Remember to register your
-     * update task in the configuration file for update tasks.
+     * Returns the database schema version of this update task.
+     * <p>
+     * For statically added update tasks an even number is supposed to be used, whereby an uneven number is supposed to be used by
+     * dynamically added update tasks. Thus version always increments by 2 for stable releases.
+     * <p>
+     * This version is compared with the schema version of the database. This update will only be applied if the database schema version is
+     * lower than this version. Remember to register your update task in the configuration file for update tasks.
      * 
      * @return The schema version with that this update task was introduced.
      */
