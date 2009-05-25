@@ -117,8 +117,8 @@ public final class Initialization {
         ConfigDatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
         assignmentStorage.setConfigDatabaseService(configDatabaseService);
 
-        Server.start(configurationService);
         Server.setConfigDatabaseService(configDatabaseService);
+        Server.start(configurationService);
         if (LOG.isInfoEnabled()) {
             LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
         }
