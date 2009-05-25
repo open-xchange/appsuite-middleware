@@ -60,9 +60,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 
 /**
  * ConfigDBStorage
@@ -122,7 +122,7 @@ public class ConfigDBStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -165,7 +165,7 @@ public class ConfigDBStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

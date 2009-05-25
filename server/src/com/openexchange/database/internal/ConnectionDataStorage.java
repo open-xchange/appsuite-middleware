@@ -49,6 +49,7 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.io.UnsupportedEncodingException;
@@ -61,9 +62,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 
 /**
  * Reads a database connection from the config DB.
@@ -105,10 +106,10 @@ public class ConnectionDataStorage {
                 retval.max = result.getInt(pos++);
                 retval.min = result.getInt(pos++);
             } else {
-                throw new DBPoolingException(Code.NO_DBPOOL, Integer.valueOf(poolId));
+                throw DBPoolingExceptionCodes.NO_DBPOOL.create(I(poolId));
             }
         } catch (final SQLException e) {
-            throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             configDatabaseService.backReadOnly(con);
@@ -131,7 +132,7 @@ public class ConnectionDataStorage {
                     try {
                         retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
                     } catch (final UnsupportedEncodingException e) {
-                        throw new DBPoolingException(Code.PARAMETER_PROBLEM, e, value);
+                        throw DBPoolingExceptionCodes.PARAMETER_PROBLEM.create(e, value);
                     }
                 }
             }

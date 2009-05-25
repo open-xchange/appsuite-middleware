@@ -51,12 +51,9 @@ package com.openexchange.database.internal;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 
 /**
  * Contains the settings to connect to the configuration database.
@@ -65,11 +62,6 @@ import com.openexchange.database.DBPoolingException.Code;
 public final class Configuration {
 
     private static final String CONFIG_FILENAME = "configdb.properties";
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Configuration.class);
 
     private Properties props;
 
@@ -159,14 +151,11 @@ public final class Configuration {
      */
     public void readConfiguration(ConfigurationService service) throws DBPoolingException {
         if (null != props) {
-            LOG.error("Duplicate initialization of database configuration.");
-            return;
-            // TODO throw exception
-            // throw new DBPoolingException(Code.DUPLICATE_INITIALIZATION);
+            throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
         }
         props = service.getFile(CONFIG_FILENAME);
         if (props.isEmpty()) {
-            throw new DBPoolingException(Code.MISSING_CONFIGURATION);
+            throw DBPoolingExceptionCodes.MISSING_CONFIGURATION.create();
         }
         separateReadWrite();
         loadDrivers();
@@ -195,24 +184,24 @@ public final class Configuration {
     private void loadDrivers() throws DBPoolingException {
         final String readDriverClass = getProperty(Property.READ_DRIVER_CLASS);
         if (null == readDriverClass) {
-            throw new DBPoolingException(Code.PROPERTY_MISSING, Property.READ_DRIVER_CLASS.propertyName);
+            throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.READ_DRIVER_CLASS.propertyName);
         }
         try {
             Class.forName(readDriverClass);
         } catch (final ClassNotFoundException e) {
-            throw new DBPoolingException(Code.NO_DRIVER, e);
+            throw DBPoolingExceptionCodes.NO_DRIVER.create(e, readDriverClass);
         }
         if (!isWriteDefined()) {
             return;
         }
         final String writeDriverClass = getProperty(Property.WRITE_DRIVER_CLASS);
         if (null == writeDriverClass) {
-            throw new DBPoolingException(Code.PROPERTY_MISSING, Property.WRITE_DRIVER_CLASS.propertyName);
+            throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.WRITE_DRIVER_CLASS.propertyName);
         }
         try {
             Class.forName(writeDriverClass);
         } catch (final ClassNotFoundException e) {
-            throw new DBPoolingException(Code.NO_DRIVER, e);
+            throw DBPoolingExceptionCodes.NO_DRIVER.create(e, writeDriverClass);
         }
     }
 

@@ -56,10 +56,10 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.DBPoolingException.Code;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.pooling.PoolingException;
 
@@ -153,7 +153,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
                 con = pool.get();
             }
         } catch (final PoolingException e) {
-            throw new DBPoolingException(Code.NO_CONNECTION, e, I(poolId));
+            throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
         }
         try {
             final String oldSchema = con.getCatalog();
@@ -166,7 +166,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             } catch (final PoolingException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new DBPoolingException(Code.SCHEMA_FAILED, e);
+            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
         return con;
     }
@@ -222,7 +222,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
                 pool.back(con);
             }
         } catch (final PoolingException e) {
-            final DBPoolingException exc = new DBPoolingException(Code.RETURN_FAILED, e, I(poolId));
+            final DBPoolingException exc = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
             LOG.error(exc.getMessage(), exc);
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);

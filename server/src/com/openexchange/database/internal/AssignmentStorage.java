@@ -69,9 +69,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster
@@ -169,11 +169,10 @@ public final class AssignmentStorage {
                 retval = new Assignment(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++),
                         result.getString(pos++));
             } else {
-                throw new DBPoolingException(Code.RESOLVE_FAILED, Integer.valueOf(contextId), Integer.valueOf(Server
-                        .getServerId()));
+                throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
             }
         } catch (final SQLException e) {
-            throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             configDatabaseService.backReadOnly(con);
@@ -197,7 +196,7 @@ public final class AssignmentStorage {
                 retval.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             configDatabaseService.backReadOnly(con);

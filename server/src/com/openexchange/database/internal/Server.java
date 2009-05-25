@@ -60,9 +60,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 
 /**
  * This class contains methods for handling the server name and identifier.
@@ -97,6 +97,17 @@ public final class Server {
     }
 
     public static final int getServerId() throws DBPoolingException {
+        if (-1 == serverId) {
+            throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+        }
+        return serverId;
+    }
+
+    public static final void start(ConfigurationService service) throws DBPoolingException {
+        serverName = service.getProperty(PROPERTY_NAME);
+        if (null == serverName || serverName.length() == 0) {
+            throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
+        }
         synchronized (Server.class) {
             if (-1 == serverId) {
                 serverId = Server.loadServerId(getServerName());
@@ -109,20 +120,11 @@ public final class Server {
                 }
             }
         }
-        return serverId;
-    }
-
-    public static final void start(ConfigurationService service) throws DBPoolingException {
-        serverName = service.getProperty(PROPERTY_NAME);
-        if (null == serverName || serverName.length() == 0) {
-            throw new DBPoolingException(Code.NO_SERVER_NAME);
-        }
-
     }
 
     public static String getServerName() throws DBPoolingException {
         if (null == serverName) {
-            throw new DBPoolingException(Code.NOT_INITIALIZED, Server.class.getName());
+            throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
         }
         return serverName;
     }
@@ -141,7 +143,7 @@ public final class Server {
                 retval = result.getInt(1);
             }
         } catch (final SQLException e) {
-            throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             if (null != con) {

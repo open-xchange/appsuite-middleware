@@ -47,57 +47,37 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.database.internal;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.internal.DBPoolingExceptionFactory;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.management.ManagementService;
-import com.openexchange.timer.TimerService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
- * Activator for the database bundle.
+ * Factory for creating {@link DBPoolingException}s.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class DBPoolingExceptionFactory extends Exceptions<DBPoolingException> {
 
-    private ServiceTracker configurationTimerTracker;
+    private static final DBPoolingExceptionFactory SINGLETON = new DBPoolingExceptionFactory();
 
-    private ServiceTracker managementTracker;
-
-    private ServiceTracker cacheTracker;
-
-    private ComponentRegistration dbpoolingComponent;
-
-    /**
-     * {@inheritDoc}
-     */
-    public void start(BundleContext context) throws Exception {
-        dbpoolingComponent = new ComponentRegistration(context, EnumComponent.DB_POOLING.getAbbreviation(), "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
-        Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        configurationTimerTracker = new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context));
-        configurationTimerTracker.open();
-        managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
-        managementTracker.open();
-        cacheTracker = new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context));
-        cacheTracker.open();
+    private DBPoolingExceptionFactory() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void stop(BundleContext context) throws Exception {
-        cacheTracker.close();
-        managementTracker.close();
-        configurationTimerTracker.close();
-        dbpoolingComponent.unregister();
+    public static final DBPoolingExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    @Override
+    protected DBPoolingException createException(ErrorMessage message, Throwable cause, Object... messageArgs) {
+        return new DBPoolingException(message, cause, messageArgs);
+    }
+
+    @Override
+    protected void knownExceptions() {
+        declareAll(DBPoolingExceptionCodes.values());
     }
 }

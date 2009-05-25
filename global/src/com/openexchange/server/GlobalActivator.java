@@ -59,7 +59,6 @@ import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.server.osgiservice.DynamicWhiteboardFactory;
 
 /**
  * {@link GlobalActivator} - Activator for global (aka kernel) bundle
@@ -94,8 +93,6 @@ public final class GlobalActivator implements BundleActivator {
                 EnumComponent.LOGIN.getAbbreviation(),
                 "com.openexchange.authentication",
                 LoginExceptionFactory.getInstance());
-            
-            
             LOG.debug("Global bundle successfully started");
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);

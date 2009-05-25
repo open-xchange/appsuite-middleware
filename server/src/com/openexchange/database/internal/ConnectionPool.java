@@ -49,6 +49,8 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.lang.reflect.Method;
@@ -67,6 +69,7 @@ import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DBPoolingException;
 
 /**
@@ -290,8 +293,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     LOG.error("Found closed connection.");
                     retval = false;
                 } else if (!con.getAutoCommit()) {
-                    final DBPoolingException dbe = new DBPoolingException(
-                        DBPoolingException.Code.NO_AUTOCOMMIT);
+                    final DBPoolingException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();
                     addTrace(dbe, data);
                     LOG.error(dbe.getMessage(), dbe);
                     con.rollback();
@@ -305,9 +307,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     final int active = ((Integer) method.invoke(con,
                         new Object[0])).intValue();
                     if (active > 0) {
-                        final DBPoolingException dbe = new DBPoolingException(
-                            DBPoolingException.Code.ACTIVE_STATEMENTS, Integer
-                            .valueOf(active));
+                        final DBPoolingException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                         addTrace(dbe, data);
                         LOG.error(dbe.getMessage(), dbe);
                         retval = false;
@@ -318,9 +318,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     LOG.error(e.getMessage(), e);
                 }
                 if (data.getTimeDiff() > 2000) {
-                    final DBPoolingException dbe = new DBPoolingException(
-                        DBPoolingException.Code.TOO_LONG, Long.valueOf(data
-                        .getTimeDiff()));
+                    final DBPoolingException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                     addTrace(dbe, data);
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(dbe.getMessage(), dbe);

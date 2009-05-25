@@ -49,13 +49,13 @@
 
 package com.openexchange.database;
 
+import com.openexchange.database.internal.DBPoolingExceptionFactory;
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * This exception is used if problems occur with the pooling of database
- * connections.
- * TODO use new exception framework.
+ * This exception is used if problems occur with the pooling of database connections.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class DBPoolingException extends AbstractOXException {
@@ -69,7 +69,7 @@ public class DBPoolingException extends AbstractOXException {
      * Initializes a new exception using the information provides by the cause.
      * @param cause the cause of the exception.
      */
-    public DBPoolingException(final AbstractOXException cause) {
+    public DBPoolingException(AbstractOXException cause) {
         super(cause);
     }
 
@@ -77,8 +77,10 @@ public class DBPoolingException extends AbstractOXException {
      * Initializes a new exception using the information provides by the code.
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
+     * @deprecated use {@link DBPoolingExceptionCodes#create(Object...)}.
      */
-    public DBPoolingException(final Code code, final Object... messageArgs) {
+    @Deprecated
+    public DBPoolingException(DBPoolingExceptionCodes code, Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -87,144 +89,29 @@ public class DBPoolingException extends AbstractOXException {
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
+     * @deprecated use {@link DBPoolingExceptionCodes#create(Throwable, Object...)}.
      */
-    public DBPoolingException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.DB_POOLING, code.category, code.detailNumber,
-            null == code.message ? cause.getMessage() : code.message, cause);
+    @Deprecated
+    public DBPoolingException(DBPoolingExceptionCodes code, Throwable cause, Object... messageArgs) {
+        super(
+            EnumComponent.DB_POOLING,
+            code.getCategory(),
+            code.getDetailNumber(),
+            null == code.getMessage() ? cause.getMessage() : code.getMessage(),
+            cause);
         setMessageArgs(messageArgs);
     }
 
     /**
-     * Error codes for the database pooling exception.
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     * Constructor for the {@link DBPoolingExceptionFactory}. If you want to instantiate a {@link DBPoolingException} use
+     * {@link DBPoolingExceptionCodes#create(Object...)} or {@link DBPoolingExceptionCodes#create(Throwable, Object...)} methods.
+     * 
+     * @param message Parameters for filling the exception with all necessary data.
+     * @param cause the initial cause of the exception.
+     * @param messageArgs arguments for the exception message.
      */
-    public enum Code {
-        /**
-         * Connection to config DB can't be created.
-         */
-        NO_CONFIG_DB("Cannot get connection to config DB.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
-        /**
-         * Resolving the database failed.
-         */
-        RESOLVE_FAILED("Resolving database for context %1$d and server %2$d not "
-            + "possible!", Category.CODE_ERROR, 2),
-        /**
-         * Cannot get connection to database %d.
-         */
-        NO_CONNECTION("Cannot get connection to database %d.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
-        /**
-         * Setting the schema failed.
-         */
-        SCHEMA_FAILED("Cannot set schema in database connection.",
-            Category.SOCKET_CONNECTION, 4),
-        /**
-         * Null is returned to the pool instead a connection object.
-         */
-        NULL_CONNECTION("Null is returned to connection pool.",
-            Category.CODE_ERROR, 5),
-        /**
-         * A SQL problem occures while reading information from the config
-         * database.
-         */
-        SQL_ERROR("Problem with executing SQL: %s", Category.CODE_ERROR,
-            6),
-        /**
-         * A database pool entry can't be found in the config database.
-         */
-        NO_DBPOOL("Cannot get information for pool %d.",
-            Category.CODE_ERROR, 7),
-        /**
-         * A driver class could not be found.
-         */
-        NO_DRIVER("Driver class missing.", Category.SETUP_ERROR, 8),
-        /**
-         * Returning a connection to the pool failed.
-         */
-        RETURN_FAILED("Cannot return connection to pool %d.",
-            Category.CODE_ERROR, 9),
-        /**
-         * Server name is not defined.
-         */
-        NO_SERVER_NAME("Server name is not defined.", Category.SETUP_ERROR,
-            10),
-        /**
-         * %s is not initialized.
-         */
-        NOT_INITIALIZED("%s is not initialized.", Category.CODE_ERROR,
-            11),
-        /**
-         * Connection used for %1$d milliseconds.
-         */
-        TOO_LONG("Connection used for %1$d milliseconds.", Category
-            .SUBSYSTEM_OR_SERVICE_DOWN, 12),
-        /**
-         * %1$d statements aren't closed.
-         */
-        ACTIVE_STATEMENTS("%1$d statements aren't closed.", Category
-            .CODE_ERROR, 13),
-        /**
-         * Connection not reset to auto commit.
-         */
-        NO_AUTOCOMMIT("Connection not reset to auto commit.", Category
-            .CODE_ERROR, 14),
-        /**
-         * Parsing problem in URL parameter "%1$s".
-         */
-        PARAMETER_PROBLEM("Parsing problem in URL parameter \"%1$s\".", Category.SETUP_ERROR, 15),
-        /**
-         * Configuration file for database configuration is missing.
-         */
-        MISSING_CONFIGURATION("Configuration file for database configuration is missing.", Category.SETUP_ERROR, 16),
-        /**
-         * Property "%1$s" is not defined.
-         */
-        PROPERTY_MISSING("Property \"%1$s\" is not defined.", Category.SETUP_ERROR, 17),
-        /**
-         * %1$s is already initialized.
-         */
-        ALREADY_INITIALIZED("%1$s is already initialized.", Category.CODE_ERROR, 18);
-
-        /**
-         * Message of the exception.
-         */
-        private final String message;
-
-        /**
-         * Category of the exception.
-         */
-        private final Category category;
-
-        /**
-         * Detail number of the exception.
-         */
-        private final int detailNumber;
-
-        /**
-         * Default constructor.
-         * @param message message.
-         * @param category category.
-         * @param detailNumber detail number.
-         */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
-            this.message = message;
-            this.category = category;
-            this.detailNumber = detailNumber;
-        }
-
-        public Category getCategory() {
-            return category;
-        }
-
-        public int getDetailNumber() {
-            return detailNumber;
-        }
-
-        public String getMessage() {
-            return message;
-        }
+    public DBPoolingException(ErrorMessage message, Throwable cause, Object... messageArgs) {
+        super(message, cause);
+        setMessageArgs(messageArgs);
     }
 }

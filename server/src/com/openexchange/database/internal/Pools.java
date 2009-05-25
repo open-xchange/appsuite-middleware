@@ -70,8 +70,8 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.pooling.ReentrantLockPool.Config;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 import com.openexchange.database.internal.Configuration.Property;
 
 /**
@@ -133,7 +133,7 @@ public final class Pools implements Runnable {
 
     public ConnectionPool getPool(final int poolId) throws DBPoolingException {
         if (null == configDBRead) {
-            throw new DBPoolingException(Code.NOT_INITIALIZED, Pools.class.getName());
+            throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Pools.class.getName());
         }
         ConnectionPool retval;
         switch (poolId) {
@@ -152,7 +152,7 @@ public final class Pools implements Runnable {
                     try {
                         Class.forName(data.driverClass);
                     } catch (final ClassNotFoundException e) {
-                        throw new DBPoolingException(Code.NO_DRIVER, e);
+                        throw DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
                     }
                     retval = createPool(poolId, data.url, data.props, getConfig(data));
                     oxPools.put(I(poolId), retval);
@@ -180,7 +180,7 @@ public final class Pools implements Runnable {
 
     private void startCleaner() throws DBPoolingException {
         if (null != cleaner) {
-            throw new DBPoolingException(Code.ALREADY_INITIALIZED, "PoolsCleaner");
+            throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create("PoolsCleaner");
         }
         cleaner = timerService.scheduleAtFixedRate(new Runnable() {
             public void run() {
@@ -335,7 +335,7 @@ public final class Pools implements Runnable {
      */
     public void start(Configuration configuration) throws DBPoolingException {
         if (null != configDBRead) {
-            throw new DBPoolingException(Code.ALREADY_INITIALIZED, Pools.class.getName());
+            throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Pools.class.getName());
         }
         initPoolConfig(configuration);
         cleanerInterval = configuration.getLong(Property.CLEANER_INTERVAL, cleanerInterval);

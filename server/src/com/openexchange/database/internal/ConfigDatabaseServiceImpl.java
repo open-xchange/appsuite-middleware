@@ -49,12 +49,14 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingException.Code;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -113,7 +115,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         try {
             return pools.getPool(poolId).get();
         } catch (final PoolingException e) {
-            throw new DBPoolingException(Code.NO_CONFIG_DB, e);
+            throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
         }
     }
 
@@ -152,7 +154,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
                 pool.back(con);
             }
         } catch (final PoolingException e) {
-            final DBPoolingException exc = new DBPoolingException(Code.RETURN_FAILED, e, Integer.valueOf(poolId));
+            final DBPoolingException exc = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
             LOG.error(exc.getMessage(), exc);
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
