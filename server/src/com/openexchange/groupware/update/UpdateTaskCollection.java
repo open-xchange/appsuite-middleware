@@ -91,7 +91,7 @@ public class UpdateTaskCollection {
     }
 
     /**
-     * Drops statically loaded update tasks and drops working queue.
+     * Drops statically loaded update tasks and working queue as well.
      */
     static void dropUpdateTaskList() {
         UpdateTaskCollection.staticUpdateTaskList = null;
