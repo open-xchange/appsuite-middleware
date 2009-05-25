@@ -163,7 +163,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private boolean isDefaultFolder(final String fullname) throws MailException {
         for (int i = 0; i < 7; i++) {
-            if (getStandardFolder(i).equals(fullname)) {
+            final String stdFullname = getStandardFolder(i);
+            if (null != stdFullname && stdFullname.equals(fullname)) {
                 return true;
             }
         }
