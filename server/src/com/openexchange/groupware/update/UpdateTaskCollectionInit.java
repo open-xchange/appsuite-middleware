@@ -59,7 +59,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -68,115 +67,113 @@ import com.openexchange.server.Initialization;
  * {@link UpdateTaskCollectionInit}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UpdateTaskCollectionInit implements Initialization {
 
-	private static final UpdateTaskCollectionInit instance = new UpdateTaskCollectionInit();
+    private static final UpdateTaskCollectionInit instance = new UpdateTaskCollectionInit();
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UpdateTaskCollectionInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskCollectionInit.class);
 
-	private static final String PROPERTYNAME = "UPDATETASKSCFG";
+    private static final String PROPERTYNAME = "UPDATETASKSCFG";
 
-	public static UpdateTaskCollectionInit getInstance() {
-		return instance;
-	}
+    public static UpdateTaskCollectionInit getInstance() {
+        return instance;
+    }
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	private UpdateTaskCollectionInit() {
-		super();
-	}
+    private UpdateTaskCollectionInit() {
+        super();
+    }
 
-	private void init() {
-		final String propStr;
-		if ((propStr = SystemConfig.getProperty(PROPERTYNAME)) == null) {
-			LOG.error("Missing property 'UPDATETASKSCFG' in system.properties");
-		} else {
-			final File updateTasksFile = new File(propStr);
-			if (!updateTasksFile.exists() || !updateTasksFile.isFile()) {
-				LOG.error("Missing file " + propStr);
-			} else {
-				final List<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
-				BufferedReader reader = null;
-				try {
-					final Class<?>[] parameterTypes = new Class<?>[0];
-					final Object[] initArgs = new Object[0];
-					reader = new BufferedReader(new InputStreamReader(new FileInputStream(updateTasksFile)));
-					String line = null;
-					while ((line = reader.readLine()) != null) {
-						final String l = line.trim();
-						if ((l.length() == 0) || (l.charAt(0) == '#')) {
-							continue;
-						}
-						try {
-							updateTaskList.add(Class.forName(l).asSubclass(UpdateTask.class).getConstructor(
-									parameterTypes).newInstance(initArgs));
-						} catch (final ClassNotFoundException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (final IllegalArgumentException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (final SecurityException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (final InstantiationException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (final IllegalAccessException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (final InvocationTargetException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (final NoSuchMethodException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						}
-					}
-					UpdateTaskCollection.setUpdateTaskList(updateTaskList);
-				} catch (final FileNotFoundException e) {
-					LOG.error(e.getMessage(), e);
-				} catch (final IOException e) {
-					LOG.error(e.getMessage(), e);
-				} finally {
-					if (reader != null) {
-						try {
-							reader.close();
-						} catch (final IOException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-				}
-			}
-		}
-	}
+    private void init() {
+        final String propStr;
+        if ((propStr = SystemConfig.getProperty(PROPERTYNAME)) == null) {
+            LOG.error("Missing property 'UPDATETASKSCFG' in system.properties");
+        } else {
+            final File updateTasksFile = new File(propStr);
+            if (!updateTasksFile.exists() || !updateTasksFile.isFile()) {
+                LOG.error("Missing file " + propStr);
+            } else {
+                final List<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
+                BufferedReader reader = null;
+                try {
+                    final Class<?>[] parameterTypes = new Class<?>[0];
+                    final Object[] initArgs = new Object[0];
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(updateTasksFile)));
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        final String l = line.trim();
+                        if ((l.length() == 0) || (l.charAt(0) == '#')) {
+                            continue;
+                        }
+                        try {
+                            updateTaskList.add(Class.forName(l).asSubclass(UpdateTask.class).getConstructor(parameterTypes).newInstance(
+                                initArgs));
+                        } catch (final ClassNotFoundException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        } catch (final IllegalArgumentException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        } catch (final SecurityException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        } catch (final InstantiationException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        } catch (final IllegalAccessException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        } catch (final InvocationTargetException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        } catch (final NoSuchMethodException e) {
+                            LOG.error(e.getMessage(), e);
+                            continue;
+                        }
+                    }
+                    UpdateTaskCollection.setUpdateTaskList(updateTaskList);
+                } catch (final FileNotFoundException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (final IOException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	private void reset() {
-		UpdateTaskCollection.setUpdateTaskList(null);
-	}
+    private void reset() {
+        UpdateTaskCollection.dropUpdateTaskList();
+    }
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error("UpdateTaskCollection has already been started", new Throwable());
-		}
-		init();
-		started.set(true);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("UpdateTaskCollection successfully started");
-		}
-	}
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            LOG.error("UpdateTaskCollection has already been started", new Throwable());
+        }
+        init();
+        UpdateTaskRegistry.initInstance();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("UpdateTaskCollection successfully started");
+        }
+    }
 
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error("UpdateTaskCollection cannot be stopped since it has not been started before", new Throwable());
-		}
-		reset();
-		started.set(false);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("UpdateTaskCollection successfully stopped");
-		}
-	}
+    public void stop() throws AbstractOXException {
+        if (!started.compareAndSet(true, false)) {
+            LOG.error("UpdateTaskCollection cannot be stopped since it has not been started before", new Throwable());
+        }
+        UpdateTaskRegistry.releaseInstance();
+        reset();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("UpdateTaskCollection successfully stopped");
+        }
+    }
 }

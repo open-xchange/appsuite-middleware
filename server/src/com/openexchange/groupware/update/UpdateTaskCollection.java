@@ -54,103 +54,182 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 
- * {@link UpdateTaskCollection}
+ * {@link UpdateTaskCollection} - Collection for update tasks.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class UpdateTaskCollection {
 
-	private UpdateTaskCollection() {
-		super();
-	}
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskCollection.class);
 
-	private static final AtomicInteger version = new AtomicInteger(-1);
+    private UpdateTaskCollection() {
+        super();
+    }
 
-	private static List<UpdateTask> updateTaskList;
+    private static final AtomicInteger version = new AtomicInteger(-1);
 
-	static void setUpdateTaskList(final List<UpdateTask> updateTaskList) {
-		UpdateTaskCollection.updateTaskList = updateTaskList;
-	}
+    private static List<UpdateTask> staticUpdateTaskList;
 
-	/**
-	 * Creates a list of <code>UpdateTask</code> instances that apply to current
-	 * database version
-	 * 
-	 * @param dbVersion
-	 *            - current database version
-	 * @return list of <code>UpdateTask</code> instances
-	 */
-	public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
-		final List<UpdateTask> retval = new ArrayList<UpdateTask>(updateTaskList);
-		/*
-		 * Filter
-		 */
-		final int size = retval.size();
-		final Iterator<UpdateTask> iter = retval.iterator();
-		for (int i = 0; i < size; i++) {
-			final UpdateTask ut = iter.next();
-			if (ut.addedWithVersion() <= dbVersion) {
-				iter.remove();
-			}
-		}
-		/*
-		 * Sort
-		 */
-		Collections.sort(retval, UPDATE_TASK_COMPARATOR);
-		return retval;
-	}
+    private static volatile BlockingQueue<UpdateTask> updateTaskQueue;
 
-	/**
-	 * Iterates all implementations of <code>UpdateTask</code> and determines
-	 * the highest version number indicated through method
-	 * <code>UpdateTask.addedWithVersion()</code>.
-	 * 
-	 * @return the highest version number
-	 */
-	public static final int getHighestVersion() {
-		if (version.get() == -1) {
-			synchronized (version) {
-				/*
-				 * Check again
-				 */
-				if (version.get() == -1) {
-					final int size = updateTaskList.size();
-					final Iterator<UpdateTask> iter = updateTaskList.iterator();
-					int vers = 0;
-					for (int i = 0; i < size; i++) {
-						vers = Math.max(vers, iter.next().addedWithVersion());
-					}
-					version.set(vers);
-				}
-			}
-		}
-		return version.get();
-	}
+    /**
+     * Sets statically loaded update tasks and initializes working queue.
+     * 
+     * @param updateTaskList The statically loaded update tasks
+     */
+    static void setUpdateTaskList(final List<UpdateTask> updateTaskList) {
+        UpdateTaskCollection.staticUpdateTaskList = updateTaskList;
+        updateTaskQueue = new LinkedBlockingQueue<UpdateTask>();
+        // Initially prefill working queue
+        updateTaskQueue.addAll(staticUpdateTaskList);
+    }
 
-	/**
-	 * Sorts instances of <code>UpdateTask</code> by their version in first
-	 * order and by their priority in second order
-	 * 
-	 */
-	private static final Comparator<UpdateTask> UPDATE_TASK_COMPARATOR = new Comparator<UpdateTask>() {
+    /**
+     * Drops statically loaded update tasks and drops working queue.
+     */
+    static void dropUpdateTaskList() {
+        UpdateTaskCollection.staticUpdateTaskList = null;
+        updateTaskQueue = null;
+    }
 
-		public int compare(final UpdateTask o1, final UpdateTask o2) {
-			if (o1.addedWithVersion() > o2.addedWithVersion()) {
-				return 1;
-			} else if (o1.addedWithVersion() < o2.addedWithVersion()) {
-				return -1;
-			} else if (o1.getPriority() > o2.getPriority()) {
-				return 1;
-			} else if (o1.getPriority() < o2.getPriority()) {
-				return -1;
-			}
-			return 0;
-		}
-	};
+    /**
+     * Adds specified update task to initial working queue.
+     * 
+     * @param updateTask The update task
+     * @return <code>true</code> if update task was successfully added to initial working queue; otherwise <code>false</code>
+     */
+    static boolean addLookedUpUpdateTask(final UpdateTask updateTask) {
+        final BlockingQueue<UpdateTask> queue = updateTaskQueue;
+        if (null == queue) {
+            return false;
+        }
+        return queue.offer(updateTask);
+    }
+
+    /**
+     * Removes specified update task from initial working queue.
+     * 
+     * @param updateTask
+     */
+    static void removeLookedUpUpdateTask(final UpdateTask updateTask) {
+        final BlockingQueue<UpdateTask> queue = updateTaskQueue;
+        if (null == queue || queue.isEmpty()) {
+            return;
+        }
+        queue.remove(updateTask);
+    }
+
+    /**
+     * Creates a list of <code>UpdateTask</code> instances that apply to current database version
+     * 
+     * @param dbVersion - current database version
+     * @return list of <code>UpdateTask</code> instances
+     */
+    public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
+        final List<UpdateTask> retval = generateList();
+        /*
+         * Filter
+         */
+        final int size = retval.size();
+        final Iterator<UpdateTask> iter = retval.iterator();
+        for (int i = 0; i < size; i++) {
+            final UpdateTask ut = iter.next();
+            if (ut.addedWithVersion() <= dbVersion) {
+                iter.remove();
+            }
+        }
+        /*
+         * Sort
+         */
+        Collections.sort(retval, UPDATE_TASK_COMPARATOR);
+        return retval;
+    }
+
+    /**
+     * Iterates all implementations of <code>UpdateTask</code> and determines the highest version number indicated through method
+     * <code>UpdateTask.addedWithVersion()</code>.
+     * 
+     * @return the highest version number
+     */
+    public static final int getHighestVersion() {
+        if (version.get() == -1) {
+            synchronized (version) {
+                /*
+                 * Check again
+                 */
+                if (version.get() == -1) {
+                    final List<UpdateTask> tasks = generateList();
+                    final int size = tasks.size();
+                    final Iterator<UpdateTask> iter = tasks.iterator();
+                    int vers = 0;
+                    for (int i = 0; i < size; i++) {
+                        vers = Math.max(vers, iter.next().addedWithVersion());
+                    }
+                    version.set(vers);
+                }
+            }
+        }
+        return version.get();
+    }
+
+    private static List<UpdateTask> generateList() {
+        BlockingQueue<UpdateTask> queue = updateTaskQueue;
+        if (null != queue) {
+            synchronized (UpdateTaskCollection.class) {
+                queue = updateTaskQueue;
+                if (null != queue) {
+                    UpdateTask task = queue.poll();
+                    /*
+                     * First touch, wait for proper initialization
+                     */
+                    final List<UpdateTask> retval = new ArrayList<UpdateTask>();
+                    try {
+                        do {
+                            retval.add(task);
+                        } while ((task = queue.poll(2000L, TimeUnit.MILLISECONDS)) != null); // Wait for 2sec for possibly looked-up update
+                        // task
+                    } catch (final InterruptedException e) {
+                        // Keep interrupted status
+                        LOG.error(e.getMessage(), e);
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        updateTaskQueue = null;
+                    }
+                    return retval;
+                }
+            }
+        }
+        /*
+         * Working queue already processed
+         */
+        final List<UpdateTask> retval = new ArrayList<UpdateTask>(staticUpdateTaskList);
+        retval.addAll(UpdateTaskRegistry.getInstance().asSet());
+        return retval;
+    }
+
+    /**
+     * Sorts instances of <code>UpdateTask</code> by their version in first order and by their priority in second order
+     */
+    private static final Comparator<UpdateTask> UPDATE_TASK_COMPARATOR = new Comparator<UpdateTask>() {
+
+        public int compare(final UpdateTask o1, final UpdateTask o2) {
+            if (o1.addedWithVersion() > o2.addedWithVersion()) {
+                return 1;
+            } else if (o1.addedWithVersion() < o2.addedWithVersion()) {
+                return -1;
+            } else if (o1.getPriority() > o2.getPriority()) {
+                return 1;
+            } else if (o1.getPriority() < o2.getPriority()) {
+                return -1;
+            }
+            return 0;
+        }
+    };
 
 }

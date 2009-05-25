@@ -112,6 +112,8 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskServiceTrackerCustomizer;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailLoginHandler;
@@ -304,6 +306,8 @@ public final class ServerActivator extends DeferredActivator {
         serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
         // I18n service load
         serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
+        // Update task service tracker
+        serviceTrackerList.add(new ServiceTracker(context, UpdateTaskProviderService.class.getName(), new UpdateTaskServiceTrackerCustomizer(context)));
 
         // Mail account delete listener
         serviceTrackerList.add(new ServiceTracker(
