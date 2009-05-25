@@ -51,6 +51,7 @@ package com.openexchange.publish.microformats;
 
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
@@ -176,6 +177,7 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     public void testRemoveSecretFromConfigExternally() throws PublicationException {
         Publication publication = new Publication();
+        publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("protected", true);
         publication.getConfiguration().put("siteName", "public");
         publication.getConfiguration().put("secret", "geheim");
@@ -187,22 +189,25 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     public void testGenerateURL() throws PublicationException {
         Publication publication = new Publication();
+        publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("siteName", "public");
 
         publicationService.modifyOutgoing(publication);
 
         assertNotNull(publication.getUrl());
-        assertEquals("/publications/bananas/public", publication.getUrl());
+        assertEquals("/publications/bananas/1337/public", publication.getUrl());
 
         publication.getConfiguration().put("protected", true);
         publication.getConfiguration().put("secret", "abedfea108275720123abde");
 
         publicationService.modifyOutgoing(publication);
 
-        assertEquals("/publications/bananas/public?secret=abedfea108275720123abde", publication.getUrl());
+        assertEquals("/publications/bananas/1337/public?secret=abedfea108275720123abde", publication.getUrl());
 
     }
 
+    // TODO: Unique Site
+    
     public void assertSecret(Publication publication) {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
     }

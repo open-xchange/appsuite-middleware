@@ -49,10 +49,13 @@
 
 package com.openexchange.publish.microformats;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.AbstractPublicationService;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
@@ -105,6 +108,10 @@ public class OXMFPublicationService extends AbstractPublicationService {
         rootURL = string;
     }
     
+    public String getRootURL() {
+        return rootURL;
+    }
+    
     public void setFolderType(String string) {
         target.setModule("folder:"+string);
     }
@@ -139,7 +146,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         Map<String, Object> configuration = publication.getConfiguration();
 
         StringBuilder urlBuilder = new StringBuilder(rootURL);
-        urlBuilder.append('/').append(configuration.get(SITE));
+        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(configuration.get(SITE));
 
         if (configuration.containsKey(SECRET)) {
             urlBuilder.append("?secret=").append(configuration.get(SECRET));
@@ -184,6 +191,18 @@ public class OXMFPublicationService extends AbstractPublicationService {
             publication.getConfiguration().put(SECRET, secret);
 
         }
+    }
+
+    public Publication getPublication(Context ctx, String site) throws PublicationException {
+        Map<String,Object> query = new HashMap<String, Object>();
+        query.put(SITE, site);
+        
+        Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
+        if(result.isEmpty()) {
+            return null;
+        }
+        
+        return result.iterator().next();
     }
 
 

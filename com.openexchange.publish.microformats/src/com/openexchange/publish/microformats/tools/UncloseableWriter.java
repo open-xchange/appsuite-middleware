@@ -47,53 +47,38 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.microformats.tools;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.api2.ContactSQLFactory;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.InfostoreDocumentLoader;
-import com.openexchange.server.osgiservice.Whiteboard;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import java.io.IOException;
+import java.io.Writer;
 
 
 /**
- * {@link LoaderActivator}
+ * {@link UncloseableWriter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class LoaderActivator implements BundleActivator {
+public class UncloseableWriter extends Writer {
+    private Writer delegate;
 
-    private Whiteboard whiteboard;
-    private ServiceRegistration dataLoaderRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        whiteboard = new Whiteboard(context);
-        
-        CompositeLoaderService compositeLoader = new CompositeLoaderService();
-        
-        InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);   
-        UserService users = whiteboard.getService(UserService.class);
-        UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
-        compositeLoader.registerLoader("infostore", new InfostoreDocumentLoader(infostore, users, userConfigs));
     
-        ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactSQLFactory.class));
-        compositeLoader.registerLoader("folder:contacts", contactLoader);
-        
-        dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), compositeLoader, null);
+    public UncloseableWriter(Writer delegate) {
+        this.delegate = delegate;
+    }
+    
+    @Override
+    public void close() throws IOException {
     }
 
-    public void stop(BundleContext context) throws Exception {
-        dataLoaderRegistration.unregister();
-        whiteboard.close();
+    @Override
+    public void flush() throws IOException {
+        delegate.flush();
+    }
+
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        delegate.write(cbuf, off, len);
     }
 
 }
