@@ -60,9 +60,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 
 /**
  * This class contains methods for handling the server name and identifier.
@@ -97,8 +97,14 @@ public final class Server {
     }
 
     public static final int getServerId() throws DBPoolingException {
-        if (-1 == serverId) {
-            throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+        synchronized (Server.class) {
+            if (-1 == serverId) {
+                serverId = Server.loadServerId(getServerName());
+                if (-1 == serverId) {
+                    throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+                }
+                LOG.trace("Got server id: " + serverId);
+            }
         }
         return serverId;
     }
@@ -107,18 +113,6 @@ public final class Server {
         serverName = service.getProperty(PROPERTY_NAME);
         if (null == serverName || serverName.length() == 0) {
             throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
-        }
-        synchronized (Server.class) {
-            if (-1 == serverId) {
-                serverId = Server.loadServerId(getServerName());
-                if (-1 == serverId) {
-                    LOG.fatal("Cannot resolve server id for server: " + getServerName());
-                } else  {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Got server id: " + serverId);
-                    }
-                }
-            }
         }
     }
 
