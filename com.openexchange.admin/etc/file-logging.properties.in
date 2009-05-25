@@ -1,7 +1,5 @@
-.level=SEVERE
-
-com.openexchange.admin.tools.monitoring.level=INFO
-com.openexchange.admin.level=INFO
+# possible log levels are ALL INFO DEBUG
+.level=INFO
 
 handlers=java.util.logging.FileHandler
 java.util.logging.FileHandler.pattern=@adminlogfile@
@@ -12,6 +10,6 @@ java.util.logging.FileHandler.formatter=java.util.logging.SimpleFormatter
 java.util.logging.FileHandler.append=true
 
 sun.rmi.level=SEVERE
-org.apache.level=SEVERE
+org.apache.level=WARNING
 com.sun.level=SEVERE
 javax.management.level=SEVERE
