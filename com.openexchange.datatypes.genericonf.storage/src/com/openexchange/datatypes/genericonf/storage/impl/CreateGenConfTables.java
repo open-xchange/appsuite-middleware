@@ -47,36 +47,54 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage.osgi;
+package com.openexchange.datatypes.genericonf.storage.impl;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
-import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
-import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.groupware.AbstractOXException;
 
-public class Activator implements BundleActivator {
+/**
+ * Creates the tables for the generic conf storage if a new schema is created.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class CreateGenConfTables implements CreateTableService {
 
-    private ServiceRegistration serviceRegistration;
-
-    private ServiceRegistration createTablesServiceRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
-        mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
-        createTablesServiceRegistration = context.registerService(CreateTableService.class.getName(), new CreateGenConfTables(), null);
-        serviceRegistration = context.registerService(
-            GenericConfigurationStorageService.class.getName(),
-            mySQLGenericConfigurationStorage,
-            null);
+    /**
+     * Default constructor.
+     */
+    public CreateGenConfTables() {
+        super();
     }
 
-    public void stop(BundleContext context) throws Exception{
-        serviceRegistration.unregister();
-        createTablesServiceRegistration.unregister();
+    public void perform(Connection con) throws AbstractOXException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            for (String create : creates) {
+                stmt.execute(create);
+            }
+        } catch (SQLException e) {
+            DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
+    public String[] requiredTables() {
+        return new String[0];
+    }
+
+    public String[] tablesToCreate() {
+        return new String[] { "genconf_attributes_strings", "genconf_attributes_bools", "sequence_genconf" };
+    }
+
+    private static final String[] creates = {
+        "CREATE TABLE genconf_attributes_strings (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value VARCHAR(256) DEFAULT NULL,KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        "CREATE TABLE genconf_attributes_bools (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value BOOL DEFAULT NULL,KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        "CREATE TABLE sequence_genconf (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
 }
