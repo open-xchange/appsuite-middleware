@@ -56,5 +56,5 @@ import com.openexchange.config.ConfigurationService;
  */
 public interface TemplateService {
 
-    public OXTemplate loadTemplate(String templateName, ConfigurationService config) throws TemplateException;
+    public OXTemplate loadTemplate(String templateName) throws TemplateException;
 }

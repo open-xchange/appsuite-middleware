@@ -66,7 +66,7 @@ public class TestTemplateService extends TestCase {
         
         configService = new SimConfigurationService();
         configService.stringProperties.put("com.openexchange.templating.path", "test-resources");
-        templateService = new TemplateServiceImpl();
+        templateService = new TemplateServiceImpl(configService);
         
 
         TemplateErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
@@ -81,8 +81,7 @@ public class TestTemplateService extends TestCase {
     }
     
     public void testLoadTemplate() throws Exception {
-        OXTemplate template = templateService.loadTemplate("test-template", configService);
+        OXTemplate template = templateService.loadTemplate("test-template");
         assertNotNull("OX-Template should not be null", template);
-        assertNotNull("Template should not be null", template.getTemplate());
     }
 }

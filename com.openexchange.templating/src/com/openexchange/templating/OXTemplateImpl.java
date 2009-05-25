@@ -49,58 +49,33 @@
 
 package com.openexchange.templating;
 
-import static com.openexchange.templating.TemplateErrorMessage.IOException;
-import java.io.File;
 import java.io.IOException;
-import com.openexchange.config.ConfigurationService;
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.TemplateLoader;
-import freemarker.template.Configuration;
+import java.io.Writer;
 import freemarker.template.Template;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class TemplateServiceImpl implements TemplateService {
+public class OXTemplateImpl implements OXTemplate{
 
-    private String PATH_PROPERTY = "com.openexchange.templating.path";
+    private Template template;
 
-    private ConfigurationService config;
-    
-    
-    public TemplateServiceImpl(ConfigurationService config) {
-        this.config = config;
-    }
-    
-    public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
-        String templatePath = config.getProperty(PATH_PROPERTY);
-        if (templatePath == null) {
-            return null;
-        }
-
-        OXTemplateImpl retval = new OXTemplateImpl();
-        retval.setTemplate(loadTemplate(templatePath, templateName));
-        return retval;
-
+    public Template getTemplate() {
+        return template;
     }
 
-    protected Template loadTemplate(String templatePath, String templateName) throws TemplateException {
-        File path = new File(templatePath);
-        if (!path.exists() || !path.isDirectory() || !path.canRead()) {
-            return null;
-        }
+    public void setTemplate(Template template) {
+        this.template = template;
+    }
 
-        Template retval = null;
+    public void process(Object rootObject, Writer writer) throws TemplateException {
         try {
-            TemplateLoader templateLoader = new FileTemplateLoader(path);
-            Configuration config = new Configuration();
-            config.setTemplateLoader(templateLoader);
-            retval = config.getTemplate(templateName);
+            template.process(rootObject, writer);
+        } catch (freemarker.template.TemplateException e) {
+            throw TemplateErrorMessage.UnderlyingException.create(e.getMessage());
         } catch (IOException e) {
-            throw IOException.create(e);
+            throw TemplateErrorMessage.IOException.create(e);
         }
-
-        return retval;
     }
 
 }

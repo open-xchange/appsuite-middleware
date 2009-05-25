@@ -49,21 +49,15 @@
 
 package com.openexchange.templating;
 
-import freemarker.template.Template;
+import java.io.Writer;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link OXTemplate}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class OXTemplate {
-
-    private Template template;
-
-    public Template getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(Template template) {
-        this.template = template;
-    }
-
+public interface OXTemplate {
+    public void process(Object rootObject, Writer writer) throws TemplateException;
 }
