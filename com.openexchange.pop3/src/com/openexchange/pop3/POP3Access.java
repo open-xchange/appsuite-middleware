@@ -80,6 +80,7 @@ import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
+import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -162,7 +163,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                     Integer.valueOf(user),
                     Integer.valueOf(cid));
                 LOG.warn("Using fallback storage \"mailaccount\". Error: " + e.getMessage(), e);
-                providerName = "mailaccount";
+                providerName = MailAccountPOP3StorageProvider.NAME;
                 // Add to properties
                 POP3StorageUtil.setPOP3StorageProviderName(pop3Access.accountId, user, cid, providerName);
             }
