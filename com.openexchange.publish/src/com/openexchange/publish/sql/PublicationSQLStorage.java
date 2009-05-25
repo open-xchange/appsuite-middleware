@@ -99,21 +99,15 @@ public class PublicationSQLStorage implements PublicationStorage {
     }
 
     public void forgetPublication(Publication publication) throws PublicationException {
+        if (!exist(publication.getId(), publication.getContext())) {
+            return;
+        }
+        
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
             writeConnection.setAutoCommit(false);
-            
-            DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
-            
-            List<Object> values = new ArrayList<Object>();
-            values.add(publication.getId());
-            values.add( publication.getContext().getContextId());
-            
-            new StatementBuilder().executeStatement(writeConnection, delete, values);
-            
-            storageService.delete(writeConnection, publication.getContext(), getConfigurationId(publication));
-            
+            delete(publication, writeConnection);
             writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -262,34 +256,8 @@ public class PublicationSQLStorage implements PublicationStorage {
         try {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
             writeConnection.setAutoCommit(false);
-            
-            int configId = storageService.save(writeConnection, publication.getContext(), publication.getConfiguration());
-            
-            int id = IDGenerator.getId(publication.getContext(), Types.PUBLICATION, writeConnection);
-            
-            INSERT insert = new INSERT().
-            INTO(publications).
-            SET("id", PLACEHOLDER).
-            SET("cid", PLACEHOLDER).
-            SET("user_id", PLACEHOLDER).
-            SET("entity", PLACEHOLDER).
-            SET("module", PLACEHOLDER).
-            SET("configuration_id", PLACEHOLDER).
-            SET("target_id", PLACEHOLDER);
-            
-            List<Object> values = new ArrayList<Object>();
-            values.add(id);
-            values.add(publication.getContext().getContextId());
-            values.add(publication.getUserId());
-            values.add(publication.getEntityId());
-            values.add(publication.getModule());
-            values.add(configId);
-            values.add(publication.getTarget().getId());
-            
-            new StatementBuilder().executeStatement(writeConnection, insert, values);
-            
+            int id = save(publication, writeConnection);
             publication.setId(id);
-            
             writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -307,7 +275,6 @@ public class PublicationSQLStorage implements PublicationStorage {
                 }
             }
         }
-        
     }
 
     public void updatePublication(Publication publication) throws PublicationException {
@@ -316,40 +283,10 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
         
         Connection writeConnection = null;
-        
         try {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
             writeConnection.setAutoCommit(false);
-            
-            if (publication.getConfiguration() != null) {
-                int configId = getConfigurationId(publication);
-                storageService.update(writeConnection, publication.getContext(), configId, publication.getConfiguration());
-            }
-            
-            UPDATE update = new UPDATE(publications);
-            List<Object> values = new ArrayList<Object>();
-            
-            if (publication.getUserId() > 0) {
-                update.SET("user_id", PLACEHOLDER);
-                values.add(publication.getUserId());
-            }
-            if (publication.getEntityId() != null) {
-                update.SET("entity", PLACEHOLDER);
-                values.add(publication.getEntityId());
-            }
-            if (publication.getModule() != null) {
-                update.SET("module", PLACEHOLDER);
-                values.add(publication.getModule());
-            }
-            if (publication.getTarget() != null) {
-                update.SET("target_id", PLACEHOLDER);
-                values.add(publication.getTarget().getId());
-            }
-            
-            if (values.size() > 0) {
-                new StatementBuilder().executeStatement(writeConnection, update, values);
-            }
-            
+            update(publication, writeConnection);
             writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -410,6 +347,77 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
         
         return retval;
+    }
+
+    private void delete(Publication publication, Connection writeConnection) throws SQLException, GenericConfigStorageException, PublicationException {
+        DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
+        
+        List<Object> values = new ArrayList<Object>();
+        values.add(publication.getId());
+        values.add( publication.getContext().getContextId());
+        
+        new StatementBuilder().executeStatement(writeConnection, delete, values);
+        
+        storageService.delete(writeConnection, publication.getContext(), getConfigurationId(publication));
+    }
+
+    private int save(Publication publication, Connection writeConnection) throws GenericConfigStorageException, SQLException {
+        int configId = storageService.save(writeConnection, publication.getContext(), publication.getConfiguration());
+        
+        int id = IDGenerator.getId(publication.getContext(), Types.PUBLICATION, writeConnection);
+        
+        INSERT insert = new INSERT().
+        INTO(publications).
+        SET("id", PLACEHOLDER).
+        SET("cid", PLACEHOLDER).
+        SET("user_id", PLACEHOLDER).
+        SET("entity", PLACEHOLDER).
+        SET("module", PLACEHOLDER).
+        SET("configuration_id", PLACEHOLDER).
+        SET("target_id", PLACEHOLDER);
+        
+        List<Object> values = new ArrayList<Object>();
+        values.add(id);
+        values.add(publication.getContext().getContextId());
+        values.add(publication.getUserId());
+        values.add(publication.getEntityId());
+        values.add(publication.getModule());
+        values.add(configId);
+        values.add(publication.getTarget().getId());
+        
+        new StatementBuilder().executeStatement(writeConnection, insert, values);
+        return id;
+    }
+
+    private void update(Publication publication, Connection writeConnection) throws PublicationException, GenericConfigStorageException, SQLException {
+        if (publication.getConfiguration() != null) {
+            int configId = getConfigurationId(publication);
+            storageService.update(writeConnection, publication.getContext(), configId, publication.getConfiguration());
+        }
+        
+        UPDATE update = new UPDATE(publications);
+        List<Object> values = new ArrayList<Object>();
+        
+        if (publication.getUserId() > 0) {
+            update.SET("user_id", PLACEHOLDER);
+            values.add(publication.getUserId());
+        }
+        if (publication.getEntityId() != null) {
+            update.SET("entity", PLACEHOLDER);
+            values.add(publication.getEntityId());
+        }
+        if (publication.getModule() != null) {
+            update.SET("module", PLACEHOLDER);
+            values.add(publication.getModule());
+        }
+        if (publication.getTarget() != null) {
+            update.SET("target_id", PLACEHOLDER);
+            values.add(publication.getTarget().getId());
+        }
+        
+        if (values.size() > 0) {
+            new StatementBuilder().executeStatement(writeConnection, update, values);
+        }
     }
     
     private List<Publication> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws SQLException, GenericConfigStorageException, PublicationException {

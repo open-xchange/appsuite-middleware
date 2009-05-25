@@ -96,21 +96,15 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
     }
 
     public void forgetSubscription(Subscription subscription) throws SubscriptionException {
+        if (!exist(subscription.getId(), subscription.getContext())) {
+            return;
+        }
         
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             writeConnection.setAutoCommit(false);
-            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
-            
-            List<Object> values = new ArrayList<Object>();
-            values.add(subscription.getId());
-            values.add(subscription.getContext().getContextId());
-            
-            new StatementBuilder().executeStatement(writeConnection, delete, values);
-            
-            storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
-            
+            delete(subscription, writeConnection);
             writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -216,36 +210,9 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
-            
             writeConnection.setAutoCommit(false);
-            
-            int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration());
-            
-            int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
-
-            INSERT insert = new INSERT().
-            INTO(subscriptions).
-            SET("id", PLACEHOLDER).
-            SET("cid", PLACEHOLDER).
-            SET("user_id", PLACEHOLDER).
-            SET("configuration_id", PLACEHOLDER).
-            SET("source_id", PLACEHOLDER).
-            SET("folder_id", PLACEHOLDER).
-            SET("last_update", PLACEHOLDER);
-
-            List<Object> values = new ArrayList<Object>();
-            values.add(id);
-            values.add(subscription.getContext().getContextId());
-            values.add(subscription.getUserId());
-            values.add(configId);
-            values.add(subscription.getSource().getId());
-            values.add(subscription.getFolderId());
-            values.add(subscription.getLastUpdate());
-
-            new StatementBuilder().executeStatement(writeConnection, insert, values);
-            
+            int id = save(subscription, writeConnection);
             subscription.setId(id);
-
             writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -273,38 +240,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
-            
             writeConnection.setAutoCommit(false);
-            
-            if (subscription.getConfiguration() != null) {
-                int configId = getConfigurationId(subscription);
-                storageService.update(writeConnection, subscription.getContext(), configId, subscription.getConfiguration());
-            }
-            
-            UPDATE update = new UPDATE(subscriptions);
-            List<Object> values = new ArrayList<Object>();
-            
-            if (subscription.getUserId() > 0) {
-                update.SET("user_id", PLACEHOLDER);
-                values.add(subscription.getUserId());
-            }
-            if (subscription.getSource() != null) {
-                update.SET("source_id", PLACEHOLDER);
-                values.add(subscription.getSource().getId());
-            }
-            if (subscription.getFolderId() > 0) {
-                update.SET("folder_id", PLACEHOLDER);
-                values.add(subscription.getFolderId());
-            }
-            if (subscription.getLastUpdate() > 0) {
-                update.SET("last_update", PLACEHOLDER);
-                values.add(subscription.getLastUpdate());
-            }
-
-            if (values.size() > 0) {
-                new StatementBuilder().executeStatement(writeConnection, update, values);
-            }
-
+            update(subscription, writeConnection);
             writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -321,6 +258,77 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                     dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
                 }
             }
+        }
+    }
+
+    private void delete(Subscription subscription, Connection writeConnection) throws SQLException, GenericConfigStorageException, SubscriptionException {
+        DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
+        
+        List<Object> values = new ArrayList<Object>();
+        values.add(subscription.getId());
+        values.add(subscription.getContext().getContextId());
+        
+        new StatementBuilder().executeStatement(writeConnection, delete, values);
+        
+        storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
+    }
+
+    private int save(Subscription subscription, Connection writeConnection) throws GenericConfigStorageException, SQLException {
+        int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration());
+        
+        int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
+
+        INSERT insert = new INSERT().
+        INTO(subscriptions).
+        SET("id", PLACEHOLDER).
+        SET("cid", PLACEHOLDER).
+        SET("user_id", PLACEHOLDER).
+        SET("configuration_id", PLACEHOLDER).
+        SET("source_id", PLACEHOLDER).
+        SET("folder_id", PLACEHOLDER).
+        SET("last_update", PLACEHOLDER);
+
+        List<Object> values = new ArrayList<Object>();
+        values.add(id);
+        values.add(subscription.getContext().getContextId());
+        values.add(subscription.getUserId());
+        values.add(configId);
+        values.add(subscription.getSource().getId());
+        values.add(subscription.getFolderId());
+        values.add(subscription.getLastUpdate());
+
+        new StatementBuilder().executeStatement(writeConnection, insert, values);
+        return id;
+    }
+
+    private void update(Subscription subscription, Connection writeConnection) throws SubscriptionException, GenericConfigStorageException, SQLException {
+        if (subscription.getConfiguration() != null) {
+            int configId = getConfigurationId(subscription);
+            storageService.update(writeConnection, subscription.getContext(), configId, subscription.getConfiguration());
+        }
+        
+        UPDATE update = new UPDATE(subscriptions);
+        List<Object> values = new ArrayList<Object>();
+        
+        if (subscription.getUserId() > 0) {
+            update.SET("user_id", PLACEHOLDER);
+            values.add(subscription.getUserId());
+        }
+        if (subscription.getSource() != null) {
+            update.SET("source_id", PLACEHOLDER);
+            values.add(subscription.getSource().getId());
+        }
+        if (subscription.getFolderId() > 0) {
+            update.SET("folder_id", PLACEHOLDER);
+            values.add(subscription.getFolderId());
+        }
+        if (subscription.getLastUpdate() > 0) {
+            update.SET("last_update", PLACEHOLDER);
+            values.add(subscription.getLastUpdate());
+        }
+
+        if (values.size() > 0) {
+            new StatementBuilder().executeStatement(writeConnection, update, values);
         }
     }
     
