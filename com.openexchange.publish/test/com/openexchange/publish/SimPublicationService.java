@@ -90,7 +90,7 @@ public class SimPublicationService implements PublicationService {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context, int)
      */
-    public Collection<Publication> getAllPublications(Context ctx, int entityId) {
+    public Collection<Publication> getAllPublications(Context ctx, String entityId) {
         // TODO Auto-generated method stub
         return null;
     }

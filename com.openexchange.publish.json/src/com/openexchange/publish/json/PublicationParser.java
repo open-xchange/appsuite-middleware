@@ -90,7 +90,7 @@ public class PublicationParser {
             publication.setId(object.getInt(ID));
         }
         if(object.has(ENTITY_ID)) {
-            publication.setEntityId(object.getInt(ENTITY_ID));
+            publication.setEntityId(object.getString(ENTITY_ID));
         }
         if(object.has(ENTITY_MODULE)) {
             publication.setModule(object.getString(ENTITY_MODULE));

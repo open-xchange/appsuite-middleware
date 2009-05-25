@@ -235,7 +235,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
         if(null == req.getParameter("entityModule")) {
             throw MISSING_PARAMETER.create("entityModule");
         }
-        int entityId = Integer.parseInt(req.getParameter("entityId"));
+        String entityId = req.getParameter("entityId");
         String module = req.getParameter("entityModule");
         Context context = getSessionObject(req).getContext();
         List<Publication> publications = loadAllPublicationsForEntity(context, entityId, module);
@@ -248,7 +248,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-    private List<Publication> loadAllPublicationsForEntity(Context context, int entityId, String module) throws PublicationException {
+    private List<Publication> loadAllPublicationsForEntity(Context context, String entityId, String module) throws PublicationException {
         List<Publication> publications = new LinkedList<Publication>();
         Collection<PublicationTarget> targetsForEntityType = discovery.getTargetsForEntityType(module);
         for(PublicationTarget target : targetsForEntityType) {

@@ -90,9 +90,9 @@ public class PublicationSQLStorageTest extends SQLTestCase {
 
     protected List<Integer> publicationsToDelete = new ArrayList<Integer>();
 
-    protected int entityId1 = 10;
+    protected String entityId1 = "10";
 
-    protected int entityId2 = entityId1;
+    protected String entityId2 = entityId1;
 
     protected String module1 = "myModule";
 
@@ -361,7 +361,7 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
     
-    protected void removePublicationsForEntity(int entity, String module) throws Exception {
+    protected void removePublicationsForEntity(String entity, String module) throws Exception {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
         
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("entity", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)));

@@ -95,7 +95,7 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
         try {
             InputStream document = infostore.getDocument(
-                publication.getEntityId(),
+                Integer.parseInt(publication.getEntityId()),
                 InfostoreFacade.CURRENT_VERSION,
                 publication.getContext(),
                 loadUser(publication.getContext(), publication.getUserId()),

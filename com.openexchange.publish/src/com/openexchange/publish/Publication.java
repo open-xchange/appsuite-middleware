@@ -64,7 +64,7 @@ public class Publication {
     private int userId;
     private Context context;
     private int id;
-    private int entityId;
+    private String entityId;
     private String module;
     private String url;
     private PublicationTarget target;
@@ -78,11 +78,11 @@ public class Publication {
         this.id = id;
     }
     
-    public int getEntityId() {
+    public String getEntityId() {
         return entityId;
     }
     
-    public void setEntityId(int entityId) {
+    public void setEntityId(String entityId) {
         this.entityId = entityId;
     }
     

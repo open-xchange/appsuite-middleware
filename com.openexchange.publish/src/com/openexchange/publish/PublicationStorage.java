@@ -63,7 +63,7 @@ public interface PublicationStorage {
 
     public void forgetPublication(Publication publication) throws PublicationException;
 
-    public List<Publication> getPublications(Context ctx, String module, int entityId) throws PublicationException;
+    public List<Publication> getPublications(Context ctx, String module, String entityId) throws PublicationException;
 
     public List<Publication> getPublications(Context ctx, String publicationTarget) throws PublicationException;
 

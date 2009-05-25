@@ -86,7 +86,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     public Collection<? extends Object> load(Publication publication) throws PublicationException {
         LinkedList<ContactObject> list = new LinkedList<ContactObject>();
         try {
-            int folderId = publication.getEntityId();
+            int folderId = Integer.parseInt(publication.getEntityId());
             ContactSQLInterface contacts = factory.create(new PublicationSession(publication));
             int numberOfContacts = contacts.getNumberOfContacts(folderId);
             SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.GIVEN_NAME, "ASC", ContactObject.ALL_COLUMNS);

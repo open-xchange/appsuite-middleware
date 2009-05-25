@@ -85,7 +85,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#getPublications(com.openexchange.groupware.contexts.Context, java.lang.String, int)
      */
-    public List<Publication> getPublications(Context ctx, String module, int entityId) throws PublicationException {
+    public List<Publication> getPublications(Context ctx, String module, String entityId) throws PublicationException {
         // TODO Auto-generated method stub
         return null;
     }

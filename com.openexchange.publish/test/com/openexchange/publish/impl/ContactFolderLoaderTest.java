@@ -89,7 +89,7 @@ public class ContactFolderLoaderTest extends TestCase {
         id2 = 1338;
 
         publication = new Publication();
-        publication.setEntityId(folderId);
+        publication.setEntityId(String.valueOf(folderId));
         publication.setContext(new SimContext(cid));
         
         contacts.simulateContact(cid, folderId, id1, "Hans");

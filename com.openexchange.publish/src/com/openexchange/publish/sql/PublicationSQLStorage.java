@@ -172,7 +172,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
-    public List<Publication> getPublications(Context ctx, String module, int entityId) throws PublicationException {
+    public List<Publication> getPublications(Context ctx, String module, String entityId) throws PublicationException {
         List<Publication> retval = null;
         
         Connection readConnection = null;
@@ -351,7 +351,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         while (resultSet.next()) {
             Publication publication = new Publication();
             publication.setContext(ctx);
-            publication.setEntityId(resultSet.getInt("entity"));
+            publication.setEntityId(resultSet.getString("entity"));
             publication.setId(resultSet.getInt("id"));
             publication.setModule(resultSet.getString("module"));
             publication.setUserId(resultSet.getInt("user_id"));
@@ -368,21 +368,21 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
     
-    private int getConfigurationId(Publication subscription) throws PublicationException {
+    private int getConfigurationId(Publication publication) throws PublicationException {
         int retval = 0;
         Connection readConection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
         try {
-            readConection = dbProvider.getReadConnection(subscription.getContext());
+            readConection = dbProvider.getReadConnection(publication.getContext());
             
             SELECT select = new SELECT("configuration_id").
             FROM(publications).
             WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
             
             List<Object> values = new ArrayList<Object>();
-            values.add(subscription.getContext().getContextId());
-            values.add(subscription.getId());
+            values.add(publication.getContext().getContextId());
+            values.add(publication.getId());
             
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConection, select, values);
@@ -402,7 +402,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
-                dbProvider.releaseReadConnection(subscription.getContext(), readConection);
+                dbProvider.releaseReadConnection(publication.getContext(), readConection);
             }
         }
         return retval;

@@ -90,7 +90,7 @@ public class PublicationWriterTest extends TestCase {
         
         publication = new Publication();
         publication.setId(23);
-        publication.setEntityId(12);
+        publication.setEntityId("12");
         publication.setModule("infostore");
         publication.setUrl("http://example.invalid/publication");
         publication.setTarget(target);
@@ -102,7 +102,7 @@ public class PublicationWriterTest extends TestCase {
         
         JSONAssertion assertion = new JSONAssertion()
                 .hasKey("id").withValue(23)
-                .hasKey("entityId").withValue(12)
+                .hasKey("entityId").withValue("12")
                 .hasKey("entityModule").withValue("infostore")
                 .hasKey("url").withValue("http://example.invalid/publication")
                 .hasKey("target").withValue("com.openexchange.publish.test")

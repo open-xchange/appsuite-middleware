@@ -91,7 +91,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
         
         publication = new Publication();
         publication.setContext(new SimContext(cid));
-        publication.setEntityId(1337);
+        publication.setEntityId("1337");
         publication.setModule("infostore");
     
         loader = new InfostoreDocumentLoader(infostoreFacade, null, null) {

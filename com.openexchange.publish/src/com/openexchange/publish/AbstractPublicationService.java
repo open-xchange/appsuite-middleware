@@ -89,7 +89,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         return publications;
     }
 
-    public Collection<Publication> getAllPublications(Context ctx, int entityId) throws PublicationException {
+    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws PublicationException {
         List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
         for(Publication publication : publications) {
             modifyOutgoing(publication);

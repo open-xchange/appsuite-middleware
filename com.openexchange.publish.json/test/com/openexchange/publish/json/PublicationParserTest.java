@@ -108,7 +108,7 @@ public class PublicationParserTest extends TestCase {
         Publication publication = new PublicationParser(discovery).parse(object);
         
         assertEquals("id was wrong", 12, publication.getId());
-        assertEquals("entityId was wrong", 23, publication.getEntityId());
+        assertEquals("entityId was wrong", "23", publication.getEntityId());
         assertEquals("entityModule was wrong", "oranges", publication.getModule());
 
         assertNotNull("target was null", publication.getTarget());

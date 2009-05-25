@@ -77,7 +77,7 @@ public class CreatePublicationTablesTask implements UpdateTask {
         "id INT(10) UNSIGNED NOT NULL, " + 
         "cid INT(10) UNSIGNED NOT NULL, " +
         "user_id INT(10) UNSIGNED NOT NULL, " +
-        "entity INT(10) UNSIGNED NOT NULL, " +
+        "entity VARCHAR(255) NOT NULL, " +
         "module VARCHAR(255) NOT NULL, " +
         "configuration_id INT(10) UNSIGNED NOT NULL, " + 
         "target_id VARCHAR(255) NOT NULL, " +
