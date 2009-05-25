@@ -61,6 +61,10 @@ public class UPDATE extends ModifyCommand {
 		this.tableName = tableName;
 		assignments = new LinkedList<Assignment>();
 	}
+	
+	public UPDATE(Table table) {
+	    this(table.getName());
+	}
 
 	public void build(IStatementBuilder builder) {
 		builder.buildUPDATE(this);
