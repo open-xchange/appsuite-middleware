@@ -262,7 +262,7 @@ public class GettextParserTest extends TestCase {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
-            assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getErrorCode(), x
+            assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getDetailNumber(), x
                 .getDetailNumber());
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -292,7 +292,7 @@ public class GettextParserTest extends TestCase {
         } catch (final I18NException x) {
             assertEquals(
                 com.openexchange.i18n.parsing.I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME
-                    .getErrorCode(), x.getDetailNumber());
+                    .getDetailNumber(), x.getDetailNumber());
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
@@ -317,7 +317,7 @@ public class GettextParserTest extends TestCase {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
-            assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getErrorCode(), x
+            assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getDetailNumber(), x
                 .getDetailNumber());
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -341,7 +341,7 @@ public class GettextParserTest extends TestCase {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
-            assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getErrorCode(), x
+            assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getDetailNumber(), x
                 .getDetailNumber());
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -361,7 +361,7 @@ public class GettextParserTest extends TestCase {
         try {
             new POParser().parse(new ExceptionThrowingInputStream(), "test.po");
         } catch (final I18NException e) {
-            assertEquals(I18NErrorMessages.IO_EXCEPTION.getErrorCode(), e
+            assertEquals(I18NErrorMessages.IO_EXCEPTION.getDetailNumber(), e
                 .getDetailNumber());
             assertEquals("test.po", e.getMessageArgs()[0]);
             assertEquals("BUMM!", e.getCause().getMessage());

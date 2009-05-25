@@ -142,7 +142,7 @@ public class ExceptionsTest extends TestCase {
 
     public void testLookupErrorMessage() {
         ErrorMessage msg = exceptions.findMessage(12);
-        assertEquals(12, msg.getErrorCode());
+        assertEquals(12, msg.getDetailNumber());
         assertEquals(component, msg.getComponent());
         assertEquals(AbstractOXException.Category.USER_INPUT, msg.getCategory());
         assertEquals(applicationId, msg.getApplicationId());
@@ -150,7 +150,7 @@ public class ExceptionsTest extends TestCase {
         assertEquals("HELP12", msg.getHelp());
 
         msg = exceptions.findMessage(13);
-        assertEquals(13, msg.getErrorCode());
+        assertEquals(13, msg.getDetailNumber());
         assertEquals(component, msg.getComponent());
         assertEquals(AbstractOXException.Category.CODE_ERROR, msg.getCategory());
         assertEquals(applicationId, msg.getApplicationId());
@@ -160,7 +160,7 @@ public class ExceptionsTest extends TestCase {
 
     public void testLookupOXErrorMessage() {
         OXErrorMessage msg = exceptions.findOXErrorMessage(12);
-        assertEquals(12, msg.getErrorCode());
+        assertEquals(12, msg.getDetailNumber());
         assertEquals(AbstractOXException.Category.USER_INPUT, msg.getCategory());
         assertEquals("MESSAGE12", msg.getMessage());
         assertEquals("HELP12", msg.getHelp());
@@ -175,7 +175,7 @@ public class ExceptionsTest extends TestCase {
 
         final Set<Integer> codes = new HashSet<Integer>();
 
-        for(final ErrorMessage message : messages) { codes.add(message.getErrorCode()); }
+        for(final ErrorMessage message : messages) { codes.add(message.getDetailNumber()); }
 
         assertTrue(codes.remove(12));
         assertTrue(codes.remove(13));
@@ -205,7 +205,7 @@ public class ExceptionsTest extends TestCase {
 
     private static final OXErrorMessage errorMessage = new OXErrorMessage() {
 
-        public int getErrorCode() {
+        public int getDetailNumber() {
             return 13;
         }
 
@@ -230,7 +230,7 @@ public class ExceptionsTest extends TestCase {
 		private static final long serialVersionUID = 5072841402483911499L;
 
 		public OXTestException(final ErrorMessage message, final Throwable cause, final Object...args) {
-            super(message.getComponent(), message.getCategory(), message.getErrorCode(), message.getMessage(), cause);
+            super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
             setMessageArgs(args);
         }
     }
