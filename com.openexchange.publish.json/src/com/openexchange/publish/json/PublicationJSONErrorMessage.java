@@ -82,7 +82,7 @@ public enum PublicationJSONErrorMessage implements OXErrorMessage {
         return category;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return errorCode;
     }
 

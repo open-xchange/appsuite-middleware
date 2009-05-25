@@ -172,7 +172,7 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     /**
      * {@inheritDoc}
      */
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return number;
     }
 

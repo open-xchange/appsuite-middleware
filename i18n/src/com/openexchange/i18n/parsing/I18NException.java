@@ -58,7 +58,7 @@ import com.openexchange.groupware.AbstractOXException;
 public class I18NException extends AbstractOXException {
 
     public I18NException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        super(message.getComponent(), message.getCategory(), message.getErrorCode(), message.getMessage(), cause);
+        super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
         setMessageArgs(args);
     }
 }

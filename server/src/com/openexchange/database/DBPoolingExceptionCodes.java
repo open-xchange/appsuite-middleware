@@ -169,15 +169,11 @@ public enum DBPoolingExceptionCodes implements OXErrorMessage {
         return category;
     }
 
-    public int getDetailNumber() {
-        return detailNumber;
-    }
-
     public String getMessage() {
         return message;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return detailNumber;
     }
 

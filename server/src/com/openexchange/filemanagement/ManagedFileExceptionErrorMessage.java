@@ -88,7 +88,7 @@ public enum ManagedFileExceptionErrorMessage implements OXErrorMessage {
         return category;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return detailNumber;
     }
 

@@ -301,7 +301,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
             subscriptionsToDelete.add(subscription.getId());
             fail("Exception expected");
         } catch (SubscriptionException e) {
-            assertEquals("Wrong error code", SubscriptionErrorMessage.IDGiven.getErrorCode(), e.getDetailNumber());
+            assertEquals("Wrong error code", SubscriptionErrorMessage.IDGiven.getDetailNumber(), e.getDetailNumber());
         }
     }
     

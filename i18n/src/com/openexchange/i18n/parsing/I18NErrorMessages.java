@@ -32,7 +32,7 @@ public enum I18NErrorMessages implements OXErrorMessage {
         this.errorCode = errorCode;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return errorCode;
     }
 

@@ -152,7 +152,7 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
         return category;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return number;
     }
 

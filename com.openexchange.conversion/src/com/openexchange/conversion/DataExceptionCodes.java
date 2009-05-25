@@ -121,7 +121,7 @@ public enum DataExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return detailNumber;
     }
 

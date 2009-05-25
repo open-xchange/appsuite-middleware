@@ -8,7 +8,7 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface OXErrorMessage {
 
-    public int getErrorCode();
+    public int getDetailNumber();
 
     public String getMessage();
 

@@ -346,7 +346,7 @@ public class AbstractOXException extends Exception {
         super(message.getMessage(), cause);
         component = message.getComponent();
         category = message.getCategory();
-        detailNumber = message.getErrorCode();
+        detailNumber = message.getDetailNumber();
         problematics = new ArrayList<ProblematicAttribute>();
     }
 

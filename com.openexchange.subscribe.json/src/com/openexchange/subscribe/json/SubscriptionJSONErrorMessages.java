@@ -93,7 +93,7 @@ public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
         this.errorCode = errorCode;
     }
     
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return errorCode;
     }
 

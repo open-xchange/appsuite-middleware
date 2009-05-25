@@ -116,7 +116,7 @@ public enum SearchExceptionMessages implements OXErrorMessage {
         return category;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return number;
     }
 

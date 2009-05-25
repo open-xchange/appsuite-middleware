@@ -348,7 +348,7 @@ public class PublicationSQLStorageTest extends SQLTestCase {
             publicationsToDelete.add(pub1.getId());
             fail("Exception expected");
         } catch (PublicationException e) {
-            assertEquals("Wrong error code", PublicationErrorMessage.IDGiven.getErrorCode(), e.getDetailNumber());
+            assertEquals("Wrong error code", PublicationErrorMessage.IDGiven.getDetailNumber(), e.getDetailNumber());
         }
     }
     

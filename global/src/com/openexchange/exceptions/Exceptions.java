@@ -96,7 +96,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     protected void declare(final OXErrorMessage error) {
-        errors.put(Integer.valueOf(error.getErrorCode()), new ErrorMessage(error, component, applicationId));
+        errors.put(Integer.valueOf(error.getDetailNumber()), new ErrorMessage(error, component, applicationId));
     }
 
     protected void declareAll(final OXErrorMessage[] errors) {
@@ -141,11 +141,11 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     public T create(final OXErrorMessage message, final Object... args) {
-        return create(message.getErrorCode(), args);
+        return create(message.getDetailNumber(), args);
     }
 
     public T create(final OXErrorMessage message, final Throwable cause, final Object... args) {
-        return create(message.getErrorCode(), cause, args);
+        return create(message.getDetailNumber(), cause, args);
     }
 
     public void throwException(final OXErrorMessage message, final Object... args) throws T {

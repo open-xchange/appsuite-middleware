@@ -76,7 +76,7 @@ public enum TemplateErrorMessage implements OXErrorMessage {
         return category;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         return errorCode;
     }
 

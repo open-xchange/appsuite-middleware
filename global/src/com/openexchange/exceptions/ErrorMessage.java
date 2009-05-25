@@ -86,9 +86,9 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage {
         this.applicationId = applicationId;
     }
 
-    public int getErrorCode() {
+    public int getDetailNumber() {
         if (delegate != null) {
-            return delegate.getErrorCode();
+            return delegate.getDetailNumber();
         }
         return errorCode;
     }
@@ -147,7 +147,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage {
     }
 
     public int compareTo(final ErrorMessage other) {
-        return getErrorCode() - other.getErrorCode();
+        return getDetailNumber() - other.getDetailNumber();
     }
 
     public OXErrorMessage getOXErrorMessage() {
