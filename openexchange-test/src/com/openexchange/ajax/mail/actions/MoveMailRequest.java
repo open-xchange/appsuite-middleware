@@ -47,21 +47,69 @@
  *
  */
 
-package com.openexchange.ajax.mail.contenttypes;
+package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.ajax.mail.TestMail;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link FallbackStrategy} - sanitizes all mails by treating them
- * as content-type "alternative" mails.
+ * {@link MoveMailRequest}
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class FallbackStrategy extends AlternativeStrategy {
+public class MoveMailRequest extends AbstractMailRequest<UpdateMailResponse> {
 
-    @Override
-    public boolean isResponsibleFor(TestMail mail) {
-        return true;
+    /**
+     * Initializes a new {@link MoveMailRequest}.
+     */
+    public MoveMailRequest(String origin, String destination, String mailID, boolean failOnError) {
+        super();
+        this.origin = origin;
+        this.destination = destination;
+        this.mailID = mailID;
+        this.failOnError = failOnError;
+    }
+
+    private String destination, origin, mailID;
+
+    private boolean failOnError;
+
+    public Object getBody() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("folder_id", destination);
+        return json;
+    }
+
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        List<Parameter> list = new LinkedList<Parameter>();
+
+        list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_UPDATE));
+        list.add(new Parameter(Mail.PARAMETER_FOLDERID, origin)); /*
+                                                                   * yes, PARAMETER_FOLDERID is actually "folder", while the key of the
+                                                                   * JSONObject in the body is actually "folder_id"
+                                                                   */
+        list.add(new Parameter(Mail.PARAMETER_ID, mailID));
+
+        return list.toArray(new Parameter[list.size()]);
+    }
+
+    public AbstractAJAXParser<? extends UpdateMailResponse> getParser() {
+        return new AbstractAJAXParser<UpdateMailResponse>(failOnError) {
+
+            @Override
+            protected UpdateMailResponse createResponse(final Response response) throws JSONException {
+                return new UpdateMailResponse(response);
+            }
+        };
     }
 
 }

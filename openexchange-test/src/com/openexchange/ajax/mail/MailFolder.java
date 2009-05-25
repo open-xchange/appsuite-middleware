@@ -58,7 +58,8 @@ import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link MailFolder}
+ * {@link MailFolder} - an enumeration of all default mail folders that exist
+ * in a typical e-mail account.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */

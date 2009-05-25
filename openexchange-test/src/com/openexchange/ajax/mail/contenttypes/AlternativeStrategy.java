@@ -53,7 +53,8 @@ import org.json.JSONException;
 import com.openexchange.ajax.mail.TestMail;
 
 /**
- * {@link AlternativeStrategy}
+ * {@link AlternativeStrategy} - sanitizes a test mail of content-type "alternative",
+ * cloning the mail text as first attachment and so on.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */

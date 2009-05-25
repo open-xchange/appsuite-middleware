@@ -298,7 +298,7 @@ public class TestMail implements IdentitySource<TestMail> {
         if (json.has(field)) {
             setId(json.getString(field));
         }
-        field = "folder_id";
+        field = "folder_id"; //yes, not MailJSONField.FOLDER, don't get any ideas... 
         if (json.has(field)) {
             setFolder(json.getString(field));
         }
@@ -323,7 +323,6 @@ public class TestMail implements IdentitySource<TestMail> {
             for (int i = 0, size = array.length(); i < size; i++) {
                 attachment.add(array.getJSONObject(i));
             }
-
         }
         sanitize();
     }
@@ -581,7 +580,7 @@ public class TestMail implements IdentitySource<TestMail> {
     public Class<TestMail> getType() {
         return TestMail.class;
     }
-
+    
     public void rememberIdentityValues(TestMail entry) {
         setId(entry.getId());
         setFolder(entry.getFolder());
