@@ -47,40 +47,48 @@
  *
  */
 
-package com.openexchange.publish.microformats.internal;
+package com.openexchange.publish.microformats;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.user.UserService;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.publish.AbstractPublicationService;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationTarget;
 
 
 /**
- * {@link Users}
+ * {@link DummyContactMFPublisher}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Users {
+public class DummyContactMFPublisher extends AbstractPublicationService {
 
-    private static UserService userService;
-    
-    public static void setUserService(UserService service) {
-        userService = service;
-    }
-    
-    /**
-     * @param ctx
-     * @param ownerId
-     * @return
-     */
-    public static User load(Context ctx, int ownerId) {
-        try {
-            return userService.getUser(ownerId, ctx);
-        } catch (UserException e) {
-            e.printStackTrace();
+    private PublicationTarget target;
+
+    @Override
+    public PublicationTarget getTarget() throws PublicationException {
+        if(target == null) {
+            target = buildTarget();
         }
-        return null;
+        return target;
     }
+
+    private PublicationTarget buildTarget() {
+        PublicationTarget target = new PublicationTarget();
+        target.setId("com.openexchange.publish.microformats.contacts.online");
+        target.setDisplayName("OXMF Contacts");
+        target.setModule("folder:contacts");
+        target.setPublicationService(this);
+        
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(FormElement.input("siteName", "Name")).add(FormElement.checkbox("protect", "Hide with secret"));
+        target.setFormDescription(form);
+        
+        
+        return target;
+    }
+    
+    
 
 }
