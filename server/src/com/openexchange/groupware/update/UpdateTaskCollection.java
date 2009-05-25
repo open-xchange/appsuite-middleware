@@ -85,9 +85,7 @@ public class UpdateTaskCollection {
      */
     static void setUpdateTaskList(final List<UpdateTask> updateTaskList) {
         UpdateTaskCollection.staticUpdateTaskList = updateTaskList;
-        updateTaskQueue = new LinkedBlockingQueue<UpdateTask>();
-        // Initially prefill working queue
-        updateTaskQueue.addAll(staticUpdateTaskList);
+        updateTaskQueue = new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList);
     }
 
     /**
