@@ -88,6 +88,8 @@ public class MoveMailTest extends AbstractMailTest {
     }
     
     public void testShouldMoveFromSentToDrafts() throws AjaxException, IOException, SAXException, JSONException{
+        MailTestManager manager = new MailTestManager(client, false);
+        
         String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Move a mail", "ALTERNATE", "Move from sent to drafts").toString() );
         
@@ -95,23 +97,22 @@ public class MoveMailTest extends AbstractMailTest {
         String destination = values.getDraftsFolder();
         
         TestMail myMail = TestMail.create( getFirstMailInFolder( origin) );
-        String oldID = myMail.getId()+10;
+        String oldID = myMail.getId();
         
-        MoveMailRequest moveRequest = new MoveMailRequest(origin, destination, oldID, false);
-        UpdateMailResponse moveResponse = client.execute(moveRequest);
-        String newID = moveResponse.getID();
+        TestMail movedMail = manager.move(myMail, destination);
+        String newID = movedMail.getId();
         
-        GetRequest getRequest = new GetRequest(destination, newID, false);
-        GetResponse getResponse = client.execute(getRequest);
-        assertTrue("Should produce no errors when getting moved e-mail", !getResponse.hasError() );
-        assertTrue("Should produce no conflicts when getting moved e-mail", !getResponse.hasConflicts() );
+        manager.get(destination, newID);
+        assertTrue("Should produce no errors when getting moved e-mail", !manager.getLastResponse().hasError() );
+        assertTrue("Should produce no conflicts when getting moved e-mail", !manager.getLastResponse().hasConflicts() );
         
-        GetRequest getRequest2 = new GetRequest(origin, oldID, false);
-        GetResponse getResponse2 = client.execute(getRequest2);
-        assertTrue("Should produce errors when trying to get moved e-mail from original place", getResponse2.hasError() );        
+        manager.get(origin, oldID);
+        assertTrue("Should produce errors when trying to get moved e-mail from original place", manager.getLastResponse().hasError() );        
     }
     
     public void testShouldNotMoveToNonExistentFolder() throws AjaxException, IOException, SAXException, JSONException{
+        MailTestManager manager = new MailTestManager(client, false);
+
         String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Move another mail", "ALTERNATE", "Move from sent to drafts").toString() );
         
@@ -121,16 +122,13 @@ public class MoveMailTest extends AbstractMailTest {
         TestMail myMail = TestMail.create( getFirstMailInFolder( origin) );
         String oldID = myMail.getId();
         
-        MoveMailRequest moveRequest = new MoveMailRequest(origin, destination, oldID, false);
-        UpdateMailResponse moveResponse = client.execute(moveRequest);
+        manager.move(myMail, destination);
+        assertTrue("Should produce error message when trying to move to nonexistent folder", manager.getLastResponse().hasError());
+        assertEquals("Should produce proper error message ", "IMAP-1002", manager.getLastResponse().getException().getErrorCode());
         
-        assertEquals("Should produce proper error message ", "IMAP-1002", moveResponse.getException().getErrorCode());
-        assertTrue("Should produce error message when trying to move to nonexistent folder", moveResponse.hasError());
-        
-        GetRequest getRequest = new GetRequest(origin, oldID, false);
-        GetResponse getResponse = client.execute(getRequest);
-        assertTrue("Should produce no errors when getting e-mail from original location", !getResponse.hasError() );
-        assertTrue("Should produce no conflicts when getting e-mail from original location", !getResponse.hasConflicts() );
+        manager.get(origin, oldID);
+        assertTrue("Should still have e-mail at original location", !manager.getLastResponse().hasError() );
+        assertTrue("Should produce no conflicts when getting e-mail from original location", !manager.getLastResponse().hasConflicts() );
     }
 
 }

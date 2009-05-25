@@ -57,9 +57,14 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
+import com.openexchange.ajax.mail.actions.MoveMailRequest;
+import com.openexchange.ajax.mail.actions.UpdateMailResponse;
 import com.openexchange.mail.MailListField;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -70,11 +75,41 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class MailTestManager {
 
+    private boolean failOnError;
+
+    private AJAXClient client;
+
+    private AbstractAJAXResponse lastResponse;
+
+    public MailTestManager() {
+
+    }
+
+    public MailTestManager(AJAXClient client) {
+        this.client = client;
+    }
+
+    public MailTestManager(AJAXClient client, boolean failOnError) {
+        this(client);
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * returns the last response executed or null if none happened.
+     */
+    public AbstractAJAXResponse getLastResponse() {
+        return lastResponse;
+    }
+
+    /**
+     * Deletes mails that are similar to the given one in the same folder. Similarity is based on the subject. This sets the lastResponse
+     * field.
+     */
     public void deleteSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
         LinkedList<String[]> similarMails = findSimilarMails(mail, client);
 
         DeleteRequest deleteRequest = new DeleteRequest(similarMails.toArray(new String[][] {}));
-        client.execute(deleteRequest);
+        lastResponse = client.execute(deleteRequest);
     }
 
     public LinkedList<String[]> findSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
@@ -97,5 +132,31 @@ public class MailTestManager {
         }
 
         return FoldersAndIds;
+    }
+
+    /**
+     * Moves a mail from its own folder to a given one.
+     * Returns a new TestMail containing the new, moved object or null if the move didn't work.  
+     * This method sets the lastResponse field.
+     */
+    public TestMail move(TestMail mail, String destination) throws AjaxException, IOException, SAXException, JSONException {
+        MoveMailRequest request = new MoveMailRequest(mail.getFolder(), destination, mail.getId(), failOnError);
+        UpdateMailResponse response = client.execute(request);
+        lastResponse = response;
+        if(lastResponse.hasError())
+            return null;
+        return get(destination, response.getID());
+    }
+
+    /**
+     * Gets a mail from the server or null if it could not be found. 
+     * This sets the last response field.
+     */
+    public TestMail get(String folder, String id) throws AjaxException, IOException, SAXException, JSONException {
+        GetRequest request = new GetRequest(folder, id, failOnError);
+        lastResponse = client.execute(request);
+        if(lastResponse.hasError())
+            return null;
+        return new TestMail((JSONObject) lastResponse.getData());
     }
 }
