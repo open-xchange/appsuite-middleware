@@ -83,11 +83,13 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
         }
         if (addedService instanceof MultipleHandlerFactoryService) {
             final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
-            if (null != registry) {
-                registry.addFactoryService((MultipleHandlerFactoryService) addedService);
+            if (null != registry && registry.addFactoryService((MultipleHandlerFactoryService) addedService)) {
+                return addedService;
             }
         }
-        return addedService;
+        // Drop reference
+        context.ungetService(reference);
+        return null;
     }
 
     public void modifiedService(final ServiceReference reference, final Object service) {
@@ -95,6 +97,9 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
+        if (null == service) {
+            return;
+        }
         try {
             if (service instanceof MultipleHandlerFactoryService) {
                 final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
