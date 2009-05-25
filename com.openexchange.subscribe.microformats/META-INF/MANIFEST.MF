@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Microformats Plug-in
+Bundle-SymbolicName: com.openexchange.subscribe.microformats
+Bundle-Version: 1.0.0
+Bundle-Activator: com.openexchange.subscribe.microformats.Activator
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.osgi.framework;version="1.3.0"
