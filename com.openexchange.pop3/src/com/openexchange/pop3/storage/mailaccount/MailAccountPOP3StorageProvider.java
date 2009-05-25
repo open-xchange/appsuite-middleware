@@ -67,6 +67,11 @@ import com.openexchange.pop3.storage.mailaccount.util.StorageDeleteListener;
  */
 public final class MailAccountPOP3StorageProvider implements POP3StorageProvider {
 
+    /**
+     * The provider name for mail account POP3 storage provider.
+     */
+    public static final String NAME = "mailaccount";
+
     private final List<MailAccountDeleteListener> deleteListeners;
 
     /**
@@ -84,7 +89,7 @@ public final class MailAccountPOP3StorageProvider implements POP3StorageProvider
     }
 
     public String getPOP3StorageName() {
-        return "mailaccount";
+        return NAME;
     }
 
     public POP3StorageProperties getPOP3StorageProperties(final POP3Access pop3Access) throws MailException {
