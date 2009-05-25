@@ -112,7 +112,8 @@ public class UpdateProcess implements Runnable {
                     try {
                         lockSchema(schema);
                     } catch (final SchemaException e) {
-                        unlock = null != e.getCause() && e.getCause() instanceof SQLException;
+                        final Throwable cause = e.getCause();
+                        unlock = (null != cause) && (cause instanceof SQLException);
                     }
                     /*
                      * Lock successfully obtained, thus remember to unlock
