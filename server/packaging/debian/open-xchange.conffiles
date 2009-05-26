@@ -5,7 +5,6 @@
 /opt/open-xchange/etc/groupware/mime.types
 /opt/open-xchange/etc/groupware/ox-scriptconf.sh
 /opt/open-xchange/etc/groupware/sessioncache.ccf
-/opt/open-xchange/etc/groupware/updatetasks.cfg
 /opt/open-xchange/etc/groupware/ajp.properties
 /opt/open-xchange/etc/groupware/attachment.properties
 /opt/open-xchange/etc/groupware/calendar.properties
