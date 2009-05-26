@@ -49,7 +49,6 @@
 
 package com.openexchange.crypto;
 
-import java.security.GeneralSecurityException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

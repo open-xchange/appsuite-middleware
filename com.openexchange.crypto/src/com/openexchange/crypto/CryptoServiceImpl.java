@@ -52,13 +52,10 @@ package com.openexchange.crypto;
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
 import static com.openexchange.crypto.CryptoErrorMessage.EncodingException;
 import static com.openexchange.crypto.CryptoErrorMessage.SecurityException;
-
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
