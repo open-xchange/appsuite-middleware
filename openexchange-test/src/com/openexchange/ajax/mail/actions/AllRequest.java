@@ -49,38 +49,62 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAllRequest;
-import com.openexchange.ajax.framework.CommonAllParser;
-import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.mail.MailListField;
 
 /**
  * {@link AllRequest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public class AllRequest  extends AbstractAllRequest<AllResponse> {
+public class AllRequest extends AbstractAllRequest<AllResponse> {
+
+    private boolean threadSort;
 
     /**
      * Default constructor.
      */
-    public AllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+    public AllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super(servletPath, folderId, columns, sort, order, failOnError);
     }
 
     /**
      * Default constructor.
      */
-    public AllRequest(final String folderPath,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+    public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        if (!threadSort) {
+            return super.getParameters();
+        }
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        params.add(new Parameter(AJAXServlet.PARAMETER_SORT, "thread"));
+        if (validateLimit()) {
+            params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
+            params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
+        }
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    /**
+     * Enables thread-sort.
+     * 
+     * @param threadSort <code>true</code> to enable thread-sort; otherwise <code>false</code>
+     * @return This ALL request with thread-sort enabled/disabled
+     */
+    public AllRequest setThreadSort(final boolean threadSort) {
+        this.threadSort = threadSort;
+        return this;
     }
 
     /**

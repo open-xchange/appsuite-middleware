@@ -136,7 +136,8 @@ public final class ThreadSortTest extends AbstractMailTest {
         for (int i = 0; i < array.length; i++) {
             final Object[] inner = array[i];
             for (int j = 0; j < inner.length; j++) {
-                System.out.println("Thread-Level: " + inner[2].toString());
+                final int threadLevel = Integer.parseInt(inner[2].toString());
+                assertTrue("Illegal thread level value: " + threadLevel, threadLevel >= 0);
             }
         }
     }

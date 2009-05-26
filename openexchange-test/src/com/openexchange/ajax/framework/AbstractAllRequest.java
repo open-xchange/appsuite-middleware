@@ -51,41 +51,36 @@ package com.openexchange.ajax.framework;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractAllRequest<T extends AbstractAllResponse> implements AJAXRequest<T> {
 
-    private final String servletPath;
+    protected final String servletPath;
 
-    private final String folderId;
+    protected final String folderId;
 
-    private final int[] columns;
+    protected final int[] columns;
 
-    private final int sort;
+    protected final int sort;
 
-    private final Order order;
+    protected final Order order;
 
-    private final boolean failOnError;
+    protected final boolean failOnError;
 
-    private int leftHandLimit = -1;
+    protected int leftHandLimit = -1;
 
-    private int rightHandLimit = -1;
+    protected int rightHandLimit = -1;
 
     /**
      * Default constructor.
      */
-    public AbstractAllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+    public AbstractAllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.folderId = String.valueOf(folderId);
@@ -98,9 +93,7 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
     /**
      * Default constructor.
      */
-    public AbstractAllRequest(final String servletPath, final String folderPath,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+    public AbstractAllRequest(final String servletPath, final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.folderId = folderPath;
@@ -136,18 +129,16 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
      */
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ALL));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
+            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         }
         if (validateLimit()) {
-	        params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
-	        params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
+            params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
+            params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
         }
         return params.toArray(new Parameter[params.size()]);
     }
@@ -171,32 +162,32 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
         return failOnError;
     }
 
-	/**
-	 * Sets the leftHandLimit
-	 *
-	 * @param leftHandLimit the leftHandLimit to set
-	 */
-	public void setLeftHandLimit(final int leftHandLimit) {
-		this.leftHandLimit = leftHandLimit;
-	}
+    /**
+     * Sets the leftHandLimit
+     * 
+     * @param leftHandLimit the leftHandLimit to set
+     */
+    public void setLeftHandLimit(final int leftHandLimit) {
+        this.leftHandLimit = leftHandLimit;
+    }
 
-	/**
-	 * Sets the rightHandLimit
-	 *
-	 * @param rightHandLimit the rightHandLimit to set
-	 */
-	public void setRightHandLimit(final int rightHandLimit) {
-		this.rightHandLimit = rightHandLimit;
-	}
+    /**
+     * Sets the rightHandLimit
+     * 
+     * @param rightHandLimit the rightHandLimit to set
+     */
+    public void setRightHandLimit(final int rightHandLimit) {
+        this.rightHandLimit = rightHandLimit;
+    }
 
-	private boolean validateLimit() {
-		if ((rightHandLimit != -1 || leftHandLimit != -1)) {
-			if (rightHandLimit < leftHandLimit) {
-				throw new IllegalArgumentException("right-hand index is less than left-hand index");
-			}
-			return true;
-		}
-		return false;
-	}
+    protected final boolean validateLimit() {
+        if ((rightHandLimit != -1 || leftHandLimit != -1)) {
+            if (rightHandLimit < leftHandLimit) {
+                throw new IllegalArgumentException("right-hand index is less than left-hand index");
+            }
+            return true;
+        }
+        return false;
+    }
 
 }
