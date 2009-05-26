@@ -52,9 +52,10 @@ package com.openexchange.groupware.update;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
- * A single update task.
- * 
+ * {@link UpdateTask} - A single update task.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UpdateTask {
 
