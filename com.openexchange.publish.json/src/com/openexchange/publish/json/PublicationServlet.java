@@ -97,6 +97,12 @@ public class PublicationServlet extends AbstractPublicationServlet{
         discovery = service;
     }
     
+    private static final Map<String, EntityType> entityTypes = new HashMap<String, EntityType>();
+
+    public static void registerEntityType(String module, EntityType entityType) {
+        entityTypes.put(module, entityType);
+    }
+
     
     @Override
     protected Log getLog() {
@@ -150,7 +156,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
         }
     }
 
-    private void createPublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
+    private void createPublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException, PublicationJSONException {
         ServerSession session = getSessionObject(req);
         Publication publication = getPublication(req, session);
         publication.setId(-1);
@@ -162,9 +168,9 @@ public class PublicationServlet extends AbstractPublicationServlet{
         
     }
 
-    private Publication getPublication(HttpServletRequest req, ServerSession session) throws JSONException, IOException, PublicationException {
+    private Publication getPublication(HttpServletRequest req, ServerSession session) throws JSONException, IOException, PublicationException, PublicationJSONException {
         JSONObject object = new JSONObject(getBody(req));
-        Publication publication = new PublicationParser(discovery).parse(object);
+        Publication publication = new PublicationParser(discovery, entityTypes).parse(object);
         publication.setUserId(session.getUserId());
         publication.setContext(session.getContext());
         if(publication.getTarget() == null && publication.getId() > 0) {
@@ -175,7 +181,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-    private void updatePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
+    private void updatePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException, PublicationJSONException {
         ServerSession session = getSessionObject(req);
         Publication publication = getPublication(req, session);
         
@@ -211,8 +217,8 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-    private void writePublication(Publication publication, HttpServletResponse resp) throws JSONException {
-        JSONObject object = new PublicationWriter().write(publication);
+    private void writePublication(Publication publication, HttpServletResponse resp) throws JSONException, PublicationJSONException {
+        JSONObject object = new PublicationWriter(entityTypes).write(publication);
         writeData(object, resp);
     }
 
@@ -228,15 +234,16 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
 
 
-    private void loadAllPublicationsForEntity(HttpServletRequest req, HttpServletResponse resp) throws PublicationJSONException, PublicationException {
-        if(null == req.getParameter("entityId")) {
-            throw MISSING_PARAMETER.create("entityId");
-        }
+    private void loadAllPublicationsForEntity(HttpServletRequest req, HttpServletResponse resp) throws PublicationJSONException, PublicationException, JSONException {
         if(null == req.getParameter("entityModule")) {
             throw MISSING_PARAMETER.create("entityModule");
         }
-        String entityId = req.getParameter("entityId");
         String module = req.getParameter("entityModule");
+        EntityType entityType = entityTypes.get(module);
+        if(null == entityType) {
+            throw UNKOWN_ENTITY_MODULE.create(module);
+        }
+        String entityId = entityType.toEntityID(req);
         Context context = getSessionObject(req).getContext();
         List<Publication> publications = loadAllPublicationsForEntity(context, entityId, module);
     
@@ -264,7 +271,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-    private void listPublications(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
+    private void listPublications(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException, PublicationJSONException {
         JSONArray ids = new JSONArray(getBody(req));
         Context context = getSessionObject(req).getContext();
         List<Publication> publications = new ArrayList<Publication>(ids.length());
@@ -283,9 +290,9 @@ public class PublicationServlet extends AbstractPublicationServlet{
         writePublications(publications, basicColumns, dynamicColumns, dynamicColumnOrder, resp);
     }
 
-    private void writePublications(List<Publication> allPublications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder, HttpServletResponse resp) {
+    private void writePublications(List<Publication> allPublications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder, HttpServletResponse resp) throws PublicationJSONException, JSONException {
         JSONArray rows = new JSONArray();
-        PublicationWriter writer = new PublicationWriter();
+        PublicationWriter writer = new PublicationWriter(entityTypes);
         for (Publication publication : allPublications) {
             JSONArray row = writer.writeArray(publication, basicColumns, dynamicColumns, dynamicColumnOrder, publication.getTarget().getFormDescription());
             rows.put(row);
@@ -304,7 +311,6 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
     
     private static final Set<String> KNOWN_PARAMS = new HashSet<String>() {{
-        add("entityId");
         add("entityModule");
         add("columns");
         add("session");
@@ -316,7 +322,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
         List<String> dynamicColumnIdentifiers = new ArrayList<String>();
         while(parameterNames.hasMoreElements()) {
             String paramName = (String) parameterNames.nextElement();
-            if(!KNOWN_PARAMS.contains(paramName)) {
+            if(!KNOWN_PARAMS.contains(paramName) && paramName.contains(".")) {
                 dynamicColumnIdentifiers.add(paramName);
             }
         }

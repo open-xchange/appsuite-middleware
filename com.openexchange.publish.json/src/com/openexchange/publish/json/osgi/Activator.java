@@ -7,6 +7,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONErrorMessage;
 import com.openexchange.publish.json.PublicationServlet;
 import com.openexchange.publish.json.PublicationTargetServlet;
+import com.openexchange.publish.json.types.IDType;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 public class Activator extends DeferredActivator {
@@ -42,6 +43,9 @@ public class Activator extends DeferredActivator {
         }
         PublicationTargetServlet.setPublicationTargetDiscoveryService(discovery);
         PublicationServlet.setPublicationTargetDiscoveryService(discovery);
+        PublicationServlet.registerEntityType("folder:contacts", new IDType());
+        PublicationServlet.registerEntityType("infostore", new IDType());
+        
         final HttpService httpService = getService(HttpService.class);
         try {
             httpService.registerServlet(TARGET_ALIAS, (targetServlet = new PublicationTargetServlet()), null, null);

@@ -49,6 +49,8 @@
 
 package com.openexchange.publish.json;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -75,10 +77,18 @@ public class PublicationWriter {
     private static final FormContentWriter formWriter = new FormContentWriter();
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
-    public JSONObject write(Publication publication) throws JSONException {
+    private Map<String, EntityType> entityTypes = new HashMap<String, EntityType>();
+    
+    public PublicationWriter() {}
+    
+    public PublicationWriter(Map<String, EntityType> entityTypes) {
+        this.entityTypes = entityTypes;
+    }
+    
+    public JSONObject write(Publication publication) throws JSONException, PublicationJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, publication.getId());
-        object.put(ENTITY_ID, publication.getEntityId());
+        object.put(ENTITY, writeEntity(publication));
         object.put(ENTITY_MODULE, publication.getModule());
         object.put(URL, publication.getUrl());
         String targetId = publication.getTarget().getId();
@@ -87,7 +97,7 @@ public class PublicationWriter {
         return object;
     }
 
-    public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) {
+    public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws PublicationJSONException, JSONException {
         JSONArray array = new JSONArray();
         writeBasicCols(array, publication, basicCols);
         for(String identifier : specialsList) {
@@ -111,12 +121,12 @@ public class PublicationWriter {
         }
     }
 
-    private void writeBasicCols(JSONArray array,Publication publication, String[] basicCols) {
+    private void writeBasicCols(JSONArray array,Publication publication, String[] basicCols) throws PublicationJSONException, JSONException {
         for(String basicCol : basicCols) {
             if(ID.equals(basicCol)) {
                 array.put(publication.getId());
-            } else if ( ENTITY_ID.equals(basicCol)) {
-                array.put(publication.getEntityId());
+            } else if ( ENTITY.equals(basicCol)) {
+                array.put(writeEntity(publication));
             } else if ( ENTITY_MODULE.equals(basicCol)) {
                 array.put(publication.getModule());
             } else if ( URL.equals(basicCol) ) {
@@ -125,6 +135,18 @@ public class PublicationWriter {
                 array.put(publication.getTarget().getId());
             }
         }
+    }
+
+    private JSONObject writeEntity(Publication publication) throws PublicationJSONException, JSONException {
+        EntityType type = entityTypes.get(publication.getModule());
+        if(type == null) {
+            throw PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE.create(publication.getModule());
+        }
+        return type.toEntity(publication.getEntityId());
+    }
+
+    public void registerEntityType(String module, EntityType entityType) {
+        entityTypes.put(module, entityType);
     }
 
 }

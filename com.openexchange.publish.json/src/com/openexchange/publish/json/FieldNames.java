@@ -58,7 +58,7 @@ package com.openexchange.publish.json;
  */
 public class FieldNames {
     public static final String ID = "id";
-    public static final String ENTITY_ID = "entityId";
+    public static final String ENTITY = "entity";
     public static final String ENTITY_MODULE = "entityModule";
     public static final String URL = "url";
     public static final String TARGET = "target";

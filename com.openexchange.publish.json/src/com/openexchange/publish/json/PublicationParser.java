@@ -50,6 +50,7 @@
 package com.openexchange.publish.json;
 
 import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
@@ -57,43 +58,56 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-
 import static com.openexchange.publish.json.FieldNames.*;
-
 
 /**
  * {@link PublicationParser}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class PublicationParser {
 
     private PublicationTargetDiscoveryService discovery;
 
     private static final FormContentParser formParser = new FormContentParser();
-    
+
+    private Map<String, EntityType> entityTypes = new HashMap<String, EntityType>();
+
     public PublicationParser(PublicationTargetDiscoveryService discovery) {
         super();
         this.discovery = discovery;
+    }
+    
+    public PublicationParser(PublicationTargetDiscoveryService discovery, Map<String, EntityType> entityTypes) {
+        super();
+        this.discovery = discovery;
+        this.entityTypes = entityTypes;
     }
 
     /**
      * @param object
      * @return
-     * @throws JSONException 
-     * @throws PublicationException 
+     * @throws JSONException
+     * @throws PublicationException
+     * @throws PublicationJSONException 
      */
-    public Publication parse(JSONObject object) throws JSONException, PublicationException {
+    public Publication parse(JSONObject object) throws JSONException, PublicationException, PublicationJSONException {
         Publication publication = new Publication();
         if(object.has(ID)) {
             publication.setId(object.getInt(ID));
         }
-        if(object.has(ENTITY_ID)) {
-            publication.setEntityId(object.getString(ENTITY_ID));
-        }
         if(object.has(ENTITY_MODULE)) {
-            publication.setModule(object.getString(ENTITY_MODULE));
+            String module = object.getString(ENTITY_MODULE);
+            publication.setModule(module);
+            if(object.has(ENTITY)) {
+                JSONObject entityDefinition = object.getJSONObject(ENTITY);
+                EntityType entityType = entityTypes.get(module);
+                if(entityType == null) {
+                    throw PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE.create(module);
+                }
+                String entityId = entityType.toEntityID(entityDefinition);
+                publication.setEntityId(entityId);
+            }
         }
         if(object.has(TARGET)) {
             PublicationTarget target = discovery.getTarget(object.getString(TARGET));
@@ -105,6 +119,10 @@ public class PublicationParser {
             }
         }
         return publication;
+    }
+
+    public void registerEntityType(String type, EntityType entityType) {
+        entityTypes.put(type, entityType);
     }
 
 }

@@ -90,20 +90,25 @@ public class PublicationWriterTest extends TestCase {
         
         publication = new Publication();
         publication.setId(23);
-        publication.setEntityId("12");
-        publication.setModule("infostore");
+        publication.setEntityId("12:13");
+        publication.setModule("oranges");
         publication.setUrl("http://example.invalid/publication");
         publication.setTarget(target);
         publication.setConfiguration(config);
     }
     
-    public void testWriteObject() throws JSONException {
-        JSONObject object = new PublicationWriter().write(publication);
+    public void testWriteObject() throws JSONException, PublicationJSONException {
+        PublicationWriter writer = new PublicationWriter();
+        writer.registerEntityType("oranges", new OrangesEntityType());
+        JSONObject object = writer.write(publication);
         
         JSONAssertion assertion = new JSONAssertion()
                 .hasKey("id").withValue(23)
-                .hasKey("entityId").withValue("12")
-                .hasKey("entityModule").withValue("infostore")
+                .hasKey("entity").withValueObject()
+                    .hasKey("id").withValue(12)
+                    .hasKey("folder").withValue(13)
+                    .objectEnds()
+                .hasKey("entityModule").withValue("oranges")
                 .hasKey("url").withValue("http://example.invalid/publication")
                 .hasKey("target").withValue("com.openexchange.publish.test")
                 .hasKey("com.openexchange.publish.test").withValueObject()
@@ -113,10 +118,10 @@ public class PublicationWriterTest extends TestCase {
                 .objectEnds();
         
         
-        assertValidates(assertion, object);
+       assertValidates(assertion, object);
     }
     
-    public void testWriteArray() throws JSONException {
+    public void testWriteArray() throws JSONException, PublicationJSONException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "target" };
         specialCols.put("com.openexchange.publish.test", new String[] { "siteName" });

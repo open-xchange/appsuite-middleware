@@ -91,7 +91,12 @@ public class PublicationParserTest extends TestCase {
         object = new JSONObject();
         
         object.put("id", 12);
-        object.put("entityId", 23);
+        
+        JSONObject entity = new JSONObject();
+        entity.put("id", 23);
+        entity.put("folder", 42);
+        
+        object.put("entity", entity);
         object.put("entityModule", "oranges");
         object.put("target", "com.openexchange.publish.test");
         
@@ -104,11 +109,13 @@ public class PublicationParserTest extends TestCase {
     
     }
     
-    public void testParse() throws JSONException, PublicationException {
-        Publication publication = new PublicationParser(discovery).parse(object);
+    public void testParse() throws JSONException, PublicationException, PublicationJSONException {
+        PublicationParser publicationParser = new PublicationParser(discovery);
+        publicationParser.registerEntityType("oranges", new OrangesEntityType());
+        Publication publication = publicationParser.parse(object);
         
         assertEquals("id was wrong", 12, publication.getId());
-        assertEquals("entityId was wrong", "23", publication.getEntityId());
+        assertEquals("entityId was wrong", "23:42", publication.getEntityId());
         assertEquals("entityModule was wrong", "oranges", publication.getModule());
 
         assertNotNull("target was null", publication.getTarget());

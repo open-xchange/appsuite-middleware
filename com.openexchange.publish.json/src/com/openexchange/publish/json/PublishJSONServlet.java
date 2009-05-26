@@ -4,6 +4,8 @@ package com.openexchange.publish.json;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,7 +48,8 @@ public class PublishJSONServlet extends PermissionServlet {
     private static final int PUT = 2;
 
     private static PublicationService publicationService;
-
+    
+    
     public static void setPublicationService(PublicationService service) {
         publicationService = service;
     }

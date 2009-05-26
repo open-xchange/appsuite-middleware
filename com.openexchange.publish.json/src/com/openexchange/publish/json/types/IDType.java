@@ -47,60 +47,32 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.publish.json.types;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-
+import javax.servlet.http.HttpServletRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.publish.json.EntityType;
 
 /**
- * {@link PublicationJSONErrorMessage}
- *
+ * {@link IDType}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public enum PublicationJSONErrorMessage implements OXErrorMessage {
-    THROWABLE(Category.INTERNAL_ERROR, 1, "Please try again later.", "An unexpected error occurred."),
-    MISSING_PARAMETER(Category.USER_INPUT, 2, "Please correct the client program", "Missing value for parameter %s"),
-    UNKNOWN_ACTION(Category.USER_INPUT, 3, "Please correct the client program","Unknown Action: %s"),
-    UNKOWN_ENTITY_MODULE(Category.USER_INPUT, 4, "Please use only entity modules known to the server", "Unknown entity module: %s");
+public class IDType implements EntityType {
 
-    private Category category;
-    private int errorCode;
-    private String help;
-    private String message;
-    
-    public static final PublicationJSONExceptionFactory EXCEPTIONS = new PublicationJSONExceptionFactory();
-    
-    private PublicationJSONErrorMessage(Category category, int errorCode, String help, String message) {
-        this.category = category;
-        this.errorCode = errorCode;
-        this.help = help;
-        this.message = message;
-    }
-    
-    public Category getCategory() {
-        return category;
+    public JSONObject toEntity(String entityId) throws JSONException {
+        JSONObject object = new JSONObject();
+        object.put("id", entityId);
+        return object;
     }
 
-    public int getDetailNumber() {
-        return errorCode;
+    public String toEntityID(JSONObject entityDefinition) throws JSONException {
+        return String.valueOf(entityDefinition.getInt("id"));
     }
 
-    public String getHelp() {
-        return help;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-    
-    public PublicationJSONException create(Throwable cause, Object...args) {
-        return EXCEPTIONS.create(this,cause, args);
-    }
-    
-    public PublicationJSONException create(Object...args) {
-        return EXCEPTIONS.create(this,args);
+    public String toEntityID(HttpServletRequest entityDefinition) throws JSONException {
+        return entityDefinition.getParameter("id");
     }
 
 }
