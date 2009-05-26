@@ -167,148 +167,143 @@ public final class UpdateTaskCollectionInit implements Initialization {
         if (!started.compareAndSet(false, true)) {
             LOG.error("UpdateTaskCollection has already been started", new Throwable());
         }
-        UpdateTaskCollection.initialize(getStaticUpdateTasks());
+        // Get static update tasks from configuration file
+        final List<UpdateTask> staticTasks = getStaticUpdateTasks();
+
+        UpdateTaskCollection.initialize(staticTasks);
         UpdateTaskRegistry.initInstance();
 
-        // Fill static update tasks
+        // Fill static update tasks programmatically if retrieval from configuration file returned null
 
-        // Version 1
-        final UpdateTaskRegistry registry = UpdateTaskRegistry.getInstance();
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateTableVersion());
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.SpamUpdateTask());
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.PasswordMechUpdateTask());
-        // Version 2
-        registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterMailAddressLength());
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.TaskModifiedByNotNull());
-        // Version 4
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DelFolderTreeTableUpdateTask());
-        // Version 5
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.UnboundFolderReplacementUpdateTask());
-        // Version 6
-        registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterCreatingDate());
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.TaskReminderFolderZero());
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailUploadQuotaUpdateTask());
-        // Version 7
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask());
-        // Version 8
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders());
-        // Version 10
-        registry.addUpdateTask(new com.openexchange.groupware.calendar.update.UpdateFolderIdInReminder());
-        // Version 11
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask());
-
-        // SP4 update tasks start from here
-
-        // Version 12
-        // Searches for duplicate infostore folder names and changes them. 
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreResolveFolderNameCollisions());
-        // Changes URL columns for infostore items to VARCHAR(256).
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreLongerURLFieldTask());
-        // Version 13
-        // Creates necessary table for spell check in database: spellcheck_user_dict
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.SpellCheckUserDictTableTask());
-        // Version 14
-        // Sets a not defined changed_from column for contacts to created_from.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsChangedFromUpdateTask());
-        // Version 15
-        // Checks and fixes the VARCHAR column sizes for contacts tables.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsFieldSizeUpdateTask());
-        // Version 16
-        // Moves contacts illegally moved to global addressbook into private contact folder.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsGlobalMoveUpdateTask());
-        // Version 17
-        // Removes attachments and links to deleted contacts.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsRepairLinksAttachments());
-        // Version 18
-        // Enlarges the column for task titles to VARCHAR(256).
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.EnlargeTaskTitle());
-        // Version 19
-        // Changes the column for series appointments exceptions to type TEXT to be able
-        // to store a lot of exceptions.
-        registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterDeleteExceptionFieldLength());
-        // Version 20
-        // Removes broken reminder caused by a bad SQL update command.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RemoveBrokenReminder());
-        // Version 21
-        // Bug 12099 caused some appointments to have the attribute modifiedBy stored as
-        // 0 in the database. This attribute is fixed with the creator.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentChangedFromZeroTask());
-        // Version 22
-        // Bug 12326 caused appointment exceptions to be treated at some code parts as
-        // series. Fix for bug 12212 added an check to discover those exceptions and not
-        // to treat them anymore as series. Fix for bug 12326 did this, too. Fix for bug
-        // 12442 adds an update task that corrects invalid data in the database for those
-        // appointments.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentExceptionRemoveDuplicateDatePosition());
-        // Version 23
-        // Bug 12495 caused appointment change exceptions to not have the recurrence date
-        // position. This is essential for clients to determine the original position of
-        // the change exception. This task tries to restore the missing recurrence date
-        // position.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentRepairRecurrenceDatePosition());
-        // Version 24
-        // Bug 12528 caused appointment change exception to not have the recurrence
-        // string anymore. This is essential for handling the recurrence date position
-        // correctly. This task tries to restore the missing recurrence string by copying
-        // it from the series appointment.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentRepairRecurrenceString());
-        // Version 25
-        // Bug 12595 caused a wrong folder identifier for participants of an appointment
-        // change exception. Then for this participant the change exception is not
-        // viewable anymore in the calendar. This update task tries to replace the wrong
-        // folder identifier with the correct one.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectWrongAppointmentFolder());
-
-        // SP5 update tasks start from here
-
-        // Version 26
-        // Introduces foreign key constraints on infostore_document and del_infostore_document.
-        // Assures these constraints are met.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments());
-        // Version 27
-        // Initial User Server Setting table
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.TaskCreateUserSettingServer());
-        // Version 28
-        // Adding column 'system' to both tables 'oxfolder_permissions' and 'del_oxfolder_permissions'
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.FolderAddPermColumnUpdateTask());
-        // Version 29
-        // Run task of version 17 again. The SP4 version was not fast enough for database
-        // connection timeouts.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsRepairLinksAttachments2());
-        // Version 30
-        // This update task combines several optimizations on the schema. Especially some
-        // indexes are improved.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectIndexes());
-        // Version 31
-        // This task corrects the charset and collation on all tables and the database
-        // itself.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectCharsetAndCollationTask());
-        // Version 32
-        // New infostore folder tree
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.NewInfostoreFolderTreeUpdateTask());
-        // Version 33
-        // Extends size of VARCHAR column 'dn' in both working and backup table of 'prg_date_rights'.
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTask());
-
-        // v6.10 update tasks start from here
-
-        // Version 34
-        // Adds necessary tables for multiple mail accounts and migrates mail account data
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask());
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountMigrationTask());
-        // Version 35
-        // Adds necessary tables to support missing POP3 features
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.POP3CreateTableTask());
-        // Version 36
-        // Adds necessary tables to support generic configuration storage
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateGenconfTablesTask());
-        // Version 37
-        // Adds necessary tables for subscribe service
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
-        // Version 38
-        // Adds necessary tables for publish service
-        registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreatePublicationTablesTask());
-
+        if (null == staticTasks) {
+            // Version 1
+            final UpdateTaskRegistry registry = UpdateTaskRegistry.getInstance();
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateTableVersion());
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.SpamUpdateTask());
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.PasswordMechUpdateTask());
+            // Version 2
+            registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterMailAddressLength());
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.TaskModifiedByNotNull());
+            // Version 4
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DelFolderTreeTableUpdateTask());
+            // Version 5
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.UnboundFolderReplacementUpdateTask());
+            // Version 6
+            registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterCreatingDate());
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.TaskReminderFolderZero());
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailUploadQuotaUpdateTask());
+            // Version 7
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask());
+            // Version 8
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders());
+            // Version 10
+            registry.addUpdateTask(new com.openexchange.groupware.calendar.update.UpdateFolderIdInReminder());
+            // Version 11
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask());
+            // Version 12
+            // Searches for duplicate infostore folder names and changes them.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreResolveFolderNameCollisions());
+            // Changes URL columns for infostore items to VARCHAR(256).
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreLongerURLFieldTask());
+            // Version 13
+            // Creates necessary table for spell check in database: spellcheck_user_dict
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.SpellCheckUserDictTableTask());
+            // Version 14
+            // Sets a not defined changed_from column for contacts to created_from.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsChangedFromUpdateTask());
+            // Version 15
+            // Checks and fixes the VARCHAR column sizes for contacts tables.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsFieldSizeUpdateTask());
+            // Version 16
+            // Moves contacts illegally moved to global addressbook into private contact folder.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsGlobalMoveUpdateTask());
+            // Version 17
+            // Removes attachments and links to deleted contacts.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsRepairLinksAttachments());
+            // Version 18
+            // Enlarges the column for task titles to VARCHAR(256).
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.EnlargeTaskTitle());
+            // Version 19
+            // Changes the column for series appointments exceptions to type TEXT to be able
+            // to store a lot of exceptions.
+            registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterDeleteExceptionFieldLength());
+            // Version 20
+            // Removes broken reminder caused by a bad SQL update command.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RemoveBrokenReminder());
+            // Version 21
+            // Bug 12099 caused some appointments to have the attribute modifiedBy stored as
+            // 0 in the database. This attribute is fixed with the creator.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentChangedFromZeroTask());
+            // Version 22
+            // Bug 12326 caused appointment exceptions to be treated at some code parts as
+            // series. Fix for bug 12212 added an check to discover those exceptions and not
+            // to treat them anymore as series. Fix for bug 12326 did this, too. Fix for bug
+            // 12442 adds an update task that corrects invalid data in the database for those
+            // appointments.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentExceptionRemoveDuplicateDatePosition());
+            // Version 23
+            // Bug 12495 caused appointment change exceptions to not have the recurrence date
+            // position. This is essential for clients to determine the original position of
+            // the change exception. This task tries to restore the missing recurrence date
+            // position.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentRepairRecurrenceDatePosition());
+            // Version 24
+            // Bug 12528 caused appointment change exception to not have the recurrence
+            // string anymore. This is essential for handling the recurrence date position
+            // correctly. This task tries to restore the missing recurrence string by copying
+            // it from the series appointment.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AppointmentRepairRecurrenceString());
+            // Version 25
+            // Bug 12595 caused a wrong folder identifier for participants of an appointment
+            // change exception. Then for this participant the change exception is not
+            // viewable anymore in the calendar. This update task tries to replace the wrong
+            // folder identifier with the correct one.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectWrongAppointmentFolder());
+            // Version 26
+            // Introduces foreign key constraints on infostore_document and del_infostore_document.
+            // Assures these constraints are met.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments());
+            // Version 27
+            // Initial User Server Setting table
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.TaskCreateUserSettingServer());
+            // Version 28
+            // Adding column 'system' to both tables 'oxfolder_permissions' and 'del_oxfolder_permissions'
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.FolderAddPermColumnUpdateTask());
+            // Version 29
+            // Run task of version 17 again. The SP4 version was not fast enough for database
+            // connection timeouts.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsRepairLinksAttachments2());
+            // Version 30
+            // This update task combines several optimizations on the schema. Especially some
+            // indexes are improved.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectIndexes());
+            // Version 31
+            // This task corrects the charset and collation on all tables and the database
+            // itself.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectCharsetAndCollationTask());
+            // Version 32
+            // New infostore folder tree
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.NewInfostoreFolderTreeUpdateTask());
+            // Version 33
+            // Extends size of VARCHAR column 'dn' in both working and backup table of 'prg_date_rights'.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTask());
+            // Version 34
+            // Adds necessary tables for multiple mail accounts and migrates mail account data
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask());
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountMigrationTask());
+            // Version 35
+            // Adds necessary tables to support missing POP3 features
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.POP3CreateTableTask());
+            // Version 36
+            // Adds necessary tables to support generic configuration storage
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateGenconfTablesTask());
+            // Version 37
+            // Adds necessary tables for subscribe service
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
+            // Version 38
+            // Adds necessary tables for publish service
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreatePublicationTablesTask());
+        }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
         }
