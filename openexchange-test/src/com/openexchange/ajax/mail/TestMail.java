@@ -278,6 +278,7 @@ public class TestMail implements IdentitySource<TestMail> {
         }
 
         read(I2i(columns), jsonArray);
+
         // handle fields that the other method cannot handle, because MailListField does not contain them.
         String field = "id";
         if (json.has(field)) {
