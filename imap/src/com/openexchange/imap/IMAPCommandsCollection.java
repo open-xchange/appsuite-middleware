@@ -1647,11 +1647,12 @@ public final class IMAPCommandsCollection {
                 final List<MailMessage> l = new ArrayList<MailMessage>(len);
                 if (response.isOK()) {
                     final String fullname = imapFolder.getFullName();
+                    final String internaldate = "INTERNALDATE";
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                             final FetchResponse fr = (FetchResponse) r[j];
                             final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, STR_UID).uid), fullname);
-                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, "INTERNALDATE").getDate());
+                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, internaldate).getDate());
                             l.add(m);
                             r[j] = null;
                         }
