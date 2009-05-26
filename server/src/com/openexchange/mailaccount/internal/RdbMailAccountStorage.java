@@ -70,6 +70,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -82,7 +83,6 @@ import com.openexchange.mailaccount.servlet.fields.GetSwitch;
 import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.servlet.fields.SetSwitch;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.PasswordUtil;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
@@ -632,7 +632,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         final Object value = attribute.doSwitch(getter);
                         if (Attribute.PASSWORD_LITERAL == attribute) {
                             try {
-                                encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                                encryptedPassword = MailPasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
                             } catch (final GeneralSecurityException e) {
                                 throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                             }
@@ -672,7 +672,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                             if (encryptedPassword == null) {
                                 try {
-                                    encryptedPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                                    encryptedPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
                                 } catch (final GeneralSecurityException e) {
                                     throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                                 }
@@ -815,7 +815,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             {
                 final String encryptedPassword;
                 try {
-                    encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                    encryptedPassword = MailPasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
                 } catch (final GeneralSecurityException e) {
                     throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                 }
@@ -854,7 +854,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null != transportURL) {
                 final String encryptedTransportPassword;
                 try {
-                    encryptedTransportPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                    encryptedTransportPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
                 } catch (final GeneralSecurityException e) {
                     throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                 }
@@ -949,7 +949,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     encryptedPassword = null;
                 } else {
                     try {
-                        encryptedPassword = PasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
+                        encryptedPassword = MailPasswordUtil.encrypt(mailAccount.getPassword(), sessionPassword);
                     } catch (final GeneralSecurityException e) {
                         throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                     }
@@ -999,7 +999,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     encryptedTransportPassword = null;
                 } else {
                     try {
-                        encryptedTransportPassword = PasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                        encryptedTransportPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
                     } catch (final GeneralSecurityException e) {
                         throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                     }

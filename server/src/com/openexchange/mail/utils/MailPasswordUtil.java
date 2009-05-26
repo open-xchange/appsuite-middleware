@@ -71,6 +71,11 @@ public final class MailPasswordUtil {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailPasswordUtil.class);
 
     /**
+     * The key length.
+     */
+    private static final int KEY_LENGTH = 8;
+
+    /**
      * The DES algorithm.
      */
     private static final String ALGORITHM_DES = "DES";
@@ -202,8 +207,6 @@ public final class MailPasswordUtil {
         final SecretKey secretKey = keyGenerator.generateKey();
         return secretKey;
     }
-
-    private static final int KEY_LENGTH = 8;
 
     /**
      * Generates a secret key from specified key string.

@@ -60,6 +60,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
@@ -67,7 +68,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.PasswordUtil;
 
 /**
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
@@ -505,7 +505,7 @@ public abstract class MailConfig {
             }
         } else {
             try {
-                mailConfig.password = PasswordUtil.decrypt(mailAccount.getPassword(), sessionPassword);
+                mailConfig.password = MailPasswordUtil.decrypt(mailAccount.getPassword(), sessionPassword);
             } catch (final GeneralSecurityException e) {
                 throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(e, new Object[0]));
             }
