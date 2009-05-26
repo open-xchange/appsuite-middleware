@@ -54,6 +54,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
+import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -72,6 +73,32 @@ public final class ThreadSortUtil {
      */
     private ThreadSortUtil() {
         super();
+    }
+
+    /**
+     * Creates a newly allocated array of <code>int</code> filled with message's sequence number.
+     * 
+     * @param threadResponse The thread response string; e.g.<br>
+     *            <code>&quot;&#042;&nbsp;THREAD&nbsp;(1&nbsp;(2)(3)(4)(5))(6)(7)(8)((9)(10)(11)(12)(13)(14)(15)(16)(17)(18)(19))&quot;</code>
+     * @return A newly allocated array of <code>int</code> filled with message's sequence number
+     */
+    public static int[] getSeqNumsFromThreadResponse(final String threadResponse) {
+        final char[] chars = threadResponse.toCharArray();
+        final SmartIntArray sia = new SmartIntArray();
+        final StringBuilder sb = new StringBuilder(8);
+        int i = 0;
+        while (i < chars.length) {
+            char c = chars[i++];
+            while (Character.isDigit(c)) {
+                sb.append(c);
+                c = chars[i++];
+            }
+            if (sb.length() > 0) {
+                sia.append(Integer.parseInt(sb.toString()));
+                sb.setLength(0);
+            }
+        }
+        return sia.toArray();
     }
 
     // private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
@@ -94,8 +121,8 @@ public final class ThreadSortUtil {
             }
             if (sb.length() > 0) {
                 tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
+                sb.setLength(0);
             }
-            sb.setLength(0);
         }
         return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
         /*-

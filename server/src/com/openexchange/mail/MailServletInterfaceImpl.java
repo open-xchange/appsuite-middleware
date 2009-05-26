@@ -934,14 +934,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
-            mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
+            final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
+            /*
+             * Apply thread level
+             */
+            for (int i = 0; i < fetchedMails.length; i++) {
+                fetchedMails[i].setThreadLevel(mails[i].getThreadLevel());
+            }
+            mails = fetchedMails;
         }
         try {
             /*
              * Remove old user cache entries
              */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), ctx);
-            if ((mails != null) && (mails.length > 0) && (mails.length < MailProperties.getInstance().getMailFetchLimit())) {
+            if ((mails.length > 0) && (mails.length < MailProperties.getInstance().getMailFetchLimit())) {
                 /*
                  * ... and put new ones
                  */

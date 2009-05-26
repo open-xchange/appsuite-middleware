@@ -499,7 +499,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     return EMPTY_RETVAL;
                 }
             }
-            Message[] msgs = null;
+            final int[] seqnums;
             final List<ThreadSortNode> threadList;
             {
                 /*
@@ -529,10 +529,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 /*
-                 * Parse THREAD response
+                 * Parse THREAD response to a list structure and extract sequence numbers
                  */
                 threadList = ThreadSortUtil.parseThreadResponse(threadResp);
-                msgs = ThreadSortUtil.getMessagesFromThreadResponse(imapFolder.getFullName(), imapFolder.getSeparator(), threadResp);
+                seqnums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
             }
             /*
              * Fetch messages
@@ -540,8 +540,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             final MailFields usedFields = new MailFields();
             final FetchProfile fetchProfile = getFetchProfile(fields, null, getIMAPProperties().isFastFetch());
             usedFields.addAll(Arrays.asList(fields));
+            usedFields.add(MailField.THREAD_LEVEL);
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-            msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), msgs, fetchProfile, false, true, body).doCommand();
+            Message[] msgs = new FetchIMAPCommand(
+                imapFolder,
+                imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                seqnums,
+                fetchProfile,
+                false,
+                true,
+                body).doCommand();
             /*
              * Apply thread level
              */
