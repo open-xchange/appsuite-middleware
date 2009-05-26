@@ -70,6 +70,10 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
 	private final String[] folderIds;
 	private boolean failOnError = true;
 	
+	public ClearRequest(String folderId){
+		this.folderIds = new String [] {folderId};
+	}
+	
 	public ClearRequest(String[] folderIds){
 		this.folderIds = folderIds;
 	}
