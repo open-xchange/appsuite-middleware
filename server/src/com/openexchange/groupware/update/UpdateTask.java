@@ -91,6 +91,9 @@ public interface UpdateTask {
      * 
      * <pre>
      * 
+     * 
+     * 
+     * 
      * public int getPriority() {
      *     return UpdateTask.UpdateTaskPriority.NORMAL.priority;
      * }
@@ -101,9 +104,8 @@ public interface UpdateTask {
     int getPriority();
 
     /**
-     * This method is called to apply the changes to the schema of the database. Write the schema changing code in this method that it
-     * doesn't destroy any information in the database if changes already have been applied. This ensures that update tasks can be executed
-     * twice if a task failed.
+     * This method is called to apply the changes to the database schema. Performed changes must not destroy any information in the
+     * database. This ensures that update tasks can be executed twice if a task failed.
      * 
      * @param schema The schema meta data
      * @param contextId The context ID which is used to fetch database connections from the pool.
