@@ -105,8 +105,6 @@ public class AdminCache {
 
     private OXAdminPoolInterface pool = null;
 
-    private ArrayList<String> sequence_tables = null;
-
     private ArrayList<String> ox_queries_initial = null;
 
     /**
@@ -144,6 +142,7 @@ public class AdminCache {
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 
     public AdminCache() {
+        super();
     }
 
     /**
@@ -155,7 +154,6 @@ public class AdminCache {
     public void initCache() {
 
         this.prop = new PropertyHandler(System.getProperties());
-        readSequenceTables();
         cacheSqlScripts();
         readMasterCredentials();
         configureAuthentication(); // disabling authentication mechs
@@ -441,37 +439,6 @@ public class AdminCache {
                 log.warn("Error closing simple CONNECTION!", ecp);
             }
         }
-    }
-
-    private void readSequenceTables() {
-        final String seqfile = getInitialOXDBSqlDir() + "/sequences.sql";
-
-        final File f = new File(seqfile);
-        if (!f.canRead()) {
-            log.fatal("Cannot read file " + seqfile + "!");
-        }
-        sequence_tables = new ArrayList<String>();
-        try {
-            final BufferedReader bf = new BufferedReader(new FileReader(f));
-            String line = null;
-            while ((line = bf.readLine()) != null) {
-                if (!line.startsWith("CREATE TABLE")) {
-                    continue;
-                }
-                final String stable = Pattern.compile("^CREATE TABLE (.*) \\($", Pattern.CASE_INSENSITIVE).matcher(line).replaceAll("$1");
-                sequence_tables.add(stable);
-            }
-        } catch (Exception e) {
-            log.fatal("Error reading sequence tables!", e);
-        }
-
-    }
-
-    public ArrayList<String> getSequenceTables() throws OXGenericException {
-        if (sequence_tables == null) {
-            throw new OXGenericException("An error occured while reading the sequence tables.");
-        }
-        return sequence_tables;
     }
 
     private String getInitialOXDBSqlDir() {
