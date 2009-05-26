@@ -9,3 +9,8 @@ JAVA_XTRAOPTS=" -Xmx512M -XX:+UseConcMarkSweepGC"
 
 # Maximum number of open Files for the groupware
 NRFILES="8192"
+
+# Specify the umask of file permissions to be created by ox, e.g. in the
+# filestore
+UMASK=066
+
