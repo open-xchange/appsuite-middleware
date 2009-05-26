@@ -53,9 +53,11 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
 
 public class Activator implements BundleActivator {
@@ -64,7 +66,11 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration createTablesServiceRegistration;
 
+    private ComponentRegistration componentRegistration;
+
     public void start(BundleContext context) throws Exception {
+        componentRegistration = new ComponentRegistration(context, "com.openexchange.datatypes.genericonf.storage", "GCF", GenericConfigStorageErrorMessage.EXCEPTIONS);
+        
         MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
         mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
         createTablesServiceRegistration = context.registerService(CreateTableService.class.getName(), new CreateGenConfTables(), null);
@@ -77,6 +83,7 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception{
         serviceRegistration.unregister();
         createTablesServiceRegistration.unregister();
+        componentRegistration.unregister();
     }
 
 }
