@@ -145,7 +145,7 @@ public class CourierEntity2ACL extends Entity2ACL {
         /*
          * A shared folder
          */
-        final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, accountId, imapAddr);
+        final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser);
         if (sharedOwnerID == userId) {
             /*
              * Owner is equal to given user
@@ -202,7 +202,7 @@ public class CourierEntity2ACL extends Entity2ACL {
                  */
                 return getUserRetval(sessionUser);
             }
-            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr));
+            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
         }
         /*
          * A shared folder
@@ -211,17 +211,32 @@ public class CourierEntity2ACL extends Entity2ACL {
             /*
              * Map alias "owner" to shared folder owner
              */
-            return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, imapAddr));
+            return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser));
         }
-        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr));
+        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
     }
 
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws AbstractOXException {
+    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr, final int sessionUser) throws AbstractOXException {
         final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, imapAddr, ctx);
         if (0 == ids.length) {
             throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
         }
-        if (ids.length > 1 && LOG.isWarnEnabled()) {
+        if (1 == ids.length) {
+            return ids[0];
+        }
+        // Prefer session user
+        Arrays.sort(ids);
+        final int pos = Arrays.binarySearch(ids, sessionUser);
+        if (pos >= 0) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+                    "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                    "\nThe session user's ID is returned."));
+            }
+            return ids[pos];
+        }
+        // Just select first user ID
+        if (LOG.isWarnEnabled()) {
             LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
                 "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
                 "\nThe first found user is returned."));

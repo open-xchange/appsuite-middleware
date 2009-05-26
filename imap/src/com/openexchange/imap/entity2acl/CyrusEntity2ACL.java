@@ -132,21 +132,38 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         }
         final int accountId;
         final InetSocketAddress imapAddr;
+        final int sessionUser;
         try {
             accountId = ((Integer) args[0]).intValue();
             imapAddr = (InetSocketAddress) args[1];
+            sessionUser = ((Integer) args[2]).intValue();
         } catch (final ClassCastException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
         }
-        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr));
+        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
     }
 
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws AbstractOXException {
+    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr, final int sessionUser) throws AbstractOXException {
         final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, imapAddr, ctx);
         if (0 == ids.length) {
             throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
         }
-        if (ids.length > 1 && LOG.isWarnEnabled()) {
+        if (1 == ids.length) {
+            return ids[0];
+        }
+        // Prefer session user
+        Arrays.sort(ids);
+        final int pos = Arrays.binarySearch(ids, sessionUser);
+        if (pos >= 0) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+                    "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                    "\nThe session user's ID is returned."));
+            }
+            return ids[pos];
+        }
+        // Just select first user ID
+        if (LOG.isWarnEnabled()) {
             LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
                 "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
                 "\nThe first found user is returned."));
