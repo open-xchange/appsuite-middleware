@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail.actions;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.framework.AbstractAllRequest;
 import com.openexchange.groupware.search.Order;
 
@@ -89,6 +90,7 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         params.add(new Parameter(AJAXServlet.PARAMETER_SORT, "thread"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         if (validateLimit()) {
             params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
             params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
