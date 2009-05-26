@@ -50,118 +50,103 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
-import java.util.TimeZone;
-
 import javax.mail.internet.AddressException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
-import com.openexchange.ajax.mail.actions.ClearRequest;
 import com.openexchange.ajax.mail.actions.CopyRequest;
 import com.openexchange.ajax.mail.actions.CopyResponse;
-import com.openexchange.ajax.mail.actions.GetRequest;
-import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * 
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class CopyTest extends AbstractMailTest {
-	
-	private static final Log LOG = LogFactory.getLog(CopyTest.class);
-	private String mailObject_25kb;
-	
-	public CopyTest(String name){
-		super(name);
-	}
 
-	public void setUp() throws Exception{
-		super.setUp();
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-		//clearFolder(getDraftsFolder());
-		
-		/*
-		 * Create JSON mail object
-		 */
-		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-	}
-	
-	public void tearDown() throws Exception{
-		/*
-		 * Clean everything
-		 */
-//		clearFolder(getInboxFolder());
-//		clearFolder(getSentFolder());
-//		clearFolder(getTrashFolder());
-		//clearFolder(getDraftsFolder());
-		super.tearDown();
-	}
-	
-	public void testCopyingOneFolder() throws IOException, SAXException, JSONException, AddressException, AbstractOXException {
-		String destinationFolderID = getDraftsFolder();
-		
-		/*
-		 * Insert a mail through a send request
-		 */
-		SendResponse sr = getClient().execute(new SendRequest(mailObject_25kb)); 
-		String mailID = sr.getFolderAndID()[1];
-		LOG.info("Sent one mail, id : "+ mailID);
-		
-		
-		// Assert that there is only a single mail in the folder
-		AllResponse allR = Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
+    private static final Log LOG = LogFactory.getLog(CopyTest.class);
+
+    private String mailObject_25kb;
+
+    public CopyTest(String name) {
+        super(name);
+    }
+
+    public void setUp() throws Exception {
+        super.setUp();
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+        // clearFolder(getDraftsFolder());
+
+        /*
+         * Create JSON mail object
+         */
+        mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+    }
+
+    public void tearDown() throws Exception {
+        /*
+         * Clean everything
+         */
+        // clearFolder(getInboxFolder());
+        // clearFolder(getSentFolder());
+        // clearFolder(getTrashFolder());
+        // clearFolder(getDraftsFolder());
+        super.tearDown();
+    }
+
+    public void testCopyingOneFolder() throws IOException, SAXException, JSONException, AddressException, AbstractOXException {
+        String destinationFolderID = getDraftsFolder();
+
+        /*
+         * Insert a mail through a send request
+         */
+        SendResponse sr = getClient().execute(new SendRequest(mailObject_25kb));
+        String mailID = sr.getFolderAndID()[1];
+        LOG.info("Sent one mail, id : " + mailID);
+
+        // Assert that there is only a single mail in the folder
+        AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
         assertEquals("There should be only one message in the source folder", 1, allR.getMailMessages(COLUMNS_DEFAULT_LIST).length);
-        
+
         // Assert that the destination folder is empty
-		allR = Executor.execute(getSession(), new AllRequest(
-				destinationFolderID, COLUMNS_DEFAULT_LIST, 0, null, true));
+        allR = Executor.execute(getSession(), new AllRequest(destinationFolderID, COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
         assertEquals("There should be no messages in the destination folder", 0, allR.getMailMessages(COLUMNS_DEFAULT_LIST).length);
-        
+
         // Send the copy request
         CopyResponse cr = Executor.execute(getSession(), new CopyRequest(mailID, getInboxFolder(), destinationFolderID));
-//        String newMailID = cr.getID();
-//        System.out.println("***** newMailID : " + newMailID);
-//
+        // String newMailID = cr.getID();
+        // System.out.println("***** newMailID : " + newMailID);
+        //
         // get the new mailID
-		allR = Executor.execute(getSession(), new AllRequest(
-				destinationFolderID, COLUMNS_DEFAULT_LIST, 0, null, true));
+        allR = Executor.execute(getSession(), new AllRequest(destinationFolderID, COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
         assertEquals("There should be exactly one message in the destination folder", 1, allR.getMailMessages(COLUMNS_DEFAULT_LIST).length);
-//        
-//        
-//        // Assert the  message is in the destination folder
-//        GetResponse gr = getClient().execute(new GetRequest(destinationFolderID, newMailID));
-//        if (gr.hasError()) {
-//            fail(allR.getException().toString());
-//        }
-//        assertEquals("The mail messages are not identical", MAIL_SUBJECT, gr.getMail(TimeZone.getDefault()).getSubject());
-       
-	}
+        //        
+        //        
+        // // Assert the message is in the destination folder
+        // GetResponse gr = getClient().execute(new GetRequest(destinationFolderID, newMailID));
+        // if (gr.hasError()) {
+        // fail(allR.getException().toString());
+        // }
+        // assertEquals("The mail messages are not identical", MAIL_SUBJECT, gr.getMail(TimeZone.getDefault()).getSubject());
+
+    }
 }
