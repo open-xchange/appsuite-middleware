@@ -127,7 +127,7 @@ public class OXUtilMySQLStorageCommon {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SHOW DATABASES like ?");
+            stmt = con.prepareStatement("SHOW DATABASES LIKE ?");
             stmt.setString(1, name);
             result = stmt.executeQuery();
             return result.next();
@@ -140,11 +140,10 @@ public class OXUtilMySQLStorageCommon {
     }
 
     private void createDatabase(Connection con, String name) throws StorageException {
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         try {
-            stmt = con.prepareStatement("CREATE DATABASE ? DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
-            stmt.setString(1, name);
-            stmt.executeUpdate();
+            stmt = con.createStatement();
+            stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
@@ -189,7 +188,25 @@ public class OXUtilMySQLStorageCommon {
             throw new StorageException(e.getMessage(), e);
         }
         if (!toCreate.isEmpty()) {
-            throw new StorageException("FIXME");
+            StringBuilder sb = new StringBuilder();
+            sb.append("Unable to determine next CreateTableService to execute.\n");
+            sb.append("Existing tables: ");
+            for (String existingTable : existingTables) {
+                sb.append(existingTable);
+                sb.append(',');
+            }
+            sb.setCharAt(sb.length() - 1, '\n');
+            for (CreateTableService service : toCreate) {
+                sb.append(service.getClass().getName());
+                sb.append(": ");
+                for (String tableToCreate : service.requiredTables()) {
+                    sb.append(tableToCreate);
+                    sb.append(',');
+                }
+                sb.setCharAt(sb.length() - 1, '\n');
+            }
+            sb.setLength(sb.length() - 1);
+            throw new StorageException(sb.toString());
         }
     }
 
@@ -206,7 +223,7 @@ public class OXUtilMySQLStorageCommon {
         return null;
     }
 
-    public void deleteDatabase(final Database db) throws StorageException {
+    public void deleteDatabase(Database db) throws StorageException {
         final Connection con;
         try {
             con = cache.getSimpleSqlConnection(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
@@ -217,11 +234,11 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         try {
             con.setAutoCommit(false);
-            stmt = con.prepareStatement("DROP DATABASE IF EXISTS ?");
-            stmt.executeUpdate();
+            stmt = con.createStatement();
+            stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
             con.commit();
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
@@ -248,7 +265,5 @@ public class OXUtilMySQLStorageCommon {
         "task_participant", "task_eparticipant", "task_removedparticipant", "del_task", "del_task_folder", "del_task_participant",
         "del_task_eparticipant", "infostore", "infostore_document", "del_infostore", "del_infostore_document", "infostore_property",
         "infostore_lock", "lock_null", "lock_null_lock", "prg_attachment", "del_attachment", "prg_links", "reminder", "filestore_usage",
-        "ical_principal", "ical_ids", "vcard_principal", "vcard_ids", "version", "genconf_attributes_strings", "genconf_attributes_bools",
-        "sequence_genconf" };
-
+        "ical_principal", "ical_ids", "vcard_principal", "vcard_ids", "version" };
 }
