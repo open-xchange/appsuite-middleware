@@ -97,9 +97,14 @@ public class CourierEntity2ACL extends Entity2ACL {
 
     private static final String ALIAS_ANYONE = "anyone";
 
-    private static final String ABSTRACT_PATTERN = "#shared#DELIM#([\\p{ASCII}&&[^#DELIM#]]+)#DELIM#\\p{ASCII}+";
+    private static final String SHARED_PREFIX = "#shared";
+
+    private static final String ABSTRACT_PATTERN = SHARED_PREFIX + "#DELIM#([\\p{ASCII}&&[^#DELIM#]]+)#DELIM#\\p{ASCII}+";
 
     private static final String getSharedFolderOwner(final String sharedFolderName, final char delim) {
+        if (!sharedFolderName.startsWith(SHARED_PREFIX, 0)) {
+            return null;
+        }
         final Matcher m = Pattern.compile(ABSTRACT_PATTERN.replaceAll("#DELIM#", String.valueOf(delim)), Pattern.CASE_INSENSITIVE).matcher(
             sharedFolderName);
         if (m.matches()) {
