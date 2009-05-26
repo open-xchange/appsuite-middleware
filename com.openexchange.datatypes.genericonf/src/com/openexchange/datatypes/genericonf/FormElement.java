@@ -60,7 +60,7 @@ import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
 public class FormElement {
 
     public static enum Widget {
-        INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox");
+        INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox"), LINK("link"), TEXT("text");
 
         private String keyword;
 
@@ -81,6 +81,10 @@ public class FormElement {
                 return switcher.password(args);
             case CHECKBOX:
                 return switcher.checkbox(args);
+            case LINK:
+                return switcher.link(args);
+            case TEXT:
+                return switcher.text(args);
             default:
                 throw new IllegalArgumentException("Didn't understand "+this.getKeyword());
             }
@@ -175,6 +179,28 @@ public class FormElement {
         formElement.setWidget(Widget.PASSWORD);
         return formElement;
     }
+    public static FormElement link(String name, String displayName, boolean mandatory, Boolean defaultValue) {
+        FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
+        formElement.setWidget(Widget.LINK);
+        return formElement;
+    }
+    public static FormElement link(String name, String displayName) {
+        return link(name, displayName, true, null);
+    }
+
+    public static FormElement password(String name, String displayName) {
+        return password(name, displayName, true, null);
+    }
+
+    public static FormElement text(String name, String displayName, boolean mandatory, Boolean defaultValue) {
+        FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
+        formElement.setWidget(Widget.TEXT);
+        return formElement;
+    }
+    public static FormElement text(String name, String displayName) {
+        return text(name, displayName, true, null);
+    }
+    
     public static FormElement checkbox(String name, String displayName, boolean mandatory, Boolean defaultValue) {
         FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
         formElement.setWidget(Widget.CHECKBOX);
@@ -183,11 +209,7 @@ public class FormElement {
     public static FormElement checkbox(String name, String displayName) {
         return checkbox(name, displayName, true, null);
     }
-
-    public static FormElement password(String name, String displayName) {
-        return password(name, displayName, true, null);
-    }
-
+    
     public Object doSwitch(WidgetSwitcher switcher, Object...args) {
         return widget.doSwitch(switcher, args);
     }

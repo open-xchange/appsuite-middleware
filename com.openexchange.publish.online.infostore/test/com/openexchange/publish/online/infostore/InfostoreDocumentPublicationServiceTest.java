@@ -92,7 +92,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
         publication.getConfiguration().put("secret", "theSecret");
         publicationService.modifyOutgoing(publication);
         
-        String url = publication.getUrl();
+        String url = (String) publication.getConfiguration().get("url");
         
         assertNotNull("No URL added", url);      
         assertTrue("URL should contain prefix", url.contains(InfostoreDocumentPublicationService.PREFIX));

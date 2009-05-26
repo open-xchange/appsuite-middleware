@@ -51,12 +51,10 @@ package com.openexchange.datatypes.genericonf.storage.impl;
 
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 
-
 /**
  * {@link ToSQLType}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ToSQLType implements WidgetSwitcher {
 
@@ -68,7 +66,15 @@ public class ToSQLType implements WidgetSwitcher {
         return args[0];
     }
 
-    public Object checkbox(Object[] args) {
+    public Object checkbox(Object...args) {
+        return args[0];
+    }
+
+    public Object link(Object... args) {
+        return args[0];
+    }
+
+    public Object text(Object... args) {
         return args[0];
     }
 

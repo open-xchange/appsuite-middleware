@@ -53,12 +53,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 
-
 /**
  * {@link FromSQL}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class FromSQL implements WidgetSwitcher {
 
@@ -67,8 +65,7 @@ public class FromSQL implements WidgetSwitcher {
     public Object checkbox(Object[] args) {
         ResultSet rs = (ResultSet) args[0];
         String columnName = (String) args[1];
-        
-        
+
         try {
             return rs.getBoolean(columnName);
         } catch (SQLException e) {
@@ -78,9 +75,13 @@ public class FromSQL implements WidgetSwitcher {
     }
 
     public Object input(Object... args) {
+        return string(args);
+    }
+
+    private Object string(Object[] args) {
         ResultSet rs = (ResultSet) args[0];
         String columnName = (String) args[1];
-        
+
         try {
             return rs.getString(columnName);
         } catch (SQLException e) {
@@ -90,22 +91,22 @@ public class FromSQL implements WidgetSwitcher {
     }
 
     public Object password(Object... args) {
-        ResultSet rs = (ResultSet) args[0];
-        String columnName = (String) args[1];
-        
-        try {
-            return rs.getString(columnName);
-        } catch (SQLException e) {
-            this.exception = e;
-            return null;
-        }
+        return string(args);
     }
 
     public void throwException() throws SQLException {
-        if(exception != null) {
+        if (exception != null) {
             throw exception;
         }
-        
+
+    }
+
+    public Object link(Object... args) {
+        return string(args);
+    }
+
+    public Object text(Object... args) {
+        return string(args);
     }
 
 }

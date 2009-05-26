@@ -74,6 +74,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private static final String SITE = "siteName";
 
+    private static final String URL = "url";
+
     private Random random = new Random();
 
     private String rootURL;
@@ -96,7 +98,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         PublicationTarget target = new PublicationTarget();
         
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("siteName", "Site", true, null)).add(FormElement.checkbox("protected", "Hide with secret?"));
+        form.add(FormElement.input(SITE, "Site", true, null)).add(FormElement.checkbox(PROTECTED, "Hide with secret?")).add(FormElement.link(URL, "URL", false, null));
         
         target.setFormDescription(form);
         target.setPublicationService(this);
@@ -128,12 +130,14 @@ public class OXMFPublicationService extends AbstractPublicationService {
     @Override
     public void beforeCreate(Publication publication) throws PublicationException {
         super.beforeCreate(publication);
+        publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, null);
     }
 
     @Override
     public void beforeUpdate(Publication publication) throws PublicationException {
         super.beforeUpdate(publication);
+        publication.getConfiguration().remove(URL);
         Publication oldPublication = load(publication.getContext(), publication.getId());
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
@@ -152,7 +156,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             urlBuilder.append("?secret=").append(configuration.get(SECRET));
         }
 
-        publication.setUrl(urlBuilder.toString());
+        publication.getConfiguration().put(URL, urlBuilder.toString());
 
         publication.getConfiguration().remove(SECRET);
 

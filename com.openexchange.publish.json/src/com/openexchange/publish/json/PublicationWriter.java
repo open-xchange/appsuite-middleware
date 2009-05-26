@@ -90,7 +90,6 @@ public class PublicationWriter {
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));
         object.put(ENTITY_MODULE, publication.getModule());
-        object.put(URL, publication.getUrl());
         String targetId = publication.getTarget().getId();
         object.put(TARGET, targetId);
         object.put(targetId, formWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration()));
@@ -129,8 +128,6 @@ public class PublicationWriter {
                 array.put(writeEntity(publication));
             } else if ( ENTITY_MODULE.equals(basicCol)) {
                 array.put(publication.getModule());
-            } else if ( URL.equals(basicCol) ) {
-                array.put(publication.getUrl());
             } else if ( TARGET.equals(basicCol) ) {
                 array.put(publication.getTarget().getId());
             }

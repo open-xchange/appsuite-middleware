@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.AbstractPublicationService;
 import com.openexchange.publish.Publication;
@@ -73,6 +74,8 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
 
     public static final String PREFIX = "/publications/infostore/documents";
 
+    private static final String URL = "url";
+
     private Random random = new Random();
     
     private PublicationTarget buildTarget() {
@@ -82,7 +85,9 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         target.setModule("infostore/object");
         target.setPublicationService(this);
         
-        target.setFormDescription(new DynamicFormDescription());
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(FormElement.link("url", "URL", false, null));
+        target.setFormDescription(form);
         
         return target;
     }
@@ -122,7 +127,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     @Override
     public void modifyOutgoing(Publication publication) throws PublicationException {
         super.modifyOutgoing(publication);
-        publication.setUrl(PREFIX+"/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get(SECRET));
+        publication.getConfiguration().put(URL, PREFIX+"/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get(SECRET));
         publication.getConfiguration().remove(SECRET);
     }
     

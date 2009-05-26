@@ -194,15 +194,15 @@ public class OXMFPublicationServiceTest extends TestCase {
 
         publicationService.modifyOutgoing(publication);
 
-        assertNotNull(publication.getUrl());
-        assertEquals("/publications/bananas/1337/public", publication.getUrl());
+        assertNotNull(publication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/public", publication.getConfiguration().get("url"));
 
         publication.getConfiguration().put("protected", true);
         publication.getConfiguration().put("secret", "abedfea108275720123abde");
 
         publicationService.modifyOutgoing(publication);
 
-        assertEquals("/publications/bananas/1337/public?secret=abedfea108275720123abde", publication.getUrl());
+        assertEquals("/publications/bananas/1337/public?secret=abedfea108275720123abde", publication.getConfiguration().get("url"));
 
     }
 

@@ -66,7 +66,6 @@ public class Publication {
     private int id;
     private String entityId;
     private String module;
-    private String url;
     private PublicationTarget target;
     private Map<String, Object> configuration = new HashMap<String, Object>();
     
@@ -92,14 +91,6 @@ public class Publication {
     
     public void setModule(String module) {
         this.module = module;
-    }
-    
-    public String getUrl() {
-        return url;
-    }
-    
-    public void setUrl(String url) {
-        this.url = url;
     }
     
     public PublicationTarget getTarget() {

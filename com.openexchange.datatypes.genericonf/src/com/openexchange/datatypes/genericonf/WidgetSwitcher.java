@@ -60,6 +60,8 @@ public interface WidgetSwitcher {
 
     Object input(Object...args);
     Object password(Object...args);
-    Object checkbox(Object[] args);
+    Object checkbox(Object...args);
+    Object link(Object...args);
+    Object text(Object...args);
 
 }

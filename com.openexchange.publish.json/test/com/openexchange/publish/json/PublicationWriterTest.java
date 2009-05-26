@@ -92,7 +92,6 @@ public class PublicationWriterTest extends TestCase {
         publication.setId(23);
         publication.setEntityId("12:13");
         publication.setModule("oranges");
-        publication.setUrl("http://example.invalid/publication");
         publication.setTarget(target);
         publication.setConfiguration(config);
     }
@@ -109,7 +108,6 @@ public class PublicationWriterTest extends TestCase {
                     .hasKey("folder").withValue(13)
                     .objectEnds()
                 .hasKey("entityModule").withValue("oranges")
-                .hasKey("url").withValue("http://example.invalid/publication")
                 .hasKey("target").withValue("com.openexchange.publish.test")
                 .hasKey("com.openexchange.publish.test").withValueObject()
                     .hasKey("siteName").withValue("publication")
