@@ -47,43 +47,39 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage.impl;
+package com.openexchange.database;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * Creates the tables for the generic conf storage if a new schema is created.
+ * Abstract class for easily implementing {@link CreateTableService} services.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class CreateGenConfTables extends AbstractCreateTableImpl {
+public abstract class AbstractCreateTableImpl implements CreateTableService {
 
-    /**
-     * Default constructor.
-     */
-    public CreateGenConfTables() {
+    public AbstractCreateTableImpl() {
         super();
     }
 
-    public String[] requiredTables() {
-        return new String[0];
+    public void perform(Connection con) throws AbstractOXException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            for (String create : getCreateStatements()) {
+                stmt.execute(create);
+            }
+        } catch (SQLException e) {
+            DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
-    public String[] tablesToCreate() {
-        return createdTables;
-    }
-
-    @Override
-    public String[] getCreateStatements() {
-        return creates;
-    }
-
-    private static final String[] createdTables = { "genconf_attributes_strings", "genconf_attributes_bools", "sequence_genconf" };
-
-    private static final String[] creates = {
-        "CREATE TABLE genconf_attributes_strings (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value VARCHAR(256) DEFAULT NULL,KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-        "CREATE TABLE genconf_attributes_bools (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value BOOL DEFAULT NULL,KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-        "CREATE TABLE sequence_genconf (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-    };
+    public abstract String[] getCreateStatements();
 
 }

@@ -82,6 +82,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.osgi.Activator;
 import com.openexchange.dataretention.DataRetentionService;
@@ -131,6 +132,7 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.management.ManagementService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
@@ -431,6 +433,8 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
+        // Register table creation for mail account storage.
+        registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         registrationList.add(context.registerService(
             MailAccountStorageService.class.getName(),
