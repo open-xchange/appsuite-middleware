@@ -50,90 +50,56 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
-import java.util.Arrays;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.ajax.mail.actions.SendResponse;
-import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.tools.servlet.AjaxException;
 
+
 /**
- * {@link SendTest}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - tests with manager
+ * {@link CopyMailWithManagerTest}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class SendTest extends AbstractMailTest {
+public class CopyMailWithManagerTest extends AbstractMailTest {
 
-    private MailTestManager manager;
+    private UserValues values;
 
-    /**
-     * Default constructor.
-     * 
-     * @param name Name of this test.
-     */
-    public SendTest(final String name) {
+    public CopyMailWithManagerTest(String name) {
         super(name);
     }
-
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        values = getClient().getValues();
+        clearFolder( values.getSentFolder() );
+        clearFolder(values.getInboxFolder() );
+        clearFolder( values.getDraftsFolder() );
     }
+    
+    public void testShouldCopyFromInboxToDrafts() throws AjaxException, JSONException, IOException, SAXException{
+        MailTestManager manager = new MailTestManager(client, false);
+        String origin = values.getInboxFolder();
+        String destination = values.getDraftsFolder();
+        
+        sendMail( createEMail(values.getSendAddress(), "Testing copy with manager", "alternative", "Copying a mail we just sent and received vom the inbox to the draft folder").toString() );
+        
+        TestMail myMail = TestMail.create( getFirstMailInFolder( origin ) ); //TODO: Move to manager
+        String oldID = myMail.getId();
+        
+        TestMail movedMail = manager.copy(myMail, destination);
+        assertFalse("Should get no errors when copying e-mail", manager.getLastResponse().hasError() );
+        String newID = movedMail.getId();
+        
+        manager.get(destination, newID);
+        assertFalse("Should get no errors when getting copied e-mail", manager.getLastResponse().hasError() );
+        assertFalse("Should produce no conflicts when getting copied e-mail", manager.getLastResponse().hasConflicts() );
+        
+        manager.get(origin, oldID);
+        assertFalse("Should still find original e-mail", manager.getLastResponse().hasError() );
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
     }
+    
 
-    /**
-     * Tests the <code>action=new</code> request on INBOX folder
-     * 
-     * @throws Throwable
-     */
-    public void testSend() throws Throwable {
-
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-        /*
-         * Create JSON mail object
-         */
-        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-        /*
-         * Perform send request
-         */
-        final SendResponse response = (SendResponse) Executor.execute(getSession(), new SendRequest(mailObject_25kb));
-        assertTrue("Send request failed", response.getFolderAndID() != null && response.getFolderAndID().length > 0);
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-    }
-
-    public void testSendWithManager() throws AjaxException, IOException, SAXException, JSONException {
-        UserValues values = client.getValues();
-
-        TestMail mail = new TestMail();
-        mail.setSubject("Test sending with manager");
-        mail.setFrom(Arrays.asList(new String[] { values.getSendAddress() }));
-        mail.setTo(Arrays.asList(new String[] { values.getSendAddress() }));
-        mail.setContentType(MailContentType.PLAIN.toString());
-        mail.setBody("This is the message body.");
-        mail.sanitize();
-
-        TestMail inSentBox = manager.send(mail);
-        assertFalse("Sending resulted in error", manager.getLastResponse().hasError());
-        assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
-    }
 }

@@ -50,7 +50,11 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,12 +62,15 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.mail.actions.CopyRequest;
+import com.openexchange.ajax.mail.actions.CopyResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
-import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
 import com.openexchange.ajax.mail.actions.MoveMailRequest;
+import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.actions.UpdateMailResponse;
 import com.openexchange.mail.MailListField;
 import com.openexchange.tools.servlet.AjaxException;
@@ -74,6 +81,8 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MailTestManager {
+    
+    private List<MailCleaner> cleaningSteps;
 
     private boolean failOnError;
 
@@ -82,10 +91,11 @@ public class MailTestManager {
     private AbstractAJAXResponse lastResponse;
 
     public MailTestManager() {
-
+        cleaningSteps = new LinkedList<MailCleaner>();
     }
 
     public MailTestManager(AJAXClient client) {
+        this();
         this.client = client;
     }
 
@@ -106,13 +116,17 @@ public class MailTestManager {
      * field.
      */
     public void deleteSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
-        LinkedList<String[]> similarMails = findSimilarMails(mail, client);
+        LinkedList<String[]> similarMails = findSimilarMailsInSameFolder(mail, client);
 
         DeleteRequest deleteRequest = new DeleteRequest(similarMails.toArray(new String[][] {}));
         lastResponse = client.execute(deleteRequest);
     }
 
-    public LinkedList<String[]> findSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
+    public LinkedList<String[]> findSimilarMailsInSameFolder(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
+        return findSimilarMails(mail, client, mail.getFolder());
+    }
+    
+    public LinkedList<String[]> findSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, AjaxException, IOException, SAXException {
         JSONArray pattern = new JSONArray();
         JSONObject param = new JSONObject();
         param.put(Mail.PARAMETER_COL, MailListField.SUBJECT.getField());
@@ -120,7 +134,6 @@ public class MailTestManager {
         pattern.put(param);
 
         int[] columns = new int[] { MailListField.ID.getField() };
-        String folder = mail.getFolder();
         MailSearchRequest searchRequest = new MailSearchRequest(pattern, folder, columns, -1, null, false);
         MailSearchResponse searchResponse = client.execute(searchRequest);
 
@@ -135,6 +148,24 @@ public class MailTestManager {
     }
 
     /**
+     * Sends a mail. 
+     * This methods also sets the lastResponse field.
+     * @return The mail as placed in the sent box.
+     */
+    public TestMail send(TestMail mail) throws JSONException, AjaxException, IOException, SAXException{
+        SendRequest request = new SendRequest(mail.toJSON().toString());
+        SendResponse response = client.execute(request);
+        lastResponse = response;
+        String[] folderAndID = response.getFolderAndID();
+        mail = get(folderAndID[0], folderAndID[1] );
+        
+        cleaningSteps.add( new MailCleaner(mail, client) );
+        markCopyInInboxIfNecessary(mail);
+        
+        return mail;
+    }
+    
+    /**
      * Moves a mail from its own folder to a given one.
      * Returns a new TestMail containing the new, moved object or null if the move didn't work.  
      * This method sets the lastResponse field.
@@ -145,7 +176,9 @@ public class MailTestManager {
         lastResponse = response;
         if(lastResponse.hasError())
             return null;
-        return get(destination, response.getID());
+        TestMail modifiedMail = get(destination, response.getID());
+        updateForCleanup(mail, modifiedMail);
+        return modifiedMail;
     }
 
     /**
@@ -158,5 +191,82 @@ public class MailTestManager {
         if(lastResponse.hasError())
             return null;
         return new TestMail((JSONObject) lastResponse.getData());
+    }
+    
+    /**
+     * Copies a mail from its own folder to another.
+     * This method sets the lastResponse field.
+     * @return the copied mail
+     */
+    public TestMail copy(TestMail original, String destination) throws AjaxException, IOException, SAXException, JSONException{
+        CopyRequest request = new CopyRequest(original.getId(), original.getFolder(), destination);
+        CopyResponse response = client.execute(request);
+        lastResponse = response;
+        String id = response.getID();
+        TestMail copy = get(destination, id);
+        cleaningSteps.add( new MailCleaner(copy, client) );
+        return copy;
+    }
+    
+    /**
+     * Deletes all mails that where created during this process
+     */
+    public void cleanUp(){
+        for(MailCleaner cleanup: cleaningSteps){
+            try {
+                cleanup.cleanUp();
+            } catch (Exception e) {
+                System.out.println("Could not delete a mail allegedly created. Was probably deleted before.");
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Updates the cleanup structure and replaces one mail to cleanup with another (e.g. the given one with a moved one)
+     * @param originalMail
+     * @param modifiedMail
+     */
+    protected void updateForCleanup(TestMail originalMail, TestMail modifiedMail) {
+        for(int i = 0, length = cleaningSteps.size(); i<length; i++){
+            MailCleaner step = cleaningSteps.get(i);
+            if(originalMail.equals( step.getMail() ) ){
+                step.setMail(modifiedMail);
+            }
+        }
+    }
+    
+    /**
+     * Returns all recipients of a mail, be they from to, cc, or bcc
+     */
+    protected Set<String> extractAllRecipients(TestMail mail) {
+        Set<String> recipients = new HashSet<String>();
+        if (mail.getFrom() != null)
+            recipients.addAll(mail.getTo());
+        if (mail.getCc() != null)
+            recipients.addAll(mail.getCc());
+        if (mail.getBcc() != null)
+            recipients.addAll(mail.getBcc());
+        return recipients;
+    }
+    
+    private void markCopyInInboxIfNecessary(TestMail mail) throws AjaxException, JSONException, IOException, SAXException{
+        Set<String> allRecipients = extractAllRecipients(mail);
+        String sender = client.getValues().getSendAddress();
+        if( containsSomewhat(sender, allRecipients )){
+            LinkedList<String[]> similarMails = findSimilarMails(mail, client, client.getValues().getInboxFolder());
+            for(String[] folderAndId: similarMails){
+                TestMail deleteMe = get(folderAndId[0], folderAndId[1]);
+                cleaningSteps.add( new MailCleaner(deleteMe, client) );
+            }
+        }        
+    }
+    
+    private boolean containsSomewhat(String needle, Collection<String> haystack){
+        for(String hay: haystack){
+            if(hay.contains(needle) || needle.contains(hay))
+                return true;
+        }
+        return false;
     }
 }
