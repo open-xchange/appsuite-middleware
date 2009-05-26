@@ -86,6 +86,15 @@ public interface UpdateTask {
 
     /**
      * Gets this update task's priority.
+     * <p>
+     * Returned value is supposed to be provided by one of the {@link UpdateTaskPriority} constants:
+     * 
+     * <pre>
+     * 
+     * public int getPriority() {
+     *     return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+     * }
+     * </pre>
      * 
      * @return The update task's priority
      */
