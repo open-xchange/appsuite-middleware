@@ -86,7 +86,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
-        assertEquals("Module differs", "folder:bananas", target.getModule());
+        assertEquals("Module differs", "bananas", target.getModule());
     }
     
     public void testId() throws PublicationException {

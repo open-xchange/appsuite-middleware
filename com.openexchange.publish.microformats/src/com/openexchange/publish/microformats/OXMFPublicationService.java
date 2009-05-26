@@ -115,7 +115,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
     
     public void setFolderType(String string) {
-        target.setModule("folder:"+string);
+        target.setModule(string);
     }
     
     public void setTargetId(String targetId) {
@@ -137,7 +137,6 @@ public class OXMFPublicationService extends AbstractPublicationService {
     @Override
     public void beforeUpdate(Publication publication) throws PublicationException {
         super.beforeUpdate(publication);
-        publication.getConfiguration().remove(URL);
         Publication oldPublication = load(publication.getContext(), publication.getId());
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
