@@ -87,7 +87,9 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -117,18 +119,7 @@ public final class IMAPCommandsCollection {
 
     private static final String STR_FETCH = "FETCH";
 
-    private static final String ERR_UID_STORE_NOT_SUPPORTED = "UID STORE not supported";
-
-    private static final String STR_INVALID_SYSTEM_FLAG = "Invalid system flag";
-
-    private static final String ERR_INVALID_SYSTEM_FLAG_DETECTED = "Invalid System Flag detected";
-
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCommandsCollection.class);
-
-    /**
-     * Server does not support %s command.
-     */
-    private static final String PROTOCOL_ERROR_TEMPL = "Server does not support %s command";
 
     /**
      * Prevent instantiation.
@@ -669,22 +660,23 @@ public final class IMAPCommandsCollection {
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
-                    r = p.command(String.format(TEMPL_UID_STORE_FLAGS, args[i], "-", ALL_COLOR_LABELS), null);
+                    final String command = String.format(TEMPL_UID_STORE_FLAGS, args[i], "-", ALL_COLOR_LABELS);
+                    r = p.command(command, null);
                     response = r[r.length - 1];
-                    try {
-                        if (response.isOK()) {
-                            continue Next;
-                        } else if (response.isBAD() && (response.getRest() != null) && (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
-                            throw new ProtocolException(IMAPException.getFormattedMessage(
-                                IMAPException.Code.PROTOCOL_ERROR,
-                                ERR_INVALID_SYSTEM_FLAG_DETECTED));
-                        } else {
-                            throw new ProtocolException(IMAPException.getFormattedMessage(
-                                IMAPException.Code.PROTOCOL_ERROR,
-                                ERR_UID_STORE_NOT_SUPPORTED));
-                        }
-                    } finally {
+                    if (response.isOK()) {
                         p.notifyResponseHandlers(r);
+                        continue Next;
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -717,22 +709,23 @@ public final class IMAPCommandsCollection {
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
-                    r = p.command(String.format(TEMPL_UID_STORE_FLAGS, args[i], "+", colorLabelFlag), null);
+                    final String command = String.format(TEMPL_UID_STORE_FLAGS, args[i], "+", colorLabelFlag);
+                    r = p.command(command, null);
                     response = r[r.length - 1];
-                    try {
-                        if (response.isOK()) {
-                            continue Next;
-                        } else if (response.isBAD() && (response.getRest() != null) && (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
-                            throw new ProtocolException(IMAPException.getFormattedMessage(
-                                IMAPException.Code.PROTOCOL_ERROR,
-                                ERR_INVALID_SYSTEM_FLAG_DETECTED));
-                        } else {
-                            throw new ProtocolException(IMAPException.getFormattedMessage(
-                                IMAPException.Code.PROTOCOL_ERROR,
-                                ERR_UID_STORE_NOT_SUPPORTED));
-                        }
-                    } finally {
+                    if (response.isOK()) {
                         p.notifyResponseHandlers(r);
+                        continue Next;
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -831,37 +824,42 @@ public final class IMAPCommandsCollection {
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(
-                    ") UTF-8 ").append(numArgument).toString(), null);
+                final String command = new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(
+                    numArgument).toString();
+                final Response[] r = p.command(command, null);
                 final Response response = r[r.length - 1];
                 final SmartIntArray sia = new SmartIntArray(32);
-                try {
-                    if (response.isOK()) {
-                        for (int i = 0, len = r.length; i < len; i++) {
-                            if (!(r[i] instanceof IMAPResponse)) {
-                                continue;
-                            }
-                            final IMAPResponse ir = (IMAPResponse) r[i];
-                            if (ir.keyEquals(COMMAND_SORT)) {
-                                String num;
-                                while ((num = ir.readAtomString()) != null) {
-                                    try {
-                                        sia.append(Integer.parseInt(num));
-                                    } catch (final NumberFormatException e) {
-                                        LOG.error(e.getMessage(), e);
-                                        throw wrapException(e, "Invalid Message Number: " + num);
-                                    }
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals(COMMAND_SORT)) {
+                            String num;
+                            while ((num = ir.readAtomString()) != null) {
+                                try {
+                                    sia.append(Integer.parseInt(num));
+                                } catch (final NumberFormatException e) {
+                                    LOG.error(e.getMessage(), e);
+                                    throw wrapException(e, "Invalid Message Number: " + num);
                                 }
                             }
-                            r[i] = null;
                         }
-                    } else {
-                        throw new ProtocolException(
-                            new StringBuilder(String.format(PROTOCOL_ERROR_TEMPL, COMMAND_SORT)).append(": ").append(
-                                getResponseType(response)).append(' ').append(response.getRest()).toString());
+                        r[i] = null;
                     }
-                } finally {
                     p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else {
                     p.handleResult(response);
                 }
                 return sia.toArray();
@@ -897,37 +895,41 @@ public final class IMAPCommandsCollection {
                 final Response response = r[r.length - 1];
                 {
                     final SmartIntArray tmp = new SmartIntArray(32);
-                    try {
-                        if (response.isOK()) {
-                            for (int i = 0, len = r.length - 1; i < len; i++) {
-                                if (!(r[i] instanceof IMAPResponse)) {
-                                    r[i] = null;
-                                    continue;
-                                }
-                                final IMAPResponse ir = (IMAPResponse) r[i];
-                                /*
-                                 * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
-                                 * messages that match the searching criteria.
-                                 */
-                                if (ir.keyEquals(COMMAND_SEARCH)) {
-                                    String num;
-                                    while ((num = ir.readAtomString()) != null) {
-                                        try {
-                                            tmp.append(Integer.parseInt(num));
-                                        } catch (final NumberFormatException e) {
-                                            continue;
-                                        }
+                    if (response.isOK()) {
+                        for (int i = 0, len = r.length - 1; i < len; i++) {
+                            if (!(r[i] instanceof IMAPResponse)) {
+                                r[i] = null;
+                                continue;
+                            }
+                            final IMAPResponse ir = (IMAPResponse) r[i];
+                            /*
+                             * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                             * messages that match the searching criteria.
+                             */
+                            if (ir.keyEquals(COMMAND_SEARCH)) {
+                                String num;
+                                while ((num = ir.readAtomString()) != null) {
+                                    try {
+                                        tmp.append(Integer.parseInt(num));
+                                    } catch (final NumberFormatException e) {
+                                        continue;
                                     }
                                 }
-                                r[i] = null;
                             }
-                        } else {
-                            throw new ProtocolException(
-                                new StringBuilder(String.format(PROTOCOL_ERROR_TEMPL, COMMAND_SEARCH)).append(": ").append(
-                                    getResponseType(response)).append(' ').append(response.getRest()).toString());
+                            r[i] = null;
                         }
-                    } finally {
                         p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            COMMAND_SEARCH_UNSEEN,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            COMMAND_SEARCH_UNSEEN,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                     newMsgSeqNums = tmp.toArray();
@@ -987,23 +989,19 @@ public final class IMAPCommandsCollection {
                 final Response[] r = p.command(COMMAND_EXPUNGE, null);
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
-                try {
-                    if (response.isOK()) {
-                        retval = Boolean.TRUE;
-                    } else if (response.isBAD() && (response.getRest() != null) && (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
-                        throw new ProtocolException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            ERR_INVALID_SYSTEM_FLAG_DETECTED));
-                    } else {
-                        throw new ProtocolException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            ERR_UID_STORE_NOT_SUPPORTED));
-                    }
-                } finally {
-                    /*
-                     * No invocation of notifyResponseHandlers() to avoid sequential (by message) folder cache update
-                     */
-                    /* p.notifyResponseHandlers(r); */
+                if (response.isOK()) {
+                    retval = Boolean.TRUE;
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_EXPUNGE,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_EXPUNGE,
+                        response.toString()));
+                } else {
                     p.handleResult(response);
                 }
                 return retval;
@@ -1230,45 +1228,46 @@ public final class IMAPCommandsCollection {
                 final Response[] r = p.command(FETCH_FLAGS, null);
                 final Response response = r[r.length - 1];
                 long[] retval = null;
-                try {
-                    if (response.isOK()) {
-                        final Set<Long> set = new TreeSet<Long>();
-                        final int mlen = r.length - 1;
-                        for (int i = 0; i < mlen; i++) {
-                            if (!(r[i] instanceof FetchResponse)) {
-                                continue;
-                            }
-                            final FetchResponse fr = (FetchResponse) r[i];
-                            final boolean deleted;
-                            {
-                                final FLAGS item = getItemOf(FLAGS.class, fr, "FLAGS");
-                                deleted = item.contains(Flags.Flag.DELETED);
-                            }
-                            if (deleted) {
-                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                set.add(Long.valueOf(uidItem.uid));
-                            }
-                            r[i] = null;
+                if (response.isOK()) {
+                    final Set<Long> set = new TreeSet<Long>();
+                    final int mlen = r.length - 1;
+                    for (int i = 0; i < mlen; i++) {
+                        if (!(r[i] instanceof FetchResponse)) {
+                            continue;
                         }
-                        if ((filter != null) && (filter.length > 0)) {
-                            for (int i = 0; i < filter.length; i++) {
-                                set.remove(Long.valueOf(filter[i]));
-                            }
+                        final FetchResponse fr = (FetchResponse) r[i];
+                        final boolean deleted;
+                        {
+                            final FLAGS item = getItemOf(FLAGS.class, fr, "FLAGS");
+                            deleted = item.contains(Flags.Flag.DELETED);
                         }
-                        retval = new long[set.size()];
-                        int i = 0;
-                        for (final Long l : set) {
-                            retval[i++] = l.longValue();
+                        if (deleted) {
+                            final UID uidItem = getItemOf(UID.class, fr, STR_UID);
+                            set.add(Long.valueOf(uidItem.uid));
                         }
-                    } else {
-                        throw new ProtocolException(new StringBuilder("FETCH command failed: ").append(getResponseType(response)).append(
-                            ' ').append(response.getRest()).toString());
+                        r[i] = null;
                     }
-                } finally {
-                    /*
-                     * No invocation of notifyResponseHandlers() to avoid sequential (by message) folder cache update
-                     */
-                    /* p.notifyResponseHandlers(r); */
+                    if ((filter != null) && (filter.length > 0)) {
+                        for (int i = 0; i < filter.length; i++) {
+                            set.remove(Long.valueOf(filter[i]));
+                        }
+                    }
+                    retval = new long[set.size()];
+                    int i = 0;
+                    for (final Long l : set) {
+                        retval[i++] = l.longValue();
+                    }
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        FETCH_FLAGS,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        FETCH_FLAGS,
+                        response.toString()));
+                } else {
                     p.handleResult(response);
                 }
                 return retval;
@@ -1356,21 +1355,30 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    r = p.command(String.format(TEMPL_FETCH_UID, args[i]), null);
+                    final String command = String.format(TEMPL_FETCH_UID, args[i]);
+                    r = p.command(command, null);
                     final int len = r.length - 1;
                     response = r[len];
-                    try {
-                        if (response.isOK()) {
-                            for (int j = 0; j < len; j++) {
-                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                    final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                                    uids[index++] = uidItem.uid;
-                                    r[j] = null;
-                                }
+                    if (response.isOK()) {
+                        for (int j = 0; j < len; j++) {
+                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
+                                uids[index++] = uidItem.uid;
+                                r[j] = null;
                             }
                         }
-                    } finally {
                         p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -1419,23 +1427,32 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+                    final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
+                    final Response[] r = p.command(command, null);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     r[len] = null;
-                    try {
-                        if (response.isOK() && len > 0) {
-                            for (int j = 0; j < len; j++) {
-                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                    final FetchResponse fr = (FetchResponse) r[j];
-                                    final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                    m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
-                                    r[j] = null;
-                                }
+                    if (response.isOK() && len > 0) {
+                        for (int j = 0; j < len; j++) {
+                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                final FetchResponse fr = (FetchResponse) r[j];
+                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
+                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                r[j] = null;
                             }
                         }
-                    } finally {
                         p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -1487,23 +1504,32 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+                    final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
+                    final Response[] r = p.command(command, null);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     r[len] = null;
-                    try {
-                        if (response.isOK()) {
-                            for (int j = 0; j < len; j++) {
-                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                    final FetchResponse fr = (FetchResponse) r[j];
-                                    final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                    m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
-                                    r[j] = null;
-                                }
+                    if (response.isOK()) {
+                        for (int j = 0; j < len; j++) {
+                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                final FetchResponse fr = (FetchResponse) r[j];
+                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
+                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                r[j] = null;
                             }
                         }
-                    } finally {
                         p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -1549,25 +1575,34 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+                    final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
+                    final Response[] r = p.command(command, null);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     r[len] = null;
-                    try {
-                        if (response.isOK()) {
-                            for (int j = 0; j < len; j++) {
-                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                    final FetchResponse fr = (FetchResponse) r[j];
-                                    final UID uidItem = getItemOf(UID.class, fr);
-                                    if (uidItem != null) {
-                                        m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(uidItem.uid));
-                                    }
-                                    r[j] = null;
+                    if (response.isOK()) {
+                        for (int j = 0; j < len; j++) {
+                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                final FetchResponse fr = (FetchResponse) r[j];
+                                final UID uidItem = getItemOf(UID.class, fr);
+                                if (uidItem != null) {
+                                    m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(uidItem.uid));
                                 }
+                                r[j] = null;
                             }
                         }
-                    } finally {
                         p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -1610,21 +1645,29 @@ public final class IMAPCommandsCollection {
                 final int len = r.length - 1;
                 final Response response = r[len];
                 final List<MailMessage> l = new ArrayList<MailMessage>(len);
-                try {
-                    if (response.isOK()) {
-                        final String fullname = imapFolder.getFullName();
-                        for (int j = 0; j < len; j++) {
-                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                final FetchResponse fr = (FetchResponse) r[j];
-                                final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, STR_UID).uid), fullname);
-                                m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, "INTERNALDATE").getDate());
-                                l.add(m);
-                                r[j] = null;
-                            }
+                if (response.isOK()) {
+                    final String fullname = imapFolder.getFullName();
+                    for (int j = 0; j < len; j++) {
+                        if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                            final FetchResponse fr = (FetchResponse) r[j];
+                            final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, STR_UID).uid), fullname);
+                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, "INTERNALDATE").getDate());
+                            l.add(m);
+                            r[j] = null;
                         }
                     }
-                } finally {
                     p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_FETCH,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_FETCH,
+                        response.toString()));
+                } else {
                     p.handleResult(response);
                 }
                 Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
@@ -1711,25 +1754,22 @@ public final class IMAPCommandsCollection {
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
-                    r = p.command(String.format(TEMPL_UID_EXPUNGE, args[i]), null);
+                    final String command = String.format(TEMPL_UID_EXPUNGE, args[i]);
+                    r = p.command(command, null);
                     response = r[r.length - 1];
-                    try {
-                        if (response.isOK()) {
-                            continue Next;
-                        } else if (response.isBAD() && (response.getRest() != null) && (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
-                            throw new ProtocolException(IMAPException.getFormattedMessage(
-                                IMAPException.Code.PROTOCOL_ERROR,
-                                ERR_INVALID_SYSTEM_FLAG_DETECTED));
-                        } else {
-                            throw new ProtocolException(IMAPException.getFormattedMessage(
-                                IMAPException.Code.PROTOCOL_ERROR,
-                                ERR_UID_STORE_NOT_SUPPORTED));
-                        }
-                    } finally {
-                        /*
-                         * No invocation of notifyResponseHandlers() to avoid sequential (by message) folder cache update
-                         */
-                        /* p.notifyResponseHandlers(r); */
+                    if (response.isOK()) {
+                        continue Next;
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
                         p.handleResult(response);
                     }
                 }
@@ -1767,30 +1807,36 @@ public final class IMAPCommandsCollection {
                 final Response[] r = p.command(command, null);
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
-                try {
-                    if (response.isOK()) {
-                        NextResp: for (int i = 0, len = r.length - 1; i < len; i++) {
-                            if (!(r[i] instanceof IMAPResponse)) {
-                                continue;
-                            }
-                            final IMAPResponse ir = (IMAPResponse) r[i];
-                            if (ir.isUnTagged() && ir.isOK()) {
-                                /*
-                                 * " OK [PERMANENTFLAGS (\Deleted \)]"
-                                 */
-                                ir.skipSpaces();
-                                if (ATOM_PERMANENTFLAGS.equals(ir.readAtom('\0'))) {
-                                    retval = Boolean.valueOf(PATTERN_USER_FLAGS.matcher(ir.getRest()).find());
-                                    break NextResp;
-                                }
-                            }
-                            r[i] = null;
+                if (response.isOK()) {
+                    NextResp: for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
                         }
-                    } else {
-                        return retval;
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.isUnTagged() && ir.isOK()) {
+                            /*
+                             * " OK [PERMANENTFLAGS (\Deleted \)]"
+                             */
+                            ir.skipSpaces();
+                            if (ATOM_PERMANENTFLAGS.equals(ir.readAtom('\0'))) {
+                                retval = Boolean.valueOf(PATTERN_USER_FLAGS.matcher(ir.getRest()).find());
+                                break NextResp;
+                            }
+                        }
+                        r[i] = null;
                     }
-                } finally {
                     p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else {
                     p.handleResult(response);
                 }
                 return retval;
@@ -1955,22 +2001,30 @@ public final class IMAPCommandsCollection {
                 final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);
                 final Response response = r[r.length - 1];
                 final Long retval = Long.valueOf(-1L);
-                try {
-                    if (response.isOK()) {
-                        for (int i = 0, len = r.length - 1; i < len; i++) {
-                            if (!(r[i] instanceof FetchResponse)) {
-                                continue;
-                            }
-                            final FetchResponse fetchResponse = (FetchResponse) r[i];
-                            if (messageId.equals(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId)) {
-                                final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
-                                return Long.valueOf(uidItem.uid);
-                            }
-                            r[i] = null;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (!(r[i] instanceof FetchResponse)) {
+                            continue;
                         }
+                        final FetchResponse fetchResponse = (FetchResponse) r[i];
+                        if (messageId.equals(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId)) {
+                            final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
+                            return Long.valueOf(uidItem.uid);
+                        }
+                        r[i] = null;
                     }
-                } finally {
-                    // p.notifyResponseHandlers(r);
+                    p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_FETCH_ENV_UID,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_FETCH_ENV_UID,
+                        response.toString()));
+                } else {
                     p.handleResult(response);
                 }
                 return retval;

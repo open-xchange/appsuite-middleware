@@ -270,9 +270,10 @@ public final class IMAPException extends MIMEMailException {
          */
         ENCODING_ERROR(MailException.Code.ENCODING_ERROR),
         /**
-         * A protocol exception occurred during execution of an IMAP request: %1$s
+         * A protocol exception occurred during execution of IMAP request "%1$s".<br>
+         * Error message: %2$s
          */
-        PROTOCOL_ERROR("A protocol exception occurred during execution of an IMAP request: %1$s", Category.INTERNAL_ERROR, 2047),
+        PROTOCOL_ERROR("A protocol exception occurred during execution of IMAP request \"%1$s\".\nError message: %2$s", Category.INTERNAL_ERROR, 2047),
         /**
          * Mail folder could not be found: %1$s.
          */
