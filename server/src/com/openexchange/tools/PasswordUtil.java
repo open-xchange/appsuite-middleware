@@ -73,11 +73,6 @@ public class PasswordUtil {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
 
     /**
-     * The key length.
-     */
-    private static final int KEY_LENGTH = 16;
-
-    /**
      * The algorithm.
      */
     private static final String ALGORITHM = "AES";
@@ -214,6 +209,8 @@ public class PasswordUtil {
         final SecretKey secretKey = keyGenerator.generateKey();
         return secretKey;
     }
+
+    private static final int KEY_LENGTH = 16;
 
     /**
      * Generates a secret key from specified key string.
