@@ -47,25 +47,18 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.datasources;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
- * {@link Activator}
+ * {@link OXMFDataSource}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
-
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
-
+public interface OXMFDataSource {
+    public String getData(Subscription subscription) throws SubscriptionException;
 }

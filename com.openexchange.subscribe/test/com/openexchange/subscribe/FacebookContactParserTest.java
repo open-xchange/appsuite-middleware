@@ -3,7 +3,6 @@ package com.openexchange.subscribe;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.subscribe.parser.FacebookContactParser;
 import com.openexchange.subscribe.parser.LinkedInContactParser;

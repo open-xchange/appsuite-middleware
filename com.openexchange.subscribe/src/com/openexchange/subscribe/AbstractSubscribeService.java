@@ -89,7 +89,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         if(subscription == null) {
             return false;
         }
-        if(subscription.getSource().getId().equals("com.openexchange.subscribe.xing")) {
+        if(subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
             return true;
         }
         return false;

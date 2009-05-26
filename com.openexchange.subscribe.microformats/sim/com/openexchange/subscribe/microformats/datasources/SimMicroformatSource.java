@@ -47,25 +47,35 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.datasources;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
- * {@link Activator}
+ * {@link SimMicroformatSource}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class SimMicroformatSource implements OXMFDataSource {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
+    private String data;
+    private Subscription subscription;
+
     
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public SimMicroformatSource(String data) {
+        this.data = data;
+    }
+    
+    public String getData(Subscription subscription) throws SubscriptionException {
+        this.subscription = subscription;
+        return data;
+    }
+    
+    public Subscription getSubscription() {
+        return subscription;
     }
 
 }

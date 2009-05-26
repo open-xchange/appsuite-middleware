@@ -47,20 +47,30 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.microformats;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.subscribe.microformats.parser.OXMFParserFactoryServiceImpl;
+
 
 /**
- * {@link OXMFParserFactoryService} - Factory service for {@link OXMFParser} instances.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link OXMFParserActivator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface OXMFParserFactoryService {
+public class OXMFParserActivator implements BundleActivator {
 
-    /**
-     * Returns a new instance of {@link OXMFParser}.
-     * 
-     * @return A new instance of {@link OXMFParser}
-     */
-    public OXMFParser getParser();
+    private ServiceRegistration parserRegistration;
+
+    public void start(BundleContext context) throws Exception {
+        parserRegistration = context.registerService(OXMFParserFactoryService.class.getName(), new OXMFParserFactoryServiceImpl(), null);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        parserRegistration.unregister();
+    }
 
 }

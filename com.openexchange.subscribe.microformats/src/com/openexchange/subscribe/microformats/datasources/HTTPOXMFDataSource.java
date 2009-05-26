@@ -47,25 +47,39 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.datasources;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import java.io.IOException;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
- * {@link Activator}
- *
+ * {@link HTTPOXMFDataSource}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class Activator extends CompositeBundleActivator {
+public class HTTPOXMFDataSource implements OXMFDataSource {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private static final String URL = "url";
+
+    public String getData(Subscription subscription) throws SubscriptionException {
+
+        HttpClient client = new HttpClient();
+        
+        GetMethod getMethod = new GetMethod((String) subscription.getConfiguration().get(URL));
+        try {
+            client.executeMethod(getMethod);
+            return getMethod.getResponseBodyAsString();
+        } catch (HttpException e) {
+            throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage());
+        } catch (IOException e) {
+            throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage());
+        }
+
     }
 
 }

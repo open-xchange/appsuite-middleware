@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.subscribe.microformats;
+package com.openexchange.subscribe.microformats.transformers;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -60,9 +60,9 @@ import com.openexchange.groupware.container.ContactObject;
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class MapToContactObjectTransformer {
+public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	
-	public static List<ContactObject> transform (List<Map<String, String>> inlist){
+	public List<ContactObject> transform (List<Map<String, String>> inlist){
 		ArrayList<ContactObject> outlist = new ArrayList<ContactObject>();
 		
 		for (Map<String,String> map : inlist){

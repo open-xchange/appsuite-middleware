@@ -47,25 +47,37 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.transformers;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
- * {@link Activator}
+ * {@link SimMapTransformer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class SimMapTransformer implements MapToObjectTransformer {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private List<? extends Object> data;
+    private List<Map<String, String>> input;
+
+    public SimMapTransformer(List<? extends Object> data) {
+        this.data = data;
     }
+
+    public List<? extends Object> transform(List<Map<String, String>> list) throws SubscriptionException {
+        this.input = list;
+        return data;
+    }
+    
+    public List<Map<String, String>> getInput() {
+        return input;
+    }
+    
+    
 
 }

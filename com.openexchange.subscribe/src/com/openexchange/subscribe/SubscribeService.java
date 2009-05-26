@@ -73,7 +73,7 @@ public interface SubscribeService {
 
     public void update(Subscription subscription) throws AbstractOXException;
 
-    public Collection getContent(Subscription subscription);
+    public Collection getContent(Subscription subscription) throws SubscriptionException;
 
     public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
     

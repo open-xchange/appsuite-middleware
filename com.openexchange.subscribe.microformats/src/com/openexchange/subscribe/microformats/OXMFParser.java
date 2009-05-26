@@ -1,8 +1,9 @@
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.microformats;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.subscribe.SubscriptionException;
 
 /**
  * {@link OXMFParser} - Parses a given HTML content into container elements.

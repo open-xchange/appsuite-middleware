@@ -5,15 +5,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.TimeZone;
 import java.util.Vector;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.TextPage;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -34,7 +25,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 //TODO: Use logging instead of println
 public class LinkedInContactParser {
 
-	public ContactObject[] getLinkedInContactsForUser (String linkedInUser, String linkedInPassword) throws FailingHttpStatusCodeException, MalformedURLException, IOException {
+	/*public ContactObject[] getLinkedInContactsForUser (String linkedInUser, String linkedInPassword) throws FailingHttpStatusCodeException, MalformedURLException, IOException {
 		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
 		
 		// emulate a known client, hopefully keeping our profile low
@@ -136,5 +127,5 @@ public class LinkedInContactParser {
 		
 		
 		return contactObject;
-	}
+	}*/
 }

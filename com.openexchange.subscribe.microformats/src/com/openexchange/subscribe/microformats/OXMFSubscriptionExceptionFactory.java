@@ -47,25 +47,27 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 
 /**
- * {@link Activator}
+ * {@link OXMFSubscriptionExceptionFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class OXMFSubscriptionExceptionFactory extends Exceptions<OXMFSubscriptionException> {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
-    
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected OXMFSubscriptionException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new OXMFSubscriptionException(message, cause, args);
+    }
+    @Override
+    protected void knownExceptions() {
+        declareAll(OXMFSubscriptionErrorMessage.values());
     }
 
 }

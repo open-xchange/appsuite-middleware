@@ -47,25 +47,27 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.parser;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import com.openexchange.subscribe.microformats.OXMFParser;
+import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * {@link OXMFParserFactoryServiceImpl} - Implementation of {@link OXMFParserFactoryService}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class OXMFParserFactoryServiceImpl implements OXMFParserFactoryService {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    /**
+     * Initializes a new {@link OXMFParserFactoryServiceImpl}.
+     */
+    public OXMFParserFactoryServiceImpl() {
+        super();
+    }
+
+    public OXMFParser getParser() {
+        return new OXMFParserImpl();
     }
 
 }

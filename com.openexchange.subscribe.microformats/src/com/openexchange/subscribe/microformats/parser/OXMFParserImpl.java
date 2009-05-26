@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.parser;
+package com.openexchange.subscribe.microformats.parser;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -60,10 +60,11 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.subscribe.OXMFParser;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.microformats.OXMFParser;
+import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
  * {@link OXMFParserImpl} - Implements {@link OXMFParser} based on <a href='http://stax.codehaus.org/'>StAX</a>.
@@ -72,7 +73,7 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public final class OXMFParserImpl implements OXMFParser {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXMFParserImpl.class);
+    private static final Log LOG = LogFactory.getLog(OXMFParserImpl.class);
 
     private static final String ELEM_BODY = "body";
 
@@ -125,7 +126,7 @@ public final class OXMFParserImpl implements OXMFParser {
         try {
             parser = factory.createXMLStreamReader(new StringReader(html));
         } catch (final XMLStreamException e) {
-            throw SubscriptionErrorMessage.EXCEPTIONS.create(PublicationErrorMessage.ParseException, e, e.getMessage());
+            throw OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         }
         try {
             /*
@@ -141,7 +142,7 @@ public final class OXMFParserImpl implements OXMFParser {
             }
             return parsedContainerElements;
         } catch (final XMLStreamException e) {
-            throw SubscriptionErrorMessage.EXCEPTIONS.create(PublicationErrorMessage.ParseException, e, e.getMessage());
+            throw OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage()) ;
         } finally {
             try {
                 parser.close();

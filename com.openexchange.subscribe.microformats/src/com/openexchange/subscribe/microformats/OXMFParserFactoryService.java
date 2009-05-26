@@ -47,27 +47,20 @@
  *
  */
 
-package com.openexchange.subscribe.parser;
-
-import com.openexchange.subscribe.OXMFParser;
-import com.openexchange.subscribe.OXMFParserFactoryService;
+package com.openexchange.subscribe.microformats;
 
 /**
- * {@link OXMFParserFactoryServiceImpl} - Implementation of {@link OXMFParserFactoryService}.
+ * {@link OXMFParserFactoryService} - Factory service for {@link OXMFParser} instances.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OXMFParserFactoryServiceImpl implements OXMFParserFactoryService {
+public interface OXMFParserFactoryService {
 
     /**
-     * Initializes a new {@link OXMFParserFactoryServiceImpl}.
+     * Returns a new instance of {@link OXMFParser}.
+     * 
+     * @return A new instance of {@link OXMFParser}
      */
-    public OXMFParserFactoryServiceImpl() {
-        super();
-    }
-
-    public OXMFParser getParser() {
-        return new OXMFParserImpl();
-    }
+    public OXMFParser getParser();
 
 }

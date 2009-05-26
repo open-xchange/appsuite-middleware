@@ -47,25 +47,19 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.transformers;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
- * {@link Activator}
+ * {@link MapToObjectTransformer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
-
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
-
+public interface MapToObjectTransformer {
+    public List<? extends Object> transform(List<Map<String, String>> list) throws SubscriptionException;
 }

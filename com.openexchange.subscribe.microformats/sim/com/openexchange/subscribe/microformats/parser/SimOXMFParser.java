@@ -47,25 +47,61 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats.parser;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.microformats.OXMFParser;
 
 
 /**
- * {@link Activator}
+ * {@link SimOXMFParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class SimOXMFParser implements OXMFParser {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator()};
+    private List<Map<String, String>> data;
+    private String html;
     
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private Set<String> containerElements = new HashSet<String>();
+    private Set<String> prefixes = new HashSet<String>();
+
+    public SimOXMFParser(List<Map<String, String>> data) {
+        this.data = data;
+    }
+    
+    public void addAttributePrefix(String prefix) {
+        prefixes.add(prefix);
+    }
+
+    public void addContainerElement(String containerElement) {
+        containerElements.add(containerElement);
+    }
+
+    public List<Map<String, String>> parse(String html) throws SubscriptionException {
+        this.html  = html;
+        return data;
+    }
+    
+    public String getHtml() {
+        return html;
+    }
+
+    public void reset() {
+
+    }
+
+    public boolean knowsContainer(String string) {
+        return containerElements.contains(string);
+    }
+
+    public boolean knowsPrefix(String string) {
+        return prefixes.contains(string);
     }
 
 }

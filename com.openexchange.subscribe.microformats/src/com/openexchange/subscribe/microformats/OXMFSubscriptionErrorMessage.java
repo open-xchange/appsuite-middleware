@@ -47,31 +47,63 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.microformats;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.subscribe.OXMFParserFactoryService;
-import com.openexchange.subscribe.parser.OXMFParserFactoryServiceImpl;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 
 /**
- * {@link OXMFParserActivator}
+ * {@link OXMFSubscriptionErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OXMFParserActivator implements BundleActivator {
+public enum OXMFSubscriptionErrorMessage implements OXErrorMessage{
 
-    private ServiceRegistration parserRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        parserRegistration = context.registerService(OXMFParserFactoryService.class.getName(), new OXMFParserFactoryServiceImpl(), null);
+    /**
+     * A parsing error occurred: %1$s.
+     */
+    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
+    IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 3, "Try again later.", "An IOException occurred: %1$s."),
+    HttpException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 3, "Try again later.", "A HTTPException occurred: %1$s."),
+    ;
+    
+    private Category category;
+    private int errorCode;
+    private String help;
+    private String message;
+    
+    public static final OXMFSubscriptionExceptionFactory EXCEPTIONS = new OXMFSubscriptionExceptionFactory();
+    
+    private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+        this.category = category;
+        this.errorCode = errorCode;
+        this.help = help;
+        this.message = message;
+    }
+    
+    public Category getCategory() {
+        return category;
     }
 
-    public void stop(BundleContext context) throws Exception {
-        parserRegistration.unregister();
+    public int getDetailNumber() {
+        return errorCode;
     }
 
+    public String getHelp() {
+        return help;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    
+    public OXMFSubscriptionException create(final Throwable cause, final Object...args) {
+        return EXCEPTIONS.create(this,cause, args);
+    }
+    
+    public OXMFSubscriptionException create(final Object...args) {
+        return EXCEPTIONS.create(this,args);
+    }
 }

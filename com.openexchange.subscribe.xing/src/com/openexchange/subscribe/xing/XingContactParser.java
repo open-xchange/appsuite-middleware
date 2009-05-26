@@ -56,6 +56,13 @@ public class XingContactParser {
 	    // 2nd step - profile home page
 	    final HtmlPage profileHomePage = (HtmlPage)loginForm.submit(null);
 	    //System.out.println("*****" + profileHomePage.getTitleText());//should be "XING  -  Start"
+	    
+	    // wrong password? 
+	    List<?> errors = profileHomePage.getByXPath("//p[@class='error-message-top']");
+	    if(errors.size() != 0) {
+//	        throw new XingWrongPasswordException();
+	    }
+	    
 	    HtmlAnchor linkToContacts = profileHomePage.getAnchorByHref("/app/contact");
 	    
 	    // 3rd step - first contacts page
