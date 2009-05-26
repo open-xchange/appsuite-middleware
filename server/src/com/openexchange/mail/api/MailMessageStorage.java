@@ -160,7 +160,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     public abstract MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws MailException;
 
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         return null;
     }
 

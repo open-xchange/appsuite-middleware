@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.ProtocolException;
@@ -67,6 +68,8 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadSortUtil {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadSortUtil.class);
 
     /**
      * Prevent instantiation
@@ -209,4 +212,90 @@ public final class ThreadSortUtil {
         return (String) val;
     }
 
+    /**
+     * Outputs specified structured list to given string builder.
+     * 
+     * @param structuredList The structured list
+     * @param sb The string builder to output to
+     */
+    public static void outputList(final List<ThreadSortMailMessage> structuredList, final StringBuilder sb) {
+        outputList(structuredList, "", sb);
+    }
+
+    private static void outputList(final List<ThreadSortMailMessage> structuredList, final String prefix, final StringBuilder sb) {
+        if (null == structuredList || structuredList.isEmpty()) {
+            return;
+        }
+        for (final ThreadSortMailMessage threadSortMailMessage : structuredList) {
+            sb.append(prefix).append(threadSortMailMessage.getMailId()).append(" (").append(threadSortMailMessage.getThreadLevel()).append(
+                ')').append('\n');
+            final List<ThreadSortMailMessage> structuredSubList = threadSortMailMessage.getChildMessages();
+            outputList(structuredSubList, prefix + "  ", sb);
+        }
+    }
+
+    /**
+     * Converts specified structured list to a flat list.
+     * 
+     * @param structuredList The structured list
+     * @param flatList The flat list to fill
+     */
+    public static void toFlatList(final List<ThreadSortMailMessage> structuredList, final List<MailMessage> flatList) {
+        if (null == structuredList || structuredList.isEmpty()) {
+            return;
+        }
+        for (final ThreadSortMailMessage tsmm : structuredList) {
+            flatList.add(tsmm.getOriginalMessage());
+            final List<ThreadSortMailMessage> children = tsmm.getChildMessages();
+            toFlatList(children, flatList);
+        }
+    }
+
+    /**
+     * Generates a structured list from specified mails.
+     * 
+     * @param mails The mails with thread level applied
+     * @return A structured list reflecting thread-order structure
+     */
+    public static List<ThreadSortMailMessage> toThreadSortStructure(final MailMessage[] mails) {
+        final List<ThreadSortMailMessage> list = new ArrayList<ThreadSortMailMessage>(mails.length);
+        int i = 0;
+        while (i < mails.length) {
+            final MailMessage mail = mails[i];
+            if (0 == mail.getThreadLevel()) {
+                final ThreadSortMailMessage tsmm = new ThreadSortMailMessage(mail);
+                list.add(tsmm);
+                i++;
+                final List<ThreadSortMailMessage> sublist = new ArrayList<ThreadSortMailMessage>();
+                i = gatherChildren(mails, i, 1, sublist);
+                tsmm.addChildMessages(sublist);
+            }
+        }
+        return list;
+    }
+
+    private static int gatherChildren(final MailMessage[] mails, final int index, final int level, final List<ThreadSortMailMessage> newList) {
+        boolean b = true;
+        int i = index;
+        while (b && i < mails.length) {
+            final MailMessage mail = mails[i];
+            final int mailLevel = mail.getThreadLevel();
+            if (mailLevel > level) {
+                if (LOG.isWarnEnabled() && mailLevel != level + 1) {
+                    LOG.warn("Unexpected thread level! Expected=" + (level + 1) + ", Actual=" + mailLevel);
+                }
+                final ThreadSortMailMessage parent = newList.get(newList.size() - 1);
+                final List<ThreadSortMailMessage> sublist = new ArrayList<ThreadSortMailMessage>();
+                i = gatherChildren(mails, i, mailLevel, sublist);
+                parent.addChildMessages(sublist);
+            } else if (mailLevel == level) {
+                newList.add(new ThreadSortMailMessage(mail));
+                i++;
+            } else {
+                // Mail's thread level is lower than given one
+                b = false;
+            }
+        }
+        return i;
+    }
 }

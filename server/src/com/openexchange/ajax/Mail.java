@@ -540,8 +540,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String sort = paramContainer.getStringParam(PARAMETER_SORT);
             final String order = paramContainer.getStringParam(PARAMETER_ORDER);
-            final boolean threadSort = (STR_THREAD.equalsIgnoreCase(sort));
-            if (sort != null && !threadSort && order == null) {
+            if (sort != null && order == null) {
                 throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_ORDER);
             }
 
@@ -572,8 +571,21 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
-                if (threadSort) {
-                    it = mailInterface.getAllThreadedMessages(folderId, columns, fromToIndices);
+                int orderDir = OrderDirection.ASC.getOrder();
+                if (order != null) {
+                    if (order.equalsIgnoreCase(STR_ASC)) {
+                        orderDir = OrderDirection.ASC.getOrder();
+                    } else if (order.equalsIgnoreCase(STR_DESC)) {
+                        orderDir = OrderDirection.DESC.getOrder();
+                    } else {
+                        throw new MailException(MailException.Code.INVALID_INT_VALUE, PARAMETER_ORDER);
+                    }
+                }
+                /*
+                 * Check for thread-sort
+                 */
+                if ((STR_THREAD.equalsIgnoreCase(sort))) {
+                    it = mailInterface.getAllThreadedMessages(folderId, orderDir, columns, fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
@@ -591,16 +603,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 } else {
                     final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    int orderDir = OrderDirection.ASC.getOrder();
-                    if (order != null) {
-                        if (order.equalsIgnoreCase(STR_ASC)) {
-                            orderDir = OrderDirection.ASC.getOrder();
-                        } else if (order.equalsIgnoreCase(STR_DESC)) {
-                            orderDir = OrderDirection.DESC.getOrder();
-                        } else {
-                            throw new MailException(MailException.Code.INVALID_INT_VALUE, PARAMETER_ORDER);
-                        }
-                    }
                     /*
                      * Get iterator
                      */
@@ -2067,8 +2069,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String sort = paramContainer.getStringParam(PARAMETER_SORT);
             final String order = paramContainer.getStringParam(PARAMETER_ORDER);
-            final boolean threadSort = (STR_THREAD.equalsIgnoreCase(sort));
-            if (sort != null && !threadSort && order == null) {
+            if (sort != null && order == null) {
                 throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_ORDER);
             }
             /*
@@ -2100,8 +2101,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
                     final int userId = session.getUserId();
                     final int contextId = session.getContextId();
-                    if (threadSort) {
-                        it = mailInterface.getThreadedMessages(folderId, null, searchCols, searchPats, true, columns);
+                    int orderDir = OrderDirection.ASC.getOrder();
+                    if (order != null) {
+                        if (order.equalsIgnoreCase(STR_ASC)) {
+                            orderDir = OrderDirection.ASC.getOrder();
+                        } else if (order.equalsIgnoreCase(STR_DESC)) {
+                            orderDir = OrderDirection.DESC.getOrder();
+                        } else {
+                            throw new MailException(MailException.Code.INVALID_INT_VALUE, PARAMETER_ORDER);
+                        }
+                    }
+                    if ((STR_THREAD.equalsIgnoreCase(sort))) {
+                        it = mailInterface.getThreadedMessages(folderId, null, orderDir, searchCols, searchPats, true, columns);
                         final int size = it.size();
                         for (int i = 0; i < size; i++) {
                             final MailMessage mail = it.next();
@@ -2113,16 +2124,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     } else {
                         final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                        int orderDir = OrderDirection.ASC.getOrder();
-                        if (order != null) {
-                            if (order.equalsIgnoreCase(STR_ASC)) {
-                                orderDir = OrderDirection.ASC.getOrder();
-                            } else if (order.equalsIgnoreCase(STR_DESC)) {
-                                orderDir = OrderDirection.DESC.getOrder();
-                            } else {
-                                throw new MailException(MailException.Code.INVALID_INT_VALUE, PARAMETER_ORDER);
-                            }
-                        }
                         it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
                         final int size = it.size();
                         for (int i = 0; i < size; i++) {

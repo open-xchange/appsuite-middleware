@@ -139,7 +139,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws MailException If messages cannot be deleted.
      */
     public abstract void deleteMessagesLong(String folder, long[] mailIds, boolean hardDelete) throws MailException;
-    
+
     /**
      * A convenience method that delivers all messages contained in given folder through invoking
      * {@link #searchMessages(String, IndexRange, MailSortField, OrderDirection, SearchTerm, MailField[]) searchMessages()} without search
@@ -168,7 +168,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public final MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
         return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
     }
-    
+
     /**
      * A convenience method that fetches the mail message's attachment identified through given <code>sequenceId</code>.
      * <p>
@@ -219,7 +219,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public final MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
         return getMessageLong(folder, Long.parseLong(mailId), markSeen);
     }
-    
+
     /**
      * Gets the mail located in given folder whose mail ID matches specified ID.
      * <p>
@@ -291,7 +291,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws MailException If messages cannot be returned
      */
     @Override
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         return null;
     }
 

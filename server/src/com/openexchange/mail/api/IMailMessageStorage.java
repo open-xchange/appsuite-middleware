@@ -83,7 +83,7 @@ public interface IMailMessageStorage {
      * @return The desired, pre-filled instances of {@link MailMessage}
      * @throws MailException
      */
-    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException;
+    public MailMessage[] getAllMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, MailField[] fields) throws MailException;
 
     /**
      * A convenience method that fetches the mail message's attachment identified through given <code>sequenceId</code>.
@@ -96,7 +96,7 @@ public interface IMailMessageStorage {
      * @return The attachment wrapped by a {@link MailPart} instance
      * @throws MailException If no attachment can be found whose sequence ID matches given <code>sequenceId</code>.
      */
-    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException;
+    public MailPart getAttachment(String folder, String mailId, String sequenceId) throws MailException;
 
     /**
      * A convenience method that fetches the mail message's image attachment identified by its <code>Content-Id</code> header given through
@@ -110,7 +110,7 @@ public interface IMailMessageStorage {
      * @return The image attachment wrapped by an {@link MailPart} instance
      * @throws MailException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
      */
-    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException;
+    public MailPart getImageAttachment(String folder, String mailId, String contentId) throws MailException;
 
     /**
      * Gets the mail located in given folder whose mail ID matches specified ID.
@@ -127,7 +127,7 @@ public interface IMailMessageStorage {
      * @return Corresponding message
      * @throws MailException If message could not be returned
      */
-    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException;
+    public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws MailException;
 
     /**
      * Gets the mails located in given folder whose mail ID matches specified ID. The constant {@link #EMPTY_RETVAL} may be returned, if
@@ -162,7 +162,7 @@ public interface IMailMessageStorage {
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws MailException If messages cannot be returned
      */
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException;
+    public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
 
     /**
      * Gets all unread messages located in given folder; meaning messages that do not have the \Seen flag set. The constant
@@ -176,7 +176,7 @@ public interface IMailMessageStorage {
      * @return Unread messages contained in an array of {@link MailMessage}
      * @throws MailException If unread messages cannot be returned.
      */
-    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException;
+    public MailMessage[] getUnreadMessages(String folder, MailSortField sortField, OrderDirection order, MailField[] fields, int limit) throws MailException;
 
     /**
      * Moves the mails identified through given mail IDs from source folder to destination folder.
@@ -191,7 +191,7 @@ public interface IMailMessageStorage {
      * @return The corresponding mail IDs if copied messages in destination folder
      * @throws MailException If messages cannot be copied.
      */
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException;
+    public String[] moveMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws MailException;
 
     /**
      * Releases all resources used by this message storage when closing superior {@link MailAccess}
@@ -209,7 +209,7 @@ public interface IMailMessageStorage {
      * @return The stored draft mail
      * @throws MailException If saving specified draft message fails
      */
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException;
+    public MailMessage saveDraft(String draftFullname, ComposedMailMessage draftMail) throws MailException;
 
     /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
@@ -249,7 +249,7 @@ public interface IMailMessageStorage {
      * @param colorLabel The color label to apply
      * @throws MailException If color label cannot be updated
      */
-    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException;
+    public void updateMessageColorLabel(String folder, String[] mailIds, int colorLabel) throws MailException;
 
     /**
      * Updates the flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is

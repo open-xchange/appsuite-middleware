@@ -398,8 +398,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getAllThreadedMessages(final String folder, final int[] fields, final int[] fromToIndices) throws MailException {
-        return getThreadedMessages(folder, fromToIndices, null, null, false, fields);
+    public SearchIterator<MailMessage> getAllThreadedMessages(final String folder, final int order, final int[] fields, final int[] fromToIndices) throws MailException {
+        return getThreadedMessages(folder, fromToIndices, order, null, null, false, fields);
     }
 
     @Override
@@ -891,7 +891,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+    public SearchIterator<MailMessage> getThreadedMessages(final String folder, final int[] fromToIndices, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -906,6 +906,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(
             fullname,
             fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+            OrderDirection.getOrderDirection(order),
             searchTerm,
             FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {

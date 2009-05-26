@@ -69,7 +69,7 @@ import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 
 /**
- * {@link MailAccountPOP3MessageStorage} - TODO Short description of this class' purpose.
+ * {@link MailAccountPOP3MessageStorage} - POP3 storage message storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -211,8 +211,8 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
-        final MailMessage[] mails = delegatee.getThreadSortedMessages(getRealFullname(folder), indexRange, searchTerm, fields);
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+        final MailMessage[] mails = delegatee.getThreadSortedMessages(getRealFullname(folder), indexRange, order, searchTerm, fields);
         for (final MailMessage mailMessage : mails) {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);

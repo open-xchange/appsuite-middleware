@@ -54,6 +54,7 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -78,6 +79,7 @@ import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
+import com.openexchange.imap.threadsort.ThreadSortMailMessage;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.mail.IndexRange;
@@ -478,7 +480,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         try {
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw new IMAPException(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED);
@@ -538,9 +540,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Fetch messages
              */
             final MailFields usedFields = new MailFields();
-            final FetchProfile fetchProfile = getFetchProfile(fields, null, getIMAPProperties().isFastFetch());
+            final FetchProfile fetchProfile = getFetchProfile(fields, MailField.RECEIVED_DATE, getIMAPProperties().isFastFetch());
             usedFields.addAll(Arrays.asList(fields));
             usedFields.add(MailField.THREAD_LEVEL);
+            usedFields.add(MailField.RECEIVED_DATE);
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             Message[] msgs = new FetchIMAPCommand(
                 imapFolder,
@@ -553,7 +556,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Apply thread level
              */
-            createThreadSortMessages(threadList, 0, msgs, 0);
+            applyThreadLevel(threadList, 0, msgs, 0);
             /*
              * ... and return
              */
@@ -580,10 +583,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 msgs = new ExtendedMimeMessage[retvalLength];
                 System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
             }
-            if (usedFields.contains(MailField.ACCOUNT_NAME)) {
-                return setAccountInfo(MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body));
+            /*
+             * Generate structured list
+             */
+            final List<ThreadSortMailMessage> structuredList;
+            {
+                final MailMessage[] mails;
+                if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                    mails = setAccountInfo(MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body));
+                } else {
+                    mails = MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
+                }
+                structuredList = ThreadSortUtil.toThreadSortStructure(mails);
             }
-            return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
+            /*
+             * Sort according to order direction
+             */
+            Collections.sort(
+                structuredList,
+                new MailMessageComparator(MailSortField.RECEIVED_DATE, OrderDirection.DESC.equals(order), null));
+            /*
+             * Output as flat list
+             */
+            final List<MailMessage> flatList = new ArrayList<MailMessage>(msgs.length);
+            ThreadSortUtil.toFlatList(structuredList, flatList);
+            return flatList.toArray(new MailMessage[flatList.size()]);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -1408,7 +1432,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return true;
     }
 
-    private static int createThreadSortMessages(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
+    private static int applyThreadLevel(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
         int idx = index;
         final int threadListSize = threadList.size();
         final Iterator<ThreadSortNode> iter = threadList.iterator();
@@ -1416,7 +1440,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             final ThreadSortNode currentNode = iter.next();
             ((ExtendedMimeMessage) msgs[idx]).setThreadLevel(level);
             idx++;
-            idx = createThreadSortMessages(currentNode.getChilds(), level + 1, msgs, idx);
+            idx = applyThreadLevel(currentNode.getChilds(), level + 1, msgs, idx);
         }
         return idx;
     }
