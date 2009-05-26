@@ -57,6 +57,7 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
@@ -74,12 +75,17 @@ public class PasswordUtil {
     /**
      * The DES algorithm.
      */
-    private static final String ALGORITHM_DES = "DES";
+    private static final String ALGORITHM_DES = "AES";
 
     /**
      * The transformation following pattern <i>"algorithm/mode/padding"</i>.
      */
-    private static final String CIPHER_TYPE = ALGORITHM_DES + "/ECB/PKCS5Padding";
+    private static final String CIPHER_TYPE = ALGORITHM_DES + "/CBC/PKCS5Padding";
+    
+    /**
+     * Parameters
+     */
+    private static IvParameterSpec iv = new IvParameterSpec(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
 
     /**
      * Encrypts specified password with given key.
@@ -115,7 +121,7 @@ public class PasswordUtil {
      */
     public static String encrypt(final String password, final Key key) throws GeneralSecurityException {
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
+        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 
         try {
             final byte[] outputBytes = cipher.doFinal(password.getBytes("UTF-8"));
@@ -182,7 +188,7 @@ public class PasswordUtil {
         }
 
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-        cipher.init(Cipher.DECRYPT_MODE, key);
+        cipher.init(Cipher.DECRYPT_MODE, key, iv);
 
         final byte[] outputBytes = cipher.doFinal(encrypted);
 
@@ -204,7 +210,7 @@ public class PasswordUtil {
         return secretKey;
     }
 
-    private static final int KEY_LENGTH = 8;
+    private static final int KEY_LENGTH = 16;
 
     /**
      * Generates a secret key from specified key string.
