@@ -81,7 +81,11 @@ public class Activator implements BundleActivator {
      * {@inheritDoc}
      */
     public void start(BundleContext context) throws Exception {
-        dbpoolingComponent = new ComponentRegistration(context, EnumComponent.DB_POOLING.getAbbreviation(), "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
+        dbpoolingComponent = new ComponentRegistration(
+            context,
+            EnumComponent.DB_POOLING,
+            "com.openexchange.database",
+            DBPoolingExceptionFactory.getInstance());
         Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
         configurationTimerTracker = new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context));
         configurationTimerTracker.open();

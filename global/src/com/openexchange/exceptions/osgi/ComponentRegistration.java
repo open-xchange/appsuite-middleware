@@ -80,19 +80,27 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
 
     private final ServiceTracker serviceTracker;
 
-    public ComponentRegistration(final BundleContext context, final String component, final String applicationId, final Exceptions<?> exceptions) {
+    public ComponentRegistration(BundleContext context, String component, String applicationId, Exceptions<?> exceptions) {
+        super();
         this.component = new StringComponent(component);
         this.applicationId = applicationId;
         this.exceptions = exceptions;
         this.context = context;
-
         serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
         serviceTracker.open();
+    }
 
+    public ComponentRegistration(BundleContext context, Component component, String applicationId, Exceptions<?> exceptions) {
+        super();
+        this.component = component;
+        this.applicationId = applicationId;
+        this.exceptions = exceptions;
+        this.context = context;
+        serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
+        serviceTracker.open();
     }
 
     public void unregister() {
-        registry.deregisterComponent(component);
         serviceTracker.close();
     }
 
@@ -111,9 +119,12 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
     }
 
     public void modifiedService(final ServiceReference serviceReference, final Object o) {
+        // Nothing to do.
     }
 
     public void removedService(final ServiceReference serviceReference, final Object o) {
+        registry.deregisterComponent(component);
         registry = null;
+        context.ungetService(serviceReference);
     }
 }

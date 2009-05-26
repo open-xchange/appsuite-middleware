@@ -71,10 +71,10 @@ public final class DataRetentionActivator implements BundleActivator {
         super();
     }
 
-    public void start(final BundleContext arg0) throws Exception {
+    public void start(BundleContext context) throws Exception {
         componentRegistration = new ComponentRegistration(
-            arg0,
-            DataRetentionException.DATA_RETENTION_COMPONENT.getAbbreviation(),
+            context,
+            DataRetentionException.DATA_RETENTION_COMPONENT,
             "com.openexchange.dataretention",
             DataRetentionExceptionFactory.getInstance());
     }

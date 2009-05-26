@@ -84,17 +84,17 @@ public final class GlobalActivator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
-    public void start(final BundleContext context) throws Exception {
+    public void start(BundleContext context) throws Exception {
         try {
             ServiceHolderInit.getInstance().start();
             componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
             loginComponent = new ComponentRegistration(
                 context,
-                EnumComponent.LOGIN.getAbbreviation(),
+                EnumComponent.LOGIN,
                 "com.openexchange.authentication",
                 LoginExceptionFactory.getInstance());
             LOG.debug("Global bundle successfully started");
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
         }
@@ -103,16 +103,15 @@ public final class GlobalActivator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
-    public void stop(final BundleContext context) throws Exception {
+    public void stop(BundleContext context) throws Exception {
         try {
             loginComponent.unregister();
             componentRegistryRegistration.unregister();
             ServiceHolderInit.getInstance().stop();
             LOG.debug("Global bundle successfully stopped");
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
         }
     }
-
 }

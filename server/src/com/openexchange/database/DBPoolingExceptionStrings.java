@@ -56,7 +56,7 @@ import com.openexchange.exceptions.LocalizableStrings;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DBPoolingExceptionMessages implements LocalizableStrings {
+public class DBPoolingExceptionStrings implements LocalizableStrings {
 
     // The server is unable to connect to the configuration database.
     public static final String NO_CONFIG_DB_MSG = "Cannot get connection to config DB.";
@@ -116,7 +116,7 @@ public class DBPoolingExceptionMessages implements LocalizableStrings {
     /**
      * Prevent instantiation.
      */
-    private DBPoolingExceptionMessages() {
+    private DBPoolingExceptionStrings() {
         super();
     }
 }

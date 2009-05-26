@@ -79,16 +79,11 @@ public final class ConversionActivator implements BundleActivator {
      * {@inheritDoc}
      */
     public void start(final BundleContext context) throws Exception {
-        try {
-            convComponent = new ComponentRegistration(
-                context,
-                DataException.CONV_COMPONENT.getAbbreviation(),
-                "com.openexchange.conversion",
-                DataExceptionFactory.getInstance());
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+        convComponent = new ComponentRegistration(
+            context,
+            DataException.CONV_COMPONENT,
+            "com.openexchange.conversion",
+            DataExceptionFactory.getInstance());
     }
 
     /**

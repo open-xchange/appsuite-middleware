@@ -49,7 +49,7 @@
 
 package com.openexchange.database;
 
-import static com.openexchange.database.DBPoolingExceptionMessages.*;
+import static com.openexchange.database.DBPoolingExceptionStrings.*;
 
 import com.openexchange.database.internal.DBPoolingExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;

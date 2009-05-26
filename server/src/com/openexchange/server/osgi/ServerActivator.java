@@ -503,17 +503,17 @@ public final class ServerActivator extends DeferredActivator {
         // TODO: Decide what to register dependent on admin/groupware start
         componentRegistrationList.add(new ComponentRegistration(
             context,
-            SearchException.SEARCH_COMPONENT.getAbbreviation(),
+            SearchException.SEARCH_COMPONENT,
             "com.openexchange.search",
             SearchExceptionFactory.getInstance()));
         componentRegistrationList.add(new ComponentRegistration(
             context,
-            ManagedFileException.MANAGED_FILE_COMPONENT.getAbbreviation(),
+            ManagedFileException.MANAGED_FILE_COMPONENT,
             "com.openexchange.filemanagement",
             ManagedFileExceptionFactory.getInstance()));
         componentRegistrationList.add(new ComponentRegistration(
             context,
-            MailAccountException.MAIL_ACCOUNT_COMPONENT.getAbbreviation(),
+            MailAccountException.MAIL_ACCOUNT_COMPONENT,
             "com.openexchange.mailaccount",
             MailAccountExceptionFactory.getInstance()));
     }
