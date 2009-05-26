@@ -73,14 +73,19 @@ public class PasswordUtil {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
 
     /**
-     * The DES algorithm.
+     * The key length.
      */
-    private static final String ALGORITHM_DES = "AES";
+    private static final int KEY_LENGTH = 16;
+
+    /**
+     * The algorithm.
+     */
+    private static final String ALGORITHM = "AES";
 
     /**
      * The transformation following pattern <i>"algorithm/mode/padding"</i>.
      */
-    private static final String CIPHER_TYPE = ALGORITHM_DES + "/CBC/PKCS5Padding";
+    private static final String CIPHER_TYPE = ALGORITHM + "/CBC/PKCS5Padding";
 
     /**
      * Parameters
@@ -204,13 +209,11 @@ public class PasswordUtil {
      * Create a key for use in the cipher code
      */
     public static Key generateRandomKey() throws NoSuchAlgorithmException {
-        final KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM_DES);
+        final KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
         keyGenerator.init(new SecureRandom());
         final SecretKey secretKey = keyGenerator.generateKey();
         return secretKey;
     }
-
-    private static final int KEY_LENGTH = 16;
 
     /**
      * Generates a secret key from specified key string.
@@ -221,7 +224,7 @@ public class PasswordUtil {
      */
     public static Key generateSecretKey(final String key) throws GeneralSecurityException {
         try {
-            return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), ALGORITHM_DES);
+            return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), ALGORITHM);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw new GeneralSecurityException("Failed to generate secret key.", e);

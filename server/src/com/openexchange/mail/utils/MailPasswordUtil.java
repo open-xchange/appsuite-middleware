@@ -60,7 +60,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * {@link MailPasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka password based encryption (PBE).
+ * {@link MailPasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka <b>p</b>assword <b>b</b>ased <b>e</b>ncryption
+ * (PBE).
  * <p>
  * PBE is a form of symmetric encryption where the same key or password is used to encrypt and decrypt a string.
  * 
