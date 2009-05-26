@@ -43,8 +43,8 @@ public class Activator extends DeferredActivator {
         }
         PublicationTargetServlet.setPublicationTargetDiscoveryService(discovery);
         PublicationServlet.setPublicationTargetDiscoveryService(discovery);
-        PublicationServlet.registerEntityType("folder:contacts", new IDType());
-        PublicationServlet.registerEntityType("infostore", new IDType());
+        PublicationServlet.registerEntityType("contacts", new IDType());
+        PublicationServlet.registerEntityType("infostore/object", new IDType());
         
         final HttpService httpService = getService(HttpService.class);
         try {

@@ -83,10 +83,10 @@ public class LoaderActivator implements BundleActivator {
         InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);   
         UserService users = whiteboard.getService(UserService.class);
         UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
-        compositeLoader.registerLoader("infostore", new InfostoreDocumentLoader(infostore, users, userConfigs));
+        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
     
         ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactSQLFactory.class));
-        compositeLoader.registerLoader("folder:contacts", contactLoader);
+        compositeLoader.registerLoader("contacts", contactLoader);
         
         dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), compositeLoader, null);
     }

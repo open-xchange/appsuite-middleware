@@ -126,7 +126,10 @@ public class MicroformatServlet extends HttpServlet {
             }
             Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
             Publication publication = publisher.getPublication(ctx, args.get(SITE));
-            
+            if(publication == null) {
+                resp.getWriter().println("Don't know site "+args.get(SITE));
+                return;
+            }
             checkProtected(publication, args);
             
             Collection<? extends Object> loaded = dataLoader.load(publication);

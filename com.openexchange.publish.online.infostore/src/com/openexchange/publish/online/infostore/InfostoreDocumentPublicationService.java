@@ -79,7 +79,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         PublicationTarget target = new PublicationTarget();
         target.setDisplayName("Publish Infostore Document");
         target.setId("com.openexchange.publish.online.infostore.document");
-        target.setModule("infostore");
+        target.setModule("infostore/object");
         target.setPublicationService(this);
         
         target.setFormDescription(new DynamicFormDescription());
