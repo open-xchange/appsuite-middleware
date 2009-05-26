@@ -66,6 +66,26 @@ public class MailCleaner implements Cleanable {
     private TestMail mail;
     private AJAXClient client;
 
+    
+    public TestMail getMail() {
+        return mail;
+    }
+
+    
+    public void setMail(TestMail mail) {
+        this.mail = mail;
+    }
+
+    
+    public AJAXClient getClient() {
+        return client;
+    }
+
+    
+    public void setClient(AJAXClient client) {
+        this.client = client;
+    }
+
     /**
      * Initializes a new {@link MailCleaner}.
      * @param mail
