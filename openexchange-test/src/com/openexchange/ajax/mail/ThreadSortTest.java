@@ -55,6 +55,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.groupware.search.Order;
 
 /**
  * {@link ThreadSortTest}
@@ -122,7 +123,12 @@ public final class ThreadSortTest extends AbstractMailTest {
         /*
          * Perform all request with thread-sort enabled
          */
-        final AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true).setThreadSort(true));
+        final AllResponse allR = Executor.execute(getSession(), new AllRequest(
+            getInboxFolder(),
+            COLUMNS_DEFAULT_LIST,
+            0,
+            Order.DESCENDING,
+            true).setThreadSort(true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
