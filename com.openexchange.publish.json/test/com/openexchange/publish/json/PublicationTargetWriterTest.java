@@ -73,7 +73,7 @@ public class PublicationTargetWriterTest extends TestCase {
         target.setId("com.openexchange.publish.test1");
         target.setDisplayName("Test 1 PubTarget");
         target.setIcon("http://example.invalid/icon.png");
-        target.setModule("folder:contacts");
+        target.setModule("contacts");
 
         target.setFormDescription(new DynamicFormDescription());
     }
@@ -85,7 +85,7 @@ public class PublicationTargetWriterTest extends TestCase {
             .hasKey("id").withValue("com.openexchange.publish.test1")
             .hasKey("displayName").withValue("Test 1 PubTarget")
             .hasKey("icon").withValue("http://example.invalid/icon.png")
-            .hasKey("module").withValue("folder:contacts")
+            .hasKey("module").withValue("contacts")
             .hasKey("formDescription").withValueArray()
        .hasNoMoreKeys();
         
