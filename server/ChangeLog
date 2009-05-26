@@ -1,3 +1,7 @@
+* 2009-05-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #13734: Proper dealing with multiple resolved user IDs during ACL mapping
+
 * 2009-05-25 - thorben.betten@open-xchange.com
 
  - Bugfix #13712: Deleting account properties prior to deleting account data

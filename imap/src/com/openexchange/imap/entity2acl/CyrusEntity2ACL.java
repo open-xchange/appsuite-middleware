@@ -50,8 +50,8 @@
 package com.openexchange.imap.entity2acl;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.api.MailConfig;
@@ -78,6 +78,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CyrusEntity2ACL extends Entity2ACL {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CyrusEntity2ACL.class);
 
     private static final String AUTH_ID_ANYONE = "anyone";
 
@@ -141,17 +143,15 @@ public final class CyrusEntity2ACL extends Entity2ACL {
 
     private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws AbstractOXException {
         final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, imapAddr, ctx);
-        if (ids.length == 1) {
-            return ids[0];
+        if (0 == ids.length) {
+            throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
         }
-        final MailAccountStorageService storageService = getServiceRegistry().getService(MailAccountStorageService.class, true);
-        for (final int id : ids) {
-            if (imapAddr.equals(toSocketAddr(
-                MailConfig.getMailServerURL(storageService.getMailAccount(accountId, id, ctx.getContextId())),
-                143))) {
-                return id;
-            }
+        if (ids.length > 1 && LOG.isWarnEnabled()) {
+            LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+                "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                "\nThe first found user is returned."));
         }
-        throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
+        return ids[0];
     }
+
 }
