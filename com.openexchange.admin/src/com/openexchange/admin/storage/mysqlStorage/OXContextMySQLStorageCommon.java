@@ -46,21 +46,22 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -146,22 +147,22 @@ public abstract class OXContextMySQLStorageCommon {
                     cs.setWriteDatabase(new Database(write_pool, db_schema));
                 }
                 //DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
-            	// THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
-            	// SEE #11094 FOR DETAILS!
+                // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+                // SEE #11094 FOR DETAILS!
                 String login_mapping = rs.getString(10);   
                 if(!ctx.getIdAsString().equals(login_mapping)){
-                	cs.addLoginMapping(login_mapping);
+                    cs.addLoginMapping(login_mapping);
                 }
             }
             // All other lines contain the same content except the mapping so we concentrate on the mapping here
             while (rs.next()) {
-            	String login_mapping = rs.getString(10);   	
-            	// DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
-            	// THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
-            	// SEE #11094 FOR DETAILS!
-            	if(!ctx.getIdAsString().equals(login_mapping)){
-            		cs.addLoginMapping(login_mapping);
-            	}                
+                String login_mapping = rs.getString(10);       
+                // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+                // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+                // SEE #11094 FOR DETAILS!
+                if(!ctx.getIdAsString().equals(login_mapping)){
+                    cs.addLoginMapping(login_mapping);
+                }                
             }
 
             // ######################
@@ -316,27 +317,36 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void deleteSequenceTables(final int context_id, final Connection write_ox_con) throws SQLException {
-        log.debug("Deleting sequence entries for context " + context_id);
-        // delete all sequence table entries
-        PreparedStatement del_stmt = null;
-        PreparedStatement seq_del = null;
+    private void deleteSequenceTables(int contextId, Connection con) throws SQLException {
+        log.debug("Deleting sequence entries for context " + contextId);
+        PreparedStatement stmt = null;
         try {
-            del_stmt = write_ox_con.prepareStatement("show tables like ?");
-            del_stmt.setString(1, "%sequence_%");
-            final ResultSet rs_sequences = del_stmt.executeQuery();
-    
-            while (rs_sequences.next()) {
-                final String del_sequence_table = rs_sequences.getString(1);
-                seq_del = write_ox_con.prepareStatement("delete from " + del_sequence_table + " where cid = ?");
-                seq_del.setInt(1, context_id);
-                seq_del.executeUpdate();
-                seq_del.close();
+            for (String tableName : determineSequenceTables(con)) {
+                stmt = con.prepareStatement("DELETE FROM `" + tableName + "` WHERE cid=?");
+                stmt.setInt(1, contextId);
+                stmt.executeUpdate();
+                stmt.close();
             }
         } finally {
-            closePreparedStatement(del_stmt);
-            closePreparedStatement(seq_del);
+            closeSQLStuff(stmt);
         }
+    }
+
+    private String[] determineSequenceTables(Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        List<String> tmp = new ArrayList<String>();
+        try {
+            stmt = con.prepareStatement("SHOW TABLES LIKE ?");
+            stmt.setString(1, "%sequence_%");
+            result = stmt.executeQuery();
+            while (result.next()) {
+                tmp.add(result.getString(1));
+            }
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return tmp.toArray(new String[tmp.size()]);
     }
 
     public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws SQLException, StorageException {
@@ -417,50 +427,47 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void initSequenceTables(final int context_id, final Connection con) throws SQLException, StorageException {
-        PreparedStatement ps = null;
+    public final void initSequenceTables(int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
         try {
-            final ArrayList<String> sequence_tables = cache.getSequenceTables();
-            final Iterator<String> is = sequence_tables.iterator();
-            while (is.hasNext()) {
-                int startval = 0;
-                final String table = is.next();
-                if (table.equals("sequence_folder")) {
-                    // below id 20 is reserved
-                    startval = 20;
-                }
-                
-                // check for the uid number feature
-                if(table.equals("sequence_uid_number")){
-                        int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START,"-1"));
-                        if(startnum>0){
-                            // we use the uid number faeture
-                            // set the start number in the sequence for uid_numbers 
-                            startval = startnum;
-                        }
-                }
-                //  check for the gid number feature
-                if(table.equals("sequence_gid_number")){
-                    int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"));
-                    if(startnum>0){
-                        // we use the gid number faeture
-                        // set the start number in the sequence for gid_numbers 
-                        startval = startnum;
-                    }
-                }
-                
-                ps = con.prepareStatement("INSERT INTO " + table + " VALUES(?,?);");
-                ps.setInt(1, context_id);
-                ps.setInt(2, startval);
-                ps.executeUpdate();
-                ps.close();
+            for (String tableName : determineSequenceTables(con)) {
+                int startValue = modifyStartValue(tableName);
+                stmt = con.prepareStatement("INSERT INTO `" + tableName + "` VALUES (?,?)");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, startValue);
+                stmt.executeUpdate();
+                stmt.close();
             }
-        } catch (final OXGenericException oxgen) {
-            log.error("Generic Error",oxgen);
-            throw new StorageException("" + oxgen.getMessage());
         } finally {
-            closePreparedStatement(ps);
+            closeSQLStuff(stmt);
         }
+    }
+
+    private int modifyStartValue(final String tableName) {
+        int retval = 0;
+        if ("sequence_folder".equals(tableName)) {
+            // below id 20 is reserved
+            retval = 20;
+        }
+        // check for the uid number feature
+        if ("sequence_uid_number".equals(tableName)) {
+            int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
+            if (startnum > 0) {
+                // we use the uid number feature
+                // set the start number in the sequence for uid_numbers 
+                retval = startnum;
+            }
+        }
+        // check for the gid number feature
+        if ("sequence_gid_number".equals(tableName)){
+            int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
+            if (startnum > 0) {
+                // we use the gid number feature
+                // set the start number in the sequence for gid_numbers 
+                retval = startnum;
+            }
+        }
+        return retval;
     }
 
     public final void initVersionTable(final int context_id, final Connection con) throws SQLException, StorageException {
