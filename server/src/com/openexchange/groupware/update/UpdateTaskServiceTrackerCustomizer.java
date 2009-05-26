@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update;
 
 import java.util.Collection;
+import java.util.Iterator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -78,11 +79,14 @@ public final class UpdateTaskServiceTrackerCustomizer implements ServiceTrackerC
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         final UpdateTaskRegistry registry = UpdateTaskRegistry.getInstance();
-        if (null != registry && registry.addUpdateTask((UpdateTask) addedService)) {
-            final UpdateTaskProviderService providerService = (UpdateTaskProviderService) addedService;
-            final Collection<UpdateTask> collection = providerService.getUpdateTasks();
+        if (null != registry) {
+            // Get provider's collection
+            final Collection<UpdateTask> collection = ((UpdateTaskProviderService) addedService).getUpdateTasks();
             boolean error = false;
-            for (final UpdateTask task : collection) {
+            final int size = collection.size();
+            final Iterator<UpdateTask> iter = collection.iterator();
+            for (int i = 0; i < size && !error; i++) {
+                final UpdateTask task = iter.next();
                 if (!registry.addUpdateTask(task)) {
                     LOG.error(new StringBuilder().append("Update task \"").append(task.getClass().getName()).append(
                         "\" could not be registered."), new Throwable());
