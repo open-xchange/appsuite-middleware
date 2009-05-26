@@ -81,11 +81,11 @@ public class PasswordUtil {
      * The transformation following pattern <i>"algorithm/mode/padding"</i>.
      */
     private static final String CIPHER_TYPE = ALGORITHM_DES + "/CBC/PKCS5Padding";
-    
+
     /**
      * Parameters
      */
-    private static IvParameterSpec iv = new IvParameterSpec(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
+    private static final IvParameterSpec iv = new IvParameterSpec(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
 
     /**
      * Encrypts specified password with given key.
@@ -238,7 +238,7 @@ public class PasswordUtil {
                 keyBytes[i] = 48;
             }
         } else if (len > KEY_LENGTH) {
-            keyBytes = new byte[8];
+            keyBytes = new byte[KEY_LENGTH];
             System.arraycopy(bytes, 0, keyBytes, 0, keyBytes.length);
         } else {
             keyBytes = bytes;
