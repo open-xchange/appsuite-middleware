@@ -81,17 +81,18 @@ public class UpdateTaskCollection {
     /**
      * Sets statically loaded update tasks and initializes working queue.
      * 
-     * @param updateTaskList The statically loaded update tasks
+     * @param updateTaskList The statically loaded update tasks; may be <code>null</code> to indicate no static update tasks
      */
-    static void setUpdateTaskList(final List<UpdateTask> updateTaskList) {
+    static void initialize(final List<UpdateTask> updateTaskList) {
         UpdateTaskCollection.staticUpdateTaskList = updateTaskList;
-        updateTaskQueue = new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList);
+        updateTaskQueue = null == staticUpdateTaskList ? new LinkedBlockingQueue<UpdateTask>() : new LinkedBlockingQueue<UpdateTask>(
+            staticUpdateTaskList);
     }
 
     /**
      * Drops statically loaded update tasks and working queue as well.
      */
-    static void dropUpdateTaskList() {
+    static void dispose() {
         UpdateTaskCollection.staticUpdateTaskList = null;
         updateTaskQueue = null;
     }
@@ -117,7 +118,7 @@ public class UpdateTaskCollection {
      */
     static void removeDiscoveredUpdateTask(final UpdateTask updateTask) {
         final BlockingQueue<UpdateTask> queue = updateTaskQueue;
-        if (null == queue || queue.isEmpty()) {
+        if (null == queue) {
             return;
         }
         queue.remove(updateTask);
@@ -207,7 +208,8 @@ public class UpdateTaskCollection {
         /*
          * Working queue already processed
          */
-        final List<UpdateTask> retval = new ArrayList<UpdateTask>(staticUpdateTaskList);
+        final List<UpdateTask> retval = null == staticUpdateTaskList ? new ArrayList<UpdateTask>() : new ArrayList<UpdateTask>(
+            staticUpdateTaskList);
         retval.addAll(UpdateTaskRegistry.getInstance().asSet());
         return retval;
     }
