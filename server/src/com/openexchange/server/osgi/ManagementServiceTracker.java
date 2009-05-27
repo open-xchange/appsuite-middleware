@@ -52,10 +52,13 @@ package com.openexchange.server.osgi;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.consistency.ConsistencyInit;
 import com.openexchange.management.ManagementService;
+import com.openexchange.report.internal.ReportingInit;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -66,24 +69,24 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagementServiceTracker.class);
+    private static final Log LOG = LogFactory.getLog(ManagementServiceTracker.class);
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
      * 
      * @param context The bundle context
      */
-    public ManagementServiceTracker(final BundleContext context) {
+    public ManagementServiceTracker(BundleContext context) {
         super(context, ManagementService.class);
     }
 
     @Override
     protected void addingServiceInternal(final ManagementService managementService) {
+        /*
+         * Add management service to server's service registry
+         */
+        ServerServiceRegistry.getInstance().addService(ManagementService.class, managementService);
         try {
-            /*
-             * Add management service to server's service registry
-             */
-            ServerServiceRegistry.getInstance().addService(ManagementService.class, managementService);
             /*
              * Add all mbeans since management service is now available
              */
@@ -102,18 +105,20 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
+        new ReportingInit(managementService).start();
     }
 
     @Override
     protected void removedServiceInternal(final ManagementService managementService) {
+        new ReportingInit(managementService).stop();
         try {
             /*
              * Remove all mbeans since management service now disappears
              */
-            managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
-            managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
-            managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
             new ConsistencyInit().stop();
+            managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {

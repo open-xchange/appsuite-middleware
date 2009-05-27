@@ -529,9 +529,8 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public int[] listAllUser(final Context context) throws UserException {
-        final String sql = "SELECT " + IDENTIFIER + " FROM user "
-            + "WHERE user.cid=?";
+    public int[] listAllUser(Context context) throws UserException {
+        final String sql = "SELECT " + IDENTIFIER + " FROM user WHERE user.cid=?";
         Connection con = null;
         try {
             con = DBPool.pickup(context);
