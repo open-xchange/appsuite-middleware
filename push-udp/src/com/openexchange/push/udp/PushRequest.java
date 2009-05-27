@@ -162,8 +162,8 @@ public class PushRequest {
 
                 final int[] users = convertString2UserIDArray(parseString(args, pos++));
 
-                timestamp = parseLong(args, pos++);
-                
+                timestamp = parseTimestamp(args, pos++);
+
                 final PushObject pushObject = new PushObject(folderId, module, contextId, users, true, timestamp);
 
                 if (LOG.isDebugEnabled()) {
@@ -312,6 +312,13 @@ public class PushRequest {
             // Not a number...
             throw new PushUDPException(PushUDPException.Code.PORT_NAN, e, s[pos]);
         }
+    }
+
+    private long parseTimestamp(final String[] s, final int pos) {
+        if (pos >= s.length) {
+            return 0;
+        }
+        return parseLong(s, pos);
     }
 
     private long parseLong(final String[] s, final int pos) {
