@@ -50,10 +50,8 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -61,11 +59,13 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Stores the parameters to delete a folder.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - working with mail folders
  */
 public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
-    private final int[] folderIds;
+    private final String[] folderIds;
 
     private final Date lastModified;
 
@@ -74,7 +74,7 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
      */
     public DeleteRequest(final int[] folderIds, final Date lastModified) {
         super();
-        this.folderIds = folderIds;
+        this.folderIds = i2s(folderIds);
         this.lastModified = lastModified;
     }
 
@@ -84,22 +84,27 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     public DeleteRequest(final FolderObject... folder) {
         super();
-        folderIds = new int[folder.length];
+        folderIds = new String[folder.length];
         Date maxLastModified = new Date(Long.MIN_VALUE);
         for (int i = 0; i < folder.length; i++) {
-            folderIds[i] = folder[i].getObjectID();
+            if (folder[i].containsObjectID()) { // task, appointment or contact folder
+                folderIds[i] = Integer.valueOf(folder[i].getObjectID()).toString();
+            } else { // mail folder
+                folderIds[i] = folder[i].getFullName();
+            }
             if (maxLastModified.before(folder[i].getLastModified())) {
                 maxLastModified = folder[i].getLastModified();
             }
         }
         lastModified = maxLastModified;
     }
+
     /**
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
-        for (final int folderId : folderIds) {
+        for (final String folderId : folderIds) {
             array.put(folderId);
         }
         return array;
@@ -118,8 +123,7 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime())
-        };
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()) };
     }
 
     /**
@@ -127,5 +131,12 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
      */
     public CommonDeleteParser getParser() {
         return new CommonDeleteParser(true);
+    }
+
+    private String[] i2s(int[] intArr) {
+        String[] strArr = new String[intArr.length];
+        for (int i = 0; i < intArr.length; i++)
+            strArr[i] = Integer.valueOf(intArr[i]).toString();
+        return strArr;
     }
 }
