@@ -50,6 +50,7 @@ package com.openexchange.subscribe.microformats.transformers;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,6 +63,8 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	
+    private static final DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd");
+    
 	public List<ContactObject> transform (List<Map<String, String>> inlist){
 		ArrayList<ContactObject> outlist = new ArrayList<ContactObject>();
 		
@@ -132,7 +135,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 			} 
 			if (map.containsKey("ox_birthday")){
 				try {
-					contact.setBirthday(DateFormat.getDateInstance().parse((String)map.get("ox_birthday")));
+					contact.setBirthday(DATE.parse((String)map.get("ox_birthday")));
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
@@ -154,7 +157,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 			}  
 			if (map.containsKey("ox_anniversary")){
 				try {
-					contact.setAnniversary(DateFormat.getDateInstance().parse((String)map.get("ox_anniversary")));
+					contact.setAnniversary(DATE.parse((String)map.get("ox_anniversary")));
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
