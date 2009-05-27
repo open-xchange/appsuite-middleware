@@ -51,6 +51,8 @@ package com.openexchange.datatypes.genericonf.storage.impl;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -149,6 +151,23 @@ public class UpdateIterator implements MapIterator<String, Object> {
         if(null != exception) {
             throw exception;
         }
+    }
+
+    public void close() {
+        List<PreparedStatement> allStatements = new ArrayList<PreparedStatement>(updateStatements.size()+deleteStatements.size());
+        Collection<PreparedStatement> updates = updateStatements.values();
+        
+        allStatements.addAll(updates);
+        allStatements.addAll(deleteStatements);
+        
+        for (PreparedStatement preparedStatement : allStatements) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException x) {
+                //IGNORE
+            }
+        }
+        
     }
 
 }

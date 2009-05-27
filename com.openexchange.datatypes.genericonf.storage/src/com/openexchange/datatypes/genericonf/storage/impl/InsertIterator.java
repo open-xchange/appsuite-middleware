@@ -52,6 +52,7 @@ package com.openexchange.datatypes.genericonf.storage.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -114,6 +115,17 @@ public class InsertIterator implements MapIterator<String, Object> {
     public void throwException() throws SQLException {
         if(exception != null) {
             throw exception;
+        }
+    }
+
+    public void close() {
+        Collection<PreparedStatement> statements = statementMap.values();
+        for (PreparedStatement preparedStatement : statements) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException x) {
+                // Ignore
+            }
         }
     }
 

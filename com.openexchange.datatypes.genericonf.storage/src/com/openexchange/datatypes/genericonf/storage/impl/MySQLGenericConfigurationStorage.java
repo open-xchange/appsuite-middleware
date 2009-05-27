@@ -100,7 +100,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 insertIterator.setIds(cid, id);
 
                 Tools.iterate(content, insertIterator);
-
+                insertIterator.close();
                 insertIterator.throwException();
                 return id;
             }
@@ -221,6 +221,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 
                 Tools.iterate(content, updateIterator);
                 
+                updateIterator.close();
                 updateIterator.throwException();
                 return null;
             }
