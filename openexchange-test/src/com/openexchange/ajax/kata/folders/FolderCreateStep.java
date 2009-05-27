@@ -75,6 +75,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         if( inserted ){
             entry.setLastModified(new Date(Long.MAX_VALUE));
             manager.deleteFolderOnServer(entry);
+            inserted = false;
         }
     }
 
