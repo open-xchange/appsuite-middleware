@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-puPUBLISH_ONLINE_INFOSTORE_BUNDLElish-infostore-online
+# Build open-xchange-publish-infostore-online
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-puPUBLISH_ONLINE_INFOSTORE_BUNDLElish-infostore-online
+oxroot=$(CURDIR)/debian/open-xchange-publish-infostore-online
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
