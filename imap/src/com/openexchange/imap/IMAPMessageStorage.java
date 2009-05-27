@@ -480,7 +480,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         try {
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw new IMAPException(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED);
@@ -540,10 +540,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Fetch messages
              */
             final MailFields usedFields = new MailFields();
-            final FetchProfile fetchProfile = getFetchProfile(fields, MailField.RECEIVED_DATE, getIMAPProperties().isFastFetch());
+            final MailField sort = null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField());
+            final FetchProfile fetchProfile = getFetchProfile(fields, sort, getIMAPProperties().isFastFetch());
             usedFields.addAll(Arrays.asList(fields));
             usedFields.add(MailField.THREAD_LEVEL);
-            usedFields.add(MailField.RECEIVED_DATE);
+            usedFields.add(sort);
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             Message[] msgs = new FetchIMAPCommand(
                 imapFolder,

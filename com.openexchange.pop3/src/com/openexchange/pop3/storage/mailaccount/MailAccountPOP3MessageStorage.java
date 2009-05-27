@@ -211,8 +211,14 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
-        final MailMessage[] mails = delegatee.getThreadSortedMessages(getRealFullname(folder), indexRange, order, searchTerm, fields);
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+        final MailMessage[] mails = delegatee.getThreadSortedMessages(
+            getRealFullname(folder),
+            indexRange,
+            sortField,
+            order,
+            searchTerm,
+            fields);
         for (final MailMessage mailMessage : mails) {
             if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
                 mailMessage.setFolder(folder);

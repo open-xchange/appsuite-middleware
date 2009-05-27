@@ -118,6 +118,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -585,7 +586,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Check for thread-sort
                  */
                 if ((STR_THREAD.equalsIgnoreCase(sort))) {
-                    it = mailInterface.getAllThreadedMessages(folderId, orderDir, columns, fromToIndices);
+                    it = mailInterface.getAllThreadedMessages(
+                        folderId,
+                        MailSortField.RECEIVED_DATE.getField(),
+                        orderDir,
+                        columns,
+                        fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
@@ -2112,7 +2118,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                     if ((STR_THREAD.equalsIgnoreCase(sort))) {
-                        it = mailInterface.getThreadedMessages(folderId, null, orderDir, searchCols, searchPats, true, columns);
+                        it = mailInterface.getThreadedMessages(
+                            folderId,
+                            null,
+                            MailSortField.RECEIVED_DATE.getField(),
+                            orderDir,
+                            searchCols,
+                            searchPats,
+                            true,
+                            columns);
                         final int size = it.size();
                         for (int i = 0; i < size; i++) {
                             final MailMessage mail = it.next();

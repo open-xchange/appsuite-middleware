@@ -171,14 +171,14 @@ public abstract class MailServletInterface {
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int order, int[] fields, int[] fromToIndices) throws MailException;
+    public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws MailException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getThreadedMessages(String folder, int[] fromToIndices, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
+    public abstract SearchIterator<MailMessage> getThreadedMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
 
     /**
      * Returns the an array of messages located in given folder. If <code>fromToUID</code> is not <code>null</code> only messages fitting

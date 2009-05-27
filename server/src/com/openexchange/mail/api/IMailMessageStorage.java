@@ -157,12 +157,14 @@ public interface IMailMessageStorage {
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
+     * @param sortField The sort field applied to thread root elements
+     * @param order Whether ascending or descending sort order
      * @param searchTerm The search term
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws MailException If messages cannot be returned
      */
-    public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
+    public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
 
     /**
      * Gets all unread messages located in given folder; meaning messages that do not have the \Seen flag set. The constant

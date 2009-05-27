@@ -191,8 +191,8 @@ public final class POP3MessageStorage extends MailMessageStorage {
     }
 
     @Override
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
-        final MailMessage[] mails = pop3MessageStorage.getThreadSortedMessages(folder, indexRange, order, searchTerm, fields);
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+        final MailMessage[] mails = pop3MessageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
         if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
             setAccountInfo(mails);
         }
