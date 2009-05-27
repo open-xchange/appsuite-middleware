@@ -47,25 +47,48 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.preferences;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class Enabled implements PreferencesItemService {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator(), new PreferencesActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public Enabled() {
+        super();
+    }
+
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.subscribe", "enabled" };
+    }
+
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                setting.setSingleValue(Boolean.valueOf(userConfig.isSubscription()));
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
     }
 
 }
