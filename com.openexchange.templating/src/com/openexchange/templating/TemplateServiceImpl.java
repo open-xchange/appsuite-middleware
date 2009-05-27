@@ -49,7 +49,7 @@
 
 package com.openexchange.templating;
 
-import static com.openexchange.templating.TemplateErrorMessage.IOException;
+import static com.openexchange.templating.TemplateErrorMessage.*;
 import java.io.File;
 import java.io.IOException;
 import com.openexchange.config.ConfigurationService;
@@ -66,12 +66,11 @@ public class TemplateServiceImpl implements TemplateService {
     private String PATH_PROPERTY = "com.openexchange.templating.path";
 
     private ConfigurationService config;
-    
-    
+
     public TemplateServiceImpl(ConfigurationService config) {
         this.config = config;
     }
-    
+
     public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
         String templatePath = config.getProperty(PATH_PROPERTY);
         if (templatePath == null) {
@@ -99,7 +98,9 @@ public class TemplateServiceImpl implements TemplateService {
         } catch (IOException e) {
             throw IOException.create(e);
         }
-
+        if (retval == null) {
+            throw TemplateNotFound.create(templateName);
+        }
         return retval;
     }
 

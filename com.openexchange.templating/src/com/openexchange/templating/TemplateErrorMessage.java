@@ -56,7 +56,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
 public enum TemplateErrorMessage implements OXErrorMessage {
     
     IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 1, "Verify file system and templates.", "An IOException occurred."),
-    UnderlyingException(Category.CODE_ERROR, 2, "Please correct the template", "The underlying templating system threw an exception: %s")
+    UnderlyingException(Category.CODE_ERROR, 2, "Please correct the template", "The underlying templating system threw an exception: %s"),
+    TemplateNotFound(Category.CODE_ERROR, 3, "Please use an existing template", "The template %2 does not exist.")
     ;
 
     private Category category;
