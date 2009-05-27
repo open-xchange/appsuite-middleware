@@ -223,7 +223,7 @@ public class PropertyHandler {
         final String modestring = checkStringProperty(configuration, Parameters.spamd);
         try {
             this.setSpamd(Boolean.valueOf(modestring));
-            logBuilder.append("\tspamd: ").append(this.isSpamd()).append('\n');
+            logBuilder.append("\t" + Parameters.spamd.getName() + ": ").append(this.isSpamd()).append('\n');
         } catch (final IllegalArgumentException e) {
             throw new SpamhandlerSpamassassinConfigurationException(Code.MODE_TYPE_WRONG, modestring);
         }
@@ -235,7 +235,7 @@ public class PropertyHandler {
             }
         } else {
             this.setHostname(hostname);
-            logBuilder.append("\thostname: ").append(this.getHostname()).append('\n');
+            logBuilder.append("\t" + Parameters.hostname.getName() + ": ").append(this.getHostname()).append('\n');
         }
         
         
@@ -253,6 +253,7 @@ public class PropertyHandler {
         } else {
             try {
                 this.setTimeout(Long.parseLong(timeoutstring));
+                logBuilder.append("\t" + Parameters.timeout.getName() + ": ").append(this.getHostname()).append('\n');
             } catch (final NumberFormatException e) {
                 throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NO_LONG, Parameters.timeout.getName(), timeoutstring);
             }
