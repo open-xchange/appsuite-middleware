@@ -53,9 +53,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.publish.Transaction;
+import com.openexchange.publish.tools.Transaction;
 import com.openexchange.database.DBPoolingException;
-import static com.openexchange.publish.Transaction.INT;
+import static com.openexchange.publish.tools.Transaction.INT;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

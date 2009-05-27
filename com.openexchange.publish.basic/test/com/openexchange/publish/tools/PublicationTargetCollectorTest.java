@@ -47,11 +47,15 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.tools;
 
 import java.util.Collection;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.SimPublicationService;
+import com.openexchange.publish.tools.PublicationTargetCollector;
 
 import junit.framework.TestCase;
 

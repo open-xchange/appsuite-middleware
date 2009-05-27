@@ -57,11 +57,11 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.publish.AbstractPublicationService;
-import com.openexchange.publish.CompositePublicationTargetDiscoveryService;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.sql.PublicationSQLStorage;
+import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService;
 import com.openexchange.server.osgiservice.Whiteboard;
 
 /**

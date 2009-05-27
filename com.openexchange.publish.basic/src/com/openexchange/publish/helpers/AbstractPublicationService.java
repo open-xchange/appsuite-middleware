@@ -47,12 +47,17 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.helpers;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationService;
+import com.openexchange.publish.PublicationStorage;
+import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.impl.DummyStorage;
 
 

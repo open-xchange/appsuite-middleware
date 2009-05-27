@@ -1,9 +1,13 @@
-package com.openexchange.publish;
+package com.openexchange.publish.tools;
 
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.SimPublicationService;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
+import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService;
 import junit.framework.TestCase;
 
 import static com.openexchange.publish.Asserts.*;

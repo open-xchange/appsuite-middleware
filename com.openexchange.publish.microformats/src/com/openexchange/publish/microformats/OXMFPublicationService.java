@@ -56,10 +56,10 @@ import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.AbstractPublicationService;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.helpers.AbstractPublicationService;
 
 /**
  * {@link OXMFPublicationService}

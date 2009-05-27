@@ -47,58 +47,70 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.tools;
 
-public class Path {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationService;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 
-    private int ownerId;
 
-    private int contextId;
+/**
+ * {@link PublicationTargetCollector}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class PublicationTargetCollector implements PublicationTargetDiscoveryService {
 
-    private String siteName;
-
-    public Path() {
-
+    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    
+    public PublicationTarget getTarget(String id) {
+        return targets.get(id);
     }
 
-    public Path(int ownerId, int contextId, String siteName) {
-        super();
-        this.ownerId = ownerId;
-        this.contextId = contextId;
-        this.siteName = siteName;
+    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
+        for(PublicationTarget target : targets.values()) {
+            if(target.getPublicationService().knows(context, publicationId)) {
+                return target;
+            }
+        }
+        return null;
     }
 
-    public Path(String path) {
-        // TODO
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
+        ArrayList<PublicationTarget> responsible = new ArrayList<PublicationTarget>();
+        for(PublicationTarget target : targets.values()) {
+            if(target.isResponsibleFor(module)) {
+                responsible.add(target);
+            }
+        }
+        return responsible;
     }
 
-    public String toString() {
-        // TODO
-        throw new UnsupportedOperationException(); // Nullllll Bock
+    public boolean knows(String id) {
+        return targets.containsKey(id);
     }
 
-    public int getOwnerId() {
-        return ownerId;
+    public Collection<PublicationTarget> listTargets() {
+        return targets.values();
     }
 
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
+    public void addPublicationService(PublicationService publicationService) throws PublicationException {
+        targets.put(publicationService.getTarget().getId(), publicationService.getTarget());
     }
-
-    public int getContextId() {
-        return contextId;
+    
+    public void removePublicationService(PublicationService publicationService) throws PublicationException {
+        targets.remove(publicationService.getTarget().getId());
     }
-
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    public String getSiteName() {
-        return siteName;
-    }
-
-    public void setSiteName(String siteName) {
-        this.siteName = siteName;
+    
+    public void clear() {
+        targets.clear();
     }
 
 }

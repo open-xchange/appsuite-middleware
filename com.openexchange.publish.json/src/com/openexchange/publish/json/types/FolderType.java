@@ -47,79 +47,34 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.json.types;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import com.openexchange.groupware.contexts.Context;
+import javax.servlet.http.HttpServletRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.publish.json.EntityType;
 
 
 /**
- * {@link CompositePublicationTargetDiscoveryService}
+ * {@link FolderType}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class CompositePublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
+public class FolderType implements EntityType {
 
-    private List<PublicationTargetDiscoveryService> services = new LinkedList<PublicationTargetDiscoveryService>();
-
-    public void addDiscoveryService(PublicationTargetDiscoveryService discovery) {
-        services.add(discovery);
-    }
-    public void removeDiscoveryService(PublicationTargetDiscoveryService service) {
-        services.remove(service);
+    public JSONObject toEntity(String entityId) throws JSONException {
+        JSONObject object = new JSONObject();
+        object.put("folder", entityId);
+        return object;
     }
 
-    public List<PublicationTarget> listTargets() throws PublicationException {
-        LinkedList<PublicationTarget> targets = new LinkedList<PublicationTarget>();
-        for (PublicationTargetDiscoveryService service : services) {
-            targets.addAll(service.listTargets());
-        }
-        return targets;
+    public String toEntityID(JSONObject entityDefinition) throws JSONException {
+        return String.valueOf(entityDefinition.getInt("folder"));
     }
 
-    public boolean knows(String id) throws PublicationException {
-        for (PublicationTargetDiscoveryService service : services) {
-            if(service.knows(id)) {
-                return true;
-            }
-        }
-        return false;
+    public String toEntityID(HttpServletRequest entityDefinition) throws JSONException {
+        return entityDefinition.getParameter("folder");
     }
-    
-    public PublicationTarget getTarget(String id) throws PublicationException {
-        for (PublicationTargetDiscoveryService service : services) {
-            if(service.knows(id)) {
-                return service.getTarget(id);
-            }
-        }
-        return null;
-    }
-
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
-        for(PublicationTargetDiscoveryService service : services) {
-            PublicationTarget target = service.getTarget(context, publicationId);
-            if (target != null) {
-                return target;
-            }
-        }
-        return null;
-    }
-
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
-        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTargetDiscoveryService service : services) {
-            targets.addAll(service.getTargetsForEntityType(module));
-        }
-        return targets;
-    }
-
-    public void clear() {
-        services.clear();
-    }
-
 
 }

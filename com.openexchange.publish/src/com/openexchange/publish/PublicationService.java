@@ -50,7 +50,6 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
-import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 
 /**

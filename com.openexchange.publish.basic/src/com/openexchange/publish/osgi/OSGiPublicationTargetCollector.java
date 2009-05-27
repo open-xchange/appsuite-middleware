@@ -63,8 +63,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.PublicationTargetCollector;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.tools.PublicationTargetCollector;
 
 
 /**

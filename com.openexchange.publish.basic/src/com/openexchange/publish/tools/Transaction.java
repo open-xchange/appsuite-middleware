@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.tools;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

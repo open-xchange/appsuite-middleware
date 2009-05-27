@@ -60,10 +60,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.CompositePublicationTargetDiscoveryService;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService;
 
 
 /**

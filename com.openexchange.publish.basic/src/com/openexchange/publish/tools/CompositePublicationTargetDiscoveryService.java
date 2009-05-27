@@ -47,66 +47,82 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 
 
 /**
- * {@link PublicationTargetCollector}
+ * {@link CompositePublicationTargetDiscoveryService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class PublicationTargetCollector implements PublicationTargetDiscoveryService {
+public class CompositePublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private List<PublicationTargetDiscoveryService> services = new LinkedList<PublicationTargetDiscoveryService>();
+
+    public void addDiscoveryService(PublicationTargetDiscoveryService discovery) {
+        services.add(discovery);
+    }
+    public void removeDiscoveryService(PublicationTargetDiscoveryService service) {
+        services.remove(service);
+    }
+
+    public List<PublicationTarget> listTargets() throws PublicationException {
+        LinkedList<PublicationTarget> targets = new LinkedList<PublicationTarget>();
+        for (PublicationTargetDiscoveryService service : services) {
+            targets.addAll(service.listTargets());
+        }
+        return targets;
+    }
+
+    public boolean knows(String id) throws PublicationException {
+        for (PublicationTargetDiscoveryService service : services) {
+            if(service.knows(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
-    public PublicationTarget getTarget(String id) {
-        return targets.get(id);
+    public PublicationTarget getTarget(String id) throws PublicationException {
+        for (PublicationTargetDiscoveryService service : services) {
+            if(service.knows(id)) {
+                return service.getTarget(id);
+            }
+        }
+        return null;
     }
 
     public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
+        for(PublicationTargetDiscoveryService service : services) {
+            PublicationTarget target = service.getTarget(context, publicationId);
+            if (target != null) {
                 return target;
             }
         }
         return null;
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) {
-        ArrayList<PublicationTarget> responsible = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : targets.values()) {
-            if(target.isResponsibleFor(module)) {
-                responsible.add(target);
-            }
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
+        List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
+        for(PublicationTargetDiscoveryService service : services) {
+            targets.addAll(service.getTargetsForEntityType(module));
         }
-        return responsible;
+        return targets;
     }
 
-    public boolean knows(String id) {
-        return targets.containsKey(id);
-    }
-
-    public Collection<PublicationTarget> listTargets() {
-        return targets.values();
-    }
-
-    public void addPublicationService(PublicationService publicationService) throws PublicationException {
-        targets.put(publicationService.getTarget().getId(), publicationService.getTarget());
-    }
-    
-    public void removePublicationService(PublicationService publicationService) throws PublicationException {
-        targets.remove(publicationService.getTarget().getId());
-    }
-    
     public void clear() {
-        targets.clear();
+        services.clear();
     }
+
 
 }
