@@ -51,14 +51,13 @@ package com.openexchange.ajax.folder.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertParser;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - using InsertResponse instead of CommonInsertResponse
  */
 class InsertParser extends CommonInsertParser {
 
@@ -69,22 +68,30 @@ class InsertParser extends CommonInsertParser {
         super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected CommonInsertResponse createResponse(final Response response)
+    protected InsertResponse instantiateResponse(
+        final Response response) {
+        return new InsertResponse(response);
+    }
+    
+    @Override
+    protected InsertResponse createResponse(final Response response)
         throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
+        final InsertResponse retval = instantiateResponse(response);
         if(JSONObject.NULL == retval.getData()) {
             fail("Problem while inserting folder: "+ response.getErrorMessage());
         }
-        final int folderId = Integer.parseInt((String) retval.getData());
-        retval.setId(folderId);
-        
-        if (isFailOnError()) {
-            assertTrue("Problem while inserting folder.", folderId > 0);
+        try {
+            final int folderId = Integer.parseInt((String) retval.getData());
+            retval.setId(folderId);
+            if (isFailOnError()) {
+                assertTrue("Problem while inserting folder.", folderId > 0);
+            }
+        } catch (NumberFormatException e){
+            //if the value is not an integer, we're probably dealing with a mail folder here
+            retval.setMailFolderID( (String) retval.getData() );
         }
+        
         return retval;
     }
 }

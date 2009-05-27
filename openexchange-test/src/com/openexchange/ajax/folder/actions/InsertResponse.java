@@ -49,77 +49,55 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.DataObject;
 
 /**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added additional constructor and handling to allow for the creation of mail folders
+ * {@link InsertResponse}
+ * 
+ * @author
  */
-public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
+public class InsertResponse extends CommonInsertResponse {
 
-    private final FolderObject folder;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
+    private String mailFolderID;
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public InsertRequest(final FolderObject folder) {
-        this(folder, true);
-    }
-
-    public InsertRequest(final FolderObject folder, boolean failOnError) {
-        super();
-        this.failOnError = failOnError;
-        this.folder = folder;
+    public InsertResponse(final Response response) {
+        super(response);
     }
 
     /**
-     * {@inheritDoc}
+     * Every new object gets a new identifier. With this method this identifier can be read.
+     * 
+     * @return the new identifier of the new object.
      */
-    public Object getBody() throws JSONException {
-        return convert(folder);
+    public String getMailFolderID() {
+        return mailFolderID;
     }
 
     /**
-     * {@inheritDoc}
+     * @param id the id to set
      */
-    public Method getMethod() {
-        return Method.PUT;
+    public void setMailFolderID(final String id) {
+        this.mailFolderID = id;
     }
 
     /**
-     * {@inheritDoc}
+     * Puts the data of this insert response into the object. This are especially the identifier and the modified time stamp.
      */
-    public Parameter[] getParameters() {
-        if (folder.containsModule() && folder.getModule() == FolderObject.MAIL){
-            String[] parts = folder.getFullName().split("/");
-            StringBuilder parentBuilder = new StringBuilder();
-            for(int i = 0; i < (parts.length - 1); i++){
-                parentBuilder.append(parts[i]);
-                parentBuilder.append("/");
-            }
-            String parent = parentBuilder.substring(0, parentBuilder.length() -1);
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), 
-                new Parameter(FolderFields.FOLDER_ID, parent ) };
+    public void fillObject(final DataObject obj) {
+        if (!isMailFolder(obj)) {
+            obj.setObjectID(getId());
         }
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(FolderFields.FOLDER_ID, folder.getParentFolderID()) };
+        obj.setLastModified(getTimestamp());
+        if (!obj.containsCreationDate())
+            obj.setCreationDate(obj.getLastModified());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError);
+    private boolean isMailFolder(DataObject obj) {
+        return getMailFolderID() != null;
     }
 }
