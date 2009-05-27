@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Crypto Plug-in
+Bundle-Name: Cryptography Plug-in
 Bundle-SymbolicName: com.openexchange.crypto
-Bundle-Version: 1.0.0
+Bundle-Version: 6.9.0.0
 Bundle-Activator: com.openexchange.crypto.osgi.Activator
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.exceptions,
  com.openexchange.exceptions.osgi,
@@ -12,3 +12,4 @@ Import-Package: com.openexchange.exceptions,
  org.apache.commons.codec.binary,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.crypto
