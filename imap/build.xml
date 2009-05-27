@@ -6,6 +6,7 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="activationBundle" value="javax.activation"/>
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
@@ -30,9 +31,9 @@
     <property name="cachingjar" value="com.openexchange.caching.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
-
     <property name="commonjar" value="common.jar"/>
-	<property name="mailjar" value="mail-1.4.2.jar" />
+	<property name="mailjar" value="mail-1.4.2.jar"/>
+    <property name="activationjar" value="activation-1.1.1.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -43,9 +44,9 @@
 		<pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
-    
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+        <pathelement location="${bundlesdir}/${activationBundle}/lib/${activationjar}"/>
     </path>
 
     <!-- Compile -->
