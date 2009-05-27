@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-
-import org.xml.sax.SAXException;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -17,12 +15,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 
 
@@ -36,54 +34,77 @@ import com.openexchange.tools.versit.converter.ConverterException;
 // TODO: Make assertions that detect relevant changes to the Xing site and throw this exception
 // TODO: Use logging instead of println
 public class XingContactParser {
+    
+    private String XING_WEBSITE = "https://www.xing.com";
+    
+    private String CONTACT_PAGE = "/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=";
+    
+    private String OFFSET = ";offset=";
+    
+    private String LOGOUT_PAGE = "/app/user?op=logout";
 	
-	public ContactObject[] getXingContactsForUser(String xingUser, String xingPassword) throws IOException, SAXException{
-		
-		// emulate a known client, hopefully keeping our profile low
-		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
-		// Javascript needs to be disabled as there are errors on the start page
-		webClient.setJavaScriptEnabled(false);
-		
-		// 1st step - login page
-	    final HtmlPage loginPage = webClient.getPage("https://www.xing.com");
-	    //fill in the credentials and submit the login form
-	    HtmlForm loginForm = loginPage.getFormByName("loginform");
-	    HtmlTextInput userfield = loginForm.getInputByName("login_user_name");
-	    userfield.setValueAttribute(xingUser);
-	    HtmlPasswordInput passwordfield = loginForm.getInputByName("login_password");
-	    passwordfield.setValueAttribute(xingPassword);
+	public ContactObject[] getXingContactsForUser(String xingUser, String xingPassword) throws XingSubscriptionException {
+	    Vector<ContactObject> contactObjects = new Vector<ContactObject>();
 	    
-	    // 2nd step - profile home page
-	    final HtmlPage profileHomePage = (HtmlPage)loginForm.submit(null);
-	    //System.out.println("*****" + profileHomePage.getTitleText());//should be "XING  -  Start"
-	    
-	    // wrong password? 
-	    List<?> errors = profileHomePage.getByXPath("//p[@class='error-message-top']");
-	    if(errors.size() != 0) {
-//	        throw new XingWrongPasswordException();
-	    }
-	    
-	    HtmlAnchor linkToContacts = profileHomePage.getAnchorByHref("/app/contact");
-	    
-	    // 3rd step - first contacts page
-	    final HtmlPage allContactsPage = linkToContacts.click();
-	    //System.out.println("*****" + allContactsPage.getTitleText()); //should be "XING  -  Contacts"
-	    List<HtmlAnchor> allLinks = allContactsPage.getAnchors();
-	    Vector<ContactObject> contactObjects = getContactsFromVcardLinks(allLinks);
-	    
-	    // 4th step - further contacts pages
-	    int offset = 10;
-	    HtmlAnchor linkToNextContactsPage = getLinkToNextContactsPage(allLinks, offset);
-	    while (linkToNextContactsPage != null) {
-	    	HtmlPage tempNextContactsPage = linkToNextContactsPage.click();
-	    	List<HtmlAnchor> tempAllLinks = tempNextContactsPage.getAnchors();
-	    	Vector<ContactObject> tempNextContacts = getContactsFromVcardLinks(tempAllLinks);
-	    	contactObjects.addAll(tempNextContacts);
-	    	offset += 10;
-	    	linkToNextContactsPage = getLinkToNextContactsPage(tempAllLinks, offset);
-	    }
-	    
-	    webClient.closeAllWindows();
+	    try {
+    		// emulate a known client, hopefully keeping our profile low
+    		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
+    		// Javascript needs to be disabled as there are errors on the start page
+    		webClient.setJavaScriptEnabled(false);
+    		
+    		// 1st step - login page
+    	    final HtmlPage loginPage = webClient.getPage(XING_WEBSITE);
+    	    //fill in the credentials and submit the login form
+    	    HtmlForm loginForm = loginPage.getFormByName("loginform");
+    	    HtmlTextInput userfield = loginForm.getInputByName("login_user_name");
+    	    userfield.setValueAttribute(xingUser);
+    	    HtmlPasswordInput passwordfield = loginForm.getInputByName("login_password");
+    	    passwordfield.setValueAttribute(xingPassword);
+    	    
+    	    // 2nd step - profile home page
+    	    final HtmlPage profileHomePage = (HtmlPage)loginForm.submit(null);
+    	    //System.out.println("*****" + profileHomePage.getTitleText());//should be "XING  -  Start"
+    	    
+    	    // wrong password? 
+    	    List<?> errors = profileHomePage.getByXPath("//p[@class='error-message-top']");
+    	    if(errors.size() != 0) {
+    	        throw XingSubscriptionErrorMessage.INVALID_LOGIN.create();
+    	    }
+    	    
+    	    // Force jump to list standard list view
+    	    HtmlPage allContactsPage = webClient.getPage(XING_WEBSITE + CONTACT_PAGE + OFFSET + "0");
+    	    HtmlPage currentPage = allContactsPage;
+    	    //HtmlAnchor linkToContacts = profileHomePage.getAnchorByHref("/app/contact");
+    	    
+    	    // 3rd step - first contacts page
+    	    //final HtmlPage allContactsPage = linkToContacts.click();
+    	    //System.out.println("*****" + allContactsPage.getTitleText()); //should be "XING  -  Contacts"
+    	    List<HtmlAnchor> allLinks = allContactsPage.getAnchors();
+    	    contactObjects.addAll(getContactsFromVcardLinks(allLinks));
+    	    
+    	    // 4th step - further contacts pages
+    	    int offset = 10;
+    	    HtmlAnchor linkToNextContactsPage = getLinkToNextContactsPage(allLinks, offset);
+    	    HtmlPage tempNextContactsPage = null;
+    	    while (linkToNextContactsPage != null) {
+    	    	tempNextContactsPage = linkToNextContactsPage.click();
+    	    	currentPage = tempNextContactsPage;
+    	    	List<HtmlAnchor> tempAllLinks = tempNextContactsPage.getAnchors();
+    	    	Vector<ContactObject> tempNextContacts = getContactsFromVcardLinks(tempAllLinks);
+    	    	contactObjects.addAll(tempNextContacts);
+    	    	offset += 10;
+    	    	linkToNextContactsPage = getLinkToNextContactsPage(tempAllLinks, offset);
+    	    }
+    	    
+    	    // 5th step - logout
+    	    HtmlAnchor logout = currentPage.getAnchorByHref(LOGOUT_PAGE);
+    	    logout.click();
+    	    webClient.closeAllWindows();
+	    } catch (FailingHttpStatusCodeException e) {
+            throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+        } catch (IOException e) {
+            throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+        }
 	    
 	    ContactObject[] contactObjectsArray = new ContactObject[contactObjects.size()];
 	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
@@ -121,7 +142,7 @@ public class XingContactParser {
 	
 	private HtmlAnchor getLinkToNextContactsPage(List<HtmlAnchor> allLinks, int offset){
 		for (HtmlAnchor tempLink : allLinks){
-			if (tempLink.getHrefAttribute().startsWith("/app/contact?notags_filter=0;search_filter=;tags_filter=;offset=" + Integer.toString(offset))){
+			if (tempLink.getHrefAttribute().startsWith(CONTACT_PAGE + OFFSET + Integer.toString(offset))){
 				return tempLink;
 			}
 		}

@@ -49,18 +49,14 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import org.xml.sax.SAXException;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 
@@ -93,16 +89,9 @@ public class XingSubscribeService extends AbstractSubscribeService{
         return folderModule == FolderObject.CONTACT;
     }
 
-    public Collection getContent(Subscription subscription) {
+    public Collection<ContactObject> getContent(Subscription subscription) throws XingSubscriptionException {
         Map<String, Object> configuration = subscription.getConfiguration();
-        try {
-            return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
     }
     
 }

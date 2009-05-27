@@ -63,7 +63,7 @@ public class SubscriptionException extends AbstractOXException {
 
     private static final long serialVersionUID = -2098766458245763667L;
 
-    public SubscriptionException(final ErrorMessage message, final Throwable cause, final Object[] args) {
+    public SubscriptionException(final ErrorMessage message, final Throwable cause, final Object... args) {
         super(message, cause);
         setMessageArgs(args);
     }

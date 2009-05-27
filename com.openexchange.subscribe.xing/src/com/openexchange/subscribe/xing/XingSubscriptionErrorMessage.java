@@ -60,7 +60,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
  *
  */
 public enum XingSubscriptionErrorMessage implements OXErrorMessage {
-    INVALID_LOGIN(Category.USER_INPUT, 1, "Please correct the password and try again", "The password you entered was wrong");
+    INVALID_LOGIN(Category.USER_INPUT, 1, "Please correct the password and try again", "The password you entered was wrong"),
+    COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 2, "Make sure, that the XING-Service is still available, and there are no major changes on the website", "XING-Service unavailable");
 
     private Category category;
     private int errorCode;

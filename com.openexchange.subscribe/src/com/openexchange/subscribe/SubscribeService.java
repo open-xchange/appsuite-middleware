@@ -51,7 +51,6 @@ package com.openexchange.subscribe;
 
 import java.util.Collection;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -73,7 +72,7 @@ public interface SubscribeService {
 
     public void update(Subscription subscription) throws AbstractOXException;
 
-    public Collection getContent(Subscription subscription) throws SubscriptionException;
+    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
 
     public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
     

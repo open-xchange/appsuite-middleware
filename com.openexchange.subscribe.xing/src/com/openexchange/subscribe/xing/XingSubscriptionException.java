@@ -51,6 +51,7 @@ package com.openexchange.subscribe.xing;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
@@ -59,9 +60,11 @@ import com.openexchange.groupware.AbstractOXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class XingSubscriptionException extends AbstractOXException {
+public class XingSubscriptionException extends SubscriptionException {
 
-    public XingSubscriptionException(ErrorMessage message, Throwable cause, Object[] args) {
+    private static final long serialVersionUID = -3747781910727222654L;
+
+    public XingSubscriptionException(ErrorMessage message, Throwable cause, Object... args) {
         super(message, cause);
         setMessageArgs(args);
         

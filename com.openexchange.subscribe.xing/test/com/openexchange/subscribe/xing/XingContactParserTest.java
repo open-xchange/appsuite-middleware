@@ -1,34 +1,48 @@
 package com.openexchange.subscribe.xing;
 
-import java.io.IOException;
-
-import org.xml.sax.SAXException;
-
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.subscribe.xing.XingContactParser;
-
 import junit.framework.TestCase;
+import com.openexchange.exceptions.StringComponent;
+import com.openexchange.groupware.container.ContactObject;
 
-public class XingContactParserTest extends TestCase{
-	
-	public void testGetXingContacts(){
+public class XingContactParserTest extends TestCase {
+
+    //TODO: Insert valid credentials for www.xing.com here
+    protected String xingUser="";
+    protected String xingPassword ="";
+    
+    //TODO: Insert INVALID credentials for www.xing.com here
+    protected String invalidXingUser="login";
+    protected String invalidXingPassword ="password";
+    
+    public void setUp() throws Exception {
+        super.setUp();
+
+        XingSubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe.xing");
+        XingSubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("XING"));
+    }
+    
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+    
+	public void testGetXingContacts() throws Exception {
 		XingContactParser parser = new XingContactParser();
-		//TODO: Insert valid credentials for www.xing.com here
-		String xingUser="";
-		String xingPassword ="";
-		try {
-			ContactObject[] contacts = parser.getXingContactsForUser(xingUser, xingPassword);
-			assertTrue("There should be at least one contact.", contacts.length >= 1);
-			ContactObject firstContact = contacts[0];
-			System.out.println("1st contact retrieved is : " + firstContact.getDisplayName());
-			ContactObject lastContact = contacts[contacts.length-1];
-			System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
-			System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		}
+		ContactObject[] contacts = parser.getXingContactsForUser(xingUser, xingPassword);
+        assertTrue("There should be at least one contact.", contacts.length >= 1);
+        ContactObject firstContact = contacts[0];
+        System.out.println("1st contact retrieved is : " + firstContact.getDisplayName());
+        ContactObject lastContact = contacts[contacts.length-1];
+        System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
+        System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
 	}
 
+	public void testInvalidCredentials() throws Exception {
+        XingContactParser parser = new XingContactParser();
+        try {
+            parser.getXingContactsForUser(invalidXingUser, invalidXingPassword);
+            fail("Exception expected");
+        } catch (XingSubscriptionException e) {
+            assertEquals("Wrong exception", XingSubscriptionErrorMessage.INVALID_LOGIN.getDetailNumber(), e.getDetailNumber());
+        }
+	}
 }
