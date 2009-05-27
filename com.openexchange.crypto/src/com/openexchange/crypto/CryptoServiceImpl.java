@@ -67,7 +67,12 @@ import org.apache.commons.codec.binary.Base64;
 public class CryptoServiceImpl implements CryptoService {
 
     /**
-     * The DES algorithm.
+     * Key length
+     */
+    private final int KEY_LENGTH = 16;
+    
+    /**
+     * The algorithm.
      */
     private final String ALGORITHM = "AES";
 
@@ -210,8 +215,6 @@ public class CryptoServiceImpl implements CryptoService {
         return retval;
     }
 
-    private final int KEY_LENGTH = 16;
-
     /**
      * Generates a secret key from specified password string.
      * 
@@ -237,7 +240,7 @@ public class CryptoServiceImpl implements CryptoService {
                 keyBytes[i] = 48;
             }
         } else if (len > KEY_LENGTH) {
-            keyBytes = new byte[8];
+            keyBytes = new byte[KEY_LENGTH];
             System.arraycopy(bytes, 0, keyBytes, 0, keyBytes.length);
         } else {
             keyBytes = bytes;
