@@ -68,7 +68,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -419,7 +418,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            new SubscriptionException(e);
         } finally {
             try {
                 if (builder != null) {

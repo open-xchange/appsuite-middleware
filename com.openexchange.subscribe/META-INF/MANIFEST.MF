@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe
-Bundle-Version: 1.0.0
+Bundle-Version: 6.9.0.0
 Bundle-Activator: com.openexchange.subscribe.osgi.Activator
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.context,
  com.openexchange.context.osgi,
@@ -16,7 +16,6 @@ Import-Package: com.openexchange.context,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.contexts,
- com.openexchange.publish,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.sql.builder,
