@@ -33,7 +33,7 @@
 	<property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="genconfjar" value="com.openexchange.genericonf.jar" />
-	
+	<property name="jsonjar" value="json.jar" />
 	
 	
 
@@ -57,6 +57,8 @@
 		<pathelement location="${bundlesdir}/${commonBundle}/jars/${osgiservicesjar}"/>
 		
 		<pathelement location="${bundlesdir}/${commonBundle}/jars/${servletjar}"/>
+
+    	<pathelement location="${bundlesdir}/${commonBundle}/libs/{jsonjar}"/>
     </path>
 
     <!-- Compile -->
