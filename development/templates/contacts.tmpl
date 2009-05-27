@@ -84,13 +84,13 @@
 		<@render key="ox_city_other" title="City other" value=contact.cityOther!"" /> <!--ox_city_other"-->
 		<@render key="ox_state_other" title="State other" value=contact.stateOther!"" /> <!--ox_state_other"-->
 		<@render key="ox_country_other" title="Country other" value=contact.countryOther!"" /> <!--ox_country_other"-->
-		<#if contact.birthday??><td class="key">Birthday:</td><td class="ox_birthday value">${contact.birthday}</td> </#if>
+		<#if contact.birthday??><td class="key">Birthday:</td><td class="ox_birthday value">${contact.birthday?string("yyyy-MM-dd")}</td> </#if>
 		<@render key="ox_marital_status" title="Marital status" value=contact.maritalStatus!"" /> <!--ox_marital_status-->
 		<@render key="ox_number_of_children" title="Number of children" value=contact.numberOfChildren!"" /> <!--ox_number_of_children"-->
 		<@render key="ox_profession" title="Profession" value=contact.profession!"" /> <!--ox profession-->
 		<@render key="ox_nickname" title="Nickname" value=contact.nickname!"" /> <!--ox nickname-->
 		<@render key="ox_spouse_name" title="Spouse name" value=contact.spouseName!"" /> <!--ox_first_name-->
-		<#if contact.anniversary??> <td class="key">Anniversary:</td><td class="ox_anniversary value">${contact.anniversary}</td> </#if>
+		<#if contact.anniversary??> <td class="key">Anniversary:</td><td class="ox_anniversary value">${contact.anniversary?string("yyyy-MM-dd")}</td> </#if>
 		<@render key="ox_note" title="Note" value=contact.note!"" /> <!--ox note-->
 		<@render key="ox_department" title="Department" value=contact.department!"" /> <!--ox department-->
 		<@render key="ox_position" title="Position" value=contact.position!"" /> <!--ox position-->
