@@ -1144,6 +1144,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     @Override
     public void updateMessageFlagsLong(final String fullname, final long[] msgUIDs, final int flagsArg, final boolean set) throws MailException {
+        if (null == msgUIDs || 0 == msgUIDs.length) {
+            // Nothing to do
+            return;
+        }
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
             /*
@@ -1259,6 +1263,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     @Override
     public void updateMessageColorLabelLong(final String fullname, final long[] msgUIDs, final int colorLabel) throws MailException {
+        if (null == msgUIDs || 0 == msgUIDs.length) {
+            // Nothing to do
+            return;
+        }
         try {
             if (!MailProperties.getInstance().isUserFlagsEnabled()) {
                 /*
