@@ -165,6 +165,7 @@ public class FolderTestManager extends TestCase {
     public void deleteFolderOnServer(FolderObject folderToDelete) throws AjaxException, IOException, SAXException, JSONException {
         DeleteRequest request = new DeleteRequest(folderToDelete);
         client.execute(request);
+        insertedOrUpdatedFolders.remove(folderToDelete);
     }
 
     public void deleteFolderOnServer(FolderObject folderToDelete, boolean failOnError) {
