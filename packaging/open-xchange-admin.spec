@@ -45,7 +45,7 @@ Requires:	open-xchange-admin-lib >= @OXVERSION@ open-xchange
 %if 0%{?suse_version}
 Requires:  mysql-client >= 5.0.0
 %endif
-%if 0%{?fedora_version}
+%if 0%{?fedora_version} || 0%{?rhel_version}
 Requires:  mysql >= 5.0.0
 %endif
 #
