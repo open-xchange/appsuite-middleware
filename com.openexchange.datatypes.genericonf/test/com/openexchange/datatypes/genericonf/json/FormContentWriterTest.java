@@ -86,7 +86,7 @@ public class FormContentWriterTest extends TestCase {
         JSONObject object = new FormContentWriter().write(form, content);
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("login").withValue("blupp")
-            .hasKey("password").withValue("geheim")
+            .hasKey("password").withValue("xxxxxxxx")
             .hasKey("checkbox").withValue(true)
        .objectEnds();
         
