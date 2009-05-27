@@ -73,7 +73,7 @@ public class OXMFParserImplTest extends TestCase {
     }
     
     public void testCollect() throws SubscriptionException {
-        final String text = "<html><head /><body><div class='ox_contact'><span class='ox_bla'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
+        final String text = "<html><head /><body><div class='ox_contact someOtherClass'><span class='ox_bla someOtherClass'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
         final List<Map<String, String>> parsed = parser.parse(text);
         
         assertNotNull("Parsed was null", parsed);

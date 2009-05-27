@@ -167,8 +167,11 @@ public final class OXMFParserImpl implements OXMFParser {
                 final String attributeName = parser.getAttributeLocalName(i);
                 if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                     final String attributeValue = parser.getAttributeValue(i);
-                    if (containerElements.contains(attributeValue)) {
-                        parsedContainerElements.add(parseContainerElement(parser));
+                    String[] classes = attributeValue.split("\\s+");
+                    for (String klass : classes) {
+                        if (containerElements.contains(klass)) {
+                            parsedContainerElements.add(parseContainerElement(parser));
+                        }
                     }
                 }
             }
@@ -211,10 +214,14 @@ public final class OXMFParserImpl implements OXMFParser {
             final String attributeName = parser.getAttributeLocalName(i);
             if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                 final String attributeValue = parser.getAttributeValue(i);
-                if (attributePrefixes.contains(attributeValue) || startsWith(attributeValue)) {
-                    map.put(attributeValue, parser.getElementText());
-                    // Postcondition: the current event is the corresponding END_ELEMENT. Therefore decrease level
-                    level--;
+                final String[] classes = attributeValue.split("\\s+");
+                for (String klass : classes) {
+                    if (attributePrefixes.contains(klass) || startsWith(klass)) {
+                        map.put(klass, parser.getElementText());
+                        // Postcondition: the current event is the corresponding END_ELEMENT. Therefore decrease level
+                        level--;
+                        break;
+                    }
                 }
             }
         }
