@@ -58,7 +58,7 @@
 		
 		<pathelement location="${bundlesdir}/${commonBundle}/jars/${servletjar}"/>
 
-    	<pathelement location="${bundlesdir}/${commonBundle}/libs/{jsonjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/{jsonjar}"/>
     </path>
 
     <!-- Compile -->
