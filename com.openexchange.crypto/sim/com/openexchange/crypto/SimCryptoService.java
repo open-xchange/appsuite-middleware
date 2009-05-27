@@ -47,65 +47,41 @@
  *
  */
 
-package com.openexchange.subscribe.xing;
+package com.openexchange.crypto;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSource;
 
 /**
- * {@link XingSubscribeService}
- * 
+ * {@link SimCryptoService}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class XingSubscribeService extends AbstractSubscribeService {
+public class SimCryptoService implements CryptoService {
 
-    private final SubscriptionSource SOURCE = new SubscriptionSource();
+    
+    private String encrypted;
+    private String decrypted;
 
-    private final DynamicFormDescription FORM = new DynamicFormDescription();
-
-    public XingSubscribeService() {
-        FORM.add(FormElement.input("login", "Login")).add(FormElement.password("password", "Password"));
-
-        SOURCE.setDisplayName("XING");
-        SOURCE.setId("com.openexchange.subscribe.xing");
-        SOURCE.setFormDescription(FORM);
-        SOURCE.setSubscribeService(this);
-        SOURCE.setFolderModule(FolderObject.CONTACT);
+    public SimCryptoService(String encrypted, String decrypted) {
+        super();
+        this.encrypted = encrypted;
+        this.decrypted = decrypted;
+    }
+    
+    public String decrypt(String encryptedPayload, String password) throws CryptoException {
+        return decrypted;
     }
 
-    public SubscriptionSource getSubscriptionSource() {
-        return SOURCE;
+    public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException {
+        return null;
     }
 
-    public boolean handles(int folderModule) {
-        return folderModule == FolderObject.CONTACT;
+    public String encrypt(String data, String password) throws CryptoException {
+        return encrypted;
     }
 
-    public Collection<ContactObject> getContent(Subscription subscription) throws XingSubscriptionException {
-        Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
+    public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException {
+        return null;
     }
 
-    @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
-        super.modifyIncoming(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        encrypt(configuration, "password");
-    }
-
-    @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
-        super.modifyOutgoing(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        decrypt(configuration, "password");
-    }
 }

@@ -26,14 +26,14 @@ public class XingContactParserTest extends TestCase {
     }
     
 	public void testGetXingContacts() throws Exception {
-		XingContactParser parser = new XingContactParser();
+		/*XingContactParser parser = new XingContactParser();
 		ContactObject[] contacts = parser.getXingContactsForUser(xingUser, xingPassword);
         assertTrue("There should be at least one contact.", contacts.length >= 1);
         ContactObject firstContact = contacts[0];
         System.out.println("1st contact retrieved is : " + firstContact.getDisplayName());
         ContactObject lastContact = contacts[contacts.length-1];
         System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
-        System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
+        System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));*/
 	}
 
 	public void testInvalidCredentials() throws Exception {

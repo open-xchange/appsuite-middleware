@@ -99,7 +99,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
         JSONAssertion assertion = new JSONAssertion().isObject().hasKey("id").withValue(2).hasKey("folder").withValue(12).hasKey("source").withValue(
             "com.openexchange.subscribe.test1").hasKey("com.openexchange.subscribe.test1").withValueObject().hasKey("username").withValue(
-            "My Username").hasKey("password").withValue("My Password").hasNoMoreKeys().hasNoMoreKeys();
+            "My Username").hasKey("password").withValue("xxxxxxxx").hasNoMoreKeys().hasNoMoreKeys();
 
         assertValidates(assertion, object);
     }

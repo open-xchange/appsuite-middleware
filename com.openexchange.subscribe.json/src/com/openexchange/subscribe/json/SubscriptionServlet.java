@@ -158,16 +158,17 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     
     private void refreshSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
         List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-        Context context = getSessionObject(req).getContext();
+        ServerSession session = getSessionObject(req);
+        Context context = session.getContext();
         if(null != req.getParameter("id")) {
             int id = Integer.parseInt(req.getParameter("id"));
-            Subscription subscription = loadSubscription(id, context, req.getParameter("source"));
+            Subscription subscription = loadSubscription(id, context, req.getParameter("source"), session.getPassword());
             subscriptionsToRefresh.add(subscription);
         }
         if(null != req.getParameter("folder")) {
             int folderId = Integer.parseInt(req.getParameter("folder"));
             FolderObject folder = loadFolder(req, resp, folderId);
-            List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder);
+            List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder, session.getPassword());
             subscriptionsToRefresh.addAll(allSubscriptions);
         }
         
@@ -177,12 +178,13 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
 
     private void listSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         JSONArray ids = new JSONArray(getBody(req));
-        Context context = getSessionObject(req).getContext();
+        ServerSession session = getSessionObject(req);
+        Context context = session.getContext();
         List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
         for(int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
             SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
-            Subscription subscription = subscribeService.loadSubscription(context, id);
+            Subscription subscription = subscribeService.loadSubscription(context, id, session.getPassword());
             if(subscription != null) {
                 subscriptions.add(subscription);
             }
@@ -196,11 +198,12 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
 
     private void loadAllSubscriptionsInFolder(HttpServletRequest req, HttpServletResponse resp) throws NumberFormatException, AbstractOXException {
         int folderId = Integer.parseInt(req.getParameter("folder"));
-        Context context = getSessionObject(req).getContext();
+        ServerSession session = getSessionObject(req);
+        Context context = session.getContext();
         
         FolderObject folder = loadFolder(req, resp, folderId);
         
-        List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder);
+        List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder, session.getPassword());
         
         String[] basicColumns = getBasicColumns(req);
         Map<String, String[]> dynamicColumns = getDynamicColumns(req);
@@ -210,11 +213,11 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         
     }
 
-    private List<Subscription> getSubscriptionsInFolder(Context context, FolderObject folder) throws AbstractOXException {
+    private List<Subscription> getSubscriptionsInFolder(Context context, FolderObject folder, String secret) throws AbstractOXException {
         List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
         for (SubscriptionSource subscriptionSource : sources) {
-            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder.getObjectID());
+            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder.getObjectID(), secret);
             allSubscriptions.addAll(subscriptions);
         }
         return allSubscriptions;
@@ -277,8 +280,9 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     private void loadSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, AbstractOXException {
         int id = Integer.parseInt(req.getParameter("id"));
         String source = req.getParameter("source");
-        Context context = getSessionObject(req).getContext();
-        Subscription subscription = loadSubscription(id, context, source);
+        ServerSession session = getSessionObject(req);
+        Context context = session.getContext();
+        Subscription subscription = loadSubscription(id, context, source, session.getPassword());
         writeSubscription(subscription, resp);
     }
 
@@ -287,14 +291,14 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeData(object, resp);
     }
 
-    private Subscription loadSubscription(int id, Context context, String source) throws AbstractOXException {
+    private Subscription loadSubscription(int id, Context context, String source, String secret) throws AbstractOXException {
         SubscribeService service = null;
         if(source != null) {
             service = discovery.getSource(source).getSubscribeService();
         } else {
             service = discovery.getSource(context, id).getSubscribeService();
         }
-        return service.loadSubscription(context, id);
+        return service.loadSubscription(context, id, secret);
     }
 
     private void deleteSubscriptions(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
@@ -313,7 +317,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
 
     private void updateSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         ServerSession session = getSessionObject(req);
-        Subscription subscription = getSubscription(req, session);
+        Subscription subscription = getSubscription(req, session, session.getPassword());
         SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.update(subscription);
         writeData(1, resp);
@@ -321,7 +325,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
 
     private void createSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, AbstractOXException {
         ServerSession session = getSessionObject(req);
-        Subscription subscription = getSubscription(req, session);
+        Subscription subscription = getSubscription(req, session, session.getPassword());
         subscription.setId(-1);
         SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.subscribe(subscription);
@@ -332,11 +336,12 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeData(subscription.getId(), resp);
     }
 
-    private Subscription getSubscription(HttpServletRequest req, ServerSession session) throws JSONException, IOException {
+    private Subscription getSubscription(HttpServletRequest req, ServerSession session, String secret) throws JSONException, IOException {
         JSONObject object = new JSONObject(getBody(req));
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
         subscription.setContext(session.getContext());
         subscription.setUserId(session.getUserId());
+        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
         return subscription;
     }
 
