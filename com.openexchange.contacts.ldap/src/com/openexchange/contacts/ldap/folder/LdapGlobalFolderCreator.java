@@ -55,10 +55,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.api2.OXException;
 import com.openexchange.contacts.ldap.property.FolderProperties;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -74,7 +74,7 @@ public class LdapGlobalFolderCreator {
          * @param folderid
          * @param adminid
          */
-        private FolderIDAndAdminID(int folderid, int adminid) {
+        private FolderIDAndAdminID(final int folderid, final int adminid) {
             this.folderid = folderid;
             this.adminid = adminid;
         }
@@ -131,7 +131,7 @@ public class LdapGlobalFolderCreator {
      * @return the id or -1 if not found 
      * @throws SQLException 
      */
-    private static int getLdapFolderID(String globalLdapFolderName2, Context ctx, Connection readCon) throws SQLException {
+    private static int getLdapFolderID(final String globalLdapFolderName2, final Context ctx, final Connection readCon) throws SQLException {
         PreparedStatement ps = null;
         try {
             ps = readCon.prepareStatement("SELECT fuid from oxfolder_tree WHERE cid=? AND fname=?");
@@ -203,8 +203,12 @@ public class LdapGlobalFolderCreator {
                 return null;
             }
 
-            public Object getParameter(String name) {
+            public Object getParameter(final String name) {
                 return null;
+            }
+
+            public boolean containsParameter(final String name) {
+                return false;
             }
 
             public String getPassword() {
@@ -234,7 +238,7 @@ public class LdapGlobalFolderCreator {
             public void removeRandomToken() {
             }
 
-            public void setParameter(String name, Object value) {
+            public void setParameter(final String name, final Object value) {
             }
             
         };

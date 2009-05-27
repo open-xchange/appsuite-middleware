@@ -52,22 +52,21 @@ package com.openexchange.publish.impl;
 import com.openexchange.publish.Publication;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link PublicationSession}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class PublicationSession implements Session {
 
-    private Publication publication;
+    private final Publication publication;
 
     /**
      * Initializes a new {@link PublicationSession}.
+     * 
      * @param publication
      */
-    public PublicationSession(Publication publication) {
+    public PublicationSession(final Publication publication) {
         super();
         this.publication = publication;
     }
@@ -88,7 +87,11 @@ public class PublicationSession implements Session {
         return null;
     }
 
-    public Object getParameter(String name) {
+    public boolean containsParameter(final String name) {
+        return false;
+    }
+
+    public Object getParameter(final String name) {
         return null;
     }
 
@@ -120,7 +123,7 @@ public class PublicationSession implements Session {
 
     }
 
-    public void setParameter(String name, Object value) {
+    public void setParameter(final String name, final Object value) {
 
     }
 

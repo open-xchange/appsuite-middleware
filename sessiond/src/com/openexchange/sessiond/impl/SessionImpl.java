@@ -147,6 +147,10 @@ public final class SessionImpl implements Session {
         return contextId;
     }
 
+    public boolean containsParameter(final String name) {
+        return parameters.containsKey(name);
+    }
+
     public Object getParameter(final String name) {
         return parameters.get(name);
     }

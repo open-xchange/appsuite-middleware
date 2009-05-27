@@ -54,212 +54,209 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.Session;
 import com.openexchange.groupware.ldap.Credentials;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
- * {@link SessionObject} - Implemets {@link com.openexchange.session.Session}
+ * {@link SessionObject} - Implements {@link com.openexchange.session.Session}.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionObject implements com.openexchange.session.Session {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SessionObject.class);
+    private final String sessionid;
 
-	private final String sessionid;
+    private String username;
 
-	private String username;
+    private String userlogin;
 
-	private String userlogin;
+    private String loginName;
 
-	private String loginName;
+    private String password;
 
-	private String password;
+    private String language;
 
-	private String language;
+    private String localip;
 
-	private String localip;
+    private String host;
 
-	private String host;
+    private long lifetime;
 
-	private long lifetime;
+    private Date timestamp;
 
-	private Date timestamp;
+    private Date creationtime;
 
-	private Date creationtime;
+    private String secret;
 
-	private String secret;
+    private String randomToken;
 
-	private String randomToken;
+    private int contextId;
 
-	private int contextId;
+    private Credentials cred;
 
-	private Credentials cred;
+    private Session mailSession;
 
-	private Session mailSession;
+    private String login;
 
-	private String login;
+    private final Map<String, Object> parameters;
 
-	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
+    public SessionObject(final String sessionid) {
+        this.sessionid = sessionid;
+        parameters = new ConcurrentHashMap<String, Object>();
+    }
 
-	private final Map<String, Object> parameters;
+    public void setUsername(final String username) {
+        this.username = username;
+    }
 
-	public SessionObject(final String sessionid) {
-		this.sessionid = sessionid;
-		parameters = new ConcurrentHashMap<String, Object>();
-		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
-	}
+    public void setUserlogin(final String userlogin) {
+        this.userlogin = userlogin;
+    }
 
-	public void setUsername(final String username) {
-		this.username = username;
-	}
+    public void setPassword(final String password) {
+        this.password = password;
+    }
 
-	public void setUserlogin(final String userlogin) {
-		this.userlogin = userlogin;
-	}
+    public void setLanguage(final String language) {
+        this.language = language;
+    }
 
-	public void setPassword(final String password) {
-		this.password = password;
-	}
+    public void setLocalIp(final String localip) {
+        this.localip = localip;
+    }
 
-	public void setLanguage(final String language) {
-		this.language = language;
-	}
+    public void setHost(final String host) {
+        this.host = host;
+    }
 
-	public void setLocalIp(final String localip) {
-		this.localip = localip;
-	}
+    public void setLifetime(final long lifetime) {
+        this.lifetime = lifetime;
+    }
 
-	public void setHost(final String host) {
-		this.host = host;
-	}
+    public void setTimestamp(final Date timestamp) {
+        this.timestamp = (Date) timestamp.clone();
+    }
 
-	public void setLifetime(final long lifetime) {
-		this.lifetime = lifetime;
-	}
+    public void setCreationtime(final Date creationtime) {
+        this.creationtime = (Date) creationtime.clone();
+    }
 
-	public void setTimestamp(final Date timestamp) {
-		this.timestamp = (Date) timestamp.clone();
-	}
+    public void setContextId(final int contextId) {
+        this.contextId = contextId;
+    }
 
-	public void setCreationtime(final Date creationtime) {
-		this.creationtime = (Date) creationtime.clone();
-	}
+    public String getSessionID() {
+        return sessionid;
+    }
 
-	public void setContextId(final int contextId) {
-		this.contextId = contextId;
-	}
+    public int getUserId() {
+        return Integer.parseInt(username);
+    }
 
-	public String getSessionID() {
-		return sessionid;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public int getUserId() {
-		return Integer.parseInt(username);
-	}
+    public String getUserlogin() {
+        return userlogin;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public String getUserlogin() {
-		return userlogin;
-	}
+    public String getLanguage() {
+        return language;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getLocalIp() {
+        return localip;
+    }
 
-	public String getLanguage() {
-		return language;
-	}
+    public String getHost() {
+        return host;
+    }
 
-	public String getLocalIp() {
-		return localip;
-	}
+    public long getLifetime() {
+        return lifetime;
+    }
 
-	public String getHost() {
-		return host;
-	}
+    public Date getTimestamp() {
+        return timestamp;
+    }
 
-	public long getLifetime() {
-		return lifetime;
-	}
+    public Date getCreationtime() {
+        return creationtime;
+    }
 
-	public Date getTimestamp() {
-		return timestamp;
-	}
+    public int getContextId() {
+        return contextId;
+    }
 
-	public Date getCreationtime() {
-		return creationtime;
-	}
+    public void setCredentials(final Credentials cred) {
+        this.cred = cred;
+    }
 
-	public int getContextId() {
-		return contextId;
-	}
+    public Credentials getCredentials() {
+        return cred;
+    }
 
-	public void setCredentials(final Credentials cred) {
-		this.cred = cred;
-	}
+    public void setLoginName(final String loginName) {
+        this.loginName = loginName;
+    }
 
-	public Credentials getCredentials() {
-		return cred;
-	}
+    public String getLoginName() {
+        return loginName;
+    }
 
-	public void setLoginName(final String loginName) {
-		this.loginName = loginName;
-	}
+    public void setRandomToken(final String randomToken) {
+        this.randomToken = randomToken;
+    }
 
-	public String getLoginName() {
-		return loginName;
-	}
+    public String getRandomToken() {
+        return randomToken;
+    }
 
-	public void setRandomToken(final String randomToken) {
-		this.randomToken = randomToken;
-	}
+    public Session getMailSession() {
+        return mailSession;
+    }
 
-	public String getRandomToken() {
-		return randomToken;
-	}
+    public void setMailSession(final Session mailSession) {
+        this.mailSession = mailSession;
+    }
 
-	public Session getMailSession() {
-		return mailSession;
-	}
+    public void closingOperations() {
+    }
 
-	public void setMailSession(final Session mailSession) {
-		this.mailSession = mailSession;
-	}
+    public String getSecret() {
+        return secret;
+    }
 
-	public void closingOperations() {
-	}
+    public void setSecret(final String secret) {
+        this.secret = secret;
+    }
 
-	public String getSecret() {
-		return secret;
-	}
+    public boolean containsParameter(final String name) {
+        return parameters.containsKey(name);
+    }
 
-	public void setSecret(final String secret) {
-		this.secret = secret;
-	}
+    public Object getParameter(final String name) {
+        return parameters.get(name);
+    }
 
-	public Object getParameter(final String name) {
-		return parameters.get(name);
-	}
+    public void setParameter(final String name, final Object value) {
+        parameters.put(name, value);
+    }
 
-	public void setParameter(final String name, final Object value) {
-		parameters.put(name, value);
-	}
+    public void removeRandomToken() {
+        randomToken = null;
+    }
 
-	public void removeRandomToken() {
-		randomToken = null;
-	}
+    public String getLogin() {
+        return login;
+    }
 
-	public String getLogin() {
-		return login;
-	}
-
-	public void setLogin(final String login) {
-		this.login = login;
-	}
+    public void setLogin(final String login) {
+        this.login = login;
+    }
 
 }

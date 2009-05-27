@@ -49,7 +49,6 @@
 
 package com.openexchange.session;
 
-
 /**
  * {@link Session}
  * 
@@ -75,6 +74,14 @@ public interface Session {
      * @return The login name
      */
     public String getLoginName();
+
+    /**
+     * Checks if there is a parameter bound to specified name.
+     * 
+     * @param name The parameter name
+     * @return <code>true</code> if there is a parameter bound to specified name; otherwise <code>false</code>
+     */
+    public boolean containsParameter(String name);
 
     /**
      * Gets the parameter bound to specified name or <code>null</code> if no such parameter is present

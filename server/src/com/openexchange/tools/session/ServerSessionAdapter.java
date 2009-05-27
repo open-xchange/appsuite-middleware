@@ -97,6 +97,10 @@ public class ServerSessionAdapter implements ServerSession {
         return session().getLoginName();
     }
 
+    public boolean containsParameter(final String name) {
+        return session().containsParameter(name);
+    }
+
     public Object getParameter(final String name) {
         return session().getParameter(name);
     }
