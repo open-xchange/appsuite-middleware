@@ -1193,6 +1193,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         if (containsObjectID()) {
             sb.append(" ObjectID=").append(getObjectID());
         }
+        if (containsFullName()) {
+            sb.append(" Full Name=").append(getFullName());
+        }
         if (containsParentFolderID()) {
             sb.append(" Parent Folder ID=").append(getParentFolderID());
         }
