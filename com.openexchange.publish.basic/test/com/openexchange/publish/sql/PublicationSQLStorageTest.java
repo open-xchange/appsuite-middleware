@@ -334,8 +334,8 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         WHERE(new EQUALS("id", pub1.getId()).
             AND(new EQUALS("cid", ctx.getContextId())).
             AND(new EQUALS("user_id", pub2.getUserId())).
-            AND(new EQUALS("entity", pub2.getEntityId())).
-            AND(new EQUALS("module", pub2.getModule())).
+            AND(new EQUALS("entity", "3546")).
+            AND(new EQUALS("module", "newModule")).
             AND(new EQUALS("target_id", pub2.getTarget().getId())));
         
         assertResult(new StatementBuilder().buildCommand(select));

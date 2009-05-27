@@ -415,7 +415,11 @@ public class PublicationSQLStorage implements PublicationStorage {
             values.add(publication.getTarget().getId());
         }
         
-        if (values.size() > 0) {
+        update.WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
+        values.add(publication.getContext().getContextId());
+        values.add(publication.getId());
+        
+        if (values.size() > 2) {
             new StatementBuilder().executeStatement(writeConnection, update, values);
         }
     }

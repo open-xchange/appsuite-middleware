@@ -327,7 +327,11 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             values.add(subscription.getLastUpdate());
         }
 
-        if (values.size() > 0) {
+        update.WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
+        values.add(subscription.getContext().getContextId());
+        values.add(subscription.getId());
+        
+        if (values.size() > 2) {
             new StatementBuilder().executeStatement(writeConnection, update, values);
         }
     }
