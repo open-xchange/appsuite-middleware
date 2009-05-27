@@ -83,7 +83,7 @@ public class CopyRequest extends AbstractMailRequest<CopyResponse> {
 
 	public Object getBody() throws JSONException {
         JSONObject jso = new JSONObject();
-        jso.put(MailListField.FOLDER_ID.getKey(), destinationFolderID);
+        jso.put("folder_id", destinationFolderID);
         return jso;        
 	}
 
@@ -97,7 +97,7 @@ public class CopyRequest extends AbstractMailRequest<CopyResponse> {
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_COPY));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, sourceFolderID));
         list.add(new Parameter(Mail.PARAMETER_ID, mailID));
-
+        
         return list.toArray(new Parameter[list.size()]);
 	}
 

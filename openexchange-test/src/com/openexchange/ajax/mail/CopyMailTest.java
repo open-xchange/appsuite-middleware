@@ -47,35 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail;
 
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.GetResponse;
+import com.openexchange.ajax.mail.actions.MoveMailRequest;
+import com.openexchange.ajax.mail.actions.UpdateMailResponse;
+import com.openexchange.tools.servlet.AjaxException;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link ClearRequest}
- * 
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ * {@link MoveMailTest}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CopyResponse extends AbstractAJAXResponse {
+public class CopyMailTest extends AbstractMailTest {
 
-	protected CopyResponse(Response response) {
-		super(response);
-		
-	}
-	
-	public String getFolder() throws JSONException{
-        JSONObject data = (JSONObject) getData();
-        return data.getString("folder_id");
+    private UserValues values;
+
+    public CopyMailTest(String name) {
+        super(name);
     }
 
-    public String getID() throws JSONException{
-        JSONObject data = (JSONObject) getData();
-        return data.getString("id");
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        values = getClient().getValues();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        clearFolder( values.getSentFolder() );
+        clearFolder( values.getInboxFolder() );
+        clearFolder( values.getDraftsFolder() );
+        super.tearDown();
+    }
+    
+    public void testShouldCopyFromSentToDrafts() throws AjaxException, IOException, SAXException, JSONException{
+        MailTestManager manager = new MailTestManager(client, false);
+        
+        String mail = values.getSendAddress();
+        sendMail( createEMail(mail, "Copy a mail", "ALTERNATE", "Copy from sent to drafts").toString() );
+        
+        String origin = values.getInboxFolder();
+        String destination = values.getDraftsFolder();
+        
+        TestMail myMail = TestMail.create( getFirstMailInFolder( origin) );
+        String oldID = myMail.getId();
+        
+        TestMail copiedMail = manager.copy(myMail, destination);
+        String newID = copiedMail.getId();
+        System.out.println("***** newID : "+newID);
+        
+        manager.get(destination, newID);
+        assertTrue("Should produce no errors when getting copied e-mail", !manager.getLastResponse().hasError() );
+        assertTrue("Should produce no conflicts when getting copied e-mail", !manager.getLastResponse().hasConflicts() );
+                
     }
 
 }
