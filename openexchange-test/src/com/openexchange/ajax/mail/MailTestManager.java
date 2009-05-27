@@ -194,6 +194,14 @@ public class MailTestManager {
     }
     
     /**
+     * Gets a mail from the server or null if it could not be found. 
+     * This sets the last response field.
+     */
+    public TestMail get(String[] folderAndId) throws AjaxException, IOException, SAXException, JSONException {
+        return get(folderAndId[0], folderAndId[1]);
+    }
+    
+    /**
      * Copies a mail from its own folder to another.
      * This method sets the lastResponse field.
      * @return the copied mail
