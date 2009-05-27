@@ -238,6 +238,14 @@ public class TestMail implements IdentitySource<TestMail> {
         return new TestMail(obj);
     }
 
+    public TestMail(String sender, String recipient, String subject, String contentType, String text) throws JSONException {
+        setFrom( Arrays.asList( new String[]{sender}));
+        setTo( Arrays.asList( new String[]{recipient}));
+        setSubject(subject);
+        setContentType(contentType);
+        setBody(text);
+        sanitize();
+    }
     /**
      * Used for reading from FitNesse tables
      * 
