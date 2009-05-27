@@ -28,7 +28,7 @@
 	
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	
-    <property name="configjar" value="com.openexchange.configread"/>
+    <property name="configjar" value="com.openexchange.configread.jar"/>
 	
 	
 	
