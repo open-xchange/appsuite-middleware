@@ -165,7 +165,28 @@ public class FolderTestManager extends TestCase {
     public void deleteFolderOnServer(FolderObject folderToDelete) throws AjaxException, IOException, SAXException, JSONException {
         DeleteRequest request = new DeleteRequest(folderToDelete);
         client.execute(request);
-        insertedOrUpdatedFolders.remove(folderToDelete);
+        removeFolderFromCleanupList(folderToDelete);
+
+    }
+
+    /**
+     * Removes a folder form the cleanup list.
+     */
+    private void removeFolderFromCleanupList(FolderObject folderToDelete) {
+        /*
+         * Once someone implements a proper equals on FolderObject, this can be replace by a simple
+         * insertedOrUpdatedFolders.remove(folderToDelete);
+         */
+        for (int i = 0, length = insertedOrUpdatedFolders.size(); i < length; i++) {
+            FolderObject folder = insertedOrUpdatedFolders.get(i);
+            // normal folder:
+            if (folder.getObjectID() == folderToDelete.getObjectID() && folder.getParentFolderID() == folderToDelete.getParentFolderID() && !folder.containsFullName() && !folderToDelete.containsFullName())
+                insertedOrUpdatedFolders.remove(i);
+            // mail folder:
+            if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
+                folderToDelete.getFullName()))
+                insertedOrUpdatedFolders.remove(i);
+        }
     }
 
     public void deleteFolderOnServer(FolderObject folderToDelete, boolean failOnError) {
