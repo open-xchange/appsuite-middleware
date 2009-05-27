@@ -1,0 +1,11 @@
+Source: open-xchange-puPUBLISH_ONLINE_INFOSTORE_BUNDLElish-infostore-online
+Section: unknown
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-publish (>= @OXVERSION@), open-xchange-publish-basic (>= @OXVERSION@)
+Standards-Version: 3.6.1
+
+Package: open-xchange-puPUBLISH_ONLINE_INFOSTORE_BUNDLElish-infostore-online
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-publish (>= @OXVERSION@), open-xchange-publish-basic (>= @OXVERSION@)
+Description: PuPUBLISH_ONLINE_INFOSTORE_BUNDLElishes a single infostore document externally
