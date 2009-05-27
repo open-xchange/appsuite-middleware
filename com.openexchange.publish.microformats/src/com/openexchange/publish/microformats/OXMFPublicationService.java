@@ -160,6 +160,17 @@ public class OXMFPublicationService extends AbstractPublicationService {
         publication.getConfiguration().remove(SECRET);
 
     }
+    
+    @Override
+    public void modifyIncoming(Publication publication) throws PublicationException {
+        String siteName = (String) publication.getConfiguration().get(SITE);
+        if(siteName != null) {
+            Publication oldPub = getPublication(publication.getContext(), siteName);
+            if(oldPub != null) {
+                throw uniquenessConstraintViolation(SITE, siteName);
+            }
+        }
+    }
 
     private boolean needsSecret(Publication publication) {
         Map<String, Object> configuration = publication.getConfiguration();

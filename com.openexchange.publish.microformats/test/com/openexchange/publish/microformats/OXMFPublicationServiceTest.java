@@ -50,9 +50,11 @@
 package com.openexchange.publish.microformats;
 
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import junit.framework.TestCase;
@@ -69,11 +71,21 @@ public class OXMFPublicationServiceTest extends TestCase {
     private final Publication oldPublication = new Publication();
 
     public void setUp() {
+        PublicationErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.publish");
+        PublicationErrorMessage.EXCEPTIONS.setComponent(new StringComponent("PUB"));
+        
         publicationService = new OXMFPublicationService() {
 
             @Override
             public Publication load(Context ctx, int publicationId) throws PublicationException {
                 return oldPublication;
+            }
+            @Override
+            public Publication getPublication(Context ctx, String site) throws PublicationException {
+                if(site.equals("existingSite")) {
+                    return new Publication();
+                }
+                return null;
             }
         };
         publicationService.setRootURL("/publications/bananas");
@@ -206,7 +218,19 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     }
 
-    // TODO: Unique Site
+    public void testUniqueSite() throws PublicationException {
+        Publication publication = new Publication();
+        publication.setContext(new SimContext(1337));
+        publication.getConfiguration().put("siteName", "existingSite");
+        
+        try {
+            publicationService.modifyIncoming(publication);
+            fail("Could create double site");
+        } catch (PublicationException x) {
+            // Hooray
+        }
+
+    }
     
     public void assertSecret(Publication publication) {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));

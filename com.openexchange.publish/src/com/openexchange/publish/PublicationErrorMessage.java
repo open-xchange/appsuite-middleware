@@ -80,7 +80,8 @@ public enum PublicationErrorMessage implements OXErrorMessage {
     /**
      * Could not find Publication (according ID and Context).
      */
-    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Publication");
+    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Publication"),
+    UniquenessConstraintViolation(Category.USER_INPUT, 6, "Choose a different value", "%s has already been taken (Field: %s)");
     
     private Category category;
     private int errorCode;

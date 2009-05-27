@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationStorage;
@@ -102,6 +103,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         afterLoad(publications);
         return publications;
     }
+    
     
 
     public boolean knows(Context ctx, int publicationId) throws PublicationException {
@@ -168,4 +170,9 @@ public abstract class AbstractPublicationService implements PublicationService {
     public void afterLoad(Collection<Publication> publications) throws PublicationException{
         
     }
+    
+    public PublicationException uniquenessConstraintViolation(String key, String value) {
+        return PublicationErrorMessage.UniquenessConstraintViolation.create(value, key);
+    }
+
 }
