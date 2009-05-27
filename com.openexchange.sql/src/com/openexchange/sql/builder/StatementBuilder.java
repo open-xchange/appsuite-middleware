@@ -188,9 +188,13 @@ public class StatementBuilder implements IStatementBuilder {
 	}
 	
 	public void executeStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
-	    PreparedStatement stmt = prepareStatement(con, element, values);
-	    stmt.execute();
-	    SQLTools.closeSQLStuff(null, stmt, null);
+	    PreparedStatement stmt = null;
+	    try {
+	        stmt = prepareStatement(con, element, values);
+	        stmt.execute();
+	    } finally {
+	        SQLTools.closeSQLStuff(null, stmt, null);
+	    }
 	}
 	
 	public ResultSet executeQuery(Connection con, Command element, List<? extends Object> values) throws SQLException {
