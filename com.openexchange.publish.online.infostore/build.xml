@@ -35,7 +35,7 @@
     <property name="publishjar" value="com.openexchange.publish.jar"/>
 	
     <property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar" />
+	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
 	
 	
