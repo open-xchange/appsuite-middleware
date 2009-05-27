@@ -383,10 +383,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             final String[] ids = mailAccess.getMessageStorage().appendMessages(confirmedHamFullname, nestedMails);
             if (parameterObject.isMove()) {
                 mailAccess.getMessageStorage().copyMessages(confirmedHamFullname, FULLNAME_INBOX, ids, true);
-                // Workaround for bug
-                if (0 != nestedMessages.length) {
-                    mailAccess.getMessageStorage().deleteMessages(parameterObject.getSpamFullname(), nestedMessages, true);
-                }
+                mailAccess.getMessageStorage().deleteMessages(parameterObject.getSpamFullname(), nestedMessages, true);
             }
         } finally {
             mailAccess.close(true);
