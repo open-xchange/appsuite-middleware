@@ -515,11 +515,11 @@ public final class MimeReply {
                 replyTexts);
         } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             if (retvalContentType.getPrimaryType() == null) {
-                final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm);
+                final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
                 retvalContentType.setContentType(contentType);
                 textBuilder.append(text);
             } else {
-                final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm);
+                final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
                 MimeProcessingUtility.appendRightVersion(retvalContentType, contentType, text, textBuilder);
             }
             found = true;
@@ -609,11 +609,11 @@ public final class MimeReply {
                         retvalContentType.setContentType(partContentType);
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         retvalContentType.setCharsetParameter(charset);
-                        textBuilder.append(MessageUtility.readMailPart(part, charset));
+                        textBuilder.append(MimeProcessingUtility.readContent(part, charset));
                     } else {
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         partContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
+                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm.isDisplayHtmlInlineContent());
                         MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
                     }
                     found = true;
@@ -643,12 +643,12 @@ public final class MimeReply {
                         retvalContentType.setContentType(partContentType);
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         retvalContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm);
+                        final String text = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
                         textBuilder.append(text);
                     } else {
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         partContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
+                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm.isDisplayHtmlInlineContent());
                         MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
                     }
                     found = true;

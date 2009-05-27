@@ -1,3 +1,7 @@
+* 2009-05-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #13742: Dealing with sun.io.MalformedInputException on IBM Java when reading mail content
+
 * 2009-05-26 - choeger@open-xchange.com
 
  - Bugfix #12859: [L3] Changing umask for Infostore documents

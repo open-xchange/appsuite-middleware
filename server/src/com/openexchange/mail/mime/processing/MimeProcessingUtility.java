@@ -52,11 +52,12 @@ package com.openexchange.mail.mime.processing;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Locale;
-import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -65,7 +66,6 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
-import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
@@ -76,6 +76,8 @@ import com.openexchange.mail.uuencode.UUEncodedMultiPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeProcessingUtility {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MimeProcessingUtility.class);
 
     /**
      * No instantiation
@@ -153,26 +155,22 @@ public final class MimeProcessingUtility {
      * @param textPart The text part
      * @param contentType The text part's content type
      * @return The proper text version
-     * @throws MessagingException
-     * @throws IOException
-     * @throws MailException
+     * @throws MailException If a mail error occurs
+     * @throws IOException If an I/O error occurs
      */
-    static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final UserSettingMail usm) throws MessagingException, IOException, MailException {
-        String charset = contentType.getCharsetParameter();
-        if (null == charset) {
-            charset = CharsetDetector.detectCharset(textPart.getInputStream());
-        }
+    static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final boolean allowHTML) throws IOException, MailException {
+        final String charset = getCharset(textPart, contentType);
         if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
-            if (usm.isDisplayHtmlInlineContent()) {
-                return MessageUtility.readMailPart(textPart, charset);
+            if (allowHTML) {
+                return readContent(textPart, charset);
             }
             contentType.setBaseType("text/plain");
             final HTML2TextHandler handler = new HTML2TextHandler((int) textPart.getSize(), false);
-            HTMLParser.parse(getConformHTML(MessageUtility.readMailPart(textPart, charset), contentType), handler);
+            HTMLParser.parse(getConformHTML(readContent(textPart, charset), contentType), handler);
             return handler.getText();
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
-            final String content = MessageUtility.readMailPart(textPart, charset);
+            final String content = readContent(textPart, charset);
             final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
             if (uuencodedMP.isUUEncoded()) {
                 /*
@@ -182,7 +180,55 @@ public final class MimeProcessingUtility {
             }
             return content;
         }
-        return MessageUtility.readMailPart(textPart, charset);
+        return readContent(textPart, charset);
+    }
+
+    /**
+     * Reads specified mail part's content catching possible <code>java.io.CharConversionException</code>.
+     * 
+     * @param mailPart The mail part
+     * @param charset The charset to use
+     * @return The mail part's content as a string
+     * @throws MailException If a mail error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    static String readContent(final MailPart mailPart, final String charset) throws MailException, IOException {
+        try {
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "US-ASCII";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+            }
+            return MessageUtility.readMailPart(mailPart, fallback);
+        }
+    }
+
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+        final String charset;
+        if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
+            String cs = contentType.getCharsetParameter();
+            if (!CharsetDetector.isValid(cs)) {
+                if (null != cs) {
+                    LOG.warn("Illegal or unsupported encoding in a message detected: \"" + cs + '"', new UnsupportedEncodingException(cs));
+                }
+                if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                } else {
+                    cs = MailProperties.getInstance().getDefaultMimeCharset();
+                }
+            }
+            charset = cs;
+        } else {
+            if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+            } else {
+                charset = MailProperties.getInstance().getDefaultMimeCharset();
+            }
+        }
+        return charset;
     }
 
     /**

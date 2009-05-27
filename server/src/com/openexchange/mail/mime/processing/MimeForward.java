@@ -313,7 +313,7 @@ public final class MimeForward {
                     originalContentType.setCharsetParameter(MessageUtility.checkCharset(originalMsg, originalContentType));
                 }
             }
-            final String content = MessageUtility.readMailPart(originalMsg, originalContentType.getCharsetParameter());
+            final String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
             forwardMsg.setText(
                 generateForwardText(
                     content == null ? "" : content,
@@ -457,7 +457,7 @@ public final class MimeForward {
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     retvalContentType.setContentType(partContentType);
                     retvalContentType.setCharsetParameter(charset);
-                    return MessageUtility.readMailPart(part, charset);
+                    return MimeProcessingUtility.readContent(part, charset);
                 } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                     final String text = getFirstSeenText(part, retvalContentType, usm);
                     if (text != null) {
@@ -476,7 +476,7 @@ public final class MimeForward {
                 final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
-                return MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm);
+                return MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
             } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                 final String text = getFirstSeenText(part, retvalContentType, usm);
                 if (text != null) {

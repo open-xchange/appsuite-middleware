@@ -253,8 +253,7 @@ public final class MailMessageParser {
          */
         if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN) || contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED) || contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT) || contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
             if (isInline) {
-                final String charset = getCharset(mailPart, contentType);
-                final String content = MessageUtility.readMailPart(mailPart, charset);
+                final String content = readContent(mailPart, contentType);
                 final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
                 if (uuencodedMP.isUUEncoded()) {
                     /*
@@ -313,13 +312,7 @@ public final class MailMessageParser {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
             if (isInline) {
-                final String charset = getCharset(mailPart, contentType);
-                if (!handler.handleInlineHtml(
-                    MessageUtility.readMailPart(mailPart, charset),
-                    contentType,
-                    size,
-                    filename,
-                    mailPart.getSequenceId())) {
+                if (!handler.handleInlineHtml(readContent(mailPart, contentType), contentType, size, filename, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -709,11 +702,26 @@ public final class MailMessageParser {
      * Generates a filename consisting of common prefix "Part_" and part's sequence ID appended
      * 
      * @param sequenceId Part's sequence ID
-     * @param baseMimeType The base Mime type to look up an appropriate file extension if <code>rawFileName</code> is <code>null</code>
+     * @param baseMimeType The base MIME type to look up an appropriate file extension if <code>rawFileName</code> is <code>null</code>
      * @return The generated filename
      */
     public static String generateFilename(final String sequenceId, final String baseMimeType) {
         return getFileName(null, sequenceId, baseMimeType);
+    }
+
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
+        final String charset = getCharset(mailPart, contentType);
+        try {
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "US-ASCII";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+            }
+            return MessageUtility.readMailPart(mailPart, fallback);
+        }
     }
 
     private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
