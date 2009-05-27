@@ -40,7 +40,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Genconf Storage GENCONF_STORAGE_BUNDLE
+Summary:        The Genconf Storage
 Requires:       open-xchange-common open-xchange-global open-xchange-server open-xchange-genconf
 #
 
