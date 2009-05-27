@@ -105,7 +105,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
                 conflicts.append( conflict.getTitle() );
                 conflicts.append(", ");
             }
-            Assert.fail(name + " " + conflicts);
+            Assert.fail(name + " " + conflicts.substring(0,conflicts.length() - 2));
         }
         checkError(insertResponse);
     }
