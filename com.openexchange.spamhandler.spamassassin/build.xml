@@ -23,12 +23,14 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
+	<property name="configjar" value="com.openexchange.configread.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
+    	<pathelement location="${bundlesdir}/${configjar}"/>
 		<pathelement location="${bundlesdir}/${serverjar}"/>
     </path>
 
@@ -59,6 +61,11 @@
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+    	<copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware">
+    		<fileset dir="conf">
+    			<include name="**"/>
+    		</fileset>
+    	</copy>
     </target>
 
     <target name="installJar" depends="jar">

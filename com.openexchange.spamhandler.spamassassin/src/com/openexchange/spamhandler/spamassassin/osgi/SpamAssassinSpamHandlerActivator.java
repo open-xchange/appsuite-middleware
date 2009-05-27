@@ -49,15 +49,22 @@
 
 package com.openexchange.spamhandler.spamassassin.osgi;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.spamhandler.spamassassin.MailServiceSupplier;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
+import com.openexchange.spamhandler.spamassassin.api.SpamdService;
+import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
 
 /**
  * {@link SpamAssassinSpamHandlerActivator} - {@link BundleActivator Activator} for spam-assassin spam handler.
@@ -68,9 +75,13 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { MailService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { MailService.class, ConfigurationService.class };
+    
+    private static Bundle thisBundle = null;
 
     private final Dictionary<String, String> dictionary;
+    
+    private List<ServiceTracker> serviceTrackerList;
 
     private ServiceRegistration serviceRegistration;
 
@@ -79,6 +90,7 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
      */
     public SpamAssassinSpamHandlerActivator() {
         super();
+        serviceTrackerList = new ArrayList<ServiceTracker>();
         dictionary = new Hashtable<String, String>();
         dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
     }
@@ -90,25 +102,65 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (MailService.class.equals(clazz)) {
-            MailServiceSupplier.getInstance().setMailService(null);
+        /*
+         * Never stop the server even if a needed service is absent
+         */
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
         }
+        ServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (MailService.class.equals(clazz)) {
-            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
         }
+        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = ServiceRegistry.getInstance();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            if (!started.compareAndSet(false, true)) {
+                /*
+                 * Don't start the bundle again. A duplicate call to
+                 * startBundle() is probably caused by temporary absent
+                 * service(s) whose re-availability causes to trigger this
+                 * method again.
+                 */
+                LOG.info("A temporary absent service is available again");
+                return;
+            }
+
+            final PropertyHandler instance = PropertyHandler.getInstance();
+            instance.loadProperties();
+
+//            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
             serviceRegistration = context.registerService(SpamHandler.class.getName(), SpamAssassinSpamHandler.getInstance(), dictionary);
+            
+            serviceTrackerList.add(new ServiceTracker(context, SpamdService.class.getName(), new SpamdInstallationServiceListener(context)));
+            
+            // Open service trackers
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
+            thisBundle = context.getBundle();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -121,11 +173,31 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
             }
-            MailServiceSupplier.getInstance().setMailService(null);
+
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
+            
+            /*
+             * Clear service registry
+             */
+            ServiceRegistry.getInstance().clearRegistry();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
 
+    public static void shutdownBundle() {
+        try {
+            thisBundle.stop();
+            thisBundle = null;
+        } catch (BundleException e) {
+            LOG.error("Can't stop bundle SpamHandler Spamassassin: " + e.getMessage(), e);
+        }
+    }
 }
