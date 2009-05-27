@@ -52,12 +52,13 @@
 		
         <pathelement location="${bundlesdir}/${serverjar}"/>
 		
+    	<pathelement location="${bundlesdir}/${servletjar}" />
+	
 		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     	
 		<pathelement location="${bundlesdir}/${commonBundle}/jars/${osgiservicesjar}"/>
 		
-		<pathelement location="${bundlesdir}/${commonBundle}/jars/${servletjar}"/>
-
+    	
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
