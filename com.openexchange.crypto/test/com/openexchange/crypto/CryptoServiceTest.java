@@ -62,13 +62,15 @@ public class CryptoServiceTest extends TestCase {
     
     protected String payloadSpecial = "HŠll™ &/() w…RLD!";
     
-    protected String password = "password";
+    protected String password = "passwordpasswordpasswordpassword";
     
     protected String passwordSpecial = "pË§wšrd;";
     
-    protected String badPassword  = "password1";
+    protected String badPassword  = "passwordpasswordpasswordpassword1";
     
     protected CryptoService cryptoService;
+    
+    protected final byte[] salt = new byte[] { 0x34, 0x11, 0x45, 0x03, 0x04, 0x05, 0x06, 0x43, 0x23, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0e };
 
     public void setUp() throws Exception {
         super.setUp();
@@ -104,6 +106,25 @@ public class CryptoServiceTest extends TestCase {
         String encrypted = cryptoService.encrypt(payload, password);
         try {
             cryptoService.decrypt(encrypted, badPassword);
+            fail("Exception expected.");
+        } catch (CryptoException e) {
+            assertEquals("Wrong exception thrown.", BadPassword.getDetailNumber(), e.getDetailNumber());
+        }
+    }
+    
+    public void testSaltUsage() throws Exception {
+        EncryptedData encryptedData = cryptoService.encrypt(payload, password, true);
+        String decryptedData = cryptoService.decrypt(encryptedData, password, true);
+        assertEquals("Payload not decrypted", payload, decryptedData);
+
+        encryptedData = cryptoService.encrypt(payload, password, false);
+        decryptedData = cryptoService.decrypt(encryptedData, password, false);
+        assertEquals("Payload not decrypted", payload, decryptedData);
+        
+        encryptedData = cryptoService.encrypt(payload, password, true);
+        encryptedData = new EncryptedData(encryptedData.getData(), salt);
+        try {
+            decryptedData = cryptoService.decrypt(encryptedData, password, true);
             fail("Exception expected.");
         } catch (CryptoException e) {
             assertEquals("Wrong exception thrown.", BadPassword.getDetailNumber(), e.getDetailNumber());

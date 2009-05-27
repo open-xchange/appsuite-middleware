@@ -49,13 +49,54 @@
 
 package com.openexchange.crypto;
 
+import java.security.GeneralSecurityException;
+
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public interface CryptoService {
 
-    public String encrypt(String password, String payload) throws CryptoException;
+    /**
+     * Encrypts specified data with given password.
+     * 
+     * @param data The data to be encrypted
+     * @param password The password
+     * @return The encrypted data as Base64 encoded string
+     * @throws GeneralSecurityException If encryption fails
+     */
+    public String encrypt(String data, String password) throws CryptoException;
 
+    /**
+     * Decrypts specified encrypted data with given password.
+     * 
+     * @param encryptedData The Base64 encoded encrypted data
+     * @param password The password
+     * @return The decrypted data
+     * @throws GeneralSecurityException If decryption fails
+     */
     public String decrypt(String encryptedPayload, String password) throws CryptoException;
+    
+    /**
+     * Encrypts specified data with given password.
+     * 
+     * @param data The data to be encrypted
+     * @param password The password
+     * @param useSalt Uses generated salt for encryption and stores the salt in the return value, if true uses internal salt constant
+     *            otherwise.
+     * @return EncryptedData object with the Base64 encoded and encrypted String and the used salt
+     * @throws GeneralSecurityException If encryption fails
+     */
+    public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException;
+    
+    /**
+     * Decrypts specified encryptedt data with the given password.
+     * 
+     * @param data EncryptedData object with the encrypted data (Base64 String) and salt
+     * @param password The password
+     * @param useSalt use Salt from the given EncryptedData object if true
+     * @return The decrypted data as String
+     * @throws GeneralSecurityException If decryption fails
+     */
+    public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException;
 }

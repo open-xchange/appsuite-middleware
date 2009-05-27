@@ -51,12 +51,18 @@ package com.openexchange.crypto;
 
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
 import static com.openexchange.crypto.CryptoErrorMessage.EncodingException;
+import static com.openexchange.crypto.CryptoErrorMessage.NoSalt;
 import static com.openexchange.crypto.CryptoErrorMessage.SecurityException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.security.SecureRandom;
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
@@ -65,11 +71,16 @@ import org.apache.commons.codec.binary.Base64;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class CryptoServiceImpl implements CryptoService {
-
+    
+    /**
+     * Algorithm for generating PBE-Keys.
+     */
+    private final String KEY_ALGORITHM = "PBKDF2WithHmacSHA1";
+    
     /**
      * Key length
      */
-    private final int KEY_LENGTH = 16;
+    private final int KEY_LENGTH = 128;
     
     /**
      * The algorithm.
@@ -92,48 +103,59 @@ public class CryptoServiceImpl implements CryptoService {
     private final String CIPHER_TYPE = ALGORITHM + "/" + MODE + "/" + PADDING;
 
     /**
-     * Parameters
+     * Initialization Vector
      */
-    private static IvParameterSpec iv = new IvParameterSpec(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
+    private final IvParameterSpec IV = new IvParameterSpec(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
     /**
-     * Encrypts specified payload with given password.
-     * 
-     * @param payload The payload to be encrypted
-     * @param password The password
-     * @return The encrypted payload as Base64 encoded string
-     * @throws GeneralSecurityException If encryption fails
+     * Salt
      */
-    public String encrypt(String payload, String password) throws CryptoException {
-        return encrypt(payload, generateSecretKey(password));
+    private final byte[] SALT = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+    
+    public String encrypt(String data, String password) throws CryptoException {
+        return encrypt(data, password, false).getData();
+    }
+
+    public String decrypt(String encryptedData, String password) throws CryptoException {
+        return decrypt(new EncryptedData(encryptedData, null), password, false);
+        //return decrypt(encryptedData, generateSecretKey(password));
+    }
+
+    public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException {
+        if (useSalt && data.getSalt() == null) {
+            throw NoSalt.create();
+        }
+        
+        if (useSalt) {
+            return decrypt(data.getData(), generateSecretKey(password, data.getSalt()));
+        } else {
+            return decrypt(data.getData(), generateSecretKey(password, SALT));
+        }
+    }
+    
+    public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException {
+        if (useSalt) {
+            byte[] salt = generateSalt();
+            return new EncryptedData(encrypt(data, generateSecretKey(password, salt)), salt);
+        } else {
+            return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
+        }
     }
 
     /**
-     * Decrypts specified encrypted payload with given password.
+     * Encrypts specified data with given key.
      * 
-     * @param encryptedPayload The Base64 encoded encrypted payload
+     * @param data The data to encrypt
      * @param password The password
-     * @return The decrypted payload
-     * @throws GeneralSecurityException If decryption fails
-     */
-    public String decrypt(String encryptedPayload, String password) throws CryptoException {
-        return decrypt(encryptedPayload, generateSecretKey(password));
-    }
-
-    /**
-     * Encrypts specified payload with given key.
-     * 
-     * @param payload The payload to encrypt
-     * @param password The password
-     * @return The encrypted payload as Base64 encoded string
+     * @return The encrypted data as Base64 encoded string
      * @throws CryptoException
      */
-    private String encrypt(final String payload, final Key password) throws CryptoException {
+    private String encrypt(final String data, final Key password) throws CryptoException {
         String retval = null;
         try {
             final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.ENCRYPT_MODE, password, iv);
-            final byte[] outputBytes = cipher.doFinal(payload.getBytes("UTF-8"));
+            cipher.init(Cipher.ENCRYPT_MODE, password, IV);
+            final byte[] outputBytes = cipher.doFinal(data.getBytes("UTF-8"));
             /*-
              * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
@@ -163,14 +185,14 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     /**
-     * Decrypts specified encrypted payload with given Key.
+     * Decrypts specified encrypted data with given Key.
      * 
-     * @param encryptedPayload The Base64 encoded encrypted payload
+     * @param encryptedData The Base64 encoded encrypted data
      * @param key The Key
-     * @return The decrypted payload
+     * @return The decrypted data
      * @throws CryptoException 
      */
-    private String decrypt(final String encryptedPayload, final Key key) throws CryptoException {
+    private String decrypt(final String encryptedData, final Key key) throws CryptoException {
         String retval = null;
         Cipher cipher = null;
         final byte encrypted[];
@@ -193,10 +215,10 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              * 
              */
-            encrypted = Base64.decodeBase64(encryptedPayload.getBytes("US-ASCII"));
+            encrypted = Base64.decodeBase64(encryptedData.getBytes("US-ASCII"));
 
             cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.DECRYPT_MODE, key, iv);
+            cipher.init(Cipher.DECRYPT_MODE, key, IV);
         } catch (final UnsupportedEncodingException e) {
             throw EncodingException.create(e);
         } catch (GeneralSecurityException e) {
@@ -222,30 +244,28 @@ public class CryptoServiceImpl implements CryptoService {
      * @return A secret key generated from specified password string
      * @throws CryptoException 
      */
-    private Key generateSecretKey(final String password) throws CryptoException {
-        try {
-            return new SecretKeySpec(ensureLength(password.getBytes("UTF-8")), ALGORITHM);
-        } catch (final UnsupportedEncodingException e) {
-            throw EncodingException.create(e);
+    private SecretKey generateSecretKey(final String password, byte[] salt) throws CryptoException {
+        try { 
+            PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, 1000, KEY_LENGTH);  
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_ALGORITHM);  
+            PBEKey key = (PBEKey) factory.generateSecret(keySpec);  
+            SecretKey secretKey = new SecretKeySpec(key.getEncoded(), ALGORITHM);
+            return secretKey;
+        } catch (GeneralSecurityException e) {
+            throw SecurityException.create(e);
         }
     }
-
-    private byte[] ensureLength(final byte[] bytes) {
-        final byte[] keyBytes;
-        final int len = bytes.length;
-        if (len < KEY_LENGTH) {
-            keyBytes = new byte[KEY_LENGTH];
-            System.arraycopy(bytes, 0, keyBytes, 0, len);
-            for (int i = len; i < keyBytes.length; i++) {
-                keyBytes[i] = 48;
-            }
-        } else if (len > KEY_LENGTH) {
-            keyBytes = new byte[KEY_LENGTH];
-            System.arraycopy(bytes, 0, keyBytes, 0, keyBytes.length);
-        } else {
-            keyBytes = bytes;
+    
+    private byte[] generateSalt() throws CryptoException {
+        byte[] salt = null;
+        try {
+            SecureRandom rand = SecureRandom.getInstance("SHA1PRNG");  
+            salt = new byte[16];  
+            rand.nextBytes(salt);
+        } catch (GeneralSecurityException e) {
+            throw SecurityException.create(e);
         }
-        return keyBytes;
+        return salt;
     }
 
 }

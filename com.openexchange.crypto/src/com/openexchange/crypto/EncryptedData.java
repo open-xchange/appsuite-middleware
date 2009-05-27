@@ -49,69 +49,26 @@
 
 package com.openexchange.crypto;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public enum CryptoErrorMessage implements OXErrorMessage {
-    /**
-     * Bad password.
-     */
-    BadPassword(Category.USER_INPUT, 1, "Provide correct password.", "Wrong Password."),
-    /**
-     * Encoding error.
-     */
-    EncodingException(Category.CODE_ERROR, 2, "Check the encoding.", "Error during encoding operation."),
-    /**
-     * Security Exception.
-     */
-    SecurityException(Category.CODE_ERROR, 3, "Check cipher initialization", "General Security Exception occurred."),
-    /**
-     * No salt given.
-     */
-    NoSalt(Category.USER_INPUT, 4, "Provide salt", "No salt given.");
+public class EncryptedData {
 
-    private Category category;
+    private String data;
 
-    private int errorCode;
+    private byte[] salt;
 
-    private String help;
-
-    private String message;
-
-    public static final CryptoExceptionFactory EXCEPTIONS = new CryptoExceptionFactory();
-
-    private CryptoErrorMessage(Category category, int errorCode, String help, String message) {
-        this.category = category;
-        this.errorCode = errorCode;
-        this.help = help;
-        this.message = message;
+    public EncryptedData(String data, byte[] salt) {
+        super();
+        this.data = data;
+        this.salt = salt;
     }
 
-    public Category getCategory() {
-        return category;
+    public String getData() {
+        return data;
     }
 
-    public int getDetailNumber() {
-        return errorCode;
+    public byte[] getSalt() {
+        return salt;
     }
-
-    public String getHelp() {
-        return help;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public CryptoException create(final Throwable cause, final Object... args) {
-        return EXCEPTIONS.create(this, cause, args);
-    }
-
-    public CryptoException create(final Object... args) {
-        return EXCEPTIONS.create(this, args);
-    }
-
 }
