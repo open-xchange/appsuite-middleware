@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Publish Plug-in
 Bundle-SymbolicName: com.openexchange.publish
-Bundle-Version: 1.0.0
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Version: 6.9.0.0
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exceptions,
