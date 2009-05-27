@@ -120,7 +120,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     public void update(Publication publication) throws PublicationException {
         modifyIncoming(publication);
         beforeUpdate(publication);
-        STORAGE.rememberPublication(publication);
+        STORAGE.updatePublication(publication);
         afterUpdate(publication);
     }
     

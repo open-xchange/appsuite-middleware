@@ -81,7 +81,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public void update(Subscription subscription) throws AbstractOXException {
-        STORAGE.rememberSubscription(subscription);
+        STORAGE.updateSubscription(subscription);
     }
     
     public boolean knows(Context ctx, int subscriptionId) throws AbstractOXException {
