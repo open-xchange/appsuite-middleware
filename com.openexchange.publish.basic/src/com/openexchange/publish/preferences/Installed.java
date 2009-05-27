@@ -47,33 +47,46 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.publish.preferences;
 
-import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link Installed}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface SubscribeService {
+public class Installed implements PreferencesItemService{
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.publish" };
+    }
 
-    public SubscriptionSource getSubscriptionSource();
-    
-    public boolean handles(int folderModule);
-    
-    public void subscribe(Subscription subscription) throws AbstractOXException;
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-    public Collection<Subscription> loadSubscriptions(Context context, int folderId, String secret) throws AbstractOXException;
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                setting.setSingleValue(Boolean.valueOf(true));
+            }
 
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
-    
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
-
-    public void update(Subscription subscription) throws AbstractOXException;
-
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
-
-    public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
-    
+            /**
+             * {@inheritDoc}
+             */
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 }

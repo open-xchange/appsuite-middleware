@@ -41,7 +41,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Basic subscribe implementation
-Requires:       open-xchange-common open-xchange-global open-xchange-genconf open-xchange-genconf-mysql open-xchange-server open-xchange-sql
+Requires:       open-xchange-common open-xchange-global open-xchange-genconf open-xchange-genconf-mysql open-xchange-server open-xchange-sql open-xchange-crypto
 #
 
 %description

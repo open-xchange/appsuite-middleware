@@ -49,31 +49,46 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.crypto.SimCryptoService;
+import junit.framework.TestCase;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link AbstractSubscribeServiceTest}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface SubscribeService {
-
-    public SubscriptionSource getSubscriptionSource();
+public class AbstractSubscribeServiceTest extends TestCase {
+    public void testEncryptPasswords() throws SubscriptionException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("p1","password1");
+        map.put("p2","password2");
+        map.put("com.openexchange.crypto.secret", "secret");
+        map.put("something else", "something else");
+        
+        AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
+        AbstractSubscribeService.encrypt(map, "p1", "p2");
+        
+        assertEquals("encrypted", map.get("p1"));
+        assertEquals("encrypted", map.get("p2"));
+        
+    }
     
-    public boolean handles(int folderModule);
-    
-    public void subscribe(Subscription subscription) throws AbstractOXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, int folderId, String secret) throws AbstractOXException;
-
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
-    
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
-
-    public void update(Subscription subscription) throws AbstractOXException;
-
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
-
-    public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
-    
+    public void testDecryptPasswords() throws SubscriptionException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("p1","password1");
+        map.put("p2","password2");
+        map.put("something else", "something else");
+        map.put("com.openexchange.crypto.secret", "secret");
+        
+        AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
+        AbstractSubscribeService.decrypt(map, "p1", "p2");
+        
+        assertEquals("decrypted", map.get("p1"));
+        assertEquals("decrypted", map.get("p2"));
+      
+    }
 }

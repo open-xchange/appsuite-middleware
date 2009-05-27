@@ -9,6 +9,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.osgi.WhiteboardContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.tx.DBProvider;
@@ -60,6 +61,8 @@ public class DiscoveryActivator implements BundleActivator {
         SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, collector);
     
         AbstractSubscribeService.STORAGE = storage;
+        
+        AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
     }
 
     public void stop(BundleContext context) throws Exception {

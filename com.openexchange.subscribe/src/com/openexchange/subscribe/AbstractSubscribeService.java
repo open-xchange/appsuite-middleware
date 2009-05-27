@@ -50,30 +50,50 @@
 package com.openexchange.subscribe;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 
-
 /**
  * {@link AbstractSubscribeService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class AbstractSubscribeService implements SubscribeService {
 
     public static SubscriptionStorage STORAGE = null;
-    
-    public Collection<Subscription> loadSubscriptions(Context ctx, int folderId) throws AbstractOXException {
-        return STORAGE.getSubscriptions(ctx, folderId);
+
+    public static CryptoService CRYPTO;
+
+    public Collection<Subscription> loadSubscriptions(Context ctx, int folderId, String secret) throws AbstractOXException {
+        List<Subscription> subscriptions = STORAGE.getSubscriptions(ctx, folderId);
+        for (Subscription subscription : subscriptions) {
+            subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+            modifyOutgoing(subscription);
+            subscription.getConfiguration().remove("com.openexchange.crypto.secret");
+        }
+        return subscriptions;
     }
 
-    public Subscription loadSubscription(Context ctx, int subscriptionId) throws AbstractOXException {
-        return STORAGE.getSubscription(ctx, subscriptionId);
+    public Subscription loadSubscription(Context ctx, int subscriptionId, String secret) throws AbstractOXException {
+        Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
+        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+        modifyOutgoing(subscription);
+        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
+        return subscription;
     }
 
     public void subscribe(Subscription subscription) throws AbstractOXException {
+        String secret = (String) subscription.getConfiguration().get("com.openexchange.crypto.secret");
+        modifyIncoming(subscription);
+        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         STORAGE.rememberSubscription(subscription);
+        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+        modifyOutgoing(subscription);
+        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
     }
 
     public void unsubscribe(Subscription subscription) throws AbstractOXException {
@@ -81,18 +101,78 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public void update(Subscription subscription) throws AbstractOXException {
+        String secret = (String) subscription.getConfiguration().get("com.openexchange.crypto.secret");
+        modifyIncoming(subscription);
+        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         STORAGE.updateSubscription(subscription);
+        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+        modifyOutgoing(subscription);
+        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
     }
-    
+
+    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
+
+    }
+
+    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+
+    }
+
     public boolean knows(Context ctx, int subscriptionId) throws AbstractOXException {
         Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
-        if(subscription == null) {
+        if (subscription == null) {
             return false;
         }
-        if(subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
+        if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
             return true;
         }
         return false;
+    }
+
+    public static void encrypt(Map<String, Object> map, String... keys) throws SubscriptionException {
+        if (CRYPTO == null) {
+            return;
+        }
+        String secret = (String) map.get("com.openexchange.crypto.secret");
+        if(secret == null) {
+            return;
+        }
+        for (String key : keys) {
+            if (map.containsKey(key)) {
+                String toEncrypt = (String) map.get(key);
+                String encrypted;
+                try {
+                    encrypted = CRYPTO.encrypt(toEncrypt, secret);
+                } catch (CryptoException e) {
+                    throw new SubscriptionException(e);
+                }
+                map.put(key, encrypted);
+            }
+        }
+        map.remove("com.openexchange.crypto.secret");
+    }
+
+    public static void decrypt(Map<String, Object> map, String... keys) throws SubscriptionException {
+        if (CRYPTO == null) {
+            return;
+        }
+        String secret = (String) map.get("com.openexchange.crypto.secret");
+        if(secret == null) {
+            return;
+        }
+        for (String key : keys) {
+            if (map.containsKey(key)) {
+                String toDecrypt = (String) map.get(key);
+                String decrypted;
+                try {
+                    decrypted = CRYPTO.decrypt(toDecrypt, secret);
+                } catch (CryptoException e) {
+                    throw new SubscriptionException(e);
+                }
+                map.put(key, decrypted);
+            }
+        }
+        map.remove("com.openexchange.crypto.secret");
     }
 
 }

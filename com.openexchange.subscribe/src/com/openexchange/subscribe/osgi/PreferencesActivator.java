@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.subscribe.preferences.Enabled;
+import com.openexchange.subscribe.preferences.Installed;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -61,13 +62,16 @@ import com.openexchange.subscribe.preferences.Enabled;
 public class PreferencesActivator implements BundleActivator {
 
     private ServiceRegistration enabledRegistry;
+    private ServiceRegistration installedRegistry;
 
     public void start(BundleContext context) throws Exception {
         enabledRegistry = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+        installedRegistry = context.registerService(PreferencesItemService.class.getName(), new Installed(), null);
     }
 
     public void stop(BundleContext context) throws Exception {
         enabledRegistry.unregister();
+        installedRegistry.unregister();
     }
 
 }

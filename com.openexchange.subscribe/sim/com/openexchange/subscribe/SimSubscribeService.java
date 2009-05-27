@@ -92,7 +92,7 @@ public class SimSubscribeService implements SubscribeService {
         return true;
     }
 
-    public Collection<Subscription> loadSubscriptions(Context context, int folderId) {
+    public Collection<Subscription> loadSubscriptions(Context context, int folderId, String secret) {
         return null;
     }
 
@@ -116,7 +116,7 @@ public class SimSubscribeService implements SubscribeService {
         return content;
     }
 
-    public Subscription loadSubscription(Context context, int subscriptionId) {
+    public Subscription loadSubscription(Context context, int subscriptionId, String secret) {
         Subscription subscriptionIdMemo = new Subscription();
         subscriptionIdMemo.setContext(context);
         subscriptionIdMemo.setId(subscriptionId);

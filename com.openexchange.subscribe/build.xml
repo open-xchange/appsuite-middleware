@@ -36,7 +36,7 @@
 	
     <property name="sqljar" value="com.openexchange.sql.jar"/>
 	
-	
+    <property name="cryptojar" value="com.openexchange.crypto.jar"/>
 	
 
     <!-- Classpath -->
@@ -54,7 +54,9 @@
 		
         <pathelement location="${bundlesdir}/${sqljar}"/>
 		
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+        <pathelement location="${bundlesdir}/${cryptojar}"/>
+
+       	<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
 		
     </path>
 
