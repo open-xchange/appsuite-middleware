@@ -11,6 +11,8 @@ JAVA_XTRAOPTS=" -Xmx512M -XX:+UseConcMarkSweepGC"
 NRFILES="8192"
 
 # Specify the umask of file permissions to be created by ox, e.g. in the
-# filestore
+# filestore.
+# BEWARE: setting a nonsense value like 666 will make open-xchange stop working!
+#         useful values are 006 or 066
 UMASK=066
 
