@@ -34,7 +34,7 @@
 	
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	
-    <property name="sqljar" value="com.openexchange.sql"/>
+    <property name="sqljar" value="com.openexchange.sql.jar"/>
 	
     <property name="publishjar" value="com.openexchange.publish.jar"/>
 	
