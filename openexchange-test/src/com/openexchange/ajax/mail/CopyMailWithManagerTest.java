@@ -78,7 +78,7 @@ public class CopyMailWithManagerTest extends AbstractMailTest {
         clearFolder( values.getDraftsFolder() );
     }
     
-    public void testShouldCopyFromInboxToDrafts() throws AjaxException, JSONException, IOException, SAXException{
+    public void testShouldCopyFromSendToDrafts() throws AjaxException, JSONException, IOException, SAXException{
         MailTestManager manager = new MailTestManager(client, false);
         String destination = values.getDraftsFolder();
         
