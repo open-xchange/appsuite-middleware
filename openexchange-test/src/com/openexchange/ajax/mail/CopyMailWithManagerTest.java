@@ -80,13 +80,11 @@ public class CopyMailWithManagerTest extends AbstractMailTest {
     
     public void testShouldCopyFromInboxToDrafts() throws AjaxException, JSONException, IOException, SAXException{
         MailTestManager manager = new MailTestManager(client, false);
-        String origin = values.getInboxFolder();
         String destination = values.getDraftsFolder();
         
-        sendMail( createEMail(values.getSendAddress(), "Testing copy with manager", "alternative", "Copying a mail we just sent and received vom the inbox to the draft folder").toString() );
         
-        TestMail myMail = TestMail.create( getFirstMailInFolder( origin ) ); //TODO: Move to manager
-        String oldID = myMail.getId();
+        TestMail myMail = new TestMail(values.getSendAddress(), values.getSendAddress(), "Testing copy with manager", "alternative", "Copying a mail we just sent and received vom the inbox to the draft folder");
+        myMail = manager.send(myMail);
         
         TestMail movedMail = manager.copy(myMail, destination);
         assertFalse("Should get no errors when copying e-mail", manager.getLastResponse().hasError() );
@@ -96,9 +94,16 @@ public class CopyMailWithManagerTest extends AbstractMailTest {
         assertFalse("Should get no errors when getting copied e-mail", manager.getLastResponse().hasError() );
         assertFalse("Should produce no conflicts when getting copied e-mail", manager.getLastResponse().hasConflicts() );
         
-        manager.get(origin, oldID);
+        manager.get(myMail.getFolderAndId());
         assertFalse("Should still find original e-mail", manager.getLastResponse().hasError() );
+        
+        manager.cleanUp();
 
+        manager.get(destination, newID);
+        assertTrue("Should not find copied e-mail after cleaning up", manager.getLastResponse().hasError() );
+        
+        manager.get(myMail.getFolderAndId());
+        assertTrue("Should not find original e-mail after cleaning up", manager.getLastResponse().hasError() );
     }
     
 
