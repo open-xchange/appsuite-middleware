@@ -50,22 +50,24 @@
 package com.openexchange.publish.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.publish.preferences.Enabled;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PreferencesActivator implements BundleActivator {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private ServiceRegistration enabledRegistry;
+
+    public void start(BundleContext context) throws Exception {
+        enabledRegistry = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        enabledRegistry.unregister();
     }
 
 }
