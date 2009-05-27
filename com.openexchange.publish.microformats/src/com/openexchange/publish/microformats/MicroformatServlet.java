@@ -127,10 +127,14 @@ public class MicroformatServlet extends HttpServlet {
             Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
             Publication publication = publisher.getPublication(ctx, args.get(SITE));
             if(publication == null) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site "+args.get(SITE));
+                
                 return;
             }
-            checkProtected(publication, args);
+            if(!checkProtected(publication, args, resp)) {
+                return;
+            }
             
             Collection<? extends Object> loaded = dataLoader.load(publication);
             
@@ -156,14 +160,17 @@ public class MicroformatServlet extends HttpServlet {
         return null;
     }
 
-    private void checkProtected(Publication publication, Map<String, String> args) {
+    private boolean checkProtected(Publication publication, Map<String, String> args, HttpServletResponse resp) throws IOException {
         Map<String, Object> configuration = publication.getConfiguration();
         if(configuration.containsKey(PROTECTED) && (Boolean) configuration.get("protected")) {
             String secret = (String) configuration.get(SECRET);
             if(!secret.equals(args.get(SECRET))) {
-                throw new IllegalArgumentException("Secret didn't match");
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().println("Don't know site this publication");
+                return false;
             }
         }
+        return true;
     }
 
 
