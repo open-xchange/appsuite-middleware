@@ -1,4 +1,4 @@
-<project name="com.openexchange.publish.json" default="install" basedir=".">
+<project name="com.openexchange.subscribe.microformats" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -15,7 +15,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-publish-json-${version}"/>
+    <property name="composite.name" value="open-xchange-subscribe-microformats-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -23,44 +23,39 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    
+	
+    <property name="globaljar" value="com.openexchange.global.jar"/>
+	
+    <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
+	
+    <property name="serverjar" value="com.openexchange.server.jar"/>
+	
+    <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
+	
+    <property name="xmljar" value="com.openexchange.xml.jar"/>
 	
 	
-	<property name="globaljar" value="com.openexchange.global.jar"/>
-	<property name="publishjar" value="com.openexchange.publish.jar"/>
-	<property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
-	<property name="serverjar" value="com.openexchange.server.jar"/>
-	<property name="genconfjar" value="com.openexchange.genericonf.jar" />
-	
-	<property name="jsonjar" value="json.jar" />
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
-	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
-		
 	
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-		
-    	<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
 		
         <pathelement location="${bundlesdir}/${globaljar}"/>
 		
+        <pathelement location="${bundlesdir}/${subscribejar}"/>
+		
+        <pathelement location="${bundlesdir}/${serverjar}"/>
+		
         <pathelement location="${bundlesdir}/${genconfjar}"/>
-
-    	<pathelement location="${bundlesdir}/${publishjar}"/>
 		
-        <pathelement location="${bundlesdir}/${publishbasicjar}"/>
+        <pathelement location="${bundlesdir}/${xmljar}"/>
 		
-    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
-
-    	<pathelement location="${bundlesdir}/${serverjar}"/>
-		
-    	<pathelement location="${bundlesdir}/${servletjar}" />
-	
 		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-    	
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+		
     </path>
 
     <!-- Compile -->
