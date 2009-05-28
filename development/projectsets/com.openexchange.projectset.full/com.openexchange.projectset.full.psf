@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<psf version="2.0">
+<?xml version="1.0" encoding="UTF-8"?><psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.authentication.imap,com.openexchange.authentication.imap"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.authentication.ldap,com.openexchange.authentication.ldap"/>
@@ -55,5 +54,9 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf.storage,com.openexchange.datatypes.genericonf.storage"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.sql,com.openexchange.sql"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.crypto,com.openexchange.crypto"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish.online.infostore,com.openexchange.publish.online.infostore"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.microformats,com.openexchange.subscribe.microformats"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.templating,com.openexchange.templating"/>
 </provider>
 </psf>
