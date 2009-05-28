@@ -36,7 +36,7 @@ sub doRequest {
     	           SOAP::Data->name("displayname" => $displayname),
     	           SOAP::Data->name("email" => $email),
     	           # And here the optional fields
-    	           SOAP::Data->name("available" => "true")
+    	           SOAP::Data->name("available" => "true")->type("xsd:boolean")
     	           )),
     	      $inSelf->{'creds'}
     	     );

@@ -90,7 +90,7 @@ sub doRequest {
 			)),
 			SOAP::Data->name("uploadFileSizeLimit" => "100"),
 			SOAP::Data->name("uploadFileSizeLimitPerFile" => "100"),
-			SOAP::Data->name("gUI_Spam_filter_capabilities_enabled" => "true")
+			SOAP::Data->name("GUI_Spam_filter_capabilities_enabled" => "false")->type("xsd:boolean")
    	          )),
 		  $inSelf->{'creds'}
 		 );
