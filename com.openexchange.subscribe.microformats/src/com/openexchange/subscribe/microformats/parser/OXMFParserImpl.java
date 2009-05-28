@@ -171,6 +171,7 @@ public final class OXMFParserImpl implements OXMFParser {
                     for (String klass : classes) {
                         if (containerElements.contains(klass)) {
                             parsedContainerElements.add(parseContainerElement(parser));
+                            return;
                         }
                     }
                 }
@@ -215,13 +216,16 @@ public final class OXMFParserImpl implements OXMFParser {
             if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                 final String attributeValue = parser.getAttributeValue(i);
                 final String[] classes = attributeValue.split("\\s+");
+                boolean found = false;
                 for (String klass : classes) {
                     if (attributePrefixes.contains(klass) || startsWith(klass)) {
                         map.put(klass, parser.getElementText());
                         // Postcondition: the current event is the corresponding END_ELEMENT. Therefore decrease level
-                        level--;
-                        break;
+                        found = true;
                     }
+                }
+                if(found) {
+                    level--;
                 }
             }
         }
