@@ -7,6 +7,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
@@ -31,6 +32,7 @@ public class Activator implements BundleActivator {
         SubscriptionSource contactSubscriptionSource = new SubscriptionSource();
         contactSubscriptionSource.setDisplayName("OXMF Contacts");
         contactSubscriptionSource.setId("com.openexchange.subscribe.microformats.contacts.http");
+        contactSubscriptionSource.setFolderModule(FolderObject.CONTACT);
         
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("url", "URL", true, null));
