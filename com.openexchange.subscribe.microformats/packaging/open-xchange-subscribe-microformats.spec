@@ -41,7 +41,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Subscriptions for OXMF feeds
-Requires:       open-xchange-common open-xchange-global com.openexchange.subscribe open-xchange-server open-xchange-genconf open-xchange-xml
+Requires:       open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf open-xchange-xml
 #
 
 %description
