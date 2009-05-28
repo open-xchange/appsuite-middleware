@@ -110,7 +110,8 @@ public final class UnifiedINBOXExecutors {
             1L,
             TimeUnit.SECONDS,
             queue,
-            new UnifiedINBOXThreadFactory());
+            new UnifiedINBOXThreadFactory(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
         threadPool.prestartAllCoreThreads();
         return threadPool;
     }
@@ -130,7 +131,8 @@ public final class UnifiedINBOXExecutors {
             1L,
             TimeUnit.SECONDS,
             queue,
-            new UnifiedINBOXThreadFactory(namePrefix));
+            new UnifiedINBOXThreadFactory(namePrefix),
+            new ThreadPoolExecutor.CallerRunsPolicy());
         threadPool.prestartAllCoreThreads();
         return threadPool;
     }
