@@ -18,8 +18,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
 <head>
 	<title>OX PubSub</title>
-<style type="text/css">
-<!--
+	<style type="text/css">
+	<!--
 	html, body {
 		margin: 0;
 		padding: 0;
@@ -75,9 +75,15 @@
 		padding: 0;
 		left-indent: 0;
 	}
+	.back {
+		text-align: center;
+		font-size: 75%;
+		text-decoration none;
+		color: #446;
+	}
 
 	-->
-</style>
+	</style>
 </head>
 
 <body>
@@ -86,7 +92,7 @@
 		<ul>
 			<#list contacts as contact>
 			<li>
-				<a href="#${contacts?seq_index_of(contact)}">
+				<a href="#contact_${contacts?seq_index_of(contact)}">
 					${contact.title!""}
 					${contact.givenName!""}
 					${contact.middleName!""}
@@ -101,7 +107,7 @@
 	
 	<div id="contacts">
 		<#list contacts as contact>
-		<table class="ox_contact" id="${contacts?seq_index_of(contact)}">
+		<table class="ox_contact" id="contact_${contacts?seq_index_of(contact)}">
 			<tr>
 			<td class="key">Name:</td>
 			<td class="value">
@@ -128,13 +134,13 @@
 			<@render key="ox_city_other" title="City other" value=contact.cityOther!"" /> <!--ox_city_other"-->
 			<@render key="ox_state_other" title="State other" value=contact.stateOther!"" /> <!--ox_state_other"-->
 			<@render key="ox_country_other" title="Country other" value=contact.countryOther!"" /> <!--ox_country_other"-->
-			<#if contact.birthday??><td class="key">Birthday:</td><td class="ox_birthday value">${contact.birthday?string("yyyy-MM-dd")}</td> </#if>
+			<#if contact.birthday??><tr><td class="key">Birthday:</td><td class="ox_birthday value">${contact.birthday?string("yyyy-MM-dd")}</td></tr></#if>
 			<@render key="ox_marital_status" title="Marital status" value=contact.maritalStatus!"" /> <!--ox_marital_status-->
 			<@render key="ox_number_of_children" title="Number of children" value=contact.numberOfChildren!"" /> <!--ox_number_of_children"-->
 			<@render key="ox_profession" title="Profession" value=contact.profession!"" /> <!--ox profession-->
 			<@render key="ox_nickname" title="Nickname" value=contact.nickname!"" /> <!--ox nickname-->
 			<@render key="ox_spouse_name" title="Spouse name" value=contact.spouseName!"" /> <!--ox_first_name-->
-			<#if contact.anniversary??> <td class="key">Anniversary:</td><td class="ox_anniversary value">${contact.anniversary?string("yyyy-MM-dd")}</td> </#if>
+			<#if contact.anniversary??><tr><td class="key">Anniversary:</td><td class="ox_anniversary value">${contact.anniversary?string("yyyy-MM-dd")}</td></tr></#if>
 			<@render key="ox_note" title="Note" value=contact.note!"" /> <!--ox note-->
 			<@render key="ox_department" title="Department" value=contact.department!"" /> <!--ox department-->
 			<@render key="ox_position" title="Position" value=contact.position!"" /> <!--ox position-->
@@ -199,6 +205,7 @@
 			<@render key="ox_userfield19" title="Userfield19" value=contact.userField19!"" /> <!--ox userfield19-->
 			<@render key="ox_userfield20" title="Userfield20" value=contact.userField20!"" /> <!--ox userfield20-->
 		</table>
+		<div class="back"><a href="#nav">Back to the top</a></div>
 		</#list>
 	</div>
 </body>
