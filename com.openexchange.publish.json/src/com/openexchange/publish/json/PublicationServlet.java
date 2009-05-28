@@ -75,6 +75,7 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.tools.QueryStringPositionComparator;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 
@@ -326,7 +327,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
                 dynamicColumnIdentifiers.add(paramName);
             }
         }
-        Collections.sort(dynamicColumnIdentifiers, new com.openexchange.tools.QueryStringPositionComparator(req.getQueryString()));
+        Collections.sort(dynamicColumnIdentifiers, new QueryStringPositionComparator(req.getQueryString()));
         return dynamicColumnIdentifiers;
     }
 
