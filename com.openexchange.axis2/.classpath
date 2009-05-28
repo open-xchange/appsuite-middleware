@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="lib/axiom-api.jar"/>
 	<classpathentry kind="lib" path="lib/axiom-impl.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-adb-codegen.jar"/>
-	<classpathentry kind="lib" path="lib/axis2-adb.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-adb.jar" sourcepath="source/axis2-1.4-src.zip"/>
 	<classpathentry kind="lib" path="lib/axis2-ant-plugin.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-clustering.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-codegen.jar"/>
