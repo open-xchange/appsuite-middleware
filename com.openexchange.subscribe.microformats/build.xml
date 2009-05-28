@@ -56,6 +56,8 @@
 		
 		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
 		
+	    <fileset dir="${bundlesdir}/${xmlBundle}/lib" includes="**.jar"/>
+    	
     	<fileset dir="lib" includes="**.jar" />
     </path>
 
