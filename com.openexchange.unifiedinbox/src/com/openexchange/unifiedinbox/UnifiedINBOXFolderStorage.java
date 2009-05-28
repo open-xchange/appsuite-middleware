@@ -58,9 +58,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.groupware.contexts.Context;
@@ -82,6 +80,8 @@ import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.converters.UnifiedINBOXFolderConverter;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
+import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
@@ -183,43 +183,68 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
-            final long start = System.currentTimeMillis();
             final MailFolder[] retval = new MailFolder[5];
-            retval[0] = UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
-                access.getAccountId(),
-                session,
-                UnifiedINBOXAccess.INBOX,
-                getLocalizedName(UnifiedINBOXAccess.INBOX));
+            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(retval.length << 4);
+            final TrackingCompletionService<Retval> completionService = new UnifiedINBOXCompletionService<Retval>(executor);
+            // Init names
+            final String[][] names = new String[5][];
+            names[0] = new String[] { UnifiedINBOXAccess.INBOX, getLocalizedName(UnifiedINBOXAccess.INBOX) };
+            names[1] = new String[] { UnifiedINBOXAccess.DRAFTS, getLocalizedName(UnifiedINBOXAccess.DRAFTS) };
+            names[2] = new String[] { UnifiedINBOXAccess.SENT, getLocalizedName(UnifiedINBOXAccess.SENT) };
+            names[3] = new String[] { UnifiedINBOXAccess.SPAM, getLocalizedName(UnifiedINBOXAccess.SPAM) };
+            names[4] = new String[] { UnifiedINBOXAccess.TRASH, getLocalizedName(UnifiedINBOXAccess.TRASH) };
+            // Create a Callable for each known subfolder
+            for (int i = 0; i < retval.length; i++) {
+                final int index = i;
+                final String[] tmp = names[index];
+                completionService.submit(new LoggingCallable<Retval>(session) {
 
-            retval[1] = UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
-                access.getAccountId(),
-                session,
-                UnifiedINBOXAccess.DRAFTS,
-                getLocalizedName(UnifiedINBOXAccess.DRAFTS));
-
-            retval[2] = UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
-                access.getAccountId(),
-                session,
-                UnifiedINBOXAccess.SENT,
-                getLocalizedName(UnifiedINBOXAccess.SENT));
-
-            retval[3] = UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
-                access.getAccountId(),
-                session,
-                UnifiedINBOXAccess.SPAM,
-                getLocalizedName(UnifiedINBOXAccess.SPAM));
-
-            retval[4] = UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
-                access.getAccountId(),
-                session,
-                UnifiedINBOXAccess.TRASH,
-                getLocalizedName(UnifiedINBOXAccess.TRASH));
-
-            if (LOG.isDebugEnabled()) {
-                final long dur = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder("Creating Unfied INBOX root's subfolders took ").append(dur).append("msec").toString());
+                    public Retval call() throws Exception {
+                        return new Retval(UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
+                            getAccountId(),
+                            getSession(),
+                            tmp[0],
+                            tmp[1],
+                            executor), index);
+                    }
+                });
             }
-            return retval;
+            // Wait for completion of each submitted task
+            try {
+                for (int i = 0; i < retval.length; i++) {
+                    final Retval f = completionService.take().get();
+                    if (null != f) {
+                        retval[f.index] = f.mailFolder;
+                    }
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append(
+                        "msec."));
+                }
+                // Return them
+                return retval;
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            } catch (final ExecutionException e) {
+                final Throwable t = e.getCause();
+                if (MailException.class.isAssignableFrom(t.getClass())) {
+                    throw (MailException) t;
+                } else if (t instanceof RuntimeException) {
+                    throw (RuntimeException) t;
+                } else if (t instanceof Error) {
+                    throw (Error) t;
+                } else {
+                    throw new IllegalStateException("Not unchecked", t);
+                }
+            } finally {
+                try {
+                    executor.shutdownNow();
+                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(parentFullname)) {
             final MailAccount[] accounts;
@@ -244,12 +269,11 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             final int unifiedInboxAccountId = access.getAccountId();
             final int length = accounts.length;
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            final CompletionService<MailFolder> completionService = new ExecutorCompletionService<MailFolder>(executor);
+            final TrackingCompletionService<MailFolder> completionService = new UnifiedINBOXCompletionService<MailFolder>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<MailFolder>(session) {
 
-                    @Override
-                    public MailFolder callInternal() throws Exception {
+                    public MailFolder call() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
@@ -288,6 +312,10 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                     if (null != f) {
                         folders.add(f);
                     }
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder("Retrieving subfolders of \"").append(parentFullname).append("\" took ").append(
+                        completionService.getDuration()).append("msec."));
                 }
                 // Sort them
                 Collections.sort(folders, new MailFolderNameComparator(getLocale()));
@@ -512,5 +540,21 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         }
 
     }
+
+    /**
+     * Tiny helper class.
+     */
+    private static final class Retval {
+
+        final MailFolder mailFolder;
+
+        final int index;
+
+        public Retval(final MailFolder mailFolder, final int index) {
+            super();
+            this.index = index;
+            this.mailFolder = mailFolder;
+        }
+    } // End of Retval
 
 }
