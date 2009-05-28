@@ -219,6 +219,10 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu May 21 2009 - dennis.sieben@open-xchange.com
+ - Bugfix ID#13606: [L3] Admin doesn't provide parameters to edit a user's mail_upload quota settings
+* Thu Apr 23 2009 - marcus.klein@open-xchange.com
+ - Bugfix ID#13440: Clearing string values with the CLT can be done with an empty string.
 * Tue Feb 24 2009 - choeger@open-xchange.com
  - Bugfix #12517: [L3] Foldercache does not synchronize properly
      set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
