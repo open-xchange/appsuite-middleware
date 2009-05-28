@@ -219,6 +219,9 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu May 28 2009 - dennis.sieben@open-xchange.com
+ - Bugfix ID#13733: antispam plugin cannot be enabled via soap
+     renamed variable inside of user object
 * Thu May 21 2009 - dennis.sieben@open-xchange.com
  - Bugfix ID#13606: [L3] Admin doesn't provide parameters to edit a user's mail_upload quota settings
 * Thu Apr 23 2009 - marcus.klein@open-xchange.com
