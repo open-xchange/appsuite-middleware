@@ -197,7 +197,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             for (int i = 0; i < retval.length; i++) {
                 final int index = i;
                 final String[] tmp = names[index];
-                completionService.submit(new LoggingCallable<Retval>(session) {
+                completionService.submit(new LoggingCallable<Retval>(session, access.getAccountId()) {
 
                     public Retval call() throws Exception {
                         return new Retval(UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(

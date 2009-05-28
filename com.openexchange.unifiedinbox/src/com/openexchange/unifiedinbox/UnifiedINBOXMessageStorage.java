@@ -58,9 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.context.ContextService;
@@ -87,6 +85,8 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
+import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
@@ -97,6 +97,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
 
     /**
      * Serial version UID
@@ -201,14 +203,14 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final int size = parsed.size();
             // Create completion service for simultaneous access
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
-            final CompletionService<GetMessagesResult> completionService = new ExecutorCompletionService<GetMessagesResult>(executor);
+            final TrackingCompletionService<GetMessagesResult> completionService = new UnifiedINBOXCompletionService<GetMessagesResult>(
+                executor);
             // Iterate parsed map and submit a task for each iteration
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
             for (int i = 0; i < size; i++) {
                 completionService.submit(new LoggingCallable<GetMessagesResult>(session) {
 
-                    @Override
-                    public GetMessagesResult callInternal() throws Exception {
+                    public GetMessagesResult call() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -277,6 +279,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 for (int i = 0; i < size; i++) {
                     final GetMessagesResult result = completionService.take().get();
                     insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullname);
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder(64).append("Retrieving ").append(mailIds.length).append(" messages from folder \"").append(
+                        fullname).append("\" took ").append(completionService.getDuration()).append("msec."));
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -391,12 +397,12 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             // Create completion service for simultaneous access
             final int length = accounts.length;
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            final CompletionService<List<MailMessage>> completionService = new ExecutorCompletionService<List<MailMessage>>(executor);
+            final TrackingCompletionService<List<MailMessage>> completionService = new UnifiedINBOXCompletionService<List<MailMessage>>(
+                executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
-                    @Override
-                    public List<MailMessage> callInternal() throws Exception {
+                    public List<MailMessage> call() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
@@ -440,6 +446,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 final List<MailMessage> messages = new ArrayList<MailMessage>(length << 2);
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder(64).append("Searching messages from folder \"").append(fullname).append("\" took ").append(
+                        completionService.getDuration()).append("msec."));
                 }
                 // Sort them
                 Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
@@ -520,12 +530,12 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
             final int length = accounts.length;
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            final CompletionService<List<MailMessage>> completionService = new ExecutorCompletionService<List<MailMessage>>(executor);
+            final TrackingCompletionService<List<MailMessage>> completionService = new UnifiedINBOXCompletionService<List<MailMessage>>(
+                executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
-                    @Override
-                    public List<MailMessage> callInternal() throws Exception {
+                    public List<MailMessage> call() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
@@ -568,6 +578,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 final List<MailMessage> messages = new ArrayList<MailMessage>(length << 2);
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder(64).append("Retrieving unread messages from folder \"").append(fullname).append("\" took ").append(
+                        completionService.getDuration()).append("msec."));
                 }
                 // Sort them
                 Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
@@ -631,8 +645,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
                 collection.add(new LoggingCallable<Object>(session) {
 
-                    @Override
-                    public Object callInternal() throws Exception {
+                    public Object call() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -665,7 +678,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             try {
                 // Invoke all and wait for being executed
-                executor.invokeAll(collection);
+                if (LOG.isDebugEnabled()) {
+                    final long start = System.currentTimeMillis();
+                    executor.invokeAll(collection);
+                    final long dur = System.currentTimeMillis() - start;
+                    LOG.debug(new StringBuilder(64).append("Deleting ").append(mailIds.length).append(" messages in folder \"").append(
+                        fullname).append(" took ").append(dur).append("msec."));
+                } else {
+                    executor.invokeAll(collection);
+                }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
@@ -735,8 +756,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (int i = 0; i < size; i++) {
                 collection.add(new LoggingCallable<Object>(session) {
 
-                    @Override
-                    public Object callInternal() throws Exception {
+                    public Object call() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -769,7 +789,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             try {
                 // Invoke all and wait for being executed
-                executor.invokeAll(collection);
+                if (LOG.isDebugEnabled()) {
+                    final long start = System.currentTimeMillis();
+                    executor.invokeAll(collection);
+                    final long dur = System.currentTimeMillis() - start;
+                    LOG.debug(new StringBuilder(64).append("Updating system/user flags of ").append(mailIds.length).append(
+                        " messages took ").append(dur).append("msec."));
+                } else {
+                    executor.invokeAll(collection);
+                }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
@@ -812,8 +840,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (int i = 0; i < size; i++) {
                 collection.add(new LoggingCallable<Object>(session) {
 
-                    @Override
-                    public Object callInternal() throws Exception {
+                    public Object call() throws Exception {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -849,7 +876,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
             try {
                 // Invoke all and wait for being executed
-                executor.invokeAll(collection);
+                if (LOG.isDebugEnabled()) {
+                    final long start = System.currentTimeMillis();
+                    executor.invokeAll(collection);
+                    final long dur = System.currentTimeMillis() - start;
+                    LOG.debug(new StringBuilder(64).append("Updating color flag of ").append(mailIds.length).append(" messages took ").append(
+                        dur).append("msec."));
+                } else {
+                    executor.invokeAll(collection);
+                }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e);

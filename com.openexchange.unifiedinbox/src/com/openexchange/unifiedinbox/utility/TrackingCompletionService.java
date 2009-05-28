@@ -49,74 +49,21 @@
 
 package com.openexchange.unifiedinbox.utility;
 
-import java.util.concurrent.Callable;
-import com.openexchange.session.Session;
+import java.util.concurrent.CompletionService;
 
 /**
- * {@link LoggingCallable} - Extends {@link Callable} interface.
+ * {@link TrackingCompletionService} - Extends {@link CompletionService} by {@link #getDuration()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class LoggingCallable<V> implements Callable<V> {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoggingCallable.class);
-
-    private final Session session;
-
-    private final int accountId;
+public interface TrackingCompletionService<V> extends CompletionService<V> {
 
     /**
-     * Initializes a new {@link LoggingCallable}.
-     */
-    public LoggingCallable() {
-        this(null);
-    }
-
-    /**
-     * Initializes a new {@link LoggingCallable}.
+     * Gets the duration. That is the tracked amount of time in milliseconds until the last element was removed from this completion queue
+     * since the first task was submitted.
      * 
-     * @param session The session
+     * @return The duration in milliseconds
      */
-    public LoggingCallable(final Session session) {
-        this(session, -1);
-    }
+    public long getDuration();
 
-    /**
-     * Initializes a new {@link LoggingCallable}.
-     * 
-     * @param session The session
-     * @param accountId The account ID
-     */
-    public LoggingCallable(final Session session, final int accountId) {
-        super();
-        this.session = session;
-        this.accountId = accountId;
-    }
-
-    /**
-     * Gets the logger.
-     * 
-     * @return The logger
-     */
-    public org.apache.commons.logging.Log getLogger() {
-        return LOG;
-    }
-
-    /**
-     * Gets the session.
-     * 
-     * @return The session or <code>null</code> if not set
-     */
-    public Session getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the account ID
-     * 
-     * @return The account ID or <code>-1</code> if not set
-     */
-    public int getAccountId() {
-        return accountId;
-    }
 }

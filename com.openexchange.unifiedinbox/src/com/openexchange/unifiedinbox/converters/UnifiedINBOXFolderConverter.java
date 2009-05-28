@@ -51,9 +51,7 @@ package com.openexchange.unifiedinbox.converters;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,6 +70,8 @@ import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
+import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
@@ -146,7 +146,21 @@ public final class UnifiedINBOXFolderConverter {
      * @throws MailException If converting mail folder fails
      */
     public static MailFolder getUnifiedINBOXFolder(final int accountId, final Session session, final String fullname, final String localizedName) throws MailException {
-        final long start = System.currentTimeMillis();
+        return getUnifiedINBOXFolder(accountId, session, fullname, localizedName, null);
+    }
+
+    /**
+     * Gets the appropriately filled instance of {@link MailFolder}.
+     * 
+     * @param accountId The account ID of the Unified INBOX account
+     * @param session The session
+     * @param fullname The folder's fullname
+     * @param localizedName The localized name of the folder
+     * @param executor The executor to use to concurrently load accounts' message counts
+     * @return The appropriately filled instance of {@link MailFolder}
+     * @throws MailException If converting mail folder fails
+     */
+    public static MailFolder getUnifiedINBOXFolder(final int accountId, final Session session, final String fullname, final String localizedName, final ExecutorService executor) throws MailException {
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified INBOX, so every folder is "subscribed"
         tmp.setSubscribed(true);
@@ -168,19 +182,15 @@ public final class UnifiedINBOXFolderConverter {
         // What else?!
         tmp.setDefaultFolder(true);
         // Set message counts
-        final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullname, accountId, session, tmp);
+        final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullname, accountId, session, tmp, executor);
         if (hasAtLeastOneSuchFolder) {
             tmp.setSubfolders(true);
             tmp.setSubscribedSubfolders(true);
         }
-        if (LOG.isDebugEnabled()) {
-            final long dur = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder("Creating Unified INBOX folder \"").append(fullname).append("\" took ").append(dur).append("msec").toString());
-        }
         return tmp;
     }
 
-    private static boolean setMessageCounts(final String fullname, final int accountId, final Session session, final MailFolder tmp) throws UnifiedINBOXException, MailException {
+    private static boolean setMessageCounts(final String fullname, final int accountId, final Session session, final MailFolder tmp, final ExecutorService executor) throws UnifiedINBOXException, MailException {
         final MailAccount[] accounts;
         try {
             final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
@@ -202,20 +212,25 @@ public final class UnifiedINBOXFolderConverter {
         }
         // Create completion service for simultaneous access
         final int length = accounts.length;
-        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-        final CompletionService<int[]> completionService = new ExecutorCompletionService<int[]>(executor);
+        final ExecutorService exec;
+        final boolean shutdown;
+        if (executor == null) {
+            exec = UnifiedINBOXExecutors.newCachedThreadPool(length);
+            shutdown = true;
+        } else {
+            exec = executor;
+            shutdown = false;
+        }
+        final TrackingCompletionService<int[]> completionService = new UnifiedINBOXCompletionService<int[]>(exec);
         final AtomicBoolean retval = new AtomicBoolean();
         // Iterate
         {
             final StringBuilder sb = new StringBuilder(128);
             for (final MailAccount mailAccount : accounts) {
                 sb.setLength(0);
-                completionService.submit(new LoggingCallable<int[]>(
-                    session,
-                    sb.append("Loading ").append(fullname).append(" from account ").append(mailAccount.getId()).toString()) {
+                completionService.submit(new LoggingCallable<int[]>(session) {
 
-                    @Override
-                    public int[] callInternal() throws Exception {
+                    public int[] call() throws Exception {
                         final MailAccess<?, ?> mailAccess;
                         try {
                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
@@ -260,6 +275,10 @@ public final class UnifiedINBOXFolderConverter {
                 deletedCount += counts[2];
                 newCount += counts[3];
             }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Retrieving message counts of folder \"").append(fullname).append("\" took ").append(
+                    completionService.getDuration()).append("msec."));
+            }
             // Apply counts
             tmp.setMessageCount(totaCount);
             tmp.setNewMessageCount(newCount);
@@ -281,13 +300,14 @@ public final class UnifiedINBOXFolderConverter {
                 throw new IllegalStateException("Not unchecked", t);
             }
         } finally {
-            try {
-                executor.shutdownNow();
-                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
+            if (shutdown) {
+                try {
+                    exec.shutdownNow();
+                    exec.awaitTermination(10000L, TimeUnit.MILLISECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }
-
 }
