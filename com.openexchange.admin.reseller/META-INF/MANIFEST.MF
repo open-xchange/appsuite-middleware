@@ -17,6 +17,5 @@ Import-Package: com.openexchange.admin.plugins,
 Require-Bundle: open_xchange_admin_plugin_hosting,
  com.openexchange.server,
  com.openexchange.admin
-Bundle-ActivationPolicy: lazy
 Eclipse-RegisterBuddy: open_xchange_admin,
  open_xchange_admin_plugin_hosting

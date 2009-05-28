@@ -10,4 +10,3 @@ Import-Package: org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.timer
 Bundle-Activator: com.openexchange.timer.osgi.TimerActivator
-Bundle-ActivationPolicy: lazy

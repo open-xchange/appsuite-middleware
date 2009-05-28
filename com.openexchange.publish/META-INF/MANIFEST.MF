@@ -9,5 +9,4 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exceptions,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts
-Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.publish

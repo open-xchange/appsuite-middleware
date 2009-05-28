@@ -27,6 +27,7 @@ Import-Package: com.davekoelle,
  com.openexchange.java,
  com.openexchange.management,
  com.openexchange.monitoring,
+ com.openexchange.publish,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
@@ -179,7 +180,6 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.tools.webdav,
  com.openexchange.user,
  com.openexchange.userconf
-Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: lib/xSocket-2.5.jar,
  .
