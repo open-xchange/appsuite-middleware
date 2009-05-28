@@ -6,7 +6,8 @@ Bundle-Version: 6.9.0.0
 Bundle-Activator: com.openexchange.subscribe.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.context,
+Import-Package: com.openexchange.api2,
+ com.openexchange.context,
  com.openexchange.context.osgi,
  com.openexchange.crypto,
  com.openexchange.datatypes.genericonf,
@@ -16,15 +17,26 @@ Import-Package: com.openexchange.context,
  com.openexchange.exceptions.osgi,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.tx,
+ com.openexchange.groupware.tx.osgi,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.publish,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,
  com.openexchange.sql.schema,
  com.openexchange.sql.tools,
- javax.net,
- javax.net.ssl,
+ com.openexchange.tools.iterator,
+ com.openexchange.tools.oxfolder,
+ com.openexchange.tools.versit,
+ com.openexchange.tools.versit.converter,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker,
@@ -34,4 +46,3 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.subscribe,
  com.openexchange.subscribe.osgi.tools
 Bundle-ClassPath: .
-Require-Bundle: com.openexchange.server
