@@ -181,7 +181,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             values.add(folderId);
             
             builder = new StatementBuilder();
-            retval = parseResultSet(builder.executeQuery(readConnection, select, values), ctx, readConnection);
+            resultSet = builder.executeQuery(readConnection, select, values);
+            retval = parseResultSet(resultSet, ctx, readConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
