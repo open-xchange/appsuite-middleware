@@ -16,9 +16,15 @@
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="composite.name" value="open-xchange-templating-${version}"/>
+	
+	<property name="common.conf.install.dir" value="${prefix}/etc"/>
+	<property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
+	<property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+		
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="templatingdir" value="${prefix}/templates"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
@@ -68,13 +74,31 @@
         </jar>
     </target>
 
+	<target name="patchConfig">
+		<move tofile="conf/templating.properties"
+		    file="conf/templating.properties.in" overwrite="true"/>
+		<replace file="${patch.conf.dir}/templating.properties">
+		     <replacefilter token="@templatepath@" value="/opt/open-xchange/templates"/>
+		</replace>
+	</target>
+	
     <!-- Install targets -->
-    <target name="install" depends="installJar,installConfig"/>
-
-    <target name="installConfig">
+    <target name="install" depends="installJar,installConfig,createTemplatingDir"/>
+	
+    <target name="installConfig" depends="patchConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+    	<mkdir dir="${conf.install.copy.dir}"/>
+    	<copy todir="${conf.install.copy.dir}" overwrite="true">
+    	   <fileset dir="${patch.conf.dir}">
+    	      <include name="**" />
+    	      <exclude name="*.in"/>
+    	      <exclude name="CVS"/>
+    	      <exclude name="osgi/**"/>
+    	   </fileset>
+    	 </copy>
+    	    	
     </target>
 
     <target name="installJar" depends="jar">
@@ -86,6 +110,10 @@
         </copy>
     </target>
 
+	<target name="createTemplatingDir">
+		<mkdir dir="${destdir}/${templatingdir}"/>	
+	</target>
+	
     <!-- Dist -->
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
