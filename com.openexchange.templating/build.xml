@@ -76,7 +76,7 @@
     </target>
 
 	<target name="patchConfig">
-		<move tofile="conf/templating.properties"
+		<move tofile="${tmp.dir}/${conf.dir}/templating.properties"
 		    file="conf/templating.properties.in" overwrite="true"/>
 		<replace file="${tmp.dir}/${conf.dir}/templating.properties">
 		     <replacefilter token="@templatepath@" value="/opt/open-xchange/templates"/>
