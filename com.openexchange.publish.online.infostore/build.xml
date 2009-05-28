@@ -59,7 +59,7 @@
     	
     	<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         	
-    	<pathelement location="${bundlesdir}/${commonBundle}/jars/${osgiservicesjar}"/>
+    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
     	
 		
     </path>
