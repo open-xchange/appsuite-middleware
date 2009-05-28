@@ -34,7 +34,10 @@
 	
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
 	
-	
+	<property name="jsonjar" value="json.jar" />
+	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+
 	
 
     <!-- Classpath -->
@@ -51,6 +54,13 @@
         <pathelement location="${bundlesdir}/${genconfjar}"/>
 		
 		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+    	
+    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
+
+    	<pathelement location="${bundlesdir}/${servletjar}" />
+
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+
 		
     </path>
 
