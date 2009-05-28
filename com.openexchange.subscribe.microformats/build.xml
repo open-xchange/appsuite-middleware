@@ -6,7 +6,8 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
-
+	<property name="xmlBundle" value="com.openexchange.xml" />
+	
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
 
