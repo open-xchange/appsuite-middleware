@@ -9,6 +9,7 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -77,7 +78,7 @@
 	<target name="patchConfig">
 		<move tofile="conf/templating.properties"
 		    file="conf/templating.properties.in" overwrite="true"/>
-		<replace file="${patch.conf.dir}/templating.properties">
+		<replace file="${tmp.dir}/${conf.dir}/templating.properties">
 		     <replacefilter token="@templatepath@" value="/opt/open-xchange/templates"/>
 		</replace>
 	</target>
@@ -91,7 +92,7 @@
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     	<mkdir dir="${conf.install.copy.dir}"/>
     	<copy todir="${conf.install.copy.dir}" overwrite="true">
-    	   <fileset dir="${patch.conf.dir}">
+    	   <fileset dir="${tmp.dir}/${conf.dir}">
     	      <include name="**" />
     	      <exclude name="*.in"/>
     	      <exclude name="CVS"/>
