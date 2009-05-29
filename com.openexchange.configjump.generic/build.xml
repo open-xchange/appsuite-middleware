@@ -7,6 +7,7 @@
     <!-- Customizable values -->
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
+    <property name="guiprefix" value="/var/www/ox6" />
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
@@ -20,6 +21,8 @@
 	<property name="composite.name" value="open-xchange-configjump-generic-${version}" />
 
     <!-- Install Constants -->
+    <property name="guipluginsdir" value="${guiprefix}/plugins" />
+    <property name="guipluginname" value="com.openexchange.extras" />
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
@@ -82,7 +85,15 @@
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
-    <target name="install" depends="installJars,installConfig"/>
+    <target name="installGui">
+            <mkdir dir="${destdir}/${guipluginsdir}/${guipluginname}" />
+            <copy todir="${destdir}/${guipluginsdir}/${guipluginname}" overwrite="true">
+                    <fileset dir="gui" />
+            </copy>
+    </target>
+
+
+    <target name="install" depends="installJars,installConfig,installGui"/>
 
 	<!-- Dist -->
 	<target name="dist" depends="clean">

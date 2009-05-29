@@ -33,6 +33,7 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 	ant -Ddestdir=$(oxroot) -Dprefix=$(instprefix) install
+	mv $(oxroot)/var $(oxroot)-gui
 
 # Build architecture-independent files here.
 binary-indep: build install

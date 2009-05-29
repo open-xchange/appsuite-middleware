@@ -45,12 +45,26 @@ Summary:        The Open-Xchange generic ConfigJump
 Requires:       open-xchange-common open-xchange-global open-xchange-configread
 #
 
+%package gui
+Group:          Applications/Productivity
+Requires:       open-xchange-gui >= @OXVERSION@
+Summary:        Open-Xchange generic ConfigJump GUI component
+
+
 %description
 The Open-Xchange generic ConfigJump
 
 Authors:
 --------
     Open Xchange
+
+%description gui
+The Open-Xchange generic ConfigJump GUI component
+
+Authors:
+--------
+    Open Xchange
+
 
 %prep
 %setup -q
@@ -74,3 +88,9 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/configjump.properties
+
+%files gui
+%defattr(-,root,root)
+%dir /var/www/ox6/plugins/com.openexchange.extras
+/var/www/ox6/plugins/com.openexchange.extras/*
+
