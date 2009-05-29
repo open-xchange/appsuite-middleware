@@ -58,9 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -71,11 +69,14 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 import com.openexchange.groupware.AbstractOXException.Truncated;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -86,141 +87,139 @@ import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 /**
- * {@link ContactInsertDataHandler} - A data handler for storing VCards into a
- * contact folder.
+ * {@link ContactInsertDataHandler} - A data handler for storing VCards into a contact folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ContactInsertDataHandler implements DataHandler {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ContactInsertDataHandler.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactInsertDataHandler.class);
 
-	private static final String[] ARGS = { "com.openexchange.groupware.contact.folder" };
+    private static final String[] ARGS = { "com.openexchange.groupware.contact.folder" };
 
-	private static final Class<?>[] TYPES = { InputStream.class };
+    private static final Class<?>[] TYPES = { InputStream.class };
 
-	/**
-	 * Initializes a new {@link ContactInsertDataHandler}
-	 */
-	public ContactInsertDataHandler() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ContactInsertDataHandler}
+     */
+    public ContactInsertDataHandler() {
+        super();
+    }
 
-	public String[] getRequiredArguments() {
-		return ARGS;
-	}
+    public String[] getRequiredArguments() {
+        return ARGS;
+    }
 
-	public Class<?>[] getTypes() {
-		return TYPES;
-	}
+    public Class<?>[] getTypes() {
+        return TYPES;
+    }
 
-	public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session)
-			throws DataException {
-		final int folder;
-		try {
-			folder = Integer.parseInt(dataArguments.get(ARGS[0]));
-		} catch (final NumberFormatException e) {
-			throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
-		}
-		final Context ctx;
-		try {
-			ctx = ContextStorage.getStorageContext(session);
-		} catch (final ContextException e) {
-			throw new DataException(e);
-		}
-		/*
-		 * Parse input stream
-		 */
-		final OXContainerConverter converter = new OXContainerConverter(session, ctx);
-		final InputStream inputStream = (InputStream) data.getData();
-		try {
-			final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, ctx);
-			final DataProperties dataProperties = data.getDataProperties();
-			final VCardTokenizer tokenizer = new VCardTokenizer(inputStream);
-			final List<VCardFileToken> chunks = tokenizer.split();
-			if (chunks.isEmpty()) {
-				LOG.error("VCard tokenizer returned zero results");
-				return new JSONArray();
-			}
-			final JSONArray jsonArray = new JSONArray();
-			for (final VCardFileToken chunk : chunks) {
-				final VersitDefinition def = chunk.getVersitDefinition();
-				if (def == null) {
-					/*
-					 * No appropriate definition for current part of the VCard
-					 * stream
-					 */
-					LOG.error("Could not recognize format of the following VCard data:\n" + Arrays.toString(chunk.getContent()));
-				} else {
-					final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(
-							chunk.getContent()), dataProperties.get(DataProperties.PROPERTY_CHARSET));
-					/*
-					 * Parse VCard from reader
-					 */
-					final VersitObject versitObject = def.parse(versitReader);
-					/*
-					 * Convert to a contact object
-					 */
-					final ContactObject contact = converter.convertContact(versitObject);
-					contact.setParentFolderID(folder);
-					/*
-					 * Store contact object
-					 */
-					try {
-						contactInterface.insertContactObject(contact);
-					} catch (final OXException oxEx) {
-						LOG.debug("Cannot store contact object", oxEx);
-						throw handleDataTruncation(oxEx);
-					}
-					jsonArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, folder).put(DataFields.ID,
-							contact.getObjectID()));
-				}
-			}
-			/*
-			 * Return JSON response
-			 */
-			return jsonArray;
-		} catch (final ConverterException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		} catch (final JSONException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		} catch (final IOException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		} finally {
-			converter.close();
-			try {
-				inputStream.close();
-			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws DataException {
+        final int folder;
+        try {
+            folder = Integer.parseInt(dataArguments.get(ARGS[0]));
+        } catch (final NumberFormatException e) {
+            throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
+        }
+        final Context ctx;
+        try {
+            ctx = ContextStorage.getStorageContext(session);
+        } catch (final ContextException e) {
+            throw new DataException(e);
+        }
+        /*
+         * Parse input stream
+         */
+        final OXContainerConverter converter = new OXContainerConverter(session, ctx);
+        final InputStream inputStream = (InputStream) data.getData();
+        try {
+            final DataProperties dataProperties = data.getDataProperties();
+            final VCardTokenizer tokenizer = new VCardTokenizer(inputStream);
+            final List<VCardFileToken> chunks = tokenizer.split();
+            if (chunks.isEmpty()) {
+                LOG.error("VCard tokenizer returned zero results");
+                return new JSONArray();
+            }
+            final JSONArray jsonArray = new JSONArray();
+            for (final VCardFileToken chunk : chunks) {
+                final VersitDefinition def = chunk.getVersitDefinition();
+                if (def == null) {
+                    /*
+                     * No appropriate definition for current part of the VCard stream
+                     */
+                    LOG.error("Could not recognize format of the following VCard data:\n" + Arrays.toString(chunk.getContent()));
+                } else {
+                    final VersitDefinition.Reader versitReader = def.getReader(
+                        new UnsynchronizedByteArrayInputStream(chunk.getContent()),
+                        dataProperties.get(DataProperties.PROPERTY_CHARSET));
+                    /*
+                     * Parse VCard from reader
+                     */
+                    final VersitObject versitObject = def.parse(versitReader);
+                    /*
+                     * Convert to a contact object
+                     */
+                    final ContactObject contact = converter.convertContact(versitObject);
+                    contact.setParentFolderID(folder);
+                    /*
+                     * Store contact object
+                     */
+                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                        ContactInterfaceDiscoveryService.class).newContactInterface(contact.getParentFolderID(), session);
+                    try {
+                        contactInterface.insertContactObject(contact);
+                    } catch (final OXException oxEx) {
+                        LOG.debug("Cannot store contact object", oxEx);
+                        throw handleDataTruncation(oxEx);
+                    }
+                    jsonArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, folder).put(DataFields.ID, contact.getObjectID()));
+                }
+            }
+            /*
+             * Return JSON response
+             */
+            return jsonArray;
+        } catch (final ConverterException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            converter.close();
+            try {
+                inputStream.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	private static DataException handleDataTruncation(final AbstractOXException e) {
-		if (e.getCategory() == Category.TRUNCATED) {
-			final String separator = ", ";
-			final StringBuilder bob = new StringBuilder();
-			final ProblematicAttribute[] problematics = e.getProblematics();
-			for (final ProblematicAttribute problematic : problematics) {
-				if (problematic instanceof Truncated) {
-					final int id = ((Truncated) problematic).getId();
-					bob.append(getNameForFieldInTruncationError(id));
-					bob.append(separator);
-				}
-			}
-			bob.setLength(bob.length() - separator.length());
-			return DataExceptionCodes.TRUNCATED.create(bob.toString());
-		}
-		return new DataException(e);
-	}
+    private static DataException handleDataTruncation(final AbstractOXException e) {
+        if (e.getCategory() == Category.TRUNCATED) {
+            final String separator = ", ";
+            final StringBuilder bob = new StringBuilder();
+            final ProblematicAttribute[] problematics = e.getProblematics();
+            for (final ProblematicAttribute problematic : problematics) {
+                if (problematic instanceof Truncated) {
+                    final int id = ((Truncated) problematic).getId();
+                    bob.append(getNameForFieldInTruncationError(id));
+                    bob.append(separator);
+                }
+            }
+            bob.setLength(bob.length() - separator.length());
+            return DataExceptionCodes.TRUNCATED.create(bob.toString());
+        }
+        return new DataException(e);
+    }
 
-	private static String getNameForFieldInTruncationError(final int id) {
-		final ContactField field = ContactField.getByValue(id);
-		if (field == null) {
-			return String.valueOf(id);
-		}
-		return field.getReadableName();
-	}
+    private static String getNameForFieldInTruncationError(final int id) {
+        final ContactField field = ContactField.getByValue(id);
+        if (field == null) {
+            return String.valueOf(id);
+        }
+        return field.getReadableName();
+    }
 }

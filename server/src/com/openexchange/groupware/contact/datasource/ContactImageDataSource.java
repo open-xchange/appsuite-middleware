@@ -50,10 +50,7 @@
 package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
-
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -61,112 +58,108 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link ContactImageDataSource} - A data source to obtains a contact's image
- * data
+ * {@link ContactImageDataSource} - A data source to obtains a contact's image data
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ContactImageDataSource implements DataSource {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ContactImageDataSource.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactImageDataSource.class);
 
-	private static final String[] ARGS = { "com.openexchange.groupware.contact.folder",
-			"com.openexchange.groupware.contact.id" };
+    private static final String[] ARGS = { "com.openexchange.groupware.contact.folder", "com.openexchange.groupware.contact.id" };
 
-	/**
-	 * Initializes a new {@link ContactImageDataSource}
-	 */
-	public ContactImageDataSource() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ContactImageDataSource}
+     */
+    public ContactImageDataSource() {
+        super();
+    }
 
-	public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session)
-			throws DataException {
-		if (!InputStream.class.equals(type)) {
-			throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
-		}
-		/*
-		 * Get arguments
-		 */
-		final int folder;
-		{
-			final String val = dataArguments.get(ARGS[0]);
-			if (val == null) {
-				throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
-			}
-			try {
-				folder = Integer.parseInt(val);
-			} catch (final NumberFormatException e) {
-				throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], val);
-			}
-		}
-		final int objectId;
-		{
-			final String val = dataArguments.get(ARGS[1]);
-			if (val == null) {
-				throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
-			}
-			try {
-				objectId = Integer.parseInt(val);
-			} catch (final NumberFormatException e) {
-				throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
-			}
-		}
-		/*
-		 * Get contact
-		 */
-		final ContactObject contact;
-		try {
-			final ContactSQLInterface contactSql = new RdbContactSQLInterface(session);
-			contact = contactSql.getObjectById(objectId, folder);
-		} catch (final ContextException e) {
-			throw new DataException(e);
-		} catch (final OXException e) {
-			throw new DataException(e);
-		}
-		/*
-		 * Return contact image
-		 */
-		final byte[] imageBytes = contact.getImage1();
-		final DataProperties properties = new DataProperties();
-		if (imageBytes == null) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder("Requested a non-existing image in contact: object-id=").append(objectId)
-						.append(" folder=").append(folder).append(" context=").append(session.getContextId()).append(
-								" session-user=").append(session.getUserId()).append(
-								"\nReturning an empty image as fallback.").toString());
-			}
-			properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-			properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-			return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
-		}
-		properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contact.getImageContentType());
-		properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
-		return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
-	}
+    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws DataException {
+        if (!InputStream.class.equals(type)) {
+            throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
+        }
+        /*
+         * Get arguments
+         */
+        final int folder;
+        {
+            final String val = dataArguments.get(ARGS[0]);
+            if (val == null) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
+            }
+            try {
+                folder = Integer.parseInt(val);
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], val);
+            }
+        }
+        final int objectId;
+        {
+            final String val = dataArguments.get(ARGS[1]);
+            if (val == null) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
+            }
+            try {
+                objectId = Integer.parseInt(val);
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
+            }
+        }
+        /*
+         * Get contact
+         */
+        final ContactObject contact;
+        try {
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folder,
+                session);
+            contact = contactInterface.getObjectById(objectId, folder);
+        } catch (final OXException e) {
+            throw new DataException(e);
+        }
+        /*
+         * Return contact image
+         */
+        final byte[] imageBytes = contact.getImage1();
+        final DataProperties properties = new DataProperties();
+        if (imageBytes == null) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder("Requested a non-existing image in contact: object-id=").append(objectId).append(" folder=").append(
+                    folder).append(" context=").append(session.getContextId()).append(" session-user=").append(session.getUserId()).append(
+                    "\nReturning an empty image as fallback.").toString());
+            }
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+        }
+        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contact.getImageContentType());
+        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
+        return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
+    }
 
-	/**
-	 * <ul>
-	 * <li><code>&quot;com.openexchange.groupware.contact.folder&quot;</code></li>
-	 * <li><code>&quot;com.openexchange.groupware.contact.id&quot;</code></li>
-	 * </ul>
-	 */
-	public String[] getRequiredArguments() {
-		final String[] args = new String[ARGS.length];
-		System.arraycopy(ARGS, 0, args, 0, ARGS.length);
-		return args;
-	}
+    /**
+     * <ul>
+     * <li><code>&quot;com.openexchange.groupware.contact.folder&quot;</code></li>
+     * <li><code>&quot;com.openexchange.groupware.contact.id&quot;</code></li>
+     * </ul>
+     */
+    public String[] getRequiredArguments() {
+        final String[] args = new String[ARGS.length];
+        System.arraycopy(ARGS, 0, args, 0, ARGS.length);
+        return args;
+    }
 
-	public Class<?>[] getTypes() {
-		return new Class<?>[] { InputStream.class };
-	}
+    public Class<?>[] getTypes() {
+        return new Class<?>[] { InputStream.class };
+    }
 
 }
