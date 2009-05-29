@@ -79,6 +79,7 @@
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
+        	<fileset dir="lib" />
         </jar>
     </target>
 
