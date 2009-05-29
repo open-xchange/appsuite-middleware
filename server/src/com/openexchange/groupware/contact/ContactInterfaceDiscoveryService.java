@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactInterfaceDiscoveryService} - A discovery service for {@link ContactInterfaceProvider} instances.
@@ -69,4 +70,13 @@ public interface ContactInterfaceDiscoveryService {
      */
     public ContactInterfaceProvider getContactInterfaceProvider(int folderId, int contextId) throws OXException;
 
+    /**
+     * Gets a newly created {@link ContactInterface} instance appropriate for specified folder ID and session.
+     * 
+     * @param folderId The folder ID
+     * @param session The session
+     * @return A newly created {@link ContactInterface} instance
+     * @throws OXException If returning an appropriate {@link ContactInterface} instance fails
+     */
+    public ContactInterface getContactInterface(int folderId, Session session) throws OXException;
 }

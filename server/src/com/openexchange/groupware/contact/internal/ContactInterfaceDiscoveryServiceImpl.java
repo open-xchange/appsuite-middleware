@@ -51,15 +51,15 @@ package com.openexchange.groupware.contact.internal;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactInterfaceDiscoveryServiceImpl} - The {@link ContactInterfaceDiscoveryService} implementation.
@@ -76,16 +76,31 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
     }
 
     public ContactInterfaceProvider getContactInterfaceProvider(final int folderId, final int contextId) throws OXException {
-        final ContactInterfaceProvider contactInterface = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
-        if (contactInterface == null) {
+        final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
+        if (provider == null) {
             try {
-                return new RdbContactInterfaceProvider(ServerServiceRegistry.getInstance().getService(ContextService.class).getContext(
-                    contextId));
+                return new RdbContactInterfaceProvider(ContextStorage.getStorageContext(contextId));
             } catch (final ContextException e) {
                 throw new OXException(e);
             }
         }
-        return contactInterface;
+        return provider;
+    }
+
+    public ContactInterface getContactInterface(final int folderId, final Session session) throws OXException {
+        final int contextId = session.getContextId();
+        final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
+        if (provider == null) {
+            if (session instanceof ServerSession) {
+                return new RdbContactInterfaceProvider(((ServerSession) session).getContext()).newContactInterface(session);
+            }
+            try {
+                return new RdbContactInterfaceProvider(ContextStorage.getStorageContext(contextId)).newContactInterface(session);
+            } catch (final ContextException e) {
+                throw new OXException(e);
+            }
+        }
+        return provider.newContactInterface(session);
     }
 
     private static final class RdbContactInterfaceProvider implements ContactInterfaceProvider {
