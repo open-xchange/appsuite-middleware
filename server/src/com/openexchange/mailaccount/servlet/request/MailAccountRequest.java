@@ -405,6 +405,7 @@ public final class MailAccountRequest {
             }
             mailConfig.setServer(server.substring(0, pos));
         }
+        mailConfig.setSecure(accountDescription.isMailSecure());
         mailAccess.setCacheable(false);
         return mailAccess;
     }
@@ -449,8 +450,8 @@ public final class MailAccountRequest {
         final MailTransport mailTransport = transportProvider.createNewMailTransport(session);
         final TransportConfig transportConfig = mailTransport.getTransportConfig();
         // Set login and password
-        transportConfig.setLogin(accountDescription.getLogin());
-        transportConfig.setPassword(accountDescription.getPassword());
+        transportConfig.setLogin(accountDescription.getTransportLogin());
+        transportConfig.setPassword(accountDescription.getTransportPassword());
         // Set server and port
         final String server;
         {
@@ -472,6 +473,7 @@ public final class MailAccountRequest {
             }
             transportConfig.setServer(server.substring(0, pos));
         }
+        transportConfig.setSecure(accountDescription.isTransportSecure());
         boolean validated = true;
         // Now try to connect
         boolean close = false;
