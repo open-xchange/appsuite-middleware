@@ -1,7 +1,0 @@
-
-SYSTEMPROPERTIES=@systemproperties@
-LOGGINGPROPERTIES=@loggingproperties@
-
-JAVA_XTRAOPTS="-Xms50M -Xmx1024M -XX:+UseConcMarkSweepGC -XX:NewSize=25M -XX:MaxNewSize=25M -XX:SurvivorRatio=6"
-
-NRFILES="8192"

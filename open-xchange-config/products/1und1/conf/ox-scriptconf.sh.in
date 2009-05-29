@@ -1,7 +1,0 @@
-
-SYSTEMPROPERTIES=@systemproperties@
-LOGGINGPROPERTIES=@loggingproperties@
-
-JAVA_XTRAOPTS="-Xms14000M -Xmx14000M -XX:NewSize=7000m -XX:MaxNewSize=7000m -XX:SurvivorRatio=6 -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -Dlog4j.configuration=log4j.xml"
-
-NRFILES="8192"
