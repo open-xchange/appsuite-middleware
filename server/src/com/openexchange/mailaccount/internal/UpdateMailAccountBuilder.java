@@ -67,6 +67,13 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         Attribute.TRANSPORT_LOGIN_LITERAL,
         Attribute.TRANSPORT_PASSWORD_LITERAL));
 
+    private static final Set<Attribute> PROPERTY_ATTRIBUTES = EnumSet.of(
+        Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL,
+        Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL,
+        Attribute.POP3_PATH_LITERAL,
+        Attribute.POP3_REFRESH_RATE_LITERAL,
+        Attribute.POP3_STORAGE_LITERAL);
+
     public static boolean needsUpdate(final Set<Attribute> attributes) {
         for (final Attribute attribute : attributes) {
             if (KNOWN_ATTRIBUTES.contains(attribute)) {
@@ -77,7 +84,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     }
 
     public boolean handles(final Attribute attribute) {
-        return KNOWN_ATTRIBUTES.contains(attribute);
+        return KNOWN_ATTRIBUTES.contains(attribute) && !PROPERTY_ATTRIBUTES.contains(attribute);
     }
 
     private final StringBuilder bob = new StringBuilder("UPDATE user_mail_account SET ");

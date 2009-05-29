@@ -621,7 +621,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         attribute.doSwitch(sqlBuilder);
                     }
 
-                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+                    if (LOG.isDebugEnabled()) {
+                        final String query = sqlBuilder.getUpdateQuery();
+                        stmt = con.prepareStatement(query);
+                        LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                            orderedAttributes).append(" :\n").append(query));
+                    } else {
+                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+                    }
 
                     final GetSwitch getter = new GetSwitch(mailAccount);
                     int pos = 1;
