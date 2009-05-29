@@ -74,18 +74,18 @@ com.openexchange.contacts.ldap.context111.LDAPglobal.foldername=LDAPglobal
 com.openexchange.contacts.ldap.context111.LDAPglobal.searchfilter=(objectclass=person)
 
 # Specify what types of contacts should be displayed. Maybe "users", "distributionlists", or "both"
-com.openexchange.contacts.ldap.context111.LDAPglobal1.contactTypes=both
+com.openexchange.contacts.ldap.context111.LDAPglobal.contactTypes=both
 
 # Specify the searchfilter for distributionlists of the global ldap folder here. This value is optional and might
 # be specified if the search filter is different from the normal searchfilter. So if this value is empty the default
 # searchfilter will be used.
-com.openexchange.contacts.ldap.context111.LDAPglobal1.searchfilter_distributionlist=(&(objectclass=groupOfNames)(objectclass=posixGroup))
+com.openexchange.contacts.ldap.context111.LDAPglobal.searchfilter_distributionlist=(&(objectclass=groupOfNames)(objectclass=posixGroup))
 
 # Specify the search base for distributionlists here (sub, base, one). This should only be specified if this
 # is different from the searchScope parameter.
-com.openexchange.contacts.ldap.context111.LDAPglobal1.searchScope_distributionlist=
+com.openexchange.contacts.ldap.context111.LDAPglobal.searchScope_distributionlist=
 
 # Specify the baseDN for distributionlists of the global ldap folder here. This value is optional and might
 # be specified if this baseDN is different from the normal baseDN. So if this value is empty the default
 # baseDN will be used
-com.openexchange.contacts.ldap.context111.LDAPglobal1.baseDN_distributionlist=
+com.openexchange.contacts.ldap.context111.LDAPglobal.baseDN_distributionlist=
