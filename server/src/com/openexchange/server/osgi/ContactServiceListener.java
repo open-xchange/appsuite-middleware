@@ -49,59 +49,80 @@
 
 package com.openexchange.server.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactServices;
+import com.openexchange.groupware.contact.ContactInterfaceProvider;
+import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 
-public class ContactServiceListener implements ServiceTrackerCustomizer{
-	
+/**
+ * {@link ContactServiceListener} - The {@link ServiceTrackerCustomizer} for {@link ContactInterface} instances.
+ * 
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class ContactServiceListener implements ServiceTrackerCustomizer {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactServiceListener.class);
+
     private final BundleContext context;
-	
-    private final ContactServices services = ContactServices.getInstance();
-    
-	private static final Log LOG = LogFactory.getLog(ContactServiceListener.class);
-	
-	
-	public ContactServiceListener(final BundleContext context){
+
+    /**
+     * Initializes a new {@link ContactServiceListener}.
+     * 
+     * @param context The bundle context
+     */
+    public ContactServiceListener(final BundleContext context) {
         super();
         this.context = context;
-	}
-	
-	public Object addingService(final ServiceReference reference) {
-        final ContactInterface contactInterface = (ContactInterface)context.getService(reference); 
-        
+    }
+
+    public Object addingService(final ServiceReference reference) {
         final Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
-        	
-        if (id != null){
-        	final int ix = new Integer(id.toString()).intValue();
-        	LOG.info("Adding Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+ix);
-        	services.addService(ix, contactInterface);
+        final Object ctx = reference.getProperty(ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE);
+        if (id != null && ctx != null) {
+            final int folderId = Integer.parseInt(id.toString());
+            final int contextId = Integer.parseInt(ctx.toString());
+            final ContactInterfaceProviderRegistry contactServices = ContactInterfaceProviderRegistry.getInstance();
+            if (!contactServices.containsService(folderId, contextId)) {
+                final ContactInterfaceProvider provider = (ContactInterfaceProvider) context.getService(reference);
+                if (contactServices.addService(folderId, contextId, provider)) {
+                    return provider;
+                }
+                context.ungetService(reference);
+            }
         }
-        
-		return contactInterface;
-	}
+        /*
+         * Nothing to track
+         */
+        return null;
+    }
 
-	public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do
+    }
 
-	}
-
-	public void removedService(final ServiceReference reference, final Object service) {
-        try {
-            final ContactInterface contactInterface = (ContactInterface)context.getService(reference);
-            final int[] overRiding = (int[])reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
-            
-	        for (int a = 0; a < overRiding.length; a++) {
-	        	LOG.info("Removing Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+overRiding[a]);
-	        	services.removeService(overRiding[a], contactInterface);
-	        }
-        } finally {
-        	context.ungetService(reference);
+    public void removedService(final ServiceReference reference, final Object service) {
+        if (null != service) {
+            try {
+                final Object overRiding = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
+                final Object ctx = reference.getProperty(ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE);
+                if (overRiding != null && ctx != null) {
+                    final int folderId = Integer.parseInt(overRiding.toString());
+                    final int contextId = Integer.parseInt(ctx.toString());
+                    LOG.info(new StringBuilder("Removing Service Bundle Contact Interface Provider: ").append(
+                        reference.getBundle().getSymbolicName()).append(" for folder ").append(folderId).append(" and context ").append(
+                        contextId));
+                    ContactInterfaceProviderRegistry.getInstance().removeService(
+                        folderId,
+                        contextId,
+                        (ContactInterfaceProvider) context.getService(reference));
+                }
+            } finally {
+                context.ungetService(reference);
+            }
         }
-	}
+    }
 
 }

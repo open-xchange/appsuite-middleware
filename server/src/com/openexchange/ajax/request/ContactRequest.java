@@ -82,7 +82,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactServices;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -94,6 +94,7 @@ import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -186,15 +187,10 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = ContactServices.getInstance().getService(contactObj.getParentFolderID(),
-                session.getContextId());
-        // ContactInterface contactInterface =
-        // ContactServices.getInstance().getService
-        // (contactObj.getParentFolderID());
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactObj.getParentFolderID(), ctx.getContextId()).newContactInterface(
+            session);
+
         contactInterface.insertContactObject(contactObj);
         timestamp = contactObj.getLastModified();
         final JSONObject jsonResponseObject = new JSONObject();
@@ -219,13 +215,10 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
-        // ContactInterface contactInterface =
-        // ContactServices.getInstance().getService(inFolder);
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
+            session);
+
         contactInterface.updateContactObject(contactobject, inFolder, timestamp);
         timestamp = contactobject.getLastModified();
         return new JSONObject();
@@ -263,13 +256,10 @@ public class ContactRequest {
             final Context ctx = session.getContext();
 
             final ContactWriter contactWriter = new ContactWriter(timeZone);
-            ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
-            // ContactInterface contactInterface =
-            // ContactServices.getInstance().getService(folderId);
-            if (contactInterface == null) {
-                contactInterface = new RdbContactSQLInterface(session, ctx);
-            }
-            contactInterface.setSession(session);
+
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(folderId, ctx.getContextId()).newContactInterface(
+                session);
 
             it = contactInterface.getModifiedContactsInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
@@ -314,13 +304,10 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
-        // ContactInterface contactInterface =
-        // ContactServices.getInstance().getService(inFolder);
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
+            session);
+
         contactInterface.deleteContactObject(objectId, inFolder, timestamp);
 
         return new JSONArray();
@@ -362,16 +349,12 @@ public class ContactRequest {
             final Context ctx = session.getContext();
 
             try {
-                // check if the int array has everytime the same folder id
+                // check if the int array has always the same folder id
                 if (isOneFolder) {
-                    ContactInterface contactInterface = ContactServices.getInstance().getService(oldfolderId,
-                            ctx.getContextId());
-                    // ContactInterface contactInterface =
-                    // ContactServices.getInstance().getService(oldfolderId);
-                    if (contactInterface == null) {
-                        contactInterface = new RdbContactSQLInterface(session, ctx);
-                    }
-                    contactInterface.setSession(session);
+
+                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                        ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(oldfolderId, ctx.getContextId()).newContactInterface(
+                        session);
 
                     final ContactWriter contactwriter = new ContactWriter(timeZone);
 
@@ -390,16 +373,12 @@ public class ContactRequest {
                 } else {
                     // costs more performance because every object in the array
                     // is checked
+                    final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
                     for (int a = 0; a < objectIdAndFolderId.length; a++) {
-                        ContactInterface contactInterface = ContactServices.getInstance().getService(
-                                objectIdAndFolderId[a][1], ctx.getContextId());
-                        // ContactInterface contactInterface =
-                        // ContactServices.getInstance
-                        // ().getService(objectIdAndFolderId[a][1]);
-                        if (contactInterface == null) {
-                            contactInterface = new RdbContactSQLInterface(session, ctx);
-                        }
-                        contactInterface.setSession(session);
+                        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(objectIdAndFolderId[a][1], ctx.getContextId()).newContactInterface(
+                            session);
+
                         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
                         final int[][] newObjectIdAndFolderId = { { objectIdAndFolderId[a][0], objectIdAndFolderId[a][1] } };
@@ -492,13 +471,9 @@ public class ContactRequest {
 
             final Context ctx = session.getContext();
 
-            ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
-            // ContactInterface contactInterface =
-            // ContactServices.getInstance().getService(folderId);
-            if (contactInterface == null) {
-                contactInterface = new RdbContactSQLInterface(session, ctx);
-            }
-            contactInterface.setSession(session);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(folderId, ctx.getContextId()).newContactInterface(
+                session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
             if (rightHandLimit == 0) {
@@ -545,13 +520,9 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
-        // ContactInterface contactInterface =
-        // ContactServices.getInstance().getService(inFolder);
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
+            session);
 
         timestamp = new Date(0);
 
@@ -641,11 +612,9 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = ContactServices.getInstance().getService(searchObj.getFolder(), ctx.getContextId());
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(searchObj.getFolder(), ctx.getContextId()).newContactInterface(
+            session);
 
         final SearchIterator<ContactObject> it =  contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
         final JSONArray jsonResponseArray = new JSONArray();
@@ -680,13 +649,9 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
-        // ContactInterface contactInterface =
-        // ContactServices.getInstance().getService(folderId);
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(folderId, ctx.getContextId()).newContactInterface(
+            session);
 
         final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
         final int origObjectId = contactObj.getObjectID();

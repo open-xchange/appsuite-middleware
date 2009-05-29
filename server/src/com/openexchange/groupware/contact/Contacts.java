@@ -2248,10 +2248,12 @@ public final class Contacts {
 
     public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
 
-        final ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService(folderId);
-        if (contactInterface != null) {
+        if (ContactInterfaceProviderRegistry.getInstance().getService(folderId, ctx.getContextId()) != null) {
+            /*
+             * Another provider is bound to folder ID/context ID pair
+             */
             return false;
         }
 

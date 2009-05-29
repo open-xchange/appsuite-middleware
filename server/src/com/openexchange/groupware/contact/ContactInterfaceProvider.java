@@ -49,55 +49,22 @@
 
 package com.openexchange.groupware.contact;
 
-import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.api2.OXException;
+import com.openexchange.session.Session;
 
-public class ContactServices {
+/**
+ * {@link ContactInterfaceProvider} - Provider for {@link ContactInterface} instances.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface ContactInterfaceProvider {
 
-    private final ConcurrentHashMap<Integer, ContactInterface> services = new ConcurrentHashMap<Integer, ContactInterface>();
-
-    private static final ContactServices instance = new ContactServices();
-
-    private ContactServices() {
-        super();
-    }
-
-    public int addService(final int folderId, final ContactInterface contactInterface) {
-        services.put(folderId, contactInterface);
-        return services.size();
-    }
-
-    public int removeService(final int folderId, final ContactInterface contactInterface) {
-        services.remove(folderId, contactInterface);
-        return services.size();
-
-    }
-
-    public static ContactServices getInstance() {
-        return instance;
-    }
-
-    public int getNumberOfServices(){
-        if (null != services){
-            return services.size();
-        }
-        return 0;
-    }
-    /*
-    public ContactInterface getService(int folderId){
-        ContactInterface contactInterface = services.get(folderId);
-        return contactInterface;
-
-    }
-    */
-
-    public ContactInterface getService(final int folderId, final int context_id){
-        final ContactInterface contactInterface = services.get(folderId);
-            if (null == contactInterface || context_id != contactInterface.getLdapServer().getContext()) {
-                return null;
-            } else {
-                return contactInterface;
-            }
-
-    }
-
+    /**
+     * Returns a newly created {@link ContactInterface} instance for specified session.
+     * 
+     * @param session The session
+     * @return A newly created {@link ContactInterface} instance
+     * @throws OXException If creating a new {@link ContactInterface} instance fails
+     */
+    public ContactInterface newContactInterface(final Session session) throws OXException;
 }

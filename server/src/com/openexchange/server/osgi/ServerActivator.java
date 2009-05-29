@@ -103,8 +103,10 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
+import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -500,6 +502,11 @@ public final class ServerActivator extends DeferredActivator {
 
         // Register folder service
         registrationList.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+
+        // Register contact interface discovery service
+        final ContactInterfaceDiscoveryService cids = new ContactInterfaceDiscoveryServiceImpl();
+        registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
+        ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
 
         /*
          * Register components

@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Date;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
@@ -58,30 +57,34 @@ import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * ContactInterface
- *
+ * {@link ContactInterface} - The contact interface.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface ContactInterface {
 
+    /**
+     * The property for the folder ID which is overridden.
+     */
     public static final String OVERRIDE_FOLDER_ATTRIBUTE = "override_folder";
+
+    /**
+     * The property for the context ID which is overridden.
+     */
+    public static final String OVERRIDE_CONTEXT_ATTRIBUTE = "override_context";
 
     public void insertContactObject(final ContactObject co) throws OXException;
 
     public void updateContactObject(final ContactObject co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException;
 
     /**
-     * Determines the number of contacts a certain
-     * private or public folder.
-     *
-     * @param folderId -
-     *            The Folder ID
-     * @param readCon -
-     *            The Readable Connection To DB
+     * Determines the number of contacts a certain private or public folder.
+     * 
+     * @param folderId - The Folder ID
+     * @param readCon - The Readable Connection To DB
      * @return Amount of contacts as an <code>int</code>
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
@@ -89,20 +92,14 @@ public interface ContactInterface {
 
     /**
      * List contacts in a folder
-     * @param folderId
-     * The Folder ID
-     * @param from
-     * Start position in list
-     * @param to
-     * End position in list
-     * @param orderBy
-     * Column id to sort. 0 if no order by is used
-     * @param orderDir
-     * Order direction (asc or desc) may be null if no special ordering is requested
-     * @param cols
-     * The columns filled to the dataobject
-     * @param readcon
-     * The readable Database Connection
+     * 
+     * @param folderId The Folder ID
+     * @param from Start position in list
+     * @param to End position in list
+     * @param orderBy Column id to sort. 0 if no order by is used
+     * @param orderDir Order direction (asc or desc) may be null if no special ordering is requested
+     * @param cols The columns filled to the dataobject
+     * @param readcon The readable Database Connection
      * @return A SearchIterator contains Task objects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
@@ -110,10 +107,9 @@ public interface ContactInterface {
 
     /**
      * Lists all contacts that match the given search
-     * @param searchObject
-     * The SearchObject
-     * @param cols
-     * fields that will be added to the data object
+     * 
+     * @param searchObject The SearchObject
+     * @param cols fields that will be added to the data object
      * @return A SearchIterator contains ContactObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
@@ -121,7 +117,7 @@ public interface ContactInterface {
 
     /**
      * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
-     *
+     * 
      * @param searchpattern The searchpattern
      * @param folderId folder id where to search
      * @param cols fields that will be added to the data object
@@ -130,33 +126,29 @@ public interface ContactInterface {
      */
     SearchIterator<ContactObject> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
 
-
     /**
      * Loads one contact by the given ID
-     * @param objectId
-     * The Object ID
-     * @return
-     * return the ContactObject
+     * 
+     * @param objectId The Object ID
+     * @return return the ContactObject
      * @throws OXException, OXPermissionException
      */
     public ContactObject getObjectById(int objectId, int inFolder) throws OXException;
 
     /**
      * Loads one contact of the given user id
-     * @param userId
-     * The User ID
-     * @return
-     * return the ContactObject
+     * 
+     * @param userId The User ID
+     * @return return the ContactObject
      * @throws OXException
      */
     public ContactObject getUserById(int userId) throws OXException;
 
     /**
      * Lists all modified objects in a folder
-     * @param folderID
-     * The Folder ID
-     * @param since
-     * all modification >= since
+     * 
+     * @param folderID The Folder ID
+     * @param since all modification >= since
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
@@ -164,10 +156,9 @@ public interface ContactInterface {
 
     /**
      * Lists all deleted objects in a folder
-     * @param folderID
-     * The Folder ID
-     * @param since
-     * all modification >= since
+     * 
+     * @param folderID The Folder ID
+     * @param since all modification >= since
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
@@ -177,21 +168,35 @@ public interface ContactInterface {
 
     /**
      * Loads a range of contacts by the given IDs
-     * @param objectIdAndInFolder[]
-     * array with two dimensions. First dimension contains a seond array with two values.
-     * 1. value is object_id
-     * 2. value if folder_id
-     * @param cols
-     * The columns filled to the dataobject
+     * 
+     * @param objectIdAndInFolder[] array with two dimensions. First dimension contains a seond array with two values. 1. value is object_id
+     *            2. value if folder_id
+     * @param cols The columns filled to the dataobject
      * @return A SearchIterator contains ContactObjects
      * @throws OXException
      */
     public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
 
+    /**
+     * Gets the folder ID.
+     * 
+     * @return The folder ID
+     */
     public int getFolderId();
 
+    /**
+     * Gets the LDAP server.
+     * 
+     * @return The LDAP server
+     */
     public LdapServer getLdapServer();
 
-    public void setSession(Session s) throws OXException;
+    /**
+     * Sets the session instance.
+     * 
+     * @param s The session instance to set
+     * @throws OXException If applying given session instance fails
+     */
+    //public void setSession(Session s) throws OXException;
 
 }

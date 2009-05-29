@@ -58,12 +58,11 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.contactcollector.osgi.ServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactServices;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -156,12 +155,9 @@ public class Memorizer implements Runnable {
             LOG.error(e.getMessage(), e);
             return -1;
         }
-        ContactInterface contactInterface = ContactServices.getInstance().getService(contact.getParentFolderID(), ctx.getContextId());
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
-
+        final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(
+            contact.getParentFolderID(),
+            ctx.getContextId()).newContactInterface(session);
         ContactObject foundContact = null;
         {
             final ContactSearchObject searchObject = new ContactSearchObject();
@@ -191,8 +187,8 @@ public class Memorizer implements Runnable {
             }
         } else {
             try {
-                int currentCount = Integer.parseInt(foundContact.getUserField20());
-                int newCount = currentCount + 1;
+                final int currentCount = Integer.parseInt(foundContact.getUserField20());
+                final int newCount = currentCount + 1;
                 foundContact.setUserField20(String.valueOf(newCount));
             } catch (final NumberFormatException nfe) {
                 foundContact.setUserField20(String.valueOf(1));

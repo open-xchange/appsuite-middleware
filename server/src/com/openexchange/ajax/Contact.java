@@ -74,11 +74,12 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactServices;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -119,15 +120,12 @@ public class Contact extends DataServlet {
 				
 				
 				final Context ctx = session.getContext();
-				
-				ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
-				//ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder);
-				if (contactInterface == null) {
-					contactInterface = new RdbContactSQLInterface(session, ctx);
-				}
-				contactInterface.setSession(session);
-				
-				try {
+
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
+                    session);
+
+                try {
 					final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
 					final String imageContentType = contactObj.getImageContentType();
 					if (imageContentType != null) {

@@ -57,6 +57,7 @@ import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
 import com.openexchange.contactcollector.preferences.ContactCollectFolder;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -134,7 +135,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserConfigurationService.class };
+        return new Class<?>[] { ContextService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class };
     }
 
     @Override
