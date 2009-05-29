@@ -54,14 +54,14 @@ import java.util.List;
 import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
+import com.openexchange.contactcollector.osgi.ServiceRegistry;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactServices;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -93,7 +93,7 @@ public class ContactCollectorTest extends TestCase {
     public void setUp() throws Exception {
         Init.startServer();
         final CalendarTestConfig config = new CalendarTestConfig();
-        user = config.getUser();
+        user = prepareUser(config.getUser());
 
         final CalendarContextToolkit tools = new CalendarContextToolkit();
         ctx = tools.getDefaultContext();
@@ -107,6 +107,14 @@ public class ContactCollectorTest extends TestCase {
         deleteContactFromFolder(mail);
     }
 
+    private static String prepareUser(final String user) {
+        final int pos = user.indexOf('@');
+        if (-1 == pos) {
+            return user;
+        }
+        return user.substring(0, pos);
+    }
+
     @Override
     public void tearDown() throws Exception {
         ServerUserSetting.setContactColletion(ctx.getContextId(), userId, false);
@@ -115,35 +123,41 @@ public class ContactCollectorTest extends TestCase {
     }
 
     public void testNewContact() throws Throwable {
-        final ContactCollectorService collector = new ContactCollectorServiceImpl();
-        final InternetAddress address = new InternetAddress(mail);
-        final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
-        addresses.add(address);
-
-        collector.memorizeAddresses(addresses, session);
-
-        Thread.sleep(1000);
-        final List<ContactObject> contacts = searchContact(mail);
-        assertEquals("No object found", 1, contacts.size());
-        assertEquals("Count does not match", "1", contacts.get(0).getUserField20());
+        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
+        collector.start();
+        try {
+            final InternetAddress address = new InternetAddress(mail);
+            final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
+            addresses.add(address);
+            collector.memorizeAddresses(addresses, session);
+            Thread.sleep(1000);
+            final List<ContactObject> contacts = searchContact(mail);
+            assertEquals("No object found", 1, contacts.size());
+            assertEquals("Count does not match", "1", contacts.get(0).getUserField20());
+        } finally {
+            collector.stop();
+        }
     }
 
     public void testExistingContact() throws Throwable {
-        final ContactCollectorService collector = new ContactCollectorServiceImpl();
-        final InternetAddress address = new InternetAddress(mail);
-        final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
-        addresses.add(address);
-
-        collector.memorizeAddresses(addresses, session);
-        Thread.sleep(1000);
-        collector.memorizeAddresses(addresses, session);
-        Thread.sleep(1000);
-        collector.memorizeAddresses(addresses, session);
-
-        Thread.sleep(1000);
-        final List<ContactObject> contacts = searchContact(mail);
-        assertEquals("Ammount of objects found is not correct", 1, contacts.size());
-        assertEquals("Count does not match", "3", contacts.get(0).getUserField20());
+        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
+        collector.start();
+        try {
+            final InternetAddress address = new InternetAddress(mail);
+            final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
+            addresses.add(address);
+            collector.memorizeAddresses(addresses, session);
+            Thread.sleep(1000);
+            collector.memorizeAddresses(addresses, session);
+            Thread.sleep(1000);
+            collector.memorizeAddresses(addresses, session);
+            Thread.sleep(1000);
+            final List<ContactObject> contacts = searchContact(mail);
+            assertEquals("Ammount of objects found is not correct", 1, contacts.size());
+            assertEquals("Count does not match", "3", contacts.get(0).getUserField20());
+        } finally {
+            collector.stop();
+        }
     }
 
     private FolderObject getStandardContactFolder() {
@@ -159,17 +173,16 @@ public class ContactCollectorTest extends TestCase {
     }
 
     private List<ContactObject> searchContact(final String pattern) throws Exception {
-        ContactInterface contactInterface = ContactServices.getInstance().getService(contactFolder.getObjectID(), ctx.getContextId());
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
+        final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
+            session);
+
         final ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setEmail1(pattern);
         searchObject.setEmail2(pattern);
         searchObject.setEmail3(pattern);
         searchObject.setOrSearch(true);
         searchObject.addFolder(contactFolder.getObjectID());
-        contactInterface.setSession(session);
 
         final int[] columns = new int[] {
             ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED, ContactObject.OBJECT_ID, ContactObject.USERFIELD20 };
@@ -193,10 +206,9 @@ public class ContactCollectorTest extends TestCase {
         final List<ContactObject> contacts = searchContact(pattern);
 
         for (final ContactObject contact : contacts) {
-            ContactInterface contactInterface = ContactServices.getInstance().getService(contactFolder.getObjectID(), ctx.getContextId());
-            if (contactInterface == null) {
-                contactInterface = new RdbContactSQLInterface(session, ctx);
-            }
+            final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
+                session);
             contactInterface.deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
         }
     }

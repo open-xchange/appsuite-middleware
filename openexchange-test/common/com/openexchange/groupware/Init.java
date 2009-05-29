@@ -94,7 +94,9 @@ import com.openexchange.group.internal.GroupInit;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
+import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
@@ -129,6 +131,8 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -257,6 +261,7 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
+        startAndInjectBasicServices();
         startAndInjectCalendarServices();
         startAndInjectTimerBundle();
         startAndInjectExceptionFramework();
@@ -271,12 +276,25 @@ public final class Init {
         startAndInjectContextService();
         startAndInjectUserService();
         startAndInjectResourceService();
+        startAndInjectContactCollector();
         startAndInjectMailAccountStorageService();
         startAndInjectMailBundle();
         startAndInjectSpamHandler();
         startAndInjectICalServices();
         startAndInjectConverterService();
         startAndInjectXMLServices();
+    }
+
+    private static void startAndInjectBasicServices() {
+        services.put(ContextService.class, new ContextServiceImpl());
+        services.put(UserService.class, new UserServiceImpl());
+        services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
+        services.put(ContactInterfaceDiscoveryService.class, new ContactInterfaceDiscoveryServiceImpl());
+        
+        ServerServiceRegistry.getInstance().addService(ContextService.class, services.get(ContextService.class));
+        ServerServiceRegistry.getInstance().addService(UserService.class, services.get(UserService.class));
+        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
+        ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
     }
 
     /**
@@ -335,7 +353,7 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseBundle() throws DBPoolingException, ComponentAlreadyRegisteredException {
-        ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
+        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
         registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
         final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
         final TimerService timerService = (TimerService) services.get(TimerService.class);
@@ -364,6 +382,13 @@ public final class Init {
          * Register IMAP bundle
          */
         MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
+    }
+
+    private static void startAndInjectContactCollector() throws Exception {
+        final com.openexchange.contactcollector.osgi.ServiceRegistry reg = com.openexchange.contactcollector.osgi.ServiceRegistry.getInstance();
+        reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+        reg.addService(ContextService.class, services.get(ContextService.class));
+        reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
     }
 
     private static void startAndInjectMailAccountStorageService() throws Exception {

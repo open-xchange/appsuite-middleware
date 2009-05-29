@@ -50,7 +50,6 @@ package com.openexchange.groupware.calendar.tools;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
@@ -122,6 +121,15 @@ public class CalendarContextToolkit {
     public Context getDefaultContext() {
         try {
             return ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        } catch (final ContextException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Context getContextByName(final String name) {
+        try {
+            return ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(name));
         } catch (final ContextException e) {
             e.printStackTrace();
             return null;

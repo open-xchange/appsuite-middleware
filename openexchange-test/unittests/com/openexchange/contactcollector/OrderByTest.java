@@ -53,13 +53,13 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.contactcollector.osgi.ServiceRegistry;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactServices;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -92,9 +92,18 @@ public class OrderByTest extends TestCase {
         Init.startServer();
         final CalendarTestConfig config = new CalendarTestConfig();
         user = config.getUser();
+        
+        final int pos = user.indexOf('@');
+        final String contextName;
+        if (pos == -1) {
+            contextName = "defaultcontext";
+        } else {
+            contextName = user.substring(pos + 1);
+            user = user.substring(0, pos);
+        }
 
         final CalendarContextToolkit tools = new CalendarContextToolkit();
-        ctx = tools.getDefaultContext();
+        ctx = tools.getContextByName(contextName);
         userId = tools.resolveUser(user, ctx);
         session = tools.getSessionForUser(user, ctx);
         contactFolder = getStandardContactFolder();
@@ -104,11 +113,9 @@ public class OrderByTest extends TestCase {
     }
 
     public void testOrderByUserfield20() throws Throwable {
-        ContactInterface contactInterface = ContactServices.getInstance().getService(contactFolder.getObjectID(), ctx.getContextId());
-        if (contactInterface == null) {
-            contactInterface = new RdbContactSQLInterface(session, ctx);
-        }
-        contactInterface.setSession(session);
+        final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
+            session);
 
         final ContactObject contact1 = new ContactObject();
         final ContactObject contact2 = new ContactObject();
@@ -135,7 +142,6 @@ public class OrderByTest extends TestCase {
             searchObject.setEmailAutoComplete(true);
             searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { "orderbyTest", "orderbyTest", "orderbyTest" });
-            contactInterface.setSession(session);
             final int[] columns = new int[] {
                 FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, DataObject.OBJECT_ID, ContactObject.SUR_NAME };
             final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(
