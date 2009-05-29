@@ -57,18 +57,31 @@ import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.servlet.AjaxException;
 
-
 /**
  * {@link ForwardMailTest}
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ForwardMailTest extends AbstractReplyTest {
 
+    MailTestManager manager;
+
     public ForwardMailTest(String name) {
         super(name);
     }
-    
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        manager = new MailTestManager(getClient());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        manager.cleanUp();
+        super.tearDown();
+    }
+
     public void testShouldForwardWithoutNotifyingFormerRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
         String mail1 = getClient().getValues().getSendAddress();
 
@@ -84,9 +97,48 @@ public class ForwardMailTest extends AbstractReplyTest {
         AbstractReplyTest.assertNullOrEmpty("Recipient field should be empty", myForwardMail.getTo());
 
         AbstractReplyTest.assertNullOrEmpty("Carbon copy field should be empty", myForwardMail.getCc());
-        
+
         AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
-       
     }
 
+    public void testShouldForwardUsingTestMailManager() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+
+        String mail1 = getClient().getValues().getSendAddress();
+
+        TestMail mySentMail = new TestMail(mail1, mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), "This is a forwarded mail");
+        mySentMail = manager.send(mySentMail);
+
+        TestMail myForwardMail = manager.forwardButDoNotSend(mySentMail);
+
+        String subject = myForwardMail.getSubject();
+        assertTrue(
+            "Should contain indicator that this is a forwarded mail in the subject line, which is '" + subject + "'",
+            subject.startsWith("Fwd:"));
+
+        AbstractReplyTest.assertNullOrEmpty("Recipient field should be empty", myForwardMail.getTo());
+
+        AbstractReplyTest.assertNullOrEmpty("Carbon copy field should be empty", myForwardMail.getCc());
+
+        AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
+    }
+
+    public void testShouldForwardUsingTestMailManager2() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+
+        String mail1 = getClient().getValues().getSendAddress();
+
+        TestMail mySentMail = new TestMail(mail1, mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), "This is a forwarded mail");
+
+        TestMail myForwardMail = manager.forwardAndSendBefore(mySentMail);
+
+        String subject = myForwardMail.getSubject();
+        assertTrue(
+            "Should contain indicator that this is a forwarded mail in the subject line, which is '" + subject + "'",
+            subject.startsWith("Fwd:"));
+
+        AbstractReplyTest.assertNullOrEmpty("Recipient field should be empty", myForwardMail.getTo());
+
+        AbstractReplyTest.assertNullOrEmpty("Carbon copy field should be empty", myForwardMail.getCc());
+
+        AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
+    }
 }
