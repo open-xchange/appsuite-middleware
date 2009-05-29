@@ -85,7 +85,7 @@ public class CreatePublicationTablesTask implements UpdateTask {
         "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id)) " + 
         "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
-    private final String CREATE_TABEL_SEQUENCE_PUBLICATIONS = "CREATE TABLE sequence_publications (" +
+    private final String CREATE_TABLE_SEQUENCE_PUBLICATIONS = "CREATE TABLE sequence_publications (" +
         "cid int(10) unsigned NOT NULL, " +
         "id int(10) unsigned NOT NULL, " +
         "PRIMARY KEY  (cid)) " +
@@ -109,11 +109,11 @@ public class CreatePublicationTablesTask implements UpdateTask {
                 Tools.exec(con, CREATE_TABLE_PUBLICATIONS);
             }
             if(!Tools.tableExists(con, "sequence_publications")) {
-                Tools.exec(con, CREATE_TABEL_SEQUENCE_PUBLICATIONS);
+                Tools.exec(con, CREATE_TABLE_SEQUENCE_PUBLICATIONS);
             }
             for(int ctxId : Tools.getContextIDs(con)) {
                 if(!Tools.hasSequenceEntry("sequence_publications", con, ctxId)) {
-                    Tools.exec(con, INSERT_IN_SEQUENCE, contextId);
+                    Tools.exec(con, INSERT_IN_SEQUENCE, ctxId);
                 }
             }
         } catch (SQLException e) {

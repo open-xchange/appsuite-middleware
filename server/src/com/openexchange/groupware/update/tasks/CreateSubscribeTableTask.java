@@ -113,7 +113,7 @@ public class CreateSubscribeTableTask implements UpdateTask {
             }
             for(int ctxId : Tools.getContextIDs(con)) {
                 if(!Tools.hasSequenceEntry("sequence_subscriptions", con, ctxId)) {
-                    Tools.exec(con, INSERT_IN_SEQUENCE, contextId);
+                    Tools.exec(con, INSERT_IN_SEQUENCE, ctxId);
                 }
             }
         } catch (SQLException e) {
