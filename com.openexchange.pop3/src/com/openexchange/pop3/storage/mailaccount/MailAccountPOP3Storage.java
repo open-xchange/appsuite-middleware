@@ -217,6 +217,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
             toCreate.setParentFullname(parentAndName[0]);
             toCreate.setSeparator(separator);
 
+            // Unsubscribe
+            toCreate.setSubscribed(false);
+
             defaultMailAccess.getFolderStorage().createFolder(toCreate);
         }
     }

@@ -210,7 +210,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                     spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                 }
                 // INBOX
-                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), storage.getSeparator(), 1));
+                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), storage.getSeparator(), 0));
                 // Other
                 for (int i = 0; i < defaultFolderNames.length; i++) {
                     final String realFullname;
@@ -239,7 +239,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                             LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                         }
                     } else {
-                        setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator(), 1));
+                        setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator(), 0));
                     }
                 }
                 setDefaultFoldersChecked(true);
@@ -339,6 +339,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     public String createFolder(final MailFolderDescription toCreate) throws MailException {
         toCreate.setParentFullname(getRealFullname(toCreate.getParentFullname()));
+        toCreate.setSubscribed(false);
         final String realFullname = delegatee.createFolder(toCreate);
         return stripPathFromFullname(path, realFullname);
     }
