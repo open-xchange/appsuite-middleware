@@ -92,16 +92,7 @@ public final class POP3Config extends MailConfig {
 
     @Override
     public MailCapabilities getCapabilities() {
-        return pop3Capabilities == null ? MailCapabilities.EMPTY_CAPS : pop3Capabilities;
-    }
-
-    /**
-     * Gets the POP3 capabilities
-     * 
-     * @return The POP3 capabilities
-     */
-    public POP3Capabilities getPOP3Capabilities() {
-        return pop3Capabilities;
+        return new POP3Capabilities();
     }
 
     /**
