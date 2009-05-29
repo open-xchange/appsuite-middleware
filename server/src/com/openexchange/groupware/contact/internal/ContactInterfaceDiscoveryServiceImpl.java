@@ -87,7 +87,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         return provider;
     }
 
-    public ContactInterface getContactInterface(final int folderId, final Session session) throws OXException {
+    public ContactInterface newContactInterface(final int folderId, final Session session) throws OXException {
         final int contextId = session.getContextId();
         final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
         if (provider == null) {

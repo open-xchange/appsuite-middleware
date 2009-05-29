@@ -72,11 +72,14 @@ public interface ContactInterfaceDiscoveryService {
 
     /**
      * Gets a newly created {@link ContactInterface} instance appropriate for specified folder ID and session.
+     * <p>
+     * This method obtains appropriate {@link ContactInterfaceProvider} and invokes
+     * {@link ContactInterfaceProvider#newContactInterface(Session)}.
      * 
      * @param folderId The folder ID
      * @param session The session
      * @return A newly created {@link ContactInterface} instance
      * @throws OXException If returning an appropriate {@link ContactInterface} instance fails
      */
-    public ContactInterface getContactInterface(int folderId, Session session) throws OXException;
+    public ContactInterface newContactInterface(int folderId, Session session) throws OXException;
 }

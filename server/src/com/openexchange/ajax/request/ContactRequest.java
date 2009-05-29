@@ -188,8 +188,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactObj.getParentFolderID(), ctx.getContextId()).newContactInterface(
-            session);
+            ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
 
         contactInterface.insertContactObject(contactObj);
         timestamp = contactObj.getLastModified();
@@ -216,8 +215,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
-            session);
+            ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
 
         contactInterface.updateContactObject(contactobject, inFolder, timestamp);
         timestamp = contactobject.getLastModified();
@@ -258,8 +256,7 @@ public class ContactRequest {
             final ContactWriter contactWriter = new ContactWriter(timeZone);
 
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(folderId, ctx.getContextId()).newContactInterface(
-                session);
+                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
 
             it = contactInterface.getModifiedContactsInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
@@ -305,8 +302,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
-            session);
+            ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
 
         contactInterface.deleteContactObject(objectId, inFolder, timestamp);
 
@@ -353,8 +349,7 @@ public class ContactRequest {
                 if (isOneFolder) {
 
                     final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(oldfolderId, ctx.getContextId()).newContactInterface(
-                        session);
+                        ContactInterfaceDiscoveryService.class).newContactInterface(oldfolderId, session);
 
                     final ContactWriter contactwriter = new ContactWriter(timeZone);
 
@@ -376,8 +371,7 @@ public class ContactRequest {
                     final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
                     for (int a = 0; a < objectIdAndFolderId.length; a++) {
                         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(objectIdAndFolderId[a][1], ctx.getContextId()).newContactInterface(
-                            session);
+                            ContactInterfaceDiscoveryService.class).newContactInterface(objectIdAndFolderId[a][1], session);
 
                         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
@@ -472,8 +466,7 @@ public class ContactRequest {
             final Context ctx = session.getContext();
 
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(folderId, ctx.getContextId()).newContactInterface(
-                session);
+                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
             if (rightHandLimit == 0) {
@@ -521,8 +514,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
-            session);
+            ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
 
         timestamp = new Date(0);
 
@@ -613,8 +605,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(searchObj.getFolder(), ctx.getContextId()).newContactInterface(
-            session);
+            ContactInterfaceDiscoveryService.class).newContactInterface(searchObj.getFolder(), session);
 
         final SearchIterator<ContactObject> it =  contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
         final JSONArray jsonResponseArray = new JSONArray();
@@ -650,8 +641,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(folderId, ctx.getContextId()).newContactInterface(
-            session);
+            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
 
         final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
         final int origObjectId = contactObj.getObjectID();
