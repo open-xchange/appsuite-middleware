@@ -4,8 +4,11 @@
 # The left side contains the values in OX, and the right side contains the value name for ldap
 
 # This part contains the ADS mappings
-#com.openexchange.contacts.ldap.uniqueid				= sAMAccountName
+
+# Required
 com.openexchange.contacts.ldap.mapping.ads.uniqueid				= sAMAccountName
+
+# Optional
 com.openexchange.contacts.ldap.mapping.ads.displayname			= displayName
 com.openexchange.contacts.ldap.mapping.ads.givenname			= givenName
 com.openexchange.contacts.ldap.mapping.ads.surname				= sn
@@ -13,6 +16,13 @@ com.openexchange.contacts.ldap.mapping.ads.password				=
 com.openexchange.contacts.ldap.mapping.ads.email1				= mail
 com.openexchange.contacts.ldap.mapping.ads.department			=
 com.openexchange.contacts.ldap.mapping.ads.company				=
+
+# The name of the attribute where the name of distributionlists is stored
+com.openexchange.contacts.ldap.mapping.ads.distributionlistname = name
+
+# This attribute must be set to have a uid field for distributionlists because this
+# differs from the uid for user object on some LDAP servers
+com.openexchange.contacts.ldap.mapping.ads.distributionuid = sAMAccountName
 
 com.openexchange.contacts.ldap.mapping.ads.birthday				=
 com.openexchange.contacts.ldap.mapping.ads.anniversary			=

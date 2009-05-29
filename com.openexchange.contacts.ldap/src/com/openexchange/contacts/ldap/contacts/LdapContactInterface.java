@@ -83,13 +83,13 @@ import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
+import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
 import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -144,15 +144,15 @@ public class LdapContactInterface implements ContactInterface {
     
     private final int context;
     
-    private final FolderProperties folderprop;
-    
     private final int folderid;
+    
+    private final FolderProperties folderprop;
     
     private final Map<Integer, String> keys = new ConcurrentHashMap<Integer, String>();
     
-    private final Map<String, Integer> values = new ConcurrentHashMap<String, Integer>();
-    
     private Session session;
+    
+    private final Map<String, Integer> values = new ConcurrentHashMap<String, Integer>();
     
     public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid) {
         this.context = context;
@@ -162,9 +162,56 @@ public class LdapContactInterface implements ContactInterface {
     }
     
     
+    private static String escapeLDAPSearchFilter(final String ldapfilter) {
+        // According to RFC2254 section 4 we escape the following chars so that no LDAP injection can be made:
+        // Character       ASCII value
+        // ---------------------------
+        // *               0x2a
+        // (               0x28
+        // )               0x29
+        // \               0x5c
+        // NUL             0x00
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ldapfilter.length(); i++) {
+            char curChar = ldapfilter.charAt(i);
+            switch (curChar) {
+                case '\\':
+                    sb.append("\\5c");
+                    break;
+                case '*':
+                    sb.append("\\2a");
+                    break;
+                case '(':
+                    sb.append("\\28");
+                    break;
+                case ')':
+                    sb.append("\\29");
+                    break;
+                case '\u0000': 
+                    sb.append("\\00"); 
+                    break;
+                default:
+                    sb.append(curChar);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static String joinValuesWithSeparator(final NamingEnumeration<?> all, final String separator) {
+        final StringBuilder sb = new StringBuilder();
+        while (all.hasMoreElements()) {
+            sb.append(all.nextElement());
+            sb.append(separator);
+        }
+        sb.delete(sb.length() - separator.length(), sb.length());
+        return sb.toString();
+    }
+
+
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
         throw new LdapException(Code.DELETE_NOT_POSSIBLE);
     }
+
 
     public SearchIterator<ContactObject> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
@@ -181,28 +228,38 @@ public class LdapContactInterface implements ContactInterface {
             throw new LdapException(Code.FOLDERID_OBJECT_NULL);
         }
         final ArrayList<ContactObject> arrayList;
-        final String searchfilter = folderprop.getSearchfilter();
-        final StringBuilder sb = new StringBuilder();
-        sb.append("(&");
-        sb.append(searchfilter);
+
         final Mappings mappings = folderprop.getMappings();
+        final ContactTypes contacttype = folderprop.getContacttypes();
+        
+        final boolean both = ContactTypes.both.equals(contacttype);
         if (searchobject.isStartLetter()) {
-            sb.append("(");
-            sb.append(mappings.getSurname());
-            sb.append("=");
-            sb.append(escapeLDAPSearchFilter(searchobject.getPattern()));
-            sb.append("*))");
-            arrayList = getLDAPContacts(folderId, columns, sb.toString(), null);
+            String userfilter = null;
+            String distrifilter = null;
+            if (both || ContactTypes.users.equals(contacttype)) {
+                userfilter = "(" + folderprop.getMappings().getSurname() + "=" + escapeLDAPSearchFilter(searchobject.getPattern()) + "*)";
+            }
+            if (both || ContactTypes.distributionlists.equals(contacttype)) {
+                distrifilter = "(" + folderprop.getMappings().getDistributionlistname() + "=" + escapeLDAPSearchFilter(searchobject.getPattern()) + "*)";
+            }
+            arrayList = getLDAPContacts(folderId, columns, userfilter, distrifilter, null);
         } else {
-            sb.append("(|");
-            addFilterFor(mappings.getDisplayname(), searchobject.getDisplayName(), sb);
-            addFilterFor(mappings.getGivenname(), searchobject.getGivenName(), sb);
-            addFilterFor(mappings.getSurname(), searchobject.getSurname(), sb);
-            addFilterFor(mappings.getEmail1(), searchobject.getEmail1(), sb);
-            addFilterFor(mappings.getEmail2(), searchobject.getEmail2(), sb);
-            addFilterFor(mappings.getEmail3(), searchobject.getEmail3(), sb);
-            sb.append("))");
-            arrayList = getLDAPContacts(folderId, columns, sb.toString(), null);
+            final StringBuilder user = new StringBuilder();
+            final StringBuilder distri = new StringBuilder();
+            if (both || ContactTypes.users.equals(contacttype)) {
+                user.append("(|");
+                addFilterFor(mappings.getDisplayname(), searchobject.getDisplayName(), user);
+                addFilterFor(mappings.getGivenname(), searchobject.getGivenName(), user);
+                addFilterFor(mappings.getSurname(), searchobject.getSurname(), user);
+                addFilterFor(mappings.getEmail1(), searchobject.getEmail1(), user);
+                addFilterFor(mappings.getEmail2(), searchobject.getEmail2(), user);
+                addFilterFor(mappings.getEmail3(), searchobject.getEmail3(), user);
+                user.append(")");
+            }
+            if (both || ContactTypes.distributionlists.equals(contacttype)) {
+                addFilterFor(mappings.getDistributionlistname(), searchobject.getDisplayName(), distri);
+            }
+            arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null);
         }
         
         sorting(orderBy, orderDir, valueOf, arrayList);
@@ -215,7 +272,14 @@ public class LdapContactInterface implements ContactInterface {
         final Order valueOf = getOrder(orderDir);
         
         final Set<Integer> columns = getColumnSet(cols);
-        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, folderprop.getSearchfilter(), null);
+        if (0 == orderBy) {
+            columns.add(ContactObject.SUR_NAME);
+            columns.add(ContactObject.DISPLAY_NAME);
+            columns.add(ContactObject.COMPANY);
+            columns.add(ContactObject.EMAIL1);
+            columns.add(ContactObject.EMAIL2);
+        }
+        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, null, null, null);
         
         // Get only the needed parts...
         final List<ContactObject> subList = getSubList(from, to, arrayList);
@@ -231,11 +295,9 @@ public class LdapContactInterface implements ContactInterface {
         return null;
     }
 
-
     public int getFolderId() {
         return folderid;
     }
-
 
     public LdapServer getLdapServer() {
         final LdapServer ldapServer = new LdapServer();
@@ -263,13 +325,23 @@ public class LdapContactInterface implements ContactInterface {
         for (final int[] object : objectIdAndInFolder) {
             final int object_id = object[0];
             final int folder_id = object[1];
-            final String searchfilter = folderprop.getSearchfilter();
-            final String filterpart = "(&" + searchfilter + "(" + folderprop.getMappings().getUniqueid() + "=";
-            if (folderprop.isMemorymapping()) {
-                contacts.addAll(getLDAPContacts(folder_id, columns, filterpart + oxUidToLdapUid(object_id) + "))", null));
-            } else {
-                contacts.addAll(getLDAPContacts(folder_id, columns, filterpart + object_id + "))", null));
+            
+            String userfilter = null;
+            String distrifilter = null;
+            final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
+            // Here we have to differentiate between users, distributionlists or both
+            if (both || ContactTypes.users.equals(folderprop.getContacttypes())) {
+                userfilter = "(" + folderprop.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id) + ")";
             }
+            if (both || ContactTypes.distributionlists.equals(folderprop.getContacttypes())) {
+                distrifilter = "(" + folderprop.getMappings().getDistributionuid() + "=" + oxUidToLdapUid(object_id) + ")";
+            }
+            if (folderprop.isMemorymapping()) {
+                contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null));
+            } else {
+                contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null));
+            }
+            
         }
         return new ArrayIterator<ContactObject>(contacts.toArray(new ContactObject[contacts.size()]));
     }
@@ -291,7 +363,7 @@ public class LdapContactInterface implements ContactInterface {
     public void setSession(final Session s) throws OXException {
         session = s;
     }
-
+    
     public void updateContactObject(final ContactObject co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
         LOG.info("Called updateContactObject");
     }
@@ -304,17 +376,17 @@ public class LdapContactInterface implements ContactInterface {
         sb.append("*)");
     }
 
-
-    private String[] getAttributes(final Set<Integer> columns) {
+    private List<String> getAttributes(final Set<Integer> columns, boolean distributionlist) {
         final List<String> retval = new ArrayList<String>();
         for (final Integer col : columns) {
-            final String fieldFromColumn = getFieldFromColumn(col);
+            final String fieldFromColumn = getFieldFromColumn(col, distributionlist);
             if (null != fieldFromColumn && fieldFromColumn.length() != 0) {
                 retval.add(fieldFromColumn);
             }
         }
-        return retval.toArray(new String[retval.size()]);
+        return retval;
     }
+
 
     private Set<Integer> getColumnSet(final int[] cols) {
         final Set<Integer> columns = new HashSet<Integer>();
@@ -324,12 +396,14 @@ public class LdapContactInterface implements ContactInterface {
         return columns;
     }
 
+
     /**
-     * @param instance
      * @param col
+     * @param distributionlist TODO
+     * @param instance
      * @return a String value or null if no corresponding entry was found
      */
-    private String getFieldFromColumn(final Integer col) {
+    private String getFieldFromColumn(final Integer col, final boolean distributionlist) {
         final Mappings mappings = folderprop.getMappings();
         switch (col) {
         case ContactObject.ANNIVERSARY:
@@ -367,7 +441,11 @@ public class LdapContactInterface implements ContactInterface {
         case ContactObject.DEPARTMENT:
             return mappings.getDepartment();
         case ContactObject.DISPLAY_NAME:
-            return mappings.getDisplayname();
+            if (distributionlist) {
+                return mappings.getDistributionlistname();
+            } else {
+                return mappings.getDisplayname();
+            }
         case ContactObject.EMAIL1:
             return mappings.getEmail1();
         case ContactObject.EMAIL2:
@@ -405,7 +483,11 @@ public class LdapContactInterface implements ContactInterface {
         case ContactObject.NUMBER_OF_EMPLOYEE:
             return mappings.getNumber_of_employee();
         case DataObject.OBJECT_ID:
-            return mappings.getUniqueid();
+            if (distributionlist) {
+                return mappings.getDistributionuid();
+            } else {
+                return mappings.getUniqueid();
+            }
         case ContactObject.POSITION:
             return mappings.getPosition();
         case ContactObject.POSTAL_CODE_BUSINESS:
@@ -526,7 +608,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private ArrayList<ContactObject> getLDAPContacts(final int folderId, final Set<Integer> columns, final String filter, final SortInfo sortField) throws LdapException {
+    private ArrayList<ContactObject> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField) throws LdapException {
         final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
         final LdapContext context;
         try {
@@ -542,10 +624,11 @@ public class LdapContactInterface implements ContactInterface {
 //            }
         try {
             try {
-                byte[] cookie = null;
+                final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
+                final boolean distributionlist = both || ContactTypes.distributionlists.equals(folderprop.getContacttypes());
                 final int pagesize = folderprop.getPagesize();
                 if (null != sortField && folderprop.getSorting().equals(Sorting.server)) {
-                    final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField()), sortField.getSort().equals(Order.asc), null);
+                    final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField(), distributionlist), sortField.getSort().equals(Order.asc), null);
                     final SortKey[] sortKeyArray = new SortKey[] { sortKey };
                     final Control[] controls = new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
                     context.setRequestControls(controls);
@@ -553,34 +636,20 @@ public class LdapContactInterface implements ContactInterface {
                     final Control[] controls = new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
                     context.setRequestControls(controls);
                 }
-                final SearchControls searchControls = getSearchControl(columns);
-                do {
-                    final NamingEnumeration<SearchResult> search = context.search(folderprop.getBaseDN(), filter, searchControls);
-                    while (null != search && search.hasMore()) {
-                        final SearchResult next = search.next();
-                        final Attributes attributes = next.getAttributes();
-                        final ContactObject contact = Mapper.getContact(getLdapGetter(attributes), columns, folderprop, getUidInterface());
-                        if (columns.contains(FolderChildObject.FOLDER_ID)) {
-                            contact.setParentFolderID(folderId);
-                        }
-                        if (columns.contains(DataObject.CREATED_BY)) {
-                            contact.setCreatedBy(admin_id);
-                        }
-                        arrayList.add(contact);
+                if (both || ContactTypes.users.equals(folderprop.getContacttypes())) {
+                    if (null != usersearchfilter) {
+                        searchAndFetch(false, folderId, columns, folderprop.getBaseDN(), "(&" + folderprop.getSearchfilter() + usersearchfilter + ")", arrayList, context, pagesize);
+                    } else {
+                        searchAndFetch(false, folderId, columns, folderprop.getBaseDN(), folderprop.getSearchfilter(), arrayList, context, pagesize);
                     }
-                    // Examine the paged results control response 
-                    final Control[] controls = context.getResponseControls();
-                    if (controls != null) {
-                        for (int i = 0; i < controls.length; i++) {
-                            if (controls[i] instanceof PagedResultsResponseControl) {
-                                final PagedResultsResponseControl prrc = (PagedResultsResponseControl) controls[i];
-                                cookie = prrc.getCookie();
-                            }
-                        }
+                }
+                if (distributionlist) {
+                    if (null != distributionsearchfilter) {
+                        searchAndFetch(true, folderId, columns, folderprop.getBaseDNDistributionlist(), "(&" + folderprop.getSearchfilterDistributionlist() + distributionsearchfilter + ")", arrayList, context, pagesize);
+                    } else {
+                        searchAndFetch(true, folderId, columns, folderprop.getBaseDNDistributionlist(), folderprop.getSearchfilterDistributionlist(), arrayList, context, pagesize);
                     }
-                    // Re-activate paged results
-                    context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
-                } while (null != cookie);
+                }
                 
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
@@ -596,95 +665,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private String getLogin() throws LdapException {
-        final User user = getUserObject();
-        final LoginSource userLoginSource = folderprop.getUserLoginSource();
-        switch (userLoginSource) {
-        case login:
-            final String imapLogin = user.getImapLogin();
-            if (null == imapLogin) {
-                throw new LdapException(Code.IMAP_LOGIN_NULL, user.getLoginInfo());
-            } else {
-                return imapLogin;
-            }
-        case mail:
-            final String mail = user.getMail();
-            if (null == mail) {
-                throw new LdapException(Code.PRIMARY_MAIL_NULL, user.getLoginInfo());
-            } else {
-                return mail;
-            }
-        case name:
-            return user.getLoginInfo();
-        default:
-            throw new LdapException(Code.GIVEN_USER_LOGIN_SOURCE_NOT_FOUND, userLoginSource);
-        }
-    }
-
-
-    private User getUserObject() throws LdapException {
-        final User user;
-        try {
-            user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e) {
-            throw new LdapException(Code.ERROR_GETTING_USER_Object, e);
-        }
-        return user;
-    }
-
-
-    private UidInterface getUidInterface() {
-        return new UidInterface() {
-
-            public Integer getUid(final String uid) throws LdapException {
-                return ldapUidToOxUid(uid);
-            }
-
-        };
-    }
-
-
-    private SearchControls getSearchControl(final Set<Integer> columns) {
-        final SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScope()));
-        searchControls.setCountLimit(0);
-        searchControls.setReturningAttributes(getAttributes(columns));
-        return searchControls;
-    }
-
-//    /**
-//     * Is paged result control supported?
-//     *
-//     * Query the rootDSE object to find out if the paged result control
-//     * is supported.
-//     */
-//    private static boolean isPagedResultControlSupported(LdapContext ctx) throws NamingException
-//    {
-//        SearchControls ctl = new SearchControls();
-//        ctl.setReturningAttributes(new String[]{"supportedControl"});
-//        ctl.setSearchScope(SearchControls.OBJECT_SCOPE);
-//
-//        /* search for the rootDSE object */
-//        NamingEnumeration<?> results = ctx.search("", "(objectClass=*)", ctl);
-//
-//        while(results.hasMore()){
-//            SearchResult entry = (SearchResult)results.next();
-//            NamingEnumeration<?> attrs = entry.getAttributes().getAll();
-//            while (attrs.hasMore()){
-//                Attribute attr = (Attribute)attrs.next();
-//                NamingEnumeration<?> vals = attr.getAll();
-//                while (vals.hasMore()){
-//                    String value = (String) vals.next();
-//                    if (value.equals("1.2.840.113556.1.4.319")) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-//        return false;
-//    }
-    
-    private LdapGetter getLdapGetter(final Attributes attributes) {
+    private LdapGetter getLdapGetter(final Attributes attributes, final LdapContext context, final String objectfullname) {
         return new LdapGetter() {
     
             public String getAttribute(final String attributename) throws LdapException {
@@ -724,7 +705,7 @@ public class LdapContactInterface implements ContactInterface {
                     throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
                 }
             }
-    
+            
             public int getIntAttribute(final String attributename) throws LdapException {
                 try {
                     final Attribute attribute = attributes.get(attributename);
@@ -743,8 +724,68 @@ public class LdapContactInterface implements ContactInterface {
                     throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
                 }
             }
+    
+            public LdapGetter getLdapGetterForDN(final String dn) throws LdapException {
+                try {
+                    return getLdapGetter(context.getAttributes(dn), context, dn);
+                } catch (final NamingException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                }
+            }
+
+            public List<String> getMultiValueAttribute(final String attributename) throws LdapException {
+                final List<String> retval = new ArrayList<String>();
+                try {
+                    final Attribute attribute = attributes.get(attributename);
+                    if (null != attribute) {
+                        if (1 < attribute.size()) {
+                            final NamingEnumeration<?> all = attribute.getAll();
+                            while (all.hasMoreElements()) {
+                                retval.add((String)all.nextElement());
+                            }
+                        } else {
+                            retval.add((String)attribute.get());
+                        }
+                        return retval;
+                    } else {
+                        return retval;
+                    }
+                } catch (final NamingException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                }
+            }
+
+            public String getObjectFullName() throws LdapException {
+                return objectfullname;
+            }
             
         };
+    }
+
+
+    private String getLogin() throws LdapException {
+        final User user = getUserObject();
+        final LoginSource userLoginSource = folderprop.getUserLoginSource();
+        switch (userLoginSource) {
+        case login:
+            final String imapLogin = user.getImapLogin();
+            if (null == imapLogin) {
+                throw new LdapException(Code.IMAP_LOGIN_NULL, user.getLoginInfo());
+            } else {
+                return imapLogin;
+            }
+        case mail:
+            final String mail = user.getMail();
+            if (null == mail) {
+                throw new LdapException(Code.PRIMARY_MAIL_NULL, user.getLoginInfo());
+            } else {
+                return mail;
+            }
+        case name:
+            return user.getLoginInfo();
+        default:
+            throw new LdapException(Code.GIVEN_USER_LOGIN_SOURCE_NOT_FOUND, userLoginSource);
+        }
     }
 
 
@@ -755,6 +796,61 @@ public class LdapContactInterface implements ContactInterface {
             valueOf = Order.valueOf(lowerCase);
         }
         return valueOf;
+    }
+
+    private SearchControls getSearchControl(final Set<Integer> columns) {
+        final SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScope()));
+        searchControls.setCountLimit(0);
+        final List<String> array = getAttributes(columns, false);
+        searchControls.setReturningAttributes(array.toArray(new String[array.size()]));
+        return searchControls;
+    }
+
+    private SearchControls getSearchControlDistri(final Set<Integer> columns) {
+        final SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScopeDistributionlist()));
+        searchControls.setCountLimit(0);
+        final List<String> array = getAttributes(columns, true);
+        array.add("member");
+        searchControls.setReturningAttributes(array.toArray(new String[array.size()]));
+        return searchControls;
+    }
+
+//    /**
+//     * Is paged result control supported?
+//     *
+//     * Query the rootDSE object to find out if the paged result control
+//     * is supported.
+//     */
+//    private static boolean isPagedResultControlSupported(LdapContext ctx) throws NamingException
+//    {
+//        SearchControls ctl = new SearchControls();
+//        ctl.setReturningAttributes(new String[]{"supportedControl"});
+//        ctl.setSearchScope(SearchControls.OBJECT_SCOPE);
+//
+//        /* search for the rootDSE object */
+//        NamingEnumeration<?> results = ctx.search("", "(objectClass=*)", ctl);
+//
+//        while(results.hasMore()){
+//            SearchResult entry = (SearchResult)results.next();
+//            NamingEnumeration<?> attrs = entry.getAttributes().getAll();
+//            while (attrs.hasMore()){
+//                Attribute attr = (Attribute)attrs.next();
+//                NamingEnumeration<?> vals = attr.getAll();
+//                while (vals.hasMore()){
+//                    String value = (String) vals.next();
+//                    if (value.equals("1.2.840.113556.1.4.319")) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+    
+    private String getStringFromStringBuilder(final StringBuilder user) {
+        return 0 == user.length() ? null : user.toString();
     }
 
 
@@ -774,31 +870,27 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private static String joinValuesWithSeparator(final NamingEnumeration<?> all, final String separator) {
-        final StringBuilder sb = new StringBuilder();
-        while (all.hasMoreElements()) {
-            sb.append(all.nextElement());
-            sb.append(separator);
-        }
-        sb.delete(sb.length() - separator.length(), sb.length());
-        return sb.toString();
+    private UidInterface getUidInterface() {
+        return new UidInterface() {
+
+            public Integer getUid(final String uid) throws LdapException {
+                return ldapUidToOxUid(uid);
+            }
+
+        };
     }
 
 
-    private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<ContactObject> subList) {
-        if (null != orderDir && folderprop.getSorting().equals(Sorting.groupware)) {
-            Collections.sort(subList, new ContactComparator(orderBy));
+    private User getUserObject() throws LdapException {
+        final User user;
+        try {
+            user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+        } catch (final ContextException e) {
+            throw new LdapException(Code.ERROR_GETTING_USER_Object, e);
         }
+        return user;
     }
-    
-    private String oxUidToLdapUid(final int uid) throws LdapException {
-        final String ldapUid = keys.get(Autoboxing.I(uid));
-        if (null != ldapUid) {
-            return ldapUid;
-        } else {
-            throw new LdapException(Code.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND, String.valueOf(uid));
-        }
-    }
+
 
     private Integer ldapUidToOxUid(final String uid) throws LdapException {
         final Integer number = values.get(uid);
@@ -812,39 +904,59 @@ public class LdapContactInterface implements ContactInterface {
             return newvalue;
         }
     }
-
-    private static String escapeLDAPSearchFilter(final String ldapfilter) {
-        // According to RFC2254 section 4 we escape the following chars so that no LDAP injection can be made:
-        // Character       ASCII value
-        // ---------------------------
-        // *               0x2a
-        // (               0x28
-        // )               0x29
-        // \               0x5c
-        // NUL             0x00
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < ldapfilter.length(); i++) {
-            char curChar = ldapfilter.charAt(i);
-            switch (curChar) {
-                case '\\':
-                    sb.append("\\5c");
-                    break;
-                case '*':
-                    sb.append("\\2a");
-                    break;
-                case '(':
-                    sb.append("\\28");
-                    break;
-                case ')':
-                    sb.append("\\29");
-                    break;
-                case '\u0000': 
-                    sb.append("\\00"); 
-                    break;
-                default:
-                    sb.append(curChar);
-            }
+    
+    private String oxUidToLdapUid(final int uid) throws LdapException {
+        final String ldapUid = keys.get(Autoboxing.I(uid));
+        if (null != ldapUid) {
+            return ldapUid;
+        } else {
+            throw new LdapException(Code.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND, String.valueOf(uid));
         }
-        return sb.toString();
+    }
+
+    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<ContactObject> arrayList, final LdapContext context, final int pagesize) throws NamingException, LdapException, IOException {
+        final SearchControls searchControls;
+        if (distributionslist) {
+            searchControls = getSearchControlDistri(columns);
+        } else {
+            searchControls = getSearchControl(columns);
+        }
+        byte[] cookie = null;
+        do {
+            final NamingEnumeration<SearchResult> search = context.search(baseDN, filter, searchControls);
+            while (null != search && search.hasMore()) {
+                final SearchResult next = search.next();
+                final Attributes attributes = next.getAttributes();
+                final LdapGetter ldapGetter = getLdapGetter(attributes, context, next.getNameInNamespace());
+                if (distributionslist) {
+                    final ContactObject retval = Mapper.getDistriContact(ldapGetter, columns, this.folderprop, getUidInterface(), folderId, this.admin_id);
+                    arrayList.add(retval);
+                } else {
+                    final ContactObject contact = Mapper.getContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, this.admin_id);
+                    arrayList.add(contact);
+                }
+            }
+            // Examine the paged results control response 
+            final Control[] controls = context.getResponseControls();
+            if (controls != null) {
+                for (int i = 0; i < controls.length; i++) {
+                    if (controls[i] instanceof PagedResultsResponseControl) {
+                        final PagedResultsResponseControl prrc = (PagedResultsResponseControl) controls[i];
+                        cookie = prrc.getCookie();
+                    }
+                }
+            }
+            // Re-activate paged results
+            context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
+        } while (null != cookie);
+    }
+
+    private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<ContactObject> subList) {
+        if (null != orderDir && folderprop.getSorting().equals(Sorting.groupware)) {
+            Collections.sort(subList, new ContactComparator(orderBy));
+        } else {
+            // Default sorting
+            Collections.sort(subList, new ContactComparator(-1));
+        }
     }
 }

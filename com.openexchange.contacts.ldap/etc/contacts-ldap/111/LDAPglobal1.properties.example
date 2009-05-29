@@ -31,7 +31,7 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.sorting=groupware
 com.openexchange.contacts.ldap.context111.LDAPglobal1.userLoginSource=name
 
 # Specify the user search filter here (optional). This is the first part which can be chose freely
-com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchFilter=(objectclass=person)
+com.openexchange.contacts.ldap.context111.LDAPglobal1.userSearchFilter=(objectclass=user)
 
 # Specify the user search scope here (optional). Possible value are sub, base and one. If this
 # value is left empty the default searchScope will be used
@@ -72,5 +72,21 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.mappingfile=mapping.ads.pr
 com.openexchange.contacts.ldap.context111.LDAPglobal1.foldername=LDAPglobal1
 
 # Specify the searchfilter for the global ldap folder here
-com.openexchange.contacts.ldap.context111.LDAPglobal1.searchfilter=(objectclass=person)
+com.openexchange.contacts.ldap.context111.LDAPglobal1.searchfilter=(objectclass=user)
 
+# Specify what types of contacts should be displayed. Maybe "users", "distributionlists", or "both"
+com.openexchange.contacts.ldap.context111.LDAPglobal1.contactTypes=both
+
+# Specify the searchfilter for distributionlists of the global ldap folder here. This value is optional and might
+# be specified if the search filter is different from the normal searchfilter. So if this value is empty the default
+# searchfilter will be used.
+com.openexchange.contacts.ldap.context111.LDAPglobal1.searchfilter_distributionlist=(objectclass=group)
+
+# Specify the search base for distributionlists here (sub, base, one). This should only be specified if this
+# is different from the searchScope parameter.
+com.openexchange.contacts.ldap.context111.LDAPglobal1.searchScope_distributionlist=sub
+
+# Specify the baseDN for distributionlists of the global ldap folder here. This value is optional and might
+# be specified if this baseDN is different from the normal baseDN. So if this value is empty the default
+# baseDN will be used
+com.openexchange.contacts.ldap.context111.LDAPglobal1.baseDN_distributionlist=cn=users,DC=exchange,DC=local

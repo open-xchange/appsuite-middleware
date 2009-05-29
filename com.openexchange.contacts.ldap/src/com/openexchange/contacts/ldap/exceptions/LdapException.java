@@ -145,7 +145,23 @@ public class LdapException extends OXException {
         /**
          * The primary mail for user "%s" is null
          */
-        PRIMARY_MAIL_NULL("The primary mail for user \"%s\" is null", Category.USER_CONFIGURATION, 16);
+        PRIMARY_MAIL_NULL("The primary mail for user \"%s\" is null", Category.USER_CONFIGURATION, 16),
+        
+        /**
+         * The mail address "%s" for distributionentry is invalid
+         */
+        MAIL_ADDRESS_DISTRI_INVALID("The mail address \"%s\" for distributionentry is invalid", Category.USER_CONFIGURATION, 17),
+
+        /**
+         * The contact type "%s" is not known
+         */
+        UNKNOWN_CONTACT_TYPE("The contact type \"%s\" is not known", Category.USER_CONFIGURATION, 18),
+
+        /**
+         * The attribute "%s" is missing for object "%s"
+         */
+        MISSING_ATTRIBUTE("The attribute \"%s\" is missing for object \"%s\"", Category.USER_CONFIGURATION, 19);
+
         
         /**
          * Message of the exception.
