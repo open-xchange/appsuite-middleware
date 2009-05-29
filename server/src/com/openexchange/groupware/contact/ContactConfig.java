@@ -143,7 +143,11 @@ public class ContactConfig {
         /**
          * Determines the field that will be used if contacts should be searched by a starting letter.
          */
-        LETTER_FIELD("contact_first_letter_field", "field02");
+        LETTER_FIELD("contact_first_letter_field", "field02"),
+        /**
+         * Enables/Disables the start letter based quick select of contacts
+         */
+        QUICK_SELECT("com.openexchange.contact.quickSelect", Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.
