@@ -164,7 +164,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws SubscriptionException {
+    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException {
         List<Subscription> retval = null;
         
         Connection readConnection = null;
@@ -318,7 +318,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             update.SET("source_id", PLACEHOLDER);
             values.add(subscription.getSource().getId());
         }
-        if (subscription.getFolderId() > 0) {
+        if (subscription.getFolderId() != null) {
             update.SET("folder_id", PLACEHOLDER);
             values.add(subscription.getFolderId());
         }
@@ -381,7 +381,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         while (resultSet.next()) {
             Subscription subscription = new Subscription();
             subscription.setContext(ctx);
-            subscription.setFolderId(resultSet.getInt("folder_id"));
+            subscription.setFolderId(resultSet.getString("folder_id"));
             subscription.setId(resultSet.getInt("id"));
             subscription.setLastUpdate(resultSet.getLong("last_update"));
             subscription.setUserId(resultSet.getInt("user_id"));

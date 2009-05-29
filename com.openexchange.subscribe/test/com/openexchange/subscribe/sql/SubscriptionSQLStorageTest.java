@@ -94,7 +94,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     
     protected Context ctx = new SimContext(1);
     
-    protected int folderId = 1;
+    protected String folderId = "eins";
     
     protected int userId = 44;
     
@@ -316,7 +316,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
         
     }
     
-    protected void clearFolder(int folderId) throws Exception {
+    protected void clearFolder(String folderId) throws Exception {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
         
         DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("folder_id", PLACEHOLDER));

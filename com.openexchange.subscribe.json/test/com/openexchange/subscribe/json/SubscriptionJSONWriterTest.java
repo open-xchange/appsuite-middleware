@@ -76,7 +76,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
     public void setUp() {
         subscription = new Subscription();
-        subscription.setFolderId(12);
+        subscription.setFolderId("12");
         subscription.setId(2);
 
         SubscriptionSource source = new SubscriptionSource();

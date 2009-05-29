@@ -61,7 +61,7 @@ public class Subscription {
     
     private int id;
     
-    private int folderId;
+    private String folderId;
 
     private Context context;
 
@@ -73,11 +73,21 @@ public class Subscription {
     
     private Map<String, Object> configuration= new HashMap<String, Object>();
 
-    public int getFolderId() {
+    public String getFolderId() {
         return folderId;
     }
+    
+    public int getFolderIdAsInt() throws SubscriptionException {
+        int retval = -1;
+        try {
+            retval = Integer.parseInt(folderId);
+        } catch (NumberFormatException e) {
+            throw SubscriptionErrorMessage.ParsingError.create(e);
+        }
+        return retval;
+    }
 
-    public void setFolderId(int folderId) {
+    public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
 

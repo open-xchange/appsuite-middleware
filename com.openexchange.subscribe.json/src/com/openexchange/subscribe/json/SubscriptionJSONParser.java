@@ -86,7 +86,7 @@ public class SubscriptionJSONParser {
         if(object.has("id")) {
             subscription.setId(object.getInt("id"));
         }
-        subscription.setFolderId(object.getInt("folder"));
+        subscription.setFolderId(object.getString("folder"));
         SubscriptionSource source = discovery.getSource(object.getString("source"));
         subscription.setSource(source);
         JSONObject config = object.getJSONObject(subscription.getSource().getId());

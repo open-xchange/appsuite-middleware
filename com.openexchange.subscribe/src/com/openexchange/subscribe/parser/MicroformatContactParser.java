@@ -12,10 +12,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionHandler;
 import com.openexchange.subscribe.SubscriptionSession;
 
@@ -55,13 +57,13 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.parser.SubscriptionHandler#handleSubscription(com.openexchange.subscribe.Subscription)
      */
-    public void handleSubscription(Subscription subscription){
+    public void handleSubscription(Subscription subscription) throws AbstractOXException{
         try {
             String website = readSubscription(subscription);
             
             parse( website );
             
-            storeContacts(new SubscriptionSession(subscription), subscription.getFolderId(), this.getContacts());
+            storeContacts(new SubscriptionSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
             
         } catch (IOException e) {
             // TODO Auto-generated catch block

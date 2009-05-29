@@ -69,7 +69,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public static CryptoService CRYPTO;
 
-    public Collection<Subscription> loadSubscriptions(Context ctx, int folderId, String secret) throws AbstractOXException {
+    public Collection<Subscription> loadSubscriptions(Context ctx, String folderId, String secret) throws AbstractOXException {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         for (Subscription subscription : allSubscriptions) {

@@ -76,7 +76,11 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     /**
      * Could not find Subscription (according ID and Context).
      */
-    SubscriptionNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Subscription");
+    SubscriptionNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Subscription"),
+    /**
+     * Parsing error.
+     */
+    ParsingError(Category.CODE_ERROR, 6, "Check value to parse.", "Parsing error.");
 
     private Category category;
     private int errorCode;

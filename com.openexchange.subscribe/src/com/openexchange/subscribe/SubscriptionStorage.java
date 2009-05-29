@@ -61,7 +61,7 @@ public interface SubscriptionStorage {
 
     public void forgetSubscription(Subscription subscription) throws SubscriptionException;
 
-    public List<Subscription> getSubscriptions(Context ctx, int folderId) throws SubscriptionException;
+    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException;
 
     public Subscription getSubscription(Context ctx, int id) throws SubscriptionException;
     

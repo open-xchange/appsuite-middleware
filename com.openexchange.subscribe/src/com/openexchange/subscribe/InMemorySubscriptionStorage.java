@@ -80,7 +80,7 @@ public class InMemorySubscriptionStorage implements SubscriptionStorage {
         if(current == null) {
             subscriptions(cid).put(subscription.getId(), subscription);
         } else {
-            if (subscription.getFolderId() != -1) {
+            if (subscription.getFolderId() != null) {
                 current.setFolderId(subscription.getFolderId());
             }
             
@@ -105,10 +105,10 @@ public class InMemorySubscriptionStorage implements SubscriptionStorage {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscriptionStorage#getSubscriptions(int, int)
      */
-    public List<Subscription> getSubscriptions(Context ctx, int folderId) {
+    public List<Subscription> getSubscriptions(Context ctx, String folderId) {
         List<Subscription> found = new LinkedList<Subscription>();
         for(Subscription subscription : subscriptions(ctx.getContextId()).values()) {
-            if(subscription.getFolderId() == folderId) {
+            if(subscription.getFolderId().equals(folderId)) {
                 found.add(subscription);
             }
         }

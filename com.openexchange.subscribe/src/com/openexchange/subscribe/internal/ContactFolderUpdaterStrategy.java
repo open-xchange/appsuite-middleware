@@ -112,7 +112,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public Collection<ContactObject> getData(Subscription subscription, Object session) throws AbstractOXException {
         RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
         
-        int folderId = subscription.getFolderId();
+        int folderId = subscription.getFolderIdAsInt();
         int numberOfContacts = contacts.getNumberOfContacts(folderId);
         SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.OBJECT_ID, "ASC", COMPARISON_COLUMNS);
         List<ContactObject> retval = new ArrayList<ContactObject>();
@@ -133,7 +133,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public void save(ContactObject newElement, Object session) throws AbstractOXException {
         RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
-        newElement.setParentFolderID(subscription.getFolderId());
+        newElement.setParentFolderID(subscription.getFolderIdAsInt());
         
         contacts.insertContactObject(newElement);
     }

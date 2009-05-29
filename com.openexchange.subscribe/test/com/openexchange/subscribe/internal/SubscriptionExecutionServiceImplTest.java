@@ -92,6 +92,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         Subscription subscription = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(12);
+        subscription.setFolderId("12");
         subscribeService.setSubscription( subscription );
         subscribeService.setContent(Arrays.asList("entry1", "entry2", "entry3"));
         source.setSubscribeService( subscribeService );

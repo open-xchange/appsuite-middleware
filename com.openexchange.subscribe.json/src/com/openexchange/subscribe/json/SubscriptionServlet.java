@@ -217,7 +217,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
         for (SubscriptionSource subscriptionSource : sources) {
-            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder.getObjectID(), secret);
+            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, String.valueOf(folder.getObjectID()), secret);
             allSubscriptions.addAll(subscriptions);
         }
         return allSubscriptions;
