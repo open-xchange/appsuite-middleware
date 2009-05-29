@@ -504,10 +504,17 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            try {
-                mailConfig.password = MailPasswordUtil.decrypt(mailAccount.getPassword(), sessionPassword);
-            } catch (final GeneralSecurityException e) {
-                throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(e, new Object[0]));
+            final String mailAccountPassword = mailAccount.getPassword();
+            if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+                // Set to empty string
+                mailConfig.password = "";
+            } else {
+                // Decrypt mail account's password using session password
+                try {
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, sessionPassword);
+                } catch (final GeneralSecurityException e) {
+                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(e, new Object[0]));
+                }
             }
         }
     }

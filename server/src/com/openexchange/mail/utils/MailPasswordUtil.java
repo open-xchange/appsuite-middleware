@@ -162,7 +162,7 @@ public final class MailPasswordUtil {
      * @throws GeneralSecurityException If password decryption fails
      */
     public static String decrypt(final String encryptedPassword, final Key key) throws GeneralSecurityException {
-        if (null == encryptedPassword) {
+        if (null == encryptedPassword || null == key) {
             return null;
         }
         final byte encrypted[];

@@ -636,7 +636,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                             } catch (final GeneralSecurityException e) {
                                 throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                             }
-                            stmt.setObject(pos++, encryptedPassword);
+                            setOptionalString(stmt, pos++, encryptedPassword);
                         } else {
                             stmt.setObject(pos++, value);
                         }
@@ -677,7 +677,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                                     throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                                 }
                             }
-                            stmt.setObject(pos++, encryptedPassword);
+                            setOptionalString(stmt, pos++, encryptedPassword);
                         } else {
                             stmt.setObject(pos++, value);
                         }
@@ -824,7 +824,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.getName());
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
                 stmt.setString(pos++, mailAccount.getLogin());
-                stmt.setString(pos++, encryptedPassword);
+                setOptionalString(stmt, pos++, encryptedPassword);
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 final String sh = mailAccount.getSpamHandler();
                 if (null == sh) {
@@ -864,7 +864,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.getName());
                 stmt.setString(pos++, transportURL);
                 stmt.setString(pos++, mailAccount.getLogin());
-                stmt.setString(pos++, encryptedTransportPassword);
+                setOptionalString(stmt, pos++, encryptedTransportPassword);
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
@@ -966,7 +966,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (mailAccount.isDefaultFlag()) {
                     stmt.setNull(pos++, Types.VARCHAR);
                 } else {
-                    stmt.setString(pos++, encryptedPassword);
+                    setOptionalString(stmt, pos++, encryptedPassword);
                 }
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
@@ -1016,7 +1016,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (mailAccount.isDefaultFlag()) {
                     stmt.setNull(pos++, Types.VARCHAR);
                 } else {
-                    stmt.setString(pos++, encryptedTransportPassword);
+                    setOptionalString(stmt, pos++, encryptedTransportPassword);
                 }
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
