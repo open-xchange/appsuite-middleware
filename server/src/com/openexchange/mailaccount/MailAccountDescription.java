@@ -143,12 +143,13 @@ public final class MailAccountDescription implements Serializable {
         mailPort = 143;
         transportProtocol = "smtp";
         mailProtocol = "imap";
+        id = -1;
     }
 
     /**
      * Gets the ID.
      * 
-     * @return The ID
+     * @return The ID or <code>-1</code> if not set
      */
     public int getId() {
         return id;
