@@ -119,6 +119,9 @@ public final class MailPasswordUtil {
      * @throws GeneralSecurityException If password encryption fails
      */
     public static String encrypt(final String password, final Key key) throws GeneralSecurityException {
+        if (null == password || null == key) {
+            return null;
+        }
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
         cipher.init(Cipher.ENCRYPT_MODE, key);
 
@@ -159,6 +162,9 @@ public final class MailPasswordUtil {
      * @throws GeneralSecurityException If password decryption fails
      */
     public static String decrypt(final String encryptedPassword, final Key key) throws GeneralSecurityException {
+        if (null == encryptedPassword) {
+            return null;
+        }
         final byte encrypted[];
         try {
             /*-
@@ -217,6 +223,9 @@ public final class MailPasswordUtil {
      * @throws GeneralSecurityException If generating secret key fails
      */
     public static Key generateSecretKey(final String key) throws GeneralSecurityException {
+        if (null == key) {
+            return null;
+        }
         try {
             return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), ALGORITHM_DES);
         } catch (final UnsupportedEncodingException e) {
