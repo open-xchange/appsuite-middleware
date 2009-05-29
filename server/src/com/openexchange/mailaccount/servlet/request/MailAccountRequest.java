@@ -280,6 +280,19 @@ public final class MailAccountRequest {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             new MailAccountParser().parse(accountDescription, jData);
 
+            if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
+                /*
+                 * ID is delivered, but password not set. Thus load from storage version.
+                 */
+                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                    MailAccountStorageService.class,
+                    true);
+                accountDescription.setPassword(storageService.getMailAccount(
+                    accountDescription.getId(),
+                    session.getUserId(),
+                    session.getContextId()).getPassword());
+            }
+
             checkNeededFields(accountDescription);
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny validation of Unified INBOX account
@@ -512,6 +525,9 @@ public final class MailAccountRequest {
                 true);
 
             final int id = accountDescription.getId();
+            if (-1 == id) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.ID);
+            }
 
             final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
             if (isUnifiedINBOXAccount(toUpdate)) {
