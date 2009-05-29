@@ -61,6 +61,8 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -96,7 +98,13 @@ public class Module implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                MailAccess<?,?> mail = null;
+                // Check if multiple mail accounts are enabled
+                if (userConfig.isMultipleMailAccounts() && (ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class) != null)) {
+                    setting.setSingleValue(Boolean.TRUE);
+                    return;
+                }
+                // Check if primary mail account is connectable
+                MailAccess<?, ?> mail = null;
                 try {
                     mail = MailAccess.getInstance(session);
                     mail.connect();
@@ -114,7 +122,7 @@ public class Module implements PreferencesItemService {
              * {@inheritDoc}
              */
             public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
+                return userConfig.hasWebMail();
             }
         };
     }
