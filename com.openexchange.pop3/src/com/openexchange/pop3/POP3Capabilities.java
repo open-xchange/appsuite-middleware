@@ -53,7 +53,7 @@ import com.openexchange.mail.api.MailCapabilities;
 
 
 /**
- * {@link POP3Capabilities} - TODO Short description of this class' purpose.
+ * {@link POP3Capabilities} - The POP3 capabilities.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
