@@ -532,7 +532,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         final String parentRealFullname = getRealFullname(parentFullname);
-        final MailFolder[] subfolders = delegatee.getSubfolders(parentRealFullname, all);
+        final MailFolder[] subfolders = delegatee.getSubfolders(parentRealFullname, true);
         for (int i = 0; i < subfolders.length; i++) {
             prepareMailFolder(subfolders[i]);
         }
@@ -593,11 +593,14 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
             mailFolder.setRootFolder(true);
         } else if (isDefaultFolder(mailFolder.getFullname())) {
             mailFolder.setDefaultFolder(true);
+            mailFolder.setSubscribed(true);
         }
         mailFolder.removePermissions();
         mailFolder.removeOwnPermission();
         mailFolder.addPermission(mp);
         mailFolder.setOwnPermission(mp);
+        // POP3 does not support subscription
+        mailFolder.setSubscribed(true);
     }
 
     private String getRealFullname(final String fullname) throws MailException {
