@@ -75,6 +75,7 @@ import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.pop3.connect.POP3ConnectCallable;
+import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
@@ -84,6 +85,7 @@ import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link POP3Access} - Establishes a POP3 access and provides access to storages.
@@ -230,7 +232,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public void setCacheable(final boolean cacheable) {
-        if (LOG.isWarnEnabled()) {
+        if (cacheable && LOG.isWarnEnabled()) {
             final UnsupportedOperationException e = new UnsupportedOperationException("POP3Access.setCacheable() not supported");
             LOG.warn(e.getMessage(), e);
         }
@@ -317,6 +319,21 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public MailFolder getRootFolder() throws MailException {
         pop3Storage.connect();
         return pop3Storage.getFolderStorage().getRootFolder();
+    }
+
+    @Override
+    public void ping() throws MailException {
+        final POP3Config config = getPOP3Config();
+        checkFieldsBeforeConnect(config);
+        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false);
+        /*
+         * Close quietly
+         */
+        try {
+            pop3Store.close();
+        } catch (final MessagingException e) {
+            LOG.warn(e.getMessage(), e);
+        }
     }
 
     @Override

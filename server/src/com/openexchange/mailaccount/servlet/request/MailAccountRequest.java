@@ -421,7 +421,7 @@ public final class MailAccountRequest {
         // Now try to connect
         boolean close = false;
         try {
-            mailAccess.connect();
+            mailAccess.ping();
             close = true;
         } catch (final AbstractOXException e) {
             if (LOG.isDebugEnabled()) {

@@ -2,6 +2,7 @@
 
  - Bugfix #13771: Fixed validation of entered mail/transport configuration
  - Bugfix #13768: Fixed update of a POP3 account
+ - Bugfix #13767: Only authentication is performed when checking POP3 account
 
 * 2009-05-27 - thorben.betten@open-xchange.com
 

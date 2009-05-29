@@ -224,6 +224,83 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
+    @Override
+    public void ping() throws MailException {
+        final IMAPConfig config = getIMAPConfig();
+        checkFieldsBeforeConnect(config);
+        /*
+         * Try to connect to IMAP server
+         */
+        final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
+        String tmpPass = getMailConfig().getPassword();
+        if (tmpPass != null) {
+            try {
+                tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        /*
+         * Get properties
+         */
+        final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
+        if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
+            imapProps.putAll(getMailProperties());
+        }
+        /*
+         * Set timeouts
+         */
+        if (imapConfProps.getImapTimeout() > 0) {
+            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(imapConfProps.getImapTimeout()));
+        }
+        if (imapConfProps.getImapConnectionTimeout() > 0) {
+            imapProps.put(
+                MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT,
+                String.valueOf(imapConfProps.getImapConnectionTimeout()));
+        }
+        /*
+         * Check if a secure IMAP connection should be established
+         */
+        if (config.isSecure()) {
+            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, TrustAllSSLSocketFactory.class.getName());
+            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(config.getPort()));
+            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, "false");
+            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, "true");
+            /*
+             * Needed for JavaMail >= 1.4
+             */
+            Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
+        }
+        /*
+         * Apply properties to IMAP session
+         */
+        imapSession = javax.mail.Session.getInstance(imapProps, null);
+        /*
+         * Check if debug should be enabled
+         */
+        if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            imapSession.setDebug(true);
+            imapSession.setDebugOut(System.err);
+        }
+        try {
+            /*
+             * Get store
+             */
+            imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
+            imapStore.connect(config.getServer(), config.getPort(), config.getLogin(), tmpPass);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, config);
+        } finally {
+            if (null != imapStore) {
+                try {
+                    imapStore.close();
+                } catch (final MessagingException e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
     private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
     private static final String ERR_CONNECT_TIMEOUT = "connect timed out";
@@ -234,8 +311,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             connected = true;
             return;
         }
+        final IMAPConfig config = getIMAPConfig();
         try {
-            final IIMAPProperties imapConfProps = (IIMAPProperties) getMailConfig().getMailProperties();
+            final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
             final boolean tmpDownEnabled = (imapConfProps.getImapTemporaryDown() > 0);
             if (tmpDownEnabled) {
                 /*
@@ -243,7 +321,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  */
                 checkTemporaryDown(imapConfProps);
             }
-            String tmpPass = getMailConfig().getPassword();
+            String tmpPass = config.getPassword();
             if (tmpPass != null) {
                 try {
                     tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
@@ -254,7 +332,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check for already failed authentication
              */
-            final String login = getMailConfig().getLogin();
+            final String login = config.getLogin();
             checkFailedAuths(login, tmpPass);
             /*
              * Get properties
@@ -277,9 +355,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if a secure IMAP connection should be established
              */
-            if (getMailConfig().isSecure()) {
+            if (config.isSecure()) {
                 imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, TrustAllSSLSocketFactory.class.getName());
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(getMailConfig().getPort()));
+                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(config.getPort()));
                 imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, "false");
                 imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, "true");
                 /*
@@ -306,7 +384,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * ... and connect
              */
             try {
-                imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), login, tmpPass);
+                imapStore.connect(config.getServer(), config.getPort(), login, tmpPass);
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
@@ -323,9 +401,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     /*
                      * Remember a timed-out IMAP server on connect attempt
                      */
-                    timedOutServers.put(
-                        new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort()),
-                        Long.valueOf(System.currentTimeMillis()));
+                    timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
                 }
                 throw e;
             }
@@ -333,7 +409,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Add server's capabilities
              */
-            ((IMAPConfig) getMailConfig()).initializeCapabilities(imapStore);
+            config.initializeCapabilities(imapStore);
             /*
              * Increase counter
              */
@@ -345,7 +421,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             decrement = true;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, getMailConfig());
+            throw MIMEMailException.handleMessagingException(e, config);
         }
     }
 
