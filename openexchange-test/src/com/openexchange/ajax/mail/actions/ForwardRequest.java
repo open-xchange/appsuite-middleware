@@ -67,6 +67,10 @@ public class ForwardRequest extends ReplyRequest {
         super(folderID, mailID);
     }
     
+    public ForwardRequest(String[] folderAndId) {
+        this(folderAndId[0], folderAndId[1]);
+    }
+    
     public String getAction(){
         return Mail.ACTION_FORWARD;
     }
