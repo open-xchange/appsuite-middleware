@@ -330,8 +330,9 @@ public class PushRequest {
     }
 
     private String parseString(final String[] s, final int pos) {
-        currentLength += s[pos].length() + 1;
-        if (s[pos].length() == 0) {
+        final int length = s[pos].length();
+        currentLength += length + 1;
+        if (length == 0) {
             return null;
         }
 
