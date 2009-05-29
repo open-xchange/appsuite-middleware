@@ -133,6 +133,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
                 System.err.println("Apparently this exception factory was not regsitered.: "+this);
                 setComponent(new StringComponent("???"));
                 setApplicationId("unset");
+                return create(code, cause, args);
             }
         }
         return createException(errorMessage, cause, args);
