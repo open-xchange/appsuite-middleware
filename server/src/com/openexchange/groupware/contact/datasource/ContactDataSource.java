@@ -54,6 +54,8 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -131,10 +133,17 @@ public final class ContactDataSource implements DataSource {
          */
         final ContactObject[] contacts = new ContactObject[folderIds.length];
         try {
+            final Map<Integer, ContactInterface> tmp = new HashMap<Integer, ContactInterface>(contacts.length);
             for (int i = 0; i < contacts.length; i++) {
                 final int folderId = folderIds[i];
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
+                final Integer key = Integer.valueOf(folderId);
+                ContactInterface contactInterface = tmp.get(key);
+                if (null == contactInterface) {
+                    contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                        folderId,
+                        session);
+                    tmp.put(key, contactInterface);
+                }
                 contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
             }
         } catch (final OXException e) {
