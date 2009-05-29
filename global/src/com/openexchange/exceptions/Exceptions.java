@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
@@ -61,11 +63,15 @@ import com.openexchange.groupware.Component;
  */
 public abstract class Exceptions<T extends AbstractOXException> {
 
+    private static final Log LOG = LogFactory.getLog(Exceptions.class); 
+    
     private final Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
 
     private Component component;
 
     private String applicationId;
+
+    private boolean initialized;
 
     public Component getComponent() {
         return component;
@@ -88,6 +94,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
     private void initialize() {
         if (null != component && null != applicationId) {
             knownExceptions();
+            initialized = true;
         }
     }
 
@@ -123,7 +130,13 @@ public abstract class Exceptions<T extends AbstractOXException> {
     public T create(final int code, final Throwable cause, final Object... args) {
         final ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
         if (errorMessage == null) {
-            throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
+            if(initialized) {
+                throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
+            } else {
+                LOG.warn("Apparently this exception factory was not regsitered.: "+this);
+                setComponent(new StringComponent("???"));
+                setApplicationId("unset");
+            }
         }
         return createException(errorMessage, cause, args);
     }
