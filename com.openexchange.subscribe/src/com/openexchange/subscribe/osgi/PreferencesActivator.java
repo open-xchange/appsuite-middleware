@@ -65,12 +65,12 @@ public class PreferencesActivator implements BundleActivator {
     private ServiceRegistration installedRegistry;
 
     public void start(BundleContext context) throws Exception {
-        enabledRegistry = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+        //enabledRegistry = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
         installedRegistry = context.registerService(PreferencesItemService.class.getName(), new Installed(), null);
     }
 
     public void stop(BundleContext context) throws Exception {
-        enabledRegistry.unregister();
+        //enabledRegistry.unregister();
         installedRegistry.unregister();
     }
 

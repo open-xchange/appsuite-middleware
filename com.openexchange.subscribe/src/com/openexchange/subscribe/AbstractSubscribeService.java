@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     public static CryptoService CRYPTO;
 
     public Collection<Subscription> loadSubscriptions(Context ctx, int folderId, String secret) throws AbstractOXException {
-        List<Subscription> subscriptions = STORAGE.getSubscriptions(ctx, folderId);
+        List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
+        List<Subscription> subscriptions = new ArrayList<Subscription>();
+        for (Subscription subscription : allSubscriptions) {
+            if(subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
+                subscriptions.add(subscription);
+            }
+        }
         for (Subscription subscription : subscriptions) {
             subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
             modifyOutgoing(subscription);
