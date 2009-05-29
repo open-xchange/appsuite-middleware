@@ -17,11 +17,11 @@ com.openexchange.contacts.ldap.mapping.openldap.department          =
 com.openexchange.contacts.ldap.mapping.openldap.company             =
 
 # The name of the attribute where the name of distributionlists is stored
-com.openexchange.contacts.ldap.mapping.ads.distributionlistname = cn
+com.openexchange.contacts.ldap.mapping.openldap.distributionlistname = cn
 
 # This attribute must be set to have a uid field for distributionlists because this
 # differs from the uid for user object on some LDAP servers
-com.openexchange.contacts.ldap.mapping.ads.distributionuid = gidNumber
+com.openexchange.contacts.ldap.mapping.openldap.distributionuid = gidNumber
 
 com.openexchange.contacts.ldap.mapping.openldap.birthday				=
 com.openexchange.contacts.ldap.mapping.openldap.anniversary			=
