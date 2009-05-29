@@ -339,7 +339,6 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     public String createFolder(final MailFolderDescription toCreate) throws MailException {
         toCreate.setParentFullname(getRealFullname(toCreate.getParentFullname()));
-        toCreate.setSubscribed(false);
         final String realFullname = delegatee.createFolder(toCreate);
         return stripPathFromFullname(path, realFullname);
     }
