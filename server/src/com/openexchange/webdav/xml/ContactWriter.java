@@ -53,18 +53,15 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.util.Date;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
-
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -73,6 +70,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -198,7 +196,7 @@ public class ContactWriter extends CommonWriter {
                 ContactObject.NUMBER_OF_ATTACHMENTS
 	};
 	
-	private ContactSQLInterface contactsql;
+	//private ContactSQLInterface contactsql;
 	
 	protected final static int[] deleteFields = {
 		DataObject.OBJECT_ID,
@@ -215,14 +213,16 @@ public class ContactWriter extends CommonWriter {
 		this.userObj = userObj;
 		this.ctx = ctx;
 		this.sessionObj = sessionObj;
-		contactsql = new RdbContactSQLInterface(sessionObj, ctx);
+		//contactsql = new RdbContactSQLInterface(sessionObj, ctx);
 	}
 	
 	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
 		try {
-			final ContactObject contactobject = contactsql.getObjectById(objectId, folderId);
+		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+	            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessionObj);
+			final ContactObject contactobject = contactInterface.getObjectById(objectId, folderId);
 			writeObject(contactobject, eProp, false, xo, os);
 		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
@@ -239,7 +239,9 @@ public class ContactWriter extends CommonWriter {
 		if (bDeleted) {
 			SearchIterator<ContactObject> it = null;
 			try {
-				it = contactsql.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
+			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+	                ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
+				it = contactInterface.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
 				writeIterator(it, true, xo, os);
 			} finally {
 				if (it != null) {
@@ -251,7 +253,9 @@ public class ContactWriter extends CommonWriter {
 		if (bModified) {
             SearchIterator<ContactObject> it = null;
             try {
-                it = contactsql.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
+                it = contactInterface.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
                 writeIterator(it, false, xo, os);
             } finally {
                 if (it != null) {
@@ -263,7 +267,9 @@ public class ContactWriter extends CommonWriter {
 		if (bList) {
 			SearchIterator<ContactObject> it = null;
 			try {
-				it = contactsql.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
+			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+	                ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
+				it = contactInterface.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
 				writeList(it, xo, os);
 			} finally {
 				if (it != null) {
@@ -291,7 +297,9 @@ public class ContactWriter extends CommonWriter {
 		try {
 			object_id = contactObj.getObjectID();
 			if (contactObj.containsImage1()&& !delete) {
-				final ContactObject contactObjectWithImage = contactsql.getObjectById(object_id, contactObj.getParentFolderID());
+			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+	                ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), sessionObj);
+				final ContactObject contactObjectWithImage = contactInterface.getObjectById(object_id, contactObj.getParentFolderID());
 				addContent2PropElement(eProp, contactObjectWithImage, delete);
 			} else {
 				addContent2PropElement(eProp, contactObj, delete);

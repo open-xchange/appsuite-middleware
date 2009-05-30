@@ -51,14 +51,12 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
-
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -67,6 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.ContactFields;
@@ -212,7 +211,7 @@ public class GroupUserWriter extends ContactWriter {
     }
 
     public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
-        final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+        //final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
 
         if (lastsync == null) {
@@ -225,7 +224,9 @@ public class GroupUserWriter extends ContactWriter {
         if (deleted) {
             SearchIterator<ContactObject> it = null;
             try {
-                it = contactsql.getDeletedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, deleteFields, lastsync);
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, sessionObj);
+                it = contactInterface.getDeletedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, deleteFields, lastsync);
                 writeIterator(it, true, xo, os);
             } finally {
                 if (it != null) {
@@ -237,7 +238,9 @@ public class GroupUserWriter extends ContactWriter {
         if (modified) {
             SearchIterator<ContactObject> it = null;
             try {
-                it = contactsql.getModifiedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, changeFields, lastsync);
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, sessionObj);
+                it = contactInterface.getModifiedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, changeFields, lastsync);
                 writeIterator(it, false, xo, os);
             } finally {
                 if (it != null) {
@@ -249,11 +252,13 @@ public class GroupUserWriter extends ContactWriter {
     }
 
     public void startWriter(final String searchpattern, final OutputStream os) throws Exception {
-        final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+        // final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
         SearchIterator<ContactObject> it = null;
         try {
-            it = contactsql.searchContacts(searchpattern, FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, sessionObj);
+            it = contactInterface.searchContacts(searchpattern, FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
             writeIterator(it, false, xo, os);
         } finally {
             if (it != null) {

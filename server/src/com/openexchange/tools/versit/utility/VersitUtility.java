@@ -53,12 +53,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -116,12 +116,14 @@ public final class VersitUtility {
         OXContainerConverter oxc = null;
         try {
             oxc = new OXContainerConverter(session);
-            final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, ctx);
+            // final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, ctx);
             final VersitObject vo = def.parse(r);
             if (vo != null) {
                 final ContactObject contactObj = oxc.convertContact(vo);
                 contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CONTACT).getObjectID());
                 contactObj.setContextId(ctx.getContextId());
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
                 contactInterface.insertContactObject(contactObj);
                 /*
                  * Add to list

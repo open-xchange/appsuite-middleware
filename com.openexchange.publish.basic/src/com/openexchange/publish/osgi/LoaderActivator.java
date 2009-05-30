@@ -52,7 +52,7 @@ package com.openexchange.publish.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.api2.ContactSQLFactory;
+import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -85,7 +85,7 @@ public class LoaderActivator implements BundleActivator {
         UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
         compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
     
-        ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactSQLFactory.class));
+        ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactInterfaceFactory.class));
         compositeLoader.registerLoader("contacts", contactLoader);
         
         dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), compositeLoader, null);

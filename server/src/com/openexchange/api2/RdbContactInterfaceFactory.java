@@ -50,15 +50,23 @@
 package com.openexchange.api2;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link ContactSQLFactory}
+ * {@link RdbContactInterfaceFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface ContactSQLFactory {
-    public ContactSQLInterface create(Session session) throws AbstractOXException;
+public class RdbContactInterfaceFactory implements ContactInterfaceFactory {
+
+    public ContactInterface create(final int folderId, final Session session) throws AbstractOXException {
+        return ServerServiceRegistry.getInstance().getService(
+            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
+    }
+
 }

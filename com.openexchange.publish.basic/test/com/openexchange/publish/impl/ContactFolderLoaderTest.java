@@ -53,7 +53,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.api2.ContactSQLFactory;
+import junit.framework.TestCase;
+import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
@@ -62,7 +63,6 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.services.SimContactSQLInterface;
 import com.openexchange.session.Session;
-import junit.framework.TestCase;
 
 
 /**
@@ -72,7 +72,7 @@ import junit.framework.TestCase;
  *
  */
 public class ContactFolderLoaderTest extends TestCase {
-    private ContactSQLFactory contactSQLFactory;
+    private ContactInterfaceFactory contactSQLFactory;
     private ContactFolderLoader contactLoader;
     private int cid;
     private int folderId;
@@ -80,6 +80,7 @@ public class ContactFolderLoaderTest extends TestCase {
     private int id2;
     private Publication publication;
 
+    @Override
     public void setUp() {
         final SimContactSQLInterface contacts = new SimContactSQLInterface();
         
@@ -96,9 +97,9 @@ public class ContactFolderLoaderTest extends TestCase {
         contacts.simulateContact(cid, folderId, id2, "Peter");
         
             
-        contactSQLFactory = new ContactSQLFactory() {
+        contactSQLFactory = new ContactInterfaceFactory() {
 
-            public ContactSQLInterface create(Session session) throws AbstractOXException {
+            public ContactSQLInterface create(final int folderId, final Session session) throws AbstractOXException {
                 return contacts;
             }
             
@@ -108,14 +109,14 @@ public class ContactFolderLoaderTest extends TestCase {
     }
     
     public void testLoadFolder() throws PublicationException {
-        Collection<? extends Object> collection = contactLoader.load(publication);
+        final Collection<? extends Object> collection = contactLoader.load(publication);
         
         assertNotNull("Collection was null", collection);
         
         assertEquals("Folder should contain two contacts", 2, collection.size());
-        Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
-        for (Object object : collection) {
-            ContactObject contact = (ContactObject) object;
+        final Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
+        for (final Object object : collection) {
+            final ContactObject contact = (ContactObject) object;
             assertTrue("Did not expect: "+contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
         }
     }

@@ -69,9 +69,7 @@ import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -281,8 +279,10 @@ public class Contact extends DataServlet {
                     }
                     contactobject.setImageContentType(uploadFile.getContentType());
 
-                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
-                    contactsql.insertContactObject(contactobject);
+                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                        ContactInterfaceDiscoveryService.class).newContactInterface(contactobject.getParentFolderID(), session);
+                    // final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
+                    contactInterface.insertContactObject(contactobject);
 
                     final JSONObject jData = new JSONObject();
                     jData.put(ContactFields.ID, contactobject.getObjectID());
@@ -335,8 +335,10 @@ public class Contact extends DataServlet {
                         contactobject.setImageContentType(uploadFile.getContentType());
                     }
 
-                    final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
-                    contactsql.updateContactObject(contactobject, inFolder, timestamp);
+                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                        ContactInterfaceDiscoveryService.class).newContactInterface(contactobject.getParentFolderID(), session);
+                    //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
+                    contactInterface.updateContactObject(contactobject, inFolder, timestamp);
                 } finally {
                     if (upload != null) {
                         upload.cleanUp();

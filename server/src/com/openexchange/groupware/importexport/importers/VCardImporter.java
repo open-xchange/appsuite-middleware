@@ -62,14 +62,14 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,6 +81,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -202,7 +203,7 @@ public class VCardImporter extends AbstractImporter {
 			}
 		}
 
-		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, session.getContext());
+		// final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, session.getContext());
 		OXContainerConverter oxContainerConverter = null;
 
 		final List<ImportResult> list = new ArrayList<ImportResult>();
@@ -236,6 +237,8 @@ public class VCardImporter extends AbstractImporter {
 						contactObj.setParentFolderID(contactFolderId);
 						importResult.setDate(new Date());
 						try {
+						    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+					            ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
 							contactInterface.insertContactObject(contactObj);
 						} catch (OXException oxEx) {
 						    if (Category.USER_INPUT.equals(oxEx.getCategory())) {

@@ -51,9 +51,9 @@ package com.openexchange.publish.impl;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import com.openexchange.api2.ContactSQLFactory;
-import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -69,13 +69,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ContactFolderLoader implements PublicationDataLoaderService {
 
-    private ContactSQLFactory factory;
+    private final ContactInterfaceFactory factory;
 
     /**
      * Initializes a new {@link ContactFolderLoader}.
      * @param contacts
      */
-    public ContactFolderLoader(ContactSQLFactory contacts) {
+    public ContactFolderLoader(final ContactInterfaceFactory contacts) {
         super();
         this.factory = contacts;
     }
@@ -83,17 +83,17 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
      */
-    public Collection<? extends Object> load(Publication publication) throws PublicationException {
-        LinkedList<ContactObject> list = new LinkedList<ContactObject>();
+    public Collection<? extends Object> load(final Publication publication) throws PublicationException {
+        final LinkedList<ContactObject> list = new LinkedList<ContactObject>();
         try {
-            int folderId = Integer.parseInt(publication.getEntityId());
-            ContactSQLInterface contacts = factory.create(new PublicationSession(publication));
-            int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.GIVEN_NAME, "ASC", ContactObject.ALL_COLUMNS);
+            final int folderId = Integer.parseInt(publication.getEntityId());
+            final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
+            final int numberOfContacts = contacts.getNumberOfContacts(folderId);
+            final SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.GIVEN_NAME, "ASC", ContactObject.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
                 list.add(contactsInFolder.next());
             }
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new PublicationException(e);
         }
         return list;

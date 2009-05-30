@@ -53,7 +53,6 @@ import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderId
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformIntArrayToSet;
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformSetToIntArray;
-
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -61,19 +60,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
@@ -88,6 +85,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
@@ -260,7 +258,7 @@ public class CSVContactExporter implements Exporter {
 			EXCEPTIONS.create(0, folder, format);
 		}
 		final int folderId = getFolderId(folder);
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
+		//final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
 		int[] cols = null;
 		if( fieldsToBeExported == null || fieldsToBeExported.length == 0){
 			cols = POSSIBLE_FIELDS;
@@ -272,7 +270,9 @@ public class CSVContactExporter implements Exporter {
 		}
 		SearchIterator<ContactObject> conIter;
 		try {
-			conIter = contactSql.getContactsInFolder(folderId, 0, contactSql.getNumberOfContacts(folderId), 0, "ASC", cols);
+		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
+			conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, "ASC", cols);
 		} catch (final OXException e) {
 			throw EXCEPTIONS.create(2, e);
 		}
@@ -308,7 +308,7 @@ public class CSVContactExporter implements Exporter {
 			EXCEPTIONS.create(0, folder, format);
 		}
 		final int folderId = getFolderId(folder);
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
+		//final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
 		int[] cols;
 		if( fieldsToBeExported == null || fieldsToBeExported.length == 0){
 			cols = POSSIBLE_FIELDS;
@@ -317,7 +317,9 @@ public class CSVContactExporter implements Exporter {
 		}
 		ContactObject conObj;
 		try {
-			conObj = contactSql.getObjectById(objectId, folderId);
+		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
+			conObj = contactInterface.getObjectById(objectId, folderId);
 		} catch (final OXException e) {
 			throw EXCEPTIONS.create(2, e);
 		}

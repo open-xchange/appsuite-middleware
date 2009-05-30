@@ -54,15 +54,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
-
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -269,11 +269,14 @@ category={
 			final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
 			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
 			
-			//final TimeZone timeZone = TimeZone.getTimeZone(sessObj.getUserObject().getTimeZone());
+			final int folderId = Integer.parseInt(folder);
+            //final TimeZone timeZone = TimeZone.getTimeZone(sessObj.getUserObject().getTimeZone());
 			//final String mail = sessObj.getUserObject().getMail();
 			
-			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-			final SearchIterator<ContactObject> searchIterator = contactSql.getModifiedContactsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
+			//final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+			final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+	            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
+			final SearchIterator<ContactObject> searchIterator = contactInterface.getModifiedContactsInFolder(folderId, fieldsToBeExported, new Date(0));
 			
 			try {
 				while (searchIterator.hasNext()) {
@@ -305,8 +308,11 @@ category={
 			final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
 			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
 			
-			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-			final ContactObject contactObj = contactSql.getObjectById(objectId, Integer.parseInt(folder));
+			final int folderId = Integer.parseInt(folder);
+            //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+			final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+	            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
+			final ContactObject contactObj = contactInterface.getObjectById(objectId, folderId);
 			try {
 				exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
 			} finally {

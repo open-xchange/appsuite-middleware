@@ -423,6 +423,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         try {
+            // TODO: Use discovery service?
             final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
             final ContactWriter contactwriter = new ContactWriter(timeZone);
 
@@ -535,6 +536,7 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
+        // TODO: Use discovery service?
         final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
 
         timestamp = new Date(0);

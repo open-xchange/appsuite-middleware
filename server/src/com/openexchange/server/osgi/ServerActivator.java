@@ -66,8 +66,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
-import com.openexchange.api2.ContactSQLFactory;
-import com.openexchange.api2.RdbContactSQLFactory;
+import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
@@ -495,7 +495,7 @@ public final class ServerActivator extends DeferredActivator {
 
         // Register ContactSQL
 
-        registrationList.add(context.registerService(ContactSQLFactory.class.getName(), new RdbContactSQLFactory(), null));
+        registrationList.add(context.registerService(ContactInterfaceFactory.class.getName(), new RdbContactInterfaceFactory(), null));
 
         // Register event factory service
         registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));

@@ -72,10 +72,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -87,6 +87,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -228,7 +229,10 @@ public final class vcard extends PermissionServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.setContentType("text/vcard");
 
-                final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessionObj);
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, sessionObj);
+                
+                //final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessionObj);
                 it = contactInterface.getModifiedContactsInFolder(contactfolder_id, _contactFields, new Date(0));
 
                 while (it.hasNext()) {
@@ -409,7 +413,7 @@ public final class vcard extends PermissionServlet {
             final VersitDefinition def = Versit.getDefinition(content_type);
 
             final OXContainerConverter oxc = new OXContainerConverter(session);
-            final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session);
+            //final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session);
 
             final Date timestamp = new Date();
             try {
@@ -452,6 +456,8 @@ public final class vcard extends PermissionServlet {
 
                             contactObj.setParentFolderID(contactfolder_id);
 
+                            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                                ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
                             if (contactObj.containsObjectID()) {
                                 contactInterface.updateContactObject(contactObj, contactfolder_id, timestamp);
                             } else {
@@ -462,6 +468,8 @@ public final class vcard extends PermissionServlet {
                         } else {
                             contactObj.setParentFolderID(contactfolder_id);
 
+                            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                                ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
                             if (contactObj.containsObjectID()) {
                                 contactInterface.updateContactObject(contactObj, contactfolder_id, timestamp);
                             } else {
@@ -492,6 +500,8 @@ public final class vcard extends PermissionServlet {
                     deleteEntry(context, principal_id, object_id);
 
                     if (enabledelete) {
+                        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                            ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
                         try {
                             contactInterface.deleteContactObject(object_id, contactfolder_id, timestamp);
                         } catch (final OXObjectNotFoundException exc) {

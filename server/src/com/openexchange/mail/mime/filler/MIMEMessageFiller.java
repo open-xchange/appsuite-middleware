@@ -79,13 +79,15 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
@@ -256,7 +258,10 @@ public class MIMEMessageFiller {
              * Get context's admin contact object
              */
             try {
-                final ContactObject c = new RdbContactSQLInterface(session).getUserById(ctx.getMailadmin());
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
+
+                final ContactObject c = contactInterface.getUserById(ctx.getMailadmin());
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                     final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(
                         c.getCompany(),

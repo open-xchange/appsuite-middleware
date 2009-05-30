@@ -51,7 +51,6 @@ package com.openexchange.groupware.importexport.importers;
 
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformInputStreamToString;
-
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -60,21 +59,19 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
@@ -92,6 +89,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -213,11 +211,11 @@ public class CSVContactImporter extends AbstractImporter {
         //reading entries...
         final List<ImportResult> results = new LinkedList<ImportResult>();
         final ContactSwitcher conSet = getContactSwitcher();
-        final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
+        //final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
         int lineNumber = 1;
         while (iter.hasNext()) {
             //...and writing them
-            results.add(writeEntry(fields, iter.next(), folder, contactsql, conSet, lineNumber++));
+            results.add(writeEntry(fields, iter.next(), folder, conSet, lineNumber++, sessObj));
         }
         return results;
     }
@@ -242,12 +240,12 @@ public class CSVContactImporter extends AbstractImporter {
      * @param fields Headers of the table; column title
      * @param entry A list of row cells.
      * @param folder The folder this is line meant to be written into
-     * @param contactsql The interface to store data in the OX
      * @param conSet The ContactSetter used for translating the given data
      * @param lineNumber Number of the entry ins the CSV file (used for precise error message)
+     * @param session The session
      * @return a report containing either the object ID of the entry created OR an error message
      */
-    protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSQLInterface contactsql, final ContactSwitcher conSet, final int lineNumber){
+    protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSwitcher conSet, final int lineNumber, final ServerSession session){
         final ImportResult result = new ImportResult();
         final ContactObject contactObj = new ContactObject();
         result.setFolder(folder);
@@ -274,7 +272,9 @@ public class CSVContactImporter extends AbstractImporter {
             }
             contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
             if(atLeastOneFieldInserted){
-                contactsql.insertContactObject(contactObj);
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
+                contactInterface.insertContactObject(contactObj);
                 result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
                 result.setDate( contactObj.getLastModified() );
             } else {
@@ -313,14 +313,14 @@ public class CSVContactImporter extends AbstractImporter {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
         
-        TimeZone utc = TimeZone.getTimeZone("UTC");
-        SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
+        final TimeZone utc = TimeZone.getTimeZone("UTC");
+        final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
         
-        SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+        final SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
         df2.setTimeZone(utc);
         
-        SimpleDateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");
+        final SimpleDateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");
         df3.setTimeZone(utc);
         
         dateSwitch.addDateFormat(df1);
