@@ -49,7 +49,6 @@
 
 package com.openexchange.crypto;
 
-import java.security.GeneralSecurityException;
 
 
 /**
@@ -63,7 +62,7 @@ public interface CryptoService {
      * @param data The data to be encrypted
      * @param password The password
      * @return The encrypted data as Base64 encoded string
-     * @throws GeneralSecurityException If encryption fails
+     * @throws CryptoException If encryption fails
      */
     public String encrypt(String data, String password) throws CryptoException;
 
@@ -73,7 +72,7 @@ public interface CryptoService {
      * @param encryptedData The Base64 encoded encrypted data
      * @param password The password
      * @return The decrypted data
-     * @throws GeneralSecurityException If decryption fails
+     * @throws CryptoException If decryption fails
      */
     public String decrypt(String encryptedPayload, String password) throws CryptoException;
     
@@ -85,7 +84,7 @@ public interface CryptoService {
      * @param useSalt Uses generated salt for encryption and stores the salt in the return value, if true uses internal salt constant
      *            otherwise.
      * @return EncryptedData object with the Base64 encoded and encrypted String and the used salt
-     * @throws GeneralSecurityException If encryption fails
+     * @throws CryptoException If encryption fails
      */
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException;
     
@@ -96,7 +95,7 @@ public interface CryptoService {
      * @param password The password
      * @param useSalt use Salt from the given EncryptedData object if true
      * @return The decrypted data as String
-     * @throws GeneralSecurityException If decryption fails
+     * @throws CryptoException If decryption fails
      */
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException;
 }
