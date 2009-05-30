@@ -53,7 +53,10 @@ import com.openexchange.api2.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link ContactInterfaceDiscoveryService} - A discovery service for {@link ContactInterfaceProvider} instances.
+ * {@link ContactInterfaceDiscoveryService} - A discovery service for an appropriate {@link ContactInterfaceProvider} instance which in turn
+ * provides the {@link ContactInterface} instance.
+ * <p>
+ * The appropriate {@link ContactInterface} instance may also be obtained by {@link #newContactInterface(int, Session)}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
