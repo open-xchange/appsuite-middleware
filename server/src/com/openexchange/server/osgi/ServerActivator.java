@@ -504,7 +504,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
 
         // Register contact interface discovery service
-        final ContactInterfaceDiscoveryService cids = new ContactInterfaceDiscoveryServiceImpl();
+        final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
 

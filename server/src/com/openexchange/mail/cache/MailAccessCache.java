@@ -55,6 +55,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -176,7 +177,11 @@ public final class MailAccessCache {
         if (timeoutMap != null) {
             return;
         }
-        timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<?, ?>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
+        try {
+            timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<?, ?>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        }
         timeoutMap.setDefaultTimeoutListener(new MailAccessTimeoutListener());
         defaultIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
     }

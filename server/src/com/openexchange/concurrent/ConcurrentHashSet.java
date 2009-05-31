@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.collections;
+package com.openexchange.concurrent;
 
 import java.io.Serializable;
 import java.util.Collection;

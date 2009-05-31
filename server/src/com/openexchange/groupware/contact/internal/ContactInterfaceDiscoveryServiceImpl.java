@@ -51,6 +51,7 @@ package com.openexchange.groupware.contact.internal;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
@@ -58,6 +59,7 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,18 +70,66 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterfaceDiscoveryService {
 
+    private static ContactInterfaceDiscoveryServiceImpl instance;
+
+    /**
+     * Gets the {@link ContactInterfaceDiscoveryService} implementation.
+     * 
+     * @return The {@link ContactInterfaceDiscoveryService} implementation
+     */
+    public static ContactInterfaceDiscoveryServiceImpl getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes the {@link ContactInterfaceDiscoveryService} implementation.
+     * 
+     * @throws OXException If initialization fails
+     */
+    static void initInstance() throws OXException {
+        instance = new ContactInterfaceDiscoveryServiceImpl();
+    }
+
+    /**
+     * Releases the {@link ContactInterfaceDiscoveryService} implementation.
+     */
+    static void releaseInstance() {
+        instance.dispose();
+        instance = null;
+    }
+
+    /*-
+     * Member section
+     */
+
+    private final RdbContactInterfaceProviderCache rdbProviderCache;
+
     /**
      * Initializes a new {@link ContactInterfaceDiscoveryServiceImpl}.
+     * 
+     * @throws OXException If initialization fails
      */
-    public ContactInterfaceDiscoveryServiceImpl() {
+    private ContactInterfaceDiscoveryServiceImpl() throws OXException {
         super();
+        try {
+            rdbProviderCache = new RdbContactInterfaceProviderCache();
+        } catch (final ServiceException e) {
+            throw new OXException(e);
+        }
+    }
+
+    /**
+     * Disposes this {@link ContactInterfaceDiscoveryService} implementation.
+     */
+    private void dispose() {
+        rdbProviderCache.dispose();
     }
 
     public ContactInterfaceProvider getContactInterfaceProvider(final int folderId, final int contextId) throws OXException {
         final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
         if (provider == null) {
             try {
-                return new RdbContactInterfaceProvider(ContextStorage.getStorageContext(contextId));
+                return rdbProviderCache.getProvider(ContextStorage.getStorageContext(contextId));
             } catch (final ContextException e) {
                 throw new OXException(e);
             }
@@ -92,10 +142,10 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
         if (provider == null) {
             if (session instanceof ServerSession) {
-                return new RdbContactInterfaceProvider(((ServerSession) session).getContext()).newContactInterface(session);
+                return rdbProviderCache.getProvider(((ServerSession) session).getContext()).newContactInterface(session);
             }
             try {
-                return new RdbContactInterfaceProvider(ContextStorage.getStorageContext(contextId)).newContactInterface(session);
+                return rdbProviderCache.getProvider(ContextStorage.getStorageContext(contextId)).newContactInterface(session);
             } catch (final ContextException e) {
                 throw new OXException(e);
             }
@@ -115,6 +165,33 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         public ContactInterface newContactInterface(final Session session) throws OXException {
             return new RdbContactSQLInterface(session, ctx);
         }
-    }
+    } // End of RdbContactInterfaceProvider
+
+    private static final class RdbContactInterfaceProviderCache {
+
+        private final TimeoutConcurrentMap<Integer, RdbContactInterfaceProvider> map;
+
+        public RdbContactInterfaceProviderCache() throws ServiceException {
+            super();
+            this.map = new TimeoutConcurrentMap<Integer, RdbContactInterfaceProvider>(20);
+        }
+
+        public RdbContactInterfaceProvider getProvider(final Context ctx) {
+            final Integer key = Integer.valueOf(ctx.getContextId());
+            RdbContactInterfaceProvider retval = map.get(key);
+            if (null == retval) {
+                retval = new RdbContactInterfaceProvider(ctx);
+                final RdbContactInterfaceProvider prev = map.putIfAbsent(key, retval, 300);
+                if (prev != null) {
+                    retval = prev;
+                }
+            }
+            return retval;
+        }
+
+        public void dispose() {
+            map.dispose();
+        }
+    } // End of RdbContactInterfaceProviderCache
 
 }

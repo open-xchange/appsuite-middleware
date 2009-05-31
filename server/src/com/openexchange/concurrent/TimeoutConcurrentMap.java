@@ -47,12 +47,11 @@
  *
  */
 
-package com.openexchange.mail.cache;
+package com.openexchange.concurrent;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.mail.MailException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -80,18 +79,14 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Initializes a new {@link TimeoutConcurrentMap}.
      * 
-     * @param shrinkerIntervalSeconds he shrinker interval in seconds
-     * @throws MailException If initialization fails
+     * @param shrinkerIntervalSeconds The shrinker interval in seconds
+     * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
      */
-    public TimeoutConcurrentMap(final int shrinkerIntervalSeconds) throws MailException {
+    public TimeoutConcurrentMap(final int shrinkerIntervalSeconds) throws ServiceException {
         super();
         map = new ConcurrentHashMap<K, ValueWrapper<V>>();
-        try {
-            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-            timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
-        } catch (final ServiceException e) {
-            throw new MailException(e);
-        }
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
     }
 
     /**
@@ -170,17 +165,50 @@ public final class TimeoutConcurrentMap<K, V> {
     }
 
     /**
+     * Puts specified key-value-pair into this time-out map with default time-out listener only if the specified key is not already
+     * associated with a value.
+     * 
+     * @param key The value's key
+     * @param value The value to put
+     * @param timeToLiveSeconds The value's time-to-live seconds
+     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
+     */
+    public V putIfAbsent(final K key, final V value, final int timeToLiveSeconds) {
+        return putIfAbsent(key, value, timeToLiveSeconds, defaultTimeoutListener);
+    }
+
+    /**
+     * Puts specified key-value-pair into this time-out map only if the specified key is not already associated with a value.
+     * 
+     * @param key The value's key
+     * @param value The value to put
+     * @param timeToLiveSeconds The value's time-to-live seconds
+     * @param timeoutListener The value's time-out listener triggered on its time-out event
+     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
+     */
+    public V putIfAbsent(final K key, final V value, final int timeToLiveSeconds, final TimeoutListener<V> timeoutListener) {
+        final ValueWrapper<V> vw = map.putIfAbsent(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, timeoutListener));
+        if (null == vw) {
+            return null;
+        }
+        return vw.value;
+    }
+
+    /**
      * Gets the value associated with given key.
      * 
      * @param key The key
      * @return The value associated with given key or <code>null</code>
      */
     public V get(final K key) {
-        final ValueWrapper<V> vw = map.get(key);
+        // Remove from map to avoid time-out event in the meantime
+        final ValueWrapper<V> vw = map.remove(key);
         if (null == vw) {
             return null;
         }
         vw.touch();
+        // Restore to map
+        map.put(key, vw);
         return vw.value;
     }
 

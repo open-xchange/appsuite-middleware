@@ -47,27 +47,41 @@
  *
  */
 
-package com.openexchange.mail.cache;
+package com.openexchange.groupware.contact.internal;
 
-import com.openexchange.concurrent.TimeoutConcurrentMap;
-import com.openexchange.mail.api.MailAccess;
+import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link MailAccessTimeoutListener} - The mail access event handler which preludes mail access closure if an instance of {@link MailAccess}
- * is removed from mail access cache.
+ * {@link ContactInterfaceDiscoveryInitialization} - {@link Initialization} for contact interface discovery.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccessTimeoutListener implements TimeoutConcurrentMap.TimeoutListener<MailAccess<?, ?>> {
+public final class ContactInterfaceDiscoveryInitialization implements Initialization {
+
+    private final AtomicBoolean started;
 
     /**
-     * Default constructor
+     * Initializes a new {@link ContactInterfaceDiscoveryInitialization}.
      */
-    public MailAccessTimeoutListener() {
+    public ContactInterfaceDiscoveryInitialization() {
         super();
+        started = new AtomicBoolean();
     }
 
-    public void onTimeout(final MailAccess<?, ?> mailAccess) {
-        mailAccess.close(false);
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            return;
+        }
+        ContactInterfaceDiscoveryServiceImpl.initInstance();
     }
+
+    public void stop() throws AbstractOXException {
+        if (!started.compareAndSet(true, false)) {
+            return;
+        }
+        ContactInterfaceDiscoveryServiceImpl.releaseInstance();
+    }
+
 }

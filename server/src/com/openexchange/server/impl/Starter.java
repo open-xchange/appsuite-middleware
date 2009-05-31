@@ -85,6 +85,10 @@ public class Starter implements Initialization {
      */
     com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
     /**
+     * Initialization for ContactInterfaceDiscovery
+     */
+    new com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization(),
+    /**
      * Reads the calendar.properties.
      */
     com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
