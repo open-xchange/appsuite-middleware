@@ -213,6 +213,10 @@ public class Starter implements Initialization {
      */
     com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
     /**
+     * Initialization for ContactInterfaceDiscovery
+     */
+    new com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization(),
+    /**
      * Initialization for alias charset provider
      */
     new com.openexchange.charset.CustomCharsetProviderInit(),
