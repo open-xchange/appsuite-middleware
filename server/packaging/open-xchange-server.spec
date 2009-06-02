@@ -303,6 +303,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 02 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #13681: Change last editor on webdav lock
 * Fri May 08 2009 - thorben.betten@open-xchange.com
  - Bugfix #13473: Fixed cookie parsing when an ending ";" is present.
 * Fri May 08 2009 - carsten.hoeger@open-xchange.com
@@ -474,10 +476,14 @@ fi
  - Bugfix #13001: Fixed wrong grammar in exception message.
 * Sun Jan 18 2009 - thorben.betten@open-xchange.com
  - Bugfix #12981: Referencing found inline content by Content-Id value
+* Fri Jan 16 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12885: Improved message for the delivery receipt email.
+ - Bugfix #12971: Setting locale for start and end date in notification mails.
+ - Bugfix #12947: Series reminder is actualized to most current occurrence instead of the next occurrence.
 * Fri Jan 16 2009 - francisco.laguna@open-xchange.com
  - Bugfix #11333: Fix SQL error when generating search string.
  - Bugfix #12790: Update version number first when removing current version.
- * Thu Jan 15 2009 - marcus.klein@open-xchange.com
+* Thu Jan 15 2009 - marcus.klein@open-xchange.com
  - Bugfix #12926: Task stays in delegators folder even if delegator removes himself from the participants list.
 * Thu Jan 15 2009 - thorben.betten@open-xchange.com
  - Bugfix #12944: Fixed changing recurring pattern for infinite recurring
