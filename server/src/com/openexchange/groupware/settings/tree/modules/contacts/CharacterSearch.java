@@ -82,7 +82,7 @@ public class CharacterSearch implements PreferencesItemService {
             }
 
             public void getValue(final Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.QUICK_SELECT));
+                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.CHARACTER_SEARCH));
             }
         };
     }
