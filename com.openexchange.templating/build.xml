@@ -4,24 +4,21 @@
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
-    <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
-
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="lib.dir" value="lib"/>
     <property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="composite.name" value="open-xchange-templating-${version}"/>
-	
-	<property name="common.conf.install.dir" value="${prefix}/etc"/>
-	<property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
-	<property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
-		
+
+    <property name="common.conf.install.dir" value="${prefix}/etc"/>
+    <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
+    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -30,29 +27,23 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-    
-	
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
-	
     <property name="configjar" value="com.openexchange.configread.jar"/>
-	
-	
-	
+
+    <!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		
+        <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-		
         <pathelement location="${bundlesdir}/${configjar}"/>
-		
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-    	
-    	<pathelement location="lib/freemarker.jar" />
-		
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -62,44 +53,41 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
-	<target name="patchConfig">
-		<move tofile="${tmp.dir}/${conf.dir}/templating.properties"
-		    file="conf/templating.properties.in" overwrite="true"/>
-		<replace file="${tmp.dir}/${conf.dir}/templating.properties">
-		     <replacefilter token="@templatepath@" value="/opt/open-xchange/templates"/>
-		</replace>
-	</target>
-	
+    <target name="patchConfig">
+        <move tofile="${tmp.dir}/${conf.dir}/templating.properties" file="conf/templating.properties.in" overwrite="true"/>
+        <replace file="${tmp.dir}/${conf.dir}/templating.properties">
+             <replacefilter token="@templatepath@" value="/opt/open-xchange/templates"/>
+        </replace>
+    </target>
+
     <!-- Install targets -->
     <target name="install" depends="installJar,installConfig,createTemplatingDir"/>
-	
+
     <target name="installConfig" depends="patchConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-    	<mkdir dir="${conf.install.copy.dir}"/>
-    	<copy todir="${conf.install.copy.dir}" overwrite="true">
-    	   <fileset dir="${tmp.dir}/${conf.dir}">
-    	      <include name="**" />
-    	      <exclude name="*.in"/>
-    	      <exclude name="CVS"/>
-    	      <exclude name="osgi/**"/>
-    	   </fileset>
-    	 </copy>
-    	    	
+        <mkdir dir="${conf.install.copy.dir}"/>
+        <copy todir="${conf.install.copy.dir}" overwrite="true">
+           <fileset dir="${tmp.dir}/${conf.dir}">
+              <include name="**" />
+              <exclude name="*.in"/>
+              <exclude name="CVS"/>
+              <exclude name="osgi/**"/>
+           </fileset>
+         </copy>
     </target>
 
     <target name="installJar" depends="jar">
@@ -111,14 +99,14 @@
         </copy>
     </target>
 
-	<target name="createTemplatingDir">
-		<mkdir dir="${destdir}/${templatingdir}"/>	
-	</target>
-	
+    <target name="createTemplatingDir">
+        <mkdir dir="${destdir}/${templatingdir}"/>
+    </target>
+
     <!-- Dist -->
     <target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -129,10 +117,10 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
