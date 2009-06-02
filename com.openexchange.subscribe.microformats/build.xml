@@ -4,17 +4,13 @@
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
-    <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
-	<property name="xmlBundle" value="com.openexchange.xml" />
-	
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="composite.name" value="open-xchange-subscribe-microformats-${version}"/>
 
@@ -22,44 +18,30 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common" />
+    <property name="xmlBundle" value="com.openexchange.xml" />
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-    
-	
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
-	
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
-	
     <property name="serverjar" value="com.openexchange.server.jar"/>
-	
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
-	
-    <property name="xmljar" value="com.openexchange.xml.jar"/>
-	
-	
-	
+
+    <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		
+        <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-		
         <pathelement location="${bundlesdir}/${subscribejar}"/>
-		
         <pathelement location="${bundlesdir}/${serverjar}"/>
-		
         <pathelement location="${bundlesdir}/${genconfjar}"/>
-		
-        <pathelement location="${bundlesdir}/${xmljar}"/>
-		
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-		
-	    <fileset dir="${bundlesdir}/${xmlBundle}/lib" includes="**.jar"/>
-    	
-    	<fileset dir="lib" includes="**.jar" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
+        <fileset dir="${bundlesdir}/${xmlBundle}/lib" includes="**.jar"/>
     </path>
 
     <!-- Compile -->
@@ -69,17 +51,14 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
-        	<fileset dir="lib" />
         </jar>
     </target>
 
@@ -103,8 +82,8 @@
 
     <!-- Dist -->
     <target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -115,10 +94,10 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
