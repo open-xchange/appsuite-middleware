@@ -147,7 +147,7 @@ public class ContactConfig {
         /**
          * Enables/Disables the start letter based quick select of contacts
          */
-        QUICK_SELECT("com.openexchange.contact.quickSelect", Boolean.TRUE.toString());
+        CHARACTER_SEARCH("com.openexchange.contact.characterSearch", Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.
