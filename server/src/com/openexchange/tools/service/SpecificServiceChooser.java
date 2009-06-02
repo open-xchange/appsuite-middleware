@@ -57,6 +57,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link SpecificServiceChooser}
@@ -64,7 +66,9 @@ import java.util.TreeSet;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SpecificServiceChooser<T> {
-
+    
+    private static final Log LOG = LogFactory.getLog(SpecificServiceChooser.class);
+    
     private SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 
     private Map<Integer, SortedSet<WeightedRegistration<T>>> contextSpecific = new HashMap<Integer, SortedSet<WeightedRegistration<T>>>();
@@ -78,11 +82,11 @@ public class SpecificServiceChooser<T> {
 
     }
 
-    public void registerForEverything(T serviceInstance, int ranking) throws ServicePriorityConflictException {
+    public synchronized void registerForEverything(T serviceInstance, int ranking) throws ServicePriorityConflictException {
         add(general, serviceInstance, ranking);
     }
 
-    public void removeForEverything(T serviceInstance) {
+    public synchronized void removeForEverything(T serviceInstance) {
         remove(general, serviceInstance);
     }
 
@@ -100,6 +104,7 @@ public class SpecificServiceChooser<T> {
     }
     
     private void add(SortedSet<WeightedRegistration<T>> set, T serviceInstance, int ranking) throws ServicePriorityConflictException {
+        notNull(serviceInstance);
         WeightedRegistration<T> newRegistration = new WeightedRegistration<T>(ranking);
         newRegistration.payload = serviceInstance;
         if(!set.add(newRegistration)) {
@@ -107,28 +112,35 @@ public class SpecificServiceChooser<T> {
         }
     }
 
-    public void registerForContext(T serviceInstance, int ranking, int cid) throws ServicePriorityConflictException {
+    private void notNull(T serviceInstance) {
+        if(serviceInstance == null) {
+            LOG.fatal("Trying to register Null Service!");
+            throw new NullPointerException("Service Instance may not be null!");
+        }
+    }
+
+    public synchronized void registerForContext(T serviceInstance, int ranking, int cid) throws ServicePriorityConflictException {
         if (!contextSpecific.containsKey(cid)) {
             contextSpecific.put(cid, new TreeSet<WeightedRegistration<T>>());
         }
         add(contextSpecific.get(cid), serviceInstance, ranking);
     }
 
-    public void removeForContext(T serviceInstance, int cid) {
+    public synchronized void removeForContext(T serviceInstance, int cid) {
         if (contextSpecific.containsKey(cid)) {
             remove(contextSpecific.get(cid), serviceInstance);
         }
     }
 
-    public void registerForContextAndFolder(T serviceInstance, int ranking, int cid, int folderId) throws ServicePriorityConflictException {
+    public synchronized void registerForContextAndFolder(T serviceInstance, int ranking, int cid, int folderId) throws ServicePriorityConflictException {
         registerForContextAndFolder(serviceInstance, ranking, cid, String.valueOf(folderId));
     }
     
-    public void removeForContextAndFolder(T serviceInstance, int cid, int folderId) {
+    public synchronized void removeForContextAndFolder(T serviceInstance, int cid, int folderId) {
         removeForContextAndFolder(serviceInstance, cid, String.valueOf(folderId));
     }
 
-    public void registerForContextAndFolder(T serviceInstance, int ranking, int cid, String folderId) throws ServicePriorityConflictException {
+    public synchronized void registerForContextAndFolder(T serviceInstance, int ranking, int cid, String folderId) throws ServicePriorityConflictException {
         Map<String, SortedSet<WeightedRegistration<T>>> folderSpecific = contextAndFolderSpecific.get(cid);
         if (folderSpecific == null) {
             folderSpecific = new HashMap<String, SortedSet<WeightedRegistration<T>>>();
@@ -141,7 +153,7 @@ public class SpecificServiceChooser<T> {
         add( folderSpecific.get(folderId), serviceInstance, ranking);
     }
 
-    public void removeForContextAndFolder(T serviceInstance, int cid, String folderId) {
+    public synchronized void removeForContextAndFolder(T serviceInstance, int cid, String folderId) {
         Map<String, SortedSet<WeightedRegistration<T>>> folderSpecific = contextAndFolderSpecific.get(cid);
         if(folderSpecific == null) {
             return;
@@ -154,7 +166,7 @@ public class SpecificServiceChooser<T> {
         registerForFolder(serviceInstance, ranking, String.valueOf(folderId));
     }
 
-    public void registerForFolder(T serviceInstance, int ranking, String folderId) throws ServicePriorityConflictException {
+    public synchronized void registerForFolder(T serviceInstance, int ranking, String folderId) throws ServicePriorityConflictException {
         if (!folderSpecific.containsKey(folderId)) {
             folderSpecific.put(folderId, new TreeSet<WeightedRegistration<T>>());
         }
@@ -165,7 +177,7 @@ public class SpecificServiceChooser<T> {
         removeForFolder(serviceInstance, String.valueOf(folderId));
     }
     
-    public void removeForFolder(T serviceInstance, String folderId) {
+    public synchronized void removeForFolder(T serviceInstance, String folderId) {
         remove (folderSpecific.get(folderId), serviceInstance);
     }
 

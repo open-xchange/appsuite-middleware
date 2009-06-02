@@ -49,25 +49,80 @@
 
 package com.openexchange.groupware.attach;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
+import com.openexchange.groupware.attach.impl.OverridableAttachmentAuthorization;
+import com.openexchange.groupware.attach.impl.OverridableAttachmentListener;
 import com.openexchange.groupware.calendar.CalendarAttachments;
 import com.openexchange.groupware.contact.ContactsAttachment;
 import com.openexchange.groupware.tasks.TaskAttachmentListener;
 import com.openexchange.groupware.tasks.TaskAuthorization;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.tools.service.ServicePriorityConflictException;
+import com.openexchange.tools.service.SpecificServiceChooser;
 
 public abstract class Attachments {
 
+    private static final Map<Integer, SpecificServiceChooser<AttachmentAuthorization>> authz = new HashMap<Integer, SpecificServiceChooser<AttachmentAuthorization>>();
+    private static final Map<Integer, SpecificServiceChooser<AttachmentListener>> listener = new HashMap<Integer, SpecificServiceChooser<AttachmentListener>>();
 	
-	public static AttachmentBase getInstance(){
-		final AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
-		impl.addAuthorization(new TaskAuthorization(), Types.TASK);
-		impl.registerAttachmentListener(new TaskAttachmentListener() ,Types.TASK);
-		impl.addAuthorization(new ContactsAttachment(), Types.CONTACT);
-		impl.registerAttachmentListener(new ContactsAttachment() ,Types.CONTACT);
-		impl.addAuthorization(new CalendarAttachments(), Types.APPOINTMENT);
-		impl.registerAttachmentListener(new CalendarAttachments(),Types.APPOINTMENT);
+    private static final AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
+    
+    static {
+        try {
+            SpecificServiceChooser<AttachmentAuthorization> taskAuth = new SpecificServiceChooser<AttachmentAuthorization>();
+            taskAuth.registerForEverything(new TaskAuthorization(), 0);
+        
+            SpecificServiceChooser<AttachmentAuthorization> contactAuth = new SpecificServiceChooser<AttachmentAuthorization>();
+            contactAuth.registerForEverything(new ContactsAttachment(), 0);
+            
+            SpecificServiceChooser<AttachmentAuthorization> appointmentAuth = new SpecificServiceChooser<AttachmentAuthorization>();
+            appointmentAuth.registerForEverything(new CalendarAttachments(), 0);
+            
+            authz.put(Types.TASK, taskAuth);
+            authz.put(Types.CONTACT, contactAuth);
+            authz.put(Types.APPOINTMENT, appointmentAuth);
+            
+            
+            SpecificServiceChooser<AttachmentListener> taskListener = new SpecificServiceChooser<AttachmentListener>();
+            taskListener.registerForEverything(new TaskAttachmentListener(), 0);
+            
+            SpecificServiceChooser<AttachmentListener> contactListener = new SpecificServiceChooser<AttachmentListener>();
+            contactListener.registerForEverything(new ContactsAttachment(), 0);
+            
+            SpecificServiceChooser<AttachmentListener> appointmentListener = new SpecificServiceChooser<AttachmentListener>();
+            appointmentListener.registerForEverything(new CalendarAttachments(), 0);
+            
+            listener.put(Types.TASK, taskListener);
+            listener.put(Types.CONTACT, contactListener);
+            listener.put(Types.APPOINTMENT, appointmentListener);
+
+            impl.addAuthorization(new OverridableAttachmentAuthorization(taskAuth), Types.TASK);
+            impl.registerAttachmentListener(new OverridableAttachmentListener(taskListener) ,Types.TASK);
+            impl.addAuthorization(new OverridableAttachmentAuthorization(contactAuth), Types.CONTACT);
+            impl.registerAttachmentListener(new OverridableAttachmentListener(contactListener) ,Types.CONTACT);
+            impl.addAuthorization(new OverridableAttachmentAuthorization(appointmentAuth), Types.APPOINTMENT);
+            impl.registerAttachmentListener(new OverridableAttachmentListener(appointmentListener),Types.APPOINTMENT);
+
+            
+        } catch (ServicePriorityConflictException e) {
+            // Doesn't happen
+            e.printStackTrace();
+        }
+    }
+    
+    public static SpecificServiceChooser<AttachmentAuthorization> getAuthorizationChooserForModule(int module) {
+        return authz.get(module);
+    }
+    
+    public static SpecificServiceChooser<AttachmentListener> getListenerChooserForModule(int module) {
+        return listener.get(module);
+    }
+
+
+    public static AttachmentBase getInstance(){
 		return impl;
 	}
 }

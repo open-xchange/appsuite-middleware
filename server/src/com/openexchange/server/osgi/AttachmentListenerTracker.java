@@ -47,20 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.attach;
+package com.openexchange.server.osgi;
 
-public class Classes {
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY = 0;
-	
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION = 1;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_UPDATEATTACHMENTACTION = 2;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION = 3;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_ATTACHMENTBASEIMPL = 4;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREATTACHEDEVENTACTION = 5;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION = 6;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTAUTHORIZATION = 9;
-    public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER = 10;
+import org.osgi.framework.BundleContext;
+import com.openexchange.groupware.attach.AttachmentListener;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.tools.service.SpecificServiceChooser;
 
-    public static final int COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST = 7;
-    public static final int COM_OPENEXCHANGE_AJAX_ATTACHMENT = 8;
+
+/**
+ * {@link AttachmentListenerTracker}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class AttachmentListenerTracker extends AttachmentPluginsTracker<AttachmentListener> {
+
+    public AttachmentListenerTracker(BundleContext context) {
+        super(context, AttachmentListener.class);
+    }
+
+    @Override
+    public SpecificServiceChooser<AttachmentListener> getChooser(int module) {
+        return Attachments.getListenerChooserForModule(module);
+    }
+
 }

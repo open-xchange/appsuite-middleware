@@ -47,20 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.attach;
+package com.openexchange.groupware.attach.impl;
 
-public class Classes {
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY = 0;
-	
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION = 1;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_UPDATEATTACHMENTACTION = 2;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION = 3;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_ATTACHMENTBASEIMPL = 4;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREATTACHEDEVENTACTION = 5;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION = 6;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTAUTHORIZATION = 9;
-    public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER = 10;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.attach.AttachmentEvent;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentListener;
+import com.openexchange.groupware.attach.Classes;
+import com.openexchange.tools.service.ServicePriorityConflictException;
+import com.openexchange.tools.service.SpecificServiceChooser;
 
-    public static final int COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST = 7;
-    public static final int COM_OPENEXCHANGE_AJAX_ATTACHMENT = 8;
+/**
+ * {@link OverridableAttachmentListener}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+@OXExceptionSource(
+    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER,
+    component = EnumComponent.ATTACHMENT
+)
+public class OverridableAttachmentListener implements AttachmentListener {
+    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(OverridableAttachmentListener.class);
+    private SpecificServiceChooser<AttachmentListener> chooser;
+
+    public OverridableAttachmentListener(SpecificServiceChooser<AttachmentListener> chooser) {
+        this.chooser = chooser;
+    }
+
+    public long attached(AttachmentEvent e) throws Exception {
+        return getDelegate(e).attached(e);
+    }
+
+    public long detached(AttachmentEvent e) throws Exception {
+        return getDelegate(e).detached(e);
+    }
+
+    @OXThrows(category=Category.SETUP_ERROR, desc="", exceptionId=0, msg="Conflicting services registered for context %i and folder %i")
+    private AttachmentListener getDelegate(AttachmentEvent e) throws AttachmentException {
+        int contextId = e.getContext().getContextId();
+        int folderId = e.getFolderId();
+        try {
+            return chooser.choose(contextId, folderId);
+        } catch (ServicePriorityConflictException e1) {
+            throw EXCEPTIONS.create(0, contextId, folderId);
+        }
+        
+    }
+
 }

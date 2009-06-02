@@ -47,20 +47,74 @@
  *
  */
 
-package com.openexchange.groupware.attach;
+package com.openexchange.server.osgi;
 
-public class Classes {
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY = 0;
-	
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION = 1;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_UPDATEATTACHMENTACTION = 2;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION = 3;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_ATTACHMENTBASEIMPL = 4;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREATTACHEDEVENTACTION = 5;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION = 6;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTAUTHORIZATION = 9;
-    public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER = 10;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.server.impl.Constants;
 
-    public static final int COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST = 7;
-    public static final int COM_OPENEXCHANGE_AJAX_ATTACHMENT = 8;
+
+/**
+ * {@link ModuleSpecificServiceTracker}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class ModuleSpecificServiceTracker<T> extends ServiceTracker {
+
+    public ModuleSpecificServiceTracker(BundleContext context, Class<T> toTrack) {
+        super(context, toTrack.getName(), null);
+    }
+
+    @Override
+    public Object addingService(ServiceReference reference) {
+        T tracked = (T) context.getService(reference);
+        Object property = reference.getProperty(Constants.OX_MODULE);
+        int module = atoi(property);
+        addingService(module, tracked, reference);
+        return tracked;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference reference, Object service) {
+        T tracked = (T) getService(reference);
+        Object property = reference.getProperty(Constants.OX_MODULE);
+        int module = atoi(property);
+        modifiedService(module, tracked, reference);
+    }
+
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        T tracked = (T) getService(reference);
+        Object property = reference.getProperty(Constants.OX_MODULE);
+        int module = atoi(property);
+        removedService(module, tracked, reference);
+        context.ungetService(reference); 
+    }
+    
+    protected int atoi(Object property) {
+        if(Integer.class.isInstance(property)) {
+            return (Integer) property;
+        } 
+        return Integer.parseInt(property.toString());
+    }
+    
+    public void removedService(int module, T tracked, ServiceReference reference) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addingService(int module, T tracked, ServiceReference reference) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void modifiedService(int module, T tracked, ServiceReference reference) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+
 }

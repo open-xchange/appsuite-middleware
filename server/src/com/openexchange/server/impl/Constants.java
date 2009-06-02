@@ -47,20 +47,23 @@
  *
  */
 
-package com.openexchange.groupware.attach;
+package com.openexchange.server.impl;
 
-public class Classes {
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY = 0;
-	
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION = 1;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_UPDATEATTACHMENTACTION = 2;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION = 3;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_ATTACHMENTBASEIMPL = 4;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREATTACHEDEVENTACTION = 5;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION = 6;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTAUTHORIZATION = 9;
-    public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER = 10;
+import com.openexchange.groupware.contact.ContactInterface;
 
-    public static final int COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST = 7;
-    public static final int COM_OPENEXCHANGE_AJAX_ATTACHMENT = 8;
+
+/**
+ * {@link Constants}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class Constants {
+
+    public static final String OX_MODULE = "com.openexchange.server.module";
+    
+    public static final String OX_OVERRIDE_FOLDER = ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE;
+    public static final String OX_OVERRIDE_CONTEXT = ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE;
+    
+    
 }

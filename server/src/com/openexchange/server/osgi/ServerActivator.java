@@ -409,7 +409,13 @@ public final class ServerActivator extends DeferredActivator {
                 context,
                 MultipleHandlerFactoryService.class.getName(),
                 new MultipleHandlerServiceTracker(context)));
-
+            
+            // Attachment Plugins
+            serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
+            serviceTrackerList.add(new AttachmentListenerTracker(context));
+            
+           
+            
             // Start up server the usual way
             starter.start();
         }
