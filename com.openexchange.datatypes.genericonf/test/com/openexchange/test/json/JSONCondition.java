@@ -47,50 +47,16 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.json;
+package com.openexchange.test.json;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.test.json.JSONAssertion;
-import junit.framework.TestCase;
-
-import static com.openexchange.test.json.JSONAssertion.assertValidates;
 
 /**
- * {@link FormContentWriterTest}
+ * {@link JSONCondition}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class FormContentWriterTest extends TestCase {
-
-    private Map<String, Object> content = null;
-    private DynamicFormDescription form = null;
-    
-    public void setUp() throws Exception {
-        content = new HashMap<String, Object>();
-        form = new DynamicFormDescription();
-        
-        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox"));
-        
-        content.put("login", "blupp");
-        content.put("password", "geheim");
-        content.put("checkbox", true);
-    }
-    
-    public void testWrite() throws JSONException {
-        JSONObject object = new FormContentWriter().write(form, content);
-        JSONAssertion assertion = new JSONAssertion().isObject()
-            .hasKey("login").withValue("blupp")
-            .hasKey("password").withValue("xxxxxxxx")
-            .hasKey("checkbox").withValue(true)
-       .objectEnds();
-        
-        assertValidates(assertion, object);
-    }
-    
+public interface JSONCondition {
+    public boolean validate(Object o);
+    public String getComplaint();
 }

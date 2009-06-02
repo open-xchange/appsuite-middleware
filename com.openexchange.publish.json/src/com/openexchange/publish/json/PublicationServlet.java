@@ -234,7 +234,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
     }
 
 
-
+    // Robustness!
     private void loadAllPublicationsForEntity(HttpServletRequest req, HttpServletResponse resp) throws PublicationJSONException, PublicationException, JSONException {
         if(null == req.getParameter("entityModule")) {
             throw MISSING_PARAMETER.create("entityModule");

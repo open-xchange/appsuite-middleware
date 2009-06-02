@@ -59,10 +59,10 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.test.JSONAssertion;
+import com.openexchange.test.json.JSONAssertion;
 import junit.framework.TestCase;
 
-import static com.openexchange.test.JSONAssertion.assertValidates;
+import static com.openexchange.test.json.JSONAssertion.assertValidates;
 
 /**
  * {@link SubscriptionJSONWriterTest}
