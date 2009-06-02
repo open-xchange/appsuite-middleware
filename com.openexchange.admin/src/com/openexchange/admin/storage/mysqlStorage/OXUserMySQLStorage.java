@@ -470,7 +470,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             }
 
-            final Boolean spam_filter_enabled = usrdata.getGUI_Spam_filter_capabilities_enabled();
+            final Boolean spam_filter_enabled = usrdata.getGui_spam_filter_enabled();
             if (null != spam_filter_enabled) {
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
                 if (spam_filter_enabled) {
@@ -1104,7 +1104,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // TODO: choeger: Extend API to allow setting of these flags
                 int flags = UserSettingMail.INT_NOTIFY_TASKS | UserSettingMail.INT_NOTIFY_APPOINTMENTS;
 
-                if (usrdata.getGUI_Spam_filter_capabilities_enabled() != null && usrdata.getGUI_Spam_filter_capabilities_enabled()) {
+                if (usrdata.getGui_spam_filter_enabled() != null && usrdata.getGui_spam_filter_enabled()) {
                     flags |= UserSettingMail.INT_SPAM_ENABLED;
                 }
                 stmt.setInt(8, flags);
@@ -1641,9 +1641,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     newuser.setMail_folder_confirmed_spam_name(rs.getString("confirmed_spam"));
                     final int bits = rs.getInt("bits");
                     if ((bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED) {
-                        newuser.setGUI_Spam_filter_capabilities_enabled(true);
+                        newuser.setGui_spam_filter_enabled(true);
                     } else {
-                        newuser.setGUI_Spam_filter_capabilities_enabled(false);
+                        newuser.setGui_spam_filter_enabled(false);
                     }
                     newuser.setDefaultSenderAddress(rs.getString("send_addr"));
                     newuser.setUploadFileSizeLimit(rs.getInt("upload_quota"));
