@@ -264,9 +264,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean mail_folder_confirmed_ham_nameset = false;
 
-    private Boolean gUI_Spam_filter_capabilities_enabled;
+    private Boolean gui_spam_filter_enabled;
 
-    private boolean gUI_Spam_filter_capabilities_enabledset = false;
+    private boolean gui_spam_filter_enabledset = false;
 
     private String manager_name;
 
@@ -4355,33 +4355,64 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
+    final public boolean isGui_spam_filter_enabledset() {
+        return gui_spam_filter_enabledset;
+    }
+
+    /**
+     * Used to check if the gui_spam_filter_capabilities_enabled field of this user object has been changed
+     *
+     * @return true if set; false if not
+     * @deprecated use {@link #isGui_spam_filter_enabledset()} instead
+     **/
+    @Deprecated
     final public boolean isGUI_Spam_filter_capabilities_enabledset() {
-        return gUI_Spam_filter_capabilities_enabledset;
+        return gui_spam_filter_enabledset;
     }
 
     /**
      * @return the gui_spam_filter_enabled
      */
+    final public Boolean getGui_spam_filter_enabled() {
+        return gui_spam_filter_enabled;
+    }
+    
+    /**
+     * @return the gui_spam_filter_enabled
+     * @deprecated use {@link #getGui_spam_filter_enabled()} instead
+     */
+    @Deprecated
     final public Boolean getGUI_Spam_filter_capabilities_enabled() {
-        return gUI_Spam_filter_capabilities_enabled;
+        return gui_spam_filter_enabled;
     }
 
     /**
      * @return
-     * @deprecated 
+     * @deprecated use {@link #getGui_spam_filter_enabled()} instead
      */
     @Deprecated
     final public Boolean getSpam_filter_enabled() {
-        return gUI_Spam_filter_capabilities_enabled;
+        return gui_spam_filter_enabled;
     }
     
     /**
      * @param gui_spam_filter_enabled
      *                the gui_spam_filter_enabled to set
      */
+    public final void setGui_spam_filter_enabled(Boolean gui_spam_filter_enabled) {
+        this.gui_spam_filter_enabledset = true;
+        this.gui_spam_filter_enabled = gui_spam_filter_enabled;
+    }
+    
+    /**
+     * @param gui_spam_filter_enabled
+     *                the gui_spam_filter_enabled to set
+     * @deprecated use {@link #setGui_spam_filter_enabled(Boolean)} instead
+     */
+    @Deprecated
     public final void setGUI_Spam_filter_capabilities_enabled(Boolean gui_spam_filter_enabled) {
-        this.gUI_Spam_filter_capabilities_enabledset = true;
-        this.gUI_Spam_filter_capabilities_enabled = gui_spam_filter_enabled;
+        this.gui_spam_filter_enabledset = true;
+        this.gui_spam_filter_enabled = gui_spam_filter_enabled;
     }
 
     /**
@@ -4593,8 +4624,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + ((given_name == null) ? 0 : given_name.hashCode());
         result = prime * result + (given_nameset ? 1231 : 1237);
         result = prime * result + ((guiPreferences == null) ? 0 : guiPreferences.hashCode());
-        result = prime * result + ((gUI_Spam_filter_capabilities_enabled == null) ? 0 : gUI_Spam_filter_capabilities_enabled.hashCode());
-        result = prime * result + (gUI_Spam_filter_capabilities_enabledset ? 1231 : 1237);
+        result = prime * result + ((gui_spam_filter_enabled == null) ? 0 : gui_spam_filter_enabled.hashCode());
+        result = prime * result + (gui_spam_filter_enabledset ? 1231 : 1237);
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + (idset ? 1231 : 1237);
         result = prime * result + ((imapLogin == null) ? 0 : imapLogin.hashCode());
@@ -4988,12 +5019,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         if (guiPreferencesset != other.guiPreferencesset)
             return false;
-        if (gUI_Spam_filter_capabilities_enabled == null) {
-            if (other.gUI_Spam_filter_capabilities_enabled != null)
+        if (gui_spam_filter_enabled == null) {
+            if (other.gui_spam_filter_enabled != null)
                 return false;
-        } else if (!gUI_Spam_filter_capabilities_enabled.equals(other.gUI_Spam_filter_capabilities_enabled))
+        } else if (!gui_spam_filter_enabled.equals(other.gui_spam_filter_enabled))
             return false;
-        if (gUI_Spam_filter_capabilities_enabledset != other.gUI_Spam_filter_capabilities_enabledset)
+        if (gui_spam_filter_enabledset != other.gui_spam_filter_enabledset)
             return false;
         if (id == null) {
             if (other.id != null)

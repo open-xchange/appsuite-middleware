@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
@@ -213,6 +214,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS = "access-multiple-mail-accounts";
     protected static final String OPT_ACCESS_SUBSCRIPTION = "access-subscription";
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
+    protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     
     
     
@@ -309,6 +311,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         standardoptions.add(OPT_DEPARTMENT_LONG);
         standardoptions.add(OPT_COMPANY_LONG);
         standardoptions.add(OPT_ALIASES_LONG);
+        standardoptions.add("gui_spam_filter_capabilities_enabled");
+        standardoptions.add("gui_spam_filter_enabled");
+
     }
 
     protected final void setIdOption(final AdminParser admp){
@@ -377,11 +382,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     /**
      * @param theMethods
-     * @param notallowed Here we define the methods we don't want. The name is the name of method without the prefix
-     * get or is
+     * @param notallowedOrReplace Here we define the methods we don't want or want to replace. The name is the name of method without the prefix.
+     * get or is. If the value of the map contains a string with length > 0, then this string will be used as columnname
      * @return
      */
-    protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final HashSet<String> notallowed) {
+    protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final Map<String, String> notallowedOrReplace) {
         // Define the returntypes we search for
         final HashSet<String> returntypes = new HashSet<String>();
         returntypes.add(JAVA_LANG_STRING);
@@ -395,16 +400,16 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         returntypes.add(PASSWORDMECH_CLASS);
         returntypes.add(SIMPLE_INT);
         
-        return getGetterGeneral(theMethods, notallowed, returntypes);
+        return getGetterGeneral(theMethods, notallowedOrReplace, returntypes);
     }
 
     /**
      * @param theMethods
-     * @param notallowed Here we define the methods we don't want. The name is the name of method without the prefix
-     * get or is
+     * @param notallowedOrReplace Here we define the methods we don't want or want to replace. The name is the name of method without the prefix.
+     * get or is. If the value of the map contains a string with length > 0, then this string will be used as columnname
      * @return
      */
-    protected final ArrayList<MethodAndNames> getGettersforExtensions(final Method[] theMethods, final HashSet<String> notallowed) {
+    protected final ArrayList<MethodAndNames> getGettersforExtensions(final Method[] theMethods, final Map<String, String> notallowedOrReplace) {
         // Define the returntypes we search for
         final HashSet<String> returntypes = new HashSet<String>(7);
         returntypes.add(JAVA_LANG_STRING);
@@ -413,10 +418,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         returntypes.add(SIMPLE_INT);
         returntypes.add(JAVA_UTIL_ARRAY_LIST);
         
-        return getGetterGeneral(theMethods, notallowed, returntypes);
+        return getGetterGeneral(theMethods, notallowedOrReplace, returntypes);
     }
 
-    private final ArrayList<MethodAndNames> getGetterGeneral(final Method[] theMethods, final HashSet<String> notallowed, final HashSet<String> returntypes) {
+    private final ArrayList<MethodAndNames> getGetterGeneral(final Method[] theMethods, final Map<String, String> notallowedOrReplace, final HashSet<String> returntypes) {
         final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
@@ -424,18 +429,28 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
             if (methodname.startsWith("get")) {
                 final String methodnamewithoutprefix = methodname.substring(3);
-                if (!notallowed.contains(methodnamewithoutprefix)) {
+                if (!notallowedOrReplace.containsKey(methodnamewithoutprefix)) {
                     final String returntype = method.getReturnType().getName();
                     if (returntypes.contains(returntype)) {
                         retlist.add(new MethodAndNames(method, methodnamewithoutprefix, returntype));
                     }
+                } else if (0 != notallowedOrReplace.get(methodnamewithoutprefix).length()) {
+                    final String returntype = method.getReturnType().getName();
+                    if (returntypes.contains(returntype)) {
+                        retlist.add(new MethodAndNames(method, notallowedOrReplace.get(methodnamewithoutprefix), returntype));
+                    }
                 }
             } else if (methodname.startsWith("is")) {
                 final String methodnamewithoutprefix = methodname.substring(2);
-                if (!notallowed.contains(methodnamewithoutprefix)) {
+                if (!notallowedOrReplace.containsKey(methodnamewithoutprefix)) {
                     final String returntype = method.getReturnType().getName();
                     if (returntypes.contains(returntype)) {
                         retlist.add(new MethodAndNames(method, methodnamewithoutprefix, returntype));
+                    }
+                } else if (0 != notallowedOrReplace.get(methodnamewithoutprefix).length()) {
+                    final String returntype = method.getReturnType().getName();
+                    if (returntypes.contains(returntype)) {
+                        retlist.add(new MethodAndNames(method, notallowedOrReplace.get(methodnamewithoutprefix), returntype));
                     }
                 }
             }
@@ -824,7 +839,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 }
             }            
         }
+        setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
+    }
+
+    protected final void setGui_Spam_option(final AdminParser admp){
+        this.spamFilterOption =  setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true); 
     }
 
     /**
@@ -869,7 +889,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 usr.removeGuiPreferences(removeguival);
             }
         }
-
+        final Boolean spamfilter = (Boolean)parser.getOptionValue(this.spamFilterOption);
+        if (null != spamfilter) {
+            usr.setGui_spam_filter_enabled(spamfilter);
+        }
         for (final OptionAndMethod optionAndMethod : optionsandmethods) {
             if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
                 String value = (String)parser.getOptionValue(optionAndMethod.getOption());
