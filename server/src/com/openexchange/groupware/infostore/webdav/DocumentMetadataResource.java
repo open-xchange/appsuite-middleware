@@ -344,8 +344,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     public void unlock(final String token) throws WebdavProtocolException {
         lockHelper.removeLock(token);
         try {
-            touch();
             lockHelper.dumpLocksToDB();
+            touch();
         } catch (final OXException e) {
             throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
@@ -720,7 +720,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     private void touch() throws WebdavProtocolException, OXException {
-        if (!existsInDB && ! exists) {
+        if (!existsInDB && !exists) {
             return;
         }
         database.touch(getId(), getSession());

@@ -1,4 +1,10 @@
+* 2009-06-02 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13681: Change last editor on webdav lock
+
 * 2009-05-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #13771: Fixed validation of entered mail/transport configuration
 
  - Bugfix #13771: Fixed validation of entered mail/transport configuration
  - Bugfix #13768: Fixed update of a POP3 account
