@@ -384,6 +384,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if (checkDefaultFolder) {
             try {
                 getFolderStorage().checkDefaultFolders();
+            } catch (final MailException e) {
+                throw e;
             } catch (final Exception e) {
                 final MailException mailExc = new MailException(MailException.Code.DEFAULT_FOLDER_CHECK_FAILED, e, e.getMessage());
                 LOG.error(mailExc.getMessage(), mailExc);

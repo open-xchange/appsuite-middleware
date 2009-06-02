@@ -201,7 +201,13 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get prefix for default folder names, NOT fullnames!
                      */
-                    final String prefix = getDefaultFolderPrefix(inboxFolder, tmp);
+                    final String prefix;
+                    final char sep;
+                    {
+                        final String[] sa = getDefaultFolderPrefix(inboxFolder, tmp);
+                        prefix = sa[0];
+                        sep = sa[1].charAt(0);
+                    }
                     /*
                      * Check for mbox
                      */
@@ -260,6 +266,7 @@ public final class IMAPDefaultFolderChecker {
                                 setDefaultMailFolder(i, checkDefaultFolder(
                                     prefixAndName[0],
                                     prefixAndName[1],
+                                    sep,
                                     type,
                                     spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                                     tmp));
@@ -272,6 +279,7 @@ public final class IMAPDefaultFolderChecker {
                                 setDefaultMailFolder(i, checkDefaultFolder(
                                     prefixAndName[0],
                                     prefixAndName[1],
+                                    sep,
                                     type,
                                     spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                                     tmp));
@@ -280,7 +288,7 @@ public final class IMAPDefaultFolderChecker {
                             }
                         } else {
                             final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
-                            setDefaultMailFolder(i, checkDefaultFolder(prefixAndName[0], prefixAndName[1], type, 1, tmp));
+                            setDefaultMailFolder(i, checkDefaultFolder(prefixAndName[0], prefixAndName[1], sep, type, 1, tmp));
                         }
                     }
                     if (LOG.isDebugEnabled()) {
@@ -295,10 +303,11 @@ public final class IMAPDefaultFolderChecker {
         }
     }
 
-    private String getDefaultFolderPrefix(final IMAPFolder inboxFolder, final StringBuilder tmp) throws MessagingException, IMAPException {
+    private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final StringBuilder tmp) throws MessagingException, IMAPException {
         /*
          * Check for NAMESPACE capability
          */
+        final char sep;
         if (imapConfig.getImapCapabilities().hasNamespace()) {
             /*
              * Perform the NAMESPACE command to detect the subfolder prefix. From rfc2342: Clients often attempt to create mailboxes for
@@ -311,7 +320,8 @@ public final class IMAPDefaultFolderChecker {
             if (personalNamespaces == null || personalNamespaces[0] == null) {
                 throw new IMAPException(IMAPException.Code.MISSING_PERSONAL_NAMESPACE);
             }
-            setSeparator(personalNamespaces[0].getSeparator());
+            sep = personalNamespaces[0].getSeparator();
+            setSeparator(sep);
             final String persPrefix = personalNamespaces[0].getFullName();
             if ((persPrefix.length() == 0)) {
                 if (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace() && IMAPCommandsCollection.canCreateSubfolder(
@@ -330,7 +340,8 @@ public final class IMAPDefaultFolderChecker {
             /*
              * Examine INBOX folder since NAMESPACE capability is not supported
              */
-            setSeparator(inboxFolder.getSeparator());
+            sep = inboxFolder.getSeparator();
+            setSeparator(sep);
             final boolean inboxInferiors = inferiors(inboxFolder);
             /*
              * Examine root folder if subfolders allowed
@@ -365,7 +376,7 @@ public final class IMAPDefaultFolderChecker {
         }
         final String prefix = tmp.toString();
         tmp.setLength(0);
-        return prefix;
+        return new String[] { prefix, String.valueOf(sep) };
     }
 
     private void setDefaultMailFolder(final int index, final String fullname) {
@@ -378,20 +389,26 @@ public final class IMAPDefaultFolderChecker {
         arr[index] = fullname;
     }
 
-    private String checkDefaultFolder(final String prefix, final String name, final int type, final int subscribe, final StringBuilder tmp) throws MessagingException {
+    private String checkDefaultFolder(final String prefix, final String name, final char sep, final int type, final int subscribe, final StringBuilder tmp) throws MessagingException {
         /*
          * Check default folder
          */
-        boolean checkSubscribed = true;
+        final boolean checkSubscribed = true;
         final Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
         tmp.setLength(0);
-        if (!f.exists() && !f.create(type)) {
+        if (!f.exists() /*&& !f.create(type)*/) {
+            // Try with own routine to get a valid error message on failure
+            IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+            /*-
+             * 
+             * 
             final IMAPException oxme = new IMAPException(
                 IMAPException.Code.NO_DEFAULT_FOLDER_CREATION,
                 tmp.append(prefix).append(name).toString());
             tmp.setLength(0);
             LOG.error(oxme.getMessage(), oxme);
             checkSubscribed = false;
+             */
         }
         if (checkSubscribed) {
             if (1 == subscribe) {

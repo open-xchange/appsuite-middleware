@@ -72,10 +72,12 @@ import javax.mail.MessagingException;
 import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
+import javax.mail.event.FolderEvent;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -628,6 +630,63 @@ public final class IMAPCommandsCollection {
                 return -1;
             }
         }))).booleanValue();
+    }
+
+    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {
+        final Boolean ret = (Boolean) newFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                final String fullName = newFolder.getFullName();
+                // Encode the mbox as per RFC2060
+                final String mbox;
+                if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                    // Only holds folders
+                    mbox = prepareStringArgument(fullName + separator);
+                } else {
+                    mbox = prepareStringArgument(fullName);
+                }
+                // Create command
+                final String command = new StringBuilder(32).append("CREATE ").append(mbox).toString();
+                // Issue command
+                final Response[] r = protocol.command(command, null);
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
+                    /*
+                     * Certain IMAP servers do not allow creation of folders that can contain messages AND subfolders.
+                     */
+                    if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                        final ListInfo[] li = protocol.list("", fullName);
+                        if (li != null && !li[0].hasInferiors) {
+                            protocol.delete(fullName);
+                            throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder ").append(fullName).append(
+                                "should hold folders AND messages, but can only hold messages.").toString());
+                        }
+                    }
+                    return Boolean.TRUE;
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else {
+                    protocol.handleResult(response);
+                }
+                return Boolean.FALSE;
+            }
+        });
+        if (null == ret) {
+            final ProtocolException pex = new ProtocolException("IMAP folder \"" + newFolder.getFullName() + "\" cannot be created.");
+            throw new MessagingException(pex.getMessage(), pex);
+        }
+        // Set exists, type, and attributes
+        if (newFolder.exists()) {
+            new ExtendedIMAPFolder(newFolder, separator).triggerNotifyFolderListeners(FolderEvent.CREATED);
+        }
     }
 
     private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
