@@ -331,12 +331,18 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			return;
 		}
 		lockHelper.addLock(lock);
+	    try {
+           touch();
+        } catch (OXException e) {
+            throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
 	}
 	
 	public void unlock(final String token) throws WebdavProtocolException {
 		lockHelper.removeLock(token);
 		try {
 			lockHelper.dumpLocksToDB();
+		    touch();
 		} catch (final OXException e) {
 		    throw new WebdavProtocolException(e, getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -691,7 +697,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		setMetadata.clear();
 		metadataChanged=false;
 	}
-
+    
+    private void touch() throws WebdavProtocolException, OXException {
+        if (!existsInDB && ! exists) {
+            return;
+        }
+        database.touch(getId(), getSession());
+    }
+    
     private void initNameAndTitle() {
         if(metadata.getFileName() == null || metadata.getFileName().trim().length()==0){
             //if(url.contains("/"))
