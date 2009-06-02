@@ -105,7 +105,7 @@ public class UpdateIterator implements MapIterator<String, Object> {
                         }
                     }
                 }
-            } else {
+            } else if(value != null){
                 insertIterator.handle(name, value);
             }
         } catch (SQLException x) {
