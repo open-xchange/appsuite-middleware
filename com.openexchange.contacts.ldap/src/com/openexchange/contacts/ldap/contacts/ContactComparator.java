@@ -67,6 +67,11 @@ public class ContactComparator implements Comparator<ContactObject> {
 
     public int compare(ContactObject o1, ContactObject o2) {
         switch (this.orderfield) {
+        case -1:
+            // Default sort
+            final String s1 = getFirstNotNull(o1);
+            final String s2 = getFirstNotNull(o2);
+            return alphanumComparator.compare(s1, s2);
         case ContactObject.ANNIVERSARY:
             return compareDate(o1.getAnniversary(), o2.getAnniversary());
         case ContactObject.ASSISTANT_NAME:
@@ -280,6 +285,24 @@ public class ContactComparator implements Comparator<ContactObject> {
 
     private int intcompare(final int o1, final int o2) {
         return o1 - o2;
+    }
+
+    private String getFirstNotNull(final ContactObject contact) {
+        final String retval;
+        if (contact.containsSurName()) {
+            retval = contact.getSurName();
+        } else if (contact.containsDisplayName()) {
+            retval = contact.getDisplayName();
+        } else if (contact.containsCompany()) {
+            retval = contact.getCompany();
+        } else if (contact.containsEmail1()) {
+            retval = contact.getEmail1();
+        } else if (contact.containsEmail2()) {
+            retval = contact.getEmail2();
+        } else {
+            retval = "";
+        }
+        return retval;
     }
 
 }

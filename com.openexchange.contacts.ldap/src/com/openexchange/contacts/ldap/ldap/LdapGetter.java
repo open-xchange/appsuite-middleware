@@ -50,6 +50,7 @@
 package com.openexchange.contacts.ldap.ldap;
 
 import java.util.Date;
+import java.util.List;
 import com.openexchange.contacts.ldap.exceptions.LdapException;
 
 
@@ -71,6 +72,15 @@ public interface LdapGetter {
     public String getAttribute(final String attributename) throws LdapException;
 
     /**
+     * Gets the value of the object with the given name as Date
+     * 
+     * @param birthday
+     * @return null if the attribute is not available
+     * @throws LdapException If something went wrong
+     */
+    public Date getDateAttribute(final String attributename) throws LdapException;
+    
+    /**
      * Gets the value of the object with the given name as int
      * 
      * @param attributename The name of the attribute
@@ -80,11 +90,30 @@ public interface LdapGetter {
     public int getIntAttribute(final String attributename) throws LdapException;
 
     /**
-     * Gets the value of the object with the given name as Date
+     * Gets an LdapGetter object for getting the attributes below the object with
+     * the specified distinguished name.
      * 
-     * @param birthday
-     * @return null if the attribute is not available
-     * @throws LdapException If something went wrong
+     * @param dn
+     * @return null if no such object was found
+     * @throws LdapException
      */
-    public Date getDateAttribute(final String attributename) throws LdapException;
+    public LdapGetter getLdapGetterForDN(final String dn) throws LdapException;
+    
+    /**
+     * Gets the values of the object with the given name as array used
+     * especially for multi-value attributes
+     * 
+     * @param attributename
+     * @return
+     * @throws LdapException
+     */
+    public List<String> getMultiValueAttribute(final String attributename) throws LdapException;
+    
+    /**
+     * Gets the fullname of the object to which the attributes belong
+     * 
+     * @return
+     * @throws LdapException
+     */
+    public String getObjectFullName() throws LdapException;
 }

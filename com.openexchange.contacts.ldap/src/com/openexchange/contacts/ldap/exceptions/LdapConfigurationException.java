@@ -77,7 +77,7 @@ public class LdapConfigurationException extends OXException {
         SEARCH_SCOPE_WRONG("The given value for searchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 3),
 
         /**
-         * The parameter "%s" is not set in the property file
+         * The parameter "%s" is not set in the property file %s
          */
         PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file \"%s\"", Category.SETUP_ERROR, 4),
 
@@ -109,8 +109,19 @@ public class LdapConfigurationException extends OXException {
         /**
          * The given value for userLoginSource "%s" is not a possible one
          */
-        USER_LOGIN_SOURCE_WRONG("The given value for userLoginSource \"%s\" is not a possible one", Category.SETUP_ERROR, 10);
+        USER_LOGIN_SOURCE_WRONG("The given value for userLoginSource \"%s\" is not a possible one", Category.SETUP_ERROR, 10),
         
+        /**
+         * The given value for contactTypes "%s" is not a possible one
+         */
+        CONTACT_TYPES_WRONG("The given value for contactTypes \"%s\" is not a possible one", Category.SETUP_ERROR, 11),
+        
+        /**
+         * The given value for searchScope_distributionlist "%s" is not a possible one
+         */
+        SEARCH_SCOPE_DISTRI_WRONG("The given value for searchScope_distributionlist \"%s\" is not a possible one", Category.SETUP_ERROR, 12);
+
+
         /**
          * Message of the exception.
          */

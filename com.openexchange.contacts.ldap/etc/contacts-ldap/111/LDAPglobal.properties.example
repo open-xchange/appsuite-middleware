@@ -4,10 +4,10 @@
 com.openexchange.contacts.ldap.context111.LDAPglobal.uri=ldap://localhost
 
 # Specify the baseDN here
-com.openexchange.contacts.ldap.context111.LDAPglobal.baseDN=dc=oxnbg,dc=int
+com.openexchange.contacts.ldap.context111.LDAPglobal.baseDN=dc=example,dc=com
 
 # Specify the bindDN here (optional)
-com.openexchange.contacts.ldap.context111.LDAPglobal.AdminDN=cn=Administrator,dc=oxnbg,dc=int
+com.openexchange.contacts.ldap.context111.LDAPglobal.AdminDN=cn=Administrator,dc=example,dc=com
 
 # Specify the bindPW here (optional)
 com.openexchange.contacts.ldap.context111.LDAPglobal.AdminBindPW=secret
@@ -49,10 +49,10 @@ com.openexchange.contacts.ldap.context111.LDAPglobal.userSearchBaseDN=
 com.openexchange.contacts.ldap.context111.LDAPglobal.userAuthType=anonymous
 
 # Specify the user AdminDN here (optional). If this value is left empty the global AdminDN will be used
-com.openexchange.contacts.ldap.context111.LDAPglobal.userAdminDN=cn=administrator,cn=users,DC=exchange,DC=local
+com.openexchange.contacts.ldap.context111.LDAPglobal.userAdminDN=
 
 # Specify the user AdminBindDN here (optional). If this value is left empty the global AdminBindPW will be used
-com.openexchange.contacts.ldap.context111.LDAPglobal.userAdminBindPW=secret
+com.openexchange.contacts.ldap.context111.LDAPglobal.userAdminBindPW=
 
 # Specify if the value given for uniqueid is a unique long value in LDAP and can be used for
 # identifying (setting "false"), or if it's a string value then memorymapping must be enabled
@@ -73,3 +73,19 @@ com.openexchange.contacts.ldap.context111.LDAPglobal.foldername=LDAPglobal
 # Specify the searchfilter for the global ldap folder here
 com.openexchange.contacts.ldap.context111.LDAPglobal.searchfilter=(objectclass=person)
 
+# Specify what types of contacts should be displayed. Maybe "users", "distributionlists", or "both"
+com.openexchange.contacts.ldap.context111.LDAPglobal.contactTypes=both
+
+# Specify the searchfilter for distributionlists of the global ldap folder here. This value is optional and might
+# be specified if the search filter is different from the normal searchfilter. So if this value is empty the default
+# searchfilter will be used.
+com.openexchange.contacts.ldap.context111.LDAPglobal.searchfilter_distributionlist=(&(objectclass=groupOfNames)(objectclass=posixGroup))
+
+# Specify the search base for distributionlists here (sub, base, one). This should only be specified if this
+# is different from the searchScope parameter.
+com.openexchange.contacts.ldap.context111.LDAPglobal.searchScope_distributionlist=
+
+# Specify the baseDN for distributionlists of the global ldap folder here. This value is optional and might
+# be specified if this baseDN is different from the normal baseDN. So if this value is empty the default
+# baseDN will be used
+com.openexchange.contacts.ldap.context111.LDAPglobal.baseDN_distributionlist=

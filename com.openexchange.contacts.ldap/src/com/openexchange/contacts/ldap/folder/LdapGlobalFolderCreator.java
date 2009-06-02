@@ -97,7 +97,7 @@ public class LdapGlobalFolderCreator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class);
     
-    public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, DBPoolingException, SQLException {
+    public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException, DBPoolingException {
         // First search for a folder with the name if is doesn't exist create it
         final Connection readCon = DBPool.pickup(ctx);
         int ldapFolderID;

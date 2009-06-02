@@ -5,16 +5,24 @@
 
 # This part contains the openLdap mapping
 
-# This field contains a field in the LDAP directory which is unique along all
-# objects. This is used for unique identification. If you don't have such a
-# field, leave this property empty.
-com.openexchange.contacts.ldap.mapping.openldap.uniqueid 			= uidNumber
-com.openexchange.contacts.ldap.mapping.openldap.displayname 			= displayName
-com.openexchange.contacts.ldap.mapping.openldap.givenname			= givenName
-com.openexchange.contacts.ldap.mapping.openldap.surname				= sn
-com.openexchange.contacts.ldap.mapping.openldap.email1				= mail
-com.openexchange.contacts.ldap.mapping.openldap.department			=
-com.openexchange.contacts.ldap.mapping.openldap.company				=
+# Required
+com.openexchange.contacts.ldap.mapping.openldap.uniqueid            = uidNumber
+
+# Optional
+com.openexchange.contacts.ldap.mapping.openldap.displayname         = displayName
+com.openexchange.contacts.ldap.mapping.openldap.givenname           = givenName
+com.openexchange.contacts.ldap.mapping.openldap.surname             = sn
+com.openexchange.contacts.ldap.mapping.openldap.email1              = mail
+com.openexchange.contacts.ldap.mapping.openldap.department          =
+com.openexchange.contacts.ldap.mapping.openldap.company             =
+
+# The name of the attribute where the name of distributionlists is stored
+com.openexchange.contacts.ldap.mapping.openldap.distributionlistname = cn
+
+# This attribute must be set to have a uid field for distributionlists because this
+# differs from the uid for user object on some LDAP servers
+com.openexchange.contacts.ldap.mapping.openldap.distributionuid = gidNumber
+
 com.openexchange.contacts.ldap.mapping.openldap.birthday				=
 com.openexchange.contacts.ldap.mapping.openldap.anniversary			=
 com.openexchange.contacts.ldap.mapping.openldap.branches				=

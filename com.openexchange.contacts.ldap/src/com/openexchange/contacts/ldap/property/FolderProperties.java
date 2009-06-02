@@ -5,8 +5,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code;
 
-
 public class FolderProperties {
+
+    
+    public interface SetterFallbackClosure {
+        public void set(String property);
+        
+        public String getFallback();
+    }
 
     public enum AuthType {
         AdminDN,
@@ -44,6 +50,12 @@ public class FolderProperties {
         AdminDN,
         anonymous;
     }
+    
+    public enum ContactTypes {
+        users,
+        distributionlists,
+        both;
+    }
 
     
     private enum Parameters {
@@ -66,8 +78,11 @@ public class FolderProperties {
         userSearchAttribute("userSearchAttribute"),
         userSearchBaseDN("userSearchBaseDN"),
         userSearchFilter("userSearchFilter"),
-        userSearchScope("userSearchScope");
-
+        userSearchScope("userSearchScope"),
+        contactTypes("contactTypes"),
+        searchfilter_distributionlist("searchfilter_distributionlist"),
+        searchScope_distributionlist("searchScope_distributionlist"),
+        baseDN_distributionlist("baseDN_distributionlist");
         
         private final String name;
         
@@ -80,6 +95,12 @@ public class FolderProperties {
         }    
     }
     
+    private interface SetterEnumClosure<T> {
+        public void set(final T enumeration);
+        
+        public T valueOf(final String string) throws IllegalArgumentException;
+    }
+
     private String adminBindPW;
     
     private String adminDN;
@@ -119,134 +140,210 @@ public class FolderProperties {
     private String userSearchFilter;
 
     private SearchScope userSearchScope;
-
+    
+    private ContactTypes contacttypes;
+    
+    private String searchfilterDistributionlist;
+    
+    private SearchScope searchScopeDistributionlist;
+    
+    private String baseDNDistributionlist;
+    
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
         
         final Properties conf = configuration.getFile(name);
         final FolderProperties retval = new FolderProperties();
         
-        
-        final String folderparameter = prefix + Parameters.foldername.getName();
-        final String searchparameter = prefix + Parameters.searchfilter.getName();
-        final String foldername = conf.getProperty(folderparameter);
-        final String searchfilter = conf.getProperty(searchparameter);
-        if (null != foldername && foldername.length() != 0) {
-            retval.setFoldername(foldername);
-        } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, folderparameter, name);
-        }
+        final CheckStringPropertyEnumParameter parameterObject = new CheckStringPropertyEnumParameter(conf, logBuilder, prefix, name);
+
+        checkStringPropertyNonOptional(parameterObject, Parameters.foldername, new SetterClosure() {
+            public void set(String string) {
+                retval.setFoldername(string);
+            }
+        });
 
         logBuilder.append("-------------------------------------------------------------------------------").append('\n');
         logBuilder.append("Properties for Context: ").append(contextnr).append(" Propertyfile: ").append(name).append(':').append(" Foldername: ").append(retval.getFoldername()).append('\n');
         logBuilder.append("-------------------------------------------------------------------------------").append('\n');
 
-        if (null != searchfilter && searchfilter.length() != 0) {
-            retval.setSearchfilter(searchfilter);
-        } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, searchfilter, name);
-        }
+        checkStringPropertyEnum(parameterObject, Parameters.contactTypes, Code.CONTACT_TYPES_WRONG, new SetterEnumClosure<ContactTypes>() {
+            public void set(ContactTypes enumeration) {
+                retval.setContacttypes(enumeration);
+            }
+            public ContactTypes valueOf(String string) throws IllegalArgumentException {
+                return ContactTypes.valueOf(string);
+            }
+        });
+
+        checkStringPropertyNonOptional(parameterObject, Parameters.searchfilter, new SetterClosure() {
+            public void set(String string) {
+                retval.setSearchfilter(string);
+            }
+        }); 
+        logBuilder.append("\tSearchfilter: ").append(retval.getSearchfilter()).append('\n');
 
         // Here we iterate over all properties...
-        retval.setUri(PropertyHandler.checkStringProperty(conf, prefix + Parameters.uri.getName(), name));
+        checkStringPropertyNonOptional(parameterObject, Parameters.uri, new SetterClosure() {
+            public void set(String string) {
+                retval.setUri(string);
+            }
+        });
         logBuilder.append("\tUri: ").append(retval.getUri()).append('\n');
         
-        retval.setBaseDN(PropertyHandler.checkStringProperty(conf, prefix + Parameters.baseDN.getName(), name));
+        checkStringPropertyNonOptional(parameterObject, Parameters.baseDN, new SetterClosure() {
+            public void set(String string) {
+                retval.setBaseDN(string);
+            }
+        });
         logBuilder.append("\tBaseDN: ").append(retval.getBaseDN()).append('\n');
         
-        retval.setAdminDN(PropertyHandler.checkStringProperty(conf, prefix + Parameters.AdminDN.getName(), name));
+        checkStringProperty(parameterObject, Parameters.AdminDN, new SetterClosure() {
+            public void set(final String string) {
+                retval.setAdminDN(string);
+            }
+        });
         logBuilder.append("\tAdminDN: ").append(retval.getAdminDN()).append('\n');
         
-        retval.setAdminBindPW(PropertyHandler.checkStringProperty(conf, prefix + Parameters.AdminBindPW.getName(), name));
+        checkStringProperty(parameterObject, Parameters.AdminBindPW, new SetterClosure() {
+            public void set(final String string) {
+                retval.setAdminBindPW(string);
+            }
+        });
         
-        final String searchScopeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.searchScope.getName(), name);
-        try {
-            retval.setSearchScope(SearchScope.valueOf(searchScopeString));
-            logBuilder.append("\tsearchScope: ").append(retval.getSearchScope()).append('\n');
-        } catch (final IllegalArgumentException e) {
-            throw new LdapConfigurationException(Code.SEARCH_SCOPE_WRONG, searchScopeString);
-        }
+        checkStringPropertyEnum(parameterObject, Parameters.searchScope, Code.SEARCH_SCOPE_WRONG, new SetterEnumClosure<SearchScope>() {
+            public void set(SearchScope enumeration) {
+                retval.setSearchScope(enumeration);
+            }
+            public SearchScope valueOf(String string) throws IllegalArgumentException {
+                return SearchScope.valueOf(string);
+            }
+        });
+
+        checkStringPropertyEnum(parameterObject , Parameters.authtype, Code.AUTH_TYPE_WRONG, new SetterEnumClosure<AuthType>() {
+            public void set(AuthType enumeration) {
+                retval.setAuthtype(enumeration);
+            }
+            public AuthType valueOf(String string) throws IllegalArgumentException {
+                return AuthType.valueOf(string);
+            }
+        });
+
+        checkStringPropertyEnum(parameterObject, Parameters.sorting, Code.SORTING_WRONG, new SetterEnumClosure<Sorting>() {
+            public void set(Sorting enumeration) {
+                retval.setSorting(enumeration);
+            }
+            public Sorting valueOf(String string) throws IllegalArgumentException {
+                return Sorting.valueOf(string);
+            }
+        });
+
+        checkStringPropertyEnum(parameterObject, Parameters.userLoginSource, Code.USER_LOGIN_SOURCE_WRONG, new SetterEnumClosure<LoginSource>() {
+            public void set(LoginSource enumeration) {
+                retval.setUserLoginSource(enumeration);
+            }
+            public LoginSource valueOf(String string) throws IllegalArgumentException {
+                return LoginSource.valueOf(string);
+            }
+        });
         
-        final String authstring = PropertyHandler.checkStringProperty(conf, prefix + Parameters.authtype.getName(), name);
-        try {
-            retval.setAuthtype(AuthType.valueOf(authstring));
-            logBuilder.append("\tauthtype: ").append(retval.getAuthtype()).append('\n');
-        } catch (final IllegalArgumentException e) {
-            throw new LdapConfigurationException(Code.AUTH_TYPE_WRONG, authstring);
-        }
-        
-        final String sortingString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.sorting.getName(), name);
-        try {
-            retval.setSorting(Sorting.valueOf(sortingString));
-            logBuilder.append("\tsorting: ").append(retval.getSorting()).append('\n');
-        } catch (final IllegalArgumentException e) {
-            throw new LdapConfigurationException(Code.SORTING_WRONG, authstring);
-        }
-        
-        final String userLoginSourceString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userLoginSource.getName(), name);
-        try {
-            retval.setUserLoginSource(LoginSource.valueOf(userLoginSourceString));
-            logBuilder.append("\tuserLoginSource: ").append(retval.getUserLoginSource()).append('\n');
-        } catch (final IllegalArgumentException e) {
-            throw new LdapConfigurationException(Code.USER_LOGIN_SOURCE_WRONG, userLoginSourceString);
-        }
-        
-        retval.setUserSearchFilter(PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchFilter.getName(), name));
+        checkStringProperty(parameterObject, Parameters.userSearchFilter, new SetterClosure() {
+            public void set(String string) {
+                retval.setUserSearchFilter(string);
+            }
+        });
         logBuilder.append("\tuserSearchFilter: ").append(retval.getUserSearchFilter()).append('\n');
-        
-        final String userSearchScopeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchScope.getName(), name);
+
+        final String userSearchScopeString = checkStringProperty(parameterObject, Parameters.userSearchScope);
         if (0 != userSearchScopeString.length()) {
             try {
                 retval.setUserSearchScope(SearchScope.valueOf(userSearchScopeString));
             } catch (final IllegalArgumentException e) {
-                throw new LdapConfigurationException(Code.USER_SEARCH_SCOPE_WRONG, authstring);
+                throw new LdapConfigurationException(Code.USER_SEARCH_SCOPE_WRONG, userSearchScopeString);
             }
         } else {
             retval.setUserSearchScope(retval.getSearchScope());
         }
         logBuilder.append("\tuserSearchScope: ").append(retval.getUserSearchScope()).append('\n');
         
-        retval.setUserSearchAttribute(PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchAttribute.getName(), name));
+        checkStringProperty(parameterObject, Parameters.userSearchAttribute, new SetterClosure() {
+            public void set(String string) {
+                retval.setUserSearchAttribute(string);
+            }
+        });
         logBuilder.append("\tuserSearchAttribute: ").append(retval.getUserSearchAttribute()).append('\n');
         
-        final String userSearchBaseDNString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userSearchBaseDN.getName(), name);
-        if (0 != userSearchBaseDNString.length()) {
+        final String userSearchBaseDNString = checkStringProperty(parameterObject, Parameters.userSearchBaseDN);
+        if (null != userSearchBaseDNString) {
             retval.setUserSearchBaseDN(userSearchBaseDNString);
         } else {
             retval.setUserSearchBaseDN(retval.getBaseDN());
         }        
         logBuilder.append("\tuserSearchBaseDN: ").append(retval.getUserSearchBaseDN()).append('\n');
         
-        final String userAuthTypeString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userAuthType.getName(), name);
-        try {
-            retval.setUserAuthType(UserAuthType.valueOf(userAuthTypeString));
-        } catch (final IllegalArgumentException e) {
-            throw new LdapConfigurationException(Code.USER_AUTH_TYPE_WRONG);
+        final String userAuthTypeString = checkStringProperty(parameterObject, Parameters.userAuthType);
+        if (null != userAuthTypeString) {
+            try {
+                retval.setUserAuthType(UserAuthType.valueOf(userAuthTypeString));
+            } catch (final IllegalArgumentException e) {
+                throw new LdapConfigurationException(Code.USER_AUTH_TYPE_WRONG);
+            }
         }
         logBuilder.append("\tuserAuthType: ").append(retval.getUserAuthType()).append('\n');
         
-        final String userAdminDNString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userAdminDN.getName(), name);
-        if (0 != userAdminDNString.length()) {
+        final String userAdminDNString = checkStringProperty(parameterObject, Parameters.userAdminDN);
+        if (null != userAdminDNString) {
             retval.setUserAdminDN(userAdminDNString);
         } else {
             retval.setUserAdminDN(retval.getAdminDN());
         }
         logBuilder.append("\tuserAdminDN: ").append(retval.getUserAdminDN()).append('\n');
         
-        final String userAdminBindPWString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.userAdminBindPW.getName(), name);
-        if (0 != userAdminBindPWString.length()) {
+        final String userAdminBindPWString = checkStringProperty(parameterObject, Parameters.userAdminBindPW);
+        if (null != userAdminBindPWString) {
             retval.setUserAdminBindPW(userAdminBindPWString);
         } else {
             retval.setUserAdminBindPW(retval.getAdminBindPW());
         }
         
-        final String memoryMappingString = PropertyHandler.checkStringProperty(conf, prefix + Parameters.memorymapping.getName(), name);
+        checkStringProperty(parameterObject, Parameters.searchfilter_distributionlist, new SetterFallbackClosure() {
+            public void set(String string) {
+                retval.setSearchfilterDistributionlist(string);
+            }
+
+            public String getFallback() {
+                return retval.getSearchfilter();
+            }
+        });
+        
+        final String searchScopeString = checkStringProperty(parameterObject, Parameters.searchScope_distributionlist);
+        if (null != searchScopeString) {
+            try {
+                retval.setSearchScopeDistributionlist(SearchScope.valueOf(searchScopeString));
+            } catch (final IllegalArgumentException e) {
+                throw new LdapConfigurationException(Code.SEARCH_SCOPE_DISTRI_WRONG, searchScopeString);
+            }
+        } else {
+            retval.setSearchScopeDistributionlist(retval.getSearchScope());
+        }
+        
+        checkStringProperty(parameterObject, Parameters.baseDN_distributionlist, new SetterFallbackClosure() {
+            public void set(String string) {
+                retval.setBaseDNDistributionlist(string);
+            }
+
+            public String getFallback() {
+                return retval.getBaseDN();
+            }
+        });
+        
+        final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
         
         // TODO: Throws no error, so use an error checking method
         retval.setMemorymapping(Boolean.parseBoolean(memoryMappingString));
         logBuilder.append("\tmemorymapping: ").append(retval.isMemorymapping()).append('\n');
 
-        final String pagesizestring = PropertyHandler.checkStringProperty(conf, prefix + Parameters.pagesize.getName(), name);
+        final String pagesizestring = checkStringProperty(parameterObject, Parameters.pagesize);
         try {
             retval.setPagesize(Integer.parseInt(pagesizestring));
             logBuilder.append("\tpagesize: ").append(retval.getPagesize()).append('\n');
@@ -254,14 +351,20 @@ public class FolderProperties {
             throw new LdapConfigurationException(Code.INVALID_PAGESIZE, pagesizestring);
         }
 
-        final String mappingfile = PropertyHandler.checkStringProperty(conf, prefix + Parameters.mappingfile.getName(), name);
-        final Properties mapprops = configuration.getFile(mappingfile);
-        if (mapprops.isEmpty()) {
-            throw new LdapConfigurationException(Code.INVALID_MAPPING_FILE, mappingfile);
+        final String mappingfile = checkStringProperty(parameterObject, Parameters.mappingfile);
+        if (null != mappingfile) {
+            final Properties mapprops = configuration.getFile(mappingfile);
+            if (mapprops.isEmpty()) {
+                throw new LdapConfigurationException(Code.INVALID_MAPPING_FILE, mappingfile);
+            } else {
+                retval.setMappings(Mappings.getMappingsFromProperties(mapprops, PropertyHandler.bundlename + mappingfile.replace(
+                    ".properties",
+                    ""), mappingfile));
+            }
         } else {
-            retval.setMappings(Mappings.getMappingsFromProperties(mapprops, PropertyHandler.bundlename +  mappingfile.replace(".properties", ""), mappingfile));
+            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameterObject.getPrefix() + Parameters.mappingfile.getName(), parameterObject.getFilename());
         }
-
+        
         return retval;
     }
 
@@ -280,6 +383,16 @@ public class FolderProperties {
     public String getBaseDN() {
         return baseDN;
     }
+
+    /**
+     * Gets the contacttypes
+     *
+     * @return The contacttypes
+     */
+    public ContactTypes getContacttypes() {
+        return contacttypes;
+    }
+
 
     public String getFoldername() {
         return foldername;
@@ -400,6 +513,16 @@ public class FolderProperties {
         this.baseDN = baseDN;
     }
 
+    /**
+     * Sets the contacttypes
+     *
+     * @param contacttypes The contacttypes to set
+     */
+    private void setContacttypes(final ContactTypes contacttypes) {
+        this.contacttypes = contacttypes;
+    }
+
+
     private void setFoldername(final String foldername) {
         this.foldername = foldername;
     }
@@ -488,4 +611,110 @@ public class FolderProperties {
         this.userSearchScope = userSearchScope;
     }
 
+    public static class CheckStringPropertyEnumParameter {
+
+        private Properties m_props;
+
+        private StringBuilder m_log;
+
+        private String m_prefix;
+
+        private String m_filename;
+
+        public CheckStringPropertyEnumParameter(Properties props, StringBuilder log, String prefix, String filename) {
+            m_props = props;
+            m_log = log;
+            m_prefix = prefix;
+            m_filename = filename;
+        }
+
+        public Properties getProps() {
+            return m_props;
+        }
+
+        public StringBuilder getLog() {
+            return m_log;
+        }
+
+        public String getPrefix() {
+            return m_prefix;
+        }
+
+        public String getFilename() {
+            return m_filename;
+        }
+    }
+
+    public interface SetterClosure {
+        public void set(final String string);
+    }
+
+    private static <T> void checkStringPropertyEnum(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final Code code, final SetterEnumClosure<T> setter) throws LdapConfigurationException {
+        final String paramname = param.getName();
+        final String property = parameterObject.getProps().getProperty(parameterObject.getPrefix() + paramname);
+        if (null != property && 0 != property.length()) {
+            try {
+                final T valueOf = setter.valueOf(property);
+                setter.set(valueOf);
+                parameterObject.getLog().append("\t").append(paramname).append(": ").append(valueOf).append('\n');
+            } catch (final IllegalArgumentException e) {
+                throw new LdapConfigurationException(code, property);
+            }
+        } else {
+            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameterObject.getPrefix() + paramname, parameterObject.getFilename());
+        }
+    }
+
+    private static void checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterClosure setter) throws LdapConfigurationException {
+        final String property = checkStringProperty(parameterObject, param);
+        if (null != property) {
+            setter.set(property);
+        }
+    }
+
+    private static void checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterFallbackClosure setter) throws LdapConfigurationException {
+        final String property = checkStringProperty(parameterObject, param);
+        if (null != property) {
+            setter.set(property);
+        } else {
+            setter.set(setter.getFallback());
+        }
+    }
+
+    private static void checkStringPropertyNonOptional(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterClosure setter) throws LdapConfigurationException {
+        final String property = checkStringProperty(parameterObject, param);
+        if (null != property) {
+            setter.set(property);
+        } else {
+            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameterObject.getPrefix() + param.getName(), parameterObject.getFilename());
+        }
+    }
+    
+    private static String checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param) throws LdapConfigurationException {
+        return PropertyHandler.checkStringProperty(parameterObject.getProps(), parameterObject.getPrefix() + param.getName());
+    }
+
+    private void setSearchfilterDistributionlist(String searchfilterDistriutionlist) {
+        this.searchfilterDistributionlist = searchfilterDistriutionlist;
+    }
+
+    public String getSearchfilterDistributionlist() {
+        return searchfilterDistributionlist;
+    }
+
+    private void setBaseDNDistributionlist(String baseDNDistriutionlist) {
+        this.baseDNDistributionlist = baseDNDistriutionlist;
+    }
+
+    public String getBaseDNDistributionlist() {
+        return baseDNDistributionlist;
+    }
+
+    private void setSearchScopeDistributionlist(SearchScope searchScoprDistributionlist) {
+        this.searchScopeDistributionlist = searchScoprDistributionlist;
+    }
+
+    public SearchScope getSearchScopeDistributionlist() {
+        return searchScopeDistributionlist;
+    }
 }
