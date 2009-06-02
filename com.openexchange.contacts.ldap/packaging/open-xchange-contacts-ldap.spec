@@ -72,5 +72,7 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/contacts-ldap
 /opt/open-xchange/etc/groupware/contacts-ldap/*
 %changelog
+* Mon May 11 2009 - dennis.sieben@open-xchange.com
+  - Implemented distributionlist
 * Thu Apr 23 2009 - dennis.sieben@open-xchange.com
   - Bugfix #13539 Search field in global LDAP contact folder does not work
