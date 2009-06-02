@@ -260,7 +260,12 @@ public abstract class ListCore extends UserAbstraction {
      */
     private void precsvinfos(final User[] users,final HashMap<Integer, UserModuleAccess> access_map) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
         final Method[] methods = User.class.getMethods();
-        final ArrayList<MethodAndNames> methArrayList = getGetters(methods, new HashSet<String>());
+        // Filter out the old gui_spam_filter_enabled getters
+        final Map<String, String> notallowedOrReplace = new HashMap<String, String>();
+        notallowedOrReplace.put("GUI_Spam_filter_capabilities_enabled", "");
+        notallowedOrReplace.put("Spam_filter_enabled", "");
+        notallowedOrReplace.put("Gui_spam_filter_enabled", "GUI_Spam_filter_capabilities_enabled");
+        final ArrayList<MethodAndNames> methArrayList = getGetters(methods, notallowedOrReplace);
         
         final ArrayList<String> columnnames = new ArrayList<String>();
         for (final MethodAndNames methodandnames : methArrayList) {
