@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.test;
+package com.openexchange.test.json;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -68,7 +68,6 @@ public class JSONAssertion implements JSONCondition {
     public static final void assertValidates(JSONAssertion assertion, Object o) {
         assertNotNull("Object was null", o);
         if(!assertion.validate(o)) {
-            System.out.println(o);
             fail(assertion.getComplaint());
         }
     }
