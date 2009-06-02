@@ -64,14 +64,14 @@ import com.openexchange.session.Session;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class QuickSelect implements PreferencesItemService {
+public class CharacterSearch implements PreferencesItemService {
 
-    public QuickSelect() {
+    public CharacterSearch() {
         super();
     }
 
     public String[] getPath() {
-        return new String[] { "modules", "contacts", "quickSelect" };
+        return new String[] { "modules", "contacts", "characterSearch" };
     }
 
     public IValueHandler getSharedValue() {

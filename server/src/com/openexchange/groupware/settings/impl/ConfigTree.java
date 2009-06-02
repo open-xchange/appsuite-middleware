@@ -239,6 +239,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.contacts.MailAddressAutoSearch.class,
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
             com.openexchange.groupware.settings.tree.modules.contacts.SingleFolderSearch.class,
+            com.openexchange.groupware.settings.tree.modules.contacts.CharacterSearch.class,
             com.openexchange.groupware.settings.tree.modules.extras.Module.class,
             com.openexchange.groupware.settings.tree.modules.folder.GUI.class,
             com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,
