@@ -49,13 +49,16 @@
 
 package com.openexchange.publish.microformats;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
@@ -161,14 +164,30 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     }
     
+    protected String normalizeSiteName(String siteName) {
+        String[] path = siteName.split("/");
+        List<String> normalized = new ArrayList<String>(path.length);
+        for(int i = 0; i < path.length; i++) {
+            if(!path[i].equals("")) {
+                normalized.add(path[i]);
+            }
+        }
+        
+        String site = Strings.join(normalized, "/");
+        return site;
+    }
+    
     @Override
     public void modifyIncoming(Publication publication) throws PublicationException {
         String siteName = (String) publication.getConfiguration().get(SITE);
+        
         if(siteName != null) {
+            siteName = normalizeSiteName(siteName);
             Publication oldPub = getPublication(publication.getContext(), siteName);
             if(oldPub != null) {
                 throw uniquenessConstraintViolation(SITE, siteName);
             }
+            publication.getConfiguration().put(SITE, siteName);
         }
     }
 

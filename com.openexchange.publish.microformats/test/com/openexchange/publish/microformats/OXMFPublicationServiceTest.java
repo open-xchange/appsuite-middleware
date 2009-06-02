@@ -232,6 +232,14 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     }
     
+    public void testNormalizedSiteName() throws PublicationException {
+        Publication publication = new Publication();
+        publication.setContext(new SimContext(1337));
+        publication.getConfiguration().put("siteName","path/with//tooMany//slashes/");
+        publicationService.modifyIncoming(publication);
+        assertEquals("path/with/tooMany/slashes", publication.getConfiguration().get("siteName"));
+    }
+    
     public void assertSecret(Publication publication) {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
     }

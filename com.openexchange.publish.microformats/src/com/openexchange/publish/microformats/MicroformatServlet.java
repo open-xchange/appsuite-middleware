@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.tools.UncloseableWriter;
@@ -187,11 +188,11 @@ public class MicroformatServlet extends HttpServlet {
         if(startIndex == -1) {
             throw new IllegalArgumentException("This does not look like a valid path: "+req.getPathInfo());
         }
-        
+        String site = Strings.join(normalized.subList(startIndex+3, normalized.size()), "/");
         Map<String, String> args = new HashMap<String, String>();
         args.put(MODULE, normalized.get(startIndex+1));
         args.put(CONTEXTID, normalized.get(startIndex+2));
-        args.put(SITE, normalized.get(startIndex+3));
+        args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
         return args;
     }
