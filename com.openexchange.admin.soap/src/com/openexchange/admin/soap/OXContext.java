@@ -101,11 +101,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).change(ctx, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).change(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -124,11 +123,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(ctx, access, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).changeModuleAccess(ctx, access, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -147,11 +145,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(ctx, access_combination_name, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).changeModuleAccess(ctx, access_combination_name, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -173,8 +170,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).create(ctx, admin_user, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).create(ctx, admin_user, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -197,8 +194,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).create(ctx, admin_user, access_combination_name, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).create(ctx, admin_user, access_combination_name, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -221,8 +218,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).create(ctx, admin_user, access, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).create(ctx, admin_user, access, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -241,9 +238,9 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).delete(ctx, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).delete(ctx, auth);
         }
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
@@ -265,11 +262,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).disable(ctx, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).disable(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -286,11 +282,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).disableAll(auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).disableAll(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -309,11 +304,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).downgrade(ctx, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).downgrade(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -331,11 +325,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).enable(ctx, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).enable(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -350,11 +343,10 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).enableAll(auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXContextInterface)rmistub).enableAll(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -375,8 +367,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).getAccessCombinationName(ctx, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).getAccessCombinationName(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -397,8 +389,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).getData(ctx, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).getData(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -419,8 +411,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).getModuleAccess(ctx, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).getModuleAccess(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -440,8 +432,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).list(search_pattern, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).list(search_pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -460,8 +452,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).listAll(auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).listAll(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -482,8 +474,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).listByDatabase(db, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).listByDatabase(db, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -504,8 +496,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).listByFilestore(fs, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).listByFilestore(fs, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -529,8 +521,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).moveContextDatabase(ctx, dst_database_id, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).moveContextDatabase(ctx, dst_database_id, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -555,8 +547,8 @@ public class OXContext extends OXSOAPRMIMapper {
             return ((OXContextInterface)rmistub).moveContextFilestore(ctx, dst_filestore_id, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXContextInterface)rmistub).moveContextFilestore(ctx, dst_filestore_id, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }

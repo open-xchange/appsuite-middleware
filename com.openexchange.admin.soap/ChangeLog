@@ -1,0 +1,4 @@
+* 2009-06-02 - dennis.sieben@open-xchange.com
+
+ - Bugfix #13796: soap interface throws error "reconnect to rmi service" on first call .
+     Implemented a second call after the reconnect

@@ -100,11 +100,10 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).addMember(ctx, grp, members, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXGroupInterface)rmistub).addMember(ctx, grp, members, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -126,11 +125,10 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).change(ctx, grp, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXGroupInterface)rmistub).change(ctx, grp, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -154,8 +152,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).create(ctx, grp, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).create(ctx, grp, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -176,11 +174,10 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).delete(ctx, grp, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXGroupInterface)rmistub).delete(ctx, grp, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -201,11 +198,10 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).delete(ctx, grps, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXGroupInterface)rmistub).delete(ctx, grps, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -229,8 +225,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).getData(ctx, grp, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).getData(ctx, grp, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -254,8 +250,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).getData(ctx, grps, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).getData(ctx, grps, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -277,8 +273,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).getDefaultGroup(ctx, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).getDefaultGroup(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -302,8 +298,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).getMembers(ctx, grp, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).getMembers(ctx, grp, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -326,8 +322,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).list(ctx, pattern, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).list(ctx, pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -349,8 +345,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).listAll(ctx, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).listAll(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -374,8 +370,8 @@ public class OXGroup extends OXSOAPRMIMapper {
             return ((OXGroupInterface)rmistub).listGroupsForUser(ctx, usr, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXGroupInterface)rmistub).listGroupsForUser(ctx, usr, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -398,10 +394,9 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).removeMember(ctx, grp, members, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXGroupInterface)rmistub).removeMember(ctx, grp, members, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 }

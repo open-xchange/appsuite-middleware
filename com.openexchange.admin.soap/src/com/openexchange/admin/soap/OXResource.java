@@ -96,11 +96,10 @@ public class OXResource extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXResourceInterface)rmistub).change(ctx, res, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXResourceInterface)rmistub).change(ctx, res, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -123,8 +122,8 @@ public class OXResource extends OXSOAPRMIMapper {
             return ((OXResourceInterface)rmistub).create(ctx, res, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXResourceInterface)rmistub).create(ctx, res, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -145,11 +144,10 @@ public class OXResource extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXResourceInterface)rmistub).delete(ctx, res, auth);
-            return;
         } catch( ConnectException e) {
             reconnect(true);
+            ((OXResourceInterface)rmistub).delete(ctx, res, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -173,8 +171,8 @@ public class OXResource extends OXSOAPRMIMapper {
             return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -198,8 +196,8 @@ public class OXResource extends OXSOAPRMIMapper {
             return ((OXResourceInterface)rmistub).getData(ctx, resources, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXResourceInterface)rmistub).getData(ctx, resources, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -222,8 +220,8 @@ public class OXResource extends OXSOAPRMIMapper {
             return ((OXResourceInterface)rmistub).list(ctx, pattern, auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return ((OXResourceInterface)rmistub).list(ctx, pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
@@ -245,8 +243,8 @@ public class OXResource extends OXSOAPRMIMapper {
             return list(ctx, "*", auth);
         } catch( ConnectException e) {
             reconnect(true);
+            return list(ctx, "*", auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }

@@ -80,11 +80,10 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
         reconnect();
         try {
             ((OXTaskMgmtInterface)rmistub).deleteJob(ctx, auth, i);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXTaskMgmtInterface)rmistub).deleteJob(ctx, auth, i);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -94,11 +93,10 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
         reconnect();
         try {
             ((OXTaskMgmtInterface)rmistub).flush(ctx, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXTaskMgmtInterface)rmistub).flush(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -110,8 +108,8 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
             return ((OXTaskMgmtInterface)rmistub).getJobList(ctx, cred);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXTaskMgmtInterface)rmistub).getJobList(ctx, cred);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -123,8 +121,8 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
             return ((OXTaskMgmtInterface)rmistub).getTaskResults(ctx, cred, id);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXTaskMgmtInterface)rmistub).getTaskResults(ctx, cred, id);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }

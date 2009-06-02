@@ -80,11 +80,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).changeDatabase(db, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXUtilInterface)rmistub).changeDatabase(db, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -94,11 +93,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).changeFilestore(fstore, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXUtilInterface)rmistub).changeFilestore(fstore, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -110,8 +108,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).createMaintenanceReason(reason, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).createMaintenanceReason(reason, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -121,11 +119,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).deleteMaintenanceReason(reasons, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXUtilInterface)rmistub).deleteMaintenanceReason(reasons, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -137,8 +134,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listAllDatabase(auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listAllDatabase(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -150,8 +147,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listAllFilestore(auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listAllFilestore(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -163,8 +160,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listAllMaintenanceReason(auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listAllMaintenanceReason(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -176,8 +173,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listAllServer(auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listAllServer(auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -189,8 +186,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listDatabase(search_pattern, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listDatabase(search_pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -202,8 +199,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listFilestore(search_pattern, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listFilestore(search_pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -215,8 +212,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listMaintenanceReason(search_pattern, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listMaintenanceReason(search_pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -228,8 +225,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).listServer(search_pattern, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).listServer(search_pattern, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -241,8 +238,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).registerDatabase(db, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).registerDatabase(db, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -254,8 +251,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).registerFilestore(fstore, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).registerFilestore(fstore, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -267,8 +264,8 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
             return ((OXUtilInterface)rmistub).registerServer(srv, auth);
         } catch (ConnectException e) {
             reconnect(true);
+            return ((OXUtilInterface)rmistub).registerServer(srv, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -278,11 +275,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).unregisterDatabase(dbhandle, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXUtilInterface)rmistub).unregisterDatabase(dbhandle, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -292,11 +288,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).unregisterFilestore(store, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXUtilInterface)rmistub).unregisterFilestore(store, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /* (non-Javadoc)
@@ -306,11 +301,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).unregisterServer(serv, auth);
-            return;
         } catch (ConnectException e) {
             reconnect(true);
+            ((OXUtilInterface)rmistub).unregisterServer(serv, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }
