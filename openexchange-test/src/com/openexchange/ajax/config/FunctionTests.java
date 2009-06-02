@@ -258,6 +258,12 @@ public class FunctionTests extends AbstractAJAXSession {
             testBoolean(param, true);
         }
     }
+    
+    public void testCharacterSearch() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse response = client.execute(new GetRequest(Tree.CharacterSearch));
+        LOG.info("User is only allowed to search via character side bar in contacts: " + response.getBoolean());
+    }
 
     private void testBoolean(final Tree param, final boolean testWrite) throws Throwable {
         final AJAXClient client = getClient();

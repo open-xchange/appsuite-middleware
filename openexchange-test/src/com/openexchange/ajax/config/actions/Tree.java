@@ -369,7 +369,10 @@ public enum Tree {
 
     /** Defines if the user is allowed to search across all contact folders. */
     SingleFolderSearch("/modules/contacts/singleFolderSearch"),
-
+    
+    /** Define if search via Sidebar is available or not .*/
+    CharacterSearch("/modules/contacts/characterSearch"),
+    
     /** */
     TasksEnabled("/modules/tasks/module"),
 
