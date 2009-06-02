@@ -53,7 +53,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.tools.LocaleTools;
 
 /**
@@ -63,14 +63,6 @@ import com.openexchange.tools.LocaleTools;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UserImpl implements User, Cloneable {
-
-    /**
-     * The group identifier for all groups and users.
-     * 
-     * @deprecated use {@link OCLPermission#ALL_GROUPS_AND_USERS} instead
-     */
-    @Deprecated
-	private static final int GROUP_ALL = 0;
 
     /**
      * For serialization.
@@ -142,7 +134,7 @@ public class UserImpl implements User, Cloneable {
      * should be something like de_DE, en_GB or en.
      */
     private String preferredLanguage;
-    
+
     /**
      * The locale bound to preferred language of this user
      */
@@ -404,34 +396,34 @@ public class UserImpl implements User, Cloneable {
     }
 
     /**
-	 * Setter for preferredLanguage. The user's locale is implicitely re-set,
-	 * too.
-	 * 
-	 * @param preferredLanguage
-	 *            Preferred language.
-	 */
-	public void setPreferredLanguage(final String preferredLanguage) {
-		this.preferredLanguage = preferredLanguage;
-		this.locale = LocaleTools.getLocale(preferredLanguage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getPreferredLanguage() {
-		return preferredLanguage;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Locale getLocale() {
-		return locale;
-	}
+     * Setter for preferredLanguage. The user's locale is implicitely re-set,
+     * too.
+     *
+     * @param preferredLanguage
+     *            Preferred language.
+     */
+    public void setPreferredLanguage(final String preferredLanguage) {
+        this.preferredLanguage = preferredLanguage;
+        this.locale = LocaleTools.getLocale(preferredLanguage);
+    }
 
     /**
-	 * {@inheritDoc}
-	 */
+     * {@inheritDoc}
+     */
+    public String getPreferredLanguage() {
+        return preferredLanguage;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Locale getLocale() {
+        return locale;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public int[] getGroups() {
         return groups.clone();
     }
@@ -452,14 +444,14 @@ public class UserImpl implements User, Cloneable {
     private static int[] addAllGroupsAndUsersGroup(final int[] groups) {
         boolean contained = false;
         for (final int group : groups) {
-            contained = group == GROUP_ALL;
+            contained = group == GroupStorage.GROUP_ZERO_IDENTIFIER;
         }
         final int[] retval;
         if (contained) {
             retval = groups;
         } else {
             retval = new int[groups.length + 1];
-            retval[0] = GROUP_ALL;
+            retval[0] = GroupStorage.GROUP_ZERO_IDENTIFIER;
             System.arraycopy(groups, 0, retval, 1, groups.length);
         }
         return retval;
@@ -526,14 +518,14 @@ public class UserImpl implements User, Cloneable {
     }
 
     public Map<String, Set<String>> getAttributes() {
-    	return attributes;
+        return attributes;
     }
 
     /**
      * @param attributes The attributes to set as an unmodifiable map
      */
     void setAttributes(final Map<String, Set<String>> attributes) {
-    	this.attributes = attributes;
+        this.attributes = attributes;
     }
 
     /**
