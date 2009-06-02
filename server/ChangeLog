@@ -1,3 +1,7 @@
+* 2009-06-02 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13681: Change last editor on webdav lock
+
 * 2009-05-08 - carsten.hoeger@open-xchange.com
 
  - Bugfix #13565: Added script method to wait for process to stop.
