@@ -98,7 +98,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
         assertNotNull("Subscription may not be null", subscription);
         assertEquals("Got wrong id", 2, subscription.getId());
-        assertEquals("Got wrong folder", 12, subscription.getFolderId());
+        assertEquals("Got wrong folder", "12", subscription.getFolderId());
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
         
@@ -115,7 +115,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
         assertNotNull("Subscription may not be null", subscription);
 
-        assertEquals("Got wrong folder", 12, subscription.getFolderId());
+        assertEquals("Got wrong folder", "12", subscription.getFolderId());
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
         
