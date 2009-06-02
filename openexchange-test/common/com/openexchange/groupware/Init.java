@@ -96,6 +96,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
+import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
@@ -285,11 +286,12 @@ public final class Init {
         startAndInjectXMLServices();
     }
 
-    private static void startAndInjectBasicServices() {
+    private static void startAndInjectBasicServices() throws AbstractOXException {
         services.put(ContextService.class, new ContextServiceImpl());
         services.put(UserService.class, new UserServiceImpl());
         services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        services.put(ContactInterfaceDiscoveryService.class, new ContactInterfaceDiscoveryServiceImpl());
+        new ContactInterfaceDiscoveryInitialization().start();
+        services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
         
         ServerServiceRegistry.getInstance().addService(ContextService.class, services.get(ContextService.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, services.get(UserService.class));
