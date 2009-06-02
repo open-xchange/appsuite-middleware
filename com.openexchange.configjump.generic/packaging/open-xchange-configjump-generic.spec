@@ -74,8 +74,13 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
+%if 0%{?rhel_version} || 0%{?fedora_version}
+%define guiprefix /var/www/html/ox6
+%else
+%define guiprefix /srv/www/htdocs/ox6
+%endif
 
-ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
+ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dguiprefix=%{guiprefix} install
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -91,6 +96,6 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 
 %files gui
 %defattr(-,root,root)
-%dir /var/www/ox6/plugins/com.openexchange.extras
-/var/www/ox6/plugins/com.openexchange.extras/*
+%dir %{guiprefix}/plugins/com.openexchange.extras
+%{guiprefix}/plugins/com.openexchange.extras/*
 
