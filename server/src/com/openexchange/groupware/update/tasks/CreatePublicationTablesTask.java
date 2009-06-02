@@ -59,7 +59,6 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
@@ -94,14 +93,14 @@ public class CreatePublicationTablesTask implements UpdateTask {
     private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_publications (cid, id) VALUES (?, 0)";
 
     public int addedWithVersion() {
-        return 38;
+        return 42;
     }
 
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection con = null;
         try {
             con = Database.getNoTimeout(contextId, true);
@@ -111,12 +110,12 @@ public class CreatePublicationTablesTask implements UpdateTask {
             if(!Tools.tableExists(con, "sequence_publications")) {
                 Tools.exec(con, CREATE_TABLE_SEQUENCE_PUBLICATIONS);
             }
-            for(int ctxId : Tools.getContextIDs(con)) {
+            for(final int ctxId : Tools.getContextIDs(con)) {
                 if(!Tools.hasSequenceEntry("sequence_publications", con, ctxId)) {
                     Tools.exec(con, INSERT_IN_SEQUENCE, ctxId);
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
             if(con != null) {

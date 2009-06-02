@@ -93,14 +93,14 @@ public class CreateSubscribeTableTask implements UpdateTask {
     private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_subscriptions (cid, id) VALUES (?, 0)";
 
     public int addedWithVersion() {
-        return 37;
+        return 40;
     }
 
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection con = null;
         try {
             con = Database.getNoTimeout(contextId, true);
@@ -110,12 +110,12 @@ public class CreateSubscribeTableTask implements UpdateTask {
             if(!Tools.tableExists(con, "sequence_subscriptions")) {
                 Tools.exec(con, CREATE_TABEL_SEQUENCE_SUBSCRIPTIONS);
             }
-            for(int ctxId : Tools.getContextIDs(con)) {
+            for(final int ctxId : Tools.getContextIDs(con)) {
                 if(!Tools.hasSequenceEntry("sequence_subscriptions", con, ctxId)) {
                     Tools.exec(con, INSERT_IN_SEQUENCE, ctxId);
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
             if(con != null) {
