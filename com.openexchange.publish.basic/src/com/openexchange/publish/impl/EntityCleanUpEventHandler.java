@@ -47,25 +47,67 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.impl;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.context.ContextService;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
- *
+ * {@link EntityCleanUpEventHandler}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class Activator extends CompositeBundleActivator {
+public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private static final Log LOG = LogFactory.getLog(EntityCleanUpEventHandler.class);
+
+    private String module;
+
+    private EntityCleanUp entityCleanUp;
+
+    private ContextService contexts;
+
+    public EntityCleanUpEventHandler(EntityCleanUp entityCleanUp, String module, ContextService contexts) {
+        this.entityCleanUp = entityCleanUp;
+        this.module = module;
+        this.contexts = contexts;
     }
+
+    public void handleEvent(Event event) {
+        final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+
+        T actionObj = (T) commonEvent.getActionObj();
+        if(!handle(actionObj)) {
+            return;
+        }
+        String entityId = getEntityId(actionObj);
+        Context context;
+        try {
+            context = contexts.getContext(commonEvent.getContextId());
+        } catch (ContextException e) {
+            LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
+            return;
+        }
+
+        try {
+            entityCleanUp.cleanUp(context, module, entityId);
+        } catch (PublicationException e) {
+            LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean handle(T actionObj) {
+        return true;
+    }
+
+    public abstract String getEntityId(T actionObj);
 
 }

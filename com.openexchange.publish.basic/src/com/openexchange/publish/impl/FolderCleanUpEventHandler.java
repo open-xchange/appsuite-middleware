@@ -47,25 +47,35 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.impl;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.container.FolderObject;
 
 
 /**
- * {@link Activator}
+ * {@link FolderCleanUpEventHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class FolderCleanUpEventHandler extends EntityCleanUpEventHandler<FolderObject> {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator()};
+    private int moduleInt;
+
+    public FolderCleanUpEventHandler(EntityCleanUp entityCleanUp,String module,int moduleInt, ContextService contexts) {
+        super(entityCleanUp, module, contexts);
+        this.moduleInt = moduleInt;
+    }
     
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public boolean handle(FolderObject actionObj) {
+        return actionObj.getModule() == moduleInt;
+    }
+
+    @Override
+    public String getEntityId(FolderObject actionObj) {
+        return String.valueOf(actionObj.getObjectID());
     }
 
 }

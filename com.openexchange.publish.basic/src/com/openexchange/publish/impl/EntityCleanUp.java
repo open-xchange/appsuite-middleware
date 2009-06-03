@@ -47,25 +47,32 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.impl;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.List;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationStorage;
 
 
 /**
- * {@link Activator}
+ * {@link EntityCleanUp}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class EntityCleanUp {
+    private PublicationStorage storage;
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public EntityCleanUp(PublicationStorage storage) {
+        this.storage = storage;
     }
-
+    
+    public void cleanUp(Context ctx, String module, String entityId) throws PublicationException {
+        List<Publication> publications = storage.getPublications(ctx, module, entityId);
+        for (Publication publication : publications) {
+            storage.forgetPublication(publication);
+        }
+    }
 }

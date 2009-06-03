@@ -47,25 +47,27 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.impl;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 
 /**
- * {@link Activator}
+ * {@link InfostoreCleanUpEventHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class InfostoreCleanUpEventHandler extends EntityCleanUpEventHandler<DocumentMetadata> {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator()};
-    
+    public InfostoreCleanUpEventHandler(EntityCleanUp entityCleanUp, ContextService contexts) {
+        super(entityCleanUp, "infostore/object", contexts);
+    }
+
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public String getEntityId(DocumentMetadata actionObj) {
+        return String.valueOf(actionObj.getId());
     }
 
 }

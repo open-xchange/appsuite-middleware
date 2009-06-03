@@ -49,23 +49,60 @@
 
 package com.openexchange.publish.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.publish.helpers.AbstractPublicationService;
+import com.openexchange.publish.impl.EntityCleanUp;
+import com.openexchange.publish.impl.FolderCleanUpEventHandler;
+import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
+import com.openexchange.server.osgiservice.Whiteboard;
 
 /**
- * {@link Activator}
- *
+ * {@link CleanUpActivator}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class Activator extends CompositeBundleActivator {
+public class CleanUpActivator implements BundleActivator {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
+
+    private Whiteboard whiteboard;
+
+    public void start(BundleContext context) throws Exception {
+        whiteboard = new Whiteboard(context);
+        ContextService contexts = whiteboard.getService(ContextService.class);
+
+        EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.STORAGE);
+
+        registerHandler(
+            context,
+            new FolderCleanUpEventHandler(entityCleanUp, "contacts", FolderObject.CONTACT, contexts),
+            "com/openexchange/groupware/folder/delete");
+
+        registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), "com/openexchange/groupware/infostore/delete");
+
+    }
+
+    public void registerHandler(BundleContext context, EventHandler handler, String topic) {
+        final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { topic });
+        registrations.add(context.registerService(EventHandler.class.getName(), handler, serviceProperties));
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        for (ServiceRegistration registration : registrations) {
+            registration.unregister();
+        }
+        whiteboard.close();
     }
 
 }
