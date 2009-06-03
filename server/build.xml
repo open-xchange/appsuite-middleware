@@ -14,16 +14,16 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf/groupware"/>
-	<property name="commonConfDir" value="conf/common"/>
+    <property name="commonConfDir" value="conf/common"/>
     <property name="bin.dir" value="sbin"/>
-	<property name="lib.dir" value="lib"/>
+    <property name="lib.dir" value="lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-server-${version}" />
+    <property name="composite.name" value="open-xchange-server-${version}"/>
 
     <fileset dir="." id="metainf">
         <include name="META-INF/**"/>
@@ -41,46 +41,48 @@
     <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
     <property name="confInstallDir2" value="${common.conf.install.dir}/common"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
-	<property name="commonConfInstallCopyDir" location="${destdir}${confInstallDir2}"/>
+    <property name="commonConfInstallCopyDir" location="${destdir}${confInstallDir2}"/>
     <property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
     <property name="bin.install.dir" value="${prefix}/sbin/"/>
     <property name="bin.install.copy.dir" location="${destdir}${bin.install.dir}"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
-    <property name="xmlBundle" value="com.openexchange.xml" />
+    <property name="xmlBundle" value="com.openexchange.xml"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
-    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
-    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
+    <property name="commonsclijar" value="org.apache.commons.cli_1.0.0.v20080604-1500.jar"/>
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="retentionjar" value="com.openexchange.dataretention.jar"/>
     <property name="conversionjar" value="com.openexchange.conversion.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
-	<property name="cachingjar" value="com.openexchange.caching.jar"/>
+    <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="commonjar" value="common.jar"/>
-    <property name="xmlbundlejar" value="com.openexchange.xml.jar" />
-	<property name="timerjar" value="com.openexchange.timer.jar" />
+    <property name="xmlbundlejar" value="com.openexchange.xml.jar"/>
+    <property name="timerjar" value="com.openexchange.timer.jar"/>
+    <property name="publishjar" value="com.openexchange.publish.jar"/>
 
-    <property name="activationjar" value="activation-1.1.1.jar" />
-    <property name="commonscodecjar" value="commons-codec-1.3.jar" />
-    <property name="commonsfileuploadjar" value="commons-fileupload-1.2.1.jar" />
-    <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
-    <property name="commonsiojar" value="commons-io-1.4.jar" />
-    <property name="jakartawebdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
-    <property name="jdomjar" value="jdom-1.1.jar" />
-    <property name="jsonjar" value="json.jar" />
-    <property name="mailjar" value="mail-1.4.2.jar" />
-    <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
-    <property name="springcorejar" value="spring-core_1.2.7.jar" />
-    <property name="tnefjar" value="tnef-1.4.0.jar" />
-	<property name="chardetjar" value="chardet-1.0.jar" />
+    <property name="activationjar" value="activation-1.1.1.jar"/>
+    <property name="chardetjar" value="chardet-1.0.jar"/>
+    <property name="commonscodecjar" value="commons-codec-1.3.jar"/>
+    <property name="commonsfileuploadjar" value="commons-fileupload-1.2.1.jar"/>
+    <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar"/>
+    <property name="commonsiojar" value="commons-io-1.4.jar"/>
+    <property name="jakartawebdavjar" value="jakarta-slide-webdavlib-2.1.jar"/>
+    <property name="jdomjar" value="jdom-1.1.jar"/>
+    <property name="jsonjar" value="json.jar"/>
+    <property name="mailjar" value="mail-1.4.2.jar"/>
+    <property name="springbeanjar" value="spring-beans_1.2.7.jar"/>
+    <property name="springcorejar" value="spring-core_1.2.7.jar"/>
+    <property name="tnefjar" value="tnef-1.4.0.jar"/>
 
-	<!-- Third party libs -->
+    <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
         <include name="${lib.dir}/*.jar"/>
         <exclude name="CVS"/>
@@ -91,34 +93,36 @@
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
         <pathelement location="${bundlesdir}/${servletjar}"/>
-        <pathelement location="${bundlesdir}/${servletjar}"/>
+        <pathelement location="${bundlesdir}/${commonsclijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${retentionjar}"/>
         <pathelement location="${bundlesdir}/${conversionjar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${monitoringjar}"/>
-		<pathelement location="${bundlesdir}/${managementjar}"/>
-    	<pathelement location="${bundlesdir}/${cachingjar}"/>
+        <pathelement location="${bundlesdir}/${managementjar}"/>
+        <pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
-    	<pathelement location="${bundlesdir}/${timerjar}"/>
+        <pathelement location="${bundlesdir}/${timerjar}"/>
+        <pathelement location="${bundlesdir}/${publishjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsfileuploadjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jakartawebdavjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}" />
-		<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
-        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}" />
-        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}" />
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}"/>
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}"/>
 
-    	<fileset refid="3rdpartyjars"/>
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- JARs for running server -->
@@ -135,7 +139,7 @@
     </fileset>
     <property name="msgfmt" value="msgfmt"/>
     <property name="java_apt" value="apt"/>
-	<property name="msgcmp" value="msgcmp"/>
+    <property name="msgcmp" value="msgcmp"/>
 
     <!-- Compile -->
     <target name="prepare">
@@ -146,7 +150,7 @@
     <target name="compile" depends="prepare">
         <javac memoryMaximumSize="192M" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath refid="project.classpath" />
+            <classpath refid="project.classpath"/>
         </javac>
     </target>
 
@@ -154,7 +158,7 @@
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF.package">
             <fileset dir="${output..}"/>
-        	<fileset refid="3rdpartyjars"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -174,7 +178,7 @@
     <target name="installJars" depends="build,installInclude">
         <mkdir dir="${bundles.install.dir}"/>
         <copy todir="${bundles.install.dir}" overwrite="true">
-            <fileset refid="server-jars" />
+            <fileset refid="server-jars"/>
         </copy>
     </target>
 
@@ -186,7 +190,7 @@
         </copy>
         <antcall target="patchConfigFiles">
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
-        	<param name="common.conf.subst.patch" value="${confInstallDir2}"/>
+            <param name="common.conf.subst.patch" value="${confInstallDir2}"/>
         </antcall>
     </target>
 
@@ -194,20 +198,20 @@
         <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
-            	<include name="**" />
+                <include name="**"/>
                 <exclude name="*.in"/>
                 <exclude name="CVS"/>
                 <exclude name="osgi/**"/>
             </fileset>
         </copy>
-    	<mkdir dir="${commonConfInstallCopyDir}"/>
-    	<copy todir="${commonConfInstallCopyDir}">
-    		<fileset dir="${commonConfDir}">
-            	<include name="**" />
+        <mkdir dir="${commonConfInstallCopyDir}"/>
+        <copy todir="${commonConfInstallCopyDir}">
+            <fileset dir="${commonConfDir}">
+                <include name="**"/>
                 <exclude name="*.in"/>
                 <exclude name="CVS"/>
-    		</fileset>
-    	</copy>
+            </fileset>
+        </copy>
     </target>
 
     <target name="patchScripts" depends="prepare">
@@ -258,10 +262,10 @@
         <delete file="${source..}/com/openexchange/server/Version.java"/>
     </target>
 
-	<!-- Dist -->
-	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -272,15 +276,15 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
-    	<fail message="Define common.conf.subst.patch." unless="common.conf.subst.patch"/>
+        <fail message="Define common.conf.subst.patch." unless="common.conf.subst.patch"/>
         <antcall target="patchOSGiIni"/>
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
@@ -360,13 +364,13 @@
             <replacefilter token="@commonsloggingjar@" value="${lib.subst.patch}/${commonsloggingjar}"/>
             <replacefilter token="@jsonjar@" value="${lib.subst.patch}/${jsonjar}"/>
             <replacefilter token="@commonsfileuploadjar@" value="${lib.subst.patch}/${commonsfileuploadjar}"/>
-            <replacefilter token="@commonsiojar@" value="${lib.subst.patch}/${commonsiojar}" />
-            <replacefilter token="@jakartawebdavjar@" value="${lib.subst.patch}/${jakartawebdavjar}" />
-            <replacefilter token="@commonshttpclientjar@" value="${lib.subst.patch}/${commonshttpclientjar}" />
-            <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
-            <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
+            <replacefilter token="@commonsiojar@" value="${lib.subst.patch}/${commonsiojar}"/>
+            <replacefilter token="@jakartawebdavjar@" value="${lib.subst.patch}/${jakartawebdavjar}"/>
+            <replacefilter token="@commonshttpclientjar@" value="${lib.subst.patch}/${commonshttpclientjar}"/>
+            <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}"/>
+            <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}"/>
             <replacefilter token="@oxgroupwarelibdir@" value="${lib.subst.patch}"/>
-	  		<replacefilter token="@libdirpath@"	value="${lib.subst.patch}"/>
+              <replacefilter token="@libdirpath@"    value="${lib.subst.patch}"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
     </target>
@@ -384,12 +388,12 @@
         </replace>
     </target>
 
-	<!-- generate manifest as shipped in jar -->
-	<target name="manifest">
-		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
-		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
-			    <attribute name="Codename" value="${codename}"/>
-		</manifest>
-	</target>
+    <!-- generate manifest as shipped in jar -->
+    <target name="manifest">
+        <copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
+        <manifest mode="update" file="META-INF/MANIFEST.MF.package">
+                <attribute name="Codename" value="${codename}"/>
+        </manifest>
+    </target>
 
 </project>
