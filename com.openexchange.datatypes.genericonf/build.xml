@@ -20,7 +20,7 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="abbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
     <property name="jsonjar" value="json.jar"/>
