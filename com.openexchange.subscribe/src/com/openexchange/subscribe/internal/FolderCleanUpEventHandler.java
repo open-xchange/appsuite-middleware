@@ -64,7 +64,6 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionStorage;
