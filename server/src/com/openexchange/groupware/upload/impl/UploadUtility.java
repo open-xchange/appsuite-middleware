@@ -108,7 +108,8 @@ public final class UploadUtility {
         if (longName) {
             sb.append(getSizePrefix(pos)).append("bytes");
         } else {
-            sb.append(getSizePrefix(pos).charAt(0)).append('B');
+            final String prefix = getSizePrefix(pos);
+            sb.append(prefix.length() == 0 ? "" : String.valueOf(prefix.charAt(0))).append('B');
         }
         return sb.toString();
     }
