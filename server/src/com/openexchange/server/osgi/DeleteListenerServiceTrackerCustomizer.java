@@ -79,7 +79,7 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
         if (DeleteRegistry.getInstance().registerDeleteListener((DeleteListener) addedService)) {
             return addedService;
         }
-        // Nothing to track
+        // Nothing to track since adding to registry failed
         context.ungetService(reference);
         return null;
     }
