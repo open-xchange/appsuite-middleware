@@ -161,6 +161,10 @@ public class Starter implements Initialization {
      */
     new com.openexchange.event.impl.EventInit(),
     /**
+     * Responsible for registering all instances for deleting users and groups.
+     */
+    new com.openexchange.groupware.delete.DeleteRegistryInitialization(),
+    /**
      * Downgrade registry start-up
      */
     com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
@@ -256,8 +260,10 @@ public class Starter implements Initialization {
      * Responsible for starting and stopping the EventQueue
      */
     new com.openexchange.event.impl.EventInit(),
-    // Responsible for registering all instances for deleting users and groups.
-    com.openexchange.groupware.delete.DeleteRegistry.getInstance(),
+    /**
+     * Responsible for registering all instances for deleting users and groups.
+     */
+    new com.openexchange.groupware.delete.DeleteRegistryInitialization(),
     /**
      * Downgrade registry start-up
      */

@@ -52,14 +52,11 @@ package com.openexchange.groupware.delete;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.groupware.AbstractOXException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -72,7 +69,6 @@ import com.openexchange.image.internal.ImageRegistryDeleteListener;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
-import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
@@ -84,38 +80,77 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteRegistry implements Initialization {
+public final class DeleteRegistry {
 
     /**
-     * The singleton instance
+     * Dummy value to associate with an Object in the concurrent map.
      */
-    private static final DeleteRegistry instance = new DeleteRegistry();
+    private static final Object PRESENT = new Object();
+
+    /**
+     * The singleton instance.
+     */
+    private static DeleteRegistry instance;
+
+    /**
+     * Initializes singleton instance.
+     */
+    static void initInstance() {
+        instance = new DeleteRegistry();
+        instance.init();
+    }
+
+    /**
+     * Releases singleton instance.
+     */
+    static void releaseInstance() {
+        instance.dispose();
+        instance = null;
+    }
+
+    /**
+     * Gets the singleton instance of {@link DeleteRegistry}.
+     * 
+     * @return The singleton instance of {@link DeleteRegistry}.
+     */
+    public static DeleteRegistry getInstance() {
+        return instance;
+    }
+
+    /*-
+     * Member section
+     */
 
     /**
      * The class-set to detect duplicate listeners.
      */
-    private final Set<Class<? extends DeleteListener>> classes;
+    private final ConcurrentMap<Class<? extends DeleteListener>, Object> classes;
 
     /**
      * The listener list to keep the order.
      */
-    private final List<DeleteListener> listeners;
-
-    /**
-     * The mutex used by this registry
-     */
-    private final Lock registryLock;
+    private final Queue<DeleteListener> listeners;
 
     /**
      * Initializes a new {@link DeleteRegistry}.
      */
     private DeleteRegistry() {
         super();
-        listeners = new ArrayList<DeleteListener>(10);
-        classes = new HashSet<Class<? extends DeleteListener>>();
-        registryLock = new ReentrantLock();
+        listeners = new ConcurrentLinkedQueue<DeleteListener>();
+        classes = new ConcurrentHashMap<Class<? extends DeleteListener>, Object>();
     }
 
+    /**
+     * Disposes this delete registry.
+     */
+    private void dispose() {
+        classes.clear();
+        listeners.clear();
+    }
+
+    /**
+     * Initializes this delete registry.
+     */
     private void init() {
         /*
          * Insert module delete listener
@@ -176,15 +211,6 @@ public final class DeleteRegistry implements Initialization {
     }
 
     /**
-     * Gets the singleton instance of {@link DeleteRegistry}.
-     * 
-     * @return The singleton instance of {@link DeleteRegistry}.
-     */
-    public static DeleteRegistry getInstance() {
-        return instance;
-    }
-
-    /**
      * Registers an instance of <code>{@link DeleteListener}</code>. <b>Note</b>: Only one instance of a certain
      * <code>{@link DeleteListener}</code> implementation is added, meaning if you try to register a certain implementation twice, the
      * latter one is going to be discarded.
@@ -193,17 +219,10 @@ public final class DeleteRegistry implements Initialization {
      * @return <code>true</code> if specified delete listener has been added to registry; otherwise <code>false</code>
      */
     public boolean registerDeleteListener(final DeleteListener listener) {
-        registryLock.lock();
-        try {
-            if (classes.contains(listener.getClass())) {
-                return false;
-            }
-            listeners.add(listener);
-            classes.add(listener.getClass());
-            return true;
-        } finally {
-            registryLock.unlock();
+        if (null != classes.putIfAbsent(listener.getClass(), PRESENT)) {
+            return false;
         }
+        return listeners.offer(listener);
     }
 
     /**
@@ -212,13 +231,10 @@ public final class DeleteRegistry implements Initialization {
      * @param listener - the listener to remove
      */
     public void unregisterDeleteListener(final DeleteListener listener) {
-        registryLock.lock();
-        try {
-            listeners.remove(listener);
-            classes.remove(listener.getClass());
-        } finally {
-            registryLock.unlock();
+        if (null == classes.remove(listener.getClass())) {
+            return;
         }
+        listeners.remove(listener);
     }
 
     /**
@@ -230,25 +246,10 @@ public final class DeleteRegistry implements Initialization {
      * @throws DeleteFailedException if delete event could not be performed
      */
     public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
-        registryLock.lock();
-        try {
-            final int size = listeners.size();
-            final Iterator<DeleteListener> iter = listeners.iterator();
-            for (int i = 0; i < size; i++) {
-                final DeleteListener listener = iter.next();
-                listener.deletePerformed(deleteEvent, readCon, writeCon);
-            }
-        } finally {
-            registryLock.unlock();
+        for (final Iterator<DeleteListener> iter = listeners.iterator(); iter.hasNext();) {
+            final DeleteListener listener = iter.next();
+            listener.deletePerformed(deleteEvent, readCon, writeCon);
         }
     }
 
-    public void start() throws AbstractOXException {
-        init();
-    }
-
-    public void stop() throws AbstractOXException {
-        classes.clear();
-        listeners.clear();
-    }
 }
