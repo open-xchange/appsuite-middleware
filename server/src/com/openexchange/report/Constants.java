@@ -47,48 +47,40 @@
  *
  */
 
-package com.openexchange.report.internal;
+package com.openexchange.report;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.management.ManagementException;
-import com.openexchange.management.ManagementService;
-import com.openexchange.report.Constants;
-import com.openexchange.server.Initialization;
 
 /**
- * {@link ReportingInit}
+ * {@link Constants}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ReportingInit implements Initialization {
+public final class Constants {
 
-    private static final Log LOG = LogFactory.getLog(ReportingInit.class);
+    private static final Log LOG = LogFactory.getLog(Constants.class);
 
-    private final ManagementService managementService;
+    public static final ObjectName REPORTING_NAME = initReportingName();
 
     /**
-     * Default constructor.
-     * @param managementService 
+     * Prevent instantiation.
      */
-    public ReportingInit(ManagementService managementService) {
+    private Constants() {
         super();
-        this.managementService = managementService;
     }
 
-    public void start() {
+    private static final ObjectName initReportingName() {
+        ObjectName retval = null;
         try {
-            managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
-        } catch (ManagementException e) {
+            retval = new ObjectName("com.openexchange.reporting", "name", "Reporting");
+        } catch (MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NullPointerException e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    public void stop() {
-        try {
-            managementService.unregisterMBean(Constants.REPORTING_NAME);
-        } catch (ManagementException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        return retval;
     }
 }

@@ -50,6 +50,11 @@
 package com.openexchange.report.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import javax.management.Attribute;
@@ -74,10 +79,14 @@ import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -145,14 +154,15 @@ public class ReportingMBean implements DynamicMBean {
                 for (Integer contextId : allContextIds) {
                     Context context = contextService.getContext(contextId.intValue());
                     int userCount = userService.listAllUser(context).length;
-                    // TODO add missing attributes.
+                    Date created = getContextCreated(context);
                     StringBuilder sb = new StringBuilder();
                     for (String loginInfo : context.getLoginInfo()) {
                         sb.append(loginInfo);
-                        sb.append(' ');
+                        sb.append(',');
                     }
                     sb.setLength(sb.length() - 1);
-                    CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] { contextId, I(userCount), I(0), new Date(), sb.toString() });
+                    CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
+                        contextId, I(userCount), calcAge(created), created, sb.toString() });
                     detail.put(value);
                 }
             } catch (ContextException e) {
@@ -165,6 +175,36 @@ public class ReportingMBean implements DynamicMBean {
             return detail;
         }
         throw new AttributeNotFoundException("Cannot find " + attribute + " attribute ");
+    }
+
+    private Long calcAge(Date created) {
+        return L((System.currentTimeMillis() - created.getTime()) / Constants.MILLI_DAY);
+    }
+
+    private Date getContextCreated(Context ctx) {
+        final Connection con;
+        try {
+            con = Database.get(ctx, false);
+        } catch (DBPoolingException e) {
+            LOG.error("Unable to get database connection.", e);
+            return new Date(0);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT c.creating_date FROM prg_contacts c JOIN user_setting_admin a ON c.cid=a.cid AND c.userid=a.user WHERE a.cid=?");
+            stmt.setInt(1, ctx.getContextId());
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return new Date(result.getLong(1));
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL problem.", e);
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+            Database.back(ctx, false, con);
+        }
+        return new Date(0);
     }
 
     public AttributeList getAttributes(String[] attributes) {
@@ -210,7 +250,7 @@ public class ReportingMBean implements DynamicMBean {
             String[] totalDescriptions = { "Number of contexts", "Number of users" };
             String[] detailDescriptions = { "Context identifier", "Number of users", "Context age in days", "Date and time of context creation", "Login mappings" };
             OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER };
-            OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.DATE, SimpleType.STRING };
+            OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING };
             totalRow = new CompositeType("Total row", "The total row", totalNames, totalDescriptions, totalTypes);
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);

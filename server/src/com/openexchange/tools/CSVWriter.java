@@ -47,48 +47,69 @@
  *
  */
 
-package com.openexchange.report.internal;
+package com.openexchange.tools;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.management.ManagementException;
-import com.openexchange.management.ManagementService;
-import com.openexchange.report.Constants;
-import com.openexchange.server.Initialization;
+import java.io.PrintStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 
 /**
- * {@link ReportingInit}
+ * {@link CSVWriter}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ReportingInit implements Initialization {
+public class CSVWriter {
 
-    private static final Log LOG = LogFactory.getLog(ReportingInit.class);
+    private static final char ROW_DELIMITER = '\n';
 
-    private final ManagementService managementService;
+    private static final char CELL_DELIMITER = ',';
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    private final List<List<Object>> data;
+
+    private final PrintStream ps;
 
     /**
-     * Default constructor.
-     * @param managementService 
+     * Initializes a new {@link CSVWriter}.
      */
-    public ReportingInit(ManagementService managementService) {
+    public CSVWriter(PrintStream ps, List<List<Object>> data) {
         super();
-        this.managementService = managementService;
+        this.ps = ps;
+        this.data = data;
     }
 
-    public void start() {
-        try {
-            managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
-        } catch (ManagementException e) {
-            LOG.error(e.getMessage(), e);
+    public void write() {
+        StringBuilder sb = new StringBuilder();
+        for (List<Object> row : data) {
+            for (Object entry : row) {
+                sb.append(quote(toString(entry)));
+                sb.append(CELL_DELIMITER);
+            }
+            sb.setCharAt(sb.length() - 1, ROW_DELIMITER);
+            ps.print(sb.toString());
+            sb.setLength(0);
         }
     }
 
-    public void stop() {
-        try {
-            managementService.unregisterMBean(Constants.REPORTING_NAME);
-        } catch (ManagementException e) {
-            LOG.error(e.getMessage(), e);
+    private static String toString(Object obj) {
+        if (obj instanceof String) {
+            return (String) obj;
         }
+        if (obj instanceof Date) {
+            return DATE_FORMAT.format((Date) obj);
+        }
+        return obj.toString();
+    }
+
+    private String quote(String s) {
+        StringBuilder tmp = new StringBuilder();
+        tmp.append('"');
+        tmp.append(s.replaceAll("\"", "\"\""));
+        tmp.append('"');
+        return tmp.toString();
     }
 }
