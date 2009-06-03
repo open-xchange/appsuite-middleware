@@ -2,9 +2,9 @@
 # norootforbuild
 
 Name:           open-xchange-crypto
-BuildArch:	noarch
+BuildArch:	noarch open-xchange-common open-xchange-global
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global
+BuildRequires:  ant 
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
