@@ -436,7 +436,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if ((msgs == null) || (msgs.length == 0)) {
                     return new MailMessage[0];
                 }
-                mails = MIMEMessageConverter.convertMessages(msgs, fields, body);
+                mails = MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
                 if (usedFields.contains(MailField.ACCOUNT_NAME)) {
                     setAccountInfo(mails);
                 }
