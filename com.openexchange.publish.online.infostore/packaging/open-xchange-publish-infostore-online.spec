@@ -4,7 +4,8 @@
 Name:           open-xchange-publish-infostore-online
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant 
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
+BuildRequires:  open-xchange-genconf open-xchange-publish open-xchange-publish-basic
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10

@@ -4,7 +4,8 @@
 Name:           open-xchange-publish-json
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant 
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-publish
+BuildRequires:  open-xchange-publish-basic open-xchange-server open-xchange-genconf
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10

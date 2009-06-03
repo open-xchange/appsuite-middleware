@@ -4,7 +4,7 @@
 Name:           open-xchange-sql
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant 
+BuildRequires:  ant open-xchange-common
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
