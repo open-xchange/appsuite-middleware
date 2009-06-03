@@ -200,7 +200,7 @@ public class DataFetcherMysql implements DataFetcher{
                     table_matches = true;
                 }
                 // add column to table
-                to.setColumn(tco);
+                to.addColumn(tco);
             }
             columns_res.close();
             if(table_matches){
