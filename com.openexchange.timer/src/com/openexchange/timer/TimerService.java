@@ -49,6 +49,7 @@
 
 package com.openexchange.timer;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -165,4 +166,10 @@ public interface TimerService {
      */
     public void purge();
 
+    /**
+     * Returns the {@link Executor} view on this timer service.
+     * 
+     * @return The {@link Executor} backing this timer service
+     */
+    public Executor getExecutor();
 }

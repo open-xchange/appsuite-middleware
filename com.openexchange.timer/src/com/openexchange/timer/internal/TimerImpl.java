@@ -49,6 +49,7 @@
 
 package com.openexchange.timer.internal;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -135,4 +136,7 @@ public final class TimerImpl implements TimerService {
         executorService.purge();
     }
 
+    public Executor getExecutor() {
+        return executorService;
+    }
 }
