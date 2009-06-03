@@ -58,6 +58,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.iterator.SearchIterator;
 
 

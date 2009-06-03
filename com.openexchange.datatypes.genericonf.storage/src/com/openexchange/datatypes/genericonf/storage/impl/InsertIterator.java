@@ -98,7 +98,9 @@ public class InsertIterator implements MapIterator<String, Object> {
         if(exception != null) {
             return;
         }
-        
+        if(value == null) {
+            return;
+        }
         PreparedStatement stmt = statementMap.get(value.getClass());
         
         try {

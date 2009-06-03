@@ -55,6 +55,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -62,14 +63,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.PermissionServlet;
+import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -81,10 +93,30 @@ import com.openexchange.tools.session.ServerSession;
 public class InfostorePublicationServlet extends HttpServlet {
 
     private static final Log LOG = LogFactory.getLog(InfostorePublicationServlet.class);
+
+    private static final String SELF_DESTRUCT = "selfDestruct";
+
+    private static final String DESTROY_DOCUMENT = "destroyDocument";
     
     private static PublicationDataLoaderService loader = null;
     private static InfostoreDocumentPublicationService publisher = null;
     private static ContextService contexts = null;
+    private static UserService users = null;
+    private static UserConfigurationService userConfigs = null;
+    
+    private static InfostoreFacade infostore = null;
+    
+    public static void setUserService(UserService service) {
+        users = service;
+    }
+    
+    public static void setUserConfigService(UserConfigurationService service) {
+        userConfigs = service;
+    }
+    
+    public static void setInfostoreFacade(InfostoreFacade service) {
+        infostore = service;
+    }
     
     public static void setPublicationDataLoaderService(PublicationDataLoaderService service) {
         loader = service;
@@ -120,13 +152,78 @@ public class InfostorePublicationServlet extends HttpServlet {
             Context ctx = getContext(path);
             String secret = getSecret(path);
             Publication publication = getPublication(secret, ctx);
+            if(publication == null) {
+                resp.getWriter().println("Not Found");
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            DocumentMetadata document = loadDocumentMetadata(publication);
             InputStream is = loadContent(publication);
-            
+            configureHeaders(document, req, resp);
             write(is, resp);
+            if(mustSelfDestruct(publication)) {
+                destroy(publication);
+                if(mustDestroyDocument(publication) && ! hasMorePublications(publication.getContext(), document)) {
+                    ServerSessionAdapter session = new ServerSessionAdapter(new PublicationSession(publication), publication.getContext());
+                    destroy(session, document);
+                }
+            }
+            
         } catch (Exception x) {
             resp.getWriter().print(x.toString());
             LOG.error(x.getMessage(), x);
         }
+    }
+
+    private void destroy(ServerSession session, DocumentMetadata document) throws OXException {
+        infostore.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
+    }
+
+    private boolean hasMorePublications(Context ctx, DocumentMetadata document) throws PublicationException {
+        return !publisher.getAllPublications(ctx, String.valueOf(document.getId())).isEmpty();
+    }
+
+    private boolean mustDestroyDocument(Publication publication) {
+        return publication.getConfiguration().get(DESTROY_DOCUMENT) == Boolean.TRUE;
+    }
+
+    private void destroy(Publication publication) throws PublicationException {
+        publisher.delete(publication);
+    }
+
+    private boolean mustSelfDestruct(Publication publication) {
+        return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
+    }
+    
+    private final boolean isIE(final HttpServletRequest req) {
+        return req.getHeader("User-Agent").contains("MSIE");
+    }
+
+
+    private void configureHeaders(DocumentMetadata document, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
+        boolean ie = isIE(req);
+        resp.setHeader("Content-Disposition", "attachment; filename=\""
+             + Helper.encodeFilename(document.getFileName(), "UTF-8", ie) + "\"");
+    }
+
+    private DocumentMetadata loadDocumentMetadata(Publication publication) throws Exception {
+        
+        int id = Integer.valueOf(publication.getEntityId());
+        int version = InfostoreFacade.CURRENT_VERSION;
+        Context ctx = publication.getContext();
+        User user = loadUser(publication);
+        UserConfiguration userConfig = loadUserConfig(publication);
+        
+        DocumentMetadata document = infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
+        return document;
+    }
+
+    private UserConfiguration loadUserConfig(Publication publication) throws UserConfigurationException {
+        return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
+    }
+
+    private User loadUser(Publication publication) throws UserException {
+        return users.getUser(publication.getUserId(), publication.getContext());
     }
 
     private void write(InputStream is, HttpServletResponse resp) throws IOException {

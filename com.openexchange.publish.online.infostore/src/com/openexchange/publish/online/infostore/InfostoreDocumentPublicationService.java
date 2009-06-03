@@ -87,6 +87,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.link("url", "URL", false, null));
+        
         target.setFormDescription(form);
         
         return target;

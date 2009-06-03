@@ -5,18 +5,21 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.online.infostore.InfostoreDocumentPublicationService;
 import com.openexchange.publish.online.infostore.InfostorePublicationServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX+"*";
-    private static final Class<?>[] NEEDED_SERVICES = {HttpService.class, PublicationDataLoaderService.class, ContextService.class };
+    private static final Class<?>[] NEEDED_SERVICES = {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };
     private ServiceRegistration serviceRegistration;
     private InfostorePublicationServlet servlet;
 
@@ -80,7 +83,26 @@ public class Activator extends DeferredActivator {
             return;
         }
         
+        UserService users = getService(UserService.class);
+        if(users == null) {
+            return;
+        }
+        
+        UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        if(userConfigs == null) {
+            return;
+        }
+        
+        InfostoreFacade infostore = getService(InfostoreFacade.class);
+        if(infostore == null) {
+            return;
+        }
+        
         InfostorePublicationServlet.setContextService(contexts);
+        InfostorePublicationServlet.setUserService(users);
+        InfostorePublicationServlet.setUserConfigService(userConfigs);
+        
+        InfostorePublicationServlet.setInfostoreFacade(infostore);
         InfostorePublicationServlet.setPublicationDataLoaderService(dataLoader);
         
         if(servlet == null) {

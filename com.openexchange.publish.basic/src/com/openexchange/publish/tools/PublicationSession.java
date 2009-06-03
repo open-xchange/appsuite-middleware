@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.publish.tools;
 
 import com.openexchange.publish.Publication;
 import com.openexchange.session.Session;
