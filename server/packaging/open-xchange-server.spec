@@ -5,7 +5,7 @@
 Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer open-xchange-publish
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -42,7 +42,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
-Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer
+Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer open-xchange-publish
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
