@@ -56,35 +56,27 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.tx.ThreadLocalDBProvider;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class InfostoreDelete implements DeleteListener {
 
-	private final ThreadLocalDBProvider provider = new ThreadLocalDBProvider();
-
-	private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
-
     public InfostoreDelete() {
-        database.setTransactional(true);
-        database.setCommitsTransaction(false);
+        super();
     }
 
-    public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		if (sqlDelEvent.getType() != DeleteEvent.TYPE_USER) {
-			return;
-		}
-		provider.setReadConnection(readCon);
-		provider.setWriteConnection(writeCon);
-		try {
-			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), new ServerSessionAdapter(sqlDelEvent
-					.getSession(), sqlDelEvent.getContext()));
-		} catch (final OXException e) {
-			throw new DeleteFailedException(e);
-		} finally {
-			provider.reset();
-		}
-	}
-
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+        if (event.getType() != DeleteEvent.TYPE_USER) {
+            return;
+        }
+        try {
+            InfostoreFacade database = new InfostoreFacadeImpl(new SimpleDBProvider(readCon, writeCon));
+            database.setTransactional(true);
+            database.setCommitsTransaction(false);
+            database.removeUser(event.getId(), event.getContext(), new ServerSessionAdapter(event
+                    .getSession(), event.getContext()));
+        } catch (OXException e) {
+            throw new DeleteFailedException(e);
+        }
+    }
 }

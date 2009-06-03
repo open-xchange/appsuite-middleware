@@ -53,32 +53,35 @@ import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
 
+/**
+ * The most simple database connection provider.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class SimpleDBProvider implements DBProvider {
 
-	private final Connection writeCon;
-	private final Connection readCon;
+    private final Connection readCon;
 
-	public SimpleDBProvider(final Connection readCon, final Connection writeCon) {
-		this.readCon = readCon;
-		this.writeCon = writeCon;
-	}
+    private final Connection writeCon;
 
-	public Connection getReadConnection(final Context ctx)
-			throws TransactionException {
-		return readCon;
-	}
+    public SimpleDBProvider(Connection readCon, Connection writeCon) {
+        super();
+        this.readCon = readCon;
+        this.writeCon = writeCon;
+    }
 
-	public Connection getWriteConnection(final Context ctx)
-			throws TransactionException {
-		return writeCon;
-	}
+    public Connection getReadConnection(Context ctx) {
+        return readCon;
+    }
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
+    public Connection getWriteConnection(Context ctx) {
+        return writeCon;
+    }
 
-	}
+    public void releaseReadConnection(Context ctx, Connection con) {
+        // Nothing to release.
+    }
 
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
-
-	}
-
+    public void releaseWriteConnection(Context ctx, Connection con) {
+        // Nothing to release.
+    }
 }

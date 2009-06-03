@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.filestore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -56,15 +57,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(
     classId = Classes.RDB_FILESTORE_STORAGE,
@@ -75,78 +74,64 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     /**
      * For creating exceptions.
      */
-    private static final FilestoreExceptionFactory EXCEPTION =
-        new FilestoreExceptionFactory(RdbFilestoreStorage.class);
+    private static final FilestoreExceptionFactory EXCEPTION = new FilestoreExceptionFactory(RdbFilestoreStorage.class);
 
-	private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
-	
-	private static final Log LOG = LogFactory.getLog(RdbFilestoreStorage.class);
-	
-	@Override
+    private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
+
+    @Override
     @OXThrowsMultiple(
-        category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-        desc = { "", "" },
-        exceptionId = { 3, 4, 5, 6 },
-        msg = { "Cannot find filestore with id %1$d.",
-            "Cannot create URI from \"%1$s\".",
-            "Can't access DBPool",
-            "Got SQL Exception"}
+        category = { Category.SUBSYSTEM_OR_SERVICE_DOWN },
+        desc = { "" },
+        exceptionId = { 5 },
+        msg = { "Can't access DBPool" }
     )
-	public Filestore getFilestore(final int id) throws FilestoreException {
-		
-		
-		Connection readCon = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			readCon = DBPool.pickup();
-			
-			stmt = readCon.prepareStatement(SELECT);
-			stmt.setInt(1,id);
-			
-			rs = stmt.executeQuery();
-			
-			if(!rs.next()) {
-				throw EXCEPTION.create(3, Integer.valueOf(id));
-			}
-			
-			final FilestoreImpl filestore = new FilestoreImpl();
-			filestore.setId(id);
-            String tmp = null;
-			try {
-                tmp = rs.getString("uri");
-				filestore.setUri(new URI(tmp));
-			} catch (final URISyntaxException e) {
-				throw EXCEPTION.create(4, e, tmp);
-			}
-			filestore.setSize(rs.getLong("size"));
-			filestore.setMaxContext(rs.getLong("max_context"));
-			return filestore;
-		} catch (final DBPoolingException e) {
-			throw EXCEPTION.create(5,e);
-		} catch (final SQLException e) {
-			throw EXCEPTION.create(6,e);
-		} finally {
-			
-			if(stmt!=null) {
-				try {
-					stmt.close();
-				} catch (final SQLException e1) {
-					LOG.error("",e1);
-				}
-			}
-			if(rs!=null) {
-				try {
-					rs.close();
-				} catch (final SQLException e) {
-					LOG.error("",e);
-				}
-			}
-			if(readCon!=null){
-				DBPool.closeReaderSilent(readCon);
-			}
-		}
-		
-	}
+    public Filestore getFilestore(final int id) throws FilestoreException {
+        final Connection con;
+        try {
+            con = DBPool.pickup();
+        } catch (final DBPoolingException e) {
+            throw EXCEPTION.create(5, e);
+        }
+        try {
+            return getFilestore(con, id);
+        } finally {
+            DBPool.closeReaderSilent(con);
+        }
+    }
 
+    @Override
+    @OXThrowsMultiple(
+        category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR },
+        desc = { "", "", "" },
+        exceptionId = { 3, 4, 6 },
+        msg = { "Cannot find filestore with id %1$d.", "Cannot create URI from \"%1$s\".", "Got SQL Exception" }
+    )
+    public Filestore getFilestore(Connection con, int id) throws FilestoreException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT);
+            stmt.setInt(1,id);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                throw EXCEPTION.create(3, I(id));
+            }
+            final FilestoreImpl filestore = new FilestoreImpl();
+            filestore.setId(id);
+            String tmp = null;
+            try {
+                tmp = result.getString("uri");
+                filestore.setUri(new URI(tmp));
+            } catch (final URISyntaxException e) {
+                throw EXCEPTION.create(4, e, tmp);
+            }
+            filestore.setSize(result.getLong("size"));
+            filestore.setMaxContext(result.getLong("max_context"));
+            return filestore;
+        } catch (SQLException e) {
+            throw EXCEPTION.create(6, e);
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+        }
+    }
 }

@@ -50,18 +50,23 @@
 package com.openexchange.groupware.filestore;
 
 import java.net.URI;
+import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 public abstract class FilestoreStorage {
 
-	private static final FilestoreStorage INSTANCE = new CachingFilestoreStorage(new RdbFilestoreStorage());
+    private static final FilestoreStorage INSTANCE = new CachingFilestoreStorage(new RdbFilestoreStorage());
 
-	public static FilestoreStorage getInstance(){
-		return INSTANCE;
-	}
+    public static FilestoreStorage getInstance(){
+        return INSTANCE;
+    }
 
-	public abstract Filestore getFilestore(int id) throws FilestoreException;
+    public abstract Filestore getFilestore(int id) throws FilestoreException;
+
+    public abstract Filestore getFilestore(Connection con, int id) throws FilestoreException;
 
     /**
      * Convenience method for generating the context specific file store
@@ -71,8 +76,24 @@ public abstract class FilestoreStorage {
      * @throws FilestoreException if an error occurs generating the URI.
      */
     public static URI createURI(final Context ctx) throws FilestoreException {
+        final int filestoreId = ctx.getFilestoreId();
         final FilestoreStorage storage = getInstance();
-        final Filestore store = storage.getFilestore(ctx.getFilestoreId());
+        final Filestore store = storage.getFilestore(filestoreId);
         return FilestoreTools.createLocation(store, ctx);
+    }
+
+    public static URI createURI(Connection con, Context ctx) throws FilestoreException {
+        final FilestoreStorage storage = getInstance();
+        final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
+        return FilestoreTools.createLocation(store, ctx);
+    }
+
+    public static URI createURI(Connection con, int contextId) throws FilestoreException {
+        final ContextStorage storage = ContextStorage.getInstance(con);
+        try {
+            return createURI(con, storage.getContext(contextId));
+        } catch (ContextException e) {
+            throw new FilestoreException(e);
+        }
     }
 }

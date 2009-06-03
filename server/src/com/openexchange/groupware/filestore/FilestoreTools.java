@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.filestore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -99,15 +99,17 @@ public final class FilestoreTools {
     public static URI createLocation(final Filestore store,
         final Context context) throws FilestoreException {
         if (store.getId() != context.getFilestoreId()) {
-            throw EXCEPTION.create(1, store.getId(), context.getContextId(),
-                context.getFilestoreId());
+            throw EXCEPTION.create(1, I(store.getId()), I(context.getContextId()), I(context.getFilestoreId()));
         }
         final URI uri = store.getUri();
         try {
-            return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath()
-                + '/' + context.getFilestoreName(), uri.getQuery(),
+            return new URI(
+                uri.getScheme(),
+                uri.getAuthority(),
+                uri.getPath() + '/' + context.getFilestoreName(),
+                uri.getQuery(),
                 uri.getFragment());
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw EXCEPTION.create(2, e);
         }
     }

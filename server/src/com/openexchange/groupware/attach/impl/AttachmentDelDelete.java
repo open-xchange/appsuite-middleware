@@ -56,44 +56,28 @@ import java.sql.SQLException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * AttachmentDelDelete
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class AttachmentDelDelete extends ContextDelete implements DeleteListener {
+public class AttachmentDelDelete extends ContextDelete {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AttachmentDelDelete.class);
-
-	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-
-		if (!isContextDelete(sqlDelEvent)) {
-			return;
-		}
-		PreparedStatement stmt = null;
-
-		try {
-			stmt = writeCon.prepareStatement("DELETE FROM del_attachment WHERE cid = ?");
-			stmt.setInt(1, sqlDelEvent.getContext().getContextId());
-			stmt.executeUpdate();
-		} catch (final SQLException e) {
-			throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (final SQLException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-
-		}
-
-	}
-
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+        if (!isContextDelete(event)) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement("DELETE FROM del_attachment WHERE cid=?");
+            stmt.setInt(1, event.getContext().getContextId());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
 }

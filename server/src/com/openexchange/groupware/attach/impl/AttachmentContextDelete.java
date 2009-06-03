@@ -1,5 +1,3 @@
-package com.openexchange.groupware.attach.impl;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -49,39 +47,31 @@ package com.openexchange.groupware.attach.impl;
  *
  */
 
+package com.openexchange.groupware.attach.impl;
 
 import java.sql.Connection;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.tx.ThreadLocalDBProvider;
+import com.openexchange.groupware.delete.DeleteFailedException.Code;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
-
 public class AttachmentContextDelete extends ContextDelete {
-    private final ThreadLocalDBProvider provider = new ThreadLocalDBProvider();
-    private
-    final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(provider); // No notifications, no permission check.
 
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentContextDelete.class);
 
-
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
-        if(!isContextDelete(deleteEvent)) {
+    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+        if (!isContextDelete(deleteEvent)) {
             return;
         }
-        provider.setReadConnection(readCon);
-        provider.setWriteConnection(writeCon);
-        try{
-            ATTACHMENT_BASE.deleteAll(deleteEvent.getContext());
-        } catch (final OXException e) {
+        try {
+            new AttachmentBaseImpl(new SimpleDBProvider(readCon, writeCon)).deleteAll(deleteEvent.getContext());
+        } catch (OXException e) {
             LL.log(e);
-            throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE,e);
-        } finally {
-            provider.reset();
+            throw new DeleteFailedException(Code.UNKNOWN_TYPE, e);
         }
     }
 }

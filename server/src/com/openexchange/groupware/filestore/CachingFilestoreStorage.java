@@ -49,70 +49,104 @@
 
 package com.openexchange.groupware.filestore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CachingFilestoreStorage.class);
+    private static final Log LOG = LogFactory.getLog(CachingFilestoreStorage.class);
 
-	private static final String REGION_NAME = "Filestore";
+    private static final String REGION_NAME = "Filestore";
 
-	private final FilestoreStorage delegate;
+    private final FilestoreStorage delegate;
 
     private static final Lock CACHE_LOCK = new ReentrantLock();
-	
-	public CachingFilestoreStorage(final FilestoreStorage fs) {
-		this.delegate = fs;
-	}
-	
-	@Override
-	public Filestore getFilestore(final int id) throws FilestoreException {
-        final FilestoreFactory factory = new FilestoreFactory(id,delegate);
-		try {
-			return CacheProxy.getCacheProxy(factory, REGION_NAME, Filestore.class);
-		} catch (final IllegalArgumentException e) {
-			/*
-			 * Should not occur
-			 */
-			LOG.error(e.getMessage(), e);
-			return delegate.getFilestore(id);
-		} catch (final FilestoreException e) {
-			throw e;
-		} catch (final AbstractOXException e) {
-			throw new FilestoreException(e);
-		}
-	}
-	
-	private static final class FilestoreFactory implements
-        OXObjectFactory<Filestore> {
+    
+    public CachingFilestoreStorage(final FilestoreStorage fs) {
+        this.delegate = fs;
+    }
 
-		private final Integer id;
-		private final FilestoreStorage delegate;
+    @Override
+    public Filestore getFilestore(int id) throws FilestoreException {
+        final FilestoreFactory factory = new FilestoreFactory(id, delegate);
+        try {
+            return CacheProxy.getCacheProxy(factory, REGION_NAME, Filestore.class);
+        } catch (final IllegalArgumentException e) {
+            /*
+             * Should not occur
+             */
+            LOG.error(e.getMessage(), e);
+            return delegate.getFilestore(id);
+        } catch (FilestoreException e) {
+            throw e;
+        } catch (AbstractOXException e) {
+            throw new FilestoreException(e);
+        }
+    }
 
-		public FilestoreFactory(final int id, final FilestoreStorage delegate) {
-			this.id = Integer.valueOf(id);
-			this.delegate = delegate;
-		}
-		
-		public Serializable getKey() {
-			return id;
-		}
+    private static final class FilestoreFactory implements OXObjectFactory<Filestore> {
 
-		public Filestore load() throws FilestoreException {
-		    return delegate.getFilestore(id.intValue());
-		}
+        private final Integer id;
+
+        private final FilestoreStorage delegate;
+
+        public FilestoreFactory(int id, FilestoreStorage delegate) {
+            super();
+            this.id = I(id);
+            this.delegate = delegate;
+        }
+        
+        public Serializable getKey() {
+            return id;
+        }
+
+        public Filestore load() throws FilestoreException {
+            return delegate.getFilestore(id.intValue());
+        }
 
         public Lock getCacheLock() {
             return CACHE_LOCK;
         }
-		
-	}
+    }
 
+    @Override
+    public Filestore getFilestore(Connection con, int id) throws FilestoreException {
+        final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        Cache filestoreCache = null;
+        if (service != null) {
+            try {
+                filestoreCache = service.getCache(REGION_NAME);
+            } catch (CacheException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        Filestore retval = null;
+        if (null != filestoreCache) {
+            retval = (Filestore) filestoreCache.get(I(id));
+        }
+        if (null == retval) {
+            retval = delegate.getFilestore(con, id);
+            if (null != filestoreCache) {
+                try {
+                    filestoreCache.put(I(id), retval);
+                } catch (CacheException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        return retval;
+    }
 }

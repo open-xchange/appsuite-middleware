@@ -52,10 +52,11 @@ package com.openexchange.groupware.filestore;
 import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 
@@ -64,7 +65,7 @@ import com.openexchange.tools.file.FileStorageException;
  * file store if the context is deleted.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class FileStorageRemover implements DeleteListener {
+public final class FileStorageRemover extends ContextDelete {
 
     /**
      * Default constructor.
@@ -76,21 +77,15 @@ public final class FileStorageRemover implements DeleteListener {
     /**
      * {@inheritDoc}
      */
-    public void deletePerformed(final DeleteEvent deleteEvent,
-        final Connection readCon, final Connection writeCon)
-        throws DeleteFailedException {
-        switch (deleteEvent.getType()) {
-        case DeleteEvent.TYPE_CONTEXT:
-            removeFileStorage(deleteEvent.getContext());
-            break;
-        default:
-            break;
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+        if (isContextDelete(event)) {
+            removeFileStorage(event.getContext(), new SimpleDBProvider(readCon, writeCon));
         }
     }
 
-    private void removeFileStorage(final Context ctx) throws DeleteFailedException {
+    private void removeFileStorage(Context ctx, DBProvider dbProvider) throws DeleteFailedException {
         try {
-            final FileStorage stor = getFileStorage(ctx);
+            final FileStorage stor = getFileStorage(ctx, dbProvider);
             stor.remove();
         } catch (final FileStorageException e) {
             throw new DeleteFailedException(e);
@@ -99,9 +94,7 @@ public final class FileStorageRemover implements DeleteListener {
         }
     }
 
-    private FileStorage getFileStorage(final Context ctx)
-        throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
-            new DBPoolProvider()); 
+    private FileStorage getFileStorage(final Context ctx, DBProvider dbProvider) throws FileStorageException, FilestoreException {
+        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, dbProvider); 
     }
 }

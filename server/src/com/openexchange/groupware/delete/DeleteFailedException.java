@@ -62,7 +62,6 @@ public class DeleteFailedException extends AbstractOXException {
     private static final long serialVersionUID = -5601390102811112914L;
 
     public static enum Code {
-
         /**
          * Unknown delete event type: %1$d
          */
