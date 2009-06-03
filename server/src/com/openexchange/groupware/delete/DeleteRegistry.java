@@ -53,10 +53,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -97,7 +99,6 @@ public final class DeleteRegistry {
      */
     static void initInstance() {
         instance = new DeleteRegistry();
-        instance.init();
     }
 
     /**
@@ -127,7 +128,12 @@ public final class DeleteRegistry {
     private final ConcurrentMap<Class<? extends DeleteListener>, Object> classes;
 
     /**
-     * The listener list to keep the order.
+     * The list of static listeners.
+     */
+    private final List<DeleteListener> staticListeners;
+
+    /**
+     * The listener queue for dynamically added listeners.
      */
     private final Queue<DeleteListener> listeners;
 
@@ -136,86 +142,99 @@ public final class DeleteRegistry {
      */
     private DeleteRegistry() {
         super();
-        listeners = new ConcurrentLinkedQueue<DeleteListener>();
         classes = new ConcurrentHashMap<Class<? extends DeleteListener>, Object>();
+        final DeleteListener[] staticListeners = getStaticListeners();
+        for (final DeleteListener deleteListener : staticListeners) {
+            classes.put(deleteListener.getClass(), PRESENT);
+        }
+        this.staticListeners = new CopyOnWriteArrayList<DeleteListener>(staticListeners);
+        listeners = new ConcurrentLinkedQueue<DeleteListener>();
     }
 
     /**
      * Disposes this delete registry.
      */
     private void dispose() {
+        staticListeners.clear();
         classes.clear();
         listeners.clear();
     }
 
     /**
-     * Initializes this delete registry.
+     * Initializes this delete registry; meaning static {@link DeleteListener listeners} are added.
      */
-    private void init() {
-        /*
-         * Insert module delete listener
-         */
-        registerDeleteListener(new TasksDelete());
-        registerDeleteListener(new InfostoreDelete());
-        registerDeleteListener(new ContactDeleteListener());
-        registerDeleteListener(ServerServiceRegistry.getInstance().getService(CalendarAdministrationService.class));
-        /*
-         * Delete user configuration & settings
-         */
-        registerDeleteListener(new UserConfigurationDeleteListener());
-        registerDeleteListener(new UserSettingMailDeleteListener());
-        registerDeleteListener(new QuotaUsageDelete());
-        registerDeleteListener(new AttachmentContextDelete());
-        registerDeleteListener(new AttachmentDelDelete());
-        /*
-         * At last insert folder delete listener
-         */
-        registerDeleteListener(new OXFolderDeleteListener());
-        // Remove FileStorage if context is deleted.
-        registerDeleteListener(new FileStorageRemover());
-        /*
-         * Remove stored images
-         */
-        registerDeleteListener(new ImageRegistryDeleteListener());
-        registerDeleteListener(new UserSettingServerDeleteListener());
-        registerDeleteListener(new MailAccountDeleteListener());
-        registerDeleteListener(new DeleteListener() {
+    private DeleteListener[] getStaticListeners() {
+        return new DeleteListener[] {
+            /*
+             * Insert module delete listener
+             */
+            new TasksDelete(),
+            new InfostoreDelete(),
+            new ContactDeleteListener(),
+            ServerServiceRegistry.getInstance().getService(CalendarAdministrationService.class),
+            /*
+             * Delete user configuration & settings
+             */
+            new UserConfigurationDeleteListener(),
+            new UserSettingMailDeleteListener(),
+            new QuotaUsageDelete(),
+            new AttachmentContextDelete(),
+            new AttachmentDelDelete(),
+            /*
+             * At last insert folder delete listener
+             */
+            new OXFolderDeleteListener(),
+            /*
+             * Remove FileStorage if context is deleted.
+             */
+            new FileStorageRemover(),
+            /*
+             * Remove stored images
+             */
+            new ImageRegistryDeleteListener(),
+            new UserSettingServerDeleteListener(),
+            new MailAccountDeleteListener(),
+            /*
+             * Remove POP3 data
+             */
+            new DeleteListener() {
 
-            public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
-                if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
-                    PreparedStatement stmt = null;
-                    try {
-                        final int contextId = deleteEvent.getContext().getContextId();
-                        final int user = deleteEvent.getId();
+                public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+                    if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
+                        PreparedStatement stmt = null;
+                        try {
+                            final int contextId = deleteEvent.getContext().getContextId();
+                            final int user = deleteEvent.getId();
 
-                        stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ?");
-                        int pos = 1;
-                        stmt.setInt(pos++, contextId);
-                        stmt.setInt(pos++, user);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
+                            stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ?");
+                            int pos = 1;
+                            stmt.setInt(pos++, contextId);
+                            stmt.setInt(pos++, user);
+                            stmt.executeUpdate();
+                            DBUtils.closeSQLStuff(stmt);
 
-                        stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_ids WHERE cid = ? AND user = ?");
-                        pos = 1;
-                        stmt.setInt(pos++, contextId);
-                        stmt.setInt(pos++, user);
-                        stmt.executeUpdate();
-                    } catch (final SQLException e) {
-                        throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
-                    } finally {
-                        DBUtils.closeSQLStuff(stmt);
+                            stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_ids WHERE cid = ? AND user = ?");
+                            pos = 1;
+                            stmt.setInt(pos++, contextId);
+                            stmt.setInt(pos++, user);
+                            stmt.executeUpdate();
+                        } catch (final SQLException e) {
+                            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+                        } finally {
+                            DBUtils.closeSQLStuff(stmt);
+                        }
                     }
                 }
-            }
-        });
+            } };
     }
 
     /**
-     * Registers an instance of <code>{@link DeleteListener}</code>. <b>Note</b>: Only one instance of a certain
-     * <code>{@link DeleteListener}</code> implementation is added, meaning if you try to register a certain implementation twice, the
-     * latter one is going to be discarded.
+     * Registers an instance of <code>{@link DeleteListener}</code>.
+     * <p>
+     * <b>Note</b>: Only one instance of a certain <code>{@link DeleteListener}</code> implementation is added, meaning if you try to
+     * register a certain implementation twice, the latter one is going to be discarded and <code>false</code> is returned.
      * 
-     * @param listener the listener to register
+     * @param listener The listener to register
      * @return <code>true</code> if specified delete listener has been added to registry; otherwise <code>false</code>
      */
     public boolean registerDeleteListener(final DeleteListener listener) {
@@ -228,7 +247,7 @@ public final class DeleteRegistry {
     /**
      * Removes given instance of <code>{@link DeleteListener}</code> from this registry's known listeners.
      * 
-     * @param listener - the listener to remove
+     * @param listener The listener to remove
      */
     public void unregisterDeleteListener(final DeleteListener listener) {
         if (null == classes.remove(listener.getClass())) {
@@ -240,13 +259,23 @@ public final class DeleteRegistry {
     /**
      * Fires the delete event.
      * 
-     * @param deleteEvent the delete event
-     * @param readCon a readable connection
-     * @param writeCon a writable connection
-     * @throws DeleteFailedException if delete event could not be performed
+     * @param deleteEvent The delete event
+     * @param readCon A readable connection
+     * @param writeCon A writable connection
+     * @throws DeleteFailedException If delete event could not be performed
      */
     public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+        /*
+         * At first trigger dynamically added listeners
+         */
         for (final Iterator<DeleteListener> iter = listeners.iterator(); iter.hasNext();) {
+            final DeleteListener listener = iter.next();
+            listener.deletePerformed(deleteEvent, readCon, writeCon);
+        }
+        /*
+         * Now trigger static listeners
+         */
+        for (final Iterator<DeleteListener> iter = staticListeners.iterator(); iter.hasNext();) {
             final DeleteListener listener = iter.next();
             listener.deletePerformed(deleteEvent, readCon, writeCon);
         }

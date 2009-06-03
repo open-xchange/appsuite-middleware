@@ -108,6 +108,7 @@ import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
@@ -349,6 +350,10 @@ public final class ServerActivator extends DeferredActivator {
             context,
             DataRetentionService.class.getName(),
             new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class)));
+
+        // Delete Listener Service Tracker
+        serviceTrackerList.add(new ServiceTracker(context, DeleteListener.class.getName(), new DeleteListenerServiceTrackerCustomizer(
+            context)));
 
         /*
          * Register EventHandler

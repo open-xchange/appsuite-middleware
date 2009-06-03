@@ -47,41 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.delete;
+package com.openexchange.server.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.delete.DeleteRegistry;
 
 /**
- * {@link DeleteRegistryInitialization} - Initialization for {@link DeleteRegistry}.
+ * {@link DeleteListenerServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer} for delete registry.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteRegistryInitialization implements Initialization {
+public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
-    private final AtomicBoolean started;
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link DeleteRegistryInitialization}.
+     * Initializes a new {@link DeleteListenerServiceTrackerCustomizer}.
+     * 
+     * @param context The bundle context
      */
-    public DeleteRegistryInitialization() {
+    public DeleteListenerServiceTrackerCustomizer(final BundleContext context) {
         super();
-        started = new AtomicBoolean();
+        this.context = context;
     }
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
+    public Object addingService(final ServiceReference reference) {
+        final Object addedService = context.getService(reference);
+        if (DeleteRegistry.getInstance().registerDeleteListener((DeleteListener) addedService)) {
+            return addedService;
         }
-        DeleteRegistry.initInstance();
+        // Nothing to track
+        context.ungetService(reference);
+        return null;
     }
 
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do
+    }
+
+    public void removedService(final ServiceReference reference, final Object service) {
+        if (null != service) {
+            try {
+                DeleteRegistry.getInstance().unregisterDeleteListener((DeleteListener) service);
+            } finally {
+                context.ungetService(reference);
+            }
         }
-        DeleteRegistry.releaseInstance();
     }
 
 }
