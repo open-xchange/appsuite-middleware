@@ -53,6 +53,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -142,7 +143,7 @@ public final class OXMFParserImpl implements OXMFParser {
             }
             return parsedContainerElements;
         } catch (final XMLStreamException e) {
-            throw OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage()) ;
+            throw OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         } finally {
             try {
                 parser.close();
@@ -163,6 +164,7 @@ public final class OXMFParserImpl implements OXMFParser {
             body = true;
         } else if (body) {
             final int count = parser.getAttributeCount();
+            boolean found = false;
             for (int i = 0; i < count; i++) {
                 final String attributeName = parser.getAttributeLocalName(i);
                 if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
@@ -170,12 +172,16 @@ public final class OXMFParserImpl implements OXMFParser {
                     String[] classes = attributeValue.split("\\s+");
                     for (String klass : classes) {
                         if (containerElements.contains(klass)) {
-                            parsedContainerElements.add(parseContainerElement(parser));
-                            return;
+                            found = true;
+                            break;
                         }
                     }
                 }
             }
+            if (found) {
+                parsedContainerElements.add(parseContainerElement(parser));
+            }
+
         }
     }
 
@@ -211,24 +217,29 @@ public final class OXMFParserImpl implements OXMFParser {
      */
     private void parseNestedElement(final XMLStreamReader parser, final Map<String, String> map) throws XMLStreamException {
         final int count = parser.getAttributeCount();
+        List<String> classList = new LinkedList<String>();
         for (int i = 0; i < count; i++) {
             final String attributeName = parser.getAttributeLocalName(i);
             if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                 final String attributeValue = parser.getAttributeValue(i);
                 final String[] classes = attributeValue.split("\\s+");
-                boolean found = false;
                 for (String klass : classes) {
+                    System.out.println(klass);
                     if (attributePrefixes.contains(klass) || startsWith(klass)) {
-                        map.put(klass, parser.getElementText());
-                        // Postcondition: the current event is the corresponding END_ELEMENT. Therefore decrease level
-                        found = true;
+                        classList.add(klass);
                     }
-                }
-                if(found) {
-                    level--;
                 }
             }
         }
+
+        if (!classList.isEmpty()) {
+            String text = parser.getElementText();
+            for (String klass : classList) {
+                map.put(klass, text);
+            }
+            level--;
+        }
+
     }
 
     /**
