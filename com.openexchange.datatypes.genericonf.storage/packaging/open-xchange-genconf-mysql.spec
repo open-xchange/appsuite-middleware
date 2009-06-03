@@ -4,7 +4,7 @@
 Name:           open-xchange-genconf-mysql
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant 
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server open-xchange-genconf
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -68,8 +68,6 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
-%dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
-%dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d/
+%dir /opt/open-xchange/etc/*/osgi/bundle.d/
 /opt/open-xchange/bundles/*
-/opt/open-xchange/etc/groupware/osgi/bundle.d/*
-/opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
+/opt/open-xchange/etc/*/osgi/bundle.d/*
