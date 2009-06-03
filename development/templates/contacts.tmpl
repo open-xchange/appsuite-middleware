@@ -1,13 +1,13 @@
 <#macro display key value title>
 <#if value != "">
-<span class="${key}">${value}</span>
+<span class="${key}">${value?html}</span>
 </#if>
 </#macro>
 
 <#macro render key value title>
 <#if value != "">
 <tr>
-<td class="key">${title}:</td> <td class="${key} value">${value}</td>
+<td class="key">${title}:</td> <td class="${key} value">${value?html}</td>
 </tr>
 </#if>
 </#macro>

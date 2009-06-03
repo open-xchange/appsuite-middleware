@@ -1,1 +1,1 @@
-com.openexchange.templating.path : @oxgroupwaresysconfdir@/templates/
+com.openexchange.templating.path : @oxgroupwaresysconfdir@/../templates/
