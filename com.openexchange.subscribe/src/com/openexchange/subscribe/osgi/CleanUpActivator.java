@@ -50,22 +50,35 @@
 package com.openexchange.subscribe.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.context.ContextService;
+import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.subscribe.internal.FolderCleanUpEventHandler;
 
 
 /**
- * {@link Activator}
+ * {@link CleanUpActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class CleanUpActivator implements BundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator(), new PreferencesActivator(), new CleanUpActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private Whiteboard whiteboard;
+    private FolderCleanUpEventHandler folderCleanUpEventHandler;
+
+    public void start(BundleContext context) throws Exception {
+        whiteboard = new Whiteboard(context);
+        ContextService contexts = whiteboard.getService(ContextService.class);
+        
+        
+        folderCleanUpEventHandler = new FolderCleanUpEventHandler(context, AbstractSubscribeService.STORAGE, contexts);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        folderCleanUpEventHandler.close();
+        whiteboard.close();
     }
 
 }

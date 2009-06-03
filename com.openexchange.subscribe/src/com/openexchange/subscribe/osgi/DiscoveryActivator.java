@@ -41,6 +41,7 @@ public class DiscoveryActivator implements BundleActivator {
     
     private Whiteboard whiteboard;
     
+  
     public void start(BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
