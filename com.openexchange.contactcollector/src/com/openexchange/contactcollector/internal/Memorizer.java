@@ -165,7 +165,7 @@ public class Memorizer implements Runnable {
             searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
             final int[] columns = new int[] {
-                DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, ContactObject.USERFIELD20 };
+                DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, ContactObject.USE_COUNT };
             final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
             try {
                 if (iterator.hasNext()) {
@@ -180,19 +180,16 @@ public class Memorizer implements Runnable {
         if (null == foundContact) {
             final OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(getFolderId(), session.getUserId(), userConfig);
             if (perm.canCreateObjects()) {
+                contact.setUseCount(1);
                 contactInterface.insertContactObject(contact);
                 retval = contact.getObjectID();
             } else {
                 retval = -1;
             }
         } else {
-            try {
-                final int currentCount = Integer.parseInt(foundContact.getUserField20());
-                final int newCount = currentCount + 1;
-                foundContact.setUserField20(String.valueOf(newCount));
-            } catch (final NumberFormatException nfe) {
-                foundContact.setUserField20(String.valueOf(1));
-            }
+            final int currentCount = foundContact.getUseCount();
+            final int newCount = currentCount + 1;
+            foundContact.setUseCount(newCount);
             final OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(
                 foundContact.getParentFolderID(),
                 session.getUserId(),
@@ -240,7 +237,6 @@ public class Memorizer implements Runnable {
         }
         retval.setDisplayName(displayName);
         retval.setParentFolderID(getFolderId());
-        retval.setUserField20(String.valueOf(1));
         return retval;
     }
 

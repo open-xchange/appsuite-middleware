@@ -303,6 +303,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 38
             // Adds necessary tables for publish service
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreatePublicationTablesTask());
+            // Version 39
+            // Adds necessary column in contact table for counting usage.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddUseCountColumnUpdateTask());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");

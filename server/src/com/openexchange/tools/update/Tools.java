@@ -215,6 +215,21 @@ public final class Tools {
         }
         return retval;
     }
+    
+    public static boolean columnExists(Connection con, String table, String column) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                retval = rs.getString(4).equals(column);
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
+    }
 
     private static final int NULLABLE = 11;
 

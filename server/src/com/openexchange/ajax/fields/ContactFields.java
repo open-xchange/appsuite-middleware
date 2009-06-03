@@ -249,5 +249,7 @@ public interface ContactFields extends CommonFields {
 	public static final String CONTAINS_IMAGE1 = "contains_image1";
 
 	public static final String IMAGE1_URL = "image1_url";
+	
+	public static final String USE_COUNT = "useCount";
 		
 }

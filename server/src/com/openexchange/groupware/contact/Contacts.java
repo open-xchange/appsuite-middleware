@@ -9382,5 +9382,67 @@ public final class Contacts {
                 }
             }
         };
+        /** ************** * intfield08 * * ************ */
+        mapping[ContactObject.USE_COUNT] = new mapper() {
+
+            public String getDBFieldName() {
+                return "useCount";
+            }
+
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final int i = rs.getInt(pos);
+                if (!rs.wasNull() && (i > 0)) {
+                    co.setUseCount(i);
+                }
+            }
+
+            public boolean containsElement(final ContactObject co) {
+                return co.containsUseCount();
+            }
+
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
+                if (co.containsUseCount()) {
+                    ps.setInt(pos, co.getUseCount());
+                } else {
+                    ps.setInt(pos, 0);
+                }
+            }
+
+            public boolean compare(final ContactObject co, final ContactObject original) {
+                return (co.getUseCount() == original.getUseCount());
+            }
+
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
+                if (((String) ob).equals("0")) {
+                    ps.setInt(position, 0);
+                } else {
+                    ps.setInt(position, Integer.parseInt((String) ob));
+                }
+            }
+
+            public Object getData(final ResultSet rs, final int pos) throws SQLException {
+                return String.valueOf(rs.getInt(pos));
+            }
+
+            public String getValueAsString(final ContactObject co) {
+                return null;
+            }
+
+            public String getReadableTitle() {
+                return null;
+            }
+
+            public void setValueAsString(final String s, final ContactObject co) {
+                if (null == s) {
+                    co.setNumberOfAttachments(0);
+                    return;
+                }
+                try {
+                    co.setUseCount(Integer.parseInt(s));
+                } catch (final NumberFormatException e) {
+                    co.setUseCount(0);
+                }
+            }
+        };
     }
 }

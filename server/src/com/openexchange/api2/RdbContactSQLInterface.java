@@ -81,6 +81,7 @@ import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.Contacts.mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
+import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -326,13 +327,15 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
         final StringBuilder order = new StringBuilder();
         final boolean specialSort;
-        if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING) {
+        if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING && order_field != ContactObject.USE_COUNT_GLOBAL_FIRST) {
             specialSort = false;
             order.append(" ORDER BY co.");
-            order.append(Contacts.mapping[order_field].getDBFieldName());
+            int realOrderField = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? ContactObject.USE_COUNT : order_field;
+            order.append(Contacts.mapping[realOrderField].getDBFieldName());
             order.append(' ');
-            if (orderMechanism != null && orderMechanism.length() > 0) {
-                order.append(orderMechanism);
+            String realOrderMechanism = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
+                order.append(realOrderMechanism);
             } else {
                 order.append("ASC");
             }
@@ -375,9 +378,13 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-        if (specialSort) {
+        
+        if (order_field == ContactObject.USE_COUNT_GLOBAL_FIRST) {
+            java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
+        } else if (specialSort) {
             java.util.Arrays.sort(contacts, new ContactComparator());
         }
+        
         return new ArrayIterator<ContactObject>(contacts);
     }
 
@@ -437,17 +444,19 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING) {
             specialSort = false;
             order.append(" ORDER BY co.");
-            order.append(Contacts.mapping[order_field].getDBFieldName());
+            int realOrderField = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? ContactObject.USE_COUNT : order_field;
+            order.append(Contacts.mapping[realOrderField].getDBFieldName());
             order.append(' ');
-            if (orderMechanism != null && orderMechanism.length() > 0) {
-                order.append(orderMechanism);
+            String realOrderMechanism = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
+                order.append(realOrderMechanism);
             } else {
                 order.append("ASC");
             }
             order.append(' ');
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
-                ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME, ContactObject.COMPANY, ContactObject.EMAIL1, ContactObject.EMAIL2 });
+                ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME, ContactObject.COMPANY, ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.USE_COUNT });
             specialSort = true;
         }
         cs.setOrder(order.toString());
@@ -477,7 +486,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-        if (specialSort) {
+        
+        if (order_field == ContactObject.USE_COUNT_GLOBAL_FIRST) {
+            java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
+        } else if (specialSort) {
             java.util.Arrays.sort(contacts, new ContactComparator());
         }
         return new ArrayIterator<ContactObject>(contacts);

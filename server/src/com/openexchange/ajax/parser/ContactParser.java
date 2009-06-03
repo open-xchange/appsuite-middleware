@@ -816,6 +816,15 @@ public class ContactParser extends CommonParser {
 				contactobject.setURL(parseString(jsonobject, ContactFields.URL));
 			}
 		},
+        new JSONAttributeMapper() {
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.USE_COUNT);
+            }
+            public void setObject(final ContactObject contactobject,
+                final JSONObject jsonobject) throws Exception {
+                contactobject.setUseCount(parseInt(jsonobject, ContactFields.USE_COUNT));
+            }
+        },
 		new JSONAttributeMapper() {
 			public boolean jsonObjectContains(final JSONObject jsonobject) {
 				return jsonobject.has(ContactFields.USERFIELD01);

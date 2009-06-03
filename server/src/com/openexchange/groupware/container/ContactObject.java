@@ -285,6 +285,13 @@ public class ContactObject extends CommonObject {
      * with the AlphanumComparator. 
      */
     public static final int SPECIAL_SORTING = 607;
+    
+    public static final int USE_COUNT = 608;
+    
+    /**
+     * The same as USAGE_COUNT, but with respect to the global addressbook (only for searching purpose).
+     */
+    public static final int USE_COUNT_GLOBAL_FIRST = 609;
 
     public static final int[] ALL_COLUMNS = {
         // From ContactObject itself
@@ -730,6 +737,10 @@ public class ContactObject extends CommonObject {
     protected boolean b_number_of_dlists;
 
     protected int number_of_dlists;
+    
+    protected int useCount;
+    
+    protected boolean b_useCount;
 
     protected DistributionListEntryObject[] dlists;
 
@@ -1149,6 +1160,10 @@ public class ContactObject extends CommonObject {
 
     public boolean getMarkAsDistribtuionlist() {
         return mark_as_distributionlist;
+    }
+    
+    public int getUseCount() {
+        return useCount;
     }
 
     // SET METHODS
@@ -1683,6 +1698,11 @@ public class ContactObject extends CommonObject {
     public void markAsDistributionlist() {
         setMarkAsDistributionlist(true);
     }
+    
+    public void setUseCount(int useCount) {
+        this.useCount = useCount;
+        b_useCount = true;
+    }
 
     // REMOVE METHODS
     public void removeDisplayName() {
@@ -2201,6 +2221,11 @@ public class ContactObject extends CommonObject {
         internal_userId = 0;
         b_internal_userId = false;
     }
+    
+    public void removeUseCount() {
+        useCount = 0;
+        b_useCount = false;
+    }
 
     // CONTAINS METHODS
     public boolean containsDisplayName() {
@@ -2618,6 +2643,10 @@ public class ContactObject extends CommonObject {
 
     public boolean containsMarkAsDistributionlist() {
         return b_mark_as_distributionlist;
+    }
+    
+    public boolean containsUseCount() {
+        return b_useCount;
     }
 
     @Override
@@ -3449,6 +3478,9 @@ public class ContactObject extends CommonObject {
         case NUMBER_OF_LINKS:
             setNumberOfLinks( ((Integer) value).intValue() );
             break;
+        case USE_COUNT:
+            setUseCount(((Integer) value).intValue());
+            break;
         default:
             super.set(field, value);
 
@@ -3664,6 +3696,8 @@ public class ContactObject extends CommonObject {
             return Integer.valueOf( getNumberOfDistributionLists() );
         case NUMBER_OF_LINKS:
             return Integer.valueOf( getNumberOfLinks() );
+        case USE_COUNT:
+            return Integer.valueOf(getUseCount());
         default:
             return super.get(field);
 
@@ -3877,6 +3911,8 @@ public class ContactObject extends CommonObject {
             return containsNumberOfDistributionLists();
         case NUMBER_OF_LINKS:
             return containsNumberOfLinks();
+        case USE_COUNT:
+            return containsUseCount();
         default:
             return super.contains(field);
 
@@ -4191,6 +4227,9 @@ public class ContactObject extends CommonObject {
             break;
         case NUMBER_OF_LINKS:
             removeNumberOfLinks();
+            break;
+        case USE_COUNT:
+            removeUseCount();
             break;
         default:
             super.remove(field);

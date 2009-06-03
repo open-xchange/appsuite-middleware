@@ -562,7 +562,13 @@ public class ContactRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
         final ContactSearchObject searchObj = new ContactSearchObject();
         if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
-            searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
+            if (jData.get(AJAXServlet.PARAMETER_INFOLDER).getClass().equals(JSONArray.class)) {
+                for (int folder : DataParser.parseJSONIntArray(jData, AJAXServlet.PARAMETER_INFOLDER)) {
+                    searchObj.addFolder(folder);
+                }
+            } else {
+                searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
+            }
         }
         if (jData.has(SearchFields.PATTERN)) {
             searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
