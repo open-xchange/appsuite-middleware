@@ -37,15 +37,14 @@
     <property name="sqljar" value="com.openexchange.sql.jar"/>
 	
     <property name="publishjar" value="com.openexchange.publish.jar"/>
-	
-	
-	
+	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		
+    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
+    		        
         <pathelement location="${bundlesdir}/${globaljar}"/>
 		
         <pathelement location="${bundlesdir}/${genconfjar}"/>
