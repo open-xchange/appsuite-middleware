@@ -67,7 +67,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     private static final long serialVersionUID = 5748081743621854608L;
 
-    private final StringBuilder mailBody;
+    private StringBuilder mailBody;
 
     private transient DataSource dataSource;
 
@@ -81,6 +81,27 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     public TextBodyMailPart(final String mailBody) {
         super();
         this.mailBody = new StringBuilder(mailBody);
+    }
+
+/**
+     * Gets a copy of this {@link TextBodyMailPart}.
+     * 
+     * @return A copy of this {@link TextBodyMailPart
+     * @throws MailException If creating a copy fails
+     */
+    public abstract TextBodyMailPart copy() throws MailException;
+
+    /**
+     * Fills specified instance with this body part's content.
+     * <p>
+     * This method is supposed to be invoked in subclass' {@link #copy()} method.
+     * 
+     * @param newInstance The new instance to fill
+     */
+    protected final void fillInstance(final TextBodyMailPart newInstance) {
+        newInstance.mailBody = new StringBuilder(this.mailBody.length());
+        newInstance.mailBody.append(this.mailBody.toString());
+        newInstance.dataSource = null;
     }
 
     /**

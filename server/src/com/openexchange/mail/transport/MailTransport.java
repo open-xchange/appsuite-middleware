@@ -143,7 +143,8 @@ public abstract class MailTransport {
      * Sends a mail message
      * <p>
      * This is a convenience method that invokes {@link #sendMailMessage(ComposedMailMessage, ComposeType, Address[])} with the latter
-     * parameter set to <code>null</code>.
+     * parameter set to <code>null</code> if {@link ComposedMailMessage#hasRecipients()} is <code>false</code>; otherwise
+     * {@link ComposedMailMessage#getRecipients()} is passed.
      * 
      * @param transportMail The mail message to send (containing necessary header data and body)
      * @param sendType The send type

@@ -107,7 +107,9 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.ServiceException;
@@ -139,7 +141,8 @@ public final class MessageParser {
 
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to a corresponding
-     * {@link ComposedMailMessage} object. Moreover the user's quota limitations are considered.
+     * {@link ComposedMailMessage} object dedicated for being saved as a draft message. Moreover the user's quota limitations are
+     * considered.
      * 
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
@@ -148,14 +151,56 @@ public final class MessageParser {
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws MailException If parsing fails
      */
-    public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws MailException {
+    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws MailException {
+        return parse(jsonObj, uploadEvent, session, accountId, null, null, false)[0];
+    }
+
+    /**
+     * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to corresponding
+     * {@link ComposedMailMessage} objects dedicated for being sent. Moreover the user's quota limitations are considered.
+     * 
+     * @param jsonObj The JSON object
+     * @param uploadEvent The upload event containing the uploaded files to attach
+     * @param session The session
+     * @param accountId The account ID
+     * @param protocol The server's protocol
+     * @param hostname The server's host name
+     * @return The corresponding instances of {@link ComposedMailMessage}
+     * @throws MailException If parsing fails
+     */
+    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName) throws MailException {
+        return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true);
+    }
+
+    /**
+     * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to corresponding
+     * {@link ComposedMailMessage} objects. Moreover the user's quota limitations are considered.
+     * 
+     * @param jsonObj The JSON object
+     * @param uploadEvent The upload event containing the uploaded files to attach
+     * @param session The session
+     * @param accountId The account ID
+     * @param protocol The server's protocol
+     * @param hostname The server's host name
+     * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise
+     *            <code>false</code>
+     * @return The corresponding instances of {@link ComposedMailMessage}
+     * @throws MailException If parsing fails
+     */
+    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport) throws MailException {
         try {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final ComposedMailMessage composedMail = provider.getNewComposedMailMessage(session, ctx);
-
-            // TODO: Change quota checker appropriate to customer needs
-            final IAttachmentHandler quotaChecker = new AbortAttachmentHandler(session);
+            /*
+             * Select appropriate handler
+             */
+            final IAttachmentHandler quotaChecker;
+            if (prepare4Transport && TransportProperties.getInstance().isPublishOnExceededQuota() && (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))) {
+                quotaChecker = new PublishAttachmentHandler(session, provider, protocol, hostName);
+            } else {
+                quotaChecker = new AbortAttachmentHandler(session);
+            }
             /*
              * Parse transport message plus its text body
              */
@@ -239,8 +284,7 @@ public final class MessageParser {
             /*
              * Fill composed mail
              */
-            quotaChecker.fillComposedMail(composedMail);
-            return composedMail;
+            return quotaChecker.generateComposedMails(composedMail);
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         } catch (final ContextException e) {
@@ -352,7 +396,7 @@ public final class MessageParser {
                     /*
                      * Parse referenced parts
                      */
-                    parseReferencedParts(provider, session, accountId, transportMail, quotaChecker, attachmentArray);
+                    parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), quotaChecker, attachmentArray);
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
                     part.setContentType(MIMETypes.MIME_DEFAULT);
@@ -520,7 +564,7 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final ComposedMailMessage transportMail, final IAttachmentHandler quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath transportMailMsgref, final IAttachmentHandler quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
         final int len = attachmentArray.length();
         if (len <= 1) {
             /*
@@ -534,7 +578,7 @@ public final class MessageParser {
         final Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(
             provider,
             session,
-            transportMail.getMsgref(),
+            transportMailMsgref,
             attachmentArray);
         /*
          * Iterate attachments array
@@ -563,7 +607,7 @@ public final class MessageParser {
                         msgref = new MailPath(attachment.get(MailJSONField.MSGREF.getKey()).toString());
                         isMail = true;
                     } else {
-                        msgref = transportMail.getMsgref();
+                        msgref = transportMailMsgref;
                         isMail = false;
                     }
                     if (null == msgref) {

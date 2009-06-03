@@ -29,10 +29,11 @@ interface IAttachmentHandler {
     public void addAttachment(MailPart attachment) throws MailException;
 
     /**
-     * Fills attachments into specified composed mail.
+     * Generates composed mails.
      * 
-     * @param composedMail The composed mail to fill
+     * @param source The source composed mail
+     * @return The resulting composed mails
      * @throws MailException If an error occurs while filling mail
      */
-    public void fillComposedMail(ComposedMailMessage composedMail) throws MailException;
+    public ComposedMailMessage[] generateComposedMails(ComposedMailMessage source) throws MailException;
 }

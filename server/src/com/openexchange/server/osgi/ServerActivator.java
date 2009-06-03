@@ -139,6 +139,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.search.SearchException;
@@ -409,13 +410,17 @@ public final class ServerActivator extends DeferredActivator {
                 context,
                 MultipleHandlerFactoryService.class.getName(),
                 new MultipleHandlerServiceTracker(context)));
-            
+
             // Attachment Plugins
             serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
             serviceTrackerList.add(new AttachmentListenerTracker(context));
-            
-           
-            
+
+           // PublicationTargetDiscoveryService
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                PublicationTargetDiscoveryService.class.getName(),
+                new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
+
             // Start up server the usual way
             starter.start();
         }

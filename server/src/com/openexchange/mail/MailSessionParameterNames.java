@@ -64,6 +64,20 @@ public final class MailSessionParameterNames {
     }
 
     /**
+     * Publishing infostore folder ID.
+     */
+    private static final String PARAM_PUBLISHING_INFOSTORE_FOLDER_ID = "mail.pubid";
+
+    /**
+     * Gets the parameter name for publishing infostore folder ID.
+     * 
+     * @return The parameter name for publishing infostore folder ID
+     */
+    public static String getParamPublishingInfostoreFolderID() {
+        return PARAM_PUBLISHING_INFOSTORE_FOLDER_ID;
+    }
+
+    /**
      * Default folder flag.
      */
     private static final String PARAM_DEF_FLD_FLAG = "mail.deffldflag";

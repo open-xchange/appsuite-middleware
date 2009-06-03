@@ -106,6 +106,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -1251,8 +1252,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
             if (null != retentionService) {
-                // TODO: Delegate runnable to thread pool
-                new Runnable() {
+                /*
+                 * Create runnable task
+                 */
+                final Runnable r = new Runnable() {
 
                     public void run() {
                         try {
@@ -1281,7 +1284,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             LOG.error(e.getMessage(), e);
                         }
                     }
-                }.run();
+                };
+                /*
+                 * Check if timer service is available to delegate execution
+                 */
+                final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                if (null == timerService) {
+                    // Execute in this thread
+                    r.run();
+                } else {
+                    // Delegate runnable to thread pool
+                    timerService.schedule(r, 1000);
+                }
             }
             /*
              * Check for a reply/forward

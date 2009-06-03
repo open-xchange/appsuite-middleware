@@ -49,19 +49,31 @@
 
 package com.openexchange.mail;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Login;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link MailLoginHandler} - The login handler delivering mailbox access event to data retention.
@@ -79,14 +91,13 @@ public final class MailLoginHandler implements LoginHandlerService {
 
     public void handleLogin(final Login login) throws LoginException {
         /*
-         * Email successfully sent, trigger data retention
+         * Track mail login in data retention service
          */
         final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
+        final Context ctx = login.getContext();
         try {
             final Session session = login.getSession();
-            if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(
-                session.getUserId(),
-                login.getContext()).hasWebMail()) {
+            if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
                 final RetentionData retentionData = retentionService.newInstance();
                 retentionData.setStartTime(new Date(System.currentTimeMillis()));
                 retentionData.setIdentifier(MailAccess.getInstance(session).getMailConfig().getLogin());
@@ -104,6 +115,90 @@ public final class MailLoginHandler implements LoginHandlerService {
         } catch (final DataRetentionException e) {
             throw new LoginException(e);
         }
+        /*
+         * Ensure publishing infostore folder exists
+         */
+        if (TransportProperties.getInstance().isPublishOnExceededQuota()) {
+            final String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
+            try {
+                final int lookUpFolder = OXFolderSQL.lookUpFolder(
+                    FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
+                    name,
+                    FolderObject.INFOSTORE,
+                    null,
+                    ctx);
+                if (-1 == lookUpFolder) {
+                    synchronized (MailLoginHandler.class) {
+                        createIfAbsent(login, ctx, name);
+                    }
+                } else {
+                    login.getSession().setParameter(
+                        MailSessionParameterNames.getParamPublishingInfostoreFolderID(),
+                        Integer.valueOf(lookUpFolder));
+                }
+            } catch (final DBPoolingException e) {
+                throw new LoginException(e);
+            } catch (final SQLException e) {
+                throw new LoginException(new OXFolderException(
+                    OXFolderException.FolderCode.SQL_ERROR,
+                    e,
+                    Integer.valueOf(ctx.getContextId())));
+            } catch (final OXFolderException e) {
+                throw new LoginException(e);
+            } catch (final OXException e) {
+                throw new LoginException(e);
+            }
+        }
+    }
+
+    private void createIfAbsent(final Login login, final Context ctx, final String name) throws DBPoolingException, SQLException, OXException, OXFolderException {
+        final int lookUpFolder = OXFolderSQL.lookUpFolder(
+            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
+            name,
+            FolderObject.INFOSTORE,
+            null,
+            ctx);
+        if (-1 == lookUpFolder) {
+            /*
+             * Create folder
+             */
+            final FolderObject fo = createNewInfostoreFolder(ctx.getMailadmin(), name, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+            final int folderID = OXFolderManager.getInstance(login.getSession()).createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+            login.getSession().setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderID));
+        }
+    }
+
+    private FolderObject createNewInfostoreFolder(final int adminId, final String name, final int parent) {
+        final FolderObject newFolder = new FolderObject();
+        newFolder.setFolderName(name);
+        newFolder.setParentFolderID(parent);
+        newFolder.setType(FolderObject.PUBLIC);
+        newFolder.setModule(FolderObject.INFOSTORE);
+
+        final List<OCLPermission> perms = new ArrayList<OCLPermission>(2);
+        // Admin permission
+        OCLPermission perm = new OCLPermission();
+        perm.setEntity(adminId);
+        perm.setFolderAdmin(true);
+        perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setGroupPermission(false);
+        perms.add(perm);
+        // All groups and users permission
+        perm = new OCLPermission();
+        perm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        perm.setFolderAdmin(false);
+        perm.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        perm.setReadObjectPermission(OCLPermission.READ_OWN_OBJECTS);
+        perm.setWriteObjectPermission(OCLPermission.WRITE_OWN_OBJECTS);
+        perm.setDeleteObjectPermission(OCLPermission.DELETE_OWN_OBJECTS);
+        perm.setGroupPermission(true);
+        perms.add(perm);
+        newFolder.setPermissions(perms);
+
+        return newFolder;
     }
 
     public void handleLogout(final Login logout) throws LoginException {

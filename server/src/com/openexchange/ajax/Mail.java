@@ -225,11 +225,15 @@ public class Mail extends PermissionServlet implements UploadListener {
             cause);
     }
 
-    private static final String UPLOAD_PARAM_MAILINTERFACE = "mi";
+    private static final String UPLOAD_PARAM_MAILINTERFACE = "msint";
 
-    private static final String UPLOAD_PARAM_WRITER = "w";
+    private static final String UPLOAD_PARAM_WRITER = "writer";
 
-    private static final String UPLOAD_PARAM_SESSION = "s";
+    private static final String UPLOAD_PARAM_SESSION = "sess";
+
+    private static final String UPLOAD_PARAM_HOSTNAME = "hostn";
+
+    private static final String UPLOAD_PARAM_PROTOCOL = "proto";
 
     private static final String STR_CHARSET = "charset";
 
@@ -1870,7 +1874,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Parse with default account's transport provider
                      */
-                    final ComposedMailMessage composedMail = MessageParser.parse(
+                    final ComposedMailMessage composedMail = MessageParser.parse4Draft(
                         jsonMailObj,
                         (UploadEvent) null,
                         session,
@@ -3234,6 +3238,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
+                uploadEvent.setParameter(UPLOAD_PARAM_HOSTNAME, req.getServerName());
+                uploadEvent.setParameter(UPLOAD_PARAM_PROTOCOL, req.isSecure() ? "https" : "http");
                 uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
                 fireUploadEvent(uploadEvent, listeners);
             } finally {
@@ -3307,9 +3313,12 @@ public class Mail extends PermissionServlet implements UploadListener {
             return false;
         }
         try {
+            final String protocol = (String) uploadEvent.getParameter(UPLOAD_PARAM_PROTOCOL);
+            final String serverName = (String) uploadEvent.getParameter(UPLOAD_PARAM_HOSTNAME);
             final PrintWriter writer = (PrintWriter) uploadEvent.getParameter(UPLOAD_PARAM_WRITER);
             final String actionStr = (String) uploadEvent.getParameter(PARAMETER_ACTION);
             try {
+                final MailServletInterface mailServletInterface = (MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE);
                 if (uploadEvent.getAction().equals(ACTION_NEW)) {
                     String msgIdentifier = null;
                     {
@@ -3346,28 +3355,32 @@ public class Mail extends PermissionServlet implements UploadListener {
                             // Send with default account's transport provider
                             accountId = MailAccount.DEFAULT_ID;
                         }
-                        final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session, accountId);
-                        if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
+                        if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
                             /*
                              * ... and save draft
                              */
-                            msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(
-                                composedMail,
-                                false,
-                                accountId);
+                            final ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId);
+                            msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId);
                         } else {
                             /*
                              * ... and send message
                              */
+                            final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(
+                                jsonMailObj,
+                                uploadEvent,
+                                session,
+                                accountId,
+                                protocol,
+                                serverName);
                             final ComposeType sendType = jsonMailObj.hasAndNotNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-                            msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).sendMessage(
-                                composedMail,
-                                sendType,
-                                accountId);
+                            msgIdentifier = mailServletInterface.sendMessage(composedMails[0], sendType, accountId);
+                            for (int i = 1; i < composedMails.length; i++) {
+                                mailServletInterface.sendMessage(composedMails[i], sendType, accountId);
+                            }
                             /*
                              * Trigger contact collector
                              */
-                            triggerContactCollector(session, composedMail);
+                            triggerContactCollector(session, composedMails[0]);
                         }
                     }
                     if (msgIdentifier == null) {
@@ -3405,7 +3418,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Check if detected account has drafts
                          */
-                        final MailServletInterface msi = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE));
+                        final MailServletInterface msi = mailServletInterface;
                         if (msi.getDraftsFolder(accountId) == null) {
                             if (MailAccount.DEFAULT_ID == accountId) {
                                 // Huh... No drafts folder in default account
@@ -3420,12 +3433,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Parse with default account's transport provider
                          */
-                        final ComposedMailMessage composedMail = MessageParser.parse(
-                            jsonMailObj,
-                            uploadEvent,
-                            session,
-                            MailAccount.DEFAULT_ID);
-                        if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT && (composedMail.getMsgref() != null)) {
+                        if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
+                            final ComposedMailMessage composedMail = MessageParser.parse4Draft(
+                                jsonMailObj,
+                                uploadEvent,
+                                session,
+                                MailAccount.DEFAULT_ID);
                             /*
                              * ... and edit draft
                              */

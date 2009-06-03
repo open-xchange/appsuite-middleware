@@ -47,37 +47,23 @@
  *
  */
 
-package com.openexchange.smtp.dataobjects;
+package com.openexchange.mail.json.parser;
 
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
- * {@link SMTPBodyPart} - The SMTP text body part implementation.
- * 
+ * {@link ParsedMessage} - Represents a parsed message from JSON source.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPBodyPart extends TextBodyMailPart {
+public final class ParsedMessage {
 
     /**
-     * Serial version UID
+     * Initializes a new {@link ParsedMessage}.
      */
-    private static final long serialVersionUID = 9070060005849174055L;
+    public ParsedMessage() {
+        super();
+        // TODO Auto-generated constructor stub
 
-    /**
-     * Initializes a new {@link SMTPBodyPart}.
-     * 
-     * @param mailBody The text body as HTML content
-     */
-    public SMTPBodyPart(final String mailBody) {
-        super(mailBody);
-    }
-
-    @Override
-    public TextBodyMailPart copy() throws MailException {
-        final SMTPBodyPart copy = new SMTPBodyPart("");
-        fillInstance(copy);
-        return copy;
     }
 
 }

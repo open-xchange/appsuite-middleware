@@ -55,6 +55,10 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
@@ -86,6 +90,8 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     private transient MIMEMessageFiller filler;
 
+    private final Set<InternetAddress> recipients;
+
     /**
      * Default constructor
      */
@@ -93,6 +99,7 @@ public abstract class ComposedMailMessage extends MailMessage {
         super();
         this.session = session;
         this.ctx = ctx;
+        recipients = new HashSet<InternetAddress>();
     }
 
     /**
@@ -124,6 +131,42 @@ public abstract class ComposedMailMessage extends MailMessage {
      */
     private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
         throw new NotSerializableException(ComposedMailMessage.class.getName());
+    }
+
+    /**
+     * Checks if this composed mail has dedicated recipients.
+     * 
+     * @return <code>true</code> if this composed mail has dedicated recipients; otherwise <code>false</code>
+     */
+    public boolean hasRecipients() {
+        return !recipients.isEmpty();
+    }
+
+    /**
+     * Gets the composed mail's dedicated recipients.
+     * 
+     * @return The dedicated recipients
+     */
+    public InternetAddress[] getRecipients() {
+        return recipients.toArray(new InternetAddress[recipients.size()]);
+    }
+
+    /**
+     * Adds a dedicated recipient to this composed mail.
+     * 
+     * @param recipient The recipient to add
+     */
+    public void addRecipient(final InternetAddress recipient) {
+        recipients.add(recipient);
+    }
+
+    /**
+     * Adds dedicated recipients to this composed mail.
+     * 
+     * @param recipients The recipients to add
+     */
+    public void addRecipients(final InternetAddress[] recipients) {
+        this.recipients.addAll(Arrays.asList(recipients));
     }
 
     /**

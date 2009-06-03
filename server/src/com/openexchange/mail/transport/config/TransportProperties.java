@@ -83,6 +83,14 @@ public final class TransportProperties implements ITransportProperties {
 
     private String defaultTransportProvider;
 
+    private boolean publishOnExceededQuota;
+
+    private String publishingInfostoreFolder;
+
+    private boolean publishPrimaryAccountOnly;
+
+    private boolean sendAttachmentToExternalRecipients;
+
     /**
      * Initializes a new {@link TransportProperties}
      */
@@ -121,6 +129,10 @@ public final class TransportProperties implements ITransportProperties {
 
     private void resetFields() {
         referencedPartLimit = 0;
+        publishingInfostoreFolder = null;
+        publishOnExceededQuota = false;
+        publishPrimaryAccountOnly = true;
+        sendAttachmentToExternalRecipients = false;
     }
 
     private void loadProperties0() {
@@ -150,6 +162,32 @@ public final class TransportProperties implements ITransportProperties {
             logBuilder.append("\tDefault Transport Provider: ").append(defaultTransportProvider).append('\n');
         }
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.enablePublishOnExceededQuota", "false").trim();
+            publishOnExceededQuota = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tPublish On Exceeded Quota: ").append(publishOnExceededQuota).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty(
+                "com.openexchange.mail.transport.publishingPublicInfostoreFolder",
+                "Email attachments").trim();
+            publishingInfostoreFolder = tmp;
+            logBuilder.append("\tPublishing Infostore Folder Name: \"").append(publishingInfostoreFolder).append('"').append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.publishPrimaryAccountOnly", "true").trim();
+            publishPrimaryAccountOnly = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tPublish Primary Account Only: ").append(publishPrimaryAccountOnly).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.sendAttachmentToExternalRecipients", "false").trim();
+            sendAttachmentToExternalRecipients = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tSend Attachment to External Recipients: ").append(sendAttachmentToExternalRecipients).append('\n');
+        }
+
         logBuilder.append("Global transport properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -168,4 +206,43 @@ public final class TransportProperties implements ITransportProperties {
     public String getDefaultTransportProvider() {
         return defaultTransportProvider;
     }
+
+    /**
+     * Gets the name of the publishing infostore folder.
+     * 
+     * @return The name of the publishing infostore folder
+     */
+    public String getPublishingInfostoreFolder() {
+        return publishingInfostoreFolder;
+    }
+
+    /**
+     * Checks if exceeded attachments shall be published rather than throwing an exceeded-quota exception.
+     * 
+     * @return <code>true</code> if exceeded attachments shall be published rather than throwing an exceeded-quota exception; otherwise
+     *         <code>false</code>
+     */
+    public boolean isPublishOnExceededQuota() {
+        return publishOnExceededQuota;
+    }
+
+    /**
+     * Checks if publishing of email attachments is only enabled for primary account.
+     * 
+     * @return <code>true</code> if publishing of email attachments is only enabled for primary account; otherwise <code>false</code>
+     */
+    public boolean isPublishPrimaryAccountOnly() {
+        return publishPrimaryAccountOnly;
+    }
+
+    /**
+     * Checks if attachments shall be sent to external recipients although quota was exceeded.
+     * 
+     * @return <code>true</code> if attachments shall be sent to external recipients although quota was exceeded; othjerwise
+     *         <code>false</code>
+     */
+    public boolean isSendAttachmentToExternalRecipients() {
+        return sendAttachmentToExternalRecipients;
+    }
+
 }

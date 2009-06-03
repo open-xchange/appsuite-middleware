@@ -466,10 +466,21 @@ public final class SMTPTransport extends MailTransport {
             composedMail.setFiller(smtpFiller);
             try {
                 smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
+
                 /*
                  * Check recipients
                  */
-                final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
+                final Address[] recipients;
+                if (allRecipients == null) {
+                    if (composedMail.hasRecipients()) {
+                        recipients = composedMail.getRecipients();
+                    } else {
+                        recipients = smtpMessage.getAllRecipients();
+                    }
+                } else {
+                    recipients = allRecipients;
+                }
+
                 if ((recipients == null) || (recipients.length == 0)) {
                     throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
                 }

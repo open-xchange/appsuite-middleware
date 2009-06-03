@@ -1,18 +1,11 @@
 
 package com.openexchange.mail.json.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 
 /**
@@ -21,17 +14,9 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AbortAttachmentHandler implements IAttachmentHandler {
+final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbortAttachmentHandler.class);
-
-    private final List<MailPart> attachments;
-
-    private final boolean doAction;
-
-    private final long uploadQuota;
-
-    private final long uploadQuotaPerFile;
 
     private TextBodyMailPart textPart;
 
@@ -44,30 +29,7 @@ final class AbortAttachmentHandler implements IAttachmentHandler {
      * @throws MailException If initialization fails
      */
     public AbortAttachmentHandler(final Session session) throws MailException {
-        super();
-        attachments = new ArrayList<MailPart>(4);
-        try {
-            final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
-            if (usm.getUploadQuota() >= 0) {
-                this.uploadQuota = usm.getUploadQuota();
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                }
-                long tmp;
-                try {
-                    tmp = ServerConfig.getInteger(ServerConfig.Property.MAX_UPLOAD_SIZE);
-                } catch (final ConfigurationException e) {
-                    LOG.error(e.getMessage(), e);
-                    tmp = 0;
-                }
-                this.uploadQuota = tmp;
-            }
-            this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
-            doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
-        } catch (final UserConfigurationException e) {
-            throw new MailException(e);
-        }
+        super(session);
     }
 
     public void addAttachment(final MailPart attachment) throws MailException {
@@ -95,11 +57,12 @@ final class AbortAttachmentHandler implements IAttachmentHandler {
         attachments.add(attachment);
     }
 
-    public void fillComposedMail(final ComposedMailMessage composedMail) throws MailException {
-        composedMail.setBodyPart(textPart);
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws MailException {
+        source.setBodyPart(textPart);
         for (final MailPart attachment : attachments) {
-            composedMail.addEnclosedPart(attachment);
+            source.addEnclosedPart(attachment);
         }
+        return new ComposedMailMessage[] { source };
     }
 
     public void setTextPart(final TextBodyMailPart textPart) {

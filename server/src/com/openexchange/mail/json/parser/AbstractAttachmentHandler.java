@@ -47,37 +47,67 @@
  *
  */
 
-package com.openexchange.smtp.dataobjects;
+package com.openexchange.mail.json.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.session.Session;
 
 /**
- * {@link SMTPBodyPart} - The SMTP text body part implementation.
+ * {@link AbstractAttachmentHandler} - An abstract {@link IAttachmentHandler attachment handler}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPBodyPart extends TextBodyMailPart {
+public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractAttachmentHandler.class);
+
+    protected final List<MailPart> attachments;
+
+    protected final boolean doAction;
+
+    protected final long uploadQuota;
+
+    protected final long uploadQuotaPerFile;
 
     /**
-     * Serial version UID
-     */
-    private static final long serialVersionUID = 9070060005849174055L;
-
-    /**
-     * Initializes a new {@link SMTPBodyPart}.
+     * Initializes a new {@link AbstractAttachmentHandler}.
      * 
-     * @param mailBody The text body as HTML content
+     * @param session The session providing needed user information
+     * @throws MailException If initialization fails
      */
-    public SMTPBodyPart(final String mailBody) {
-        super(mailBody);
-    }
-
-    @Override
-    public TextBodyMailPart copy() throws MailException {
-        final SMTPBodyPart copy = new SMTPBodyPart("");
-        fillInstance(copy);
-        return copy;
+    public AbstractAttachmentHandler(final Session session) throws MailException {
+        super();
+        attachments = new ArrayList<MailPart>(4);
+        try {
+            final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
+            if (usm.getUploadQuota() >= 0) {
+                this.uploadQuota = usm.getUploadQuota();
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+                }
+                long tmp;
+                try {
+                    tmp = ServerConfig.getInteger(ServerConfig.Property.MAX_UPLOAD_SIZE);
+                } catch (final ConfigurationException e) {
+                    LOG.error(e.getMessage(), e);
+                    tmp = 0;
+                }
+                this.uploadQuota = tmp;
+            }
+            this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
+            doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
+        } catch (final UserConfigurationException e) {
+            throw new MailException(e);
+        }
     }
 
 }
