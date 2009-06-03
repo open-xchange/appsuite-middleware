@@ -37,6 +37,8 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.Arrays;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,8 +69,14 @@ public class ContactSearchJSONWriter {
         throws JSONException {
         final JSONObject json = new JSONObject();
         int[] folders = search.getFolders();
-        if (folders != null && folders.length > 0) {
+        if (folders != null && folders.length == 1) {
             json.put(AJAXServlet.PARAMETER_INFOLDER, folders[0]);
+        } else if (folders != null && folders.length > 1) {
+            JSONArray folderArray = new JSONArray();
+            for (int folder : folders) {
+                folderArray.put(folder);
+            }
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderArray);
         } else if (ContactSearchObject.NO_FOLDER != search.getFolder()) {
             json.put(AJAXServlet.PARAMETER_INFOLDER, search.getFolder());
         }

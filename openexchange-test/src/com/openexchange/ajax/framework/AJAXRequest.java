@@ -72,7 +72,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
 
     String getServletPath();
 
-    class Parameter {
+    public class Parameter {
         private final String name;
         private final String value;
         public Parameter(final String name, final String value) {

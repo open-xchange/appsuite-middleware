@@ -698,12 +698,21 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso,final int folder, final int[] cols, String host, final String session) throws OXException, Exception {
+	    return searchContactAdvanced(webCon, cso, folder, 0, cols, host, session);
+	}
+	
+	public static ContactObject[] searchContactAdvanced(WebConversation webCon, ContactSearchObject cso, int folder, int orderBy, int[] cols, String host, String session) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
+		
+        if (orderBy != 0) {
+            parameter.setParameter(AJAXServlet.PARAMETER_SORT, orderBy);
+            parameter.setParameter(AJAXServlet.PARAMETER_ORDER, "ASC");
+        }
 	
 		final JSONObject jsonObj = new JSONObject();
 		//jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, folder);
@@ -713,6 +722,7 @@ public class ContactTest extends AbstractAJAXTest {
 		jsonObj.put(ContactFields.EMAIL1 ,cso.getEmail1());
 		jsonObj.put(ContactFields.EMAIL2 ,cso.getEmail2());
 		jsonObj.put(ContactFields.EMAIL3 ,cso.getEmail3());
+		
 		
 		if (cso.getEmailAutoComplete()){
 			jsonObj.put("emailAutoComplete","true");
@@ -966,7 +976,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactArray;
 	}
 	
-	private static ContactObject[] jsonArray2ContactArray(final JSONArray jsonArray, final int[] cols) throws Exception {
+	protected static ContactObject[] jsonArray2ContactArray(final JSONArray jsonArray, final int[] cols) throws Exception {
 		final ContactObject[] contactArray = new ContactObject[jsonArray.length()];
 		
 		for (int a = 0; a < contactArray.length; a++) {
@@ -1522,6 +1532,11 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
 			}
 			break;
+		case ContactObject.USE_COUNT:
+            if (!jsonArray.isNull(pos)) {
+                contactObj.setUseCount(jsonArray.getInt(pos));
+            }
+            break;
 		default:
 			throw new Exception("missing field in mapping: " + field);
 

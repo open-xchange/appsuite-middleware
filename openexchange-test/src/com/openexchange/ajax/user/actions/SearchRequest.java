@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.user.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -71,6 +73,8 @@ public final class SearchRequest extends AbstractContactRequest<SearchResponse> 
     private final int[] columns;
 
     private final boolean failOnError;
+    
+    private List<Parameter> parameters;
 
     /**
      * @param search
@@ -85,12 +89,19 @@ public final class SearchRequest extends AbstractContactRequest<SearchResponse> 
      * @param search Object with search information. Currently only the pattern
      * is supported.
      */
-    public SearchRequest(final ContactSearchObject search, final int[] columns,
-        final boolean failOnError) {
+    public SearchRequest(final ContactSearchObject search, final int[] columns, final boolean failOnError) {
+        this(search, columns, failOnError, null);
+    }
+    
+    public SearchRequest(ContactSearchObject search, int[] columns, boolean failOnError, List<Parameter> parameters) {
         super();
         this.search = search;
         this.failOnError = failOnError;
         this.columns = columns;
+        this.parameters = new ArrayList<Parameter>();
+        this.parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
+        this.parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        this.parameters.addAll(parameters);
     }
 
     /**
@@ -111,10 +122,7 @@ public final class SearchRequest extends AbstractContactRequest<SearchResponse> 
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns) 
-        };
+        return this.parameters.toArray(new Parameter[parameters.size()]);
     }
 
     /**

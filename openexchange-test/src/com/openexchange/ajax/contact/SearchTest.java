@@ -2,17 +2,24 @@
 package com.openexchange.ajax.contact;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.ContactTest;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.SearchRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,6 +72,8 @@ public class SearchTest extends ContactTest {
             PROTOCOL + getHostName(),
             getSessionId());
         assertTrue("contact array size < 2", contactArray.length >= 2);
+        
+        deleteContacts(objectId1, objectId2);
     }
 
     public void testSearchEmailComplete() throws Exception {
@@ -115,7 +124,8 @@ public class SearchTest extends ContactTest {
             PROTOCOL + getHostName(),
             getSessionId());
         assertTrue("contact array size >= 3", contactArray2.length >= 3);
-
+        
+        deleteContacts(objectId1, objectId2, objectId3);
     }
 
     // Node 2652
@@ -143,32 +153,82 @@ public class SearchTest extends ContactTest {
             deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
         }
     }
+    
+    public void testAutoCompleteWithContactCollectFolderAndGlobalAddressbook() throws Exception {
+        int[] contactIds = new int[]{};
+        try {
+            final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+            final GetResponse getResponse = client.execute(new GetRequest(Tree.ContactCollectFolder));
+            int collectFolderId = getResponse.getInteger();
+            contactIds = insertSearchableContacts(collectFolderId);
+            
+            ContactSearchObject searchObject = new ContactSearchObject();
+            searchObject.setEmail1("*e*");
+            searchObject.setEmailAutoComplete(true);
+            searchObject.addFolder(6);
+            searchObject.addFolder(collectFolderId);
+            
+            int[] columns = new int[] {ContactObject.FOLDER_ID, ContactObject.OBJECT_ID, ContactObject.USE_COUNT};
+            
+            List<Parameter> parameters = new ArrayList<Parameter>();
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, ContactObject.USE_COUNT_GLOBAL_FIRST));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "DESC"));
+            com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
+            com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
+            
+            ContactObject[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
+            
+            boolean stillGlobal = true;
+            int previousCount = Integer.MAX_VALUE;
+            for (ContactObject contactObject : result) {
+                if (!stillGlobal) {
+                    assertFalse("Did not expect global contacts any more.", contactObject.getParentFolderID() == 6);
+                }
+                if (contactObject.getParentFolderID() != 6) {
+                    stillGlobal = false;
+                }
+                if (!stillGlobal) {
+                    assertTrue("Wrong order of collected contacts.", previousCount >= contactObject.getUseCount());
+                }
+            }
+        } finally {
+            deleteContacts(contactIds);
+        }
+        
+    }
 
     // Node 3087
 
-    private int[] insertSearchableContacts() throws IOException, SAXException, JSONException, Exception {
+    private int[] insertSearchableContacts(int folderId) throws IOException, SAXException, JSONException, Exception {
         final ContactObject contactObj = new ContactObject();
         contactObj.setSurName("Mustermann");
         contactObj.setGivenName("Tom");
         contactObj.setEmail1("tom.mustermann@email.com");
-        contactObj.setParentFolderID(contactFolderId);
+        contactObj.setParentFolderID(folderId);
+        contactObj.setUseCount(1);
 
         final ContactObject contactObj2 = new ContactObject();
         contactObj2.setSurName("Mustermann");
         contactObj2.setGivenName("Ute");
         contactObj2.setEmail1("ute.mustermann@email.com");
-        contactObj2.setParentFolderID(contactFolderId);
+        contactObj2.setParentFolderID(folderId);
+        contactObj2.setUseCount(2);
 
         final ContactObject contactObj3 = new ContactObject();
         contactObj3.setSurName("Gloreich");
         contactObj3.setGivenName("Guenter");
-        contactObj3.setParentFolderID(contactFolderId);
+        contactObj3.setParentFolderID(folderId);
+        contactObj3.setUseCount(3);
 
         final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         final int objectId2 = insertContact(getWebConversation(), contactObj2, PROTOCOL + getHostName(), getSessionId());
         final int objectId3 = insertContact(getWebConversation(), contactObj3, PROTOCOL + getHostName(), getSessionId());
 
         return new int[] { objectId1, objectId2, objectId3 };
+    }
+    
+    private int[] insertSearchableContacts() throws IOException, SAXException, JSONException, Exception {
+        return insertSearchableContacts(contactFolderId);
     }
 
     private void deleteContacts(int... ids) throws IOException, SAXException, JSONException, Exception {

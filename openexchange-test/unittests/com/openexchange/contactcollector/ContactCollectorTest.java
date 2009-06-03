@@ -133,7 +133,7 @@ public class ContactCollectorTest extends TestCase {
             Thread.sleep(1000);
             final List<ContactObject> contacts = searchContact(mail);
             assertEquals("No object found", 1, contacts.size());
-            assertEquals("Count does not match", "1", contacts.get(0).getUserField20());
+            assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
         } finally {
             collector.stop();
         }
@@ -154,7 +154,7 @@ public class ContactCollectorTest extends TestCase {
             Thread.sleep(1000);
             final List<ContactObject> contacts = searchContact(mail);
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
-            assertEquals("Count does not match", "3", contacts.get(0).getUserField20());
+            assertEquals("Count does not match", 3, contacts.get(0).getUseCount());
         } finally {
             collector.stop();
         }
