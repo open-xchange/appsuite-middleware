@@ -262,9 +262,9 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
+        startAndInjectTimerBundle();
         startAndInjectBasicServices();
         startAndInjectCalendarServices();
-        startAndInjectTimerBundle();
         startAndInjectExceptionFramework();
         startAndInjectConfigBundle();
         startAndInjectConfiguration();
@@ -286,13 +286,20 @@ public final class Init {
         startAndInjectXMLServices();
     }
 
+    private static void startAndInjectTimerBundle() {
+        final TimerImpl timer = new TimerImpl();
+        timer.start();
+        services.put(TimerService.class, timer);
+        ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
+    }
+
     private static void startAndInjectBasicServices() throws AbstractOXException {
         services.put(ContextService.class, new ContextServiceImpl());
         services.put(UserService.class, new UserServiceImpl());
         services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
         new ContactInterfaceDiscoveryInitialization().start();
         services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
-        
+
         ServerServiceRegistry.getInstance().addService(ContextService.class, services.get(ContextService.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, services.get(UserService.class));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
@@ -330,13 +337,6 @@ public final class Init {
         } catch (final NullPointerException e) {
             e.printStackTrace();
         }
-    }
-
-    private static void startAndInjectTimerBundle() {
-        final TimerImpl timer = new TimerImpl();
-        timer.start();
-        services.put(TimerService.class, timer);
-        ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
     }
 
     private static void startAndInjectExceptionFramework() {
