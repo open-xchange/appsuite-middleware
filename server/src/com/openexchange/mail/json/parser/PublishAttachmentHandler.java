@@ -248,13 +248,13 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             internalVersion.setBodyPart(textPart);
             // Generate text for attachment
             final StringBuilder textBuilder = new StringBuilder(256 * links.size());
-            textBuilder.append("Please access and save file(s) on your machine. It may not be available to view next time.<br />");
+            textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
             appendLinks(links, textBuilder);
             internalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
         } else {
             final String text = (String) textPart.getContent();
             final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
-            textBuilder.append("Please access and save file(s) on your machine. It may not be available to view next time.<br />");
+            textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
             appendLinks(links, textBuilder);
             textBuilder.append("Find original text below:<br /><br />");
             textBuilder.append(text);
@@ -278,13 +278,13 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
                 final StringBuilder textBuilder = new StringBuilder(256 * links.size());
-                textBuilder.append("Please access and save file(s) on your machine. It may not be available to view next time.<br />");
+                textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
                 final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
-                textBuilder.append("Please access and save file(s) on your machine. It may not be available to view next time.<br />");
+                textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
                 appendLinks(links, textBuilder);
                 textBuilder.append("Find original text below:<br /><br />");
                 textBuilder.append(text);
