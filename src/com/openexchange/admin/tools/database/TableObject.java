@@ -80,7 +80,7 @@ public class TableObject {
         return name;
     }
     
-    public void setColumn(TableColumnObject to){
+    public void addColumn(TableColumnObject to) {
         this.columns.add(to);
     }
     
