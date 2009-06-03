@@ -69,8 +69,6 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/templates/
-%dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
-%dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d/
+%dir /opt/open-xchange/etc/*/osgi/bundle.d/
 /opt/open-xchange/bundles/*
-/opt/open-xchange/etc/groupware/osgi/bundle.d/*
-/opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
+/opt/open-xchange/etc/*/osgi/bundle.d/*
