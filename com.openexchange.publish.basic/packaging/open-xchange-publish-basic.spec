@@ -4,7 +4,8 @@
 Name:           open-xchange-publish-basic
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant 
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-genconf
+BuildRequires:  open-xchange-genconf-mysql open-xchange-server open-xchange-sql open-xchange-publish
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
