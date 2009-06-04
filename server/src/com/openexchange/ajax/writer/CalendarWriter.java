@@ -190,10 +190,8 @@ public abstract class CalendarWriter extends CommonWriter {
         writeParameter(ParticipantsFields.TYPE, participant.getType(), jsonObj, participant.getType() > 0);
         if (Participant.USER == participant.getType()) {
             final UserParticipant userParticipant = (UserParticipant) participant;
-            writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
-            if (userParticipant.containsConfirmMessage()) {
-                writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
-            }
+            writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj, userParticipant.containsConfirm());
+            writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj, userParticipant.containsConfirmMessage());
         }
         return jsonObj;
     }
