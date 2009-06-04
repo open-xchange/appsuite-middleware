@@ -467,7 +467,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                         LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                     }
                 } else {
-                    itemHandler.handleItem(fetchResponse.getItem(j), msg, LOG);
+                    itemHandler.handleItem(item, msg, LOG);
                 }
             }
         } catch (final MessagingException e) {
