@@ -509,7 +509,8 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             try {
                 publisher.delete(publication.publication);
             } catch (final PublicationException e) {
-                LOG.error("Publication with ID \"" + publication.publication.getId() + " could not be roll-backed.", e);
+                LOG.error(new StringBuilder("Publication with ID \"").append(publication.publication.getId()).append(
+                    " could not be roll-backed.").toString(), e);
             }
             try {
                 infostoreFacade.startTransaction();
