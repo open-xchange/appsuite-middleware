@@ -4,7 +4,7 @@
 <booleanAttribute key="automaticValidate" value="false"/>
 <stringAttribute key="bootstrap" value=""/>
 <stringAttribute key="checked" value="[NONE]"/>
-<booleanAttribute key="clearConfig" value="false"/>
+<booleanAttribute key="clearConfig" value="true"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Open-Xchange Admin"/>
 <booleanAttribute key="default_auto_start" value="true"/>
 <intAttribute key="default_start_level" value="4"/>
@@ -14,8 +14,8 @@
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#10;-Xmx512M&#10;-XX:+UseConcMarkSweepGC&#10;-Dopenexchange.propdir=${workspace_loc:/config-development/adminTmp}&#10;-Dconfigdir=${workspace_loc:/config-development/adminTmp}&#10;-Djava.util.logging.config.file=${workspace_loc:/config-development/tmp/logging.properties}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <booleanAttribute key="show_selected_only" value="false"/>
-<stringAttribute key="target_bundles" value="org.apache.commons.logging*1.1.1@default:default,javax.servlet*2.4.0.v200806031604@default:default,org.eclipse.osgi@:,org.eclipse.equinox.event@default:default,org.eclipse.osgi.services@default:default"/>
+<stringAttribute key="target_bundles" value="org.eclipse.osgi.services@default:default,org.eclipse.equinox.event@default:default,org.apache.commons.logging*1.1.1@default:default,org.eclipse.osgi@:,javax.servlet*2.4.0.v200806031604@default:default,org.apache.commons.cli@default:default,org.apache.commons.lang@default:default"/>
 <booleanAttribute key="tracing" value="false"/>
 <booleanAttribute key="useDefaultConfigArea" value="true"/>
-<stringAttribute key="workspace_bundles" value="com.openexchange.management@default:default,com.openexchange.xml@default:default,com.openexchange.conversion@default:default,javax.activation@default:default,com.openexchange.server@default:default,com.openexchange.calendar@default:default,com.openexchange.admin@default:default,com.openexchange.timer@default:default,com.openexchange.caching@default:default,com.openexchange.i18n@default:default,com.openexchange.common@default:default,com.openexchange.global@default:default,com.openexchange.dataretention@default:default,com.openexchange.configread@default:default,com.openexchange.control@default:default,open_xchange_admin_plugin_hosting@default:default,com.openexchange.monitoring@default:default"/>
+<stringAttribute key="workspace_bundles" value="com.openexchange.configread@default:default,com.openexchange.admin@default:default,com.openexchange.caching@default:default,com.openexchange.i18n@default:default,com.openexchange.xml@default:default,com.openexchange.datatypes.genericonf.storage@default:default,com.openexchange.calendar@default:default,com.openexchange.management@default:default,com.openexchange.global@default:default,com.openexchange.publish@default:default,com.openexchange.conversion@default:default,com.openexchange.timer@default:default,javax.activation@default:default,open_xchange_admin_plugin_hosting@default:default,com.openexchange.control@default:default,com.openexchange.server@default:default,com.openexchange.monitoring@default:default,com.openexchange.common@default:default,com.openexchange.datatypes.genericonf@default:default,com.openexchange.dataretention@default:default"/>
 </launchConfiguration>
