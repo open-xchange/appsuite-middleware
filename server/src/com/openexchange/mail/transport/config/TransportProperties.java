@@ -91,6 +91,8 @@ public final class TransportProperties implements ITransportProperties {
 
     private boolean sendAttachmentToExternalRecipients;
 
+    private boolean provideLinksInAttachment;
+
     /**
      * Initializes a new {@link TransportProperties}
      */
@@ -133,6 +135,7 @@ public final class TransportProperties implements ITransportProperties {
         publishOnExceededQuota = false;
         publishPrimaryAccountOnly = true;
         sendAttachmentToExternalRecipients = false;
+        provideLinksInAttachment = false;
     }
 
     private void loadProperties0() {
@@ -186,6 +189,12 @@ public final class TransportProperties implements ITransportProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.transport.sendAttachmentToExternalRecipients", "false").trim();
             sendAttachmentToExternalRecipients = Boolean.parseBoolean(tmp);
             logBuilder.append("\tSend Attachment to External Recipients: ").append(sendAttachmentToExternalRecipients).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.provideLinksInAttachment", "false").trim();
+            provideLinksInAttachment = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tProvide Links In Attachment: ").append(provideLinksInAttachment).append('\n');
         }
 
         logBuilder.append("Global transport properties successfully loaded!");
@@ -243,6 +252,15 @@ public final class TransportProperties implements ITransportProperties {
      */
     public boolean isSendAttachmentToExternalRecipients() {
         return sendAttachmentToExternalRecipients;
+    }
+
+    /**
+     * Checks if publication links shall be provided in "text/html" file attachment named "links.html".
+     * 
+     * @return <code>true</code> if publication links shall be provided in "text/html" file attachment; otherwise <code>false</code>
+     */
+    public boolean isProvideLinksInAttachment() {
+        return provideLinksInAttachment;
     }
 
 }

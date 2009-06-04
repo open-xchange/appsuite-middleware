@@ -252,14 +252,14 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (null == user) {
                 // External
                 if (null == external) {
-                    external = generateExternalVersion(source, ctx, links, false);
+                    external = generateExternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment());
                     mails.add(external);
                 }
                 external.addRecipient(address);
             } else {
                 // Internal
                 if (null == internal) {
-                    internal = generateInternalVersion(source, ctx, links, false);
+                    internal = generateInternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment());
                     mails.add(internal);
                 }
                 internal.addRecipient(address);
