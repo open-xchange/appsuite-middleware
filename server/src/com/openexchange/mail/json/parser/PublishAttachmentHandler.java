@@ -147,7 +147,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Handle exceeded quota through generating appropriate publication links
          */
-        final List<Publication> publications = new ArrayList<Publication>(attachments.size());
+        final List<PublicationAndInfostoreID> publications = new ArrayList<PublicationAndInfostoreID>(attachments.size());
         /*
          * Check for folder ID
          */
@@ -157,6 +157,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
         }
         final int folderId = ((Integer) session.getParameter(key)).intValue();
+        final Context ctx = getContext();
         final PublicationTarget target;
         final PublicationService publisher;
         try {
@@ -184,12 +185,12 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             throw new MailException(e);
         }
         try {
-            return generateComposedMails0(source, publications, folderId, target, publisher);
+            return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
         } catch (final MailException e) {
             /*
              * Rollback of publications
              */
-            rollbackPublications(publications, publisher);
+            rollbackPublications(publications, publisher, ctx);
             /*
              * Re-throw exception
              */
@@ -197,8 +198,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     }
 
-    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<Publication> publications, final int folderId, final PublicationTarget target, final PublicationService publisher) throws MailException {
-        final Context ctx = getContext();
+    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<PublicationAndInfostoreID> publications, final int folderId, final PublicationTarget target, final PublicationService publisher, final Context ctx) throws MailException {
         final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
         try {
             /*
@@ -416,7 +416,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<Publication> publications, final PublicationTarget target, final PublicationService publisher) throws MailException, TransactionException, PublicationException {
+    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws MailException, TransactionException, PublicationException {
         /*
          * Create document meta data for current attachment
          */
@@ -485,22 +485,51 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Remember publication in provided list
          */
-        publications.add(publication);
+        publications.add(new PublicationAndInfostoreID(publication, documentMetadata.getId()));
         /*
          * Return URL
          */
         return (String) publication.getConfiguration().get("url");
     } // End of publishAttachmentAndGetPath()
 
-    private static void rollbackPublications(final List<Publication> publications, final PublicationService publisher) {
+    private void rollbackPublications(final List<PublicationAndInfostoreID> publications, final PublicationService publisher, final Context ctx) {
         /*
          * Remove publication one-by-one
          */
-        for (final Publication publication : publications) {
+        final InfostoreFacade infostoreFacade = Infostore.FACADE;
+        final ServerSession serverSession;
+        if (session instanceof ServerSession) {
+            serverSession = (ServerSession) session;
+        } else {
+            serverSession = new ServerSessionAdapter(session, ctx);
+        }
+        final long timestamp = System.currentTimeMillis();
+        final int[] arr = new int[1];
+        for (final PublicationAndInfostoreID publication : publications) {
             try {
-                publisher.delete(publication);
+                publisher.delete(publication.publication);
             } catch (final PublicationException e) {
-                LOG.error("Publication with ID \"" + publication.getId() + " could not be roll-backed.", e);
+                LOG.error("Publication with ID \"" + publication.publication.getId() + " could not be roll-backed.", e);
+            }
+            try {
+                infostoreFacade.startTransaction();
+                try {
+                    arr[0] = publication.infostoreId;
+                    infostoreFacade.removeDocument(arr, timestamp, serverSession);
+                    infostoreFacade.commit();
+                } catch (final OXException x) {
+                    infostoreFacade.rollback();
+                    throw x;
+                } finally {
+                    infostoreFacade.finish();
+                }
+            } catch (final TransactionException e) {
+                LOG.error(new StringBuilder("Transaction error while deleting infostore document with ID \"").append(
+                    publication.infostoreId).append("\" failed.").toString(), e);
+            } catch (final OXException e) {
+                LOG.error(
+                    new StringBuilder("Deleting infostore document with ID \"").append(publication.infostoreId).append("\" failed.").toString(),
+                    e);
             }
         }
     } // End of rollbackPublications()
@@ -575,5 +604,19 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
 
     } // End of LinkAndNamePair
+
+    private static final class PublicationAndInfostoreID {
+
+        final Publication publication;
+
+        final int infostoreId;
+
+        public PublicationAndInfostoreID(final Publication publication, final int infostoreId) {
+            super();
+            this.publication = publication;
+            this.infostoreId = infostoreId;
+        }
+
+    } // End of PublicationAndInfostoreID
 
 }
