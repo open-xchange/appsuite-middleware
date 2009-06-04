@@ -172,7 +172,7 @@ public class SearchTest extends ContactTest {
             
             List<Parameter> parameters = new ArrayList<Parameter>();
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, ContactObject.USE_COUNT_GLOBAL_FIRST));
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "DESC"));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "ASC"));
             com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
             com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
             
@@ -189,6 +189,7 @@ public class SearchTest extends ContactTest {
                 }
                 if (!stillGlobal) {
                     assertTrue("Wrong order of collected contacts.", previousCount >= contactObject.getUseCount());
+                    previousCount = contactObject.getUseCount();
                 }
             }
         } finally {
