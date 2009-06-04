@@ -59,10 +59,27 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface CreateTableService {
 
+    /**
+     * This method should give all table names that have to exist before the {@link #perform(Connection)} method is called. You can use this
+     * if your table has foreign keys to some other tables.
+     * @return an array with table names that have to exist before the {@link #perform(Connection)} method is called.
+     */
     String[] requiredTables();
 
+    /**
+     * This method must give all names of tables that are create during call of the {@link #perform(Connection)} method. Maybe some other
+     * tables require your before they can be created.
+     * @return an array with table names that are created during call of the {@link #perform(Connection)} method.
+     */
     String[] tablesToCreate();
 
+    /**
+     * The implementation of this method should create the required tables on the given database connection. The connection is already
+     * configured to use the correct schema. The given connection is already in a transaction. Do not modify the transaction state of the
+     * connection.
+     * @param con writable connection in a transaction state.
+     * @throws AbstractOXException should be thrown if creating the table fails.
+     */
     void perform(Connection con) throws AbstractOXException;
 
 }
