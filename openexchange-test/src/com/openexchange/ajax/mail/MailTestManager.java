@@ -159,7 +159,6 @@ public class MailTestManager {
         SendResponse response = client.execute(request);
         lastResponse = response;
         String[] folderAndID = response.getFolderAndID();
-        System.out.println("DEBUG 2424: " + folderAndID[0]+ " / " + folderAndID[1]);
         mail = get(folderAndID[0], folderAndID[1]);
 
         cleaningSteps.add(new MailCleaner(mail, client));
