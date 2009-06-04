@@ -101,7 +101,9 @@ public final class SearchRequest extends AbstractContactRequest<SearchResponse> 
         this.parameters = new ArrayList<Parameter>();
         this.parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
         this.parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        this.parameters.addAll(parameters);
+        if( parameters != null ){
+            this.parameters.addAll(parameters);
+        }
     }
 
     /**
