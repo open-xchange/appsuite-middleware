@@ -70,6 +70,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
 import com.openexchange.ajax.mail.actions.MoveMailRequest;
+import com.openexchange.ajax.mail.actions.ReplyAllRequest;
 import com.openexchange.ajax.mail.actions.ReplyRequest;
 import com.openexchange.ajax.mail.actions.ReplyResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
@@ -153,11 +154,12 @@ public class MailTestManager {
     public List<TestMail> findAndLoadSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, AjaxException, IOException, SAXException {
         LinkedList<String[]> mailIDs = findSimilarMails(mail, client, folder);
         LinkedList<TestMail> results = new LinkedList<TestMail>();
-        for(String[] folderAndId: mailIDs){
-            results.add( get(folderAndId));
+        for (String[] folderAndId : mailIDs) {
+            results.add(get(folderAndId));
         }
         return results;
     }
+
     /**
      * Sends a mail. This methods also sets the lastResponse field.
      * 
@@ -246,16 +248,23 @@ public class MailTestManager {
         return mailFormattedForForwarding;
     }
 
-
     /**
-     * Formats a given mail to look like a reply. 
+     * Formats a given mail to look like a reply.
      */
     public TestMail replyAndDoNotSend(TestMail replyToMe) throws AjaxException, IOException, SAXException, JSONException {
         ReplyRequest request = new ReplyRequest(replyToMe.getFolderAndId());
         ReplyResponse response = client.execute(request);
+        lastResponse = response;
         return new TestMail((JSONObject) response.getData());
     }
-    
+
+    public TestMail replyToAllAndDoNotSend(TestMail replyToMe) throws AjaxException, IOException, SAXException, JSONException {
+        ReplyAllRequest request = new ReplyAllRequest(replyToMe.getFolderAndId());
+        ReplyResponse response = client.execute(request);
+        lastResponse = response;
+        return new TestMail((JSONObject) response.getData());
+    }
+
     /**
      * Deletes all mails that where created during this process.
      */
@@ -318,5 +327,4 @@ public class MailTestManager {
         }
         return false;
     }
-
 }
