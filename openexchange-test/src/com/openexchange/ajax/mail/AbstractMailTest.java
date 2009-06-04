@@ -269,7 +269,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         GetRequest getRequest = new GetRequest(folder, id);
         GetResponse getResponse = getClient().execute(getRequest);
         JSONObject jsonMail = (JSONObject) getResponse.getData();
-        return TestMail.create( jsonMail );
+        return new TestMail( jsonMail );
     }
     
 }

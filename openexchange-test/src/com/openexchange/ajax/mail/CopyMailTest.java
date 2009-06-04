@@ -96,7 +96,7 @@ public class CopyMailTest extends AbstractMailTest {
         String origin = values.getInboxFolder();
         String destination = values.getDraftsFolder();
         
-        TestMail myMail = TestMail.create( getFirstMailInFolder( origin) );
+        TestMail myMail = new TestMail( getFirstMailInFolder( origin) );
         String oldID = myMail.getId();
         
         TestMail copiedMail = manager.copy(myMail, destination);

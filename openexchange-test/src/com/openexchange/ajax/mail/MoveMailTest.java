@@ -96,7 +96,7 @@ public class MoveMailTest extends AbstractMailTest {
         String origin = values.getInboxFolder();
         String destination = values.getDraftsFolder();
         
-        TestMail myMail = TestMail.create( getFirstMailInFolder( origin) );
+        TestMail myMail = new TestMail( getFirstMailInFolder( origin) );
         String oldID = myMail.getId();
         
         TestMail movedMail = manager.move(myMail, destination);
@@ -119,7 +119,7 @@ public class MoveMailTest extends AbstractMailTest {
         String origin = values.getSentFolder();
         String destination = values.getDraftsFolder() + "doesn't exist";
         
-        TestMail myMail = TestMail.create( getFirstMailInFolder( origin) );
+        TestMail myMail = new TestMail( getFirstMailInFolder( origin) );
         String oldID = myMail.getId();
         
         manager.move(myMail, destination);

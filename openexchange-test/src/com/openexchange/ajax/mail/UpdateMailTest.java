@@ -88,7 +88,7 @@ public class UpdateMailTest extends AbstractMailTest {
     public void testShouldBeAbleToAddFlags() throws AjaxException, IOException, SAXException, JSONException{
         String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag", "ALTERNATE", "Just a little bit").toString() );
-        TestMail myMail = TestMail.create( getFirstMailInFolder(values.getInboxFolder() ) );
+        TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
         
         UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
         int additionalFlag = MailMessage.FLAG_FLAGGED; //note: doesn't work for 16 (recent) and 64 (user)
@@ -110,7 +110,7 @@ public class UpdateMailTest extends AbstractMailTest {
     public void testShouldBeAbleToSetColors() throws AjaxException, IOException, SAXException, JSONException{
         String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for changing colors", "ALTERNATE", "Just a little bit").toString() );
-        TestMail myMail = TestMail.create( getFirstMailInFolder(values.getInboxFolder() ) );
+        TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
         
         UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
         int myColor = 8;

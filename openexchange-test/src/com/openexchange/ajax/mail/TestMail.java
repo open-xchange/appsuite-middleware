@@ -227,15 +227,18 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     public TestMail(JSONObject obj) throws JSONException {
+        this();
         read(obj);
     }
 
     public TestMail(int[] columns, JSONArray values) throws JSONException {
+        this();
         read(columns, values);
     }
-
-    public static TestMail create(JSONObject obj) throws JSONException {
-        return new TestMail(obj);
+    
+    public TestMail(Map<String, String> map) throws JSONException{
+        this();
+        read(map);
     }
 
     public TestMail(String sender, String recipient, String subject, String contentType, String text) throws JSONException {
