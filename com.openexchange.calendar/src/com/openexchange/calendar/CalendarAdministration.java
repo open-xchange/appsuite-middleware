@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
@@ -114,15 +113,23 @@ public class CalendarAdministration implements CalendarAdministrationService {
      */
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException {
         try {
-	    	if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+            switch (deleteEvent.getType()) {
+            case DeleteEvent.TYPE_USER:
 	            deleteUser(deleteEvent, readcon, writecon);
-	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_GROUP) {
+	            break;
+            case DeleteEvent.TYPE_GROUP:
 	            deleteGroup(deleteEvent, readcon, writecon);
-	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE) {
+	            break;
+            case DeleteEvent.TYPE_RESOURCE:
 	            deleteResource(deleteEvent, readcon, writecon);
-	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE_GROUP) {
+	            break;
+            case DeleteEvent.TYPE_RESOURCE_GROUP:
 	            deleteResourceGroup(deleteEvent, readcon, writecon);
-	        } else {
+	            break;
+            case DeleteEvent.TYPE_CONTEXT:
+                // Do nothing.
+                break;
+            default:
 	        	throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE, Integer.valueOf(deleteEvent.getType()));
 	        }
         } catch (final SQLException e) {
