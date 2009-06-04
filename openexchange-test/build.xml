@@ -110,7 +110,7 @@
         </antcall>
     </target>
 
-    <target name="run-i18n-tests" depends="unit-jar">
+    <target name="run-i18n-tests">
         <antcall target="run-tests">
             <param name="test.jar" value="open-xchange-unit-tests.jar"/>
             <param name="test.class" value="com.openexchange.test.I18nTests"/>
