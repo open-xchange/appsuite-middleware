@@ -1414,10 +1414,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return selectwithint(-1, "SELECT cid FROM context_server2db_pool WHERE write_db_pool_id = ? OR read_db_pool_id = ?", pool_id, pool_id);
     }
 
-    /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#primaryMailExists(int,
-     *      java.lang.String)
-     */
     @Override
     public void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException {
         Connection con = null;
