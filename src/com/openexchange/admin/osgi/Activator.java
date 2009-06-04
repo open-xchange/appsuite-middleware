@@ -46,32 +46,34 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin;
+package com.openexchange.admin.osgi;
 
+import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.admin.PluginStarter;
+import com.openexchange.context.ContextService;
 
 public class Activator implements BundleActivator {
 
     private PluginStarter starter = null;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
+    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+
     public void start(BundleContext context) throws Exception {
+        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
+        for (int i = trackers.size() - 1; i >= 0; i--) {
+            trackers.get(i).open();
+        }
         this.starter = new PluginStarter();
         this.starter.start(context);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(BundleContext context) throws Exception {
         this.starter.stop();
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
+        }
     }
-
 }
