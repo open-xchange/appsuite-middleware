@@ -313,6 +313,7 @@ public class ContactObject extends CommonObject {
         // IMAGE1_CONTENT_TYPE, MARK_AS_DISTRIBUTIONLIST,
         DEFAULT_ADDRESS,
         // IMAGE1_URL,
+        USE_COUNT,
         // From CommonObject
         // Left out as it is unclear what these are for and they produce an error//LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4,
         // LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10,
