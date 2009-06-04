@@ -102,7 +102,6 @@ public abstract class Entity2ACL {
     final static void resetEntity2ACL() {
         singleton = null;
         instancialized.set(false);
-        Entity2ACLAutoDetector.resetEntity2ACLMappings();
     }
 
     /**

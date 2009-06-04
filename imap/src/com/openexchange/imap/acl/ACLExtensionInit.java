@@ -91,6 +91,7 @@ public final class ACLExtensionInit implements Initialization {
             return;
         }
         ACLExtensionFactory.createInstance();
+        ACLExtensionAutoDetector.initACLExtensionMappings();
         // TODO: Uncomment subsequent code to enable configured instance rather than auto-detection
         /*-
          * 
@@ -133,6 +134,7 @@ public final class ACLExtensionInit implements Initialization {
             return;
         }
         ACLExtensionFactory.getInstance().resetACLExtensionFactory();
+        ACLExtensionAutoDetector.resetACLExtensionMappings();
         ACLExtensionFactory.releaseInstance();
     }
 

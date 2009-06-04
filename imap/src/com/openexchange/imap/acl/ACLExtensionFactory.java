@@ -116,7 +116,6 @@ public final class ACLExtensionFactory {
     void resetACLExtensionFactory() {
         configured = null;
         instantiated.set(false);
-        ACLExtensionAutoDetector.resetACLExtensionMappings();
     }
 
     /**

@@ -61,8 +61,6 @@ import com.openexchange.server.Initialization;
  */
 public final class Entity2ACLInit implements Initialization {
 
-    private static final Object[] EMPTY_ARGS = new Object[0];
-
     private static final Entity2ACLInit instance = new Entity2ACLInit();
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Entity2ACLInit.class);
@@ -76,13 +74,14 @@ public final class Entity2ACLInit implements Initialization {
 
     private Class<? extends Entity2ACL> implementingClass;
 
-    private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started;
 
     /**
      * No instantiation
      */
     private Entity2ACLInit() {
         super();
+        started = new AtomicBoolean();
     }
 
     public void start() throws AbstractOXException {
@@ -90,6 +89,7 @@ public final class Entity2ACLInit implements Initialization {
             LOG.error(Entity2ACLInit.class.getName() + " already started");
             return;
         }
+        Entity2ACLAutoDetector.initEntity2ACLMappings();
         synchronized (this) {
             try {
                 if (null == implementingClass) {
@@ -116,11 +116,11 @@ public final class Entity2ACLInit implements Initialization {
                     Entity2ACL.setInstance(implementingClass.newInstance());
                 }
             } catch (final ClassNotFoundException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, EMPTY_ARGS);
+                throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, new Object[0]);
             } catch (final InstantiationException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
             } catch (final IllegalAccessException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
             }
         }
         started.set(true);
@@ -133,6 +133,7 @@ public final class Entity2ACLInit implements Initialization {
         }
         implementingClass = null;
         Entity2ACL.resetEntity2ACL();
+        Entity2ACLAutoDetector.resetEntity2ACLMappings();
         started.set(false);
     }
 

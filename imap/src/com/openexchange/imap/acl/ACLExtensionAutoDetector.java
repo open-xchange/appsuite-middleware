@@ -51,8 +51,13 @@ package com.openexchange.imap.acl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.imap.config.IIMAPProperties;
@@ -68,7 +73,7 @@ final class ACLExtensionAutoDetector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ACLExtensionAutoDetector.class);
 
-    private static final ConcurrentMap<InetSocketAddress, ACLExtension> map = new ConcurrentHashMap<InetSocketAddress, ACLExtension>();
+    private static ConcurrentMap<InetSocketAddress, Future<ACLExtension>> map;
 
     /**
      * Prevent instantiation
@@ -78,17 +83,22 @@ final class ACLExtensionAutoDetector {
     }
 
     /**
+     * Initializes the auto-detector
+     */
+    static void initACLExtensionMappings() {
+        map = new ConcurrentHashMap<InetSocketAddress, Future<ACLExtension>>();
+    }
+
+    /**
      * Resets the auto-detector
      */
     static void resetACLExtensionMappings() {
         map.clear();
+        map = null;
     }
 
     /**
      * Determines the ACL extension dependent on IMAP server's capabilities.
-     * <p>
-     * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
-     * IP address.
      * 
      * @param imapConfig The IMAP configuration
      * @return The IMAP server's ACL extension.
@@ -96,66 +106,110 @@ final class ACLExtensionAutoDetector {
      */
     public static ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IOException {
         final InetSocketAddress key = new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort());
-        final ACLExtension cached = map.get(key);
-        if (null != cached) {
-            return cached;
+        Future<ACLExtension> cached = map.get(key);
+        if (null == cached) {
+            final FutureTask<ACLExtension> ft = new FutureTask<ACLExtension>(new ACLExtensionCallable(
+                key,
+                imapConfig.isSecure(),
+                imapConfig.getIMAPProperties(),
+                LOG));
+            cached = map.putIfAbsent(key, ft);
+            if (null == cached) {
+                cached = ft;
+                ft.run();
+            }
         }
-        putACLExtension(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
-        return map.get(key);
+        try {
+            return cached.get();
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw new IOException(e.getMessage());
+        } catch (final CancellationException e) {
+            throw new IOException(e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw ((IOException) cause);
+            }
+            if (cause instanceof RuntimeException) {
+                throw new IOException(e.getMessage());
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
+        }
     }
 
-    private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
+    private static final class ACLExtensionCallable implements Callable<ACLExtension> {
 
-    private static final Pattern PAT_RIGHTS = Pattern.compile("(?:^|\\s)(?:RIGHTS=)([a-zA-Z0-9]+)(?:\\s+|$)");
+        private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
 
-    private static void putACLExtension(final InetSocketAddress key, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
-        if (map.containsKey(key)) {
-            return;
+        private static final Pattern PAT_RIGHTS = Pattern.compile("(?:^|\\s)(?:RIGHTS=)([a-zA-Z0-9]+)(?:\\s+|$)");
+
+        private final org.apache.commons.logging.Log logger;
+
+        private final InetSocketAddress key;
+
+        private final boolean isSecure;
+
+        private final IIMAPProperties imapProperties;
+
+        public ACLExtensionCallable(final InetSocketAddress key, final boolean isSecure, final IIMAPProperties imapProperties, final org.apache.commons.logging.Log logger) {
+            super();
+            this.logger = logger;
+            this.imapProperties = imapProperties;
+            this.isSecure = isSecure;
+            this.key = key;
         }
-        final String capabilities = IMAPCapabilityAndGreetingCache.getCapability(key, isSecure, imapProperties);
-        /*
-         * Examine CAPABILITY response
-         */
-        final boolean hasACL = PAT_ACL.matcher(capabilities).find();
-        if (!hasACL) {
-            map.put(key, NoACLExtension.getInstance());
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
-                    "] CAPABILITY response indicates no support of ACL extension."));
-            }
-            return;
-        }
-        final Matcher m = PAT_RIGHTS.matcher(capabilities);
-        if (m.find()) {
-            final String allowedRights = m.group(1);
+
+        public ACLExtension call() throws Exception {
+            final String capabilities = IMAPCapabilityAndGreetingCache.getCapability(key, isSecure, imapProperties);
             /*
-             * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
+             * Examine CAPABILITY response
              */
-            final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
-            map.put(key, containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension());
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
-                    "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
-                    "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
-                    " is going to be used.\n"));
+            final boolean hasACL = PAT_ACL.matcher(capabilities).find();
+            if (!hasACL) {
+                if (logger.isInfoEnabled()) {
+                    logger.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
+                        "] CAPABILITY response indicates no support of ACL extension."));
+                }
+                return NoACLExtension.getInstance();
             }
-            return;
+            final Matcher m = PAT_RIGHTS.matcher(capabilities);
+            if (m.find()) {
+                final String allowedRights = m.group(1);
+                /*
+                 * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
+                 */
+                final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
+                if (logger.isInfoEnabled()) {
+                    logger.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
+                        "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
+                        "\" capability.").append("\n\tACL extension according to ").append(
+                        containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(" is going to be used.\n"));
+                }
+                return containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension();
+            }
+            if (logger.isInfoEnabled()) {
+                logger.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
+                    "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
+                    "\n\tACL extension according to RFC 2086 is going to be used.\n"));
+            }
+            return new RFC2086ACLExtension();
         }
-        map.putIfAbsent(key, new RFC2086ACLExtension());
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append(
-                "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
-                "\n\tACL extension according to RFC 2086 is going to be used.\n"));
+
+        private static final char[] RFC4314_CARACTERS = { 'k', 'x', 't', 'e' };
+
+        private static boolean containsRFC4314Character(final String allowedRights) {
+            boolean found = false;
+            for (int i = 0; !found && i < RFC4314_CARACTERS.length; i++) {
+                found = (allowedRights.indexOf(RFC4314_CARACTERS[i]) >= 0);
+            }
+            return found;
         }
+
     }
 
-    private static final char[] RFC4314_CARACTERS = { 'k', 'x', 't', 'e' };
-
-    private static boolean containsRFC4314Character(final String allowedRights) {
-        boolean found = false;
-        for (int i = 0; !found && i < RFC4314_CARACTERS.length; i++) {
-            found = (allowedRights.indexOf(RFC4314_CARACTERS[i]) >= 0);
-        }
-        return found;
-    }
 }
