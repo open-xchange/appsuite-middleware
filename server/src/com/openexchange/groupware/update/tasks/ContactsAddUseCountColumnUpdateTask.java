@@ -71,9 +71,9 @@ import com.openexchange.tools.update.Tools;
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
 
-    private final String ADD_COLUMN = "ALTER TABLE prg_contacts ADD COLUMN useCount INT(10) unsigned default 0";
+    private final String ADD_COLUMN = "ALTER TABLE prg_contacts ADD COLUMN useCount INT4 UNSIGNED DEFAULT 0";
     
-    private final String ADD_COLUMN_DEL = "ALTER TABLE del_contacts ADD COLUMN useCount INT(10) unsigned";
+    private final String ADD_COLUMN_DEL = "ALTER TABLE del_contacts ADD COLUMN useCount INT4 UNSIGNED";
 
     private final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class);
 
