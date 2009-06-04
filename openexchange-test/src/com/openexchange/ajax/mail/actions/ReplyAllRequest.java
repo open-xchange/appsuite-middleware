@@ -67,6 +67,10 @@ public class ReplyAllRequest extends ReplyRequest {
         super(folderID, mailID);
     }
     
+    public ReplyAllRequest(String[] folderAndID){
+        this(folderAndID[0], folderAndID[1]);
+    }
+    
     public String getAction(){
         return Mail.ACTION_REPLYALL;
     }
