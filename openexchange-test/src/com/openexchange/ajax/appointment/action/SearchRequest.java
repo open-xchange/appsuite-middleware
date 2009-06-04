@@ -58,6 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.request.AppointmentRequest;
+import com.openexchange.java.Strings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -78,7 +79,7 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
-        param(AJAXServlet.PARAMETER_COLUMNS, join(columns));
+        param(AJAXServlet.PARAMETER_COLUMNS, Strings.join(columns, ", "));
         if (orderBy != -1) {
             param(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
@@ -130,12 +131,5 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
         return body;
     }
 
-    private String join(final int[] values) {
-        final StringBuilder b = new StringBuilder();
-        for (final int v : values) {
-            b.append(v).append(", ");
-        }
-        b.setLength(b.length() - 2);
-        return b.toString();
-    }
+
 }
