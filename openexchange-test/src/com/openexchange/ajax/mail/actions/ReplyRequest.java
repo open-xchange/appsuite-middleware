@@ -55,7 +55,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 /**
  * {@link ReplyRequest}
@@ -96,6 +95,10 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
 
     public ReplyRequest(){
         
+    }
+    
+    public ReplyRequest(String[] folderAndID){
+        this(folderAndID[0], folderAndID[1]);
     }
     
     public ReplyRequest(String folderID, String mailID){
