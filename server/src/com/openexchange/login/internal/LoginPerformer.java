@@ -51,10 +51,8 @@ package com.openexchange.login.internal;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -71,6 +69,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -261,7 +260,8 @@ public final class LoginPerformer {
 
     private static void triggerLoginHandlers(final LoginImpl login) throws InterruptedException {
         // TODO: Use global thread pool and provided default thread factory
-        final ExecutorService executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
+        // final Executor executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
+        final Executor executor = ServerServiceRegistry.getInstance().getService(TimerService.class).getExecutor();
         for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
             final LoginHandlerService handler = it.next();
             executor.execute(new Runnable() {
@@ -275,14 +275,15 @@ public final class LoginPerformer {
                 }
             });
         }
-        executor.shutdown();
+        // executor.shutdown();
         // Wait for finished
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        // executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }
 
     private static void triggerLogoutHandlers(final LoginImpl logout) throws InterruptedException {
         // TODO: Use global thread pool and provided default thread factory
-        final ExecutorService executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
+        // final ExecutorService executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
+        final Executor executor = ServerServiceRegistry.getInstance().getService(TimerService.class).getExecutor();
         for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
             final LoginHandlerService handler = it.next();
             executor.execute(new Runnable() {
@@ -296,9 +297,9 @@ public final class LoginPerformer {
                 }
             });
         }
-        executor.shutdown();
+        // executor.shutdown();
         // Wait for finished
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        // executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }
 
     /*-
