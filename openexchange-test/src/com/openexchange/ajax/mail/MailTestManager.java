@@ -75,6 +75,7 @@ import com.openexchange.ajax.mail.actions.ReplyRequest;
 import com.openexchange.ajax.mail.actions.ReplyResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
+import com.openexchange.ajax.mail.actions.UpdateMailRequest;
 import com.openexchange.ajax.mail.actions.UpdateMailResponse;
 import com.openexchange.mail.MailListField;
 import com.openexchange.tools.servlet.AjaxException;
@@ -326,5 +327,21 @@ public class MailTestManager {
                 return true;
         }
         return false;
+    }
+
+    /**
+     * Updates a mail identified by folder and id with data in a TestMail. Returns the complete updated mail. Sets lastResponse to the
+     * result of the updateRequest.
+     */
+    public TestMail update(String folder, String id, TestMail updates) throws AjaxException, IOException, SAXException, JSONException {
+        UpdateMailRequest request = new UpdateMailRequest(folder, id);
+        if (updates.getColor() != -1)
+            request.setColor(updates.getColor());
+        if (updates.getFlags() != -1)
+            request.setFlags(updates.getFlags());
+        UpdateMailResponse response = client.execute(request);
+        TestMail result = get(folder, id);
+        lastResponse = response;
+        return result;
     }
 }
