@@ -134,99 +134,134 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     }
 
     public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws MailException {
-        if (exceeded) {
+        if (!exceeded) {
             /*
-             * Check for folder ID
+             * No quota exceeded, return prepared source
              */
-            final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
-            if (!session.containsParameter(key)) {
-                final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
-                throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
+            source.setBodyPart(textPart);
+            for (final MailPart attachment : attachments) {
+                source.addEnclosedPart(attachment);
             }
-            final Context ctx = getContext();
-            final int folderId = ((Integer) session.getParameter(key)).intValue();
-            /*
-             * Create Publish-Link for each attachment
-             */
-            final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
-            try {
-                final StringBuilder linkBuilder = new StringBuilder(256);
-                for (final MailPart attachment : attachments) {
-                    /*
-                     * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
-                     */
-                    final String url = publishAttachmentAndGetURL(attachment, folderId, ctx);
-                    /*
-                     * Add to list
-                     */
-                    linkBuilder.setLength(0);
-                    links.add(new LinkAndNamePair(
-                        attachment.getFileName(),
-                        linkBuilder.append(protocol).append("://").append(hostName).append(url).toString()));
-                }
-            } catch (final ServiceException e) {
-                throw new MailException(e);
-            } catch (final PublicationException e) {
-                throw new MailException(e);
-            } catch (final TransactionException e) {
-                throw new MailException(e);
-            }
-            /*
-             * Get recipients
-             */
-            final Set<InternetAddress> addresses = new HashSet<InternetAddress>();
-            addresses.addAll(Arrays.asList(source.getTo()));
-            addresses.addAll(Arrays.asList(source.getCc()));
-            addresses.addAll(Arrays.asList(source.getBcc()));
-            /*
-             * Iterate recipients and split them to internal vs. external recipients
-             */
-            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-            final List<ComposedMailMessage> mails = new ArrayList<ComposedMailMessage>(2);
-            ComposedMailMessage internal = null;
-            ComposedMailMessage external = null;
-            for (final InternetAddress address : addresses) {
-                User user = null;
-                try {
-                    user = userService.searchUser(address.getAddress(), ctx);
-                } catch (final UserException e) {
-                    /*
-                     * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
-                     * Therefore check for this special error code and throw an exception if it is not equal.
-                     */
-                    if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
-                        throw new MailException(e);
-                    }
-                }
-                if (null == user) {
-                    // External
-                    if (null == external) {
-                        external = generateExternalVersion(source, ctx, links, false);
-                        mails.add(external);
-                    }
-                    external.addRecipient(address);
-                } else {
-                    // Internal
-                    if (null == internal) {
-                        internal = generateInternalVersion(source, ctx, links, false);
-                        mails.add(internal);
-                    }
-                    internal.addRecipient(address);
-                }
-            }
-            /*
-             * Return mail versions
-             */
-            return mails.toArray(new ComposedMailMessage[mails.size()]);
+            return new ComposedMailMessage[] { source };
         }
         /*
-         * No quota exceeded, return prepared source
+         * Handle exceeded quota through generating appropriate publication links
          */
-        source.setBodyPart(textPart);
-        for (final MailPart attachment : attachments) {
-            source.addEnclosedPart(attachment);
+        final List<Publication> publications = new ArrayList<Publication>(attachments.size());
+        try {
+            return generateComposedMails0(source, publications);
+        } catch (final MailException e) {
+            /*
+             * Rollback of publications
+             */
+            rollbackPublications(publications);
+            /*
+             * Rethrow exception
+             */
+            throw e;
         }
-        return new ComposedMailMessage[] { source };
+    }
+
+    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<Publication> publications) throws MailException {
+        /*
+         * Check for folder ID
+         */
+        final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
+        if (!session.containsParameter(key)) {
+            final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
+            throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
+        }
+        final Context ctx = getContext();
+        final int folderId = ((Integer) session.getParameter(key)).intValue();
+        /*
+         * Create Publish-Link for each attachment
+         */
+        final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
+        try {
+            /*
+             * Get discovery service
+             */
+            final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
+                PublicationTargetDiscoveryService.class,
+                true);
+            /*
+             * Get discovery service's target
+             */
+            final PublicationTarget target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
+            /*
+             * ... and in turn target's publication service
+             */
+            final PublicationService publisher = target.getPublicationService();
+            /*
+             * Generate publication link for each attachment
+             */
+            final StringBuilder linkBuilder = new StringBuilder(256);
+            for (final MailPart attachment : attachments) {
+                /*
+                 * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
+                 */
+                final String url = publishAttachmentAndGetURL(attachment, folderId, ctx, publications, target, publisher);
+                /*
+                 * Add to list
+                 */
+                linkBuilder.setLength(0);
+                links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.append(protocol).append("://").append(hostName).append(
+                    url).toString()));
+            }
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final PublicationException e) {
+            throw new MailException(e);
+        } catch (final TransactionException e) {
+            throw new MailException(e);
+        }
+        /*
+         * Get recipients
+         */
+        final Set<InternetAddress> addresses = new HashSet<InternetAddress>();
+        addresses.addAll(Arrays.asList(source.getTo()));
+        addresses.addAll(Arrays.asList(source.getCc()));
+        addresses.addAll(Arrays.asList(source.getBcc()));
+        /*
+         * Iterate recipients and split them to internal vs. external recipients
+         */
+        final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        final List<ComposedMailMessage> mails = new ArrayList<ComposedMailMessage>(2);
+        ComposedMailMessage internal = null;
+        ComposedMailMessage external = null;
+        for (final InternetAddress address : addresses) {
+            User user = null;
+            try {
+                user = userService.searchUser(address.getAddress(), ctx);
+            } catch (final UserException e) {
+                /*
+                 * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
+                 * Therefore check for this special error code and throw an exception if it is not equal.
+                 */
+                if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
+                    throw new MailException(e);
+                }
+            }
+            if (null == user) {
+                // External
+                if (null == external) {
+                    external = generateExternalVersion(source, ctx, links, false);
+                    mails.add(external);
+                }
+                external.addRecipient(address);
+            } else {
+                // Internal
+                if (null == internal) {
+                    internal = generateInternalVersion(source, ctx, links, false);
+                    mails.add(internal);
+                }
+                internal.addRecipient(address);
+            }
+        }
+        /*
+         * Return mail versions
+         */
+        return mails.toArray(new ComposedMailMessage[mails.size()]);
     }
 
     private Context getContext() throws MailException {
@@ -374,7 +409,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetURL(final MailPart attachment, final int folderId, final Context ctx) throws MailException, TransactionException, ServiceException, PublicationException {
+    private String publishAttachmentAndGetURL(final MailPart attachment, final int folderId, final Context ctx, final List<Publication> publications, final PublicationTarget target, final PublicationService publisher) throws MailException, TransactionException, ServiceException, PublicationException {
         /*
          * Create document meta data for current attachment
          */
@@ -425,11 +460,8 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             }
         }
         /*
-         * Generate Publish-Link for current attachment
+         * Generate publication for current attachment
          */
-        final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-            PublicationTargetDiscoveryService.class,
-            true);
         final Publication publication = new Publication();
         publication.setModule("infostore/object");
         publication.setEntityId(String.valueOf(documentMetadata.getId()));
@@ -438,18 +470,47 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Set target
          */
-        final PublicationTarget target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
         publication.setTarget(target);
         /*
          * ... and publish
          */
-        final PublicationService publisher = target.getPublicationService();
         publisher.create(publication);
+        /*
+         * Remember publication in provided list
+         */
+        publications.add(publication);
         /*
          * Return URL
          */
         return (String) publication.getConfiguration().get("url");
     } // End of publishAttachmentAndGetURL()
+
+    private void rollbackPublications(final List<Publication> publications) {
+        try {
+            final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
+                PublicationTargetDiscoveryService.class,
+                true);
+            /*
+             * Get target's publication service
+             */
+            final PublicationTarget target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
+            final PublicationService publisher = target.getPublicationService();
+            /*
+             * ... and remove publication one-by-one
+             */
+            for (final Publication publication : publications) {
+                try {
+                    publisher.delete(publication);
+                } catch (final PublicationException e) {
+                    LOG.error("Publication with ID \"" + publication.getId() + " could not be roll-backed.", e);
+                }
+            }
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final PublicationException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    } // End of rollbackPublications()
 
     private static void appendLinks(final List<LinkAndNamePair> links, final StringBuilder textBuilder) {
         for (final LinkAndNamePair pair : links) {
