@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contexts.impl;
 
-import java.sql.Connection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -87,16 +86,6 @@ public abstract class ContextStorage {
      */
     public static ContextStorage getInstance() {
         return impl;
-    }
-
-    /**
-     * Creates an instance implementing the context storage exclusively using specified connection.
-     * 
-     * @param con The connection to use
-     * @return An instance implementing the context storage exclusively using specified connection.
-     */
-    public static ContextStorage getInstance(final Connection con) {
-        return new SingleConRdbContextStorage(con);
     }
 
     /**

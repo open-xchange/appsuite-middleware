@@ -53,10 +53,28 @@ import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
 
-// For Testing we need to insulate the services from the rest of the OX
 public interface DBProvider {
-	public Connection getReadConnection(Context ctx) throws TransactionException;
-	public void releaseReadConnection(Context ctx, Connection con);
-	public Connection getWriteConnection(Context ctx) throws TransactionException;
-	public void releaseWriteConnection(Context ctx, Connection con);
+
+    static final DBProvider DUMMY = new DBProvider() {
+        public Connection getReadConnection(Context ctx) {
+            throw new UnsupportedOperationException();
+        }
+        public Connection getWriteConnection(Context ctx) {
+            throw new UnsupportedOperationException();
+        }
+        public void releaseReadConnection(Context ctx, Connection con) {
+            throw new UnsupportedOperationException();
+        }
+        public void releaseWriteConnection(Context ctx, Connection con) {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+    Connection getReadConnection(Context ctx) throws TransactionException;
+
+    void releaseReadConnection(Context ctx, Connection con);
+
+    Connection getWriteConnection(Context ctx) throws TransactionException;
+
+    void releaseWriteConnection(Context ctx, Connection con);
 }
