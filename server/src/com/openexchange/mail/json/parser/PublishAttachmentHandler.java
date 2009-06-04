@@ -155,7 +155,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     /*
                      * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
                      */
-                    final String url = generatePublishURL(attachment, folderId, ctx);
+                    final String url = publishAttachmentAndGetURL(attachment, folderId, ctx);
                     /*
                      * Add to list
                      */
@@ -374,7 +374,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String generatePublishURL(final MailPart attachment, final int folderId, final Context ctx) throws MailException, TransactionException, ServiceException, PublicationException {
+    private String publishAttachmentAndGetURL(final MailPart attachment, final int folderId, final Context ctx) throws MailException, TransactionException, ServiceException, PublicationException {
         /*
          * Create document meta data for current attachment
          */
@@ -449,7 +449,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Return URL
          */
         return (String) publication.getConfiguration().get("url");
-    } // End of generatePublishURL()
+    } // End of publishAttachmentAndGetURL()
 
     private static void appendLinks(final List<LinkAndNamePair> links, final StringBuilder textBuilder) {
         for (final LinkAndNamePair pair : links) {
