@@ -148,21 +148,6 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Handle exceeded quota through generating appropriate publication links
          */
         final List<Publication> publications = new ArrayList<Publication>(attachments.size());
-        try {
-            return generateComposedMails0(source, publications);
-        } catch (final MailException e) {
-            /*
-             * Rollback of publications
-             */
-            rollbackPublications(publications);
-            /*
-             * Rethrow exception
-             */
-            throw e;
-        }
-    }
-
-    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<Publication> publications) throws MailException {
         /*
          * Check for folder ID
          */
@@ -171,12 +156,9 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
             throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
         }
-        final Context ctx = getContext();
         final int folderId = ((Integer) session.getParameter(key)).intValue();
-        /*
-         * Create Publish-Link for each attachment
-         */
-        final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
+        final PublicationTarget target;
+        final PublicationService publisher;
         try {
             /*
              * Get discovery service
@@ -187,11 +169,38 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             /*
              * Get discovery service's target
              */
-            final PublicationTarget target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
+            target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
+            if (null == target) {
+                final Throwable t = new Throwable("Missing publication target for ID: com.openexchange.publish.online.infostore.document");
+                throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
+            }
             /*
              * ... and in turn target's publication service
              */
-            final PublicationService publisher = target.getPublicationService();
+            publisher = target.getPublicationService();
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final PublicationException e) {
+            throw new MailException(e);
+        }
+        try {
+            return generateComposedMails0(source, publications, folderId, target, publisher);
+        } catch (final MailException e) {
+            /*
+             * Rollback of publications
+             */
+            rollbackPublications(publications, publisher);
+            /*
+             * Re-throw exception
+             */
+            throw e;
+        }
+    }
+
+    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<Publication> publications, final int folderId, final PublicationTarget target, final PublicationService publisher) throws MailException {
+        final Context ctx = getContext();
+        final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
+        try {
             /*
              * Generate publication link for each attachment
              */
@@ -200,16 +209,14 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 /*
                  * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
                  */
-                final String url = publishAttachmentAndGetURL(attachment, folderId, ctx, publications, target, publisher);
+                final String path = publishAttachmentAndGetPath(attachment, folderId, ctx, publications, target, publisher);
                 /*
                  * Add to list
                  */
                 linkBuilder.setLength(0);
                 links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.append(protocol).append("://").append(hostName).append(
-                    url).toString()));
+                    path).toString()));
             }
-        } catch (final ServiceException e) {
-            throw new MailException(e);
         } catch (final PublicationException e) {
             throw new MailException(e);
         } catch (final TransactionException e) {
@@ -409,7 +416,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetURL(final MailPart attachment, final int folderId, final Context ctx, final List<Publication> publications, final PublicationTarget target, final PublicationService publisher) throws MailException, TransactionException, ServiceException, PublicationException {
+    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<Publication> publications, final PublicationTarget target, final PublicationService publisher) throws MailException, TransactionException, PublicationException {
         /*
          * Create document meta data for current attachment
          */
@@ -483,32 +490,18 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Return URL
          */
         return (String) publication.getConfiguration().get("url");
-    } // End of publishAttachmentAndGetURL()
+    } // End of publishAttachmentAndGetPath()
 
-    private void rollbackPublications(final List<Publication> publications) {
-        try {
-            final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-                PublicationTargetDiscoveryService.class,
-                true);
-            /*
-             * Get target's publication service
-             */
-            final PublicationTarget target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
-            final PublicationService publisher = target.getPublicationService();
-            /*
-             * ... and remove publication one-by-one
-             */
-            for (final Publication publication : publications) {
-                try {
-                    publisher.delete(publication);
-                } catch (final PublicationException e) {
-                    LOG.error("Publication with ID \"" + publication.getId() + " could not be roll-backed.", e);
-                }
+    private static void rollbackPublications(final List<Publication> publications, final PublicationService publisher) {
+        /*
+         * Remove publication one-by-one
+         */
+        for (final Publication publication : publications) {
+            try {
+                publisher.delete(publication);
+            } catch (final PublicationException e) {
+                LOG.error("Publication with ID \"" + publication.getId() + " could not be roll-backed.", e);
             }
-        } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final PublicationException e) {
-            LOG.error(e.getMessage(), e);
         }
     } // End of rollbackPublications()
 
