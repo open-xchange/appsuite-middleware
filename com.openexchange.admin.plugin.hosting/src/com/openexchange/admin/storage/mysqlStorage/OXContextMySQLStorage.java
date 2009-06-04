@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.rmi.RemoteException;
 import java.sql.Connection;
@@ -66,7 +64,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -84,6 +81,7 @@ import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXUser;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -93,17 +91,25 @@ import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.api2.OXException;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.ServiceException;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -235,6 +241,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void delete(final Context ctx) throws StorageException {
         LOG.debug("Fetching connection and scheme for context " + ctx.getId());
+        // groupware context must be loaded before entry from user_setting_admin table is removed.
+        final com.openexchange.groupware.contexts.Context gwCtx;
+        try {
+            ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
+            gwCtx = service.getContext(ctx.getId().intValue());
+        } catch (ContextException e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException(e);
+        } catch (ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException(e);
+        }
         // we need the right connection and scheme for this context
         final int poolId;
         final Connection conForContext;
@@ -279,28 +297,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         try {
             // fetch infos for filestore from configdb before deleting on this connection
-            URI createURI = FilestoreStorage.createURI(conForConfigDB, ctx.getId().intValue());
+            URI createURI = FilestoreStorage.createURI(conForConfigDB, gwCtx);
             // Delete filestore directory of the context
             LOG.debug("Starting filestore delete(cid=" + ctx.getId() + ") from disc!");
-            final String errortext = "Error deleting filestore(cid=" + ctx.getId() + ") from disc! Please run the consistency tool to resolve this problem!";
-            try {
-                FileUtils.deleteDirectory(new File(createURI));
-            } catch (IOException e) {
-                LOG.error(errortext, e);
-                throw new StorageException(errortext);
-            }
+            FileStorage.getInstance(createURI, gwCtx, DBProvider.DUMMY).remove();
             LOG.debug("Filestore delete(cid=" + ctx.getId() + ") from disc finished!");
             // Execute delete context from configdb AND the drop database command if this context is the last one
             conForConfigDB.setAutoCommit(false);
             this.oxcontextcommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
             // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947            
             conForConfigDB.commit();
+        } catch (FilestoreException e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException(e);
+        } catch (FileStorageException e) {
+            final String errortext = "Error deleting filestore(cid=" + ctx.getId() + ") from disc! Please run the consistency tool to resolve this problem!";
+            LOG.error(errortext, e);
+            throw new StorageException(errortext);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             DBUtils.rollback(conForConfigDB);
-            throw new StorageException(e);
-        } catch (FilestoreException e) {
-            LOG.error(e.getMessage(), e);
             throw new StorageException(e);
         } finally {
             try {
@@ -315,12 +331,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         LOG.debug("Now deleting data for context " + ctx.getId());
         try {
             con.setAutoCommit(false);
+            // first delete everything with OSGi DeleteListener services.
+            DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
+            DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+            // now go through tables and delete the remainders
             for (int i = sorted_tables.size() - 1; i >= 0; i--) {
                 deleteTableData(ctx, con, sorted_tables.get(i));
             }
             // commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
             con.commit();
         } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw new StorageException(e);
+        } catch (DeleteFailedException e) {
+            DBUtils.rollback(con);
+            throw new StorageException(e);
+        } catch (ContextException e) {
             DBUtils.rollback(con);
             throw new StorageException(e);
         } finally {
