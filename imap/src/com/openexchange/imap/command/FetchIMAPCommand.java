@@ -731,15 +731,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                      */
                     headerStream = ((RFC822DATA) item).getByteArrayInputStream();
                 }
+                h = new InternetHeaders();
                 if (null == headerStream) {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
                             " in folder ").append(msg.getFullname()).toString());
                     }
-                    return;
+                } else {
+                    h.load(headerStream);
                 }
-                h = new InternetHeaders();
-                h.load(headerStream);
             }
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
@@ -795,7 +795,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
             try {
-                msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailProperties.getInstance().getDefaultMimeCharset());
+                msg.setSubject(
+                    env.subject == null ? "" : MimeUtility.decodeText(env.subject),
+                    MailProperties.getInstance().getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
                 logger.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
