@@ -235,20 +235,21 @@ public class TestMail implements IdentitySource<TestMail> {
         this();
         read(columns, values);
     }
-    
-    public TestMail(Map<String, String> map) throws JSONException{
+
+    public TestMail(Map<String, String> map) throws JSONException {
         this();
         read(map);
     }
 
     public TestMail(String sender, String recipient, String subject, String contentType, String text) throws JSONException {
-        setFrom( Arrays.asList( new String[]{sender}));
-        setTo( Arrays.asList( new String[]{recipient}));
+        setFrom(Arrays.asList(new String[] { sender }));
+        setTo(Arrays.asList(new String[] { recipient }));
         setSubject(subject);
         setContentType(contentType);
         setBody(text);
         sanitize();
     }
+
     /**
      * Used for reading from FitNesse tables
      * 
@@ -442,13 +443,13 @@ public class TestMail implements IdentitySource<TestMail> {
         }
         // ints
         if (field == MailListField.COLOR_LABEL) {
-            setColor(((Integer) value).intValue());
+            setColor(Integer.valueOf((String) value).intValue());
         }
         if (field == MailListField.FLAGS) {
-            setFlags(((Integer) value).intValue());
+            setFlags(Integer.valueOf((String) value).intValue());
         }
         if (field == MailListField.PRIORITY) {
-            setPriority(((Integer) value).intValue());
+            setPriority(Integer.valueOf((String) value).intValue());
         }
     }
 
@@ -462,7 +463,7 @@ public class TestMail implements IdentitySource<TestMail> {
     protected List<String> addresses2list(String mailAddresses) {
         LinkedList<String> addresses = new LinkedList<String>();
         String[] strings = mailAddresses.split(",");
-        for(String address: strings){
+        for (String address : strings) {
             addresses.add(address.trim());
         }
         return addresses;
@@ -611,6 +612,5 @@ public class TestMail implements IdentitySource<TestMail> {
         }
         return true;
     }
-    
-    
+
 }
