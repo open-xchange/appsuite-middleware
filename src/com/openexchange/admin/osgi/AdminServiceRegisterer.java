@@ -53,10 +53,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.mailaccount.MailAccountStorageService;
 
 /**
- * Puts a found {@link MailAccountStorageService} into the {@link AdminServiceRegistry}.
+ * Puts a found services into the {@link AdminServiceRegistry}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
