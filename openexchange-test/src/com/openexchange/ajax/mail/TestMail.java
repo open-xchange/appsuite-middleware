@@ -460,7 +460,12 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     protected List<String> addresses2list(String mailAddresses) {
-        return Arrays.asList(mailAddresses.split(","));
+        LinkedList<String> addresses = new LinkedList<String>();
+        String[] strings = mailAddresses.split(",");
+        for(String address: strings){
+            addresses.add(address.trim());
+        }
+        return addresses;
     }
 
     /**
