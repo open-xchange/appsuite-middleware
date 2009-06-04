@@ -59,6 +59,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractAttachmentHandler} - An abstract {@link IAttachmentHandler attachment handler}.
@@ -87,7 +88,12 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
         super();
         attachments = new ArrayList<MailPart>(4);
         try {
-            final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
+            final UserSettingMail usm;
+            if (session instanceof ServerSession) {
+                usm = ((ServerSession) session).getUserSettingMail();
+            } else {
+                usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
+            }
             if (usm.getUploadQuota() >= 0) {
                 this.uploadQuota = usm.getUploadQuota();
             } else {
@@ -109,5 +115,4 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
             throw new MailException(e);
         }
     }
-
 }

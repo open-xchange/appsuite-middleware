@@ -62,8 +62,6 @@ import com.openexchange.login.internal.LoginHandlerRegistry;
  */
 public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoginHandlerCustomizer.class);
-
     private final BundleContext context;
 
     /**
@@ -77,23 +75,25 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
-        if (service instanceof LoginHandlerService) {
-            final boolean added = LoginHandlerRegistry.getInstance().addLoginHandler((LoginHandlerService) service);
-            if (!added) {
-                LOG.error("Duplicate login handler detected: " + serviceReference.getClass().getName());
-            }
+        if ((service instanceof LoginHandlerService) && LoginHandlerRegistry.getInstance().addLoginHandler((LoginHandlerService) service)) {
+            return service;
         }
-        return service;
+        // Nothing to track
+        context.ungetService(serviceReference);
+        return null;
     }
 
-    public void modifiedService(final ServiceReference serviceReference, final Object o) {
+    public void modifiedService(final ServiceReference serviceReference, final Object service) {
         // Nothing to do
     }
 
-    public void removedService(final ServiceReference serviceReference, final Object o) {
-        if (o instanceof LoginHandlerService) {
-            LoginHandlerRegistry.getInstance().removeLoginHandler((LoginHandlerService) o);
+    public void removedService(final ServiceReference serviceReference, final Object service) {
+        if (null != service) {
+            if (service instanceof LoginHandlerService) {
+                LoginHandlerRegistry.getInstance().removeLoginHandler((LoginHandlerService) service);
+            }
+            context.ungetService(serviceReference);
         }
-        context.ungetService(serviceReference);
     }
+
 }

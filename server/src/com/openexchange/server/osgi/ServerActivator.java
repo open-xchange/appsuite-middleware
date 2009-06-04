@@ -120,12 +120,13 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskServiceTrackerCustomizer;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.mail.MailLoginHandler;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
+import com.openexchange.mail.loginhandler.MailLoginHandler;
+import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
@@ -451,6 +452,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
+        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new TransportLoginHandler(), null));
         // Register table creation for mail account storage.
         registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle

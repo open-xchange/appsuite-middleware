@@ -93,6 +93,8 @@ public final class TransportProperties implements ITransportProperties {
 
     private boolean provideLinksInAttachment;
 
+    private long publishedDocumentTimeToLive;
+
     /**
      * Initializes a new {@link TransportProperties}
      */
@@ -136,6 +138,7 @@ public final class TransportProperties implements ITransportProperties {
         publishPrimaryAccountOnly = true;
         sendAttachmentToExternalRecipients = false;
         provideLinksInAttachment = false;
+        publishedDocumentTimeToLive = 604800000L;
     }
 
     private void loadProperties0() {
@@ -195,6 +198,20 @@ public final class TransportProperties implements ITransportProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.transport.provideLinksInAttachment", "false").trim();
             provideLinksInAttachment = Boolean.parseBoolean(tmp);
             logBuilder.append("\tProvide Links In Attachment: ").append(provideLinksInAttachment).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.publishedDocumentTimeToLive", "604800000").trim();
+            try {
+                publishedDocumentTimeToLive = Long.parseLong(tmp);
+            } catch (final NumberFormatException e) {
+                LOG.warn(
+                    new StringBuilder("Value of property \"com.openexchange.mail.transport.publishedDocumentTimeToLive\" is not a number: ").append(
+                        tmp).append(". Using fallback 604800000 instead.").toString(),
+                    e);
+                publishedDocumentTimeToLive = 604800000L;
+            }
+            logBuilder.append("\tPublished Document Time-to-Live: ").append(publishedDocumentTimeToLive).append('\n');
         }
 
         logBuilder.append("Global transport properties successfully loaded!");
@@ -261,6 +278,15 @@ public final class TransportProperties implements ITransportProperties {
      */
     public boolean isProvideLinksInAttachment() {
         return provideLinksInAttachment;
+    }
+
+    /**
+     * Gets the time-to-live in milliseconds for published documents.
+     * 
+     * @return The time-to-live in milliseconds for published documents
+     */
+    public long getPublishedDocumentTimeToLive() {
+        return publishedDocumentTimeToLive;
     }
 
 }
