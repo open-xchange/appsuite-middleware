@@ -6,7 +6,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.crypto.CryptoServiceImpl;
+import com.openexchange.crypto.internal.CryptoServiceImpl;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 /**

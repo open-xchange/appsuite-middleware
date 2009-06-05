@@ -49,6 +49,7 @@
 
 package com.openexchange.crypto;
 
+import com.openexchange.crypto.internal.CryptoExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 

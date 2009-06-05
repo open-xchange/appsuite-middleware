@@ -50,6 +50,7 @@
 package com.openexchange.crypto;
 
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
+import com.openexchange.crypto.internal.CryptoServiceImpl;
 import com.openexchange.exceptions.StringComponent;
 import junit.framework.TestCase;
 
@@ -60,11 +61,11 @@ public class CryptoServiceTest extends TestCase {
     
     protected String payload = "Hello World!";
     
-    protected String payloadSpecial = "HŠll™ &/() w…RLD!";
+    protected String payloadSpecial = "Hï¿½llï¿½ &/() wï¿½RLD!";
     
     protected String password = "passwordpasswordpasswordpassword";
     
-    protected String passwordSpecial = "pË§wšrd;";
+    protected String passwordSpecial = "pË§wï¿½rd;";
     
     protected String badPassword  = "passwordpasswordpasswordpassword1";
     

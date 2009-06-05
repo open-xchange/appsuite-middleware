@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.crypto.internal;
 
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
 import static com.openexchange.crypto.CryptoErrorMessage.EncodingException;
@@ -65,6 +65,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.crypto.EncryptedData;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

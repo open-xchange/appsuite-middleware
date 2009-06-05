@@ -47,8 +47,10 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.crypto.internal;
 
+import com.openexchange.crypto.CryptoErrorMessage;
+import com.openexchange.crypto.CryptoException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
 
