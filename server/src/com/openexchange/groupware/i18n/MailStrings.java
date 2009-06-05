@@ -73,4 +73,14 @@ public class MailStrings {
 
     public static final String DEFAULT_SUBJECT = "[No Subject]";
 
+    /**
+     * The available attachments for this E-Mail can be accessed via the links:
+     */
+    public static final String PUBLISHED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the links:";
+
+    /**
+     * The links will be deleted by #DATE#
+     */
+    public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted by #DATE#";
+
 }

@@ -5,11 +5,18 @@ import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertPart;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
+import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -18,6 +25,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -27,6 +35,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -232,10 +241,10 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Iterate recipients and split them to internal vs. external recipients
          */
+        final Date elapsedDate = new Date(System.currentTimeMillis() + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
         final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-        final List<ComposedMailMessage> mails = new ArrayList<ComposedMailMessage>(2);
-        ComposedMailMessage internal = null;
-        ComposedMailMessage external = null;
+        final Map<Locale, ComposedMailMessage> internalMessages = new HashMap<Locale, ComposedMailMessage>(addresses.size());
+        ComposedMailMessage externalMessage = null;
         for (final InternetAddress address : addresses) {
             User user = null;
             try {
@@ -250,24 +259,41 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 }
             }
             if (null == user) {
-                // External
-                if (null == external) {
-                    external = generateExternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment());
-                    mails.add(external);
+                // External user
+                if (null == externalMessage) {
+                    externalMessage = generateExternalVersion(
+                        source,
+                        ctx,
+                        links,
+                        TransportProperties.getInstance().isProvideLinksInAttachment(),
+                        elapsedDate);
                 }
-                external.addRecipient(address);
+                externalMessage.addRecipient(address);
             } else {
-                // Internal
-                if (null == internal) {
-                    internal = generateInternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment());
-                    mails.add(internal);
+                // Internal user
+                final Locale locale = user.getLocale();
+                ComposedMailMessage localedMessage = internalMessages.get(locale);
+                if (null == localedMessage) {
+                    localedMessage = generateInternalVersion(
+                        source,
+                        ctx,
+                        links,
+                        TransportProperties.getInstance().isProvideLinksInAttachment(),
+                        elapsedDate,
+                        locale);
+                    internalMessages.put(locale, localedMessage);
                 }
-                internal.addRecipient(address);
+                localedMessage.addRecipient(address);
             }
         }
         /*
          * Return mail versions
          */
+        final List<ComposedMailMessage> mails = new ArrayList<ComposedMailMessage>(internalMessages.size() + 1);
+        mails.addAll(internalMessages.values());
+        if (null != externalMessage) {
+            mails.add(externalMessage);
+        }
         return mails.toArray(new ComposedMailMessage[mails.size()]);
     }
 
@@ -282,23 +308,28 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     }
 
-    private ComposedMailMessage generateInternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment) throws MailException {
+    private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
+
+    private ComposedMailMessage generateInternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate, final Locale locale) throws MailException {
         final ComposedMailMessage internalVersion = copyOf(source, ctx);
         final TextBodyMailPart textPart = this.textPart.copy();
+        final StringHelper stringHelper = new StringHelper(locale);
         if (appendLinksAsAttachment) {
             // Apply text part as it is
             internalVersion.setBodyPart(textPart);
             // Generate text for attachment
             final StringBuilder textBuilder = new StringBuilder(256 * links.size());
-            textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
+            textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
             appendLinks(links, textBuilder);
             internalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
         } else {
             final String text = (String) textPart.getContent();
             final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
-            textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
+            textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
             appendLinks(links, textBuilder);
-            textBuilder.append("Find original text below:<br /><br />");
+            textBuilder.append(
+                htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
+                    DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
             textBuilder.append(text);
             textPart.setText(textBuilder.toString());
             internalVersion.setBodyPart(textPart);
@@ -306,7 +337,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         return internalVersion;
     }
 
-    private ComposedMailMessage generateExternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment) throws MailException {
+    private ComposedMailMessage generateExternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate) throws MailException {
         final ComposedMailMessage externalVersion = copyOf(source, ctx);
         final TextBodyMailPart textPart = this.textPart.copy();
         if (TransportProperties.getInstance().isSendAttachmentToExternalRecipients()) {
@@ -315,20 +346,25 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.addEnclosedPart(attachment);
             }
         } else {
+            // TODO: Make Locale configurable
+            final Locale locale = Locale.ENGLISH;
+            final StringHelper stringHelper = new StringHelper(locale);
             if (appendLinksAsAttachment) {
                 // Apply text part as it is
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
                 final StringBuilder textBuilder = new StringBuilder(256 * links.size());
-                textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
+                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
                 final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
-                textBuilder.append("Save file(s) on your machine. It may not be available to view next time.<br />");
+                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
                 appendLinks(links, textBuilder);
-                textBuilder.append("Find original text below:<br /><br />");
+                textBuilder.append(
+                    htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
+                        DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
                 textBuilder.append(text);
                 textPart.setText(textBuilder.toString());
                 externalVersion.setBodyPart(textPart);
