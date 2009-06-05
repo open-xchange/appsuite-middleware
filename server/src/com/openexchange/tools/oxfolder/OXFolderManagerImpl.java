@@ -70,6 +70,9 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.folder.FolderDeleteListenerService;
+import com.openexchange.folder.FolderException;
+import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
@@ -134,6 +137,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     /**
      * Getter for testing purposes.
+     * 
      * @return
      */
     public AppointmentSQLInterface getCSql() {
@@ -142,6 +146,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     /**
      * Setter for testing purposes.
+     * 
      * @param sql
      */
     public void setCSql(final AppointmentSQLInterface sql) {
@@ -799,7 +804,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
             final Tasks tasks = Tasks.getInstance();
             return readCon == null ? tasks.isFolderEmpty(ctx, folderId) : tasks.isFolderEmpty(ctx, readCon, folderId);
         } else if (module == FolderObject.CALENDAR) {
-            final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+            final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
+                session);
             if (readCon == null) {
                 try {
                     return calSql.isFolderEmpty(user.getId(), folderId);
@@ -1485,6 +1491,18 @@ final class OXFolderManagerImpl extends OXFolderManager {
         } finally {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);
+            }
+        }
+        /*
+         * Iterate possibly listening folder delete listeners
+         */
+        for (final Iterator<FolderDeleteListenerService> iter = FolderDeleteListenerRegistry.getInstance().getDeleteListenerServices(); iter.hasNext();) {
+            final FolderDeleteListenerService next = iter.next();
+            try {
+                next.onFolderDeleted(folderID, ctx);
+            } catch (final FolderException e) {
+                LOG.error(new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
+                    "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()), e);
             }
         }
     }

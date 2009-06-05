@@ -94,7 +94,9 @@ import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileExceptionFactory;
+import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -355,6 +357,12 @@ public final class ServerActivator extends DeferredActivator {
         // Delete Listener Service Tracker
         serviceTrackerList.add(new ServiceTracker(context, DeleteListener.class.getName(), new DeleteListenerServiceTrackerCustomizer(
             context)));
+
+        // Folder Delete Listener Service Tracker
+        serviceTrackerList.add(new ServiceTracker(
+            context,
+            FolderDeleteListenerService.class.getName(),
+            new FolderDeleteListenerServiceTrackerCustomizer(context)));
 
         /*
          * Register EventHandler
