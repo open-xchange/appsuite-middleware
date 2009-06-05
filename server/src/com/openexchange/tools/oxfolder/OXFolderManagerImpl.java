@@ -1415,6 +1415,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             } catch (final FolderException e) {
                 LOG.error(new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
                     "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()), e);
+                throw new OXFolderException(e);
             }
         }
         /*
