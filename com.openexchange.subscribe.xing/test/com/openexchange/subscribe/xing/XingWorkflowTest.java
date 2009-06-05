@@ -128,12 +128,18 @@ public class XingWorkflowTest extends TestCase {
 		
 		Workflow xingWorkflow = new Workflow(listOfSteps);
 		
-        try {
-        	ContactObject[] contacts = xingWorkflow.execute();
-            fail("Exception expected");
-        } catch (XingSubscriptionException e) {
-            assertEquals("Wrong exception", XingSubscriptionErrorMessage.INVALID_LOGIN.getDetailNumber(), e.getDetailNumber());
-        }
+	}
+	
+	public static void testInvalidWorkflow() {
+		Workflow xingWorkflow = null;
+		try {
+			// insert valid location for the yml-file here
+			// insert valid credentials in the file
+			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
+			fail("Exception expected");
+		} catch (WorkflowException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
