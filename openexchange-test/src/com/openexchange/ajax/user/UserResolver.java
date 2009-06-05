@@ -79,6 +79,9 @@ public class UserResolver {
         this.client = client;
     }
     
+    /**
+     * Finds users that match the search pattern.
+     */
     public User[] resolveUser(String searchPattern) throws AjaxException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchPattern);
@@ -89,13 +92,7 @@ public class UserResolver {
     }
 
     /**
-     * @param identifier
-     * @return
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws AjaxException 
-     * @throws OXException 
+     * Loads a user by its user id.
      */
     public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(identifier);
