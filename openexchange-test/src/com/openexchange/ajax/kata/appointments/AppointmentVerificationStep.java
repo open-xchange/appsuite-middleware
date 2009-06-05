@@ -85,6 +85,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.Strings;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -226,7 +227,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 Participant[] expected = appointment.getParticipants();
                 Participant[] actual = loaded.getParticipants();
                 if (!compareArrays(expected, actual)) {
-                    throw new ParticipantComparisonFailure("", expected, actual);
+                    throw new ParticipantComparisonFailure("Missing participant", expected, actual);
                 }
                 continue;
             }
@@ -234,7 +235,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 UserParticipant[] expected = appointment.getUsers();
                 UserParticipant[] actual = loaded.getUsers();
                 if (!compareArrays(expected, actual)) {
-                    throw new UserParticipantComparisonFailure("", expected, actual);
+                    throw new UserParticipantComparisonFailure("Missing user", expected, actual);
                 }
                 continue;
             }
