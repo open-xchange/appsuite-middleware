@@ -105,7 +105,7 @@ public final class FolderDeleteListenerRegistry {
     /**
      * Checks if a delete listener of given class is contained in this registry.
      * 
-     * @param clazz The delete listener's type
+     * @param clazz The name of the delete listener's type
      * @return <code>true</code> if delete listener is contained; otherwise <code>false</code>
      */
     public boolean containsByClassName(final String clazz) {
