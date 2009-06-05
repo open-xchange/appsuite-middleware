@@ -1911,6 +1911,12 @@ public final class IMAPCommandsCollection {
 
     private static interface HeaderString {
 
+        /**
+         * Gets the headers as a {@link String}
+         * 
+         * @param fetchItem The appropriate fetch item representing headers
+         * @return The headers as a {@link String} or <code>null</code>
+         */
         public String getHeaderString(Item fetchItem);
     }
 
@@ -1918,6 +1924,9 @@ public final class IMAPCommandsCollection {
 
         public String getHeaderString(final Item fetchItem) {
             final ByteArray byteArray = ((BODY) fetchItem).getByteArray();
+            if (null == byteArray) {
+                return null;
+            }
             try {
                 return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
             } catch (final UnsupportedEncodingException e) {
@@ -1931,6 +1940,9 @@ public final class IMAPCommandsCollection {
 
         public String getHeaderString(final Item fetchItem) {
             final ByteArray byteArray = ((RFC822DATA) fetchItem).getByteArray();
+            if (null == byteArray) {
+                return null;
+            }
             try {
                 return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
             } catch (final UnsupportedEncodingException e) {
@@ -2003,7 +2015,10 @@ public final class IMAPCommandsCollection {
                                     if (!h.isEmpty()) {
                                         h.clear();
                                     }
-                                    h.load(headerStream.getHeaderString(headerItem));
+                                    final String headerString = headerStream.getHeaderString(headerItem);
+                                    if (null != headerString) {
+                                        h.load(headerString);
+                                    }
                                     curMarker = h.getHeader(MessageHeaders.HDR_X_OX_MARKER, null);
                                 }
                                 markerFound = (marker.equals(curMarker));

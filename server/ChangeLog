@@ -4,6 +4,7 @@
  - Bugfix #13746: Programmatically setting JTidy "clean" configuration option to false
    and removed this option from TidyConfiguration.properties file.
  - Bugfix #13776: Providing more account/user information if checking account's default folders fails
+ - Bugfix #13804: Fixed NPE on autosave draft operation
 
 * 2009-06-02 - francisco.laguna@open-xchange.com
 
