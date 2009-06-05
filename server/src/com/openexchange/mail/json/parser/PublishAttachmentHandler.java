@@ -346,7 +346,6 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.addEnclosedPart(attachment);
             }
         } else {
-            // TODO: Make Locale configurable
             final Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
             final StringHelper stringHelper = new StringHelper(locale);
             if (appendLinksAsAttachment) {
