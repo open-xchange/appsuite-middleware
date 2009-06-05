@@ -61,10 +61,10 @@ public interface FolderDeleteListenerService {
     /**
      * Invoked on a folder delete event for specified folder.
      * 
-     * @param folderId The ID of the folder which has been deleted
+     * @param folderId The ID of the folder which is going to be deleted
      * @param context The folder's context
      * @throws FolderException If handling the folder delete event by this listener fails
      */
-    public void onFolderDeleted(int folderId, Context context) throws FolderException;
+    public void onFolderDelete(int folderId, Context context) throws FolderException;
 
 }
