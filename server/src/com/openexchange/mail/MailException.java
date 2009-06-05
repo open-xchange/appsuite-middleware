@@ -298,9 +298,9 @@ public class MailException extends AbstractOXException {
          */
         INVALID_SENDER("The specified email address %1$s is not covered by allowed email address aliases", Category.USER_INPUT, 56),
         /**
-         * Checking default folders on connect failed: %1$s
+         * Checking default folders on server %1$s for user %2$s (%3$s) in context on %4$s failed: %5$s
          */
-        DEFAULT_FOLDER_CHECK_FAILED("Checking default folders on connect failed: %1$s", Category.CODE_ERROR, 57),
+        DEFAULT_FOLDER_CHECK_FAILED("Checking default folders on server %1$s for user %2$s (%3$s) in context on %4$s failed: %5$s", Category.CODE_ERROR, 57),
         /**
          * The types of specified data source are not supported
          */
