@@ -1269,7 +1269,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             tz = TimeZone.getDefault();
         }
         return new EmailableParticipant(
-            -1,
+            session.getContextId(),
             participant.getType(),
             -1,
             new int[0],

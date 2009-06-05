@@ -1,3 +1,7 @@
+* 2009-06-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #13716: Setting proper context ID when creating an EmailableParticipant instance for an external user.
+
 * 2009-06-02 - francisco.laguna@open-xchange.com
 
  - Bugfix #13681: Change last editor on webdav lock
