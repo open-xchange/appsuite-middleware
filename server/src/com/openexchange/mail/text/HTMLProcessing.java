@@ -541,6 +541,7 @@ public final class HTMLProcessing {
          */
         tidy.setXHTML(true);
         tidy.setConfigurationFromProps(getTidyConfiguration());
+        tidy.setMakeClean(false);
         tidy.setForceOutput(true);
         tidy.setOutputEncoding(CHARSET_US_ASCII);
         tidy.setTidyMark(false);

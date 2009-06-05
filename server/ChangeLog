@@ -1,6 +1,8 @@
 * 2009-06-05 - thorben.betten@open-xchange.com
 
- - Bugfix #13716: Setting proper context ID when creating an EmailableParticipant instance for an external user.
+ - Bugfix #13716: Setting proper context ID when creating an EmailableParticipant instance for an external user
+ - Bugfix #13746: Programmatically setting JTidy "clean" configuration option to false
+   and removed this option from TidyConfiguration.properties file.
 
 * 2009-06-02 - francisco.laguna@open-xchange.com
 
