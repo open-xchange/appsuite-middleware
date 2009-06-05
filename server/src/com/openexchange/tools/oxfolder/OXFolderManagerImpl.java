@@ -1406,6 +1406,18 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     private void deleteValidatedFolder(final int folderID, final long lastModified, final int type) throws OXException {
         /*
+         * Iterate possibly listening folder delete listeners
+         */
+        for (final Iterator<FolderDeleteListenerService> iter = FolderDeleteListenerRegistry.getInstance().getDeleteListenerServices(); iter.hasNext();) {
+            final FolderDeleteListenerService next = iter.next();
+            try {
+                next.onFolderDelete(folderID, ctx);
+            } catch (final FolderException e) {
+                LOG.error(new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
+                    "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()), e);
+            }
+        }
+        /*
          * Delete folder
          */
         final int module = getOXFolderAccess().getFolderModule(folderID);
@@ -1491,18 +1503,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
         } finally {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);
-            }
-        }
-        /*
-         * Iterate possibly listening folder delete listeners
-         */
-        for (final Iterator<FolderDeleteListenerService> iter = FolderDeleteListenerRegistry.getInstance().getDeleteListenerServices(); iter.hasNext();) {
-            final FolderDeleteListenerService next = iter.next();
-            try {
-                next.onFolderDeleted(folderID, ctx);
-            } catch (final FolderException e) {
-                LOG.error(new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
-                    "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()), e);
             }
         }
     }

@@ -60,6 +60,9 @@ public interface FolderDeleteListenerService {
 
     /**
      * Invoked on a folder delete event for specified folder.
+     * <p>
+     * <b>Note</b>: The implementation is supposed to throw a {@link FolderException} only if folder deletion cannot proceed unless event
+     * was successfully handled by implementation.
      * 
      * @param folderId The ID of the folder which is going to be deleted
      * @param context The folder's context
