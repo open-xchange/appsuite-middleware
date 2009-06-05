@@ -68,6 +68,10 @@ public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object
 	private Exception exception;
 	private boolean executedSuccessfully;
 	
+	public PageByUrlStep(){
+		
+	}
+	
 	public PageByUrlStep(String description, String url){
 		this.description = description;
 		this.url = url;
@@ -109,6 +113,34 @@ public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object
 
 	public void setInput(Object input) {
 		// this needs to do nothing
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public HtmlPage getCurrentPage() {
+		return currentPage;
+	}
+
+	public void setCurrentPage(HtmlPage currentPage) {
+		this.currentPage = currentPage;
+	}
+
+	public boolean isExecutedSuccessfully() {
+		return executedSuccessfully;
+	}
+
+	public void setExecutedSuccessfully(boolean executedSuccessfully) {
+		this.executedSuccessfully = executedSuccessfully;
+	}
+
+	public void setException(Exception exception) {
+		this.exception = exception;
 	}
 	
 	

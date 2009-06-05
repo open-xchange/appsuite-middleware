@@ -75,13 +75,17 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 	
 	private List<TextPage> pages;
 	private ContactObject[] contactObjectsArray;
+	
+	public ContactObjectsByVcardTextPagesStep() {
+		
+	}
 
 	public void execute(WebClient webClient) {
 		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		
 		for (TextPage page : pages) {
-			byte[] vcard = page.getWebResponse().getContentAsBytes();
+			byte[] vcard = page.getContent().getBytes();
     		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
     		VersitDefinition.Reader versitReader;
 				
@@ -107,6 +111,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
 	    	contactObjectsArray[i] = contactObjects.get(i);
 	    }
+	    
 		
 	}
 
@@ -124,6 +129,22 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 
 	public void setInput(List<TextPage> input) {
 		this.pages = input;
+	}
+
+	public List<TextPage> getPages() {
+		return pages;
+	}
+
+	public void setPages(List<TextPage> pages) {
+		this.pages = pages;
+	}
+
+	public ContactObject[] getContactObjectsArray() {
+		return contactObjectsArray;
+	}
+
+	public void setContactObjectsArray(ContactObject[] contactObjectsArray) {
+		this.contactObjectsArray = contactObjectsArray;
 	}
 
 }

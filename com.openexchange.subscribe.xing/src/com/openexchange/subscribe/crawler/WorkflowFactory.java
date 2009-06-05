@@ -49,8 +49,12 @@
 
 package com.openexchange.subscribe.crawler;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ho.yaml.Yaml;
 
 /**
  * Gets a text input and creates Workflow
@@ -59,13 +63,29 @@ import java.util.List;
  *
  */
 public class WorkflowFactory {
-	
-	public static Workflow createWorkflow(String workflowAsText){
-		List<Step> listOfSteps = new ArrayList<Step>();
+
+	public static Workflow createWorkflow(String filename) throws WorkflowException{
 		
-		
-		Workflow workflow = new Workflow(listOfSteps);
+		Workflow workflow = null;
+		try {
+			workflow = (Workflow) Yaml.load(new File(filename));
+			checkSanity(workflow);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
 		return workflow;
+	}
+	
+	private static void checkSanity(Workflow workflow) throws WorkflowException {
+		Step previousStep = null;
+		for (Step currentStep : workflow.getSteps()){
+			if (previousStep != null){
+				if (!previousStep.outputType().equals(currentStep.inputType())){
+					throw new WorkflowException("Output- and input-types of these steps do not match : " + previousStep + currentStep);
+				}
+			}
+		}
 	}
 
 }

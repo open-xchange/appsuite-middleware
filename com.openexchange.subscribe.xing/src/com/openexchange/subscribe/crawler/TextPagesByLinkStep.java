@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -69,10 +70,14 @@ import com.openexchange.groupware.container.ContactObject;
 public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextPage>, HtmlPage> {
 	
 	private HtmlPage htmlPage;
-	private final String urlBeforeOffset, urlAfterOffset, linkpart;
-	private final int offset;
+	private String urlBeforeOffset, urlAfterOffset, linkpart;
+	private int offset;
 	
-	private List<TextPage> returnedPages;
+	private List<TextPage> returnedPages = new ArrayList<TextPage>();
+	
+	public TextPagesByLinkStep() {
+		
+	}
 	
 	public TextPagesByLinkStep(String description, String urlBeforeOffset, int offset, String urlAfterOffset, String linkpart) {
 		this.description = description;
@@ -139,5 +144,55 @@ public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextP
 	public void setInput(HtmlPage input) {
 		this.htmlPage = input;
 	}
+
+	public HtmlPage getHtmlPage() {
+		return htmlPage;
+	}
+
+	public void setHtmlPage(HtmlPage htmlPage) {
+		this.htmlPage = htmlPage;
+	}
+
+	public List<TextPage> getReturnedPages() {
+		return returnedPages;
+	}
+
+	public void setReturnedPages(List<TextPage> returnedPages) {
+		this.returnedPages = returnedPages;
+	}
+
+	public String getUrlBeforeOffset() {
+		return urlBeforeOffset;
+	}
+
+	public String getUrlAfterOffset() {
+		return urlAfterOffset;
+	}
+
+	public String getLinkpart() {
+		return linkpart;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setUrlBeforeOffset(String urlBeforeOffset) {
+		this.urlBeforeOffset = urlBeforeOffset;
+	}
+
+	public void setUrlAfterOffset(String urlAfterOffset) {
+		this.urlAfterOffset = urlAfterOffset;
+	}
+
+	public void setLinkpart(String linkpart) {
+		this.linkpart = linkpart;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+	
+	
 
 }

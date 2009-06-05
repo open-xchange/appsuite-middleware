@@ -14,7 +14,11 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class Workflow {
 
-	private final List<Step> steps;
+	private List<Step> steps;
+	
+	public Workflow() {
+		
+	}
 	
 	public Workflow (List<Step> steps){
 		this.steps = steps;
@@ -38,13 +42,15 @@ public class Workflow {
 			if (! currentStep.executedSuccessfully()) break;
 		}
 		
-		webClient.closeAllWindows();
-		
-		ContactObject[] contactObjectsArray = new ContactObject[contactObjects.size()];
-	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
-	    	contactObjectsArray[i] = contactObjects.get(i);
-	    }
-		return contactObjectsArray;
+		return (ContactObject[]) previousStep.getOutput();
+	}
+
+	public List<Step> getSteps() {
+		return steps;
+	}
+
+	public void setSteps(List<Step> steps) {
+		this.steps = steps;
 	}
 
 }

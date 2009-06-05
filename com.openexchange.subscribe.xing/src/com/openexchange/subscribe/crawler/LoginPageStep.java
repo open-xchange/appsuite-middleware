@@ -69,7 +69,11 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField;
 	private HtmlPage currentPage;
 	
-	LoginPageStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField) {
+	public LoginPageStep(){
+		
+	}
+	
+	public LoginPageStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField) {
 		this.description = description;
 		this.url = url;
 		this.username = username;
@@ -123,6 +127,58 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 
 	public void setInput(Object input) {
 		// this does nothing
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getNameOfLoginForm() {
+		return nameOfLoginForm;
+	}
+
+	public void setNameOfLoginForm(String nameOfLoginForm) {
+		this.nameOfLoginForm = nameOfLoginForm;
+	}
+
+	public String getNameOfUserField() {
+		return nameOfUserField;
+	}
+
+	public void setNameOfUserField(String nameOfUserField) {
+		this.nameOfUserField = nameOfUserField;
+	}
+
+	public String getNameOfPasswordField() {
+		return nameOfPasswordField;
+	}
+
+	public void setNameOfPasswordField(String nameOfPasswordField) {
+		this.nameOfPasswordField = nameOfPasswordField;
+	}
+
+	public void setCurrentPage(HtmlPage currentPage) {
+		this.currentPage = currentPage;
 	}
 	
 	
