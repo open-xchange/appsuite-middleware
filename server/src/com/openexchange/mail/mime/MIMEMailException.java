@@ -58,6 +58,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Locale;
+import javax.mail.Address;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
@@ -248,7 +249,11 @@ public class MIMEMailException extends MailException {
         /**
          * An error in mail server protocol. Error message: %1$s.
          */
-        PROTOCOL_ERROR("An error in mail server protocol. Error message: %1$s.", Category.CODE_ERROR, 1027);
+        PROTOCOL_ERROR("An error in mail server protocol. Error message: %1$s.", Category.CODE_ERROR, 1027),
+        /**
+         * Message could not be sent: %1$s
+         */
+        SEND_FAILED_MSG("Message could not be sent: %1$s", Category.CODE_ERROR, 1028);
 
         private final String message;
 
@@ -378,6 +383,11 @@ public class MIMEMailException extends MailException {
                 final SMTPSendFailedException exc = (SMTPSendFailedException) e;
                 if ((exc.getReturnCode() == 552) || (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1)) {
                     return new MIMEMailException(Code.MESSAGE_TOO_LARGE, exc, new Object[0]);
+                }
+                final Address[] addrs = exc.getInvalidAddresses();
+                if (null == addrs || addrs.length == 0) {
+                    // No invalid addresses available
+                    return new MIMEMailException(Code.SEND_FAILED_MSG, exc, exc.getMessage());
                 }
                 return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
             } else if (e instanceof SendFailedException) {
