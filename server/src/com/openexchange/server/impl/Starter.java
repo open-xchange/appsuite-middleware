@@ -112,6 +112,7 @@ public class Starter implements Initialization {
      * Folder initialization
      */
     com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+    new com.openexchange.folder.internal.FolderInitialization(),
     /**
      * Mail initialization
      */
@@ -232,6 +233,7 @@ public class Starter implements Initialization {
      * Folder initialization
      */
     com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+    new com.openexchange.folder.internal.FolderInitialization(),
     /**
      * User storage init
      */
