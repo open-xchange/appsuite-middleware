@@ -240,18 +240,23 @@ public final class SMTPTransport extends MailTransport {
                      * Check if a secure SMTP connection should be established
                      */
                     if (smtpConfig.isSecure()) {
+                        /*
+                         * Enable TLS
+                         */
+                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
+                        /*
+                         * Enable SSL, too
+                         */
                         smtpProps.put(
                             MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS,
                             TrustAllSSLSocketFactory.class.getName());
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig.getPort()));
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
                         /*
                          * Specify protocols
                          */
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL_PROTOCOLS, "SSLv3 TLSv1");
                         smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL, "true");
-
                         /*
                          * Needed for JavaMail >= 1.4
                          */
