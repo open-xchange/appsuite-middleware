@@ -65,6 +65,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -659,56 +663,98 @@ public class Folder extends SessionServlet {
                                     }
                                 }
                                 /*
-                                 * Iterate sorted mail accounts
+                                 * Request root folder for each account
                                  */
-                                for (final MailAccount mailAccount : accounts) {
-                                    final MailFolder rootFolder;
-                                    final MailAccess<?, ?> mailAccess;
-                                    try {
-                                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                                        rootFolder = mailAccess.getRootFolder();
-                                    } catch (final MailException e) {
-                                        LOG.error(e.getMessage(), e);
-                                        continue;
-                                    }
-                                    try {
-                                        final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                            columns,
-                                            mailAccess.getMailConfig());
-                                        final JSONArray ja = new JSONArray();
-                                        if (mailAccount.isDefaultAccount()) {
-                                            for (int i = 0; i < mailFolderWriters.length; i++) {
-                                                mailFolderWriters[i].writeField(
-                                                    ja,
-                                                    mailAccount.getId(),
-                                                    rootFolder,
-                                                    false,
-                                                    MailFolder.DEFAULT_FOLDER_NAME,
-                                                    1,
-                                                    MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
-                                                    FolderObject.SYSTEM_MODULE,
-                                                    false);
+                                final CompletionService<ArrayIndexPair> completionService = new ExecutorCompletionService<ArrayIndexPair>(
+                                    ServerServiceRegistry.getInstance().getService(com.openexchange.timer.TimerService.class).getExecutor());
+                                final int size = accounts.size();
+                                for (int i = 0; i < size; i++) {
+                                    final int index = i;
+                                    final MailAccount mailAccount = accounts.get(index);
+                                    completionService.submit(new Callable<ArrayIndexPair>() {
+
+                                        public ArrayIndexPair call() throws Exception {
+                                            final MailFolder rootFolder;
+                                            final MailAccess<?, ?> mailAccess;
+                                            try {
+                                                mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                                rootFolder = mailAccess.getRootFolder();
+                                            } catch (final MailException e) {
+                                                LOG.error(e.getMessage(), e);
+                                                return null;
                                             }
-                                        } else {
-                                            for (int i = 0; i < mailFolderWriters.length; i++) {
-                                                mailFolderWriters[i].writeField(
-                                                    ja,
-                                                    mailAccount.getId(),
-                                                    rootFolder,
-                                                    false,
-                                                    mailAccount.getName(),
-                                                    1,
-                                                    MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
-                                                    FolderObject.SYSTEM_MODULE,
-                                                    false);
+                                            try {
+                                                final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                                    columns,
+                                                    mailAccess.getMailConfig());
+                                                final JSONArray ja = new JSONArray();
+                                                if (mailAccount.isDefaultAccount()) {
+                                                    for (int i = 0; i < mailFolderWriters.length; i++) {
+                                                        mailFolderWriters[i].writeField(
+                                                            ja,
+                                                            mailAccount.getId(),
+                                                            rootFolder,
+                                                            false,
+                                                            MailFolder.DEFAULT_FOLDER_NAME,
+                                                            1,
+                                                            MailFolderUtility.prepareFullname(
+                                                                mailAccount.getId(),
+                                                                MailFolder.DEFAULT_FOLDER_ID),
+                                                            FolderObject.SYSTEM_MODULE,
+                                                            false);
+                                                    }
+                                                } else {
+                                                    for (int i = 0; i < mailFolderWriters.length; i++) {
+                                                        mailFolderWriters[i].writeField(
+                                                            ja,
+                                                            mailAccount.getId(),
+                                                            rootFolder,
+                                                            false,
+                                                            mailAccount.getName(),
+                                                            1,
+                                                            MailFolderUtility.prepareFullname(
+                                                                mailAccount.getId(),
+                                                                MailFolder.DEFAULT_FOLDER_ID),
+                                                            FolderObject.SYSTEM_MODULE,
+                                                            false);
+                                                    }
+                                                }
+                                                return new ArrayIndexPair(index, ja);
+                                            } finally {
+                                                mailAccess.close(true);
                                             }
                                         }
-                                        jsonWriter.value(ja);
-                                    } catch (final MailException e) {
-                                        LOG.error(e.getMessage(), e);
-                                    } finally {
-                                        mailAccess.close(true);
+                                    });
+                                }
+                                /*
+                                 * Wait for completion
+                                 */
+                                final JSONArray[] arrays = new JSONArray[size];
+                                try {
+                                    for (int i = 0; i < size; i++) {
+                                        final ArrayIndexPair aip = completionService.take().get();
+                                        arrays[aip.index] = aip.jsonArray;
                                     }
+                                } catch (final InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                                } catch (final ExecutionException e) {
+                                    final Throwable t = e.getCause();
+                                    if (MailException.class.isAssignableFrom(t.getClass())) {
+                                        LOG.error(t.getMessage(), t);
+                                    } else if (t instanceof RuntimeException) {
+                                        throw (RuntimeException) t;
+                                    } else if (t instanceof Error) {
+                                        throw (Error) t;
+                                    } else {
+                                        throw new IllegalStateException("Not unchecked", t);
+                                    }
+                                }
+                                /*
+                                 * Iterate sorted arrays
+                                 */
+                                for (int k = 0; k < size; k++) {
+                                    jsonWriter.value(arrays[k]);
                                 }
                             }
                         }
@@ -2052,6 +2098,19 @@ public class Folder extends SessionServlet {
             return collator.compare(o1.getName(), o2.getName());
         }
 
+    }
+
+    private static final class ArrayIndexPair {
+
+        final int index;
+
+        final JSONArray jsonArray;
+
+        public ArrayIndexPair(final int index, final JSONArray jsonArray) {
+            super();
+            this.index = index;
+            this.jsonArray = jsonArray;
+        }
     }
 
 }
