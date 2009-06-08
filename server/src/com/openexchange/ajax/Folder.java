@@ -681,7 +681,7 @@ public class Folder extends SessionServlet {
                                                 rootFolder = mailAccess.getRootFolder();
                                             } catch (final MailException e) {
                                                 LOG.error(e.getMessage(), e);
-                                                return null;
+                                                return new ArrayIndexPair(index, null);
                                             }
                                             try {
                                                 final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
@@ -754,7 +754,10 @@ public class Folder extends SessionServlet {
                                  * Iterate sorted arrays
                                  */
                                 for (int k = 0; k < size; k++) {
-                                    jsonWriter.value(arrays[k]);
+                                    final JSONArray array = arrays[k];
+                                    if (null != array) {
+                                        jsonWriter.value(array);
+                                    }
                                 }
                             }
                         }
