@@ -421,7 +421,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             decrement = true;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, config);
+            throw MIMEMailException.handleMessagingException(e, config, session);
         }
     }
 
