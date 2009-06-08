@@ -77,28 +77,6 @@ import com.openexchange.mail.MailListField;
  */
 public class TestMail implements IdentitySource<TestMail> {
 
-    public enum TestMailField {
-        MESSAGE("message");
-
-        private String fitnesse;
-
-        private TestMailField(String fitnesse) {
-            this.fitnesse = fitnesse;
-        }
-
-        public String toString() {
-            return fitnesse;
-        }
-
-        public static TestMailField getBy(String fitnesse) {
-            for (TestMailField field : values()) {
-                if (fitnesse.equals(field.fitnesse))
-                    return field;
-            }
-            return null;
-        }
-    }
-
     private List<String> from, to, cc, bcc;
 
     private List<JSONObject> attachment;
@@ -112,6 +90,10 @@ public class TestMail implements IdentitySource<TestMail> {
 
     public int getFlags() {
         return flags;
+    }
+
+    public Set<MailFlag> getFlagsAsSet() {
+        return MailFlag.transform(flags);
     }
 
     public void setFlags(int flags) {
@@ -352,7 +334,21 @@ public class TestMail implements IdentitySource<TestMail> {
                 setColor(values.getInt(index));
             }
             if (field == MailListField.FLAGS) {
-                setFlags(values.getInt(index));
+                try{
+                    int flags = values.getInt(index);
+                    setFlags(flags);
+                } catch (JSONException e){
+                    String flagString = values.getString(index);
+                    String[] flags = flagString.split(",");
+                    int bitmask = 0;
+                    for(String flagName : flags){
+                        MailFlag flag = MailFlag.getByName(flagName);
+                        if(flag != null)
+                            bitmask += flag.getValue();
+                    }
+                    setFlags(bitmask);
+                }
+                
             }
             if (field == MailListField.PRIORITY) {
                 setPriority(values.getInt(index));
@@ -446,7 +442,20 @@ public class TestMail implements IdentitySource<TestMail> {
             setColor(Integer.valueOf((String) value).intValue());
         }
         if (field == MailListField.FLAGS) {
-            setFlags(Integer.valueOf((String) value).intValue());
+            String myValue = (String) value;
+            try {
+                setFlags(Integer.valueOf(myValue).intValue());
+            } catch (NumberFormatException e) {
+                String[] flags = myValue.split(",");
+                int bitmask = 0;
+                for(String flagName : flags){
+                    MailFlag flag = MailFlag.getByName(flagName);
+                    if(flag != null)
+                        bitmask += flag.getValue();
+                }
+                setFlags(bitmask);
+            }
+            
         }
         if (field == MailListField.PRIORITY) {
             setPriority(Integer.valueOf((String) value).intValue());
