@@ -1,3 +1,7 @@
+* 2009-06-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #13777: Creating INBOX folder if absent
+
 * 2009-06-05 - thorben.betten@open-xchange.com
 
  - Bugfix #13716: Setting proper context ID when creating an EmailableParticipant instance for an external user
