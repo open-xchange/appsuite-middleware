@@ -166,9 +166,9 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
             subscriptionsToRefresh.add(subscription);
         }
         if(null != req.getParameter("folder")) {
-            int folderId = Integer.parseInt(req.getParameter("folder"));
-            FolderObject folder = loadFolder(req, resp, folderId);
-            List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder, session.getPassword());
+            String folderId = req.getParameter("folder");
+            List<Subscription> allSubscriptions = null;
+            allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
             subscriptionsToRefresh.addAll(allSubscriptions);
         }
         
@@ -197,14 +197,14 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     }
 
     private void loadAllSubscriptionsInFolder(HttpServletRequest req, HttpServletResponse resp) throws NumberFormatException, AbstractOXException {
-        int folderId = Integer.parseInt(req.getParameter("folder"));
+        String folderId = req.getParameter("folder");
         ServerSession session = getSessionObject(req);
         Context context = session.getContext();
         
-        FolderObject folder = loadFolder(req, resp, folderId);
         
-        List<Subscription> allSubscriptions = getSubscriptionsInFolder(context, folder, session.getPassword());
-        
+        List<Subscription> allSubscriptions = null;
+        allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
+          
         String[] basicColumns = getBasicColumns(req);
         Map<String, String[]> dynamicColumns = getDynamicColumns(req);
         List<String> dynamicColumnOrder = getDynamicColumnOrder(req);
@@ -213,11 +213,11 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         
     }
 
-    private List<Subscription> getSubscriptionsInFolder(Context context, FolderObject folder, String secret) throws AbstractOXException {
-        List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
+    private List<Subscription> getSubscriptionsInFolder(Context context, String folder, String secret) throws AbstractOXException {
+        List<SubscriptionSource> sources = discovery.getSources();
         List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
         for (SubscriptionSource subscriptionSource : sources) {
-            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, String.valueOf(folder.getObjectID()), secret);
+            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
             allSubscriptions.addAll(subscriptions);
         }
         return allSubscriptions;
@@ -270,12 +270,6 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         }
         return columns.split("\\s*,\\s*");
     }
-
-    private FolderObject loadFolder(HttpServletRequest req, HttpServletResponse resp, int folderId) throws OXException {
-        OXFolderAccess ofa = new OXFolderAccess(getSessionObject(req).getContext());
-        return ofa.getFolderObject(folderId);
-    }
-
 
     private void loadSubscription(HttpServletRequest req, HttpServletResponse resp) throws JSONException, AbstractOXException {
         int id = Integer.parseInt(req.getParameter("id"));
