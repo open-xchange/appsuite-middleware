@@ -68,6 +68,9 @@ public class FormContentWriter {
     
     public JSONObject write(DynamicFormDescription form, Map<String, Object> content) throws JSONException {
         JSONObject object = new JSONObject();
+        if(form == null) {
+            return object;
+        }
         for(FormElement element : form) {
             if(content.containsKey(element.getName())) {
                 Object value = content.get(element.getName());
