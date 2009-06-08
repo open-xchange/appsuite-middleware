@@ -222,7 +222,7 @@ public class QuotaFileStorage extends FileStorage {
         }
     }
 
-	@Override
+    @Override
     public boolean deleteFile(String identifier) throws FileStorageException {
         return deleteFile(new String[] { identifier }).isEmpty();
     }
@@ -499,35 +499,12 @@ public class QuotaFileStorage extends FileStorage {
     protected static class NilLockMode implements LockMode {
 
         public void lock(final long timeout) throws FileStorageException {
+            // NilLockMode does not locking.
         }
 
         public void unlock() throws FileStorageException {
+            // NilLockMode does not locking.
         }
 
     }
-
-    protected static class OnlyUnlockMode implements LockMode {
-
-        private final FileStorage delegate;
-
-        private final Context ctx;
-
-        public OnlyUnlockMode(final FileStorage delegate, final Context ctx) {
-            this.delegate = delegate;
-            this.ctx = ctx;
-        }
-
-        public void lock(final long timeout) throws FileStorageException {
-        }
-
-        public void unlock() throws FileStorageException {
-            try {
-                delegate.unlock();
-            } catch (final FileStorageException x) {
-                throw addContextInfo(x, ctx);
-            }
-        }
-
-    }
-
 }
