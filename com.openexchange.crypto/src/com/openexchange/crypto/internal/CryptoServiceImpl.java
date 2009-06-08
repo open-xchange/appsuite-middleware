@@ -68,23 +68,35 @@ import org.apache.commons.codec.binary.Base64;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
+import de.rtner.security.auth.spi.PBKDF2Engine;
+import de.rtner.security.auth.spi.PBKDF2Parameters;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class CryptoServiceImpl implements CryptoService {
+
+    /**
+     * Hash Algorithm for generating PBE-Keys.
+     */
+    private final String KEY_ALGORITHM = "HMacSHA1";
+
+    /**
+     * Key Charset
+     */
+    private final String CHARSET = "UTF-8";
     
     /**
-     * Algorithm for generating PBE-Keys.
+     * Algorithm for creating random salt.
      */
-    private final String KEY_ALGORITHM = "PBKDF2WithHmacSHA1";
+    private final String RANDOM_ALGORITHM = "SHA1PRNG";
     
     /**
      * Key length
      */
-    private final int KEY_LENGTH = 128;
-    
+    private final int KEY_LENGTH = 16;
+
     /**
      * The algorithm.
      */
@@ -114,28 +126,28 @@ public class CryptoServiceImpl implements CryptoService {
      * Salt
      */
     private final byte[] SALT = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
-    
+
     public String encrypt(String data, String password) throws CryptoException {
         return encrypt(data, password, false).getData();
     }
 
     public String decrypt(String encryptedData, String password) throws CryptoException {
         return decrypt(new EncryptedData(encryptedData, null), password, false);
-        //return decrypt(encryptedData, generateSecretKey(password));
+        // return decrypt(encryptedData, generateSecretKey(password));
     }
 
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException {
         if (useSalt && data.getSalt() == null) {
             throw NoSalt.create();
         }
-        
+
         if (useSalt) {
             return decrypt(data.getData(), generateSecretKey(password, data.getSalt()));
         } else {
             return decrypt(data.getData(), generateSecretKey(password, SALT));
         }
     }
-    
+
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException {
         if (useSalt) {
             byte[] salt = generateSalt();
@@ -183,7 +195,7 @@ public class CryptoServiceImpl implements CryptoService {
         } catch (GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
-        
+
         return retval;
     }
 
@@ -193,7 +205,7 @@ public class CryptoServiceImpl implements CryptoService {
      * @param encryptedData The Base64 encoded encrypted data
      * @param key The Key
      * @return The decrypted data
-     * @throws CryptoException 
+     * @throws CryptoException
      */
     private String decrypt(final String encryptedData, final Key key) throws CryptoException {
         String retval = null;
@@ -227,7 +239,7 @@ public class CryptoServiceImpl implements CryptoService {
         } catch (GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
-        
+
         try {
             final byte[] outputBytes = cipher.doFinal(encrypted);
             retval = new String(outputBytes, "UTF-8");
@@ -236,7 +248,7 @@ public class CryptoServiceImpl implements CryptoService {
         } catch (GeneralSecurityException e) {
             throw BadPassword.create(e);
         }
-        
+
         return retval;
     }
 
@@ -245,25 +257,21 @@ public class CryptoServiceImpl implements CryptoService {
      * 
      * @param password The password string
      * @return A secret key generated from specified password string
-     * @throws CryptoException 
+     * @throws CryptoException
      */
     private SecretKey generateSecretKey(final String password, byte[] salt) throws CryptoException {
-        try { 
-            PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, 1000, KEY_LENGTH);  
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_ALGORITHM);  
-            PBEKey key = (PBEKey) factory.generateSecret(keySpec);  
-            SecretKey secretKey = new SecretKeySpec(key.getEncoded(), ALGORITHM);
-            return secretKey;
-        } catch (GeneralSecurityException e) {
-            throw SecurityException.create(e);
-        }
+        PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
+        PBKDF2Engine engine = new PBKDF2Engine(params);
+        byte[] key = engine.deriveKey(password, KEY_LENGTH);
+        SecretKey secretKey = new SecretKeySpec(key, ALGORITHM);
+        return secretKey;
     }
-    
+
     private byte[] generateSalt() throws CryptoException {
         byte[] salt = null;
         try {
-            SecureRandom rand = SecureRandom.getInstance("SHA1PRNG");  
-            salt = new byte[16];  
+            SecureRandom rand = SecureRandom.getInstance(RANDOM_ALGORITHM);
+            salt = new byte[16];
             rand.nextBytes(salt);
         } catch (GeneralSecurityException e) {
             throw SecurityException.create(e);
