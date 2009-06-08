@@ -269,6 +269,22 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
+    /**
+     * Gets the separator character of the IMAP server associated with specified IMAP folder.
+     * 
+     * @param imapFolder The IMAP folder to obtain IMAP protocol
+     * @return The separator character
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static char getSeparator(final IMAPFolder imapFolder) throws MessagingException {
+        return ((Character) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                return Character.valueOf(getSeparator(p));
+            }
+        }))).charValue();
+    }
+
     static char getSeparator(final IMAPProtocol p) throws ProtocolException {
         final String dummyFullname = String.valueOf(System.currentTimeMillis());
         final ListInfo[] li;

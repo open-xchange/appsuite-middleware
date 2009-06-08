@@ -187,9 +187,23 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get INBOX folder
                      */
-                    final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder("INBOX");
-                    if (!inboxFolder.exists()) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, "INBOX");
+                    final IMAPFolder inboxFolder;
+                    {
+                        final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder("INBOX");
+                        if (tmp.exists()) {
+                            inboxFolder = tmp;
+                        } else {
+                            /*
+                             * Strange... No INBOX available. Try to create it.
+                             */
+                            final char sep = IMAPCommandsCollection.getSeparator(tmp);
+                            try {
+                                IMAPCommandsCollection.createFolder(tmp, sep, FOLDER_TYPE);
+                            } catch (final MessagingException e) {
+                                IMAPCommandsCollection.createFolder(tmp, sep, IMAPFolder.HOLDS_MESSAGES);
+                            }
+                            inboxFolder = (IMAPFolder) imapStore.getFolder("INBOX");
+                        }
                     }
                     if (!inboxFolder.isSubscribed()) {
                         /*
@@ -396,7 +410,7 @@ public final class IMAPDefaultFolderChecker {
         final boolean checkSubscribed = true;
         final Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
         tmp.setLength(0);
-        if (!f.exists() /*&& !f.create(type)*/) {
+        if (!f.exists() /* && !f.create(type) */) {
             // Try with own routine to get a valid error message on failure
             IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
             /*-
