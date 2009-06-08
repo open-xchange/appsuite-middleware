@@ -259,8 +259,8 @@ public class QuotaFileStorage extends FileStorage {
 			delegate.lock(LOCK_TIMEOUT);
 			lockMode.set(new NilLockMode());
 			final long size = delegate.getFileSize(identifier);
-			final boolean deleted = super.deleteFile(identifier);
-			if(deleted) {
+			final boolean deleted = super.deleteFile(new String[] { identifier }).size() == 0;
+			if (deleted) {
 					decUsed(size);
 			}
 			return deleted;

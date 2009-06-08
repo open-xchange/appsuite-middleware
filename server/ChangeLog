@@ -1,3 +1,7 @@
+* 2009-06-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #13384: Fixed a single file delete through QuotaFileStorage calling the wrong delete method.
+
 * 2009-05-22 - marcus.klein@open-xchange.com
 
  - Bugfix #13640: Improved performance of free busy result calculation.
