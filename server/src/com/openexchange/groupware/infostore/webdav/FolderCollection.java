@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -573,7 +574,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			final FolderCollection parent = (FolderCollection) parent();
 			parent.loadFolder();
 			final FolderObject parentFolder = parent.folder;
-			copyPerms = parentFolder.getPermissions();			
+			if(FolderObject.SYSTEM_MODULE == parentFolder.getType()) {
+			    copyPerms = Collections.emptyList(); 
+			} else {
+	            copyPerms = parentFolder.getPermissions();          
+			}
 		} else {
 			copyPerms = this.overrideNewACL;
 		}
