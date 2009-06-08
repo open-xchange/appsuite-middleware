@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.crawler;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.subscribe.xing.XingSubscriptionException;
 
 
 /**
@@ -65,7 +66,7 @@ public interface Step<O, I> extends HasOutput<O>, HasInput<I>{
 	
 	Exception getException();
 	
-	void execute(WebClient webClient);
+	void execute(WebClient webClient)  throws XingSubscriptionException;
 	
 	String inputType();
 	

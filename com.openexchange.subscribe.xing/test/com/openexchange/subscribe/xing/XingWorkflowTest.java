@@ -69,42 +69,49 @@ import junit.framework.TestCase;
 
 public class XingWorkflowTest extends TestCase {
 	
-	public void testXingByCreatingStepsManually() {
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
-		
-		// insert valid credentials here
-		String username ="";
-		String password ="";
-		
-		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password"));
-		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
-		listOfSteps.add(new ContactObjectsByVcardTextPagesStep());
-		
-		Workflow xingWorkflow = new Workflow(listOfSteps);
-		
-		ContactObject[] contacts = xingWorkflow.execute();
-		
-		assertTrue("There should be some contacts", contacts.length != 0);
-		ContactObject firstContact = contacts[0];
-		System.out.println("First contact retrieved is : " + firstContact.getDisplayName());
-		ContactObject lastContact = contacts[contacts.length-1];
-        System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
-        System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
-	}
+//	public void testXingByCreatingStepsManually() {
+//		ArrayList<Step> listOfSteps = new ArrayList<Step>();
+//		
+//		// insert valid credentials here
+//		String username ="karsten.will@gmx.de";
+//		String password ="P1lotXIN";
+//		
+//		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password","Home | XING"));
+//		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
+//		listOfSteps.add(new ContactObjectsByVcardTextPagesStep());
+//		
+//		Workflow xingWorkflow = new Workflow(listOfSteps);
+//		//System.out.println("***** Xing Workflow : " + Yaml.dump(xingWorkflow));
+//		
+//		ContactObject[] contacts = new ContactObject[0];
+//		try {
+//			contacts = xingWorkflow.execute();
+//		} catch (XingSubscriptionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		assertTrue("There should be some contacts", contacts.length != 0);
+//		ContactObject firstContact = contacts[0];
+//		System.out.println("First contact retrieved is : " + firstContact.getDisplayName());
+//		ContactObject lastContact = contacts[contacts.length-1];
+//        System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
+//        System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
+//	}
 	
 	public void testXingByCreatingStepsViaYaml() {
 		Workflow xingWorkflow = null;
+		ContactObject[] contacts = new ContactObject[0];
 		try {
 			// insert valid location for the yml-file here
 			// insert valid credentials in the file
-			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/XingWorkflow.yml");
-		} catch (WorkflowException e) {
+			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/XingWorkflow.yml");		
+			contacts = xingWorkflow.execute();
+		} catch (XingSubscriptionException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		
-		ContactObject[] contacts = xingWorkflow.execute();
-		
 		assertTrue("There should be some contacts", contacts.length != 0);
 		ContactObject firstContact = contacts[0];
 		System.out.println("First contact retrieved is : " + firstContact.getDisplayName());
@@ -112,34 +119,34 @@ public class XingWorkflowTest extends TestCase {
         System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
 	}
-	
-	public void testInvalidCredentials() throws Exception {
-		XingSubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe.xing");
-        XingSubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("XING"));
-		
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
-		// insert valid credentials here
-		String username ="";
-		String password ="";
-		
-		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password"));
-		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
-		listOfSteps.add(new ContactObjectsByVcardTextPagesStep());
-		
-		Workflow xingWorkflow = new Workflow(listOfSteps);
-		
-	}
-	
-	public static void testInvalidWorkflow() {
-		Workflow xingWorkflow = null;
-		try {
-			// insert valid location for the yml-file here
-			// insert valid credentials in the file
-			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
-			fail("Exception expected");
-		} catch (WorkflowException e) {
-			e.printStackTrace();
-		}
-	}
+//	
+//	public void testInvalidCredentials() throws Exception {
+//		XingSubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe.xing");
+//        XingSubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("XING"));
+//		
+//		ArrayList<Step> listOfSteps = new ArrayList<Step>();
+//		// invalid credentials
+//		String username ="someone@example.com";
+//		String password ="invalid";
+//		
+//		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password", "Home | XING"));
+//		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
+//		listOfSteps.add(new ContactObjectsByVcardTextPagesStep());
+//		
+//		Workflow xingWorkflow = new Workflow(listOfSteps);
+//		
+//	}
+//	
+//	public static void testInvalidWorkflow() {
+//		Workflow xingWorkflow = null;
+//		try {
+//			// insert valid location for the yml-file here
+//			// insert valid credentials in the file
+//			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
+//			fail("Exception expected");
+//		} catch (XingSubscriptionException e) {
+//			assertEquals("Wrong exception", XingSubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
+//		}
+//	}
 	
 }

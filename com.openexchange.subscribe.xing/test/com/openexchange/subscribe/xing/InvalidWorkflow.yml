@@ -4,14 +4,18 @@ steps:
     nameOfLoginForm: loginform
     nameOfPasswordField: login_password
     nameOfUserField: login_user_name
-    pageTitleAfterLogin: "Home | XING"    
-    password: 
+    password: P1lotXIN
     url: "https://www.xing.com"
-    username: 
+    username: karsten.will@gmx.de
   - !com.openexchange.subscribe.crawler.TextPagesByLinkStep
     linkpart: /app/vcard
     offset: 10
     urlAfterOffset: ""
     urlBeforeOffset: "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset="
-  - !com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep {}
+  - !com.openexchange.subscribe.crawler.TextPagesByLinkStep
+    linkpart: /app/vcard
+    offset: 10
+    urlAfterOffset: ""
+    urlBeforeOffset: "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset="
+
 

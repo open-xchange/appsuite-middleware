@@ -58,6 +58,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
+import com.openexchange.subscribe.xing.XingSubscriptionException;
 
 /**
  * This Step logs into a website via a form requiring username and password. 
@@ -66,14 +68,14 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
  */
 public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object>{
 
-	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField;
+	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, pageTitleAfterLogin;
 	private HtmlPage currentPage;
 	
 	public LoginPageStep(){
 		
 	}
 	
-	public LoginPageStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField) {
+	public LoginPageStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField, String pageTitleAfterLogin) {
 		this.description = description;
 		this.url = url;
 		this.username = username;
@@ -81,9 +83,10 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 		this.nameOfLoginForm = nameOfLoginForm;
 		this.nameOfUserField = nameOfUserField;
 		this.nameOfPasswordField = nameOfPasswordField;
+		this.pageTitleAfterLogin = pageTitleAfterLogin;
 	}
 	
-	public void execute(WebClient webClient) {
+	public void execute(WebClient webClient) throws XingSubscriptionException{
 		HtmlPage loginPage;
 		try {
 			// Get the page, fill in the credentials and submit the login form
@@ -96,6 +99,9 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 		    final HtmlPage pageAfterLogin = (HtmlPage)loginForm.submit(null);
 		    this.currentPage = pageAfterLogin;
 		    
+		    if (!pageAfterLogin.getTitleText().equals(pageTitleAfterLogin)){
+		    	throw XingSubscriptionErrorMessage.INVALID_LOGIN.create();
+		    }
 		    executedSuccessfully = true;
 		} catch (FailingHttpStatusCodeException e) {	
 			e.printStackTrace();
@@ -179,6 +185,14 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 
 	public void setCurrentPage(HtmlPage currentPage) {
 		this.currentPage = currentPage;
+	}
+
+	public String getPageTitleAfterLogin() {
+		return pageTitleAfterLogin;
+	}
+
+	public void setPageTitleAfterLogin(String pageTitleAfterLogin) {
+		this.pageTitleAfterLogin = pageTitleAfterLogin;
 	}
 	
 	

@@ -56,6 +56,9 @@ import java.util.List;
 
 import org.ho.yaml.Yaml;
 
+import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
+import com.openexchange.subscribe.xing.XingSubscriptionException;
+
 /**
  * Gets a text input and creates Workflow
  * 
@@ -64,7 +67,7 @@ import org.ho.yaml.Yaml;
  */
 public class WorkflowFactory {
 
-	public static Workflow createWorkflow(String filename) throws WorkflowException{
+	public static Workflow createWorkflow(String filename) throws XingSubscriptionException{
 		
 		Workflow workflow = null;
 		try {
@@ -77,14 +80,16 @@ public class WorkflowFactory {
 		return workflow;
 	}
 	
-	private static void checkSanity(Workflow workflow) throws WorkflowException {
+	private static void checkSanity(Workflow workflow) throws XingSubscriptionException {
 		Step previousStep = null;
 		for (Step currentStep : workflow.getSteps()){
 			if (previousStep != null){
 				if (!previousStep.outputType().equals(currentStep.inputType())){
-					throw new WorkflowException("Output- and input-types of these steps do not match : " + previousStep + currentStep);
+					System.out.println("output : " + previousStep.outputType() + ", input : " + currentStep.inputType());
+					throw XingSubscriptionErrorMessage.INVALID_WORKFLOW.create();
 				}
 			}
+			previousStep = currentStep;
 		}
 	}
 

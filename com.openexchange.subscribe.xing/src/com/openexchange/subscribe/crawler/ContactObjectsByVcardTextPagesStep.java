@@ -116,7 +116,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 	}
 
 	public String inputType() {
-		return TEXT_PAGE;
+		return LIST_OF_TEXT_PAGES;
 	}
 
 	public String outputType() {

@@ -55,6 +55,7 @@ import java.net.MalformedURLException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.openexchange.subscribe.xing.XingSubscriptionException;
 
 /**
  * This Step gets a page reachable via Url in the current context (WebClient) 
@@ -77,7 +78,7 @@ public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object
 		this.url = url;
 	}
 	
-	public void execute(WebClient webClient) {
+	public void execute(WebClient webClient)  throws XingSubscriptionException{
 		try {
 			HtmlPage pageByUrl = webClient.getPage(this.url);
 			this.currentPage = pageByUrl;
