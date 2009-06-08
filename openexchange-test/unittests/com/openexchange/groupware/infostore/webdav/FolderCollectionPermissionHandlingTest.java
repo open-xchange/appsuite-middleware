@@ -174,6 +174,21 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		
 		assertPermissions(newFolder.getPermissions(), buildReadAll(userIdA, true), perm2);
 	}
+	
+	public void testAddAdminOnCreateAndDontInheritFromSystemFolders() throws Exception {
+	    
+	    FolderObject publicInfostore = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, ctx);
+	    
+        final String url = "/"+publicInfostore.getFolderName()+"/subfolder";
+        
+        factory.resolveCollection(url).create();
+        final FolderCollection coll = (FolderCollection) factory.resolveCollection(url);
+        
+        final FolderObject newFolder = FolderObject.loadFolderObjectFromDB(coll.getId(), ctx);
+        folders.add(newFolder);
+        
+        assertPermissions(newFolder.getPermissions(), buildReadAll(userIdA, true));
+    }
 		
 	public void testCopy() throws Exception {
 		final FolderObject copyMe = buildFolderToCopy();
