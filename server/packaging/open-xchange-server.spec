@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	24
+Release:	25
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,8 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jun 08 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13384: Fixed a single file delete through QuotaFileStorage calling the wrong delete method.
 * Fri May 22 2009 - marcus.klein@open-xchange.com
  - Bugfix #13640: Improved performance of free busy result calculation.
 * Fri Apr 17 2009 - francisco.laguna@open-xchange.com
