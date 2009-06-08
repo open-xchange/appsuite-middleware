@@ -1033,19 +1033,19 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             final Map<String, String> properties = mailAccount.getProperties();
             if (!properties.isEmpty()) {
                 if (properties.containsKey("pop3.deletewt")) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                    updateProperty(cid, user, id, "pop3.deletewt", properties.get("pop3.deletewt"), con);
                 }
                 if (properties.containsKey("pop3.expunge")) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+                    updateProperty(cid, user, id, "pop3.expunge", properties.get("pop3.expunge"), con);
                 }
                 if (properties.containsKey("pop3.refreshrate")) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+                    updateProperty(cid, user, id, "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
                 }
                 if (properties.containsKey("pop3.storage")) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+                    updateProperty(cid, user, id, "pop3.storage", properties.get("pop3.storage"), con);
                 }
                 if (properties.containsKey("pop3.path")) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
+                    updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), con);
                 }
             }
         } catch (final SQLException e) {
