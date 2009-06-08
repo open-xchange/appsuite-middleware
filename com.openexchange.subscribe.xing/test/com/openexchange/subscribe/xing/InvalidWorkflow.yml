@@ -4,9 +4,9 @@ steps:
     nameOfLoginForm: loginform
     nameOfPasswordField: login_password
     nameOfUserField: login_user_name
-    password: P1lotXIN
+    password: 
     url: "https://www.xing.com"
-    username: karsten.will@gmx.de
+    username: 
   - !com.openexchange.subscribe.crawler.TextPagesByLinkStep
     linkpart: /app/vcard
     offset: 10
