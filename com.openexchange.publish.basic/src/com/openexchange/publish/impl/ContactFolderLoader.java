@@ -92,7 +92,10 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
             final SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.GIVEN_NAME, "ASC", ContactObject.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
-                list.add(contactsInFolder.next());
+                ContactObject next = contactsInFolder.next();
+                if(!next.getMarkAsDistribtuionlist()) {
+                    list.add(next);
+                }
             }
         } catch (final AbstractOXException e) {
             throw new PublicationException(e);

@@ -217,6 +217,17 @@ public class SimContactSQLInterface implements ContactSQLInterface {
         getFolderList(folderId).add(contact);
     }
 
+    public void simulateDistributionList(int cid, int folderId, int id1, String name) {
+        ContactObject contact = new ContactObject();
+        contact.setContextId(cid);
+        contact.setParentFolderID(folderId);
+        contact.setObjectID(id1);
+        contact.setDisplayName(name);
+        contact.setMarkAsDistributionlist(true);
+        
+        getFolderList(folderId).add(contact);
+    }
+
     private List<ContactObject> getFolderList(int folderId) {
         if (folders.containsKey(folderId)) {
             return folders.get(folderId);

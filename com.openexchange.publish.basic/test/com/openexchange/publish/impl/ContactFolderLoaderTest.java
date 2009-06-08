@@ -78,6 +78,7 @@ public class ContactFolderLoaderTest extends TestCase {
     private int folderId;
     private int id1;
     private int id2;
+    private int id3;
     private Publication publication;
 
     @Override
@@ -88,14 +89,15 @@ public class ContactFolderLoaderTest extends TestCase {
         folderId = 12;
         id1 = 1337;
         id2 = 1338;
-
+        id3 = 1339;
+        
         publication = new Publication();
         publication.setEntityId(String.valueOf(folderId));
         publication.setContext(new SimContext(cid));
         
         contacts.simulateContact(cid, folderId, id1, "Hans");
         contacts.simulateContact(cid, folderId, id2, "Peter");
-        
+        contacts.simulateDistributionList(cid, folderId, id3, "DistriList");
             
         contactSQLFactory = new ContactInterfaceFactory() {
 
