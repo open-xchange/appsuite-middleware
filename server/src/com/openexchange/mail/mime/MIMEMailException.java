@@ -79,6 +79,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.session.Session;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectionException;
@@ -110,9 +111,13 @@ public class MIMEMailException extends MailException {
          */
         LOGIN_FAILED("There was an issue in authenticating your E-Mail password. This may be because of a recent password change. " + "To continue please logout now and then log back in with your most current password. (server=%1$s | user=%2$s)", Category.PERMISSION, 1000),
         /**
-         * Wrong or missing login data to access server %1$s. Error message from server: %2$s.
+         * Wrong or missing login data to access server %1$s. Error message from server: %2$s
          */
-        INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s. Error message from server: %2$s.", Category.PERMISSION, 1001),
+        INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s. Error message from server: %2$s", Category.PERMISSION, 1001),
+        /**
+         * Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s
+         */
+        INVALID_CREDENTIALS_EXT("Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s", Category.PERMISSION, 1001),
         /**
          * Mail folder could not be found: %1$s.
          */
@@ -316,6 +321,17 @@ public class MIMEMailException extends MailException {
         return handleMessagingException(e, null);
     }
 
+    /**
+     * Handles given instance of {@link MessagingException} and creates an appropriate instance of {@link MIMEMailException}
+     * 
+     * @param e The messaging exception
+     * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
+     * @return An appropriate instance of {@link MIMEMailException}
+     */
+    public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig) {
+        return handleMessagingException(e, mailConfig, null);
+    }
+
     private static final String STR_EMPTY = "";
 
     private static final String ERR_TMP = "temporary error, please try again later";
@@ -336,9 +352,10 @@ public class MIMEMailException extends MailException {
      * 
      * @param e The messaging exception
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
+     * @param session The session providing user information
      * @return An appropriate instance of {@link MIMEMailException}
      */
-    public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig) {
+    public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
         try {
             if ((e instanceof AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(
                 ERR_AUTH_FAILED) != -1))) {
@@ -349,6 +366,16 @@ public class MIMEMailException extends MailException {
                         e,
                         mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                         mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        MIMEMailException.Code.INVALID_CREDENTIALS_EXT,
+                        e,
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        e.getMessage());
                 }
                 return new MIMEMailException(
                     MIMEMailException.Code.INVALID_CREDENTIALS,
