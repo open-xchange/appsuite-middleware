@@ -90,6 +90,7 @@ import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
+import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -199,6 +200,7 @@ public final class Init {
         /**
          * Folder initialization
          */
+        new FolderInitialization(),
         com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
         /**
          * Mail initialization
