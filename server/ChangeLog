@@ -1,3 +1,7 @@
+* 2009-06-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #13807: Supporting TLS for SMTP and IMAP provider
+
 * 2009-06-08 - francisco.laguna@open-xchange.com
 
  - Bugfix #13800: Don't inherit permissions from system folders when a folder is created via infostore webdav interface.
