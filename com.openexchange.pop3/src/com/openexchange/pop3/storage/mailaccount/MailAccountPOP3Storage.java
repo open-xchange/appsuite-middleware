@@ -290,7 +290,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
     public void syncMessages(final boolean expunge) throws MailException {
-        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false);
+        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(
+            pop3Access.getPOP3Config(),
+            pop3Access.getMailProperties(),
+            false,
+            pop3Access.getSession());
         /*
          * Increase counter
          */
@@ -362,7 +366,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 }
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config());
+            throw MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession());
         } finally {
             try {
                 pop3Store.close();

@@ -325,7 +325,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public void ping() throws MailException {
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
-        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false);
+        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session);
         /*
          * Close quietly
          */
@@ -358,7 +358,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         try {
             server = new InetSocketAddress(InetAddress.getByName(getPOP3Config().getServer()), getPOP3Config().getPort());
         } catch (final UnknownHostException e) {
-            throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config());
+            throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
         Future<Object> f = CONNECT_MAP.get(server);
         if (null == f) {

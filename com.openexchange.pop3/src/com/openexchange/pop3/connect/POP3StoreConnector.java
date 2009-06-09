@@ -66,6 +66,7 @@ import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
+import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.pop3.POP3Store;
 
@@ -94,10 +95,12 @@ public final class POP3StoreConnector {
      * 
      * @param pop3Config The POP3 configuration providing credentials and server settings
      * @param pop3Properties Optional additional POP3 properties applied to POP3 session (may be <code>null</code>)
+     * @param monitorFailedAuthentication <code>true</code> to monitor failed authentication; otherwise <code>false</code>
+     * @param session The session providing user information
      * @return A connected instance of {@link POP3Store}
      * @throws MailException If establishing a connected instance of {@link POP3Store} fails
      */
-    public static POP3Store getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication) throws MailException {
+    public static POP3Store getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication, final Session session) throws MailException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -189,7 +192,7 @@ public final class POP3StoreConnector {
             }
             return pop3Store;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config);
+            throw MIMEMailException.handleMessagingException(e, pop3Config, session);
         }
     }
 

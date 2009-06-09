@@ -117,19 +117,27 @@ public class MIMEMailException extends MailException {
         /**
          * Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s
          */
-        INVALID_CREDENTIALS_EXT("Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s", Category.PERMISSION, 1001),
+        INVALID_CREDENTIALS_EXT("Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s", Category.PERMISSION, INVALID_CREDENTIALS.detailNumber),
         /**
-         * Mail folder could not be found: %1$s.
+         * Mail folder "%1$s" could not be found.
          */
-        FOLDER_NOT_FOUND("Mail folder could not be found: %1$s.", Category.CODE_ERROR, 1002),
+        FOLDER_NOT_FOUND("Mail folder \"%1$s\" could not be found.", Category.CODE_ERROR, 1002),
         /**
-         * Folder is closed: %1$s
+         * Mail folder "%1$s" could not be found on server %2$s with login %3$s (user=%4$s, context=%5$s).
+         */
+        FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found onserver %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_NOT_FOUND.detailNumber),
+        /**
+         * Folder "%1$s" is closed.
          * <p>
          * This exception is thrown when a method is invoked on a Messaging object and the Folder that owns that object has died due to some
          * reason. Following the exception, the Folder is reset to the "closed" state.
          * </p>
          */
-        FOLDER_CLOSED("Folder is closed: %1$s", Category.CODE_ERROR, 1003),
+        FOLDER_CLOSED("Folder \"%1$s\" is closed.", Category.CODE_ERROR, 1003),
+        /**
+         * Folder "%1$s" is closed on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         */
+        FOLDER_CLOSED_EXT("Folder \"%1$s\" is closed on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_CLOSED.detailNumber),
         /**
          * Illegal write attempt: %1$s
          * <p>
@@ -384,9 +392,29 @@ public class MIMEMailException extends MailException {
                     e.getMessage());
             } else if (e instanceof FolderClosedException) {
                 final Folder f = ((FolderClosedException) e).getFolder();
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.FOLDER_CLOSED_EXT,
+                        e,
+                        null == f ? e.getMessage() : f.getFullName(),
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
+                }
                 return new MIMEMailException(Code.FOLDER_CLOSED, e, null == f ? e.getMessage() : f.getFullName());
             } else if (e instanceof FolderNotFoundException) {
                 final Folder f = ((FolderNotFoundException) e).getFolder();
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.FOLDER_NOT_FOUND_EXT,
+                        e,
+                        null == f ? e.getMessage() : f.getFullName(),
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
+                }
                 return new MIMEMailException(Code.FOLDER_NOT_FOUND, e, null == f ? e.getMessage() : f.getFullName());
             } else if (e instanceof IllegalWriteException) {
                 return new MIMEMailException(Code.ILLEGAL_WRITE, e, e.getMessage());

@@ -187,7 +187,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return (checkForNamespaceFolder(fullname) != null);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
@@ -207,7 +207,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
@@ -306,7 +306,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return EMPTY_PATH;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
@@ -396,7 +396,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         try {
             return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig, ctx);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
@@ -538,7 +538,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
                     }
                 } else {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig);
+                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
                 }
             }
             /*
@@ -604,7 +604,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         "could not be deleted"), e2);
                 }
             }
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final MailException e) {
             if (createMe != null && created) {
                 try {
@@ -862,7 +862,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return moveMe.getFullName();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IMAPException e) {
             throw e;
         } catch (final AbstractOXException e) {
@@ -960,7 +960,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return updateMe.getFullName();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IMAPException e) {
             throw e;
         } catch (final AbstractOXException e) {
@@ -1040,7 +1040,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return fullname;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
@@ -1221,7 +1221,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 f.close(false);
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final AbstractOXException e) {
             throw new IMAPException(e);
         }
@@ -1257,7 +1257,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
@@ -1382,7 +1382,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             return quotas;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 

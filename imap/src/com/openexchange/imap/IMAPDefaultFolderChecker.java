@@ -311,7 +311,7 @@ public final class IMAPDefaultFolderChecker {
                     }
                     setDefaultFoldersChecked(true);
                 } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig);
+                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
                 }
             }
         }

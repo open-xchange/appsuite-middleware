@@ -275,7 +275,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
             imapStore.connect(config.getServer(), config.getPort(), config.getLogin(), tmpPass);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, config);
+            throw MIMEMailException.handleMessagingException(e, config, session);
         } finally {
             if (null != imapStore) {
                 try {
