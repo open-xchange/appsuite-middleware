@@ -12,6 +12,23 @@
 </#if>
 </#macro>
 
+<#macro image contact>
+<#if contact.containsImage1()>
+	<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
+</#if>
+</#macro>
+
+<#macro imageMicroformatted contact>
+<#if contact.containsImage1()>
+<tr>
+<td class="value" colspan="2">
+	<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
+</td>
+</tr>
+</#if>
+</#macro>
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
@@ -93,6 +110,7 @@
 			<#list contacts as contact>
 			<li>
 				<a href="#contact_${contacts?seq_index_of(contact)}">
+					<@image contact=contact />
 					${contact.title!""}
 					${contact.givenName!""}
 					${contact.middleName!""}
@@ -108,6 +126,7 @@
 	<div id="contacts">
 		<#list contacts as contact>
 		<table class="ox_contact" id="contact_${contacts?seq_index_of(contact)}">
+			<@imageMicroformatted contact=contact />
 			<tr>
 			<td class="key">Name:</td>
 			<td class="value">

@@ -48,15 +48,24 @@
  */
 package com.openexchange.subscribe.microformats.transformers;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.tools.ImageTypeDetector;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -64,6 +73,8 @@ import com.openexchange.groupware.container.ContactObject;
 public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	
     private static final DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd");
+    
+    private static final Log LOG = LogFactory.getLog(MapToContactObjectTransformer.class);
     
 	public List<ContactObject> transform (List<Map<String, String>> inlist){
 		ArrayList<ContactObject> outlist = new ArrayList<ContactObject>();
@@ -289,7 +300,12 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 				contact.setCompany((String)map.get("ox_company"));
 			}  
 			if (map.containsKey("ox_image")){
-				contact.setImage1(((String)map.get("ox_image")).getBytes());
+			    try {
+                    loadImageFromURL(contact, new URL(map.get("ox_image")));
+                } catch (MalformedURLException e) {
+                    LOG.warn(e.getMessage(), e);
+                    // Discard image. This is all best effort, nothing more, maybe next time.
+                }
 			}  
 			if (map.containsKey("ox_userfield01")){
 				contact.setGivenName((String)map.get("ox_userfield01"));
@@ -357,5 +373,62 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 		
 		return outlist;
 	}
+	
+	// Shamelessly stolen from OXContainerConverter. Thanks. :)
+	private static void loadImageFromURL(final ContactObject contactContainer, final URL url) {
+        String mimeType = null;
+        byte[] bytes = null;
+        try {
+            final URLConnection urlCon = url.openConnection();
+            urlCon.setConnectTimeout(2500);
+            urlCon.setReadTimeout(2500);
+            urlCon.connect();
+            mimeType = urlCon.getContentType();
+            final BufferedInputStream in = new BufferedInputStream(urlCon.getInputStream());
+            try {
+                final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream();
+                final byte[] bbuf = new byte[8192];
+                int read = -1;
+                while ((read = in.read(bbuf, 0, bbuf.length)) != -1) {
+                    buffer.write(bbuf, 0, read);
+                }
+                bytes = buffer.toByteArray(); //value.getBytes(CHARSET_ISO_8859_1);
+                // In case the config-file was not read (yet) the default value is given here
+                long maxSize=33750000;
+                /*if (null != ContactConfig.getInstance().getProperty("max_image_size")){
+                    maxSize = Long.parseLong(ContactConfig.getInstance().getProperty("max_image_size"));
+                }   
+                if (maxSize > 0 && bytes.length > maxSize) {
+                    LOG.warn("Contact image is too large and is therefore ignored", new Throwable());
+                    bytes = null;
+                }*/ // FIXME!
+            } finally {
+                try {
+                    in.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        } catch (final java.net.SocketTimeoutException e) {
+            final String uri = url.toString();
+            LOG.warn(new StringBuilder(64 + uri.length()).append("Either connecting to or reading from an image's URI timed out: ").append(
+                uri).toString(), e);
+        } catch (final IOException e) {
+            final String uri = url.toString();
+            LOG.warn(new StringBuilder(32 + uri.length()).append("Image  URI could not be loaded: ").append(uri).toString(), e);
+        }
+        if (bytes != null) {
+            contactContainer.setImage1(bytes);
+            if (mimeType == null) {
+                mimeType = ImageTypeDetector.getMimeType(bytes);
+                /*if ("application/octet-stream".equals(mimeType)) {
+                    mimeType = getMimeType(url.toString());
+                }*/
+            }
+            contactContainer.setImageContentType(mimeType);
+        }
+    }
+	
+	
 
 }

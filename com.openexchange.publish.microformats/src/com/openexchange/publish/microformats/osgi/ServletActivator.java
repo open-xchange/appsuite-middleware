@@ -55,8 +55,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.microformats.ContactPictureServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
+import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.templating.TemplateService;
 
@@ -74,7 +77,8 @@ public class ServletActivator extends DeferredActivator {
     private boolean registered;
 
     private static final Class<?>[] NEEDED_SERVICES = {
-        HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class };
+        HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
+        ContactInterfaceDiscoveryService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -108,38 +112,49 @@ public class ServletActivator extends DeferredActivator {
         PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
         ContextService contexts = getService(ContextService.class);
         TemplateService templates = getService(TemplateService.class);
+        ContactInterfaceDiscoveryService contacts = getService(ContactInterfaceDiscoveryService.class);
 
-        if (null == httpService || null == dataLoader || null == context || null == templates) {
+        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts) {
             return;
         }
 
-        MicroformatServlet.setContextService(contexts);
+        OnlinePublicationServlet.setContextService(contexts);
+
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setTemplateService(templates);
 
         MicroformatServlet microformatServlet = new MicroformatServlet();
 
+        ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
+
         registered = true;
         for (String alias : activator.getAliases()) {
             try {
-                httpService.registerServlet(alias+"/*", microformatServlet, null, null);
+                httpService.registerServlet(alias + "/*", microformatServlet, null, null);
             } catch (ServletException e) {
                 LOG.error(e.getMessage(), e);
             } catch (NamespaceException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
+        try {
+            httpService.registerServlet("/publications/contactPictures/*", new ContactPictureServlet(), null, null);
+        } catch (ServletException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NamespaceException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     private void unregisterServlet() {
-        if(!registered)
+        if (!registered)
             return;
         registered = false;
-            
+
         HttpService httpService = getService(HttpService.class);
 
         for (String alias : activator.getAliases()) {
-            httpService.unregister(alias+"/*");
+            httpService.unregister(alias + "/*");
         }
     }
 

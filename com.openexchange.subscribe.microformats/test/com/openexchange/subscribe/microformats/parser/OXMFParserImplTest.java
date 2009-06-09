@@ -90,6 +90,18 @@ public class OXMFParserImplTest extends TestCase {
         
     }
     
+    public void testCollectImageSources() throws SubscriptionException {
+        final String text = "<html><head /><body><div class='ox_contact someOtherClass'><img src=\"http://www.open-xchange.com/bla.png\" class=\"ox_image\" /> <span class='ox_bla someOtherClass'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
+        final List<Map<String, String>> parsed = parser.parse(text);
+        final Map blaMap = parsed.get(0);
+        
+        
+        assertEquals("Bla", blaMap.get("ox_bla"));
+        assertEquals("Blupp", blaMap.get("ox_blupp"));
+        assertEquals("http://www.open-xchange.com/bla.png", blaMap.get("ox_image"));
+        
+    }
+    
     public void testCollectDeeplyNested() throws SubscriptionException {
         final String text = "<html><head /><body><div class='ox_contact'><div><span class='ox_bla'>Bla</span><span class='ox_blupp bla'>Blupp</span></div><!-- comment --> </div><div class='ox_contact'><div><div><span class='ox_bla'>Bla2</span></div><span class='ox_blupp'>Blupp2</span></div></div></body></html>";
         final List<Map<String, String>> parsed = parser.parse(text);

@@ -80,6 +80,10 @@ public final class OXMFParserImpl implements OXMFParser {
 
     private static final String ATTR_CLASS = "class";
 
+    private static final String ATTR_SRC = "src";
+
+    private static final String ELEM_IMG = "img";
+
     /*
      * Member section
      */
@@ -218,26 +222,34 @@ public final class OXMFParserImpl implements OXMFParser {
     private void parseNestedElement(final XMLStreamReader parser, final Map<String, String> map) throws XMLStreamException {
         final int count = parser.getAttributeCount();
         List<String> classList = new LinkedList<String>();
+        String text = null;
+        boolean collectSrc = false;
+        if (ELEM_IMG.equalsIgnoreCase(parser.getLocalName())) {
+            collectSrc = true;
+        }
         for (int i = 0; i < count; i++) {
             final String attributeName = parser.getAttributeLocalName(i);
             if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                 final String attributeValue = parser.getAttributeValue(i);
                 final String[] classes = attributeValue.split("\\s+");
                 for (String klass : classes) {
-                    System.out.println(klass);
                     if (attributePrefixes.contains(klass) || startsWith(klass)) {
                         classList.add(klass);
                     }
                 }
+            } else if (collectSrc && ATTR_SRC.equalsIgnoreCase(attributeName)) {
+                text = parser.getAttributeValue(i);
             }
         }
 
         if (!classList.isEmpty()) {
-            String text = parser.getElementText();
+            if (text == null) {
+                text = parser.getElementText();
+                level--;
+            }
             for (String klass : classList) {
                 map.put(klass, text);
             }
-            level--;
         }
 
     }

@@ -51,120 +51,99 @@ package com.openexchange.publish.microformats;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.context.ContextService;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.microformats.tools.UncloseableWriter;
-import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateService;
+import com.openexchange.publish.tools.PublicationSession;
+
 
 /**
- * {@link MicroformatServlet}
- * 
+ * {@link ContactPictureServlet}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class MicroformatServlet extends OnlinePublicationServlet {
-
-    private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
-
-    private static final Map<String, String> templateNames = new HashMap<String, String>();
-
-    private static final Log LOG = LogFactory.getLog(MicroformatServlet.class);
-
-    private static final String MODULE = "module";
-
+public class ContactPictureServlet extends OnlinePublicationServlet {
+    
+    private static final String CONTEXTID = "contextId";
     private static final String SITE = "site";
+    private static final String CONTACT_ID = "contactId";
+
+    private static final Log LOG = LogFactory.getLog(ContactPictureServlet.class);
     
-    private static final String CONTEXTID = "ctx";
-
-    private static PublicationDataLoaderService dataLoader = null;
-
-    private static TemplateService templateService = null;
+    private static OXMFPublicationService contactPublisher = null;
     
-    private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
-
-    public static void setPublicationDataLoaderService(PublicationDataLoaderService service) {
-        dataLoader = service;
+    public static void setContactPublisher(OXMFPublicationService service) {
+        contactPublisher = service;
     }
-
-    public static void setTemplateService(TemplateService service) {
-        templateService = service;
+    
+    private static ContactInterfaceDiscoveryService contacts;
+    
+    public static void setContactInterfaceDiscoveryService(ContactInterfaceDiscoveryService service) {
+        contacts = service;
     }
-
-    public static void registerType(String module, OXMFPublicationService publisher, String templateName, Map<String, Object> additionalVars) {
-        publishers.put(module, publisher);
-        templateNames.put(module, templateName);
-        additionalTemplateVariables.put(module, additionalVars);
-    }
-
+    
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String, String> args = getPublicationArguments(req);
         try {
-            resp.setContentType("text/html; charset=UTF-8");
-            Map<String, String> args = getPublicationArguments(req);
-            String module = args.get(MODULE);
-
-            OXMFPublicationService publisher = publishers.get(module);
-            if (publisher == null) {
-                resp.getWriter().println("Don't know how to handle module " + module);
-                return;
-            }
             Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
-            Publication publication = publisher.getPublication(ctx, args.get(SITE));
+            Publication publication = contactPublisher.getPublication(ctx, args.get(SITE));
             if (publication == null) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site " + args.get(SITE));
-
                 return;
             }
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
-
-            Collection<? extends Object> loaded = dataLoader.load(publication);
-
-            HashMap<String, Object> variables = new HashMap<String, Object>();
-            variables.put(getCollectionName(module), loaded);
-            variables.put("publication", publication);
-            variables.put("request", req);
             
-            if(additionalTemplateVariables.containsKey(module)) {
-                variables.putAll(additionalTemplateVariables.get(module));
-            }
-            String templateName = templateNames.get(module);
-            OXTemplate template = templateService.loadTemplate(templateName);
-
-            template.process(variables, new UncloseableWriter(resp.getWriter()));
-
+            int folderId = Integer.parseInt(publication.getEntityId());
+            int contactId = Integer.parseInt(args.get(CONTACT_ID));
+            
+            ContactObject contact = loadContact(publication, folderId, contactId);
+            
+            writeImage(contact, resp);
+            
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
-            resp.getWriter().println("An exception occurred: ");
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             t.printStackTrace(resp.getWriter());
+            LOG.error(t.getMessage(), t);
         }
+
     }
 
-    private String getCollectionName(String module) {
-        if (module.equals("contacts")) {
-            return "contacts";
-        }
-        return null;
+    private void writeImage(ContactObject contact, HttpServletResponse resp) throws IOException {
+        resp.setContentType(contact.getImageContentType());
+        ServletOutputStream outputStream = resp.getOutputStream();
+        outputStream.write(contact.getImage1());
+        outputStream.flush();
     }
 
+    private ContactObject loadContact(Publication publication, int folderId, int contactId) throws OXException {
+        ContactInterface contactInterface = contacts.newContactInterface(folderId, new PublicationSession(publication));
+        contactInterface.getObjectsById(new int[][]{{contactId, folderId}}, new int[]{ContactObject.IMAGE1, ContactObject.IMAGE1_CONTENT_TYPE});
+        return contactInterface.getObjectById(contactId, folderId);
+    }
 
     private Map<String, String> getPublicationArguments(HttpServletRequest req) throws UnsupportedEncodingException {
+        // URL format is: /publications/contactPictures/[cid]/[siteName]/[contactID]/[displayName]?secret=[secret]
+        
         String[] path = req.getPathInfo().split("/");
         List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
@@ -177,12 +156,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         if (startIndex == -1) {
             throw new IllegalArgumentException("This does not look like a valid path: " + req.getPathInfo());
         }
-        String site = Strings.join(decode(normalized.subList(startIndex + 3, normalized.size()), req), "/");
+        String site = Strings.join(decode(normalized.subList(startIndex + 3, normalized.size()-2), req), "/");
         Map<String, String> args = new HashMap<String, String>();
-        args.put(MODULE, normalized.get(startIndex + 1));
         args.put(CONTEXTID, normalized.get(startIndex + 2));
         args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
+        args.put(CONTACT_ID, normalized.get(normalized.size()-2));
         return args;
     }
+    
 }
