@@ -101,9 +101,9 @@ public class XingContactParser {
     	    logout.click();
     	    webClient.closeAllWindows();
 	    } catch (FailingHttpStatusCodeException e) {
-            throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+            throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (IOException e) {
-            throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+            throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
 	    
 	    ContactObject[] contactObjectsArray = new ContactObject[contactObjects.size()];
