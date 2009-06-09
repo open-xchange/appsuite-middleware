@@ -50,7 +50,6 @@
 package com.openexchange.smtp.config;
 
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
@@ -62,13 +61,7 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
  */
 public final class SMTPSessionProperties {
 
-    private static Properties sessionProperties;
-
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
-    private static final String STR_TRUE = "true";
-
-    private static final String STR_FALSE = "false";
+    private static volatile Properties sessionProperties;
 
     /**
      * No instantiation
@@ -83,26 +76,27 @@ public final class SMTPSessionProperties {
      * @return a cloned version of default SMTP session properties
      */
     public static Properties getDefaultSessionProperties() {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (null == sessionProperties) {
+        Properties tmp = sessionProperties;
+        if (null == tmp) {
+            synchronized (SMTPSessionProperties.class) {
+                tmp = sessionProperties;
+                if (null == tmp) {
                     initializeSMTPProperties();
-                    initialized.set(true);
+                    tmp = sessionProperties;
                 }
             }
         }
-        return (Properties) sessionProperties.clone();
+        return (Properties) tmp.clone();
     }
 
     /**
      * Resets default SMTP session properties
      */
     public static void resetDefaultSessionProperties() {
-        if (initialized.get()) {
-            synchronized (initialized) {
+        if (null != sessionProperties) {
+            synchronized (SMTPSessionProperties.class) {
                 if (null != sessionProperties) {
                     sessionProperties = null;
-                    initialized.set(false);
                 }
             }
         }
@@ -121,20 +115,20 @@ public final class SMTPSessionProperties {
          * Set some global JavaMail properties
          */
         if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
         }
         if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-            System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+            sessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+            System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
         }
         if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
         }
         if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
         }
         if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
             sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());

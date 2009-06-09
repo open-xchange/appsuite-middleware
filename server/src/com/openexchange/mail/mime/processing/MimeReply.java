@@ -92,7 +92,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -271,7 +270,7 @@ public final class MimeReply {
                 /*
                  * Add any other address the user is known by to filter
                  */
-                final String alternates = mailSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_ALTERNATES);
+                final String alternates = mailSession.getProperty("mail.alternates");
                 if (alternates != null) {
                     filter.addAll(Arrays.asList(parseAddressList(alternates, false)));
                 }

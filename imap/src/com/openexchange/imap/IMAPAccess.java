@@ -104,6 +104,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
 
+    /*-
+     * Member section
+     */
+
     private transient IMAPFolderStorage folderStorage;
 
     private transient IMAPMessageStorage messageStorage;
@@ -248,33 +252,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapProps.putAll(getMailProperties());
         }
         /*
-         * Set timeouts
+         * Get parameterized IMAP session
          */
-        if (imapConfProps.getImapTimeout() > 0) {
-            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(imapConfProps.getImapTimeout()));
-        }
-        if (imapConfProps.getImapConnectionTimeout() > 0) {
-            imapProps.put(
-                MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT,
-                String.valueOf(imapConfProps.getImapConnectionTimeout()));
-        }
-        /*
-         * Check if a secure IMAP connection should be established
-         */
-        if (config.isSecure()) {
-            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, TrustAllSSLSocketFactory.class.getName());
-            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(config.getPort()));
-            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, "false");
-            imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, "true");
-            /*
-             * Needed for JavaMail >= 1.4
-             */
-            Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
-        }
-        /*
-         * Apply properties to IMAP session
-         */
-        imapSession = javax.mail.Session.getInstance(imapProps, null);
+        final javax.mail.Session imapSession = setConnectProperties(
+            config.getPort(),
+            config.isSecure(),
+            imapConfProps.getImapTimeout(),
+            imapConfProps.getImapConnectionTimeout(),
+            imapProps);
         /*
          * Check if debug should be enabled
          */
@@ -282,6 +267,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapSession.setDebug(true);
             imapSession.setDebugOut(System.err);
         }
+        IMAPStore imapStore = null;
         try {
             /*
              * Get store
@@ -300,8 +286,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
     }
-
-    private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
     private static final String ERR_CONNECT_TIMEOUT = "connect timed out";
 
@@ -342,33 +326,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapProps.putAll(getMailProperties());
             }
             /*
-             * Set timeouts
+             * Get parameterized IMAP session
              */
-            if (imapConfProps.getImapTimeout() > 0) {
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(imapConfProps.getImapTimeout()));
-            }
-            if (imapConfProps.getImapConnectionTimeout() > 0) {
-                imapProps.put(
-                    MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT,
-                    String.valueOf(imapConfProps.getImapConnectionTimeout()));
-            }
-            /*
-             * Check if a secure IMAP connection should be established
-             */
-            if (config.isSecure()) {
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, TrustAllSSLSocketFactory.class.getName());
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(config.getPort()));
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, "false");
-                imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, "true");
-                /*
-                 * Needed for JavaMail >= 1.4
-                 */
-                Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
-            }
-            /*
-             * Apply properties to IMAP session
-             */
-            imapSession = javax.mail.Session.getInstance(imapProps, null);
+            imapSession = setConnectProperties(
+                config.getPort(),
+                config.isSecure(),
+                imapConfProps.getImapTimeout(),
+                imapConfProps.getImapConnectionTimeout(),
+                imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -672,6 +637,62 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         } catch (final MailAccountException e) {
             throw new IMAPException(e);
         }
+    }
+
+    private static javax.mail.Session setConnectProperties(final int port, final boolean isSecure, final int timeout, final int connectionTimeout, final Properties imapProps) {
+        /*
+         * Set timeouts
+         */
+        if (timeout > 0) {
+            imapProps.put("mail.imap.timeout", String.valueOf(timeout));
+        }
+        if (connectionTimeout > 0) {
+            imapProps.put("mail.imap.connectiontimeout", String.valueOf(connectionTimeout));
+        }
+        /*
+         * Check if a secure IMAP connection should be established
+         */
+        final String sPort = String.valueOf(port);
+        final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        if (isSecure) {
+            /*
+             * Enables the use of the STARTTLS command.
+             */
+            imapProps.put("mail.imap.starttls.enable", "true");
+            /*
+             * Set main socket factory to a SSL socket factory
+             */
+            imapProps.put("mail.imap.socketFactory.class", socketFactoryClass);
+            imapProps.put("mail.imap.socketFactory.port", sPort);
+            imapProps.put("mail.imap.socketFactory.fallback", "false");
+            /*
+             * Needed for JavaMail >= 1.4
+             */
+            Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+        } else {
+            /*
+             * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
+             */
+            imapProps.put("mail.imap.starttls.enable", "true");
+            /*
+             * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
+             * so.
+             */
+            imapProps.put("mail.imap.socketFactory.port", sPort);
+            imapProps.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
+            imapProps.put("mail.imap.ssl.socketFactory.port", sPort);
+            imapProps.put("mail.imap.socketFactory.fallback", "false");
+            /*
+             * Specify SSL protocols
+             */
+            imapProps.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+            // imapProps.put("mail.imap.ssl.enable", "true");
+            /*
+             * Needed for JavaMail >= 1.4
+             */
+            Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+        }
+        return javax.mail.Session.getInstance(imapProps, null);
     }
 
 }

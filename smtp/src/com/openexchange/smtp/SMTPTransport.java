@@ -85,7 +85,6 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
@@ -143,8 +142,6 @@ public final class SMTPTransport extends MailTransport {
         usm = null;
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
-
-    private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
     /**
      * Constructor
@@ -225,48 +222,71 @@ public final class SMTPTransport extends MailTransport {
                      */
                     final ISMTPProperties smtpProperties = smtpConfig.getSMTPProperties();
                     if (smtpProperties.getSmtpLocalhost() != null) {
-                        smtpProps.put(MIMESessionPropertyNames.PROP_SMTPLOCALHOST, smtpProperties.getSmtpLocalhost());
+                        smtpProps.put("mail.smtp.localhost", smtpProperties.getSmtpLocalhost());
                     }
                     if (smtpProperties.getSmtpTimeout() > 0) {
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_TIMEOUT, String.valueOf(smtpProperties.getSmtpTimeout()));
+                        smtpProps.put("mail.smtp.timeout", String.valueOf(smtpProperties.getSmtpTimeout()));
                     }
                     if (smtpProperties.getSmtpConnectionTimeout() > 0) {
-                        smtpProps.put(
-                            MIMESessionPropertyNames.PROP_MAIL_SMTP_CONNECTIONTIMEOUT,
-                            String.valueOf(smtpProperties.getSmtpConnectionTimeout()));
+                        smtpProps.put("mail.smtp.connectiontimeout", String.valueOf(smtpProperties.getSmtpConnectionTimeout()));
                     }
-                    smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_AUTH, smtpProperties.isSmtpAuth() ? "true" : "false");
+                    smtpProps.put("mail.smtp.auth", smtpProperties.isSmtpAuth() ? "true" : "false");
                     /*
                      * Check if a secure SMTP connection should be established
                      */
+                    final String sPort = String.valueOf(smtpConfig.getPort());
+                    final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
                     if (smtpConfig.isSecure()) {
                         /*
-                         * Enable TLS
+                         * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
+                         * connection before issuing any login commands.
                          */
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
+                        smtpProps.put("mail.smtp.starttls.enable", "true");
                         /*
-                         * Enable SSL, too
+                         * Force use of SSL through specifying the name of the javax.net.SocketFactory interface. This class will be used to
+                         * create SMTP sockets.
                          */
-                        smtpProps.put(
-                            MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS,
-                            TrustAllSSLSocketFactory.class.getName());
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig.getPort()));
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
+                        smtpProps.put("mail.smtp.socketFactory.class", socketFactoryClass);
+                        smtpProps.put("mail.smtp.socketFactory.port", sPort);
+                        smtpProps.put("mail.smtp.socketFactory.fallback", "false");
                         /*
-                         * Specify protocols
+                         * Specify SSL protocols
                          */
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL_PROTOCOLS, "SSLv3 TLSv1");
-                        smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL, "true");
+                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
                          */
-                        Security.setProperty(PROPERTY_SECURITY_PROVIDER, TrustAllSSLSocketFactory.class.getName());
+                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+                    } else {
+                        /*
+                         * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
+                         * connection before issuing any login commands.
+                         */
+                        smtpProps.put("mail.smtp.starttls.enable", "true");
+                        /*
+                         * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create SMTP SSL sockets if TLS
+                         * handshake says so.
+                         */
+                        smtpProps.put("mail.smtp.socketFactory.port", sPort);
+                        smtpProps.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
+                        smtpProps.put("mail.smtp.ssl.socketFactory.port", sPort);
+                        smtpProps.put("mail.smtp.socketFactory.fallback", "false");
+                        /*
+                         * Specify SSL protocols
+                         */
+                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        smtpProps.put("mail.smtp.ssl", "true");
+                        /*
+                         * Needed for JavaMail >= 1.4
+                         */
+                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
                     }
                     /*
                      * Apply host & port to SMTP session
                      */
-                    smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
-                    smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(smtpConfig.getPort()));
+                    // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
+                    // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
                     smtpSession = javax.mail.Session.getInstance(smtpProps, null);
                 }
             }
@@ -575,8 +595,8 @@ public final class SMTPTransport extends MailTransport {
         }
         boolean close = false;
         try {
-            if (getTransportConfig0().getSMTPProperties().isSmtpAuth()) {
-                final SMTPConfig config = getTransportConfig0();
+            final SMTPConfig config = getTransportConfig0();
+            if (config.getSMTPProperties().isSmtpAuth()) {
                 final String encPass = encodePassword(config.getPassword());
                 transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
                 close = true;
