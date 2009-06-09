@@ -20,11 +20,7 @@
 
 <#macro imageMicroformatted contact>
 <#if contact.containsImage1()>
-<tr>
-<td class="value" colspan="2">
 	<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
-</td>
-</tr>
 </#if>
 </#macro>
 
@@ -67,13 +63,16 @@
 		text-align: right;
 		padding-right: 1em;
 	}
-	table.ox_contact, td.value {
+	table.a_contact, td.value {
 		width: 100%;
 	}
 	td.value, td.value span {
 		color: #446;
 		font-weight: bold;
 		text-align: left;
+	}
+	.ox_contact{
+		clear: both;
 	}
 	#nav, .ox_contact {
 		margin: .5em;
@@ -98,19 +97,29 @@
 		text-decoration none;
 		color: #446;
 	}
+	.ox_image{
+		float:right;
+	}
+	.message {
+		margin-top: 2em;
+		text-align: center;
+	}
 
 	-->
 	</style>
 </head>
 
 <body>
+	<#if (contacts?size == 0)>
+		<div class="message">Folder is empty</div>
+	</#if>
+
 	<#if (contacts?size > 2)>
 	<div id="nav">
 		<ul>
 			<#list contacts as contact>
 			<li>
 				<a href="#contact_${contacts?seq_index_of(contact)}">
-					<@image contact=contact />
 					${contact.title!""}
 					${contact.givenName!""}
 					${contact.middleName!""}
@@ -125,8 +134,9 @@
 	
 	<div id="contacts">
 		<#list contacts as contact>
-		<table class="ox_contact" id="contact_${contacts?seq_index_of(contact)}">
-			<@imageMicroformatted contact=contact />
+		<div class="ox_contact">
+					<@imageMicroformatted contact=contact />
+		<table class="a_contact" id="contact_${contacts?seq_index_of(contact)}">
 			<tr>
 			<td class="key">Name:</td>
 			<td class="value">
@@ -225,6 +235,7 @@
 			<@render key="ox_userfield20" title="Userfield20" value=contact.userField20!"" /> <!--ox userfield20-->
 		</table>
 		<div class="back"><a href="#nav">Back to the top</a></div>
+		</div>
 		</#list>
 	</div>
 </body>
