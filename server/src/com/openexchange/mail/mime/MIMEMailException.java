@@ -125,7 +125,7 @@ public class MIMEMailException extends MailException {
         /**
          * Mail folder "%1$s" could not be found on server %2$s with login %3$s (user=%4$s, context=%5$s).
          */
-        FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found onserver %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_NOT_FOUND.detailNumber),
+        FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_NOT_FOUND.detailNumber),
         /**
          * Folder "%1$s" is closed.
          * <p>
