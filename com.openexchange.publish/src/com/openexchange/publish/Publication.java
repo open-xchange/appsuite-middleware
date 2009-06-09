@@ -129,6 +129,16 @@ public class Publication {
         this.context = context;
     }
     
+    public void create() throws PublicationException {
+        getTarget().getPublicationService().create(this);
+    }
     
+    public void update() throws PublicationException {
+        getTarget().getPublicationService().update(this);
+    }
+    
+    public void destroy() throws PublicationException {
+        getTarget().getPublicationService().delete(this);
+    }
     
 }

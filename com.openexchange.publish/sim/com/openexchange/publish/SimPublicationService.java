@@ -50,36 +50,43 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
-
 
 /**
  * {@link SimPublicationService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SimPublicationService implements PublicationService {
 
     private PublicationTarget target;
 
-    /* (non-Javadoc)
+    private int newId;
+
+    private int updatedId;
+
+    private Set<Integer> deletedIds = new HashSet<Integer>();
+
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#create(com.openexchange.publish.Publication)
      */
     public void create(Publication publication) {
-        // TODO Auto-generated method stub
-
+        publication.setId(newId);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#delete(com.openexchange.publish.Publication)
      */
     public void delete(Publication publication) {
-        // TODO Auto-generated method stub
-
+        deletedIds.add(publication.getId());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context)
      */
     public Collection<Publication> getAllPublications(Context ctx) {
@@ -87,7 +94,8 @@ public class SimPublicationService implements PublicationService {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context, int)
      */
     public Collection<Publication> getAllPublications(Context ctx, String entityId) {
@@ -95,14 +103,16 @@ public class SimPublicationService implements PublicationService {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getTarget()
      */
     public PublicationTarget getTarget() {
         return target;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#knows(com.openexchange.groupware.contexts.Context, int)
      */
     public boolean knows(Context ctx, int publicationId) {
@@ -110,7 +120,8 @@ public class SimPublicationService implements PublicationService {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#load(com.openexchange.groupware.contexts.Context, int)
      */
     public Publication load(Context ctx, int publicationId) {
@@ -118,16 +129,28 @@ public class SimPublicationService implements PublicationService {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#update(com.openexchange.publish.Publication)
      */
     public void update(Publication publication) {
-        // TODO Auto-generated method stub
-
+        this.updatedId = publication.getId();
     }
 
     public void setTarget(PublicationTarget publicationTarget) {
         this.target = publicationTarget;
+    }
+
+    public void setNewId(int i) {
+        this.newId = i;
+    }
+
+    public int getUpdatedId() {
+        return updatedId;
+    }
+
+    public Set<Integer> getDeletedIDs() {
+        return deletedIds;
     }
 
 }
