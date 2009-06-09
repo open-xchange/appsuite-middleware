@@ -330,10 +330,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING && order_field != ContactObject.USE_COUNT_GLOBAL_FIRST) {
             specialSort = false;
             order.append(" ORDER BY co.");
-            int realOrderField = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? ContactObject.USE_COUNT : order_field;
+            final int realOrderField = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? ContactObject.USE_COUNT : order_field;
             order.append(Contacts.mapping[realOrderField].getDBFieldName());
             order.append(' ');
-            String realOrderMechanism = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            final String realOrderMechanism = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
                 order.append(realOrderMechanism);
             } else {
@@ -444,10 +444,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING) {
             specialSort = false;
             order.append(" ORDER BY co.");
-            int realOrderField = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? ContactObject.USE_COUNT : order_field;
+            final int realOrderField = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? ContactObject.USE_COUNT : order_field;
             order.append(Contacts.mapping[realOrderField].getDBFieldName());
             order.append(' ');
-            String realOrderMechanism = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            final String realOrderMechanism = order_field == ContactObject.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
                 order.append(realOrderMechanism);
             } else {
@@ -754,7 +754,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             msg={    ContactException.INIT_CONNECTION_FROM_DBPOOL,
                             ContactException.NON_CONTACT_FOLDER_MSG,
                             ContactException.NO_PERMISSION_MSG,
-                            ContactException.NO_PERMISSION_MSG,
+                            ContactException.NO_READ_PERMISSION_MSG,
                             "An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d",
                             "An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d"
                         }

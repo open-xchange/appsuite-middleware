@@ -1,6 +1,7 @@
 * 2009-06-09 - thorben.betten@open-xchange.com
 
  - Bugfix #13807: Supporting TLS for SMTP and IMAP provider
+ - Bugfix #13431: Proper error message on missing read permission to contact folder
 
 * 2009-06-08 - francisco.laguna@open-xchange.com
 
