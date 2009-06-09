@@ -126,8 +126,12 @@ public final class POP3StoreConnector {
             if ((null != pop3Properties) && !pop3Properties.isEmpty()) {
                 pop3Props.putAll(pop3Properties);
             }
-            /*
-             * Check if a secure POP3 connection should be established
+            /*-
+             * Check if a secure POP3 connection should be established.
+             * 
+             * Unfortunately the JavaMail POP3 provider doesn't support to start in plain text mode and
+             * switch the connection into TLS mode using the STLS command. Possibly the server will accept
+             * connecting to the secure POP3 port in TLS mode.
              */
             final int port = pop3Config.getPort();
             if (pop3Config.isSecure()) {
