@@ -61,6 +61,9 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.json.types.EntityMap;
+import com.openexchange.publish.json.types.FolderType;
+import com.openexchange.publish.json.types.IDType;
 
 import static com.openexchange.publish.json.FieldNames.*;
 
@@ -77,12 +80,9 @@ public class PublicationWriter {
     private static final FormContentWriter formWriter = new FormContentWriter();
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
-    private Map<String, EntityType> entityTypes = new HashMap<String, EntityType>();
+    private Map<String, EntityType> entityTypes = new EntityMap();
     
-    public PublicationWriter() {}
-    
-    public PublicationWriter(Map<String, EntityType> entityTypes) {
-        this.entityTypes = entityTypes;
+    public PublicationWriter() {
     }
     
     public JSONObject write(Publication publication) throws JSONException, PublicationJSONException {
@@ -135,6 +135,9 @@ public class PublicationWriter {
     }
 
     private JSONObject writeEntity(Publication publication) throws PublicationJSONException, JSONException {
+        if(publication.getModule() == null) {
+            return new JSONObject();
+        }
         EntityType type = entityTypes.get(publication.getModule());
         if(type == null) {
             throw PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE.create(publication.getModule());

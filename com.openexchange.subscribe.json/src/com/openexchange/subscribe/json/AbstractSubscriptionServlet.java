@@ -66,6 +66,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
+    
+    
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        return session.getUserConfiguration().isSubscription();
+    }
 
     protected void writeOXException(AbstractOXException x, HttpServletResponse resp) {
         getLoggingLogic().log(x);

@@ -49,36 +49,64 @@
 
 package com.openexchange.publish.json;
 
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.publish.Publication;
 
 
 /**
- * {@link EntityType}
+ * {@link SimPublicationRequest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
+public class SimPublicationRequest implements PublicationRequest {
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
+    private Action action;
+    private Publication publication;
+    private int[] ids;
+    private List<Publication> publications;
+    private String[] basicColumns;
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
+    public void setAction(Action action) {
+        this.action = action;
+    }
     
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    public Action getAction() {
+        return action;
+    }
+
+    public void setPublication(Publication publication) {
+        this.publication = publication;
+    }
+    
+    public Publication getPublication() {
+        return publication;
+    }
+
+    public void setPublications(List<Publication> publications) {
+        this.publications = publications;
+    }
+
+    public List<Publication> getPublications() {
+        return publications;
+    }
+
+    public void setColumns(String...columns) {
+        this.basicColumns = columns;
+    }
+
+    public String[] getBasicColumns() {
+        return basicColumns;
+    }
+
+    public List<String> getDynamicColumnOrder() {
+        return new ArrayList<String>();
+    }
+    public Map<String, String[]> getDynamicColumns() {
+        return new HashMap<String, String[]>();
+    }
 
 }

@@ -47,38 +47,21 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.publish.json.responses;
 
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.publish.json.PublicationResponse;
 
 
 /**
- * {@link EntityType}
+ * {@link SuccessResponse}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
+public class SuccessResponse implements PublicationResponse {
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
-
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
-    
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    public Object getJSONData() {
+        return 1;
+    }
 
 }

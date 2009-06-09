@@ -108,11 +108,6 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
     }
     
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        return true;
-    }
-
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handleRequest(req, resp);
     }

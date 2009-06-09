@@ -58,6 +58,9 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.json.types.EntityMap;
+import com.openexchange.publish.json.types.FolderType;
+import com.openexchange.publish.json.types.IDType;
 import static com.openexchange.publish.json.FieldNames.*;
 
 /**
@@ -71,19 +74,14 @@ public class PublicationParser {
 
     private static final FormContentParser formParser = new FormContentParser();
 
-    private Map<String, EntityType> entityTypes = new HashMap<String, EntityType>();
+    private Map<String, EntityType> entityTypes = new EntityMap();
 
     public PublicationParser(PublicationTargetDiscoveryService discovery) {
         super();
         this.discovery = discovery;
     }
     
-    public PublicationParser(PublicationTargetDiscoveryService discovery, Map<String, EntityType> entityTypes) {
-        super();
-        this.discovery = discovery;
-        this.entityTypes = entityTypes;
-    }
-
+ 
     /**
      * @param object
      * @return

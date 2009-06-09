@@ -47,38 +47,40 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.publish.json.responses;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.json.PublicationJSONException;
+import com.openexchange.publish.json.PublicationResponse;
+import com.openexchange.publish.json.PublicationWriter;
 
 
 /**
- * {@link EntityType}
+ * {@link PublicationsResponse}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
+public class PublicationsResponse implements PublicationResponse {
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
+    private JSONArray payload;
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
+    public PublicationsResponse(List<Publication> allPublications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder) throws PublicationJSONException, JSONException {
+        JSONArray rows = new JSONArray();
+        PublicationWriter writer = new PublicationWriter();
+        for (Publication publication : allPublications) {
+            JSONArray row = writer.writeArray(publication, basicColumns, dynamicColumns, dynamicColumnOrder, publication.getTarget().getFormDescription());
+            rows.put(row);
+        }
+        this.payload = rows;
+    }
     
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    public Object getJSONData() {
+        return payload;
+    }
 
 }

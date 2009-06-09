@@ -47,38 +47,76 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.publish.json.types;
 
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.publish.json.EntityType;
 
 
 /**
- * {@link EntityType}
+ * {@link EntityMap}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
+public class EntityMap implements Map<String, EntityType>{
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
-
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
+    private static final EntityType ID = new IDType();
+    private static final EntityType FOLDER = new FolderType();
     
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean containsKey(Object key) {
+        return true;
+    }
+
+    public boolean containsValue(Object value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Set<java.util.Map.Entry<String, EntityType>> entrySet() {
+        throw new UnsupportedOperationException();
+    }
+
+    public EntityType get(Object key) {
+        boolean slash = key.toString().contains("/");
+        if(slash) {
+            return ID;
+        }
+        return FOLDER;
+    }
+
+    public boolean isEmpty() {
+        throw new UnsupportedOperationException();
+    }
+
+    public Set<String> keySet() {
+        throw new UnsupportedOperationException();
+    }
+
+    public EntityType put(String key, EntityType value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void putAll(Map<? extends String, ? extends EntityType> t) {
+        throw new UnsupportedOperationException();
+    }
+
+    public EntityType remove(Object key) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int size() {
+        throw new UnsupportedOperationException();
+    }
+
+    public Collection<EntityType> values() {
+        throw new UnsupportedOperationException();
+    }
 
 }

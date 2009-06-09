@@ -49,36 +49,15 @@
 
 package com.openexchange.publish.json;
 
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 
 /**
- * {@link EntityType}
+ * {@link PublicationResponse}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
+public interface PublicationResponse {
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
-
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
-    
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    Object getJSONData();
 
 }

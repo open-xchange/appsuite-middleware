@@ -111,11 +111,10 @@ public class PublicationParserTest extends TestCase {
     
     public void testParse() throws JSONException, PublicationException, PublicationJSONException {
         PublicationParser publicationParser = new PublicationParser(discovery);
-        publicationParser.registerEntityType("oranges", new OrangesEntityType());
         Publication publication = publicationParser.parse(object);
         
         assertEquals("id was wrong", 12, publication.getId());
-        assertEquals("entityId was wrong", "23:42", publication.getEntityId());
+        assertEquals("entityId was wrong", "42", publication.getEntityId());
         assertEquals("entityModule was wrong", "oranges", publication.getModule());
 
         assertNotNull("target was null", publication.getTarget());

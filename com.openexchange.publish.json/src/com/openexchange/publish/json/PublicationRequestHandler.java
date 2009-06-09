@@ -49,36 +49,51 @@
 
 package com.openexchange.publish.json;
 
-import javax.servlet.http.HttpServletRequest;
+import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_ACTION;
 import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.json.responses.CreateResponse;
+import com.openexchange.publish.json.responses.PublicationsResponse;
+import com.openexchange.publish.json.responses.SinglePublicationResponse;
+import com.openexchange.publish.json.responses.SuccessResponse;
 
 
 /**
- * {@link EntityType}
+ * {@link PublicationRequestHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
+public class PublicationRequestHandler {
 
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
-
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
-    
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    public PublicationResponse handle(PublicationRequest req) throws PublicationException, PublicationJSONException, JSONException {
+       
+        switch(req.getAction()) {
+        case NEW: {
+            Publication publication = req.getPublication();
+            publication.create();
+            return new CreateResponse(publication);
+        }
+        case UPDATE: {
+            Publication publication = req.getPublication();
+            publication.update();
+            return new SuccessResponse();
+        }
+        case DELETE: {
+            for(Publication publication : req.getPublications()) {
+                publication.destroy();
+            }
+            return new SuccessResponse();
+        }
+        case GET: {
+            return new SinglePublicationResponse(req.getPublication());
+        }
+        case ALL: case LIST:{
+            return new PublicationsResponse(req.getPublications(), req.getBasicColumns(), req.getDynamicColumns(), req.getDynamicColumnOrder());
+        }
+        }
+        throw UNKNOWN_ACTION.create(req.getAction().toString());
+    }
 
 }

@@ -90,7 +90,7 @@ public class PublicationWriterTest extends TestCase {
         
         publication = new Publication();
         publication.setId(23);
-        publication.setEntityId("12:13");
+        publication.setEntityId("12");
         publication.setModule("oranges");
         publication.setTarget(target);
         publication.setConfiguration(config);
@@ -98,14 +98,12 @@ public class PublicationWriterTest extends TestCase {
     
     public void testWriteObject() throws JSONException, PublicationJSONException {
         PublicationWriter writer = new PublicationWriter();
-        writer.registerEntityType("oranges", new OrangesEntityType());
         JSONObject object = writer.write(publication);
         
         JSONAssertion assertion = new JSONAssertion()
                 .hasKey("id").withValue(23)
                 .hasKey("entity").withValueObject()
-                    .hasKey("id").withValue(12)
-                    .hasKey("folder").withValue(13)
+                    .hasKey("folder").withValue("12")
                     .objectEnds()
                 .hasKey("entityModule").withValue("oranges")
                 .hasKey("target").withValue("com.openexchange.publish.test")

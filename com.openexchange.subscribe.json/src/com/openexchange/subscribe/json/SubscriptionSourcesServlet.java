@@ -85,10 +85,6 @@ public class SubscriptionSourcesServlet extends AbstractSubscriptionServlet {
     private static final Log LOG = LogFactory.getLog(SubscriptionSourcesServlet.class);
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(SubscriptionSourcesServlet.class, LOG);
     
-    @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        return true;
-    }
     
     private static SubscriptionSourceDiscoveryService discoverer = null;
     private static SubscriptionSourceJSONWriterInterface writer = null;

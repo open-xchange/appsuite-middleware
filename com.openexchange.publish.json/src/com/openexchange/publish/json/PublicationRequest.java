@@ -49,36 +49,35 @@
 
 package com.openexchange.publish.json;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
 
 
 /**
- * {@link EntityType}
+ * {@link PublicationRequest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EntityType {
-
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(JSONObject entityDefinition) throws JSONException;
-
-    /**
-     * @param entityDefinition
-     * @return
-     */
-    String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
-
+public interface PublicationRequest {   
     
-    /**
-     * @param entityId
-     * @return
-     */
-    JSONObject toEntity(String entityId) throws JSONException;
+    public static enum Action {
+        NEW, UPDATE, DELETE, GET, ALL, LIST;
+    }
+
+    Publication getPublication() throws PublicationException, PublicationJSONException, JSONException;
+
+    Action getAction();
+
+    List<Publication> getPublications() throws JSONException, PublicationException;
+
+    String[] getBasicColumns();
+
+    Map<String, String[]> getDynamicColumns();
+
+    List<String> getDynamicColumnOrder();
 
 }

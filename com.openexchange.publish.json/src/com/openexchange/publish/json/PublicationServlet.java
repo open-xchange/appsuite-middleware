@@ -75,6 +75,7 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.json.types.EntityMap;
 import com.openexchange.tools.QueryStringPositionComparator;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
@@ -94,16 +95,12 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
     private static PublicationTargetDiscoveryService discovery = null;
     
+    private static final Map<String, EntityType> entities = new EntityMap();
+    
     public static void setPublicationTargetDiscoveryService(PublicationTargetDiscoveryService service) {
         discovery = service;
     }
     
-    private static final Map<String, EntityType> entityTypes = new HashMap<String, EntityType>();
-
-    public static void registerEntityType(String module, EntityType entityType) {
-        entityTypes.put(module, entityType);
-    }
-
     
     @Override
     protected Log getLog() {
@@ -162,8 +159,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
         Publication publication = getPublication(req, session);
         publication.setId(-1);
         
-        PublicationService publisher = publication.getTarget().getPublicationService();
-        publisher.create(publication);
+        publication.create();
         
         writeData(publication.getId(), resp);
         
@@ -171,7 +167,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
     private Publication getPublication(HttpServletRequest req, ServerSession session) throws JSONException, IOException, PublicationException, PublicationJSONException {
         JSONObject object = new JSONObject(getBody(req));
-        Publication publication = new PublicationParser(discovery, entityTypes).parse(object);
+        Publication publication = new PublicationParser(discovery).parse(object);
         publication.setUserId(session.getUserId());
         publication.setContext(session.getContext());
         if(publication.getTarget() == null && publication.getId() > 0) {
@@ -186,8 +182,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
         ServerSession session = getSessionObject(req);
         Publication publication = getPublication(req, session);
         
-        PublicationService publisher = publication.getTarget().getPublicationService();
-        publisher.update(publication);
+        publication.update();
 
         writeData(1, resp);
     }
@@ -219,7 +214,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
 
     private void writePublication(Publication publication, HttpServletResponse resp) throws JSONException, PublicationJSONException {
-        JSONObject object = new PublicationWriter(entityTypes).write(publication);
+        JSONObject object = new PublicationWriter().write(publication);
         writeData(object, resp);
     }
 
@@ -240,7 +235,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
             throw MISSING_PARAMETER.create("entityModule");
         }
         String module = req.getParameter("entityModule");
-        EntityType entityType = entityTypes.get(module);
+        EntityType entityType = entities.get(module);
         if(null == entityType) {
             throw UNKOWN_ENTITY_MODULE.create(module);
         }
@@ -293,7 +288,7 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
     private void writePublications(List<Publication> allPublications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder, HttpServletResponse resp) throws PublicationJSONException, JSONException {
         JSONArray rows = new JSONArray();
-        PublicationWriter writer = new PublicationWriter(entityTypes);
+        PublicationWriter writer = new PublicationWriter();
         for (Publication publication : allPublications) {
             JSONArray row = writer.writeArray(publication, basicColumns, dynamicColumns, dynamicColumnOrder, publication.getTarget().getFormDescription());
             rows.put(row);

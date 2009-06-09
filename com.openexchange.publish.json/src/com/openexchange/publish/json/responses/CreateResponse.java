@@ -47,39 +47,28 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.publish.json.responses;
 
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.json.PublicationResponse;
 
 
 /**
- * {@link OrangesEntityType}
+ * {@link CreateResponse}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OrangesEntityType implements EntityType{
+public class CreateResponse implements PublicationResponse {
 
-    public String toEntityID(JSONObject entityDefinition) throws JSONException {
-        return entityDefinition.getInt("id")+":"+entityDefinition.getInt("folder");
+    private Publication created;
+
+    public CreateResponse(Publication created) {
+        this.created = created;
     }
-
-    public JSONObject toEntity(String entityId) throws JSONException {
-        JSONObject object = new JSONObject();
-        
-        String[] split = entityId.split(":");
-        
-        object.put("id", Integer.valueOf(split[0]));
-        object.put("folder", Integer.valueOf(split[1]));
-        
-        return object;
-    }
-
-    public String toEntityID(HttpServletRequest entityDefinition) throws JSONException {
-        // TODO Auto-generated method stub
-        return null;
+    
+    public Object getJSONData() {
+        return created.getId();
     }
 
 }
