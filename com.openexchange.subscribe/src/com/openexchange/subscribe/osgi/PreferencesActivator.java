@@ -61,17 +61,14 @@ import com.openexchange.subscribe.preferences.Installed;
  */
 public class PreferencesActivator implements BundleActivator {
 
-    private ServiceRegistration enabledRegistry;
-    private ServiceRegistration installedRegistry;
+    private ServiceRegistration userConfigFlagRegistration;
 
     public void start(BundleContext context) throws Exception {
-        //enabledRegistry = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
-        installedRegistry = context.registerService(PreferencesItemService.class.getName(), new Installed(), null);
+        userConfigFlagRegistration = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
     }
 
     public void stop(BundleContext context) throws Exception {
-        //enabledRegistry.unregister();
-        installedRegistry.unregister();
+        userConfigFlagRegistration.unregister();
     }
 
 }

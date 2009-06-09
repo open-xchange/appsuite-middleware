@@ -69,7 +69,7 @@ public class Enabled implements PreferencesItemService {
     }
 
     public String[] getPath() {
-        return new String[] { "modules", "com.openexchange.publish", "enabled" };
+        return new String[] { "modules", "com.openexchange.publish" };
     }
 
     public IValueHandler getSharedValue() {
