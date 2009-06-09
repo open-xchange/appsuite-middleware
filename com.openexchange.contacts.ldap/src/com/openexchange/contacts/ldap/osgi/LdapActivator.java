@@ -53,14 +53,15 @@ import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator.FolderIDAndAdminID;
+import com.openexchange.contacts.ldap.ldap.LdapContactInterfaceProvider;
 import com.openexchange.contacts.ldap.property.ContextProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
@@ -147,15 +148,30 @@ public final class LdapActivator extends DeferredActivator {
             for (final Integer ctx : instance.getContextdetails().keySet()) {
                 final ContextProperties contextProperties = instance.getContextdetails().get(ctx);
                 for (final FolderProperties folderprop : contextProperties.getFolderproperties()) {
-                    final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(new ContextImpl(ctx), folderprop);
+                    final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(
+                        new ContextImpl(ctx.intValue()),
+                        folderprop);
                     final int folderid = createGlobalFolder.getFolderid();
                     final String stringfolderid = String.valueOf(folderid);
-                    final LdapContactInterface ldapContactInterface = new LdapContactInterface(ctx, createGlobalFolder.getAdminid(), folderprop, folderid);
-                    context.registerService(ContactInterface.class.getName(), ldapContactInterface, getHashtableWithFolderID(stringfolderid));
+                    /*
+                     * Register LDAP contact interface provider for current context-ID/folder-ID pair
+                     */
+                    context.registerService(ContactInterfaceProvider.class.getName(), new LdapContactInterfaceProvider(
+                        folderprop,
+                        createGlobalFolder.getAdminid(),
+                        folderid,
+                        ctx.intValue()), getHashtableWithFolderID(stringfolderid, ctx.toString()));
+                    LOG.info(new StringBuilder("Registered global LDAP contact provider for folder \"").append(folderprop.getFoldername()).append(
+                        "\" with id \"").append(stringfolderid).append("\" for context: ").append(ctx).toString());
+                    /*-
+                     * 
+                     * 
+                    final LdapContactInterface ldapContactInterface = new LdapContactInterface(ctx.intValue(), createGlobalFolder.getAdminid(), folderprop, folderid);
+                    context.registerService(ContactInterface.class.getName(), ldapContactInterface, getHashtableWithFolderID(stringfolderid, ctx.toString()));
                     LOG.info("Registered global LDAP folder \"" + folderprop.getFoldername() + "\" with id \"" + stringfolderid + "\" for context: " + ctx);
+                     */
                 }
             }
-            
         } catch (final Exception e) {
             throw e;
         } finally {
@@ -184,9 +200,10 @@ public final class LdapActivator extends DeferredActivator {
         }
     }
 
-    private Hashtable<String, String> getHashtableWithFolderID(final String folderid) {
+    private Hashtable<String, String> getHashtableWithFolderID(final String folderid, final String contextId) {
         final Hashtable<String, String> hashTable = new Hashtable<String, String>();
         hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, folderid);
+        hashTable.put(ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE, contextId);
         return hashTable;
     }
 
