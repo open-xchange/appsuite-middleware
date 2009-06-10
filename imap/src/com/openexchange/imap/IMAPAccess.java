@@ -657,7 +657,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Enables the use of the STARTTLS command.
              */
-            imapProps.put("mail.imap.starttls.enable", "true");
+            // imapProps.put("mail.imap.starttls.enable", "true");
             /*
              * Set main socket factory to a SSL socket factory
              */

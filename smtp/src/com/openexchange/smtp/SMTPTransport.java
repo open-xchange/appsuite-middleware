@@ -240,7 +240,7 @@ public final class SMTPTransport extends MailTransport {
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
                          * connection before issuing any login commands.
                          */
-                        smtpProps.put("mail.smtp.starttls.enable", "true");
+                        // smtpProps.put("mail.smtp.starttls.enable", "true");
                         /*
                          * Force use of SSL through specifying the name of the javax.net.SocketFactory interface. This class will be used to
                          * create SMTP sockets.
