@@ -186,24 +186,26 @@ public final class ThreadSortUtil {
                 }
                 final Response response = r[r.length - 1];
                 String retval = null;
-                try {
-                    if (response.isOK()) { // command successful
-                        final String threadStr = "THREAD";
-                        for (int i = 0, len = r.length; i < len; i++) {
-                            if (!(r[i] instanceof IMAPResponse)) {
-                                continue;
-                            }
-                            final IMAPResponse ir = (IMAPResponse) r[i];
-                            if (ir.keyEquals(threadStr)) {
-                                retval = ir.toString();
-                            }
-                            r[i] = null;
+                if (response.isOK()) { // command successful
+                    final String threadStr = "THREAD";
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
                         }
-                    } else {
-                        throw new ProtocolException("IMAP server does not support THREAD command");
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals(threadStr)) {
+                            retval = ir.toString();
+                        }
+                        r[i] = null;
                     }
-                } finally {
                     p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
+                        response.toString()).toString());
+                } else if (response.isNO()) {
+                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
+                        response.toString()).toString());
+                } else {
                     p.handleResult(response);
                 }
                 return retval;
