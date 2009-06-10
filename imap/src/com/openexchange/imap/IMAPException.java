@@ -746,8 +746,8 @@ public final class IMAPException extends MIMEMailException {
         private IMAPCode(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.extend = null;
-            this.detailNumber = extend.detailNumber;
-            this.category = extend.category;
+            this.detailNumber = detailNumber;
+            this.category = category;
         }
 
         private IMAPCode(final String message, final IMAPCode extend) {
