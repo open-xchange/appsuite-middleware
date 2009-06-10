@@ -165,6 +165,10 @@ public class MailException extends AbstractOXException {
          */
         INVALID_FIELD("Message field %1$s cannot be handled", Category.CODE_ERROR, 22),
         /**
+         * Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         */
+        INVALID_FIELD_EXT("Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.CODE_ERROR, 22),
+        /**
          * Versit error: %1$s
          */
         VERSIT_ERROR("Versit error: %1$s", Category.CODE_ERROR, 23),
@@ -273,6 +277,10 @@ public class MailException extends AbstractOXException {
          */
         FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %1$s does not hold messages and is therefore not selectable", Category.PERMISSION, 50),
         /**
+         * Folder %1$s does not hold messages and is therefore not selectable on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         */
+        FOLDER_DOES_NOT_HOLD_MESSAGES_EXT("Folder %1$s does not hold messages and is therefore not selectable on server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.PERMISSION, 50),
+        /**
          * Insufficient folder attributes: Either existence status or fullname have to be present to determine if a mail folder create or
          * update shall be performed
          */
@@ -326,9 +334,17 @@ public class MailException extends AbstractOXException {
          */
         DUPLICATE_FOLDER("A folder named %1$s already exists.", Category.PERMISSION, 63),
         /**
+         * A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, context=%5$s).
+         */
+        DUPLICATE_FOLDER_EXT("A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.PERMISSION, 63),
+        /**
          * No create access on mail folder %1$s.
          */
         NO_CREATE_ACCESS("No create access on mail folder %1$s.", Category.PERMISSION, 64),
+        /**
+         * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
+         */
+        NO_CREATE_ACCESS_EXT("No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.PERMISSION, 64),
         /**
          * Mail account %1$s with ID %2$s does not support mail transport.
          */

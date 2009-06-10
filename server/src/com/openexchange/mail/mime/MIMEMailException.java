@@ -176,9 +176,13 @@ public class MIMEMailException extends MailException {
          */
         PARSE_ERROR("Wrong message header: %1$s", Category.USER_INPUT, 1009),
         /**
-         * An attempt was made to open a read-only folder with read-write: %1$s
+         * An attempt was made to open a read-only folder with read-write "%1$s"
          */
-        READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write: %1$s", Category.PERMISSION, 1010),
+        READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write \"%1$s\"", Category.PERMISSION, 1010),
+        /**
+         * An attempt was made to open a read-only folder with read-write "%1$s" on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         */
+        READ_ONLY_FOLDER_EXT("An attempt was made to open a read-only folder with read-write \"%1$s\" on server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.PERMISSION, 1010),
         /**
          * Invalid search expression: %1$s
          */
@@ -431,6 +435,16 @@ public class MIMEMailException extends MailException {
                 }
                 return new MIMEMailException(Code.PARSE_ERROR, e, e.getMessage());
             } else if (e instanceof ReadOnlyFolderException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.READ_ONLY_FOLDER_EXT,
+                        e,
+                        e.getMessage(),
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
+                }
                 return new MIMEMailException(Code.READ_ONLY_FOLDER, e, e.getMessage());
             } else if (e instanceof SearchException) {
                 return new MIMEMailException(Code.SEARCH_ERROR, e, e.getMessage());
