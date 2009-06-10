@@ -66,7 +66,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         super();
     }
 
-    public void perform(Connection con) throws AbstractOXException {
+    public final void perform(Connection con) throws AbstractOXException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
