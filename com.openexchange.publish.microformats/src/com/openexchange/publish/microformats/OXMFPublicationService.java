@@ -184,7 +184,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if(siteName != null) {
             siteName = normalizeSiteName(siteName);
             Publication oldPub = getPublication(publication.getContext(), siteName);
-            if(oldPub != null) {
+            if(oldPub != null && oldPub.getId() != publication.getId()) {
                 throw uniquenessConstraintViolation(SITE, siteName);
             }
             publication.getConfiguration().put(SITE, siteName);

@@ -83,7 +83,9 @@ public class OXMFPublicationServiceTest extends TestCase {
             @Override
             public Publication getPublication(Context ctx, String site) throws PublicationException {
                 if(site.equals("existingSite")) {
-                    return new Publication();
+                    Publication publication = new Publication();
+                    publication.setId(23);
+                    return publication;
                 }
                 return null;
             }
@@ -220,6 +222,7 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     public void testUniqueSite() throws PublicationException {
         Publication publication = new Publication();
+        publication.setId(42);
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("siteName", "existingSite");
         
@@ -230,6 +233,14 @@ public class OXMFPublicationServiceTest extends TestCase {
             // Hooray
         }
 
+    }
+    
+    public void testSubmittingUnchangingSiteNameIsAccepted() throws PublicationException {
+        Publication publication = new Publication();
+        publication.setId(23);
+        publication.setContext(new SimContext(1337));
+        publication.getConfiguration().put("siteName", "existingSite");
+        publicationService.modifyIncoming(publication);
     }
     
     public void testNormalizedSiteName() throws PublicationException {
