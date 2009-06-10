@@ -39,7 +39,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.w3c.dom.css,
  org.w3c.dom.ranges,
  org.w3c.dom.stylesheets,
- org.xml.sax
+ org.xml.sax,
+ org.xml.sax.ext
 Bundle-ClassPath: .,
  lib/htmlunit-2.4.jar,
  lib/sac-1.3.jar,
