@@ -47,14 +47,26 @@
  *
  */
 
-package com.openexchange.unifiedinbox;
+package com.openexchange.unifiedinbox.copy;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
+import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
+import com.openexchange.unifiedinbox.UnifiedINBOXException;
+import com.openexchange.unifiedinbox.UnifiedINBOXUID;
+import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
@@ -114,27 +126,33 @@ public final class UnifiedINBOXMessageCopier {
         if (move && sourceFolder.equals(destFolder)) {
             throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
         }
-        // Iterate mail IDs
+        // Helper object
         final UnifiedINBOXUID tmp = new UnifiedINBOXUID();
-        final String[] arr = new String[1];
+        // The array to fill
         final String[] retval = new String[mailIds.length];
+        // A map remembering callables
+        final Map<Integer, KF2KFCallable> callableMap = new HashMap<Integer, KF2KFCallable>(mailIds.length);
+        // Iterate mail IDs
         for (int i = 0; i < mailIds.length; i++) {
             tmp.setUIDString(mailIds[i]);
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, tmp.getAccountId());
-            mailAccess.connect();
-            try {
-                final String realSource = UnifiedINBOXUtility.determineAccountFullname(mailAccess, sourceFolder);
-                final String realDest = UnifiedINBOXUtility.determineAccountFullname(mailAccess, destFolder);
-                arr[0] = tmp.getId();
-                if (move) {
-                    retval[i] = mailAccess.getMessageStorage().moveMessages(realSource, realDest, arr, fast)[0];
-                } else {
-                    retval[i] = mailAccess.getMessageStorage().copyMessages(realSource, realDest, arr, fast)[0];
-                }
-            } finally {
-                mailAccess.close(true);
+            final Integer accountId = Integer.valueOf(tmp.getAccountId());
+            // Look-up callable by account ID
+            KF2KFCallable callable = callableMap.get(accountId);
+            if (null == callable) {
+                callable = new KF2KFCallable(sourceFolder, destFolder, fast, move, retval, tmp.getAccountId(), session);
+                callableMap.put(accountId, callable);
             }
+            callable.addIdAndIndex(tmp.getId(), Integer.valueOf(i));
         }
+        // Perform callables
+        final ExecutorService executorService = UnifiedINBOXExecutors.newUnlimitedCachedThreadPool("UnifiedINBOXMessageCopier-");
+        final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executorService);
+        try {
+            performCallables(callableMap.values(), completionService);
+        } finally {
+            executorService.shutdown();
+        }
+        // Delete messages on move
         if (move) {
             access.getMessageStorage().deleteMessages(sourceFolder, mailIds, true);
         }
@@ -162,50 +180,39 @@ public final class UnifiedINBOXMessageCopier {
         }
         // Proceed
         final String[] retval = new String[mailIds.length];
-        final String[] arr = new String[1];
+        // A map remembering callables
+        final Map<Integer, KF2AFEqualCallable> callableMap = new HashMap<Integer, KF2AFEqualCallable>(mailIds.length);
+        final Map<Integer, KF2AFDifferCallable> otherCallableMap = new HashMap<Integer, KF2AFDifferCallable>(mailIds.length);
+        // Iterate mail IDs
         for (int i = 0; i < mailIds.length; i++) {
             tmp.setUIDString(mailIds[i]);
+            final Integer accountId = Integer.valueOf(tmp.getAccountId());
             // Check if accounts are equal...
             if (tmp.getAccountId() == destAccountId) {
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, tmp.getAccountId());
-                mailAccess.connect();
-                try {
-                    final String realSource = UnifiedINBOXUtility.determineAccountFullname(mailAccess, sourceFolder);
-                    arr[0] = tmp.getId();
-                    if (move) {
-                        retval[i] = mailAccess.getMessageStorage().moveMessages(realSource, destFullname, arr, fast)[0];
-                    } else {
-                        retval[i] = mailAccess.getMessageStorage().copyMessages(realSource, destFullname, arr, fast)[0];
-                    }
-                } finally {
-                    mailAccess.close(true);
+                KF2AFEqualCallable callable = callableMap.get(accountId);
+                if (null == callable) {
+                    callable = new KF2AFEqualCallable(sourceFolder, destFullname, fast, move, retval, tmp.getAccountId(), session);
+                    callableMap.put(accountId, callable);
                 }
+                callable.addIdAndIndex(tmp.getId(), Integer.valueOf(i));
             } else {
                 // Accounts differ
-                final MailAccess<?, ?> sourceMailAccess = MailAccess.getInstance(session, tmp.getAccountId());
-                sourceMailAccess.connect();
-                try {
-                    final MailMessage mailToCopy = sourceMailAccess.getMessageStorage().getMessage(tmp.getFullname(), tmp.getId(), false);
-                    if (null == mailToCopy) {
-                        retval[i] = null;
-                    } else {
-                        // Append to destination's storage
-                        final MailAccess<?, ?> destMailAccess = MailAccess.getInstance(session, destAccountId);
-                        destMailAccess.connect();
-                        try {
-                            // Append message to destination folder
-                            retval[i] = destMailAccess.getMessageStorage().appendMessages(destFullname, new MailMessage[] { mailToCopy })[0];
-                        } finally {
-                            destMailAccess.close(true);
-                        }
-                        if (move) {
-                            sourceMailAccess.getMessageStorage().deleteMessages(tmp.getFullname(), new String[] { tmp.getId() }, true);
-                        }
-                    }
-                } finally {
-                    sourceMailAccess.close(true);
+                KF2AFDifferCallable callable = otherCallableMap.get(accountId);
+                if (null == callable) {
+                    callable = new KF2AFDifferCallable(tmp.getAccountId(), destAccountId, destFullname, fast, move, retval, session);
+                    otherCallableMap.put(accountId, callable);
                 }
+                callable.addIdAndFullnameAndIndex(tmp.getId(), tmp.getFullname(), Integer.valueOf(i));
             }
+        }
+        // Perform callables
+        final ExecutorService executorService = UnifiedINBOXExecutors.newUnlimitedCachedThreadPool("UnifiedINBOXMessageCopier-");
+        final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executorService);
+        try {
+            performCallables(callableMap.values(), completionService);
+            performCallables(otherCallableMap.values(), completionService);
+        } finally {
+            executorService.shutdown();
         }
         return retval;
     }
@@ -282,6 +289,37 @@ public final class UnifiedINBOXMessageCopier {
             sourceMailAccess.close(true);
         }
         return retval;
+    }
+
+    private static void performCallables(final Collection<? extends Callable<Object>> callables, final CompletionService<Object> completionService) throws MailException {
+        for (final Callable<Object> callable : callables) {
+            completionService.submit(callable);
+        }
+        // Wait for completion
+        try {
+            final int nCallables = callables.size();
+            for (int k = 0; k < nCallables; k++) {
+                completionService.take().get();
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+        } catch (final ExecutionException e) {
+            launderThrowable(e);
+        }
+    }
+
+    private static void launderThrowable(final ExecutionException e) throws MailException {
+        final Throwable t = e.getCause();
+        if (MailException.class.isAssignableFrom(t.getClass())) {
+            throw (MailException) t;
+        } else if (t instanceof RuntimeException) {
+            throw (RuntimeException) t;
+        } else if (t instanceof Error) {
+            throw (Error) t;
+        } else {
+            throw new IllegalStateException("Not unchecked", t);
+        }
     }
 
 }
