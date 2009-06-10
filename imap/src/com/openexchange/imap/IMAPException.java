@@ -58,7 +58,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.session.Session;
 
 /**
- * {@link IMAPException}
+ * {@link IMAPException} - Indicates an IMAP error.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
