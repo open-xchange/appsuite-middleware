@@ -649,7 +649,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (cdao.containsUntil() && cdao.getUntil() != null) {
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 } else if (occurrences > 0) {
-                    cdao.setUntil(getOccurenceDate(cdao));
+                    cdao.setUntil(calculateUntilOfSequence(cdao));
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     dsf(recStrBuilder, 'o', occurrences);
                 }
@@ -662,7 +662,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (cdao.containsUntil() && cdao.getUntil() != null) {
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 } else if (occurrences > 0) {
-                    cdao.setUntil(getOccurenceDate(cdao));
+                    cdao.setUntil(calculateUntilOfSequence(cdao));
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     dsf(recStrBuilder, 'o', occurrences);
                 }
@@ -682,7 +682,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
                     }
@@ -699,7 +699,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
                     }
@@ -718,7 +718,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
                     }
@@ -736,7 +736,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
                     }
@@ -749,6 +749,12 @@ public final class CalendarCollection implements CalendarCollectionService {
         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE);
     }
 
+    private Date calculateUntilOfSequence(CalendarDataObject cdao) throws OXException {
+        Date temp = getOccurenceDate(cdao);
+        temp.setTime(temp.getTime() - cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
+        return temp;
+    }
+    
     /**
      * Gets the specified occurrence's end date within recurring appointment.
      * 

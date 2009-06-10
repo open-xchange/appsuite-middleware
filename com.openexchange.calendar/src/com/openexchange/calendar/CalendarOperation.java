@@ -592,9 +592,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         final long end_date = edao.getUntil().getTime();
         long start_time = cdao.getStartDate().getTime();
-        long end_time = (cdao.getEndDate().getTime() + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY));
+        long end_time = (cdao.getEndDate().getTime());
         start_time = start_time % Constants.MILLI_DAY;
-        end_time = end_time % Constants.MILLI_DAY;
+        end_time = end_time % Constants.MILLI_DAY  + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
         cdao.setStartDate(recColl.calculateRecurringDate(start_date, start_time));
         cdao.setEndDate(recColl.calculateRecurringDate(end_date, end_time));
     }
