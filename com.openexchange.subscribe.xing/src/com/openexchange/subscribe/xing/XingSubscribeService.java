@@ -75,7 +75,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     public XingSubscribeService() {
         FORM.add(FormElement.input("login", "Login")).add(FormElement.password("password", "Password"));
 
-        SOURCE.setDisplayName("XING");
+        SOURCE.setDisplayName("XING Super Duper Service");
         SOURCE.setId("com.openexchange.subscribe.xing");
         SOURCE.setFormDescription(FORM);
         SOURCE.setSubscribeService(this);

@@ -88,6 +88,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
     public OSGiPublicationTargetCollector(BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, PublicationService.class.getName(), this);
+        tracker.open();
     }
     
     public void close() {

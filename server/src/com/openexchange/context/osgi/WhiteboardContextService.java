@@ -74,6 +74,7 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
     public WhiteboardContextService(BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, ContextService.class.getName(), this);
+        tracker.open();
     }
     
     public void close() {

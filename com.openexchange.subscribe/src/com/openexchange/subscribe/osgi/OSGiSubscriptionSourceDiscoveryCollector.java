@@ -86,6 +86,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     public OSGiSubscriptionSourceDiscoveryCollector(BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
+        tracker.open();
     }
     
     public void close() {

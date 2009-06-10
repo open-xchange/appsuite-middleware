@@ -77,6 +77,7 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
     public OSGiSubscriptionSourceCollector(BundleContext context) throws InvalidSyntaxException {
         this.context = context;
         this.tracker = new ServiceTracker(context,SubscribeService.class.getName(), this);
+        tracker.open();
     }
 
     private void grabAll() {

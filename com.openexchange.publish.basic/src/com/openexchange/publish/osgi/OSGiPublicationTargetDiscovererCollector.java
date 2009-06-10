@@ -88,6 +88,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
     public OSGiPublicationTargetDiscovererCollector(BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, PublicationTargetDiscoveryService.class.getName(), this);
+        tracker.open();
         blacklist.add(this);
     }
     
