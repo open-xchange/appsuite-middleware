@@ -73,7 +73,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         for (Subscription subscription : allSubscriptions) {
-            if(subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
+            if(subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
                 subscriptions.add(subscription);
             }
         }
