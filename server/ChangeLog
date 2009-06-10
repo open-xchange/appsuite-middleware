@@ -1,6 +1,7 @@
 * 2009-06-10 - martin.herfurth@open-xchange.com
 
  - Bugfix #13260: Delete occurrences of fulltime appointment sequences.
+ - Bugfix #12280: Length of fulltime appointment sequences fixed.
 
 * 2009-06-09 - thorben.betten@open-xchange.com
 
