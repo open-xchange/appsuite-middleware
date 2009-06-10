@@ -1856,4 +1856,29 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         assertTrue("Member should be in the participants.", foundMember);
 
     }
+    
+    public void testFullTimeSeries() throws Throwable {
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+        appointment.setTitle("Test Full Time Series");
+        long now = System.currentTimeMillis();
+        appointment.setStartDate(new Date(now));
+        appointment.setEndDate(new Date(now + 3600000));
+        appointment.setFullTime(true);
+        appointment.setRecurrenceType(CalendarDataObject.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(2);
+        appointments.save(appointment);
+        int objectId = appointment.getObjectID();
+        clean.add(appointment);
+        
+        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        cal.setTimeInMillis(now);
+
+        CalendarDataObject loaded = appointments.load(objectId, folders.getStandardFolder(userId, ctx));
+        Calendar loadedUntil = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        loadedUntil.setTime(loaded.getUntil());
+        
+        assertEquals("Wrong day in until", cal.get(Calendar.DAY_OF_MONTH) + 1, loadedUntil.get(Calendar.DAY_OF_MONTH));
+        assertEquals("Wrong hour in until", 0, loadedUntil.get(Calendar.HOUR_OF_DAY));
+    }
 }

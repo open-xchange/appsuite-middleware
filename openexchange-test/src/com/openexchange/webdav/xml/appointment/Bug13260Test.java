@@ -66,14 +66,22 @@ public class Bug13260Test extends AppointmentTest {
     }
 
     public void testBugAsWritten() throws Exception {
-        test(true);
+        test(true, false);
     }
 
     public void testBugWithEnd() throws Exception {
-        test(false);
+        test(false, false);
+    }
+    
+    public void testBugAsWrittenInComment6() throws Exception {
+        test(true, true);
+    }
+    
+    public void testBugWithEndAndFullTime() throws Exception {
+        test(false, true);
     }
 
-    private void test(boolean endless) throws Exception {
+    private void test(boolean endless, boolean fullTime) throws Exception {
         int objectId = -1;
         try {
             // Create Appointment
@@ -81,6 +89,7 @@ public class Bug13260Test extends AppointmentTest {
             appointmentObj.setTitle("testBug13260");
             appointmentObj.setStartDate(startTime);
             appointmentObj.setEndDate(endTime);
+            appointmentObj.setFullTime(fullTime);
             appointmentObj.setParentFolderID(appointmentFolderId);
             appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
             appointmentObj.setInterval(1);
