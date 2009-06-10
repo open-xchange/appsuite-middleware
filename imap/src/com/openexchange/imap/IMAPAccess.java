@@ -668,7 +668,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Needed for JavaMail >= 1.4
              */
-            Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+//            Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
         } else {
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
@@ -690,7 +690,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Needed for JavaMail >= 1.4
              */
-            Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+//            Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
         }
         return javax.mail.Session.getInstance(imapProps, null);
     }

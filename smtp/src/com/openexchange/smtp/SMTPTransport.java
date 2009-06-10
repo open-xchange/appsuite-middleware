@@ -257,7 +257,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Needed for JavaMail >= 1.4
                          */
-                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+//                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
                     } else {
                         /*
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
@@ -280,7 +280,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Needed for JavaMail >= 1.4
                          */
-                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+//                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
                     }
                     /*
                      * Apply host & port to SMTP session

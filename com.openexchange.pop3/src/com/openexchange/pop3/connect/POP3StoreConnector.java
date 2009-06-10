@@ -145,7 +145,7 @@ public final class POP3StoreConnector {
                 /*
                  * Needed for JavaMail >= 1.4
                  */
-                Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
+//                Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
             }
             /*
              * Apply properties to POP3 session
