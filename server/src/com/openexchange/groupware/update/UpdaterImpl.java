@@ -58,6 +58,9 @@ import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.TimerService;
 
 /**
  * Implementation for the updater interface.
@@ -91,21 +94,26 @@ public class UpdaterImpl extends Updater {
      * {@inheritDoc}
      */
     @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "",
-            exceptionId = 1,
-            msg = "Update process initialization failed: %1$s."
+        category = Category.CODE_ERROR,
+        desc = "",
+        exceptionId = 1,
+        msg = "Update process initialization failed: %1$s."
     )
     @Override
     public void startUpdate(final Context context) throws UpdateException {
+        final TimerService timerService;
+        try {
+            timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        } catch (ServiceException e) {
+            throw new UpdateException(e);
+        }
         UpdateProcess process;
         try {
             process = new UpdateProcess(context);
         } catch (final SchemaException e) {
             throw EXCEPTION.create(1, e, e.getMessage());
         }
-        final Thread thread = new Thread(process);
-        thread.start();
+        timerService.schedule(process, 0);
     }
 
     /**

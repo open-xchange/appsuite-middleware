@@ -97,70 +97,70 @@ public class UpdateProcess implements Runnable {
         updateLock.lock();
         try {
             boolean unlock = false;
-            try {
+            /*
+             * Load schema
+             */
+            final Schema schema = schemaStore.getSchema(context);
+            if (schema.getDBVersion() >= UpdateTaskCollection.getHighestVersion()) {
                 /*
-                 * Load schema
+                 * Already been updated before by previous thread
                  */
-                final Schema schema = schemaStore.getSchema(context);
-                if (schema.getDBVersion() >= UpdateTaskCollection.getHighestVersion()) {
-                    /*
-                     * Already been updated before by previous thread
-                     */
-                    return;
-                }
-                try {
-                    try {
-                        lockSchema(schema);
-                    } catch (final SchemaException e) {
-                        final Throwable cause = e.getCause();
-                        unlock = (null != cause) && (cause instanceof SQLException);
-                    }
-                    /*
-                     * Lock successfully obtained, thus remember to unlock
-                     */
-                    unlock = true;
-                    /*
-                     * Remove affected contexts and kick active sessions
-                     */
-                    removeContexts();
-                    /*
-                     * Get filtered & sorted list of update tasks
-                     */
-                    final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema
-                            .getDBVersion());
-                    /*
-                     * Perform updates
-                     */
-                    final Iterator<UpdateTask> iter = updateTasks.iterator();
-                    while (iter.hasNext()) {
-                        final UpdateTask task = iter.next();
-                        final String taskName = task.getClass().getSimpleName();
-                        try {
-                            LOG.info("Starting update task "
-                                + taskName + " on schema "
-                                + schema.getSchema() + ".");
-                            task.perform(schema, context.getContextId());
-                        } catch (final AbstractOXException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                        LOG.info("Update task " + taskName + " on schema "
-                            + schema.getSchema() + " done.");
-                    }
-                } finally {
-                    if (unlock) {
-                        unlockSchema(schema);
-                    }
-                    // Remove contexts from cache if they are cached during
-                    // update process.
-                    removeContexts();
-                }
-            } catch (final SchemaException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final DBPoolingException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final ContextException e) {
-                LOG.error(e.getMessage(), e);
+                return;
             }
+            try {
+                try {
+                    lockSchema(schema);
+                } catch (final SchemaException e) {
+                    final Throwable cause = e.getCause();
+                    unlock = (null != cause) && (cause instanceof SQLException);
+                }
+                /*
+                 * Lock successfully obtained, thus remember to unlock
+                 */
+                unlock = true;
+                /*
+                 * Remove affected contexts and kick active sessions
+                 */
+                removeContexts();
+                /*
+                 * Get filtered & sorted list of update tasks
+                 */
+                final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema
+                        .getDBVersion());
+                /*
+                 * Perform updates
+                 */
+                final Iterator<UpdateTask> iter = updateTasks.iterator();
+                while (iter.hasNext()) {
+                    final UpdateTask task = iter.next();
+                    final String taskName = task.getClass().getSimpleName();
+                    try {
+                        LOG.info("Starting update task "
+                            + taskName + " on schema "
+                            + schema.getSchema() + ".");
+                        task.perform(schema, context.getContextId());
+                    } catch (final AbstractOXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                    LOG.info("Update task " + taskName + " on schema "
+                        + schema.getSchema() + " done.");
+                }
+            } finally {
+                if (unlock) {
+                    unlockSchema(schema);
+                }
+                // Remove contexts from cache if they are cached during
+                // update process.
+                removeContexts();
+            }
+        } catch (final SchemaException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         } finally {
             updateLock.unlock();
         }

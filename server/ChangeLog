@@ -1,3 +1,7 @@
+* 2009-06-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #13873: Catching RuntimeExceptions in database update tasks. Fixed causes of RuntimeExceptions in database update tasks.
+
 * 2009-06-10 - martin.herfurth@open-xchange.com
 
  - Bugfix #13260: Delete occurrences of fulltime appointment sequences.
