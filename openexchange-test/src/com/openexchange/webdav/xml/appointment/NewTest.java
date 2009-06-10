@@ -258,7 +258,7 @@ public class NewTest extends AppointmentTest {
 		final Date startDate = c.getTime();
 		final Date endDate = new Date(c.getTimeInMillis() + dayInMillis);
 		
-		final Date until = new Date(endDate.getTime() + ((occurrences-1)*dayInMillis));
+		final Date until = new Date(startDate.getTime() + ((occurrences-1)*dayInMillis));
 		
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDailyFullTimeRecurrenceWithOccurrences");
