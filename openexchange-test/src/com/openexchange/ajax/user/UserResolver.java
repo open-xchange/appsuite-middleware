@@ -70,6 +70,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * {@link UserResolver}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - fix to work like GUI
  *
  */
 public class UserResolver {
@@ -84,7 +85,13 @@ public class UserResolver {
      */
     public User[] resolveUser(String searchPattern) throws AjaxException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
-        search.setPattern(searchPattern);
+        search.setDisplayName(searchPattern);
+        search.setGivenName(searchPattern);
+        search.setSurname(searchPattern);
+        search.setEmail1(searchPattern);
+        search.setEmail2(searchPattern);
+        search.setEmail3(searchPattern);
+        search.setOrSearch(true);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
         final SearchResponse response = client.execute(request);

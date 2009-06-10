@@ -37,17 +37,17 @@
 
 package com.openexchange.ajax.contact.action;
 
-import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
  * Writes contact search object to a JSON.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - putSearchFields
  */
 public class ContactSearchJSONWriter {
 
@@ -59,14 +59,13 @@ public class ContactSearchJSONWriter {
     }
 
     /**
-     * Writes a contact search object as its JSON representation. This writer
-     * only supports the pattern and the folder.
+     * Writes a contact search object as its JSON representation. This writer only supports the pattern and the folder.
+     * 
      * @param search context search object.
      * @return a JSON representation of the task search object.
      * @throws JSONException if writing json gives errors.
      */
-    public static JSONObject write(final ContactSearchObject search)
-        throws JSONException {
+    public static JSONObject write(final ContactSearchObject search) throws JSONException {
         final JSONObject json = new JSONObject();
         int[] folders = search.getFolders();
         if (folders != null && folders.length == 1) {
@@ -82,7 +81,41 @@ public class ContactSearchJSONWriter {
         }
         if (ContactSearchObject.NO_PATTERN != search.getPattern()) {
             json.put("pattern", search.getPattern());
+        } else {
+            putSearchFields(search, json);
         }
         return json;
+    }
+
+    /**
+     * adds params for all typical search fields to a json object
+     */
+    public static void putSearchFields(ContactSearchObject search, JSONObject json) throws JSONException {
+        /*
+         * Trying to look like what the GUI does: {"display_name":"gera", "first_name":"gera", "last_name":"gera", "email1":"gera",
+         * "email2":"gera", "email3":"gera", "orSearch":true, "folder":6 }. If you want it to work completely, do it yourself. I recommend
+         * implementing some kind of metaprogramming first so you can iterate over the fields of a SearchObject.
+         */
+        if (search.getGivenName() != null) {
+            json.put("first_name", search.getGivenName());
+        }
+        if (search.getSurname() != null) {
+            json.put("last_name", search.getSurname());
+        }
+        if (search.getDisplayName() != null) {
+            json.put("display_name", search.getDisplayName());
+        }
+        if (search.getEmail1() != null) {
+            json.put("email1", search.getEmail1());
+        }
+        if (search.getEmail2() != null) {
+            json.put("email2", search.getEmail2());
+        }
+        if (search.getEmail3() != null) {
+            json.put("email3", search.getEmail3());
+        }
+        if (search.isOrSearch()) {
+            json.put("orSearch", true);
+        }
     }
 }
