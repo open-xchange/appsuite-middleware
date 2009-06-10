@@ -56,7 +56,6 @@ import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.Security;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -257,7 +256,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Needed for JavaMail >= 1.4
                          */
-//                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+                        // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
                     } else {
                         /*
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
@@ -280,7 +279,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Needed for JavaMail >= 1.4
                          */
-//                        Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+                        // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
                     }
                     /*
                      * Apply host & port to SMTP session
