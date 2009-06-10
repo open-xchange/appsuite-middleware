@@ -343,6 +343,8 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             exc = new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             exc = new TaskException(Code.NO_CONNECTION, e);
+        } catch (Throwable t) {
+            exc = new TaskException(Code.THREAD_ISSUE, t);
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);

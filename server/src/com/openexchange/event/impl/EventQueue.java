@@ -126,8 +126,8 @@ public final class EventQueue {
                         shutdownLock.unlock();
                     }
                 }
-            } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+            } catch (Throwable t) {
+                LOG.error(t.getMessage(), t);
             }
         }
 

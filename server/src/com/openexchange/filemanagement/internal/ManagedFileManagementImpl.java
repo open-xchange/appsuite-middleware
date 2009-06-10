@@ -134,8 +134,8 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                         iter.remove();
                     }
                 }
-            } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+            } catch (Throwable t) {
+                logger.error(t.getMessage(), t);
             }
         }
     }

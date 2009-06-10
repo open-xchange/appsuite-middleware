@@ -190,8 +190,8 @@ public final class Pools implements Runnable {
                     thread.setName("PoolsCleaner");
                     Pools.this.run();
                     thread.setName(origName);
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
+                } catch (Throwable t) {
+                    LOG.error(t.getMessage(), t);
                 }
             }
         }, cleanerInterval, cleanerInterval);

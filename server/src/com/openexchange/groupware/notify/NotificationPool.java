@@ -291,8 +291,8 @@ public final class NotificationPool {
                         ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
                     }
                 }
-            } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+            } catch (Throwable t) {
+                logger.error(t.getMessage(), t);
             } finally {
                 taskWriteLock.unlock();
             }
