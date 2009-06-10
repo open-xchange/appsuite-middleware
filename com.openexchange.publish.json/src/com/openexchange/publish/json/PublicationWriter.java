@@ -106,6 +106,9 @@ public class PublicationWriter {
     }
 
     private void writeSpecialCols(JSONArray array, Publication publication, String[] strings, String externalId, DynamicFormDescription form) {
+        if(strings == null) {
+            return;
+        }
         boolean writeNulls = !publication.getTarget().getId().equals(externalId);
         Map<String, Object> configuration  = publication.getConfiguration();
         for(String col : strings) {
@@ -130,6 +133,8 @@ public class PublicationWriter {
                 array.put(publication.getModule());
             } else if ( TARGET.equals(basicCol) ) {
                 array.put(publication.getTarget().getId());
+            } else {
+                throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(basicCol);
             }
         }
     }

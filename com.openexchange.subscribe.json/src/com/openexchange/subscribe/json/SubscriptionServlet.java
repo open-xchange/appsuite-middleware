@@ -218,7 +218,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         return allSubscriptions;
     }
     
-    private void writeSubscriptions(List<Subscription> allSubscriptions, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder, HttpServletResponse resp) {
+    private void writeSubscriptions(List<Subscription> allSubscriptions, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder, HttpServletResponse resp) throws SubscriptionJSONException {
         JSONArray rows = new JSONArray();
         SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         for (Subscription subscription : allSubscriptions) {
@@ -275,7 +275,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         writeSubscription(subscription, resp);
     }
 
-    private void writeSubscription(Subscription subscription, HttpServletResponse resp) throws JSONException {
+    private void writeSubscription(Subscription subscription, HttpServletResponse resp) throws JSONException, SubscriptionJSONException {
         JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription());
         writeData(object, resp);
     }

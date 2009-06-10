@@ -70,6 +70,7 @@ public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
     MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+3, "Missing Form Field(s): %s", "", CODE_ERROR),
     
     THROWABLE(SubscriptionSourcesServlet.CLASS_ID*100+3, "Got Exception %s", "", CODE_ERROR),
+    UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID*100+1,"Unknown column: %s", "Please ask only for columns the server knows", USER_INPUT),
     
     ;
     

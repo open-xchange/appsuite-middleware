@@ -105,6 +105,8 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                     }
                 } else if (MODULE.equals(field)) {
                     row.put(getModuleAsString(source));
+                } else {
+                    SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.throwException(field);
                 }
             }
             retval.put(row);

@@ -72,7 +72,7 @@ public class PublicationTargetWriter {
     private static final String MODULE = "module";
     private static final String FORM_DESCRIPTION = "formDescription";
 
-    public JSONObject write(PublicationTarget target) throws JSONException {
+    public JSONObject write(PublicationTarget target) throws JSONException, PublicationJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, target.getId());
         object.put(DISPLAY_NAME, target.getDisplayName());
@@ -82,11 +82,11 @@ public class PublicationTargetWriter {
         return object;
     }
 
-    private JSONArray writeFormDescription(DynamicFormDescription form) throws JSONException {
+    private JSONArray writeFormDescription(DynamicFormDescription form) throws JSONException, PublicationJSONException {
         return new FormDescriptionWriter().write(form);
     }
 
-    public JSONArray writeArray(PublicationTarget target, String[] columns) throws JSONException {
+    public JSONArray writeArray(PublicationTarget target, String[] columns) throws JSONException, PublicationJSONException {
         JSONArray array = new JSONArray();
         for(String column : columns) {
             if( column.equals(ID) ) {
@@ -99,13 +99,15 @@ public class PublicationTargetWriter {
                 array.put(target.getModule());
             } else if ( column.equals(FORM_DESCRIPTION) ) {
                 array.put(writeFormDescription(target.getFormDescription()));
+            } else {
+                throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(column);
             }
         }
         
         return array;
     }
 
-    public JSONArray writeJSONArray(Collection<PublicationTarget> targets, String[] columns) throws JSONException {
+    public JSONArray writeJSONArray(Collection<PublicationTarget> targets, String[] columns) throws JSONException, PublicationJSONException {
         JSONArray array = new JSONArray();
         for (PublicationTarget publicationTarget : targets) {
             array.put(writeArray(publicationTarget, columns));

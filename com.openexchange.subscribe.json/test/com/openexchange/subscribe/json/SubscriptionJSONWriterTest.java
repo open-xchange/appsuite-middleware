@@ -93,7 +93,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         
     }
 
-    public void testWriteAsObject() throws JSONException {
+    public void testWriteAsObject() throws JSONException, SubscriptionJSONException {
 
         JSONObject object = new SubscriptionJSONWriter().write(subscription, form);
 
@@ -104,7 +104,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, object);
     }
 
-    public void testWriteArray() {
+    public void testWriteArray() throws SubscriptionJSONException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "source" };
         specialCols.put("com.openexchange.subscribe.test1", new String[] { "username" });
@@ -120,7 +120,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, array);
     }
 
-    public void testWriteArrayWithUnusedSource() {
+    public void testWriteArrayWithUnusedSource() throws SubscriptionJSONException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "source" };
         specialCols.put("com.openexchange.subscribe.test2", new String[] { "username", "field1", "field2" });
@@ -139,6 +139,23 @@ public class SubscriptionJSONWriterTest extends TestCase {
             JSONObject.NULL);
 
         assertValidates(assertion, array);
+
+    }
+    
+    public void testUnknownColumnGeneratesException() {
+        Map<String, String[]> specialCols = new HashMap<String, String[]>();
+        String[] basicCols = new String[] { "id", "unknownColumn" };
+        
+        try {
+            JSONArray array = new SubscriptionJSONWriter().writeArray(
+                subscription,
+                basicCols,
+                specialCols,
+                Arrays.asList("com.openexchange.subscribe.test2"), form);
+            fail("Expected Exception");
+        } catch (SubscriptionJSONException x) {
+            
+        }
 
     }
 }

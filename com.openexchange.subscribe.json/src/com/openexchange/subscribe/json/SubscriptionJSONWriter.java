@@ -68,7 +68,10 @@ import com.openexchange.subscribe.Subscription;
  *
  */
 public class SubscriptionJSONWriter {
+    
+    public static final int CLASS_ID = 2;
 
+    
     private static final FormContentWriter formContentWriter = new FormContentWriter();
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
     
@@ -80,7 +83,7 @@ public class SubscriptionJSONWriter {
      * @return
      * @throws JSONException 
      */
-    public JSONObject write(Subscription subscription, DynamicFormDescription form) throws JSONException {
+    public JSONObject write(Subscription subscription, DynamicFormDescription form) throws JSONException, SubscriptionJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
@@ -89,12 +92,12 @@ public class SubscriptionJSONWriter {
         return object;
     }
 
-    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form) throws JSONException {
+    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form) throws JSONException, SubscriptionJSONException  {
         JSONObject config = formContentWriter.write(form, configuration);
         object.put(id, config);
     }
 
-    public JSONArray writeArray(Subscription subscription, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) {
+    public JSONArray writeArray(Subscription subscription, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws SubscriptionJSONException {
         JSONArray array = new JSONArray();
         writeBasicCols(array, subscription, basicCols);
         for(String identifier : specialsList) {
@@ -103,7 +106,10 @@ public class SubscriptionJSONWriter {
         return array;
     }
 
-    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId, DynamicFormDescription form) {
+    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId, DynamicFormDescription form) throws SubscriptionJSONException{
+        if(strings == null) {
+            return;
+        }
         boolean writeNulls = !subscription.getSource().getId().equals(externalId);
         Map<String, Object> configuration  = subscription.getConfiguration();
         for(String col : strings) {
@@ -118,7 +124,7 @@ public class SubscriptionJSONWriter {
         }
     }
 
-    private void writeBasicCols(JSONArray array, Subscription subscription, String[] basicCols) {
+    private void writeBasicCols(JSONArray array, Subscription subscription, String[] basicCols) throws SubscriptionJSONException {
         for(String basicCol : basicCols) {
             if("id".equals(basicCol)) {
                 array.put(subscription.getId());
@@ -126,6 +132,8 @@ public class SubscriptionJSONWriter {
                 array.put(subscription.getFolderId());
             } else if ("source".equals(basicCol)) {
                 array.put(subscription.getSource().getId());
+            } else {
+                SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.throwException(basicCol);
             }
         }
     }

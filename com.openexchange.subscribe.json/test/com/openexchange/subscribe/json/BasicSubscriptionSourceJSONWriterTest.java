@@ -166,6 +166,16 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
 
     }
     
+    public void testUnknownColumn() {
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        try {
+            parser.writeJSONArray(sourceList, new String[]{"id", "unkownColumn"});
+            fail("Unknown column was accepted");
+        } catch (SubscriptionJSONException x) {
+            
+        }
+    }
+    
     public static final void assertRow(JSONArray array, Object...values) throws JSONException {
         assertEquals(array.length(), values.length);
         for(int i = 0; i < values.length; i++) {

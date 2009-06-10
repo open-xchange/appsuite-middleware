@@ -78,7 +78,7 @@ public class PublicationTargetWriterTest extends TestCase {
         target.setFormDescription(new DynamicFormDescription());
     }
     
-    public void testWriteObject() throws JSONException {
+    public void testWriteObject() throws JSONException, PublicationJSONException {
         JSONObject object = new PublicationTargetWriter().write(target);
         
         JSONAssertion assertion = new JSONAssertion().isObject()
@@ -93,12 +93,22 @@ public class PublicationTargetWriterTest extends TestCase {
         assertValidates(assertion, object);
     }
     
-    public void testWriteArray() throws JSONException {
+    public void testWriteArray() throws JSONException, PublicationJSONException {
         JSONArray array = new PublicationTargetWriter().writeArray(target, new String[]{"id", "displayName", "icon", "module"});
     
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(target.getId(), target.getDisplayName(), target.getIcon(), target.getModule());
         
         assertValidates(assertion, array);
+    }
+    
+    public void testUnknownColumn() throws JSONException {
+        try {
+            JSONArray array = new PublicationTargetWriter().writeArray(target, new String[]{"id", "unkownColumn"});
+            fail("Expected exception");
+        } catch(PublicationJSONException x) {
+            // Hooray!
+        }
+    
     }
     
     

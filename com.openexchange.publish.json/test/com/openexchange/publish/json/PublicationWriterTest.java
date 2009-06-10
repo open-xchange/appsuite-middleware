@@ -133,4 +133,15 @@ public class PublicationWriterTest extends TestCase {
         assertValidates(assertion, array);
         
     }
+    
+    public void testThrowsExceptionOnUnknownColumn() {
+        try {
+            new PublicationWriter().writeArray(publication, new String[]{"id", "unknownColumn"}, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription());
+            fail("Should have failed");
+        } catch (PublicationJSONException e) {
+            
+        } catch (JSONException e) {
+
+        }
+    }
 }
