@@ -70,7 +70,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
- * {@link UnifiedINBOXMessageCopier} - Copies messages.
+ * {@link UnifiedINBOXMessageCopier} - Copies messages from/to Unified INBOX folders.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
