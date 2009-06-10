@@ -79,7 +79,8 @@ public interface UpdateTask {
      * dynamically added update tasks. Thus version always increments by 2 for stable releases.
      * <p>
      * This version is compared with the schema version of the database. This update will only be applied if the database schema version is
-     * lower than this version. Remember to register your update task in the configuration file for update tasks.
+     * lower than this version. Remember to register your update task in the configuration file for update tasks or to publish it as an OSGi
+     * service.
      * 
      * @return The schema version with that this update task was introduced.
      */
@@ -91,10 +92,6 @@ public interface UpdateTask {
      * Returned value is supposed to be provided by one of the {@link UpdateTaskPriority} constants:
      * 
      * <pre>
-     * 
-     * 
-     * 
-     * 
      * public int getPriority() {
      *     return UpdateTask.UpdateTaskPriority.NORMAL.priority;
      * }
