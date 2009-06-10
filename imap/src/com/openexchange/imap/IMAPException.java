@@ -802,7 +802,7 @@ public final class IMAPException extends MIMEMailException {
          * @param code The code whose extended version shall be returned
          * @return The extended code for specified code or <code>null</code>
          */
-        public static IMAPCode getExtendedCode(final IMAPCode code) {
+        static IMAPCode getExtendedCode(final IMAPCode code) {
             return EXT_MAP.get(code);
         }
     }
