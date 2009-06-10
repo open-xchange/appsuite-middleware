@@ -891,8 +891,6 @@ public final class IMAPException extends MIMEMailException {
         return String.format(imapCode.getMessage(), msgArgs);
     }
 
-    private static final transient Object[] EMPTY_ARGS = new Object[0];
-
     /**
      * Initializes a new {@link IMAPException}
      * 
@@ -900,36 +898,6 @@ public final class IMAPException extends MIMEMailException {
      */
     public IMAPException(final AbstractOXException cause) {
         super(cause);
-    }
-
-    /**
-     * Initializes a new {@link IMAPException}
-     * 
-     * @param code The code
-     */
-    private IMAPException(final Code code) {
-        this(code, EMPTY_ARGS);
-    }
-
-    /**
-     * Initializes a new {@link IMAPException}
-     * 
-     * @param code The code
-     * @param messageArgs The message arguments
-     */
-    private IMAPException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new {@link IMAPException}
-     * 
-     * @param code The code
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     */
-    private IMAPException(final Code code, final Throwable cause, final Object... messageArgs) {
-        this(code.getImapCode().getCategory(), code.getImapCode().getNumber(), code.getImapCode().getMessage(), cause, messageArgs);
     }
 
     private IMAPException(final Category category, final int number, final String message, final Throwable cause, final Object... messageArgs) {
