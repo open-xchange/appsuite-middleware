@@ -69,6 +69,9 @@ public final class IMAPException extends MIMEMailException {
      */
     private static final long serialVersionUID = -8226676160145457046L;
 
+    /**
+     * The IMAP error code enumeration.
+     */
     public static enum Code {
 
         /**
