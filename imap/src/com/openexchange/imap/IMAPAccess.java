@@ -409,7 +409,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Still treated as being temporary broken
                  */
-                throw new IMAPException(IMAPException.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig().getLogin());
+                throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig().getLogin());
             }
             timedOutServers.remove(key);
         }
@@ -424,7 +424,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             return folderStorage;
         }
-        throw new IMAPException(IMAPException.Code.NOT_CONNECTED);
+        throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
     }
 
     @Override
@@ -436,7 +436,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             return messageStorage;
         }
-        throw new IMAPException(IMAPException.Code.NOT_CONNECTED);
+        throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
     }
 
     @Override
@@ -448,7 +448,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             return logicTools;
         }
-        throw new IMAPException(IMAPException.Code.NOT_CONNECTED);
+        throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
     }
 
     @Override

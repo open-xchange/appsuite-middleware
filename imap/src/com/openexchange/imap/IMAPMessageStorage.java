@@ -483,7 +483,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         try {
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
-                throw new IMAPException(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED);
+                throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
             /*
@@ -660,17 +660,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
             try {
                 if (!holdsMessages()) {
-                    throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
+                    throw IMAPException.create(
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                        imapConfig,
+                        session,
+                        imapFolder.getFullName());
                 }
                 if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(
                     imapFolder,
                     true,
                     session,
                     accountId))) {
-                    throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
-                throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             if (hardDelete || usm.isHardDeleteMsgs()) {
                 blockwiseDeletion(msgUIDs, false, null);
@@ -682,7 +686,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("\n\tDefault trash folder is not set: aborting delete operation");
                 }
-                throw new IMAPException(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, "trash");
+                throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
             }
             final boolean backup = (!(fullname.startsWith(trashFullname)));
             blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
@@ -750,7 +754,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                      */
                     throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
                 }
-                throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
+                throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
             }
         }
         /*
@@ -772,8 +776,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Not possible to retry since connection is broken
              */
-            throw new IMAPException(
+            throw IMAPException.create(
                 IMAPException.Code.CONNECT_ERROR,
+                imapConfig,
+                session,
                 e,
                 imapAccess.getMailConfig().getServer(),
                 imapAccess.getMailConfig().getLogin());
@@ -781,14 +787,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Not possible to retry since connection is broken
              */
-            throw new IMAPException(
+            throw IMAPException.create(
                 IMAPException.Code.CONNECT_ERROR,
+                imapConfig,
+                session,
                 e,
                 imapAccess.getMailConfig().getServer(),
                 imapAccess.getMailConfig().getLogin());
         } catch (final MessagingException e) {
-            throw new IMAPException(
+            throw IMAPException.create(
                 IMAPException.Code.UID_EXPUNGE_FAILED,
+                imapConfig,
+                session,
                 e,
                 Arrays.toString(uids),
                 imapFolder.getFullName(),
@@ -804,7 +814,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     @Override
     public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(destFolder)) {
-            throw new IMAPException(IMAPException.Code.NO_ROOT_MOVE);
+            throw IMAPException.create(IMAPException.Code.NO_ROOT_MOVE, imapConfig, session, new Object[0]);
         }
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);
     }
@@ -812,13 +822,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private long[] copyOrMoveMessages(final String sourceFullname, final String destFullname, final long[] mailIds, final boolean move, final boolean fast) throws MailException {
         try {
             if (null == mailIds) {
-                throw new IMAPException(IMAPException.Code.MISSING_PARAMETER, "mailIDs");
+                throw IMAPException.create(IMAPException.Code.MISSING_PARAMETER, imapConfig, session, "mailIDs");
             } else if ((sourceFullname == null) || (sourceFullname.length() == 0)) {
-                throw new IMAPException(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "source");
+                throw IMAPException.create(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, imapConfig, session, "source");
             } else if ((destFullname == null) || (destFullname.length() == 0)) {
-                throw new IMAPException(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "target");
+                throw IMAPException.create(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, imapConfig, session, "target");
             } else if (sourceFullname.equals(destFullname) && move) {
-                throw new IMAPException(IMAPException.Code.NO_EQUAL_MOVE, sourceFullname);
+                throw IMAPException.create(IMAPException.Code.NO_EQUAL_MOVE, imapConfig, session, sourceFullname);
             } else if (0 == mailIds.length) {
                 // Nothing to move
                 return new long[0];
@@ -829,17 +839,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             imapFolder = setAndOpenFolder(imapFolder, sourceFullname, Folder.READ_WRITE);
             try {
                 if (!holdsMessages()) {
-                    throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
+                    throw IMAPException.create(
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                        imapConfig,
+                        session,
+                        imapFolder.getFullName());
                 }
                 if (move && imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(
                     imapFolder,
                     true,
                     session,
                     accountId))) {
-                    throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
-                throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             {
                 /*
@@ -848,10 +862,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullname);
                 try {
                     if (!destFolder.exists()) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, destFullname);
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullname);
                     }
                     if ((destFolder.getType() & Folder.HOLDS_MESSAGES) == 0) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, destFullname);
+                        throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, destFullname);
                     }
                 } catch (final MessagingException e) {
                     throw IMAPException.handleMessagingException(e, imapConfig, session);
@@ -865,10 +879,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                         true,
                         session,
                         accountId))) {
-                        throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, destFolder.getFullName());
+                        throw IMAPException.create(IMAPException.Code.NO_INSERT_ACCESS, imapConfig, session, destFolder.getFullName());
                     }
                 } catch (final MessagingException e) {
-                    throw new IMAPException(IMAPException.Code.NO_ACCESS, e, destFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, destFolder.getFullName());
                 }
             }
             /*
@@ -981,8 +995,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Not possible to retry since connection is broken
                  */
-                throw new IMAPException(
+                throw IMAPException.create(
                     IMAPException.Code.CONNECT_ERROR,
+                    imapConfig,
+                    session,
                     e,
                     imapAccess.getMailConfig().getServer(),
                     imapAccess.getMailConfig().getLogin());
@@ -990,8 +1006,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Not possible to retry since connection is broken
                  */
-                throw new IMAPException(
+                throw IMAPException.create(
                     IMAPException.Code.CONNECT_ERROR,
+                    imapConfig,
+                    session,
                     e,
                     imapAccess.getMailConfig().getServer(),
                     imapAccess.getMailConfig().getLogin());
@@ -1003,8 +1021,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                         /*
                          * The BYE response is always untagged, and indicates that the server is about to close the connection.
                          */
-                        throw new IMAPException(
+                        throw IMAPException.create(
                             IMAPException.Code.CONNECT_ERROR,
+                            imapConfig,
+                            session,
                             e,
                             imapAccess.getMailConfig().getServer(),
                             imapAccess.getMailConfig().getLogin());
@@ -1014,8 +1034,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                         /*
                          * Connection is down. No retry.
                          */
-                        throw new IMAPException(
+                        throw IMAPException.create(
                             IMAPException.Code.CONNECT_ERROR,
+                            imapConfig,
+                            session,
                             e,
                             imapAccess.getMailConfig().getServer(),
                             imapAccess.getMailConfig().getLogin());
@@ -1023,15 +1045,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                         /*
                          * Connection is down. No retry.
                          */
-                        throw new IMAPException(
+                        throw IMAPException.create(
                             IMAPException.Code.CONNECT_ERROR,
+                            imapConfig,
+                            session,
                             e,
                             imapAccess.getMailConfig().getServer(),
                             imapAccess.getMailConfig().getLogin());
                     }
                 }
-                throw new IMAPException(
+                throw IMAPException.create(
                     IMAPException.Code.UID_EXPUNGE_FAILED,
+                    imapConfig,
+                    session,
                     e,
                     Arrays.toString(tmp),
                     imapFolder.getFullName(),
@@ -1053,13 +1079,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             imapFolder = setAndOpenFolder(imapFolder, destFullname, Folder.READ_WRITE);
             try {
                 if (!holdsMessages()) {
-                    throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
+                    throw IMAPException.create(
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                        imapConfig,
+                        session,
+                        imapFolder.getFullName());
                 }
                 if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
-                    throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_INSERT_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
-                throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             /*
              * Convert messages to JavaMail message objects
@@ -1169,35 +1199,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             boolean applyFlags = false;
             if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
                 affectedFlags.add(Flags.Flag.ANSWERED);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_DELETED) > 0)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
                 affectedFlags.add(Flags.Flag.DELETED);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
                 affectedFlags.add(Flags.Flag.DRAFT);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
                 affectedFlags.add(Flags.Flag.FLAGGED);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_SEEN) > 0)) {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canKeepSeen(myRights)) {
-                    throw new IMAPException(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
                 affectedFlags.add(Flags.Flag.SEEN);
                 applyFlags = true;
@@ -1210,7 +1240,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
                 if (supportsUserFlags.booleanValue()) {
                     if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                        throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                     }
                     affectedFlags.add(MailMessage.USER_FORWARDED);
                     applyFlags = true;
@@ -1228,7 +1258,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
                 if (supportsUserFlags.booleanValue()) {
                     if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                        throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                     }
                     affectedFlags.add(MailMessage.USER_READ_ACK);
                     applyFlags = true;
@@ -1281,13 +1311,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
             try {
                 if (!holdsMessages()) {
-                    throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
+                    throw IMAPException.create(
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                        imapConfig,
+                        session,
+                        imapFolder.getFullName());
                 }
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
-                    throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
-                throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
                 LOG.error(new StringBuilder().append("Folder \"").append(imapFolder.getFullName()).append(
@@ -1378,7 +1412,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IOException e) {
-            throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
+            throw IMAPException.create(IMAPException.Code.IO_ERROR, imapConfig, session, e, e.getMessage());
         }
     }
 

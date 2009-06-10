@@ -1214,7 +1214,7 @@ public final class IMAPCommandsCollection {
             return val.booleanValue();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
-            throw new IMAPException(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
+            throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
     }
 
@@ -1230,7 +1230,7 @@ public final class IMAPCommandsCollection {
      */
     public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws IMAPException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
-            throw new IMAPException(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
+            IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
         }
         try {
             return ((Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -1276,7 +1276,7 @@ public final class IMAPCommandsCollection {
             })).booleanValue();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
-            throw new IMAPException(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
+            throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
     }
 
@@ -2231,4 +2231,5 @@ public final class IMAPCommandsCollection {
         pe.initCause(e);
         return pe;
     }
+
 }

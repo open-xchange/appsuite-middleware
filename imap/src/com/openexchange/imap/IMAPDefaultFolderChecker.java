@@ -332,7 +332,7 @@ public final class IMAPDefaultFolderChecker {
              */
             final Folder[] personalNamespaces = imapStore.getPersonalNamespaces();
             if (personalNamespaces == null || personalNamespaces[0] == null) {
-                throw new IMAPException(IMAPException.Code.MISSING_PERSONAL_NAMESPACE);
+                throw IMAPException.create(IMAPException.Code.MISSING_PERSONAL_NAMESPACE, imapConfig, session, new Object[0]);
             }
             sep = personalNamespaces[0].getSeparator();
             setSeparator(sep);
@@ -385,7 +385,7 @@ public final class IMAPDefaultFolderChecker {
                 }
             } else {
                 // Cannot occur: No folders are allowed to be created, neither below INBOX nor below root folder
-                throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, "INBOX");
+                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, "INBOX");
             }
         }
         final String prefix = tmp.toString();

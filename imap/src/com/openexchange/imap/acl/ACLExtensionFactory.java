@@ -104,7 +104,7 @@ public final class ACLExtensionFactory {
             try {
                 return ACLExtensionAutoDetector.getACLExtension(imapConfig);
             } catch (final IOException e) {
-                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
+                throw IMAPException.create(IMAPException.Code.IO_ERROR, e, e.getMessage());
             }
         }
         return configured;

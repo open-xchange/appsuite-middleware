@@ -209,7 +209,7 @@ public final class IMAPSort {
                     }
                 }
                 if (LOG.isWarnEnabled()) {
-                    final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
+                    final IMAPException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
                     LOG.warn(imapException.getMessage(), imapException);
                 }
                 applicationSort = true;
@@ -279,7 +279,7 @@ public final class IMAPSort {
             imapSortCritBuilder.append("SIZE");
             break;
         default:
-            throw new IMAPException(IMAPException.Code.UNSUPPORTED_SORT_FIELD, sortField.getKey());
+            throw IMAPException.create(IMAPException.Code.UNSUPPORTED_SORT_FIELD, sortField.getKey());
         }
         return imapSortCritBuilder.toString();
     }

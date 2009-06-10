@@ -257,7 +257,7 @@ public final class IMAPConfig extends MailConfig {
             try {
                 imapServerAddress = InetAddress.getByName(imapServer);
             } catch (final UnknownHostException e) {
-                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
+                throw IMAPException.create(IMAPException.Code.IO_ERROR, e, e.getMessage());
             }
         }
         return imapServerAddress;

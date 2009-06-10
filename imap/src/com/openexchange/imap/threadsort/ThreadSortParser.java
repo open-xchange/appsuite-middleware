@@ -104,7 +104,7 @@ final class ThreadSortParser {
                 parse(threadList.substring(messageIDLength + 1), childThreads);
                 actual.addChildren(childThreads);
             } else if (threadList.length() > messageIDLength) {
-                throw new IMAPException(
+                throw IMAPException.create(
                     IMAPException.Code.THREAD_SORT_PARSING_ERROR,
                     "Found unexpected character: " + threadList.charAt(messageIDLength));
             }
@@ -120,7 +120,7 @@ final class ThreadSortParser {
                 }
                 final int closingBracket = findMatchingBracket(threadList.substring(pos));
                 if (closingBracket == -1) {
-                    throw new IMAPException(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Closing parenthesis not found.");
+                    throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Closing parenthesis not found.");
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(new StringBuilder("Closing bracket: ").append((pos + closingBracket)).toString());
@@ -146,7 +146,7 @@ final class ThreadSortParser {
                 LOG.debug(new StringBuilder("List: ").append(recthreads).toString());
             }
         } else {
-            throw new IMAPException(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Found unexpected character: " + threadList.charAt(0));
+            throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Found unexpected character: " + threadList.charAt(0));
         }
     }
 
