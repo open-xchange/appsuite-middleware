@@ -1296,7 +1296,7 @@ public class CalendarRecurringTests extends TestCase {
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         
-        final Date check_time = new Date(start_time + (new CalendarCollection().MILLI_DAY*occurrence));
+        final Date check_time = new Date(start_time + (new CalendarCollection().MILLI_DAY*(occurrence-1)));
         
         assertEquals("Check correct until", check_time, testobject.getUntil());
     }
