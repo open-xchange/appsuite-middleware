@@ -82,8 +82,9 @@ public interface POP3Storage {
     /**
      * Synchronizes this storage with actual POP3 account.
      * <p>
-     * Tries to establish a connection to actual POP3 account, fetches all contained messages and synchronizes them with the ones hold in
-     * this storage.
+     * Tries to establish a connection to actual POP3 account, invokes {@link POP3StorageConnectCounter#incrementCounter()
+     * incrementCounter()}, fetches all contained messages, synchronizes them with the ones hold in this storage, and finally invokes
+     * {@link POP3StorageConnectCounter#decrementCounter() decrementCounter()}.
      * 
      * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
      * @param connectCounter The connect counter
