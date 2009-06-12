@@ -51,7 +51,6 @@ package com.openexchange.pop3.connect;
 
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
-import java.security.Security;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -145,7 +144,7 @@ public final class POP3StoreConnector {
                 /*
                  * Needed for JavaMail >= 1.4
                  */
-//                Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
+                // Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
             }
             /*
              * Apply properties to POP3 session
