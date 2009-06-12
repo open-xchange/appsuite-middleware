@@ -702,6 +702,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final MailAccountDescription account = new MailAccountDescription();
         final Set<Attribute> changed = new HashSet<Attribute>();
         account.setDefaultFlag(true);
+        account.setId(0);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
         if (user.isImapServerset() || null != user.getImapServer()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
@@ -709,6 +710,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         if (user.isImapLoginset() || null != user.getImapLogin()) {
             changed.add(Attribute.LOGIN_LITERAL);
+            changed.add(Attribute.TRANSPORT_LOGIN_LITERAL);
             account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         }
         if (null != user.getPrimaryEmail()) {
