@@ -49,6 +49,9 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
+import com.openexchange.groupware.contexts.Context;
+
 /**
  * {@link OXFolderNotFoundException} - Indicates a missing folder.
  * 
@@ -64,8 +67,8 @@ public class OXFolderNotFoundException extends OXFolderException {
      * @param fuid The folder ID
      * @param cid The context ID
      */
-    public OXFolderNotFoundException(final int fuid, final int cid) {
-        super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(cid));
+    public OXFolderNotFoundException(final int fuid, final Context ctx) {
+        super(FolderCode.NOT_EXISTS, getFolderName(fuid, ctx), Integer.valueOf(ctx.getContextId()));
     }
 
 }

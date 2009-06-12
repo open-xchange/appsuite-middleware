@@ -337,7 +337,7 @@ public final class FolderCacheManager {
      */
     private FolderObject loadFolderObjectInternal(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         if (folderId <= 0) {
-            throw new OXFolderNotFoundException(folderId, ctx.getContextId());
+            throw new OXFolderNotFoundException(folderId, ctx);
         }
         final FolderObject folderObj;
         try {

@@ -303,7 +303,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             } else {
                 folderobject.fill(oxfolderAccess.getFolderObject(folderobject.getObjectID()), false);
                 if (!folderobject.exists(ctx)) {
-                    throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx.getContextId());
+                    throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx);
                 }
                 if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
                     throw new OXConcurrentModificationException(
@@ -379,7 +379,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folderobject.exists(ctx)) {
-                throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx.getContextId());
+                throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx);
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
                 throw new OXConcurrentModificationException(
@@ -732,7 +732,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folderobject.exists(ctx)) {
-                throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx.getContextId());
+                throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx);
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
                 throw new OXConcurrentModificationException(

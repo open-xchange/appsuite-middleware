@@ -1314,7 +1314,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public void set(int field, Object value) {
+    @Override
+    public void set(final int field, final Object value) {
         switch (field) {
         case MODULE:
             setModule( ((Integer)value ).intValue());
@@ -1340,7 +1341,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public Object get(int field) {
+    @Override
+    public Object get(final int field) {
         switch (field) {
         case MODULE:
             return Integer.valueOf(getModule());
@@ -1357,7 +1359,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public boolean contains(int field) {
+    @Override
+    public boolean contains(final int field) {
         switch (field) {
         case MODULE:
             return containsModule();
@@ -1374,7 +1377,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public void remove(int field) {
+    @Override
+    public void remove(final int field) {
         switch (field) {
         case MODULE:
             removeModule();
@@ -1398,14 +1402,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public Set<Integer> findDifferingFields(DataObject dataObject) {
-        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+    @Override
+    public Set<Integer> findDifferingFields(final DataObject dataObject) {
+        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
 
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
             return differingFields;
         }
 
-        FolderObject other = (FolderObject) dataObject;
+        final FolderObject other = (FolderObject) dataObject;
 
         if ((!containsFolderName() && other.containsFolderName()) || (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
             other.getFolderName())))) {
@@ -1500,7 +1505,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw new OXFolderNotFoundException(folderId, ctx.getContextId());
+                    throw new OXFolderNotFoundException(folderId, ctx);
                 }
                 final FolderObject folderObj = new FolderObject(rs.getString(2), folderId, rs.getInt(3), rs.getInt(4), rs.getInt(6));
                 folderObj.setParentFolderID(rs.getInt(1));

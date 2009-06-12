@@ -1176,7 +1176,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
              */
             try {
                 if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
-                    throw new OXFolderNotFoundException(fo.getObjectID(), ctx.getContextId());
+                    throw new OXFolderNotFoundException(fo.getObjectID(), ctx);
                 }
             } catch (final DBPoolingException e) {
                 throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -1259,7 +1259,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
              */
             try {
                 if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
-                    throw new OXFolderNotFoundException(fo.getObjectID(), ctx.getContextId());
+                    throw new OXFolderNotFoundException(fo.getObjectID(), ctx);
                 }
             } catch (final DBPoolingException e) {
                 throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
