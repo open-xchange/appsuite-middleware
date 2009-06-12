@@ -86,9 +86,10 @@ public interface POP3Storage {
      * this storage.
      * 
      * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
+     * @param connectCounter The connect counter
      * @throws MailException If synchronizing messages fails
      */
-    public void syncMessages(boolean expunge) throws MailException;
+    public void syncMessages(boolean expunge, POP3StorageConnectCounter connectCounter) throws MailException;
 
     /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.

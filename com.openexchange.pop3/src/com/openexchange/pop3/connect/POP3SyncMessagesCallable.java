@@ -53,17 +53,18 @@ import java.util.concurrent.Callable;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StorageConnectCounter;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 
 /**
- * {@link POP3ConnectCallable} - {@link Callable} to connect to POP3 account and synchronize its messages with POP3 storage.
+ * {@link POP3SyncMessagesCallable} - {@link Callable} to connect to POP3 account and synchronize its messages with POP3 storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3ConnectCallable implements Callable<Object> {
+public final class POP3SyncMessagesCallable implements Callable<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3ConnectCallable.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3SyncMessagesCallable.class);
 
     private final POP3Storage pop3Storage;
 
@@ -73,20 +74,23 @@ public final class POP3ConnectCallable implements Callable<Object> {
 
     private final String server;
 
+    private final POP3StorageConnectCounter connectCounter;
+
     /**
-     * Initializes a new {@link POP3ConnectCallable}.
+     * Initializes a new {@link POP3SyncMessagesCallable}.
      * 
      * @param pop3Storage The POP3 storage
      * @param pop3StorageProperties The POP3 storage properties
      * @param folderStorage The POP3 storage's folder storage instance
      * @param server Either the host name or textual representation of the IP address of the POP3 server
      */
-    public POP3ConnectCallable(final POP3Storage pop3Storage, final POP3StorageProperties pop3StorageProperties, final IMailFolderStorage folderStorage, final String server) {
+    public POP3SyncMessagesCallable(final POP3Storage pop3Storage, final POP3StorageProperties pop3StorageProperties, final IMailFolderStorage folderStorage, final String server, final POP3StorageConnectCounter connectCounter) {
         super();
         this.pop3Storage = pop3Storage;
         this.pop3StorageProperties = pop3StorageProperties;
         this.folderStorage = folderStorage;
         this.server = server;
+        this.connectCounter = connectCounter;
     }
 
     public Object call() throws Exception {
@@ -108,7 +112,7 @@ public final class POP3ConnectCallable implements Callable<Object> {
                 /*
                  * Access POP3 account and synchronize
                  */
-                pop3Storage.syncMessages(isExpungeOnQuit());
+                pop3Storage.syncMessages(isExpungeOnQuit(), connectCounter);
                 /*
                  * Update last-accessed time stamp
                  */
@@ -152,11 +156,9 @@ public final class POP3ConnectCallable implements Callable<Object> {
             try {
                 minutes = Integer.parseInt(frequencyStr);
             } catch (final NumberFormatException e) {
-                LOG.warn(
-                    new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                        "\" is not a number: ").append(frequencyStr).append(". Using fallback of ").append(FALLBACK_MINUTES).append(
-                        " minutes."),
-                    e);
+                LOG.warn(new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
+                    "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
+                    " minutes."), e);
                 minutes = FALLBACK_MINUTES;
             }
             return minutes * 60 * 1000;

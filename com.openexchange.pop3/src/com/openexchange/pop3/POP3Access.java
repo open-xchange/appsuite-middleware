@@ -74,10 +74,11 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3SessionProperties;
-import com.openexchange.pop3.connect.POP3ConnectCallable;
 import com.openexchange.pop3.connect.POP3StoreConnector;
+import com.openexchange.pop3.connect.POP3SyncMessagesCallable;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
+import com.openexchange.pop3.storage.POP3StorageConnectCounter;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
@@ -101,7 +102,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
 
-    private static final ConcurrentMap<InetSocketAddress, Future<Object>> CONNECT_MAP = new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
+    private static final ConcurrentMap<InetSocketAddress, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
 
     /*-
      * Members
@@ -118,8 +119,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     private transient MailLogicTools logicTools;
 
     private boolean connected;
-
-    private boolean decrement;
 
     /**
      * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
@@ -208,7 +207,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         messageStorage = null;
         logicTools = null;
         connected = false;
-        decrement = false;
     }
 
     /**
@@ -279,14 +277,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 pop3Storage = null;
             }
         } finally {
-            if (decrement) {
-                /*
-                 * Decrease counters
-                 */
-                MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
-                MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-                decrementCounter();
-            }
             /*
              * Reset
              */
@@ -342,16 +332,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         pop3Storage.connect();
         connected = true;
         /*
-         * Increase counter
-         */
-        MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
-        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-        incrementCounter();
-        /*
-         * Remember to decrement
-         */
-        decrement = true;
-        /*
          * Ensure exclusive connect through future since a POP3 account may only be connected to one client at the same time
          */
         final InetSocketAddress server;
@@ -360,15 +340,29 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         } catch (final UnknownHostException e) {
             throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
-        Future<Object> f = CONNECT_MAP.get(server);
+        Future<Object> f = SYNCHRONIZER_MAP.get(server);
         boolean removeFromMap = false;
         if (null == f) {
-            final FutureTask<Object> ft = new FutureTask<Object>(new POP3ConnectCallable(
+            final FutureTask<Object> ft = new FutureTask<Object>(new POP3SyncMessagesCallable(
                 pop3Storage,
                 pop3StorageProperties,
                 getFolderStorage(),
-                getPOP3Config().getServer()));
-            f = CONNECT_MAP.putIfAbsent(server, ft);
+                getPOP3Config().getServer(),
+                new POP3StorageConnectCounter() {
+
+                    public void decrementCounter() {
+                        MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
+                        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
+                        POP3Access.decrementCounter();
+                    }
+
+                    public void incrementCounter() {
+                        MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
+                        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+                        POP3Access.incrementCounter();
+                    }
+                }));
+            f = SYNCHRONIZER_MAP.putIfAbsent(server, ft);
             if (f == null) {
                 /*
                  * Yap, this thread's future task was put to map
@@ -406,7 +400,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 /*
                  * And remove from map
                  */
-                CONNECT_MAP.remove(server);
+                SYNCHRONIZER_MAP.remove(server);
             }
         }
     }
