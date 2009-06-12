@@ -14,6 +14,7 @@
 * 2009-06-12 - thorben.betten@open-xchange.com
 
  - Bugfix #13480: Enabling TTL for successful look-ups from the name service.
+ - Bugfix #13833: Fixed mail path parsing if path contains umlauts
 
 * 2009-06-09 - thorben.betten@open-xchange.com
 

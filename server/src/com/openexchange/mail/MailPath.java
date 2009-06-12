@@ -53,8 +53,6 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder fullname followed
@@ -91,9 +89,6 @@ public final class MailPath implements Cloneable, Serializable {
      * The <code>'/'</code> character which separates folder's fullname from mail's ID in a mail path
      */
     public static final char SEPERATOR = '/';
-
-    private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(16).append("(\\p{Print}+)(").append(SEPERATOR).append(
-        ")(\\p{Print}+)").toString());
 
     /**
      * Gets the mail path corresponding to given folder fullname and message UID
@@ -302,14 +297,14 @@ public final class MailPath implements Cloneable, Serializable {
      * @throws MailException If mail path's string representation does not match expected pattern
      */
     public MailPath setMailIdentifierString(final String mailPathStr) throws MailException {
-        final Matcher m = DELIM_PATTERN.matcher(mailPathStr);
-        if (!m.matches()) {
+        final int pos = mailPathStr.lastIndexOf(SEPERATOR);
+        if (-1 == pos) {
             throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
         }
-        final FullnameArgument fa = prepareMailFolderParam(m.group(1));
+        final FullnameArgument fa = prepareMailFolderParam(mailPathStr.substring(0, pos));
         this.accountId = fa.getAccountId();
         this.folder = fa.getFullname();
-        this.mailID = m.group(3);
+        this.mailID = mailPathStr.substring(pos + 1);
         str = mailPathStr;
         return this;
     }
