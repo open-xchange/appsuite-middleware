@@ -413,35 +413,35 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public POP3FolderStorage getFolderStorage() throws MailException {
-        if (connected) {
-            if (null == folderStorage) {
-                folderStorage = new POP3FolderStorage(pop3Storage);
-            }
-            return folderStorage;
+        if (!connected) {
+            throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
         }
-        throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
+        if (null == folderStorage) {
+            folderStorage = new POP3FolderStorage(pop3Storage);
+        }
+        return folderStorage;
     }
 
     @Override
     public POP3MessageStorage getMessageStorage() throws MailException {
-        if (connected) {
-            if (null == messageStorage) {
-                messageStorage = new POP3MessageStorage(pop3Storage, accountId, session);
-            }
-            return messageStorage;
+        if (!connected) {
+            throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
         }
-        throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
+        if (null == messageStorage) {
+            messageStorage = new POP3MessageStorage(pop3Storage, accountId, session);
+        }
+        return messageStorage;
     }
 
     @Override
     public MailLogicTools getLogicTools() throws MailException {
-        if (connected) {
-            if (null == logicTools) {
-                logicTools = new MailLogicTools(session, accountId);
-            }
-            return logicTools;
+        if (!connected) {
+            throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
         }
-        throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
+        if (null == logicTools) {
+            logicTools = new MailLogicTools(session, accountId);
+        }
+        return logicTools;
     }
 
     @Override
