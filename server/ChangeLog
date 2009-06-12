@@ -1,3 +1,7 @@
+* 2009-06-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #13879: Added shift-jis as alias charset of Shift_JIS.
+
 * 2009-06-10 - marcus.klein@open-xchange.com
 
  - Bugfix #13873: Catching RuntimeExceptions in database update tasks. Fixed causes of RuntimeExceptions in database update tasks.

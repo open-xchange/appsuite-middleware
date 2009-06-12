@@ -49,6 +49,8 @@
 
 package com.openexchange.charset;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -59,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public final class CustomCharsetProviderInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CustomCharsetProviderInit.class);
+    private static final Log LOG = LogFactory.getLog(CustomCharsetProviderInit.class);
 
     /**
      * Initializes a new {@link CustomCharsetProviderInit}.
@@ -79,6 +81,7 @@ public final class CustomCharsetProviderInit implements Initialization {
         provider.addAliasCharset("US-ASCII", "x-unknown");
         provider.addAliasCharset("ISO-8859-1", "ISO");
         provider.addAliasCharset("MacRoman", "MACINTOSH");
+        provider.addAliasCharset("Shift_JIS", "shift-jis");
         /*
          * Add starts-with charsets
          */
@@ -90,5 +93,4 @@ public final class CustomCharsetProviderInit implements Initialization {
         CustomCharsetProvider.releaseCharsetMap();
         LOG.info("Custom charset provider successfully dropped.");
     }
-
 }
