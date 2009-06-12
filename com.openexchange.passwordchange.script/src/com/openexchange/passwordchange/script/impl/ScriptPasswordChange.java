@@ -135,8 +135,8 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		cmd[1] = cid;
 		cmd[2] = usern;
 		cmd[3] = userid;
-		cmd[4] = oldpw;
-		cmd[5] = newpw;
+		cmd[4] = "\""+oldpw+"\""; // for spaces in passwor
+		cmd[5] = "\""+newpw+"\""; // 
 		
 		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
 		
