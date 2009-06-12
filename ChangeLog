@@ -1,3 +1,7 @@
+* 2009-06-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #13849: Added missing primary mail account identifier when updating it.
+
 * 2009-05-28 - dennis.sieben@open-xchange.com
 
  - Bugfix #13733: antispam plugin cannot be enabled via soap
