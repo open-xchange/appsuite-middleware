@@ -61,7 +61,7 @@ import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.tools.LocaleTools;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**

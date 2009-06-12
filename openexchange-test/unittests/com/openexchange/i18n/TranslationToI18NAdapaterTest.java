@@ -56,7 +56,7 @@ import com.openexchange.i18n.impl.TranslationsI18N;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class TranslationToI18NAdapaterTest extends TestCase {
-    private I18nTools i18n;
+    private I18nService i18n;
 
     public void setUp() {
         Translations tr = new Translations();

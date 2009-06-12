@@ -51,7 +51,7 @@ package com.openexchange.i18n;
 
 import java.util.Locale;
 import com.openexchange.groupware.Init;
-import com.openexchange.i18n.tools.I18nServices;
+import com.openexchange.server.services.I18nServices;
 import junit.framework.TestCase;
 
 /**
@@ -96,7 +96,7 @@ public class TranslatedSingleTest extends TestCase {
     }
 
     public void testTranslation() {
-        final I18nTools i18nService = I18nServices.getInstance().getService(locale);
+        final I18nService i18nService = I18nServices.getInstance().getService(locale);
         assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
         final boolean isTranslated = i18nService.hasKey(key);
         assertTrue("No translation for key " + key + " into language " + locale + ".", isTranslated);
