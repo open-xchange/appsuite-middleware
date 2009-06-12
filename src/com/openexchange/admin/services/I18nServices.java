@@ -46,36 +46,54 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.admin.PluginStarter;
-import com.openexchange.context.ContextService;
+package com.openexchange.admin.services;
+
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.i18n.I18nService;
 
-public class Activator implements BundleActivator {
+public class I18nServices {
 
-    private PluginStarter starter = null;
+    private static final Log LOG = LogFactory.getLog(I18nServices.class);
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final ConcurrentHashMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
-    public void start(BundleContext context) throws Exception {
-        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
-        trackers.push(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-        for (int i = trackers.size() - 1; i >= 0; i--) {
-            trackers.get(i).open();
-        }
-        this.starter = new PluginStarter();
-        this.starter.start(context);
+    private static final I18nServices SINGLETON = new I18nServices();
+
+    private I18nServices() {
+        super();
     }
 
-    public void stop(BundleContext context) throws Exception {
-        this.starter.stop();
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
+    public void addService(Locale locale, I18nService i18n) {
+        if (null !=services.put(locale, i18n)) {
+            LOG.warn("Another i18n translation service found for " + locale);
         }
+    }
+
+    public void removeService(Locale locale, I18nService i18n) {
+        services.remove(locale, i18n);
+    }
+
+    public static I18nServices getInstance() {
+        return SINGLETON;
+    }
+
+    public String translate(Locale locale, String toTranslate) {
+        I18nService service = services.get(locale);
+        if (null == service) {
+            if (!"en".equalsIgnoreCase(locale.getLanguage())) {
+                LOG.warn("No i18n service for locale " + locale + ".");
+            }
+            return toTranslate;
+        }
+        if (!service.hasKey(toTranslate)) {
+            LOG.warn("I18n service for locale " + locale + " has no translation for \"" + toTranslate + "\".");
+            return toTranslate;
+        }
+        return service.getLocalized(toTranslate);
     }
 }

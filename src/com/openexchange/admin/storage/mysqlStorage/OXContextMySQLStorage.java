@@ -63,6 +63,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,6 +83,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -102,11 +104,14 @@ import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
@@ -1203,14 +1208,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 // create group users for context
-                // get display name for context default group resolved via
-                // admins language
+                String groupName = translateGroupName(admin_user);
+                this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, groupName, group_id, gid_number);
 
-                final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + admin_user.getLanguage().toUpperCase(), "Users");
-                this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id, gid_number);
-
-                
-                
                 this.oxcontextcommon.createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin, uid_number, access);
                 // create system folder for context
                 // get lang and displayname of admin
@@ -1288,6 +1288,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("Error pushing ox write connection to pool!", ecp);
             }
         }
+    }
+
+    /**
+     * Translate display name for context default group resolved via administrators language.
+     * @param administrator administrator user of the context.
+     * @return the translated group name if a corresponding service is available.
+     */
+    private String translateGroupName(final User administrator) {
+        Locale locale = LocaleTools.getLocale(administrator.getLanguage());
+        return I18nServices.getInstance().translate(locale, Groups.STANDARD_GROUP);
     }
 
     /**
