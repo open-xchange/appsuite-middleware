@@ -391,6 +391,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
+            if (cause instanceof MailException) {
+                throw ((MailException) cause);
+            }
             if (cause instanceof RuntimeException) {
                 throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
             }
