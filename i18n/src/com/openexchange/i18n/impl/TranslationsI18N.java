@@ -50,13 +50,13 @@
 package com.openexchange.i18n.impl;
 
 import java.util.Locale;
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.parsing.Translations;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class TranslationsI18N implements I18nTools {
+public class TranslationsI18N implements I18nService {
 
     private final Translations translations;
 

@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  */
 public abstract class UserStorage {
 
-	private static final Log LOG = LogFactory.getLog(UserStorage.class);
+    private static final Log LOG = LogFactory.getLog(UserStorage.class);
 
     /**
      * Attribute name of alias.
@@ -226,7 +226,7 @@ public abstract class UserStorage {
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
-     * @throws UserException if an error occurs during the search. 
+     * @throws UserException if an error occurs during the search.
      */
     public abstract int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
 
@@ -259,6 +259,12 @@ public abstract class UserStorage {
      * @throws UserException if removing gives an exception.
      */
     public abstract void invalidateUser(final Context ctx, final int userId) throws UserException;
+
+    public final void invalidateUser(Context ctx, int[] userIds) throws UserException {
+        for (final int member : userIds) {
+            invalidateUser(ctx, member);
+        }
+    }
 
     public static final boolean authenticate(final User user,
         final String password) throws UserException {
@@ -311,41 +317,41 @@ public abstract class UserStorage {
     }
 
     /**
-	 * Reads the data from a user from the underlying persistent data storage.
-	 * 
-	 * @param uid
-	 *            User identifier.
-	 * @param context
-	 *            Context.
-	 * @return a user object or <code>null</code> on exception.
-	 */
+     * Reads the data from a user from the underlying persistent data storage.
+     *
+     * @param uid
+     *            User identifier.
+     * @param context
+     *            Context.
+     * @return a user object or <code>null</code> on exception.
+     */
     public static User getStorageUser(final int uid, final Context context) {
-		try {
-			return getInstance().getUser(uid, context);
-		} catch (final LdapException e) {
-			LOG.error(e.getMessage(), e);
-			return null;
-		}
-	}
+        try {
+            return getInstance().getUser(uid, context);
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
-     * 
+     *
      * @param uid User identifier.
      * @param contextId Context ID.
      * @return a user object or <code>null</code> on exception.
      */
     public static User getStorageUser(final int uid, final int contextId) {
-		try {
-			return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
-		} catch (final LdapException e) {
-			LOG.error(e.getMessage(), e);
-			return null;
-		} catch (final ContextException e) {
-			LOG.error(e.getMessage(), e);
-			return null;
-		}
-	}
+        try {
+            return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
     static void loadProperties() throws LdapException {
             ALIAS = LdapUtility.findProperty(Names.USER_ATTRIBUTE_ALIAS);

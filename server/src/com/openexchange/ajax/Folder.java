@@ -591,7 +591,7 @@ public class Folder extends SessionServlet {
                                 if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                                     throw new AbstractOXException(e);
                                 }
-                                creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
+                                creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                             }
                             if (displayNames.containsKey(creatorDisplayName)) {
                                 continue;

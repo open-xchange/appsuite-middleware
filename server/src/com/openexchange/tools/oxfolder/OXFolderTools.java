@@ -992,7 +992,7 @@ public class OXFolderTools {
                         throw e;
                     }
                     final StringHelper strHelper = new StringHelper(locale);
-                    creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
+                    creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
                 final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
                     "u:" + fo.getCreatedBy(),

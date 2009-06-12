@@ -52,7 +52,6 @@ package com.openexchange.group.internal;
 import java.util.Date;
 
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
@@ -60,8 +59,9 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.ldap.UserException.Code;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.tools.LocaleTools;
 
 /**
  * Tool methods for groups.
@@ -73,6 +73,7 @@ public final class GroupTools {
      * Cloneable object for group 0.
      */
     static final Group GROUP_ZERO;
+
     /**
      * Prevent instantiation
      */
@@ -84,31 +85,20 @@ public final class GroupTools {
         final Group retval;
         try {
             retval = (Group) GROUP_ZERO.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new UserException(UserException.Code.NOT_CLONEABLE, e, Group.class.getName());
+        } catch (CloneNotSupportedException e) {
+            throw new UserException(Code.NOT_CLONEABLE, e, Group.class.getName());
         }
         final UserStorage ustor = UserStorage.getInstance();
         retval.setMember(ustor.listAllUser(ctx));
         retval.setLastModified(new Date());
         final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
         final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin.getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));
+        retval.setDisplayName(helper.getString(Groups.ALL_USERS));
         return retval;
     }
 
     static {
         GROUP_ZERO = new Group();
         GROUP_ZERO.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
-    }
-
-    static final void invalidateUser(final Context ctx, final int[] userIds) throws GroupException {
-        try {
-            final UserStorage storage = UserStorage.getInstance();
-            for (final int member : userIds) {
-                storage.invalidateUser(ctx, member);
-            }
-        } catch (final UserException e) {
-            throw new GroupException(e);
-        }
     }
 }

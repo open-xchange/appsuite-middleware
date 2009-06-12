@@ -1,3 +1,7 @@
+* 2009-06-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #6692: Renamed group 0 to "All users" and group 1 to "Standard group". An update task fixes values in the database.
+
 * 2009-06-12 - marcus.klein@open-xchange.com
 
  - Bugfix #13879: Added shift-jis as alias charset of Shift_JIS.

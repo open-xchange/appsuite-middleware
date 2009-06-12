@@ -291,21 +291,24 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Adds necessary tables for multiple mail accounts and migrates mail account data
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask());
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountMigrationTask());
-            // Version 35
+            // Version 36
             // Adds necessary tables to support missing POP3 features
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.POP3CreateTableTask());
-            // Version 36
+            // Version 38
             // Adds necessary tables to support generic configuration storage
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateGenconfTablesTask());
-            // Version 37
+            // Version 40
             // Adds necessary tables for subscribe service
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
-            // Version 38
+            // Version 42
             // Adds necessary tables for publish service
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreatePublicationTablesTask());
-            // Version 39
+            // Version 44
             // Adds necessary column in contact table for counting usage.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddUseCountColumnUpdateTask());
+            // Version 46
+            // Renames the standard group of all users.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RenameGroupTask());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");

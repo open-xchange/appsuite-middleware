@@ -55,7 +55,8 @@ import java.util.MissingResourceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.server.services.I18nServices;
 
 /**
  * StringHelper
@@ -94,7 +95,7 @@ public class StringHelper {
         if (null == locale) {
             return key;
         }
-        I18nTools tool;
+        I18nService tool;
         try {
             tool = I18nServices.getInstance().getService(locale);
             if (tool == null) {

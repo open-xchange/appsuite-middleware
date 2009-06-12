@@ -120,7 +120,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskServiceTrackerCustomizer;
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
@@ -314,7 +314,7 @@ public final class ServerActivator extends DeferredActivator {
         // move this to the required services once the database component gets into its own bundle.
         serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
         // I18n service load
-        serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
+        serviceTrackerList.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceListener(context)));
         // Update task service tracker
         serviceTrackerList.add(new ServiceTracker(context, UpdateTaskProviderService.class.getName(), new UpdateTaskServiceTrackerCustomizer(context)));
 

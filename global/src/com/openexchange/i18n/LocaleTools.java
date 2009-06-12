@@ -50,17 +50,56 @@
 package com.openexchange.i18n;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * @author <a href="mailto:ben.pahne@open-xchange">Ben Pahne</a>
+ * Tool methods for handling locales.
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public final class LocaleTools {
 
-public interface I18nTools {
+    private static final String STR_EMPTY = "";
 
-    public String getLocalized(String key);
+    private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
 
-    public boolean hasKey(String key);
+    /**
+     * Prevent instantiation
+     */
+    private LocaleTools() {
+        super();
+    }
 
-    public Locale getLocale();
+    /**
+     * Splits the full locale identifier into its parts and creates the corresponding locale. Currently the fullIdentifier must match the
+     * pattern <code>language_country</code>.
+     * 
+     * @param fullIdentifier full locale identifier compliant to RFC 2798 and 2068.
+     * @return the locale or <code>null</code> if the pattern doesn't match.
+     */
+    public static Locale getLocale(final String fullIdentifier) {
+        final Matcher match = identifierPattern.matcher(fullIdentifier);
+        Locale retval = null;
+        if (match.matches()) {
+            final String country = match.group(2);
+            final String variant = match.group(3);
+            retval = new Locale(match.group(1), country == null ? STR_EMPTY : country, variant == null ? STR_EMPTY : variant);
+        }
+        return retval;
+    }
+
+    /**
+     * An own implementation of toLowerCase() to avoid circularity problems between Locale and String. The most straightforward algorithm is
+     * used. Look at optimizations later.
+     */
+    public static String toLowerCase(final String str) {
+        final char[] buf = new char[str.length()];
+        for (int i = 0; i < buf.length; i++) {
+            buf[i] = Character.toLowerCase(str.charAt(i));
+        }
+        return new String(buf);
+    }
 
 }

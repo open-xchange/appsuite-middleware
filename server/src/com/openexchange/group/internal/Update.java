@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -297,7 +298,12 @@ final class Update {
         while (iter.hasNext()) {
             tmp[i++] = iter.next().intValue();
         }
-        GroupTools.invalidateUser(ctx, tmp);
+        UserStorage storage = UserStorage.getInstance();
+        try {
+            storage.invalidateUser(ctx, tmp);
+        } catch (UserException e) {
+            throw new GroupException(e);
+        }
         // The time stamp of folder must be increased. The GUI the reloads the
         // folder. This must be done because through this change some folders
         // may get visible or invisible.

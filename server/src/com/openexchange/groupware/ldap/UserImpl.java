@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.openexchange.group.GroupStorage;
-import com.openexchange.tools.LocaleTools;
+import com.openexchange.i18n.LocaleTools;
 
 /**
  * This class implements the data container for the attributes of a user. This

@@ -55,8 +55,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.i18n.I18nTools;
-import com.openexchange.i18n.tools.I18nServices;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.server.services.I18nServices;
 
 public class I18nServiceListener implements ServiceTrackerCustomizer{
 	
@@ -73,7 +73,7 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
 	}
 	
 	public Object addingService(final ServiceReference reference) {
-        final I18nTools i18n = (I18nTools)context.getService(reference); 
+        final I18nService i18n = (I18nService)context.getService(reference); 
         
         LOG.info("Adding Service Bundle I18nTools "+i18n.getLocale());
         
@@ -83,13 +83,13 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
 	}
 
 	public void modifiedService(final ServiceReference reference, final Object service) {
-		// TODO Auto-generated method stub
+		// Nothing to do.
 		
 	}
 
 	public void removedService(final ServiceReference reference, final Object service) {
         try {
-			final I18nTools i18n = (I18nTools)context.getService(reference);
+			final I18nService i18n = (I18nService)context.getService(reference);
 	        
 	        LOG.info("Removing Service Bundle I18nTools "+i18n.getLocale());
 	        

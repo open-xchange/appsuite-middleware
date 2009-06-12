@@ -70,6 +70,7 @@ import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -244,6 +245,11 @@ public final class Delete {
      * @throws GroupException if something during propagate fails.
      */
     private void propagate() throws GroupException {
-        GroupTools.invalidateUser(ctx, getOrig().getMember());
+        UserStorage storage = UserStorage.getInstance();
+        try {
+            storage.invalidateUser(ctx, getOrig().getMember());
+        } catch (UserException e) {
+            throw new GroupException(e);
+        }
     }
 }

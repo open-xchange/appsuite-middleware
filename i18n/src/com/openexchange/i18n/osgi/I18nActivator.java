@@ -67,7 +67,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.impl.CompositeI18nTools;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
@@ -149,13 +149,13 @@ public class I18nActivator implements BundleActivator {
         final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();
         final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
 
-        final Map<Locale, List<I18nTools>> locales = new HashMap<Locale, List<I18nTools>>();
+        final Map<Locale, List<I18nService>> locales = new HashMap<Locale, List<I18nService>>();
 
         for (final Translations tr : translations) {
 
-            List<I18nTools> list = locales.get(tr.getLocale());
+            List<I18nService> list = locales.get(tr.getLocale());
             if (list == null) {
-                list = new ArrayList<I18nTools>();
+                list = new ArrayList<I18nService>();
                 locales.put(tr.getLocale(), list);
             }
 
@@ -164,9 +164,9 @@ public class I18nActivator implements BundleActivator {
 
         for (final ResourceBundle rc : resourceBundles) {
 
-            List<I18nTools> list = locales.get(rc.getLocale());
+            List<I18nService> list = locales.get(rc.getLocale());
             if (list == null) {
-                list = new ArrayList<I18nTools>();
+                list = new ArrayList<I18nService>();
                 locales.put(rc.getLocale(), list);
             }
 
@@ -178,19 +178,19 @@ public class I18nActivator implements BundleActivator {
         }
 
         for (final Locale locale : locales.keySet()) {
-            final List<I18nTools> list = locales.get(locale);
+            final List<I18nService> list = locales.get(locale);
 
             final Properties prop = new Properties();
             prop.put("language", locale);
 
-            I18nTools i18n = null;
+            I18nService i18n = null;
             if (list.size() == 1) {
                 i18n = list.get(0);
             } else {
                 i18n = new CompositeI18nTools(list);
             }
 
-            serviceRegistrations.add(context.registerService(I18nTools.class.getName(), i18n, prop));
+            serviceRegistrations.add(context.registerService(I18nService.class.getName(), i18n, prop));
 
         }
 

@@ -47,16 +47,25 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.server.services;
 
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.LocaleTools;
 
+/**
+ * Registry for all found {@link I18nService} instances.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class I18nServices {
 
-    private final ConcurrentHashMap<Locale, I18nTools> services = new ConcurrentHashMap<Locale, I18nTools>();
+    private static final Log LOG = LogFactory.getLog(I18nServices.class);
+
+    private final ConcurrentHashMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
     private static final I18nServices instance = new I18nServices();
 
@@ -64,12 +73,12 @@ public class I18nServices {
         super();
     }
 
-    public int addService(final Locale l, final I18nTools i18n) {
+    public int addService(final Locale l, final I18nService i18n) {
         services.put(l, i18n);
         return services.size();
     }
 
-    public int removeService(final Locale l, final I18nTools i18n) {
+    public int removeService(final Locale l, final I18nService i18n) {
         services.remove(l, i18n);
         return services.size();
 
@@ -79,18 +88,29 @@ public class I18nServices {
         return instance;
     }
 
-    public int getNumberOfServices() {
-        if (null != services) {
-            return services.size();
-        }
-        return 0;
-    }
-
-    public I18nTools getService(final Locale l) {
+    public I18nService getService(final Locale l) {
         if (null != services) {
             return services.get(l);
         }
         return null;
     }
 
+    public String translate(Locale locale, String toTranslate) {
+        I18nService service = services.get(locale);
+        if (null == service) {
+            if (!"en".equalsIgnoreCase(locale.getLanguage())) {
+                LOG.warn("No i18n service for locale " + locale + ".");
+            }
+            return toTranslate;
+        }
+        if (!service.hasKey(toTranslate)) {
+            LOG.warn("I18n service for locale " + locale + " has no translation for \"" + toTranslate + "\".");
+            return toTranslate;
+        }
+        return service.getLocalized(toTranslate);
+    }
+
+    public String translate(String localeId, String toTranslate) {
+        return translate(LocaleTools.getLocale(localeId), toTranslate);
+    }
 }

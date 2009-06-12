@@ -54,13 +54,13 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
 
 /**
  * @author <a href="mailto:ben.pahne@open-xchange">Ben Pahne</a>
  */
 
-public class I18nImpl implements I18nTools {
+public class I18nImpl implements I18nService {
 
     private static final Log LOG = LogFactory.getLog(I18nImpl.class);
 

@@ -51,21 +51,21 @@ package com.openexchange.i18n.impl;
 
 import java.util.List;
 import java.util.Locale;
-import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.I18nService;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CompositeI18nTools implements I18nTools {
+public class CompositeI18nTools implements I18nService {
 
     private Locale locale;
 
-    private final List<I18nTools> tools;
+    private final List<I18nService> tools;
 
-    public CompositeI18nTools(final List<I18nTools> i18n) {
+    public CompositeI18nTools(final List<I18nService> i18n) {
         super();
         tools = i18n;
-        for (final I18nTools i18nTool : i18n) {
+        for (final I18nService i18nTool : i18n) {
             if (null == locale) {
                 locale = i18nTool.getLocale();
             } else if (!locale.equals(i18nTool.getLocale())) {
@@ -75,7 +75,7 @@ public class CompositeI18nTools implements I18nTools {
     }
 
     public String getLocalized(final String key) {
-        for (final I18nTools tool : tools) {
+        for (final I18nService tool : tools) {
             if (tool.hasKey(key)) {
                 return tool.getLocalized(key);
             }
@@ -84,7 +84,7 @@ public class CompositeI18nTools implements I18nTools {
     }
 
     public boolean hasKey(final String key) {
-        for (final I18nTools tool : tools) {
+        for (final I18nService tool : tools) {
             if (tool.hasKey(key)) {
                 return true;
             }

@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
-import static com.openexchange.tools.LocaleTools.toLowerCase;
+import static com.openexchange.i18n.LocaleTools.toLowerCase;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;

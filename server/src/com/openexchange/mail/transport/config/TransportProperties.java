@@ -52,8 +52,8 @@ package com.openexchange.mail.transport.config;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.LocaleTools;
 
 /**
  * {@link TransportProperties}

@@ -74,9 +74,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.sql.DBUtils;
 

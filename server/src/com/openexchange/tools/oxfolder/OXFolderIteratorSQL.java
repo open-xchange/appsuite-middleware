@@ -663,7 +663,7 @@ public final class OXFolderIteratorSQL {
                         throw e;
                     }
                     final StringHelper strHelper = new StringHelper(locale);
-                    creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
+                    creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
                 final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
                     FolderObject.SHARED_PREFIX + fo.getCreatedBy(),
