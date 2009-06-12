@@ -49,74 +49,58 @@
 
 package com.openexchange.server;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.authentication.exception.LoginExceptionFactory;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
+import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link GlobalActivator} - Activator for global (aka kernel) bundle
+ * {@link ServerInitialization} - The {@link Initialization initialization} for server.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GlobalActivator implements BundleActivator {
+final class ServerInitialization implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
+    private final AtomicBoolean started;
 
-    private ServiceRegistration componentRegistryRegistration;
+    private String previousTTL;
 
-    private ComponentRegistration loginComponent;
-
-    private Initialization initialization;
+    private String previousNegativeTTL;
 
     /**
-     * Initializes a new {@link GlobalActivator}
+     * Initializes a new {@link ServerInitialization}.
      */
-    public GlobalActivator() {
+    ServerInitialization() {
         super();
+        started = new AtomicBoolean();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void start(final BundleContext context) throws Exception {
-        try {
-            initialization = new com.openexchange.server.ServerInitialization();
-            initialization.start();
-            ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            loginComponent = new ComponentRegistration(
-                context,
-                EnumComponent.LOGIN,
-                "com.openexchange.authentication",
-                LoginExceptionFactory.getInstance());
-            LOG.debug("Global bundle successfully started");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            return;
         }
+        /*
+         * Remember previous settings
+         */
+        previousTTL = java.security.Security.getProperty("networkaddress.cache.ttl");
+        previousNegativeTTL = java.security.Security.getProperty("networkaddress.cache.negative.ttl");
+        /*
+         * The number of seconds to cache the successful lookup
+         */
+        java.security.Security.setProperty("networkaddress.cache.ttl", String.valueOf(3600));
+        /*
+         * The number of seconds to cache the failure for un-successful lookups
+         */
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl", String.valueOf(10));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void stop(final BundleContext context) throws Exception {
-        try {
-            loginComponent.unregister();
-            componentRegistryRegistration.unregister();
-            ServiceHolderInit.getInstance().stop();
-            initialization.stop();
-            initialization = null;
-            LOG.debug("Global bundle successfully stopped");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+    public void stop() throws AbstractOXException {
+        if (!started.compareAndSet(true, false)) {
+            return;
         }
+        /*
+         * Restore previous settings
+         */
+        java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
     }
+
 }
