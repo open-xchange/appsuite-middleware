@@ -361,6 +361,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
         Future<Object> f = CONNECT_MAP.get(server);
+        boolean removeFromMap = false;
         if (null == f) {
             final FutureTask<Object> ft = new FutureTask<Object>(new POP3ConnectCallable(
                 pop3Storage,
@@ -373,6 +374,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                  * Yap, this thread's future task was put to map
                  */
                 f = ft;
+                removeFromMap = true;
                 ft.run();
             }
         }
@@ -396,11 +398,14 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 throw (Error) cause;
             }
             throw new IllegalStateException("Not unchecked", cause);
+        } finally {
+            if (removeFromMap) {
+                /*
+                 * And remove from map
+                 */
+                CONNECT_MAP.remove(server);
+            }
         }
-        /*
-         * And remove from map
-         */
-        CONNECT_MAP.remove(server);
     }
 
     @Override
