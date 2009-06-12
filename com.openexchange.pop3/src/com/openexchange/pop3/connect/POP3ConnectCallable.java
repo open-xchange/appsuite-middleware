@@ -152,12 +152,18 @@ public final class POP3ConnectCallable implements Callable<Object> {
             try {
                 minutes = Integer.parseInt(frequencyStr);
             } catch (final NumberFormatException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn(
+                    new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
+                        "\" is not a number: ").append(frequencyStr).append(". Using fallback of ").append(FALLBACK_MINUTES).append(
+                        " minutes."),
+                    e);
                 minutes = FALLBACK_MINUTES;
             }
             return minutes * 60 * 1000;
         }
         // Fallback to 10 minutes
+        LOG.warn(new StringBuilder(128).append("Missing POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
+            "\"").append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes."), new Throwable());
         return FALLBACK_MINUTES * 60 * 1000;
     }
 
