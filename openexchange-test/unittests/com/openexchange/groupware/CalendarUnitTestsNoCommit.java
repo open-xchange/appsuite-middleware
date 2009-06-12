@@ -60,7 +60,6 @@ public class CalendarUnitTestsNoCommit {
 		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
 		
 		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
 		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
 		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
 
