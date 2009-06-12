@@ -46,36 +46,51 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.admin.PluginStarter;
-import com.openexchange.context.ContextService;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.admin.services.I18nServices;
 import com.openexchange.i18n.I18nService;
 
-public class Activator implements BundleActivator {
+/**
+ * Adds a found {@link I18nService} to the registry for the services.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private PluginStarter starter = null;
+    private static final Log LOG = LogFactory.getLog(I18nServiceCustomizer.class);
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final BundleContext context;
 
-    public void start(BundleContext context) throws Exception {
-        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
-        trackers.push(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-        for (int i = trackers.size() - 1; i >= 0; i--) {
-            trackers.get(i).open();
-        }
-        this.starter = new PluginStarter();
-        this.starter.start(context);
+    public I18nServiceCustomizer(BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    public void stop(BundleContext context) throws Exception {
-        this.starter.stop();
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
+    public Object addingService(ServiceReference reference) {
+        I18nService i18n = (I18nService) context.getService(reference);
+        LOG.debug("Adding translation service for locale " + i18n.getLocale() + " to administration daemon.");
+        I18nServices.getInstance().addService(i18n.getLocale(), i18n);
+        return i18n;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        try {
+            I18nService i18n = (I18nService) service;
+            I18nServices.getInstance().removeService(i18n.getLocale(), i18n);
+            LOG.debug("Removing translation service for locale " + i18n.getLocale() + " from administration daemon.");
+        } finally {
+            context.ungetService(reference);
         }
     }
 }
