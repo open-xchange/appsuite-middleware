@@ -307,10 +307,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 final Message[] all = inbox.getMessages();
                 {
                     // Initiate fetch
-                    final FetchProfile fetchProfile = MIMEStorageUtility.getUIDFetchProfile();
-                    fetchProfile.add(FetchProfile.Item.ENVELOPE);
                     final long start = System.currentTimeMillis();
-                    inbox.fetch(all, fetchProfile);
+                    inbox.fetch(all, MIMEStorageUtility.getUIDFetchProfile());
                     MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 }
                 final String[] uidlsFromPOP3 = new String[all.length];
@@ -381,16 +379,37 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
-        final List<MailMessage> toAppend = new ArrayList<MailMessage>(newUIDLs.size());
+        /*
+         * Filter new ones
+         */
+        final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
         for (int i = 0; i < all.length; i++) {
             final Message message = all[i];
             final String uidl = inbox.getUID(message);
             if (newUIDLs.contains(uidl)) {
-                final MailMessage mm = MIMEMessageConverter.convertMessage((MimeMessage) message);
-                mm.setMailId(uidl);
-                toAppend.add(mm);
+                toFetch.add(message);
             }
         }
+        /*
+         * Fetch ENVELOPE for new messages
+         */
+        final Message[] msgs = toFetch.toArray(new Message[toFetch.size()]);
+        final FetchProfile fetchProfile = new FetchProfile();
+        fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        final long start = System.currentTimeMillis();
+        inbox.fetch(msgs, fetchProfile);
+        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        /*
+         * Append them to storage
+         */
+        final List<MailMessage> toAppend = new ArrayList<MailMessage>(msgs.length);
+        for (int i = 0; i < msgs.length; i++) {
+            final Message message = msgs[i];
+            final MailMessage mm = MIMEMessageConverter.convertMessage((MimeMessage) message);
+            mm.setMailId(inbox.getUID(message));
+            toAppend.add(mm);
+        }
+
         ((MailAccountPOP3MessageStorage) getMessageStorage()).appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
     }
 
