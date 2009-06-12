@@ -49,8 +49,11 @@
 
 package com.openexchange.pop3.connect;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -62,9 +65,11 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.POP3Provider;
+import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
+import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.pop3.POP3Store;
@@ -108,6 +113,24 @@ public final class POP3StoreConnector {
                  */
                 checkTemporaryDown(pop3Config);
             }
+            /*
+             * Check capabilities
+             */
+            final String server = pop3Config.getServer();
+            final int port = pop3Config.getPort();
+            final String capabilities;
+            try {
+                capabilities = POP3CapabilityCache.getCapability(
+                    InetAddress.getByName(server),
+                    port,
+                    pop3Config.isSecure(),
+                    (IPOP3Properties) pop3Config.getMailProperties());
+            } catch (final UnknownHostException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+            final boolean responseCodeAware = capabilities.toUpperCase().indexOf("RESP-CODES") >= 0;
             String tmpPass = pop3Config.getPassword();
             if (tmpPass != null) {
                 try {
@@ -135,7 +158,6 @@ public final class POP3StoreConnector {
              * switch the connection into TLS mode using the STLS command. Possibly the server will accept
              * connecting to the secure POP3 port in TLS mode.
              */
-            final int port = pop3Config.getPort();
             if (pop3Config.isSecure()) {
                 pop3Props.put("mail.pop3.socketFactory.class", TrustAllSSLSocketFactory.class.getName());
                 pop3Props.put("mail.pop3.socketFactory.port", String.valueOf(port));
@@ -164,7 +186,6 @@ public final class POP3StoreConnector {
             /*
              * ... and connect
              */
-            final String server = pop3Config.getServer();
             try {
                 pop3Store.connect(server, port, login, tmpPass);
             } catch (final AuthenticationFailedException e) {
@@ -173,6 +194,47 @@ public final class POP3StoreConnector {
                      * Remember failed authentication's credentials (for a short amount of time) to speed-up subsequent connect trials
                      */
                     failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
+                }
+                if (responseCodeAware && e.getMessage().indexOf("[LOGIN-DELAY]") >= 0) {
+                    final int pos = capabilities.indexOf("LOGIN-DELAY");
+                    if (-1 == pos) {
+                        throw new POP3Exception(
+                            POP3Exception.Code.LOGIN_DELAY,
+                            e,
+                            server,
+                            login,
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            e.getMessage());
+                    }
+                    // Parse seconds
+                    final StringBuilder seconds = new StringBuilder(16);
+                    final char c = capabilities.charAt(pos + 11);
+                    while ('\r' != c && '\n' != c) {
+                        if (Character.isDigit(c)) {
+                            seconds.append(c);
+                        }
+                    }
+                    try {
+                        throw new POP3Exception(
+                            POP3Exception.Code.LOGIN_DELAY2,
+                            e,
+                            server,
+                            login,
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            Integer.valueOf(seconds.toString()),
+                            e.getMessage());
+                    } catch (final NumberFormatException nfe) {
+                        throw new POP3Exception(
+                            POP3Exception.Code.LOGIN_DELAY,
+                            e,
+                            server,
+                            login,
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            e.getMessage());
+                    }
                 }
                 throw e;
             } catch (final MessagingException e) {
@@ -329,4 +391,5 @@ public final class POP3StoreConnector {
             return true;
         }
     }
+
 }

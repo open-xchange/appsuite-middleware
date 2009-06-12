@@ -228,61 +228,69 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public void ping() throws MailException {
+    public boolean ping() throws MailException {
         final IMAPConfig config = getIMAPConfig();
         checkFieldsBeforeConnect(config);
-        /*
-         * Try to connect to IMAP server
-         */
-        final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
-        String tmpPass = getMailConfig().getPassword();
-        if (tmpPass != null) {
-            try {
-                tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-        /*
-         * Get properties
-         */
-        final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
-        if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
-            imapProps.putAll(getMailProperties());
-        }
-        /*
-         * Get parameterized IMAP session
-         */
-        final javax.mail.Session imapSession = setConnectProperties(
-            config.getPort(),
-            config.isSecure(),
-            imapConfProps.getImapTimeout(),
-            imapConfProps.getImapConnectionTimeout(),
-            imapProps);
-        /*
-         * Check if debug should be enabled
-         */
-        if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
-            imapSession.setDebug(true);
-            imapSession.setDebugOut(System.err);
-        }
-        IMAPStore imapStore = null;
         try {
             /*
-             * Get store
+             * Try to connect to IMAP server
              */
-            imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
-            imapStore.connect(config.getServer(), config.getPort(), config.getLogin(), tmpPass);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, config, session);
-        } finally {
-            if (null != imapStore) {
+            final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
+            String tmpPass = getMailConfig().getPassword();
+            if (tmpPass != null) {
                 try {
-                    imapStore.close();
-                } catch (final MessagingException e) {
-                    LOG.warn(e.getMessage(), e);
+                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
+                } catch (final UnsupportedEncodingException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             }
+            /*
+             * Get properties
+             */
+            final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
+            if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
+                imapProps.putAll(getMailProperties());
+            }
+            /*
+             * Get parameterized IMAP session
+             */
+            final javax.mail.Session imapSession = setConnectProperties(
+                config.getPort(),
+                config.isSecure(),
+                imapConfProps.getImapTimeout(),
+                imapConfProps.getImapConnectionTimeout(),
+                imapProps);
+            /*
+             * Check if debug should be enabled
+             */
+            if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+                imapSession.setDebug(true);
+                imapSession.setDebugOut(System.err);
+            }
+            IMAPStore imapStore = null;
+            try {
+                /*
+                 * Get store
+                 */
+                imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
+                imapStore.connect(config.getServer(), config.getPort(), config.getLogin(), tmpPass);
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e, config, session);
+            } finally {
+                if (null != imapStore) {
+                    try {
+                        imapStore.close();
+                    } catch (final MessagingException e) {
+                        LOG.warn(e.getMessage(), e);
+                    }
+                }
+            }
+            return true;
+        } catch (final MailException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString());
+            }
+            return false;
         }
     }
 

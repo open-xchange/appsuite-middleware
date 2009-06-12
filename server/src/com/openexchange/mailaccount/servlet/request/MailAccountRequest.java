@@ -372,7 +372,8 @@ public final class MailAccountRequest {
                 return Boolean.FALSE;
             }
             // Now check transport server URL, if a transport server is present
-            if (null != accountDescription.getTransportServer()) {
+            final String transportServer = accountDescription.getTransportServer();
+            if (null != transportServer && transportServer.length() > 0) {
                 validated = checkTransportServerURL(accountDescription);
             }
             return Boolean.valueOf(validated);
@@ -429,24 +430,8 @@ public final class MailAccountRequest {
         if (null == mailAccess) {
             return false;
         }
-        // Validate
-        boolean validated = true;
         // Now try to connect
-        boolean close = false;
-        try {
-            mailAccess.ping();
-            close = true;
-        } catch (final AbstractOXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Validating mail account failed.", e);
-            }
-            validated = false;
-        } finally {
-            if (close) {
-                mailAccess.close(false);
-            }
-        }
-        return validated;
+        return mailAccess.ping();
     }
 
     private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException {

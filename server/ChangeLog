@@ -15,6 +15,7 @@
 
  - Bugfix #13480: Enabling TTL for successful look-ups from the name service.
  - Bugfix #13833: Fixed mail path parsing if path contains umlauts
+ - Bugfix #13843: Checking for "[LOGIN-DELAY]" response code on authentication error when validating POP3 mail account
 
 * 2009-06-09 - thorben.betten@open-xchange.com
 

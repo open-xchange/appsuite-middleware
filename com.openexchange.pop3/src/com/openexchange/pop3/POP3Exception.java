@@ -359,7 +359,17 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Illegal move operation.
          */
-        MOVE_ILLEGAL("Illegal move operation.", Category.USER_INPUT, 2066);
+        MOVE_ILLEGAL("Illegal move operation.", Category.USER_INPUT, 2066),
+        /**
+         * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).<br>
+         * Error message from server: %5$s
+         */
+        LOGIN_DELAY("Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).\nError message from server: %5$s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2067),
+        /**
+         * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
+         * Error message from server: %6$s
+         */
+        LOGIN_DELAY2("Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.\nError message from server: %6$s", LOGIN_DELAY.category, LOGIN_DELAY.detailNumber);
 
         private final String message;
 

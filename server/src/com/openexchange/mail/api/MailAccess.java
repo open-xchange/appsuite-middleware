@@ -326,15 +326,22 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Pings the mail server to check if a connection can be established.
+     * Pings the mail server to check if a connection can be established and and immediately closes connection.
      * <p>
      * Default implementation just delegates to {@link #connect()} but may be overridden in implementing subclass if not appropriate or a
      * faster way can be achieved.
      * 
+     * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
      * @throws MailException If the ping fails
      */
-    public void ping() throws MailException {
-        connect();
+    public boolean ping() throws MailException {
+        try {
+            connect0(false);
+            close(false);
+            return true;
+        } catch (final MailException e) {
+            return false;
+        }
     }
 
     /**

@@ -83,6 +83,7 @@ import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
+import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -312,18 +313,25 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    public void ping() throws MailException {
+    public boolean ping() throws MailException {
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
-        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session);
-        /*
-         * Close quietly
-         */
         try {
-            pop3Store.close();
-        } catch (final MessagingException e) {
-            LOG.warn(e.getMessage(), e);
+            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session);
+            /*
+             * Close quietly
+             */
+            try {
+                pop3Store.close();
+            } catch (final MessagingException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        } catch (final POP3Exception e) {
+            throw e;
+        } catch (final MailException e) {
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -344,10 +352,10 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         boolean removeFromMap = false;
         if (null == f) {
             final FutureTask<Object> ft = new FutureTask<Object>(new POP3SyncMessagesCallable(
+                this,
                 pop3Storage,
                 pop3StorageProperties,
                 getFolderStorage(),
-                getPOP3Config().getServer(),
                 new POP3StorageConnectCounter() {
 
                     public void decrementCounter() {
@@ -450,12 +458,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     protected void startup() throws MailException {
-        // Nothing to start
+        POP3CapabilityCache.init();
     }
 
     @Override
     protected void shutdown() throws MailException {
         POP3SessionProperties.resetDefaultSessionProperties();
+        POP3CapabilityCache.tearDown();
     }
 
     @Override

@@ -49,13 +49,22 @@
 
 package com.openexchange.pop3.connect;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
+import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.config.IPOP3Properties;
+import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageConnectCounter;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
+import com.openexchange.pop3.util.POP3CapabilityCache;
 
 /**
  * {@link POP3SyncMessagesCallable} - {@link Callable} to connect to POP3 account and synchronize its messages with POP3 storage.
@@ -66,30 +75,31 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3SyncMessagesCallable.class);
 
+    private final POP3Access pop3Access;
+
     private final POP3Storage pop3Storage;
 
     private final POP3StorageProperties pop3StorageProperties;
 
     private final IMailFolderStorage folderStorage;
 
-    private final String server;
-
     private final POP3StorageConnectCounter connectCounter;
 
     /**
      * Initializes a new {@link POP3SyncMessagesCallable}.
      * 
+     * @param pop3Access The POP3 access
      * @param pop3Storage The POP3 storage
      * @param pop3StorageProperties The POP3 storage properties
      * @param folderStorage The POP3 storage's folder storage instance
      * @param server Either the host name or textual representation of the IP address of the POP3 server
      */
-    public POP3SyncMessagesCallable(final POP3Storage pop3Storage, final POP3StorageProperties pop3StorageProperties, final IMailFolderStorage folderStorage, final String server, final POP3StorageConnectCounter connectCounter) {
+    public POP3SyncMessagesCallable(final POP3Access pop3Access, final POP3Storage pop3Storage, final POP3StorageProperties pop3StorageProperties, final IMailFolderStorage folderStorage, final POP3StorageConnectCounter connectCounter) {
         super();
+        this.pop3Access = pop3Access;
         this.pop3Storage = pop3Storage;
         this.pop3StorageProperties = pop3StorageProperties;
         this.folderStorage = folderStorage;
-        this.server = server;
         this.connectCounter = connectCounter;
     }
 
@@ -97,7 +107,52 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         /*
          * Is it allowed to connect to real POP3 account to synchronize messages?
          */
-        if (isConnectable(getRefreshRateMillis())) {
+        final long refreshRate = getRefreshRateMillis();
+        if (isConnectable(refreshRate)) {
+            final String server;
+            /*
+             * Check refresh rate setting
+             */
+            try {
+                final POP3Config pop3Config = pop3Access.getPOP3Config();
+                server = pop3Config.getServer();
+                final int port = pop3Config.getPort();
+                final String capabilities = POP3CapabilityCache.getCapability(
+                    InetAddress.getByName(server),
+                    port,
+                    pop3Config.isSecure(),
+                    (IPOP3Properties) pop3Config.getMailProperties());
+                /*
+                 * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
+                 * capabilities
+                 */
+                final int pos = capabilities.indexOf("LOGIN-DELAY");
+                if (pos >= 0) {
+                    final StringBuilder builder = new StringBuilder(16);
+                    final char c = capabilities.charAt(pos + 11);
+                    while ('\r' != c && '\n' != c) {
+                        if (Character.isDigit(c)) {
+                            builder.append(c);
+                        }
+                    }
+                    try {
+                        final int min = Integer.parseInt(builder.toString());
+                        if ((min * 1000) > refreshRate) {
+                            builder.setLength(0);
+                            LOG.warn(builder.append("Refresh rate of ").append(refreshRate / 1000).append(
+                                "sec is lower than minimum allowed seconds between logins (").append(min).append(')'));
+                        }
+
+                    } catch (final NumberFormatException nfe) {
+                        LOG.warn("Cannot parse LOGIN-DELAY seconds from capabilities: " + nfe.getMessage(), nfe);
+                    }
+                }
+            } catch (final UnknownHostException e) {
+                throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e));
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+
             if (LOG.isDebugEnabled()) {
                 LOG.debug("\n\tSynchronizing messages with POP3 account: " + server);
             }
