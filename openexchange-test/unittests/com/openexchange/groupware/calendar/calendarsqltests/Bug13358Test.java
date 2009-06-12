@@ -47,39 +47,47 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.sql.Connection;
+import com.openexchange.calendar.CalendarAdministration;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.server.impl.DBPool;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug13358Test extends CalendarSqlTest {
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13358">bug #13358</a>
+     */
+    public void testDeleteUserGroup() throws Throwable {
+        final CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
+        appointment.setTitle("Bug 13358 Test");
+        appointments.save(appointment);
+        final int objectId = appointment.getObjectID();
+        clean.add(appointment);
+        
+        final DeleteEvent deleteEvent = new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctx);
+        final Connection readcon = DBPool.pickup(ctx);
+        final Connection writecon = DBPool.pickupWriteable(ctx);
+        final CalendarAdministration ca = new CalendarAdministration();
+        ca.deletePerformed(deleteEvent, readcon, writecon);
+        
+        final CalendarDataObject loadApp = appointments.load(objectId, folders.getStandardFolder(userId, ctx));
+        Participant[] participants = loadApp.getParticipants();
+        boolean foundGroup = false;
+        boolean foundMember = false;
+        for (Participant participant : participants) {
+            if (participant.getType() == Participant.GROUP) {
+                foundGroup = true;
+            } else if (participant.getIdentifier() == secondUserId) {
+                foundMember = true;
+            }
+        }
+        
+        assertFalse("Group should not be in the participants.", foundGroup);
+        assertTrue("Member should be in the participants.", foundMember);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
-
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+    }
 }

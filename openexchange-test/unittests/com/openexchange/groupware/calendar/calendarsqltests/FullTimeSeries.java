@@ -47,39 +47,41 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class CalendarUnitTestsNoCommit {
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
+public class FullTimeSeries extends CalendarSqlTest {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+    public void testFullTimeSeries() throws Throwable {
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+        appointment.setTitle("Test Full Time Series");
+        long now = System.currentTimeMillis();
+        appointment.setStartDate(new Date(now));
+        appointment.setEndDate(new Date(now + 3600000));
+        appointment.setFullTime(true);
+        appointment.setRecurrenceType(CalendarDataObject.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(2);
+        appointments.save(appointment);
+        int objectId = appointment.getObjectID();
+        clean.add(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        cal.setTimeInMillis(now);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        CalendarDataObject loaded = appointments.load(objectId, folders.getStandardFolder(userId, ctx));
+        Calendar loadedUntil = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        loadedUntil.setTime(loaded.getUntil());
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+        assertEquals("Wrong day in until", cal.get(Calendar.DAY_OF_MONTH) + 1, loadedUntil.get(Calendar.DAY_OF_MONTH));
+        assertEquals("Wrong hour in until", 0, loadedUntil.get(Calendar.HOUR_OF_DAY));
+    }
 }

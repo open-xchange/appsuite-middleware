@@ -47,39 +47,51 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.util.Date;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarException;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug11865Test extends CalendarSqlTest {
+    // Bug 11865
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testShouldDisallowTurningAnExceptionIntoASeries() throws OXException {
+        final Date start = D("07/02/2008 10:00");
+        final Date end = D("07/02/2008 12:00");
+        // Create Weekly recurrence
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.WEDNESDAY);
+        appointment.setTitle("Everything can happen on a Wednesday");
+        appointment.setInterval(1);
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setRecurrenceType(CalendarDataObject.WEEKLY);
+        update.setDays(CalendarDataObject.MONDAY);
+        update.setTitle("Monday! Monday!");
+        update.setInterval(1);
+        update.setRecurrencePosition(3);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+        appointments.save(update);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+        update = appointments.createIdentifyingCopy(update);
+        update.setRecurrencePosition(1);
+        update.setTitle("Exception");
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
+        try {
+            appointments.save(update);
+            fail("Could change recurrence position for change exception");
+        } catch (final OXCalendarException e) {
+            if ((OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE.getDetailNumber() != e.getDetailNumber()) && (OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE.getDetailNumber() != e.getDetailNumber())) {
+                fail("Unexpected error code: " + e.getDetailNumber());
+            }
+        }
 
-		return tests;
-	}
+    }
 }

@@ -47,39 +47,57 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug13121Test extends CalendarSqlTest {
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13121">bug #13121</a>
+     */
+    public void testDeleteParticipantInSharedFolder() throws Throwable {
+        try {
+            /*-
+             * user = chef1
+             * seconduser = sec1
+             * thirduser = chef2
+             * fourthuser = sec2
+             */
+            folders.sharePrivateFolder(session, ctx, secondUserId);
+            folders.sharePrivateFolder(session3, ctx, fourthUserId);
+            final int folderIdOfChef1 = folders.getStandardFolder(userId, ctx);
+            final int folderIdOfChef2 = folders.getStandardFolder(thirdUserId, ctx);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+            appointments.switchUser(secondUser);
+            final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, thirdUser);
+            appointment.setParentFolderID(folderIdOfChef1);
+            appointments.save(appointment);
+            clean.add(appointment);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+            appointments.switchUser(fourthUser);
+            final CalendarDataObject delAppointment = appointments.createIdentifyingCopy(appointment);
+            delAppointment.setParentFolderID(folderIdOfChef2);
+            delAppointment.setPrivateFolderID(folderIdOfChef2);
+            appointments.delete(delAppointment);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+            appointments.switchUser(user);
+            final CalendarDataObject loadApp = appointments.load(appointment.getObjectID(), folderIdOfChef1);
+            assertNotNull(loadApp);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+            appointments.switchUser(thirdUser);
+            try {
+                appointments.load(appointment.getObjectID(), folderIdOfChef2);
+                fail();
+            } catch (Exception e) {
+                // Expected!
+            }
+            
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            folders.unsharePrivateFolder(session, ctx);
+            folders.unsharePrivateFolder(session3, ctx);
+        }
+    }
 }

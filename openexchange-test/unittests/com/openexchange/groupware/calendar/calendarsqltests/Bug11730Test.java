@@ -47,39 +47,45 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug11730Test extends CalendarSqlTest {
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11730">bug #11730</a>
+     */
+    public void testDeleteTwoOccurrencesAsParticipant() throws Throwable {
+        try {
+            final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+            appointment.setStartDate(new Date(1228471200000L));
+            appointment.setEndDate(new Date(1228474800000L));
+            appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+            appointment.setDays(CalendarDataObject.FRIDAY);
+            appointment.setInterval(1);
+            appointment.setTitle("Bug 12730 Test");
+            appointments.save(appointment);
+            clean.add(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+            appointments.switchUser(secondUser);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+            CalendarDataObject deleteAppointment = new CalendarDataObject();
+            deleteAppointment.setObjectID(appointment.getObjectID());
+            deleteAppointment.setContext(ctx);
+            deleteAppointment.setParentFolderID(appointments.getPrivateFolder());
+            deleteAppointment.setRecurrencePosition(3);
+            appointments.delete(deleteAppointment);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+            deleteAppointment = new CalendarDataObject();
+            deleteAppointment.setObjectID(appointment.getObjectID());
+            deleteAppointment.setContext(ctx);
+            deleteAppointment.setParentFolderID(appointments.getPrivateFolder());
+            deleteAppointment.setRecurrencePosition(4);
+            appointments.delete(deleteAppointment);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
 }

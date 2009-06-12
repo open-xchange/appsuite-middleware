@@ -47,39 +47,46 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.util.List;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug4778Test extends CalendarSqlTest {
+    // Bug 4778
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws OXException, SearchIteratorException {
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        folders.sharePrivateFolder(session, ctx, secondUserId);
+        try {
+            appointments.switchUser(secondUser);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+            final SearchIterator<AppointmentObject> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
+                userId,
+                Participant.USER,
+                D("23/02/1981 00:00"),
+                D("25/02/1981 00:00"));
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+            final List<AppointmentObject> appointments = read(freebusy);
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
+            assertEquals(1, appointments.size());
+            final AppointmentObject result = appointments.get(0);
+            // Assert the title is visible
 
-		return tests;
-	}
+            assertEquals(appointment.getTitle(), result.getTitle());
+        } finally {
+            folders.unsharePrivateFolder(session, ctx);
+        }
+
+    }
 }

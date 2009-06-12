@@ -74,7 +74,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
         tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
 
-        tests.addTestSuite(com.openexchange.groupware.calendar.CalendarSqlTest.class);
+        tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
+        tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);

@@ -47,39 +47,33 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.tools.events.EventAssertions.assertModificationEventWithOldObject;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.tools.events.TestEventAdmin;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug9950Test extends CalendarSqlTest {
+    // Bug #9950
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testParticipantChangeTriggersEvent() throws OXException {
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+        TestEventAdmin.getInstance().clearEvents();
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setParticipants(tools.users(ctx, participant1, participant2));
+        appointments.save(update);
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
+        assertModificationEventWithOldObject(AppointmentObject.class, appointment.getParentFolderID(), appointment.getObjectID());
 
-		return tests;
-	}
+    }
 }

@@ -202,11 +202,11 @@ public abstract class AbstractCalendarTest extends TestCase {
     	}
     }
 
-    protected static interface Verifyer {
+    public static interface Verifyer {
             public void verify(TestCalendarListener listener);
         }
 
-    protected static final class TestCalendarListener implements CalendarListener {
+    public static final class TestCalendarListener implements CalendarListener {
             private String called;
             List<Object> args = new ArrayList<Object>();
             private Verifyer verifyer;

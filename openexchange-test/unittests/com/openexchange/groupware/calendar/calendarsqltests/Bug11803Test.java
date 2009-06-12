@@ -47,39 +47,50 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.util.Date;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug11803Test extends CalendarSqlTest {
+    // Bug 11803
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testFreeBusyResultShouldOnlyContainRecurrenceInSpecifiedInterval() throws OXException, SearchIteratorException {
+        final Date start = D("07/02/2008 10:00");
+        final Date end = D("07/02/2008 12:00");
+        // Create Weekly recurrence
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.WEDNESDAY);
+        appointment.setTitle("Everything can happen on a Wednesday");
+        appointment.setInterval(1);
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        // Ask for freebusy information in one week containing one ocurrence
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+        final SearchIterator<AppointmentObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
+            userId,
+            Participant.USER,
+            D("18/02/2008 00:00"),
+            D("25/02/2008 00:00"));
+        // Verify only one ocurrence was returned
+        try {
+            assertTrue("Should find exactly one ocurrence. Found none.", iterator.hasNext());
+            final AppointmentObject occurrence = iterator.next();
+            assertFalse("Should find exactly one ocurrence. Found more than one", iterator.hasNext());
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+            assertEquals(D("20/02/2008 10:00"), occurrence.getStartDate());
+            assertEquals(D("20/02/2008 12:00"), occurrence.getEndDate());
+        } finally {
+            iterator.close();
+        }
+    }
 }

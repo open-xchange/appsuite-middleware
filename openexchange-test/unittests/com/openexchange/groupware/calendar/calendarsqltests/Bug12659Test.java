@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug12659Test extends CalendarSqlTest {
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12659">bug #12659</a>
+     */
+    public void testMoveAppointmentToSharedFolder() {
+        try {
+            folders.sharePrivateFolder(session2, ctx, userId);
+            final int foreignFolderId = folders.getStandardFolder(secondUserId, ctx);
+            final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+            appointments.save(appointment);
+            clean.add(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
-
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+            final CalendarDataObject appointmentUpdate = appointments.createIdentifyingCopy(appointment);
+            appointmentUpdate.setParentFolderID(foreignFolderId);
+            appointments.move(appointmentUpdate, appointment.getParentFolderID());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            folders.unsharePrivateFolder(session2, ctx);
+        }
+    }
 }

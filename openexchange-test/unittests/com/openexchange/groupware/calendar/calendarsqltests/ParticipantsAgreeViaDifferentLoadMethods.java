@@ -47,39 +47,41 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Date;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
-
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+    public void testParticipantsAgreeViaDifferentLoadMethods() throws OXException, SQLException, SearchIteratorException {
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
+        appointments.save(appointment);
+        clean.add(appointment);
+        
+        AppointmentSQLInterface appointmentSql = appointments.getCurrentAppointmentSQLInterface();
+        
+        SearchIterator<AppointmentObject> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
+        AppointmentObject loadedViaFolderListing = null;
+        while(appointmentsBetweenInFolder.hasNext()) {
+            AppointmentObject temp = appointmentsBetweenInFolder.next();
+            if(temp.getObjectID() == appointment.getObjectID()) {
+                loadedViaFolderListing = temp;
+            }
+        }
+        
+        CalendarDataObject loadedViaID = appointments.reload(appointment);
+        
+        System.out.println(Arrays.asList(loadedViaFolderListing.getParticipants()));
+        System.out.println(Arrays.asList(loadedViaID.getParticipants()));
+          
+    }
 }

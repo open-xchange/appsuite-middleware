@@ -47,39 +47,42 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.util.Date;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarException;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug11051Test extends CalendarSqlTest {
+    // Bug 11051
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testShouldSurviveInvalidDaysValueInWeeklyRecurrenceWithOccurrence() throws OXException {
+        final Date start = D("24/02/1981 10:00");
+        final Date end = D("24/02/1981 12:00");
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setStartDate(start);
+        update.setEndDate(end);
+        update.setRecurrenceType(CalendarDataObject.MONTHLY);
+        update.setMonth(3);
+        update.setDays(666);
+        update.setInterval(2);
+        update.setOccurrence(2);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+        try {
+            appointments.save(update);
+        } catch (final OXCalendarException x) {
+            x.printStackTrace();
+            assertEquals(x.getMessage(), 45, x.getDetailNumber());
+        } catch (final Throwable t) {
+            t.printStackTrace();
+            fail(t.getMessage());
+        }
+    }
 }

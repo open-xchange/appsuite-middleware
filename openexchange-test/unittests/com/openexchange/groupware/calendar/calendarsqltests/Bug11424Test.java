@@ -47,39 +47,64 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.sql.SQLException;
+import java.util.Date;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.UserParticipant;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug11424Test extends CalendarSqlTest {
+    // Bug 11424
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testUpdateInSharedFolderShouldAutoAcceptTimeChange() throws OXException, SQLException {
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        folders.sharePrivateFolder(session, ctx, secondUserId);
+        try {
+            appointments.switchUser(secondUser);
+            CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+            appointment.setParentFolderID(folders.getStandardFolder(userId, ctx));
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+            appointments.save(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+            appointment = appointments.reload(appointment);
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
+            boolean found = false;
+            for (final UserParticipant participant : appointment.getUsers()) {
+                if (participant.getIdentifier() == userId) {
+                    found = true;
+                    assertEquals(CalendarDataObject.ACCEPT, participant.getConfirm());
+                }
+            }
 
-		return tests;
-	}
+            assertTrue(found);
+
+            final CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setStartDate(appointment.getStartDate());
+            cdao.setEndDate(new Date(appointment.getEndDate().getTime() + 36000000));
+            cdao.setObjectID(appointment.getObjectID());
+            cdao.setParentFolderID(appointment.getParentFolderID());
+            cdao.setContext(appointment.getContext());
+
+            appointments.save(cdao);
+
+            appointment = appointments.reload(appointment);
+
+            found = false;
+            for (final UserParticipant participant : appointment.getUsers()) {
+                if (participant.getIdentifier() == userId) {
+                    found = true;
+                    assertEquals(CalendarDataObject.ACCEPT, participant.getConfirm());
+                }
+            }
+
+            assertTrue(found);
+
+        } finally {
+            // Unshare
+            folders.unsharePrivateFolder(session, ctx);
+        }
+    }
 }

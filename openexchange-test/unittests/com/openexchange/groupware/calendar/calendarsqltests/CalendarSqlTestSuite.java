@@ -47,39 +47,58 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class CalendarUnitTestsNoCommit {
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
+public class CalendarSqlTestSuite {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+    public static Test suite() {
+        TestSuite tests = new TestSuite();
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
-
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+        tests.addTestSuite(FullTimeSeries.class);
+        tests.addTestSuite(Bug9950Test.class);
+        tests.addTestSuite(Bug5557Test.class);
+        tests.addTestSuite(Bug4778Test.class);
+        tests.addTestSuite(Bug13358Test.class);
+        tests.addTestSuite(Bug13121Test.class);
+        tests.addTestSuite(Bug13068Test.class);
+        tests.addTestSuite(Bug12923Test.class);
+        tests.addTestSuite(Bug12681Test.class);
+        tests.addTestSuite(Bug12662Test.class);
+        tests.addTestSuite(Bug12659Test.class);
+        tests.addTestSuite(Bug12601Test.class);
+        tests.addTestSuite(Bug12571Test.class);
+        tests.addTestSuite(Bug12509Test.class);
+        tests.addTestSuite(Bug12496Test.class);
+        tests.addTestSuite(Bug12489Test.class);
+        tests.addTestSuite(Bug12466Test.class);
+        tests.addTestSuite(Bug12413Test.class);
+        tests.addTestSuite(Bug12377Test.class);
+        tests.addTestSuite(Bug12269Test.class);
+        tests.addTestSuite(Bug12072Test.class);
+        tests.addTestSuite(Bug11881Test.class);
+        tests.addTestSuite(Bug11865Test.class);
+        tests.addTestSuite(Bug11803Test.class);
+        tests.addTestSuite(Bug11730Test.class);
+        tests.addTestSuite(Bug11708Test.class);
+        tests.addTestSuite(Bug11695Test.class);
+        tests.addTestSuite(Bug11453Test.class);
+        tests.addTestSuite(Bug11424Test.class);
+        tests.addTestSuite(Bug11316Test.class);
+        tests.addTestSuite(Bug11307Test.class);
+        tests.addTestSuite(Bug11148Test.class);
+        tests.addTestSuite(Bug11059Test.class);
+        tests.addTestSuite(Bug11051Test.class);
+        tests.addTestSuite(Bug10806Test.class);
+        tests.addTestSuite(Bug10154Test.class);
+        tests.addTestSuite(Node1077Test.class);
+        tests.addTestSuite(ParticipantsAgreeViaDifferentLoadMethods.class);
+        
+        return tests;
+    }
 }

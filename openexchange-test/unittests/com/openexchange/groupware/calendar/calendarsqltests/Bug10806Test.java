@@ -47,39 +47,43 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.sql.SQLException;
+import java.util.Date;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug10806Test extends CalendarSqlTest {
+    // Bug 10806
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+    public void testReschedulingOfPrivateRecurringAppointmentWithOneResourceParticipant() throws OXException, SQLException {
+        final Date start = D("04/06/2007 10:00");
+        final Date end = D("04/06/2007 12:00");
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
+        appointment.setStartDate(start);
+        appointment.setEndDate(end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.MONDAY);
+        appointment.setInterval(1);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+        final Date newStart = D("04/06/2007 13:00");
+        final Date newEnd = D("04/06/2007 14:00");
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setStartDate(newStart);
+        update.setEndDate(newEnd);
+        appointments.save(update);
 
-		return tests;
-	}
+        final CalendarDataObject reloaded = appointments.reload(appointment);
+        assertEquals(reloaded.getStartDate(), newStart);
+        assertEquals(reloaded.getEndDate(), newEnd);
+
+    }
 }

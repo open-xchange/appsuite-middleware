@@ -47,39 +47,44 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
+import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.tools.iterator.SearchIterator;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
-
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+public class Bug13068Test extends CalendarSqlTest {
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13068">bug #13068</a>
+     */
+    public void testRemoveReminderIfChangedIntoPast() throws Throwable {
+        final long oneHour = 3600000;
+        final long tomorrow = System.currentTimeMillis() + 24 * 3600000;
+        final long yesterday = System.currentTimeMillis() - 24 * 3600000;
+        
+        CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(tomorrow), new Date(tomorrow + oneHour));
+        appointment.setTitle("Bug 13068 Test");
+        appointment.setAlarm(5);
+        appointment.setAlarmFlag(true);
+        appointment.setIgnoreConflicts(true);
+        appointments.save(appointment);
+        clean.add(appointment);
+        
+        final ReminderSQLInterface reminderInterface = new ReminderHandler(ctx);
+        SearchIterator<?> iterator = reminderInterface.listReminder(appointment.getObjectID());
+        
+        assertTrue("Reminder expected", iterator.hasNext());
+        
+        CalendarDataObject updateAppointment = appointments.createIdentifyingCopy(appointment);
+        updateAppointment.setStartDate(new Date(yesterday));
+        updateAppointment.setEndDate(new Date(yesterday + oneHour));
+        appointments.save(updateAppointment);
+        
+        iterator = reminderInterface.listReminder(appointment.getObjectID());
+        
+        assertFalse("No Reminder expected", iterator.hasNext());
+    }
 }

@@ -47,39 +47,50 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug11708Test extends CalendarSqlTest {
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11708">bug #11708</a>
+     */
+    public void testDisableReminderFlagDoesNotCauseConflict() {
+        try {
+            // 15. January 2009 08:00:00 UTC - 15. January 2009 10:00:00 UTC
+            final CalendarDataObject conflictAppointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(
+                1232013600000L));
+            conflictAppointment.setTitle("Bug 11708 Test - conflict appointment");
+            appointments.save(conflictAppointment);
+            clean.add(conflictAppointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+            final CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(1232013600000L));
+            appointment.setTitle("Bug 11708 Test");
+            appointment.setAlarm(5);
+            appointment.setAlarmFlag(true);
+            appointment.setIgnoreConflicts(true);
+            appointments.save(appointment);
+            clean.add(appointment);
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+            final CalendarDataObject removeReminderAppointment = appointments.createIdentifyingCopy(appointment);
+            removeReminderAppointment.setAlarmFlag(false);
+            removeReminderAppointment.setAlarm(-1);
+            removeReminderAppointment.setStartDate(appointment.getStartDate()); // Outlook sends start- and endDate, even if it has not
+                                                                                // changed. That is the problem.
+            removeReminderAppointment.setEndDate(appointment.getEndDate());
+            removeReminderAppointment.setIgnoreConflicts(false);
+            CalendarDataObject[] conflicts = appointments.save(removeReminderAppointment);
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+            if (conflicts != null) {
+                assertEquals("Changing alarm flag should not cause conflicts.", 0, conflicts.length);
+            }
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
-
-		return tests;
-	}
+        }
+    }
 }

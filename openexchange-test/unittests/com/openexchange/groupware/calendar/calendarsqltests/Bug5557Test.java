@@ -47,39 +47,42 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.api2.OXException;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.tools.events.TestEventAdmin;
 
-public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
+public class Bug5557Test extends CalendarSqlTest {
+    // Bug 5557
+    /**
+     * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=5557">bug #5557</a>
+     */
+    public void testUpdateToAppointmentShouldThrowEventIncludingPrivateFolderIds() throws OXException {
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, participant3);
+        appointments.save(appointment);
+        clean.add(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-		
-		// Cisco tests
-		tests.addTestSuite(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest.class);
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+        TestEventAdmin.getInstance().clearEvents();
 
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setTitle("Title update 5557");
 
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+        appointments.save(appointment);
 
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+        final CommonEvent event = TestEventAdmin.getInstance().getNewest();
 
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-		
+        final AppointmentObject appointmentFromEvent = (AppointmentObject) event.getActionObj();
 
-		return tests;
-	}
+        assertNotNull(appointmentFromEvent.getUsers());
+        for (final UserParticipant userParticipant : appointmentFromEvent.getUsers()) {
+            final int participantsStandardCalendar = folders.getStandardFolder(userParticipant.getIdentifier(), ctx);
+            assertEquals(participantsStandardCalendar, userParticipant.getPersonalFolderId());
+        }
+
+    }
 }
