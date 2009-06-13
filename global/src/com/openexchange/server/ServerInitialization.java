@@ -96,11 +96,19 @@ final class ServerInitialization implements Initialization {
         if (!started.compareAndSet(true, false)) {
             return;
         }
-        /*
-         * Restore previous settings
-         */
-        java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
-        java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
+        if (null == previousTTL) {
+            java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+        } else {
+            /*
+             * Restore previous settings
+             */
+            java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
+        }
+        if (null == previousNegativeTTL) {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", "10");
+        } else {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
+        }
     }
 
 }
