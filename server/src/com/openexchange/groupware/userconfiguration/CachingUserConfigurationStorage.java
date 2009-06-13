@@ -51,7 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
@@ -64,17 +63,14 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException.U
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link CachingUserConfigurationStorage} - A cache-based implementation of
- * {@link UserConfigurationStorage} with a fallback to
+ * {@link CachingUserConfigurationStorage} - A cache-based implementation of {@link UserConfigurationStorage} with a fallback to
  * {@link RdbUserConfigurationStorage}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(CachingUserConfigurationStorage.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CachingUserConfigurationStorage.class);
 
     private static final String CACHE_REGION_NAME = "UserConfiguration";
 
@@ -131,7 +127,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         if (null != reg) {
             reg.unregisterListener(cacheAvailabilityListener);
         }
-        ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
+        releaseCache();
     }
 
     private final CacheKey getKey(final int userId, final Context ctx) {
@@ -150,8 +146,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-                    CACHE_REGION_NAME);
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         }
     }
 
@@ -166,16 +161,18 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
         try {
             cache.clear();
+            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                cacheService.freeCache(CACHE_REGION_NAME);
+            }
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-                    CACHE_REGION_NAME);
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         }
         cache = null;
     }
 
     @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
-            throws UserConfigurationException {
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
         if (cache == null) {
             return getFallback().getUserConfiguration(userId, groups, ctx);
         }
@@ -228,8 +225,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx)
-            throws UserConfigurationException {
+    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws UserConfigurationException {
         delegateStorage.saveUserConfiguration(permissionBits, userId, ctx);
         cacheWriteLock.lock();
         try {

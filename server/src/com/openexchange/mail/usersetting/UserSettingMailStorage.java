@@ -50,7 +50,6 @@
 package com.openexchange.mail.usersetting;
 
 import java.sql.Connection;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -66,9 +65,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UserSettingMailStorage.class);
 
-    private static UserSettingMailStorage singleton;
-
-    private static final AtomicBoolean initialized = new AtomicBoolean();
+    private static volatile UserSettingMailStorage singleton;
 
     /**
      * Default constructor
@@ -83,27 +80,27 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @return The singleton instance of {@link UserSettingMailStorage}
      */
     public static final UserSettingMailStorage getInstance() {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (null == singleton) {
-                    singleton = new CachingUserSettingMailStorage();
-                    initialized.set(true);
+        UserSettingMailStorage tmp = singleton;
+        if (null == tmp) {
+            synchronized (UserSettingMailStorage.class) {
+                tmp = singleton;
+                if (null == tmp) {
+                    tmp = singleton = new CachingUserSettingMailStorage();
                 }
             }
         }
-        return singleton;
+        return tmp;
     }
 
     /**
      * Releases this storage instance
      */
     public static final void releaseInstance() {
-        if (initialized.get()) {
-            synchronized (initialized) {
+        if (null != singleton) {
+            synchronized (UserSettingMailStorage.class) {
                 if (null != singleton) {
                     singleton.shutdownStorage();
                     singleton = null;
-                    initialized.set(false);
                 }
             }
         }

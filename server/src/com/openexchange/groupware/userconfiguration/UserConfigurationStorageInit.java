@@ -50,7 +50,6 @@
 package com.openexchange.groupware.userconfiguration;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
@@ -61,120 +60,105 @@ import com.openexchange.server.Initialization;
  * {@link UserConfigurationStorageInit}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UserConfigurationStorageInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserConfigurationStorageInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UserConfigurationStorageInit.class);
 
-	private static enum UserConfigurationImpl {
+    private static enum UserConfigurationImpl {
 
-		/**
-		 * Caching
-		 */
-		CACHING("Caching", CachingUserConfigurationStorage.class.getName()),
-		/**
-		 * Database
-		 */
-		DB("DB", RdbUserConfigurationStorage.class.getName());
+        /**
+         * Caching
+         */
+        CACHING("Caching", CachingUserConfigurationStorage.class.getName()),
+        /**
+         * Database
+         */
+        DB("DB", RdbUserConfigurationStorage.class.getName());
 
-		private final String alias;
+        private final String alias;
 
-		private final String impl;
+        private final String impl;
 
-		private UserConfigurationImpl(final String alias, final String impl) {
-			this.alias = alias;
-			this.impl = impl;
-		}
+        private UserConfigurationImpl(final String alias, final String impl) {
+            this.alias = alias;
+            this.impl = impl;
+        }
 
-		public String getAlias() {
-			return alias;
-		}
+        public String getAlias() {
+            return alias;
+        }
 
-		public String getImpl() {
-			return impl;
-		}
-	}
+        public String getImpl() {
+            return impl;
+        }
+    }
 
-	private static UserConfigurationStorageInit instance = new UserConfigurationStorageInit();
+    private static UserConfigurationStorageInit instance = new UserConfigurationStorageInit();
 
-	/**
-	 * Gets the singleton instance of {@link UserConfigurationStorageInit}
-	 * 
-	 * @return The singleton instance of {@link UserConfigurationStorageInit}
-	 */
-	public static UserConfigurationStorageInit getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link UserConfigurationStorageInit}
+     * 
+     * @return The singleton instance of {@link UserConfigurationStorageInit}
+     */
+    public static UserConfigurationStorageInit getInstance() {
+        return instance;
+    }
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	/**
-	 * No instance
-	 */
-	private UserConfigurationStorageInit() {
-		super();
-	}
+    /**
+     * No instance
+     */
+    private UserConfigurationStorageInit() {
+        super();
+    }
 
-	private static String getUserConfigurationImpl(final String alias) {
-		final UserConfigurationImpl[] arr = UserConfigurationImpl.values();
-		for (int i = 0; i < arr.length; i++) {
-			if (arr[i].alias.equalsIgnoreCase(alias)) {
-				return arr[i].impl;
-			}
-		}
-		return null;
-	}
+    private static String getUserConfigurationImpl(final String alias) {
+        final UserConfigurationImpl[] arr = UserConfigurationImpl.values();
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].alias.equalsIgnoreCase(alias)) {
+                return arr[i].impl;
+            }
+        }
+        return null;
+    }
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
-			return;
-		}
-		synchronized (started) {
-			if (started.get()) {
-				return;
-			}
-			final String classNameProp = SystemConfig.getProperty(Property.USER_CONF_STORAGE);
-			if (null == classNameProp) {
-				throw new UserConfigurationException(UserConfigurationCode.MISSING_SETTING, Property.USER_CONF_STORAGE
-						.getPropertyName());
-			}
-			try {
-				final String className = getUserConfigurationImpl(classNameProp);
-				final Class<? extends UserConfigurationStorage> implementingClass = Class.forName(
-						className == null ? classNameProp : className).asSubclass(UserConfigurationStorage.class);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
-				}
-				UserConfigurationStorage.setInstance(implementingClass.newInstance());
-				started.set(true);
-			} catch (final ClassNotFoundException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
-			} catch (final ClassCastException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
-			} catch (final InstantiationException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
-			} catch (final IllegalAccessException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
-			}
-		}
-	}
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
+            return;
+        }
+        final String classNameProp = SystemConfig.getProperty(Property.USER_CONF_STORAGE);
+        if (null == classNameProp) {
+            throw new UserConfigurationException(UserConfigurationCode.MISSING_SETTING, Property.USER_CONF_STORAGE.getPropertyName());
+        }
+        try {
+            final String className = getUserConfigurationImpl(classNameProp);
+            final Class<? extends UserConfigurationStorage> implementingClass = Class.forName(className == null ? classNameProp : className).asSubclass(
+                UserConfigurationStorage.class);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
+            }
+            UserConfigurationStorage.setInstance(implementingClass.newInstance());
+            started.set(true);
+        } catch (final ClassNotFoundException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+        } catch (final ClassCastException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+        } catch (final InstantiationException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+        } catch (final IllegalAccessException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+        }
+    }
 
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(UserConfigurationStorageInit.class.getName()
-					+ " cannot be stopped since it has not been started before");
-			return;
-		}
-		synchronized (started) {
-			if (!started.get()) {
-				return;
-			}
-			UserConfigurationStorage.releaseInstance();
-			started.set(false);
-		}
-	}
+    public void stop() throws AbstractOXException {
+        if (!started.compareAndSet(true, false)) {
+            LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");
+            return;
+        }
+        UserConfigurationStorage.releaseInstance();
+    }
 
 }

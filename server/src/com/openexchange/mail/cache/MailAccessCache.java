@@ -143,6 +143,7 @@ public final class MailAccessCache {
             synchronized (MailAccessCache.class) {
                 if (null == singleton) {
                     singleton = new MailAccessCache();
+                    singleton.initCache();
                 }
             }
         }
@@ -156,6 +157,7 @@ public final class MailAccessCache {
         if (null != singleton) {
             synchronized (MailAccessCache.class) {
                 if (null != singleton) {
+                    singleton.releaseCache();
                     singleton = null;
                 }
             }

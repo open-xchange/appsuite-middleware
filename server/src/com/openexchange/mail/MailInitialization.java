@@ -190,7 +190,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
      * @throws AbstractOXException If mail caches shut-down fails
      */
     public void shutDownCaches() throws AbstractOXException {
-        MailAccessCache.getInstance().releaseCache();
         MailMessageCache.getInstance().releaseCache();
         MailCacheConfiguration.getInstance().stop();
     }
@@ -202,7 +201,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
      */
     public void startUpCaches() throws AbstractOXException {
         MailCacheConfiguration.getInstance().start();
-        MailAccessCache.getInstance().initCache();
         MailMessageCache.getInstance().initCache();
     }
 

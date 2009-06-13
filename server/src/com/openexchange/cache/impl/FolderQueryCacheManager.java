@@ -172,10 +172,13 @@ public final class FolderQueryCacheManager {
             synchronized (FolderQueryCacheManager.class) {
                 if (instance != null) {
                     instance = null;
-                    try {
-                        ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
-                    } catch (final CacheException e) {
-                        throw new OXException(e);
+                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            cacheService.freeCache(REGION_NAME);
+                        } catch (final CacheException e) {
+                            throw new OXException(e);
+                        }
                     }
                 }
             }
@@ -312,7 +315,7 @@ public final class FolderQueryCacheManager {
     private final static QueryCacheKey.Module MODULE = QueryCacheKey.Module.FOLDER;
 
     private CacheKey createQueryKey(final int queryNum) {
-        return folderQueryCache.newCacheKey(MODULE.getNum(), Integer.valueOf(queryNum));
+        return folderQueryCache.newCacheKey(MODULE.getNum(), queryNum);
     }
 
     private static Integer createUserKey(final int userId) {

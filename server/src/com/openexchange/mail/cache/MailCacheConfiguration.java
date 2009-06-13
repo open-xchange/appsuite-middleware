@@ -122,10 +122,12 @@ public final class MailCacheConfiguration implements Initialization {
             LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been stopped. Aborting.");
         }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        try {
-            cacheService.freeCache(MailMessageCache.REGION_NAME);
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
+        if (null != cacheService) {
+            try {
+                cacheService.freeCache(MailMessageCache.REGION_NAME);
+            } catch (final CacheException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 

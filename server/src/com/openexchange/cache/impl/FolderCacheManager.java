@@ -164,10 +164,13 @@ public final class FolderCacheManager {
             synchronized (FolderCacheManager.class) {
                 if (instance != null) {
                     instance = null;
-                    try {
-                        ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(FOLDER_CACHE_REGION_NAME);
-                    } catch (final CacheException e) {
-                        LOG.error(e.getMessage(), e);
+                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
+                        } catch (final CacheException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
                     }
                 }
             }

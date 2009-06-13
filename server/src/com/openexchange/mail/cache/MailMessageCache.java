@@ -439,6 +439,10 @@ public final class MailMessageCache {
         }
         try {
             cache.clear();
+            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                cacheService.freeCache(REGION_NAME);
+            }
         } catch (final CacheException e) {
             throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, e.getMessage());
         } finally {
