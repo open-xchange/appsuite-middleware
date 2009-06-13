@@ -161,7 +161,7 @@ public final class MimeReply {
              */
             final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.getParamDefaultFolderArray(accountId));
             if (arr == null) {
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
                 mailAccess.connect();
                 try {
                     final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
@@ -612,7 +612,10 @@ public final class MimeReply {
                     } else {
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         partContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm.isDisplayHtmlInlineContent());
+                        final String text = MimeProcessingUtility.handleInlineTextPart(
+                            part,
+                            partContentType,
+                            usm.isDisplayHtmlInlineContent());
                         MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
                     }
                     found = true;
@@ -642,12 +645,18 @@ public final class MimeReply {
                         retvalContentType.setContentType(partContentType);
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         retvalContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
+                        final String text = MimeProcessingUtility.handleInlineTextPart(
+                            part,
+                            retvalContentType,
+                            usm.isDisplayHtmlInlineContent());
                         textBuilder.append(text);
                     } else {
                         final String charset = MessageUtility.checkCharset(part, partContentType);
                         partContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm.isDisplayHtmlInlineContent());
+                        final String text = MimeProcessingUtility.handleInlineTextPart(
+                            part,
+                            partContentType,
+                            usm.isDisplayHtmlInlineContent());
                         MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
                     }
                     found = true;
