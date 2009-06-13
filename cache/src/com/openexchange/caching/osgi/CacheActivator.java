@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -94,11 +95,9 @@ public final class CacheActivator extends DeferredActivator {
         dictionary.put("name", "oxcache");
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
@@ -115,20 +114,29 @@ public final class CacheActivator extends DeferredActivator {
          */
         if (ConfigurationService.class.equals(clazz)) {
             JCSCacheServiceInit.getInstance().setConfigurationService(getService(ConfigurationService.class));
+            JCSCacheServiceInit.getInstance().reconfigureByPropertyFile();
         }
     }
 
     @Override
     protected void startBundle() throws Exception {
+        JCSCacheServiceInit.initInstance();
         JCSCacheServiceInit.getInstance().start(getService(ConfigurationService.class));
         /*
          * Register service
          */
         serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(), dictionary);
-        tracker = new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
+        final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer {
+
+            private final BundleContext bundleContext;
+
+            public ServiceTrackerCustomizerImpl(final BundleContext bundleContext) {
+                super();
+                this.bundleContext = bundleContext;
+            }
 
             public Object addingService(final ServiceReference reference) {
-                final ManagementService management = (ManagementService) context.getService(reference);
+                final ManagementService management = (ManagementService) bundleContext.getService(reference);
                 registerCacheMBean(management);
                 return management;
             }
@@ -140,9 +148,10 @@ public final class CacheActivator extends DeferredActivator {
             public void removedService(final ServiceReference reference, final Object service) {
                 final ManagementService management = (ManagementService) service;
                 unregisterCacheMBean(management);
-                context.ungetService(reference);
+                bundleContext.ungetService(reference);
             }
-        });
+        }
+        tracker = new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizerImpl(context));
         tracker.open();
     }
 
@@ -160,6 +169,7 @@ public final class CacheActivator extends DeferredActivator {
          * Stop cache
          */
         JCSCacheServiceInit.getInstance().stop();
+        JCSCacheServiceInit.releaseInstance();
     }
 
     void registerCacheMBean(final ManagementService management) {

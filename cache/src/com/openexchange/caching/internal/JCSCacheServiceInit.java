@@ -74,7 +74,21 @@ public final class JCSCacheServiceInit {
 
     private static final String PROP_CACHE_CONF_FILE = "com.openexchange.caching.configfile";
 
-    private static final JCSCacheServiceInit SINGLETON = new JCSCacheServiceInit();
+    private static JCSCacheServiceInit SINGLETON;
+
+    /**
+     * Initializes the instance of {@link JCSCacheServiceInit}.
+     */
+    public static void initInstance() {
+        SINGLETON = new JCSCacheServiceInit();
+    }
+
+    /**
+     * Releases the instance of {@link JCSCacheServiceInit}.
+     */
+    public static void releaseInstance() {
+        SINGLETON = null;
+    }
 
     /**
      * Gets the singleton instance of {@link JCSCacheServiceInit}
@@ -203,13 +217,8 @@ public final class JCSCacheServiceInit {
         if (configurationService == null) {
             throw new CacheException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ConfigurationService.class.getName()));
         }
-        final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
-        if (cacheConfigFile == null) {
-            throw new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
-        }
-        initializeCompositeCacheManager(true);
-        configure(loadProperties(cacheConfigFile.trim()));
-        LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
+        configureByPropertyFile(true, true);
+        LOG.info("JCS caching system successfully re-configured.");
     }
 
     /**
@@ -224,16 +233,40 @@ public final class JCSCacheServiceInit {
         }
         this.configurationService = configurationService;
         /*
+         * Configure by property file
+         */
+        configureByPropertyFile(true, false);
+        LOG.info("JCS caching system successfully started");
+    }
+
+    /**
+     * Re-Configure JCS caching system with newly read property file.
+     */
+    public void reconfigureByPropertyFile() {
+        try {
+            configureByPropertyFile(false, true);
+        } catch (final CacheException e) {
+            // Cannot occur
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private void configureByPropertyFile(final boolean errorIfNull, final boolean obtainMutex) throws CacheException {
+        /*
          * Check default cache configuration file defined through property
          */
-        final String cacheConfigFile = this.configurationService.getProperty(PROP_CACHE_CONF_FILE);
+        final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
         if (cacheConfigFile == null) {
-            throw new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
+            final CacheException ce = new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
+            if (errorIfNull) {
+                throw ce;
+            }
+            LOG.warn(ce.getMessage(), ce);
+            return;
         }
-        initializeCompositeCacheManager(false);
+        initializeCompositeCacheManager(obtainMutex);
         configure(loadProperties(cacheConfigFile.trim()));
         defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
-        LOG.info("JCS caching system successfully started");
     }
 
     /**
@@ -241,11 +274,13 @@ public final class JCSCacheServiceInit {
      */
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error("JCS cache service has not been started before and therefore cannot be stopped");
+            LOG.error("JCS cache service has not been started before and therefore cannot be stopped.");
         }
+        props = null;
+        defaultCacheRegions = null;
         ccmInstance.shutDown();
         ccmInstance = null;
-        LOG.info("JCS caching system successfully stopped");
+        LOG.info("JCS caching system successfully stopped.");
     }
 
     /**
