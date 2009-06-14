@@ -601,6 +601,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         mailFolder.setOwnPermission(mp);
         // POP3 does not support subscription
         mailFolder.setSubscribed(true);
+        mailFolder.setSubscribedSubfolders(mailFolder.hasSubfolders());
     }
 
     private String getRealFullname(final String fullname) throws MailException {
