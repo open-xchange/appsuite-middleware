@@ -6,6 +6,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.server.osgiservice.ServiceDependentRegistration;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.templating.TemplateErrorMessage;
 import com.openexchange.templating.TemplateService;
@@ -16,28 +17,39 @@ import com.openexchange.templating.TemplateServiceImpl;
  */
 public class Activator implements BundleActivator {
 
-    private ServiceRegistration templateServiceregistration;
     private ComponentRegistration componentRegistration;
     private Whiteboard whiteboard;
+    private ServiceDependentRegistration<TemplateServiceImpl> serviceRegistration;
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
+    
     public void start(BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
-        ConfigurationService config = whiteboard.getService(ConfigurationService.class);
-        templateServiceregistration = context.registerService(TemplateService.class.getName(), new TemplateServiceImpl(config), null);
+        this.serviceRegistration = new ServiceDependentRegistration<TemplateServiceImpl>(context, TemplateService.class.getName(), null, whiteboard) {
+            private ConfigurationService config;
+
+            @Override
+            public TemplateServiceImpl configure(TemplateServiceImpl service) {
+                config = get(ConfigurationService.class);
+                return new TemplateServiceImpl(config);
+            }
+            
+            @Override
+            public boolean validateServices() {
+                boolean hasProperty = config.getProperty(TemplateServiceImpl.PATH_PROPERTY) != null;
+                if(!hasProperty) {
+                    LOG.warn(TemplateServiceImpl.PATH_PROPERTY+" is not set. Templating will remain inactive.");
+                }
+                return hasProperty;
+            }
+        };
+        
+        serviceRegistration.start();
         componentRegistration = new ComponentRegistration(context, "TMPL", "com.openexchange.templating", TemplateErrorMessage.EXCEPTIONS);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(BundleContext context) throws Exception {
-        templateServiceregistration.unregister();
         componentRegistration.unregister();
+        serviceRegistration.close();
         whiteboard.close();
     }
 

@@ -49,57 +49,78 @@
 
 package com.openexchange.server.osgiservice;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.global.OXCloseable;
 
 
 /**
- * {@link Whiteboard}
+ * {@link ServiceDependentRegistration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Whiteboard implements OXCloseable {
-    
-    private static final Log LOG = LogFactory.getLog(Whiteboard.class);
-    
-    private List<OXCloseable> closeables = new LinkedList<OXCloseable>();
+public class ServiceDependentRegistration<T> extends ConditionalRegistration implements DynamicServiceStateListener {
 
-    private BundleContext context;
+    private Whiteboard whiteboard;
+    private List<Object> services = new ArrayList<Object>();
 
-    private DynamicWhiteboardFactory factory;
-    
-    public Whiteboard(BundleContext context) {
-        this.context = context;
-        this.factory = new DynamicWhiteboardFactory(context);
-        closeables.add(factory);
+    public ServiceDependentRegistration(BundleContext context, String serviceName, T service, Dictionary dict, Whiteboard whiteboard) {
+        super(context, serviceName, service, dict);
+        this.whiteboard = whiteboard;
+        this.service = configure(service);
     }
     
-    public <T> T getService(Class<T> klass) {
-        return factory.createWhiteboardService(context, klass, closeables, null);
+    public ServiceDependentRegistration(BundleContext context, String serviceName, T service, Whiteboard whiteboard) {
+        this(context, serviceName, service, null, whiteboard);
     }
     
-    public <T> T getService(Class<T> klass, DynamicServiceStateListener listener) {
-        return factory.createWhiteboardService(context, klass, closeables, listener);
+    /**
+     * Override to configure the service
+     * @param service
+     */
+    public T configure(T service) {
+        return service;
+    }
+
+    public void addDependency(Object...services) {
+        this.services.addAll(Arrays.asList(services));
     }
     
-    public boolean isActive(Object o) {
-        return factory.isActive(o);
+    public <T> T get(Class<T> clazz) {
+        return getAndDependOn(clazz);
     }
     
-    public void close() throws AbstractOXException {
-        for(OXCloseable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (AbstractOXException x) {
-                LOG.error(x);
+    public <T> T getAndDependOn(Class<T> clazz) {
+        T service = whiteboard.getService(clazz, this);
+        addDependency(service);
+        return service;
+    }
+    
+    @Override
+    protected boolean mustRegister() {
+        for(Object service : services) {
+            if (! whiteboard.isActive(service)) {
+                LOG.info("Missing service. Proxy is not active: "+service+ " needed by "+this.service);
+                return false;
             }
         }
+        return validateServices();
     }
+    
+    /**
+     * Override to add additional constraint requirements to the service
+     * @return
+     */
+    public boolean validateServices() {
+        return true;
+    }
+
+    public void stateChanged() {
+        check();
+    }
+    
+   
 }

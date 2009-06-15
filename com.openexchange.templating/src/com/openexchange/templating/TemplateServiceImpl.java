@@ -63,7 +63,7 @@ import freemarker.template.Template;
  */
 public class TemplateServiceImpl implements TemplateService {
 
-    private String PATH_PROPERTY = "com.openexchange.templating.path";
+    public static final String PATH_PROPERTY = "com.openexchange.templating.path";
 
     private ConfigurationService config;
 

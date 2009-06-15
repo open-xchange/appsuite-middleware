@@ -49,57 +49,79 @@
 
 package com.openexchange.server.osgiservice;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Dictionary;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.global.OXCloseable;
+import org.osgi.framework.ServiceRegistration;
 
 
 /**
- * {@link Whiteboard}
+ * {@link ConditionalRegistration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Whiteboard implements OXCloseable {
+public class ConditionalRegistration {
+    protected BundleContext context;
+    protected String serviceName;
+    protected Object service;
+    protected Dictionary dictionary;
+    protected ServiceRegistration registration;
+    private boolean running;
     
-    private static final Log LOG = LogFactory.getLog(Whiteboard.class);
-    
-    private List<OXCloseable> closeables = new LinkedList<OXCloseable>();
+    protected static final Log LOG = LogFactory.getLog(ConditionalRegistration.class);
 
-    private BundleContext context;
-
-    private DynamicWhiteboardFactory factory;
-    
-    public Whiteboard(BundleContext context) {
+    public ConditionalRegistration(BundleContext context, String serviceName, Object service, Dictionary dict) {
         this.context = context;
-        this.factory = new DynamicWhiteboardFactory(context);
-        closeables.add(factory);
+        this.serviceName = serviceName;
+        this.service = service;
+        this.dictionary = dict;
     }
     
-    public <T> T getService(Class<T> klass) {
-        return factory.createWhiteboardService(context, klass, closeables, null);
-    }
-    
-    public <T> T getService(Class<T> klass, DynamicServiceStateListener listener) {
-        return factory.createWhiteboardService(context, klass, closeables, listener);
-    }
-    
-    public boolean isActive(Object o) {
-        return factory.isActive(o);
-    }
-    
-    public void close() throws AbstractOXException {
-        for(OXCloseable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (AbstractOXException x) {
-                LOG.error(x);
-            }
+    public void check() {
+        if(!running) {
+            return;
+        }
+        if(!registered() && mustRegister()) {
+            register();
+        } else if (registered() && ! mustRegister()) {
+            unregister();
         }
     }
+
+    private synchronized void unregister() {
+        if(this.registration != null) {
+            LOG.info("Unregistering "+service+" as "+serviceName+". ");
+            registration.unregister();
+            registration = null;
+        }
+    }
+
+
+    private synchronized void register() {
+        if(registration == null && service != null && running) {
+            registration = context.registerService(serviceName, service, dictionary);
+            LOG.info("Registering "+service+" as "+serviceName);
+        }
+    }
+
+    protected boolean mustRegister() {
+        return true;
+    }
+
+    private synchronized boolean registered() {
+        return registration != null;
+    }
+    
+    public void start() {
+        running = true;
+        check();
+    }
+    
+    public void close() {
+        running = false;
+        unregister();
+    }
+    
 }

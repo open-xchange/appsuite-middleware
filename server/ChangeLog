@@ -1,3 +1,11 @@
+* 2009-06-15 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13865: React to intricacies of service dependencies correctly in templating bundle
+
+* 2009-06-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #13535: Added "Cc" to generated text on inline forward
+
 * 2009-06-15 - thorben.betten@open-xchange.com
 
  - Bugfix #13535: Added "Cc" to generated text on inline forward

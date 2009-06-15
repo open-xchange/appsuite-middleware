@@ -49,57 +49,13 @@
 
 package com.openexchange.server.osgiservice;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.global.OXCloseable;
-
 
 /**
- * {@link Whiteboard}
+ * {@link DynamicServiceStateListener}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Whiteboard implements OXCloseable {
-    
-    private static final Log LOG = LogFactory.getLog(Whiteboard.class);
-    
-    private List<OXCloseable> closeables = new LinkedList<OXCloseable>();
-
-    private BundleContext context;
-
-    private DynamicWhiteboardFactory factory;
-    
-    public Whiteboard(BundleContext context) {
-        this.context = context;
-        this.factory = new DynamicWhiteboardFactory(context);
-        closeables.add(factory);
-    }
-    
-    public <T> T getService(Class<T> klass) {
-        return factory.createWhiteboardService(context, klass, closeables, null);
-    }
-    
-    public <T> T getService(Class<T> klass, DynamicServiceStateListener listener) {
-        return factory.createWhiteboardService(context, klass, closeables, listener);
-    }
-    
-    public boolean isActive(Object o) {
-        return factory.isActive(o);
-    }
-    
-    public void close() throws AbstractOXException {
-        for(OXCloseable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (AbstractOXException x) {
-                LOG.error(x);
-            }
-        }
-    }
+public interface DynamicServiceStateListener {
+    public void stateChanged();
 }
