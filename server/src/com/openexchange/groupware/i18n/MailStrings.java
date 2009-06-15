@@ -90,6 +90,9 @@ public class MailStrings {
      */
     public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO##CC_LINE#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
 
+    /**
+     * The default subject.
+     */
     public static final String DEFAULT_SUBJECT = "[No Subject]";
 
     /**
