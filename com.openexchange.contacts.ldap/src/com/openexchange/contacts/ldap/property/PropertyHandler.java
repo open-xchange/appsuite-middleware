@@ -74,9 +74,9 @@ public class PropertyHandler {
     
     private static PropertyHandler singleton = new PropertyHandler();
     
-    private Map<Integer, ContextProperties> contextdetails = new ConcurrentHashMap<Integer, ContextProperties>();
+    private final Map<Integer, ContextProperties> contextdetails = new ConcurrentHashMap<Integer, ContextProperties>();
     
-    private AtomicBoolean loaded = new AtomicBoolean();
+    private final AtomicBoolean loaded = new AtomicBoolean();
     
     public static PropertyHandler getInstance() {
         return singleton;
@@ -89,8 +89,13 @@ public class PropertyHandler {
     public void loadProperties() throws LdapConfigurationException {
         final StringBuilder logBuilder = new StringBuilder();
         
-        final File[] dirs = directorylisting(new File("/opt/open-xchange/etc/groupware/contacts-ldap"));
-        
+        final String pathname = "/opt/open-xchange/etc/groupware/contacts-ldap";
+        final File[] dirs = directorylisting(new File(pathname));
+
+        if (null == dirs) {
+            throw new LdapConfigurationException(LdapConfigurationException.Code.NOT_DIRECTORY, pathname);
+        }
+
         final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
         
         logBuilder.append("\nLoading Contacts-LDAP properties...\n");
@@ -121,7 +126,7 @@ public class PropertyHandler {
     private static File[] directorylisting(final File file) {
         final File[] listFiles = file.listFiles(new FileFilter() {
 
-            public boolean accept(File pathname) {
+            public boolean accept(final File pathname) {
                 return pathname.isDirectory();
             }
             
