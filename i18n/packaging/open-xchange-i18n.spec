@@ -74,7 +74,5 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %dir /opt/open-xchange/i18n
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
-/opt/open-xchange/etc/admindaemon/*.properties
-/opt/open-xchange/etc/groupware/*.properties
 /opt/open-xchange/i18n/*
 
