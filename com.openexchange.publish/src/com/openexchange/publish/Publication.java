@@ -53,92 +53,104 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 
-
 /**
  * {@link Publication}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class Publication {
+
     private int userId;
+
     private Context context;
+
     private int id;
+
     private String entityId;
+
     private String module;
+
     private PublicationTarget target;
+
     private Map<String, Object> configuration = new HashMap<String, Object>();
+
+    private String displayName;
+
     
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }
-    
+
     public String getEntityId() {
         return entityId;
     }
-    
+
     public void setEntityId(String entityId) {
         this.entityId = entityId;
     }
-    
+
     public String getModule() {
         return module;
     }
-    
+
     public void setModule(String module) {
         this.module = module;
     }
-    
+
     public PublicationTarget getTarget() {
         return target;
     }
-    
+
     public void setTarget(PublicationTarget target) {
         this.target = target;
     }
-    
+
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
-    
+
     public void setConfiguration(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 
-    
     public int getUserId() {
         return userId;
     }
 
-    
     public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    
     public Context getContext() {
         return context;
     }
 
-    
     public void setContext(Context context) {
         this.context = context;
     }
-    
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public void create() throws PublicationException {
         getTarget().getPublicationService().create(this);
     }
-    
+
     public void update() throws PublicationException {
         getTarget().getPublicationService().update(this);
     }
-    
+
     public void destroy() throws PublicationException {
         getTarget().getPublicationService().delete(this);
     }
-    
+
 }
