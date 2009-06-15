@@ -459,10 +459,12 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected void startup() throws MailException {
         POP3CapabilityCache.init();
+        POP3StoreConnector.startUp();
     }
 
     @Override
     protected void shutdown() throws MailException {
+        POP3StoreConnector.shutDown();
         POP3SessionProperties.resetDefaultSessionProperties();
         POP3CapabilityCache.tearDown();
     }

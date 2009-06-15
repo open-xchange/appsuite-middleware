@@ -55,6 +55,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -441,7 +442,7 @@ public final class POP3CapabilityCache {
 
         public Capability(final String capabilities) {
             super();
-            this.capabilities = capabilities;
+            this.capabilities = capabilities == null ? null : capabilities.toUpperCase(Locale.ENGLISH);
         }
 
         public String getCapability() {

@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.connect;
 
+import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -126,25 +127,11 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                  * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
                  * capabilities
                  */
-                final int pos = capabilities.indexOf("LOGIN-DELAY");
-                if (pos >= 0) {
-                    final StringBuilder builder = new StringBuilder(16);
-                    final char c = capabilities.charAt(pos + 11);
-                    while ('\r' != c && '\n' != c) {
-                        if (Character.isDigit(c)) {
-                            builder.append(c);
-                        }
-                    }
-                    try {
-                        final int min = Integer.parseInt(builder.toString());
-                        if ((min * 1000) > refreshRate) {
-                            builder.setLength(0);
-                            LOG.warn(builder.append("Refresh rate of ").append(refreshRate / 1000).append(
-                                "sec is lower than minimum allowed seconds between logins (").append(min).append(')'));
-                        }
-
-                    } catch (final NumberFormatException nfe) {
-                        LOG.warn("Cannot parse LOGIN-DELAY seconds from capabilities: " + nfe.getMessage(), nfe);
+                final int min = parseLoginDelaySeconds(capabilities);
+                if (min >= 0) {
+                    if ((min * 1000) > refreshRate) {
+                        LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
+                            "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)"));
                     }
                 }
             } catch (final UnknownHostException e) {
@@ -152,7 +139,6 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
-
             if (LOG.isDebugEnabled()) {
                 LOG.debug("\n\tSynchronizing messages with POP3 account: " + server);
             }

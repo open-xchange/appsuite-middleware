@@ -369,7 +369,11 @@ public final class POP3Exception extends MIMEMailException {
          * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
          * Error message from server: %6$s
          */
-        LOGIN_DELAY2("Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.\nError message from server: %6$s", LOGIN_DELAY.category, LOGIN_DELAY.detailNumber);
+        LOGIN_DELAY2("Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.\nError message from server: %6$s", LOGIN_DELAY.category, LOGIN_DELAY.detailNumber),
+        /**
+         * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
+         */
+        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2068);
 
         private final String message;
 

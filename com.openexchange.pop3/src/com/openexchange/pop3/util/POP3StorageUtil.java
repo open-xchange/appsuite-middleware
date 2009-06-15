@@ -74,6 +74,8 @@ import com.openexchange.pop3.storage.POP3StoragePropertyNames;
  */
 public class POP3StorageUtil {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3StorageUtil.class);
+
     /**
      * Initializes a new {@link POP3StorageUtil}.
      */
@@ -513,4 +515,35 @@ public class POP3StorageUtil {
             Database.back(cid, false, con);
         }
     }
+
+    private static final String LOGIN_DELAY = "LOGIN-DELAY";
+
+    /**
+     * Parses the minimum allowed seconds between logins indicated by "LOGIN-DELAY" capability.
+     * 
+     * @param capabilities The capabilities possibly containing "LOGIN-DELAY" capability
+     * @return The minimum allowed seconds between logins or <code>-1</code> on absence
+     */
+    public static int parseLoginDelaySeconds(final String capabilities) {
+        final int pos = capabilities.indexOf(LOGIN_DELAY);
+        if (-1 == pos) {
+            // No LOGIN-DELAY capability found
+            return -1;
+        }
+        // Parse seconds; something like LOGIN-DELAY 60
+        final StringBuilder seconds = new StringBuilder(16);
+        final char c = capabilities.charAt(pos + LOGIN_DELAY.length());
+        while ('\r' != c && '\n' != c) {
+            if (Character.isDigit(c)) {
+                seconds.append(c);
+            }
+        }
+        try {
+            return Integer.parseInt(seconds.toString());
+        } catch (final NumberFormatException e) {
+            LOG.warn("LOGIN-DELAY seconds cannot be parsed to an integer: " + capabilities, e);
+            return -1;
+        }
+    }
+
 }

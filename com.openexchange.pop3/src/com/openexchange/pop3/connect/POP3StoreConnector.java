@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.connect;
 
+import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -83,9 +84,25 @@ public final class POP3StoreConnector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3StoreConnector.class);
 
-    private static final Map<HostAndPort, Long> timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+    private static Map<HostAndPort, Long> timedOutServers;
 
-    private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+    private static Map<LoginAndPass, Long> failedAuths;
+
+    /**
+     * Start-up.
+     */
+    public static void startUp() {
+        timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+        failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+    }
+
+    /**
+     * Shut-down.
+     */
+    public static void shutDown() {
+        timedOutServers = null;
+        failedAuths = null;
+    }
 
     /**
      * Initializes a new {@link POP3StoreConnector}.
@@ -130,7 +147,28 @@ public final class POP3StoreConnector {
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
-            final boolean responseCodeAware = capabilities.toUpperCase().indexOf("RESP-CODES") >= 0;
+            /*
+             * JavaMail POP3 implementation requires capabilities "UIDL" and "TOP"
+             */
+            final String login = pop3Config.getLogin();
+            if (capabilities.indexOf("TOP") < 0) {
+                throw new POP3Exception(
+                    POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
+                    "TOP",
+                    server,
+                    login,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            } else if (capabilities.indexOf("UIDL") < 0) {
+                throw new POP3Exception(
+                    POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
+                    "UIDL",
+                    server,
+                    login,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+            final boolean responseCodeAware = capabilities.indexOf("RESP-CODES") >= 0;
             String tmpPass = pop3Config.getPassword();
             if (tmpPass != null) {
                 try {
@@ -142,7 +180,6 @@ public final class POP3StoreConnector {
             /*
              * Check for already failed authentication
              */
-            final String login = pop3Config.getLogin();
             checkFailedAuths(login, tmpPass);
             /*
              * Get properties
@@ -196,8 +233,8 @@ public final class POP3StoreConnector {
                     failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
                 }
                 if (responseCodeAware && e.getMessage().indexOf("[LOGIN-DELAY]") >= 0) {
-                    final int pos = capabilities.indexOf("LOGIN-DELAY");
-                    if (-1 == pos) {
+                    final int seconds = parseLoginDelaySeconds(capabilities);
+                    if (-1 == seconds) {
                         throw new POP3Exception(
                             POP3Exception.Code.LOGIN_DELAY,
                             e,
@@ -207,34 +244,15 @@ public final class POP3StoreConnector {
                             Integer.valueOf(session.getContextId()),
                             e.getMessage());
                     }
-                    // Parse seconds
-                    final StringBuilder seconds = new StringBuilder(16);
-                    final char c = capabilities.charAt(pos + 11);
-                    while ('\r' != c && '\n' != c) {
-                        if (Character.isDigit(c)) {
-                            seconds.append(c);
-                        }
-                    }
-                    try {
-                        throw new POP3Exception(
-                            POP3Exception.Code.LOGIN_DELAY2,
-                            e,
-                            server,
-                            login,
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()),
-                            Integer.valueOf(seconds.toString()),
-                            e.getMessage());
-                    } catch (final NumberFormatException nfe) {
-                        throw new POP3Exception(
-                            POP3Exception.Code.LOGIN_DELAY,
-                            e,
-                            server,
-                            login,
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()),
-                            e.getMessage());
-                    }
+                    throw new POP3Exception(
+                        POP3Exception.Code.LOGIN_DELAY2,
+                        e,
+                        server,
+                        login,
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        Integer.valueOf(seconds),
+                        e.getMessage());
                 }
                 throw e;
             } catch (final MessagingException e) {
