@@ -111,7 +111,17 @@ public final class POP3CapabilityCache {
     }
 
     /**
-     * Gets the cached CAPABILITY from POP3 server denoted by specified parameters.
+     * Gets the cached CAPABILITY from POP3 server denoted by specified parameters.<br>
+     * Example:
+     * 
+     * <pre>
+     * STLS
+     * TOP
+     * USER
+     * SASL LOGIN
+     * UIDL
+     * RESP-CODES
+     * </pre>
      * 
      * @param inetAddress The POP3 server's internet address
      * @param port The POP3 server's port
@@ -125,7 +135,17 @@ public final class POP3CapabilityCache {
     }
 
     /**
-     * Gets the cached CAPABILITY from POP3 server denoted by specified parameters.
+     * Gets the cached CAPABILITY from POP3 server denoted by specified parameters:<br>
+     * Example:
+     * 
+     * <pre>
+     * STLS
+     * TOP
+     * USER
+     * SASL LOGIN
+     * UIDL
+     * RESP-CODES
+     * </pre>
      * 
      * @param address The POP3 server's address
      * @param isSecure Whether to establish a secure connection
@@ -138,7 +158,17 @@ public final class POP3CapabilityCache {
     }
 
     /**
-     * Gets the cached CAPABILITY from POP3 server denoted by specified parameters.
+     * Gets the cached CAPABILITY from POP3 server denoted by specified parameters.<br>
+     * Example:
+     * 
+     * <pre>
+     * STLS
+     * TOP
+     * USER
+     * SASL LOGIN
+     * UIDL
+     * RESP-CODES
+     * </pre>
      * 
      * @param address The POP3 server's address
      * @param isSecure Whether to establish a secure connection
