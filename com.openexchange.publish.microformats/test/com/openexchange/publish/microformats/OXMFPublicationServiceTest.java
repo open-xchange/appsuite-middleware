@@ -110,12 +110,21 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertEquals("id differs", "com.openexchange.publish.microformats.contacts.online", target.getId());
     }
     
-    public void testDisplayName() throws PublicationException {
+    public void testDisplayNameOfTarget() throws PublicationException {
         PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
         assertEquals("Display Name differs", "Banana Publications!", target.getDisplayName());
     }
+    
+    public void testModifyOutgoingShouldSetDisplayNameToSiteName() throws PublicationException{
+        Publication publication = new Publication();
+        publication.setContext(new SimContext(1337));
+        publication.getConfiguration().put("siteName","expected");
+        publicationService.modifyOutgoing(publication);
+        assertEquals("Should be the siteName", "expected", publication.getDisplayName());
+    }
+
 
     public void testFields() throws PublicationException {
         PublicationTarget target = publicationService.getTarget();
@@ -250,7 +259,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService.modifyIncoming(publication);
         assertEquals("path/with/tooMany/slashes", publication.getConfiguration().get("siteName"));
     }
-    
+        
     public void assertSecret(Publication publication) {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
     }
@@ -263,5 +272,4 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
         assertTrue("Secret was not null explicitely!", publication.getConfiguration().get("secret") == null);
     }
-
 }
