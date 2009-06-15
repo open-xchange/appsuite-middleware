@@ -49,68 +49,38 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSource;
+import junit.framework.TestCase;
+
 
 /**
- * {@link XingSubscribeService}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link XingSubscribeServiceTest}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class XingSubscribeService extends AbstractSubscribeService {
+public class XingSubscribeServiceTest extends TestCase {
 
-    private static final String LOGIN = "login";
+    private XingSubscribeService subscriptionService;
 
-    private static final String PASSWORD = "password";
-
-    private final SubscriptionSource SOURCE = new SubscriptionSource();
-
-    private final DynamicFormDescription FORM = new DynamicFormDescription();
-
-    public XingSubscribeService() {
-        FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
-
-        SOURCE.setDisplayName("XING Super Duper Service");
-        SOURCE.setId("com.openexchange.subscribe.xing");
-        SOURCE.setFormDescription(FORM);
-        SOURCE.setSubscribeService(this);
-        SOURCE.setFolderModule(FolderObject.CONTACT);
-    }
-
-    public SubscriptionSource getSubscriptionSource() {
-        return SOURCE;
-    }
-
-    public boolean handles(int folderModule) {
-        return folderModule == FolderObject.CONTACT;
-    }
-
-    public Collection<ContactObject> getContent(Subscription subscription) throws XingSubscriptionException {
-        Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        subscriptionService = new XingSubscribeService();
+        
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
-        super.modifyIncoming(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        encrypt(configuration, PASSWORD);
+    protected void tearDown() throws Exception {
+        // TODO Auto-generated method stub
+        super.tearDown();
+    }
+    
+    public void testModifyOutgoingShouldSetDisplaynameToLogin() throws SubscriptionException{
+        Subscription subscription = new Subscription();
+        subscription.getConfiguration().put("login","expected");
+        subscriptionService.modifyOutgoing(subscription);
+        assertEquals("Display name should be login name", "expected", subscription.getDisplayName());
     }
 
-    @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
-        super.modifyOutgoing(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        decrypt(configuration, PASSWORD);
-        subscription.setDisplayName( (String) subscription.getConfiguration().get(LOGIN) );
-    }
 }
