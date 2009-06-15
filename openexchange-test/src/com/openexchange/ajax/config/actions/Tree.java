@@ -214,6 +214,12 @@ public enum Tree {
      *               2 = middle = 1000 milliseconds
      *               3 = long   = 2000 milliseconds */
     HoverSpeed("/gui/effects/hover/speed"),
+    
+    /** [inside GUI] "true" or "false" */
+    ShowMiniCalendarOnStartUp("/gui/portal/minicalendar"),
+    
+    /** [inside GUI] "true" or "false" */
+    ShowInfoBoxOnStartUp("/gui/portal/tooltip"),
 
     //TODO: more gui settings
 
