@@ -58,7 +58,7 @@
     <target name="install" depends="installJar,installConfig,installLanguages"/>
 
     <target name="installConfig">
-        <copy todir="${destdir}/${commonConfigDir}}">
+        <copy todir="${destdir}/${commonConfigDir}">
             <fileset dir="conf">
                 <exclude name="**CVS/**"/>
             </fileset>
