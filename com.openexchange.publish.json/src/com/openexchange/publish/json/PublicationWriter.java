@@ -49,8 +49,11 @@
 
 package com.openexchange.publish.json;
 
-import java.util.Collection;
-import java.util.HashMap;
+import static com.openexchange.publish.json.FieldNames.DISPLAYNAME;
+import static com.openexchange.publish.json.FieldNames.ENTITY;
+import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
+import static com.openexchange.publish.json.FieldNames.ID;
+import static com.openexchange.publish.json.FieldNames.TARGET;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -62,34 +65,29 @@ import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.publish.json.types.FolderType;
-import com.openexchange.publish.json.types.IDType;
-
-import static com.openexchange.publish.json.FieldNames.*;
-
 
 /**
  * {@link PublicationWriter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class PublicationWriter {
 
-   
     private static final FormContentWriter formWriter = new FormContentWriter();
+
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
     private Map<String, EntityType> entityTypes = new EntityMap();
-    
+
     public PublicationWriter() {
     }
-    
+
     public JSONObject write(Publication publication) throws JSONException, PublicationJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));
         object.put(ENTITY_MODULE, publication.getModule());
+        object.put(DISPLAYNAME, publication.getDisplayName());
         String targetId = publication.getTarget().getId();
         object.put(TARGET, targetId);
         object.put(targetId, formWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration()));
@@ -99,20 +97,20 @@ public class PublicationWriter {
     public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws PublicationJSONException, JSONException {
         JSONArray array = new JSONArray();
         writeBasicCols(array, publication, basicCols);
-        for(String identifier : specialsList) {
+        for (String identifier : specialsList) {
             writeSpecialCols(array, publication, specialCols.get(identifier), identifier, form);
         }
         return array;
     }
 
     private void writeSpecialCols(JSONArray array, Publication publication, String[] strings, String externalId, DynamicFormDescription form) {
-        if(strings == null) {
+        if (strings == null) {
             return;
         }
         boolean writeNulls = !publication.getTarget().getId().equals(externalId);
-        Map<String, Object> configuration  = publication.getConfiguration();
-        for(String col : strings) {
-            if(writeNulls) {
+        Map<String, Object> configuration = publication.getConfiguration();
+        for (String col : strings) {
+            if (writeNulls) {
                 array.put(JSONObject.NULL);
             } else {
                 Object value = configuration.get(col);
@@ -123,16 +121,18 @@ public class PublicationWriter {
         }
     }
 
-    private void writeBasicCols(JSONArray array,Publication publication, String[] basicCols) throws PublicationJSONException, JSONException {
-        for(String basicCol : basicCols) {
-            if(ID.equals(basicCol)) {
+    private void writeBasicCols(JSONArray array, Publication publication, String[] basicCols) throws PublicationJSONException, JSONException {
+        for (String basicCol : basicCols) {
+            if (ID.equals(basicCol)) {
                 array.put(publication.getId());
-            } else if ( ENTITY.equals(basicCol)) {
+            } else if (ENTITY.equals(basicCol)) {
                 array.put(writeEntity(publication));
-            } else if ( ENTITY_MODULE.equals(basicCol)) {
+            } else if (ENTITY_MODULE.equals(basicCol)) {
                 array.put(publication.getModule());
-            } else if ( TARGET.equals(basicCol) ) {
+            } else if (TARGET.equals(basicCol)) {
                 array.put(publication.getTarget().getId());
+            } else if (DISPLAYNAME.equals(basicCol)) {
+                array.put(publication.getDisplayName());
             } else {
                 throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(basicCol);
             }
@@ -140,11 +140,11 @@ public class PublicationWriter {
     }
 
     private JSONObject writeEntity(Publication publication) throws PublicationJSONException, JSONException {
-        if(publication.getModule() == null) {
+        if (publication.getModule() == null) {
             return new JSONObject();
         }
         EntityType type = entityTypes.get(publication.getModule());
-        if(type == null) {
+        if (type == null) {
             throw PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE.create(publication.getModule());
         }
         return type.toEntity(publication.getEntityId());
