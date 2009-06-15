@@ -525,7 +525,7 @@ public final class MimeForward {
         {
             final InternetAddress[] cc = msg.getCc();
             forwardPrefix = PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("Cc: ").append(MimeProcessingUtility.addrs2String(cc)).toString());
+                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(MimeProcessingUtility.addrs2String(cc)).toString());
 
             final InternetAddress[] to = msg.getTo();
             forwardPrefix = PATTERN_TO.matcher(forwardPrefix).replaceFirst(
