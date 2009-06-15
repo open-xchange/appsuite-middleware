@@ -60,39 +60,38 @@ import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
 import com.openexchange.subscribe.Subscription;
 
-
 /**
  * {@link SubscriptionJSONWriter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SubscriptionJSONWriter {
-    
+
     public static final int CLASS_ID = 2;
 
-    
     private static final FormContentWriter formContentWriter = new FormContentWriter();
+
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
-    
+
     private static final String ID = "id";
+
     private static final String FOLDER = "folder";
-    
-    /**
-     * @param subscription
-     * @return
-     * @throws JSONException 
-     */
+
+    private static final String DISPLAYNAME = "displayName";
+
+    private static final String SOURCE = "source";
+
     public JSONObject write(Subscription subscription, DynamicFormDescription form) throws JSONException, SubscriptionJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
-        object.put("source", subscription.getSource().getId());
+        object.put(DISPLAYNAME, subscription.getDisplayName());
+        object.put(SOURCE, subscription.getSource().getId());
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form);
         return object;
     }
 
-    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form) throws JSONException, SubscriptionJSONException  {
+    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form) throws JSONException, SubscriptionJSONException {
         JSONObject config = formContentWriter.write(form, configuration);
         object.put(id, config);
     }
@@ -100,20 +99,20 @@ public class SubscriptionJSONWriter {
     public JSONArray writeArray(Subscription subscription, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws SubscriptionJSONException {
         JSONArray array = new JSONArray();
         writeBasicCols(array, subscription, basicCols);
-        for(String identifier : specialsList) {
+        for (String identifier : specialsList) {
             writeSpecialCols(array, subscription, specialCols.get(identifier), identifier, form);
         }
         return array;
     }
 
-    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId, DynamicFormDescription form) throws SubscriptionJSONException{
-        if(strings == null) {
+    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId, DynamicFormDescription form) throws SubscriptionJSONException {
+        if (strings == null) {
             return;
         }
         boolean writeNulls = !subscription.getSource().getId().equals(externalId);
-        Map<String, Object> configuration  = subscription.getConfiguration();
-        for(String col : strings) {
-            if(writeNulls) {
+        Map<String, Object> configuration = subscription.getConfiguration();
+        for (String col : strings) {
+            if (writeNulls) {
                 array.put(JSONObject.NULL);
             } else {
                 Object value = configuration.get(col);
@@ -125,13 +124,15 @@ public class SubscriptionJSONWriter {
     }
 
     private void writeBasicCols(JSONArray array, Subscription subscription, String[] basicCols) throws SubscriptionJSONException {
-        for(String basicCol : basicCols) {
-            if("id".equals(basicCol)) {
+        for (String basicCol : basicCols) {
+            if (ID.equals(basicCol)) {
                 array.put(subscription.getId());
-            } else if ("folder".equals(basicCol)) {
+            } else if (FOLDER.equals(basicCol)) {
                 array.put(subscription.getFolderId());
-            } else if ("source".equals(basicCol)) {
+            } else if (SOURCE.equals(basicCol)) {
                 array.put(subscription.getSource().getId());
+            } else if (DISPLAYNAME.equals(basicCol)) {
+                array.put(subscription.getDisplayName());
             } else {
                 SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.throwException(basicCol);
             }
