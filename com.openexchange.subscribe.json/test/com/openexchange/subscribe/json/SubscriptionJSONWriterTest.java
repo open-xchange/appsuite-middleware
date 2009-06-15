@@ -116,7 +116,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
     public void testWriteArray() throws SubscriptionJSONException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
-        String[] basicCols = new String[] { "id", "source" };
+        String[] basicCols = new String[] { "id", "source", "displayName" };
         specialCols.put("com.openexchange.subscribe.test1", new String[] { "username" });
 
         JSONArray array = new SubscriptionJSONWriter().writeArray(
@@ -127,7 +127,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
         JSONAssertion assertion = 
             new JSONAssertion()
-                .isArray().withValues(2, "com.openexchange.subscribe.test1", "My Username");
+                .isArray().withValues(2, "com.openexchange.subscribe.test1", "mySubscription", "My Username");
 
         assertValidates(assertion, array);
     }

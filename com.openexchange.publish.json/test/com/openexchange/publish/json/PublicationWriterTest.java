@@ -121,7 +121,7 @@ public class PublicationWriterTest extends TestCase {
     
     public void testWriteArray() throws JSONException, PublicationJSONException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
-        String[] basicCols = new String[] { "id", "target" };
+        String[] basicCols = new String[] { "id", "target", "displayName" };
         specialCols.put("com.openexchange.publish.test", new String[] { "siteName" });
         
         JSONArray array = new PublicationWriter().writeArray(
@@ -130,7 +130,7 @@ public class PublicationWriterTest extends TestCase {
             specialCols,
             Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription());
 
-        JSONAssertion assertion = new JSONAssertion().isArray().withValues(23, "com.openexchange.publish.test", "publication");
+        JSONAssertion assertion = new JSONAssertion().isArray().withValues(23, "com.openexchange.publish.test", "myName", "publication");
 
         assertValidates(assertion, array);
         
