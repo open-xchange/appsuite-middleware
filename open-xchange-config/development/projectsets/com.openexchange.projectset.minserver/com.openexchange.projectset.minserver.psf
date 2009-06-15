@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<psf version="2.0">
+<?xml version="1.0" encoding="UTF-8"?><psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.conversion,com.openexchange.conversion"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.dataretention,com.openexchange.dataretention"/>
@@ -14,5 +13,7 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.timer,com.openexchange.timer"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/javax.activation,javax.activation"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.calendar,com.openexchange.calendar"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf,com.openexchange.datatypes.genericonf"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish,com.openexchange.publish"/>
 </provider>
 </psf>
