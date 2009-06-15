@@ -215,6 +215,7 @@ public final class ContentType extends ParameterizedHeader {
         primaryType = contentType.getPrimaryType();
         subType = contentType.getSubType();
         parameterList = (ParameterList) contentType.parameterList.clone();
+        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
     }
 
     /**
