@@ -162,6 +162,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
         publication.getConfiguration().remove(SECRET);
 
+        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
     }
     
     protected String normalizeSiteName(String siteName) {
