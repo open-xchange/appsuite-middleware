@@ -84,7 +84,8 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
             final Object protocol = reference.getProperty("protocol");
             if (null == protocol) {
                 LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
-                return addedService;
+                context.ungetService(reference);
+                return null;
             }
             try {
                 /*
@@ -96,9 +97,13 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                 } else {
                     LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
                         "' could not be added.").append("Another provider which supports the protocol has already been registered."));
+                    context.ungetService(reference);
+                    return null;
                 }
             } catch (final MailException e) {
                 LOG.error(e.getMessage(), e);
+                context.ungetService(reference);
+                return null;
             }
         }
         return addedService;
@@ -109,22 +114,24 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
-        try {
-            if (service instanceof TransportProvider) {
-                try {
-                    final TransportProvider provider = (TransportProvider) service;
-                    TransportProviderRegistry.unregisterTransportProvider(provider);
-                    LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered"));
-                } catch (final MailException e) {
-                    LOG.error(e.getMessage(), e);
+        if (null != service) {
+            try {
+                if (service instanceof TransportProvider) {
+                    try {
+                        final TransportProvider provider = (TransportProvider) service;
+                        TransportProviderRegistry.unregisterTransportProvider(provider);
+                        LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
+                            "' successfully unregistered"));
+                    } catch (final MailException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
+            } finally {
+                /*
+                 * TODO: Necessary?
+                 */
+                context.ungetService(reference);
             }
-        } finally {
-            /*
-             * TODO: Necessary?
-             */
-            context.ungetService(reference);
         }
     }
 

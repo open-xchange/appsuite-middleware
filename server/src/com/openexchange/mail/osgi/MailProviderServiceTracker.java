@@ -84,7 +84,8 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
             final Object protocol = reference.getProperty("protocol");
             if (null == protocol) {
                 LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
-                return addedService;
+                context.ungetService(reference);
+                return null;
             }
             try {
                 /*
@@ -96,9 +97,13 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
                 } else {
                     LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
                         "' could not be added.").append(" Another provider which supports the protocol has already been registered."));
+                    context.ungetService(reference);
+                    return null;
                 }
             } catch (final MailException e) {
                 LOG.error(e.getMessage(), e);
+                context.ungetService(reference);
+                return null;
             }
         }
         return addedService;
@@ -109,19 +114,21 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
-        try {
-            if (service instanceof MailProvider) {
-                try {
-                    final MailProvider provider = (MailProvider) service;
-                    MailProviderRegistry.unregisterMailProvider(provider);
-                    LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered"));
-                } catch (final MailException e) {
-                    LOG.error(e.getMessage(), e);
+        if (null != service) {
+            try {
+                if (service instanceof MailProvider) {
+                    try {
+                        final MailProvider provider = (MailProvider) service;
+                        MailProviderRegistry.unregisterMailProvider(provider);
+                        LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
+                            "' successfully unregistered"));
+                    } catch (final MailException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
+            } finally {
+                context.ungetService(reference);
             }
-        } finally {
-            context.ungetService(reference);
         }
     }
 
