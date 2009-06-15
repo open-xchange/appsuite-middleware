@@ -81,6 +81,15 @@ public class SQLTools {
                 }
             }
         }
+        if (con != null) {
+            try {
+                con.close();
+            } catch (SQLException x) {
+                if (sqle == null) {
+                    sqle = x;
+                }
+            }
+        }
         if(sqle != null) {
             throw sqle;
         }
