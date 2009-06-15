@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -260,21 +261,53 @@ public abstract class DeferredActivator implements BundleActivator {
                     started.set(true);
                 } catch (final Exception e) {
                     final Bundle bundle = context.getBundle();
-                    LOG.error(new StringBuilder(64).append("\nStopping bundle ").append(bundle.getSymbolicName()).append(
-                        " due to failed start-up: ").append(e.getMessage()).toString(), e);
+                    final StringBuilder errorBuilder = new StringBuilder(64);
+                    if (LOG.isErrorEnabled()) {
+                        errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
+                        final String errorMsg = e.getMessage();
+                        if (null == errorMsg || "null".equals(errorMsg)) {
+                            errorBuilder.append(e.getClass().getName());
+                        } else {
+                            errorBuilder.append(errorMsg);
+                        }
+                        LOG.error(errorBuilder.toString(), e);
+                    }
                     /*
                      * Shut-down
                      */
-                    try {
-                        reset();
+                    reset();
+                    if (Bundle.STARTING == bundle.getState()) {
                         /*
-                         * Stop with Bundle.STOP_TRANSIENT set to zero
+                         * Bundle cannot be stopped by same thread if still in STARTING state
                          */
-                        bundle.stop(0);
-                    } catch (final Exception e2) {
-                        LOG.error("Shut-down failed: " + e2.getMessage(), e2);
+                        new Thread(new Runnable() {
+
+                            public void run() {
+                                shutDownBundle(bundle, errorBuilder);
+                            }
+                        }).start();
+                    } else {
+                        shutDownBundle(bundle, errorBuilder);
                     }
                 }
+            }
+        }
+    }
+
+    private static void shutDownBundle(final Bundle bundle, final StringBuilder errorBuilder) {
+        try {
+            /*
+             * Stop with Bundle.STOP_TRANSIENT set to zero
+             */
+            bundle.stop(0);
+            if (LOG.isErrorEnabled()) {
+                errorBuilder.setLength(0);
+                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n"));
+            }
+        } catch (final BundleException e) {
+            if (LOG.isErrorEnabled()) {
+                errorBuilder.setLength(0);
+                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n"));
             }
         }
     }
