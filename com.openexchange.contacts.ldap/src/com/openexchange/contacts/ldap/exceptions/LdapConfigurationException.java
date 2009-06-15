@@ -119,7 +119,12 @@ public class LdapConfigurationException extends OXException {
         /**
          * The given value for searchScope_distributionlist "%s" is not a possible one
          */
-        SEARCH_SCOPE_DISTRI_WRONG("The given value for searchScope_distributionlist \"%s\" is not a possible one", Category.SETUP_ERROR, 12);
+        SEARCH_SCOPE_DISTRI_WRONG("The given value for searchScope_distributionlist \"%s\" is not a possible one", Category.SETUP_ERROR, 12),
+
+        /**
+         * Abstract pathname "%1$s" does not denote a directory.
+         */
+        NOT_DIRECTORY("Abstract pathname \"%1$s\" does not denote a directory.", Category.SETUP_ERROR, 13);
 
 
         /**

@@ -88,12 +88,15 @@ public class PropertyHandler {
     
     public void loadProperties() throws LdapConfigurationException {
         final StringBuilder logBuilder = new StringBuilder();
-        
-        final String pathname = "/opt/open-xchange/etc/groupware/contacts-ldap";
-        final File[] dirs = directorylisting(new File(pathname));
 
-        if (null == dirs) {
-            throw new LdapConfigurationException(LdapConfigurationException.Code.NOT_DIRECTORY, pathname);
+        final File[] dirs;
+        {
+            final String pathname = "/opt/open-xchange/etc/groupware/contacts-ldap";
+            dirs = directorylisting(new File(pathname));
+
+            if (null == dirs) {
+                throw new LdapConfigurationException(LdapConfigurationException.Code.NOT_DIRECTORY, pathname);
+            }
         }
 
         final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
