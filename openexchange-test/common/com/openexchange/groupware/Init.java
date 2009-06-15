@@ -243,6 +243,7 @@ public final class Init {
 
     public static void injectProperty() {
         System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
+        System.setProperty("openexchange.propdir2", TestInit.getTestProperty("openexchange.propdir2"));
     }
 
     public static void startServer() throws Exception {
