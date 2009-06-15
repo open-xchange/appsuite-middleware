@@ -1,27 +1,60 @@
 <#macro display key value title>
-<#if value != "">
-<span class="${key}">${value?html}</span>
-</#if>
+	<#if value != "">
+		<span class="${key}">${value?html}</span>
+	</#if>
+</#macro>
+
+<#macro display_mail_value contact>
+	<#if contact.givenName?? || contact.surName?? || contact.middleName??>
+		${contact.title!""}
+		${contact.givenName!""}
+		${contact.middleName!""}
+		${contact.surName!""}
+	<#elseif contact.email1??>
+		${contact.email1}
+	<#elseif contact.email2??>
+		${contact.email2}
+	<#elseif contact.email3??>
+		${contact.email3}
+	</#if>
+	<@display key="ox_suffix" title="Suffix" value=contact.suffix!"" />
+</#macro>
+
+<#macro display_name contact>
+	<#if contact.givenName?? || contact.surName?? || contact.middleName??>
+		<@display key="ox_title" title="Title" value=contact.title!"" />
+		<@display key="ox_first_name" title="First name" value=contact.givenName!"" />
+		<@display key="ox_second_name" title="Second name" value=contact.middleName!"" />
+		<@display key="ox_last_name" title="Last name" value=contact.surName!"" />
+	<#elseif contact.email1??>
+		<@display key="ox_email1" title="Email1" value=contact.email1 />
+	<#elseif contact.email2??>
+		<@display key="ox_email2" title="Email2" value=contact.email2 />
+	<#elseif contact.email3??>
+		<@display key="ox_email3" title="Email3" value=contact.email3 />
+	</#if>
+	<@display key="ox_suffix" title="Suffix" value=contact.suffix!"" />
 </#macro>
 
 <#macro render key value title>
-<#if value != "">
-<tr>
-<td class="key">${title}:</td> <td class="${key} value">${value?html}</td>
-</tr>
-</#if>
+	<#if value != "">
+		<tr>
+			<td class="key">${title}:</td> 
+			<td class="${key} value">${value?html}</td>
+		</tr>
+	</#if>
 </#macro>
 
 <#macro image contact>
-<#if contact.containsImage1()>
-	<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
-</#if>
+	<#if contact.containsImage1()>
+		<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
+	</#if>
 </#macro>
 
 <#macro imageMicroformatted contact>
-<#if contact.containsImage1()>
-	<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
-</#if>
+	<#if contact.containsImage1()>
+		<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
+	</#if>
 </#macro>
 
 
@@ -80,7 +113,7 @@
 		background: #fff;
 		padding: .5em;
 	}
-	#nav a {
+	#nav a, #nav a:visited, #nav a:hover, #nav a:link {
 		text-decoration: none;
 		color: #446;
 		font-weight: bold;
@@ -120,11 +153,7 @@
 			<#list contacts as contact>
 			<li>
 				<a href="#contact_${contacts?seq_index_of(contact)}">
-					${contact.title!""}
-					${contact.givenName!""}
-					${contact.middleName!""}
-					${contact.surName!""}
-					${contact.suffix!""}
+					<@display_mail_value contact=contact />
 				</a>
 			</li>
 			</#list>
@@ -140,11 +169,7 @@
 			<tr>
 			<td class="key">Name:</td>
 			<td class="value">
-			<@display key="ox_title" title="Title" value=contact.title!"" />
-			<@display key="ox_first_name" title="First name" value=contact.givenName!"" />
-			<@display key="ox_second_name" title="Second name" value=contact.middleName!"" />
-			<@display key="ox_last_name" title="Last name" value=contact.surName!"" />
-			<@display key="ox_suffix" title="Suffix" value=contact.suffix!"" />
+			<@display_name contact=contact />
 			</td>
 			</tr>
 	
