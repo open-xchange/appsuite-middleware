@@ -90,7 +90,6 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -141,6 +140,10 @@ public class LdapContactInterface implements ContactInterface {
     }
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class);
     
+    private static final String MAPPING_TABLE_KEYS = "CONTACT_LDAP_MAPPING_TABLE_KEYS";
+
+    private static final String MAPPING_TABLE_VALUES = "CONTACT_LDAP_MAPPING_TABLE_VALUES";
+    
     private final int admin_id;
     
     private final int context;
@@ -149,11 +152,7 @@ public class LdapContactInterface implements ContactInterface {
     
     private final FolderProperties folderprop;
     
-    private final Map<Integer, String> keys = new ConcurrentHashMap<Integer, String>();
-    
     private Session session;
-    
-    private final Map<String, Integer> values = new ConcurrentHashMap<String, Integer>();
     
     public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid) {
         this.context = context;
@@ -331,10 +330,10 @@ public class LdapContactInterface implements ContactInterface {
             final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
             // Here we have to differentiate between users, distributionlists or both
             if (both || ContactTypes.users.equals(folderprop.getContacttypes())) {
-                userfilter = "(" + folderprop.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id) + ")";
+                userfilter = "(" + folderprop.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id, getKeyMappingTable()) + ")";
             }
             if (both || ContactTypes.distributionlists.equals(folderprop.getContacttypes())) {
-                distrifilter = "(" + folderprop.getMappings().getDistributionuid() + "=" + oxUidToLdapUid(object_id) + ")";
+                distrifilter = "(" + folderprop.getMappings().getDistributionuid() + "=" + oxUidToLdapUid(object_id, getKeyMappingTable()) + ")";
             }
             if (folderprop.isMemorymapping()) {
                 contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null));
@@ -361,6 +360,7 @@ public class LdapContactInterface implements ContactInterface {
 
     public void setSession(final Session s) throws OXException {
         session = s;
+        initMappingTable();
     }
     
     public void updateContactObject(final ContactObject co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
@@ -602,6 +602,16 @@ public class LdapContactInterface implements ContactInterface {
         default:
             return null;
         }
+    }
+
+
+    private Map<Integer, String> getKeyMappingTable() throws LdapException {
+        final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
+        if (null == keys) {
+            throw new LdapException(Code.NO_KEYS_MAPPING_TABLE_FOUND);
+        }
+        final Map<Integer, String> table = (Map<Integer, String>) keys;
+        return table;
     }
 
 
@@ -871,12 +881,11 @@ public class LdapContactInterface implements ContactInterface {
         return new UidInterface() {
 
             public Integer getUid(final String uid) throws LdapException {
-                return ldapUidToOxUid(uid);
+                return ldapUidToOxUid(uid, getValuesMappingTable(), getKeyMappingTable());
             }
 
         };
     }
-
 
     private User getUserObject() throws LdapException {
         final User user;
@@ -889,7 +898,32 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private Integer ldapUidToOxUid(final String uid) throws LdapException {
+    private Map<String, Integer> getValuesMappingTable() throws LdapException {
+        final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
+        if (null == values) {
+            throw new LdapException(Code.NO_VALUES_MAPPING_TABLE_FOUND);
+        }
+        final Map<String, Integer> table = (Map<String, Integer>) values;
+        return table;
+    
+    }
+
+
+    private void initMappingTable() {
+        final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
+        final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
+        if (null == keys) {
+            // Mapping table for this session was never initialized, so we do it here...
+            this.session.setParameter(MAPPING_TABLE_KEYS, new ConcurrentHashMap<Integer, String>());
+        }
+        if (null == values) {
+            // Mapping table for this session was never initialized, so we do it here...
+            this.session.setParameter(MAPPING_TABLE_VALUES, new ConcurrentHashMap<String, Integer>());
+        }
+    }
+
+
+    private Integer ldapUidToOxUid(final String uid, final Map<String, Integer> values, final Map<Integer, String> keys) throws LdapException {
         final Integer number = values.get(uid);
         if (null != number) {
             return number;
@@ -902,7 +936,7 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
     
-    private String oxUidToLdapUid(final int uid) throws LdapException {
+    private String oxUidToLdapUid(final int uid, final Map<Integer, String> keys) throws LdapException {
         final String ldapUid = keys.get(Autoboxing.I(uid));
         if (null != ldapUid) {
             return ldapUid;

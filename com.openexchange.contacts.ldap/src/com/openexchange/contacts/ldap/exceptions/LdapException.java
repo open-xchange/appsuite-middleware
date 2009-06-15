@@ -160,7 +160,18 @@ public class LdapException extends OXException {
         /**
          * The attribute "%s" is missing for object "%s"
          */
-        MISSING_ATTRIBUTE("The attribute \"%s\" is missing for object \"%s\"", Category.USER_CONFIGURATION, 19);
+        MISSING_ATTRIBUTE("The attribute \"%s\" is missing for object \"%s\"", Category.USER_CONFIGURATION, 19),
+        
+        /**
+         * No values mapping table found
+         */
+        NO_VALUES_MAPPING_TABLE_FOUND("No values mapping table found", Category.CODE_ERROR, 20),
+
+        /**
+         * No keys mapping table found
+         */
+        NO_KEYS_MAPPING_TABLE_FOUND("No keys mapping table found", Category.CODE_ERROR, 21);
+
 
         
         /**
