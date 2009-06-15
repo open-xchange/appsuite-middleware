@@ -496,6 +496,8 @@ public final class MimeForward {
 
     private static final Pattern PATTERN_TO = Pattern.compile(Pattern.quote("#TO#"));
 
+    private static final Pattern PATTERN_CCLINE = Pattern.compile(Pattern.quote("#CC_LINE#"));
+
     private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
 
     private static final Pattern PATTERN_TIME = Pattern.compile(Pattern.quote("#TIME#"));
@@ -521,6 +523,10 @@ public final class MimeForward {
                 from == null || from.length == 0 ? "" : from[0].toUnicodeString());
         }
         {
+            final InternetAddress[] cc = msg.getCc();
+            forwardPrefix = PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
+                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("Cc: ").append(MimeProcessingUtility.addrs2String(cc)).toString());
+
             final InternetAddress[] to = msg.getTo();
             forwardPrefix = PATTERN_TO.matcher(forwardPrefix).replaceFirst(
                 to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
