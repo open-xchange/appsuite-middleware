@@ -99,9 +99,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
-    private static final Map<HostAndPort, Long> timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+    private static Map<HostAndPort, Long> timedOutServers;
 
-    private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+    private static Map<LoginAndPass, Long> failedAuths;
 
     /*-
      * Member section
@@ -483,6 +483,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void startup() throws MailException {
+        timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+        failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
         IMAPCapabilityAndGreetingCache.init();
         try {
             ACLExtensionInit.getInstance().start();
@@ -522,6 +524,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         IMAPCapabilityAndGreetingCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
+        timedOutServers = null;
+        failedAuths = null;
     }
 
     @Override
