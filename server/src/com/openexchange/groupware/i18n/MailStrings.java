@@ -63,46 +63,40 @@ public class MailStrings {
         super();
     }
 
+    // The internationalized subject for a read acknowledgement
     public static final String ACK_SUBJECT = "Read Acknowledgement";
 
+    // The text body of a received read acknowledgement
+    // #DATE# is replaced with the sent date of referenced email
+    // #RECIPIENT# is replaced with personal and/or email address of recipient(s)
+    // #SUBJECT# is replaced with referenced email's subject
     public static final String ACK_NOTIFICATION_TEXT = "This is a delivery receipt for the mail that you sent on #DATE# to #RECIPIENT# with subject \"#SUBJECT#\".\n\nNote: This delivery receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
 
-    /**
-     * The prefixed text on reply:
-     * 
-     * <pre>
-     * On 12 June 2009 at 08:30h Jane Doe &lt;jane.doe@somewhere.com&gt; wrote:
-     * </pre>
-     */
+    // The prefixed text on reply.
+    // #DATE# is replaced with the sent date of referenced email
+    // #TIME# is replaced with time of referenced email
+    // #SENDER# is replaced with personal and/or email address of the sender
     public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
 
-    /**
-     * The prefixed text on inline forward:
-     * 
-     * <pre>
-     * ---------- Original Message ----------
-     * From: Hotel XYZ &lt;hotel@xyz.com&gt;
-     * To: Jane Doe &lt;jane.doe@somewhere.com&gt;
-     * Date: 12 June 2009 at 08:30h
-     * Subject: The message's subject
-     * 
-     * <pre>
-     */
+    // The prefixed text on inline forward.
+    // #FROM# is replaced with personal and/or email address of original message's From header
+    // #TO# is replaced with personal and/or email address(es) of original message's To header
+    // #CC_LINE# is replaced with personal and/or email address(es) of original message's Cc header prefixed with "\nCc: " (which needs not
+    // to be internationalized
+    // #DATE# is replaced with the sent date of referenced email
+    // #TIME# is replaced with time of referenced email
+    // #SUBJECT# is replaced with referenced email's subject
     public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO##CC_LINE#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
 
-    /**
-     * The default subject.
-     */
+    // The internationalized default subject.
     public static final String DEFAULT_SUBJECT = "[No Subject]";
 
-    /**
-     * The available attachments for this E-Mail can be accessed via the links:
-     */
+    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+    // Hints to the available attachments for affected message
     public static final String PUBLISHED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the links:";
 
-    /**
-     * The links will be deleted by #DATE#
-     */
+    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+    // Indicates the elapsed date for affected message's attachments
     public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted by #DATE#";
 
 }
