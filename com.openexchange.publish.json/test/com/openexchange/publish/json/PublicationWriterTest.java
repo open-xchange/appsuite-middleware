@@ -94,6 +94,7 @@ public class PublicationWriterTest extends TestCase {
         publication.setModule("oranges");
         publication.setTarget(target);
         publication.setConfiguration(config);
+        publication.setDisplayName("myName");
     }
     
     public void testWriteObject() throws JSONException, PublicationJSONException {
@@ -107,6 +108,7 @@ public class PublicationWriterTest extends TestCase {
                     .objectEnds()
                 .hasKey("entityModule").withValue("oranges")
                 .hasKey("target").withValue("com.openexchange.publish.test")
+                .hasKey("displayName").withValue("myName")
                 .hasKey("com.openexchange.publish.test").withValueObject()
                     .hasKey("siteName").withValue("publication")
                     .hasKey("protected").withValue(true)
