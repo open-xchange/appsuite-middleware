@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -68,7 +67,7 @@ public class OXFolderNotFoundException extends OXFolderException {
      * @param cid The context ID
      */
     public OXFolderNotFoundException(final int fuid, final Context ctx) {
-        super(FolderCode.NOT_EXISTS, getFolderName(fuid, ctx), Integer.valueOf(ctx.getContextId()));
+        super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()));
     }
 
 }

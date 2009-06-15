@@ -5,10 +5,7 @@
 * 2009-06-15 - thorben.betten@open-xchange.com
 
  - Bugfix #13535: Added "Cc" to generated text on inline forward
-
-* 2009-06-15 - thorben.betten@open-xchange.com
-
- - Bugfix #13535: Added "Cc" to generated text on inline forward
+ - Bugfix #13899: Fixed possible stack overflow on access to non-existing folder
 
 * 2009-06-15 - marcus.klein@open-xchange.com
 
