@@ -910,15 +910,18 @@ public class LdapContactInterface implements ContactInterface {
 
 
     private void initMappingTable() {
-        final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
-        final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
-        if (null == keys) {
-            // Mapping table for this session was never initialized, so we do it here...
-            this.session.setParameter(MAPPING_TABLE_KEYS, new ConcurrentHashMap<Integer, String>());
-        }
-        if (null == values) {
-            // Mapping table for this session was never initialized, so we do it here...
-            this.session.setParameter(MAPPING_TABLE_VALUES, new ConcurrentHashMap<String, Integer>());
+        // We only add the tables to the session if this is desired through the config file
+        if (folderprop.isMemorymapping()) {
+            final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
+            final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
+            if (null == keys) {
+                // Mapping table for this session was never initialized, so we do it here...
+                this.session.setParameter(MAPPING_TABLE_KEYS, new ConcurrentHashMap<Integer, String>());
+            }
+            if (null == values) {
+                // Mapping table for this session was never initialized, so we do it here...
+                this.session.setParameter(MAPPING_TABLE_VALUES, new ConcurrentHashMap<String, Integer>());
+            }
         }
     }
 
