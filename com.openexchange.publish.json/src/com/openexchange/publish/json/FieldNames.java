@@ -61,5 +61,6 @@ public class FieldNames {
     public static final String ENTITY = "entity";
     public static final String ENTITY_MODULE = "entityModule";
     public static final String TARGET = "target";
+    public static final String DISPLAYNAME= "displayName";
 
 }
