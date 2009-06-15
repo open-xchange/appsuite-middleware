@@ -62,14 +62,10 @@ public final class Groups {
         super();
     }
 
-    /**
-     * Display name of group with identifier 0.
-     */
+    // Display name of group with identifier 0. This group always contains all existing users of a context.
     public static final String ALL_USERS = "All users";
 
-    /**
-     * Display name of group with identifier 1.
-     */
+    // Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
     public static final String STANDARD_GROUP = "Standard group";
 
 }
