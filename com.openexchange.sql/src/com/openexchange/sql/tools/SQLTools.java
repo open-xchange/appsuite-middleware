@@ -64,23 +64,28 @@ import com.openexchange.sql.grammar.LIST;
 public class SQLTools {
 
     public static void closeSQLStuff(Connection con, Statement stmt, ResultSet rs) throws SQLException {
+        SQLException sqle = null;
         if (rs != null) {
             try {
                 rs.close();
-            } finally {
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } finally {
-                        if (con != null) {
-                            con.close();
-                        }
-                    }
+            } catch (SQLException x) {
+                sqle = x;
+            }
+        } 
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException x) {
+                if (sqle == null) {
+                    sqle = x;
                 }
             }
         }
+        if(sqle != null) {
+            throw sqle;
+        }
     }
-    
+
     public static LIST createLIST(int length, Expression expression) {
         List<Expression> list = new ArrayList<Expression>();
         for (int i = 0; i < length; i++) {
