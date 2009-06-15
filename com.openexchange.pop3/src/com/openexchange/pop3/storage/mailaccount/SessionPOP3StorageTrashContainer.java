@@ -74,7 +74,12 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
     public static SessionPOP3StorageTrashContainer getInstance(final POP3Access pop3Access) throws MailException {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getTrashContainer(pop3Access.getAccountId());
-        SessionPOP3StorageTrashContainer cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
+        SessionPOP3StorageTrashContainer cached;
+        try {
+            cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
+        } catch (final ClassCastException e) {
+            cached = null;
+        }
         if (null == cached) {
             cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access));
             session.setParameter(key, cached);

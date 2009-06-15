@@ -73,7 +73,12 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
     public static SessionPOP3StorageProperties getInstance(final POP3Access pop3Access) throws MailException {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getStorageProperties(pop3Access.getAccountId());
-        SessionPOP3StorageProperties cached = (SessionPOP3StorageProperties) session.getParameter(key);
+        SessionPOP3StorageProperties cached;
+        try {
+            cached = (SessionPOP3StorageProperties) session.getParameter(key);
+        } catch (final ClassCastException e) {
+            cached = null;
+        }
         if (null == cached) {
             cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access));
             session.setParameter(key, cached);
