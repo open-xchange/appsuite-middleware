@@ -75,7 +75,10 @@ public class Strings {
             return null;
         StringBuilder builder = new StringBuilder();
         for(Object obj: coll){
-            builder.append(obj.toString());
+            if(obj == null)
+                builder.append(obj);
+            else
+                builder.append(obj.toString());
             builder.append(connector);
         }
         if(builder.length() == 0)
