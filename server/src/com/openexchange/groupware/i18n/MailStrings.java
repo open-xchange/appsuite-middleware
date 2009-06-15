@@ -67,16 +67,23 @@ public class MailStrings {
 
     public static final String ACK_NOTIFICATION_TEXT = "This is a delivery receipt for the mail that you sent on #DATE# to #RECIPIENT# with subject \"#SUBJECT#\".\n\nNote: This delivery receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
 
+    /**
+     * The prefixed text on reply:
+     * 
+     * <pre>
+     * On 12 June 2009 at 08:30h Jane Doe &lt;jane.doe@somewhere.com&gt; wrote:
+     * </pre>
+     */
     public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
 
     /**
-     * The prefixed text on inline forward:<br>
+     * The prefixed text on inline forward:
      * 
      * <pre>
      * ---------- Original Message ----------
      * From: Hotel XYZ &lt;hotel@xyz.com&gt;
      * To: Jane Doe &lt;jane.doe@somewhere.com&gt;
-     * Date: 12 June 2009 at 08:30
+     * Date: 12 June 2009 at 08:30h
      * Subject: The message's subject
      * 
      * <pre>
