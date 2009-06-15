@@ -543,7 +543,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             initConnection(accountId);
             final MailMessage[] originalMails = new MailMessage[folders.length];
             for (int i = 0; i < arguments.length; i++) {
-                originalMails[i] = mailAccess.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
+                final MailMessage origMail = mailAccess.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
+                if (null == origMail) {
+                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, fowardMsgUIDs[i], arguments[i].getFullname());
+                }
+                originalMails[i] = origMail;
             }
             return mailAccess.getLogicTools().getFowardMessage(originalMails, usm);
         }
@@ -551,8 +555,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < arguments.length && sameAccount; i++) {
             final MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
             try {
-                originalMails[i] = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
-                originalMails[i].loadContent();
+                final MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
+                if (null == origMail) {
+                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, fowardMsgUIDs[i], arguments[i].getFullname());
+                }
+                originalMails[i] = origMail;
+                origMail.loadContent();
             } finally {
                 ma.close(true);
             }
@@ -864,6 +872,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         final MailMessage originalMail = mailAccess.getMessageStorage().getMessage(fullname, replyMsgUID, false);
+        if (null == originalMail) {
+            throw new MailException(MailException.Code.MAIL_NOT_FOUND, replyMsgUID, fullname);
+        }
         return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm);
     }
 
