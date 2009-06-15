@@ -110,7 +110,6 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.file.FileStorage;
@@ -2052,7 +2051,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             if (selectedDatabase == null) {
-                throw new OXContextException("The new context could not be created. The maximum numbers of contexts has been reached. Please check the database maxctx setting.");
+                throw new OXContextException("The new context could not be created. The maximum number of contexts in every database "
+                    + "cluster has been reached. Use register-, create- or change database to resolve the problem.");
             }
 
             pstm = configdb_con.prepareStatement("SELECT read_db_pool_id FROM db_cluster WHERE write_db_pool_id = ?");
