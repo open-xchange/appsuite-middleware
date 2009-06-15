@@ -91,7 +91,7 @@ public class PropertyHandler {
 
         final File[] dirs;
         {
-            final String pathname = "/opt/open-xchange/etc/groupware/contacts-ldap";
+            final String pathname = System.getProperty("openexchange.propdir") + "/contacts-ldap";
             dirs = directorylisting(new File(pathname));
 
             if (null == dirs) {
