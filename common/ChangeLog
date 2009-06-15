@@ -1,3 +1,8 @@
+* 2009-06-15 - choeger@open-xchange.com
+
+ - Bugfix ID#13385: config update script destroys parameters on update when no
+   newline is at the end of a configuration file
+
 * 2009-03-16 - choeger@open-xchange.com
 
  - Bugfix ID#13385: allpluginsloaded does not work with SP5U1RC1

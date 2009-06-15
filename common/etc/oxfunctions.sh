@@ -239,7 +239,6 @@ foreach my $line (@LINES) {
     while ( $LINES[$count-$back] =~ /^#/ ) {
       $out = $LINES[$count-$back++].$out;
     }
-		
   }
   $count++;
 }
@@ -263,14 +262,18 @@ if ( $end > 0 ) {
   for (my $i=0; $i<=$#OUTLINES; $i++) {
     if ( $i <= $start+1 || $i > $end ) {
       print $OUTLINES[$i];
+      print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
     }
     if ( $i == $start+1 ) {
       print $out;
+      print "\n" if( substr($out,-1) ne "\n" );
     }
   }
 } else {
   print @OUTLINES;
+  print "\n" if( substr($OUTLINES[-1],-1) ne "\n" );
   print $out;
+  print "\n" if( substr($out,-1) ne "\n" );
 }
 ' > $tmp
 	if [ $? -gt 0 ]; then
