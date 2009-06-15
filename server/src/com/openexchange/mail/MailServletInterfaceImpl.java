@@ -560,7 +560,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw new MailException(MailException.Code.MAIL_NOT_FOUND, fowardMsgUIDs[i], arguments[i].getFullname());
                 }
                 originalMails[i] = origMail;
-                origMail.loadContent();
+                originalMails[i].loadContent();
             } finally {
                 ma.close(true);
             }
