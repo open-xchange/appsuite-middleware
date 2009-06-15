@@ -58,9 +58,9 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Subscription {
-    
+
     private int id;
-    
+
     private String folderId;
 
     private Context context;
@@ -68,15 +68,18 @@ public class Subscription {
     private int userId;
 
     private long lastUpdate;
-    
-    private SubscriptionSource source;
-    
-    private Map<String, Object> configuration= new HashMap<String, Object>();
 
+    private SubscriptionSource source;
+
+    private Map<String, Object> configuration = new HashMap<String, Object>();
+
+    private String displayName;
+
+    
     public String getFolderId() {
         return folderId;
     }
-    
+
     public int getFolderIdAsInt() throws SubscriptionException {
         int retval = -1;
         try {
@@ -114,32 +117,41 @@ public class Subscription {
     public void setLastUpdate(long lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
-    
+
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
-    
+
     public void setConfiguration(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
-    
+
     public void setSource(SubscriptionSource source) {
         this.source = source;
     }
-    
+
     public SubscriptionSource getSource() {
         return source;
     }
-    
+
     public DynamicFormDescription getDescription() {
         return source.getFormDescription();
     }
-    
+
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
 }
