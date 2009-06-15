@@ -75,10 +75,6 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
         this.context = context;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (null == addedService) {
@@ -108,22 +104,18 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
         return addedService;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     public void removedService(final ServiceReference reference, final Object service) {
         try {
             if (service instanceof MailProvider) {
                 try {
-                    MailProviderRegistry.unregisterMailProvider((MailProvider) service);
+                    final MailProvider provider = (MailProvider) service;
+                    MailProviderRegistry.unregisterMailProvider(provider);
+                    LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
+                        "' successfully unregistered"));
                 } catch (final MailException e) {
                     LOG.error(e.getMessage(), e);
                 }
