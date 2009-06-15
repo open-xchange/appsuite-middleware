@@ -299,7 +299,7 @@ public final class MailForwardTest extends AbstractMailTest {
 							{
 							    final InternetAddress[] cc = sourceMail.getCc();
 					            forwardPrefix = forwardPrefix.replaceFirst("#CC_LINE#",
-					                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("Cc: ").append(addrs2String(cc)).toString());
+					                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(addrs2String(cc)).toString());
 					            
 								final InternetAddress[] to = sourceMail.getTo();
 								forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
@@ -421,7 +421,7 @@ public final class MailForwardTest extends AbstractMailTest {
 					{
 					    final InternetAddress[] cc = sourceMail.getCc();
 					    forwardPrefix = forwardPrefix.replaceFirst("#CC_LINE#",
-                            cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("Cc: ").append(addrs2String(cc)).toString());
+                            cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(addrs2String(cc)).toString());
 					    
 						final InternetAddress[] to = sourceMail.getTo();
 						forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
