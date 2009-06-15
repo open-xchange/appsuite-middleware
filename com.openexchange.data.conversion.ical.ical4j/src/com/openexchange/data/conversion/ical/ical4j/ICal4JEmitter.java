@@ -60,6 +60,7 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.Method;
 import net.fortuna.ical4j.model.property.ProdId;
 
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -88,7 +89,6 @@ public class ICal4JEmitter implements ICalEmitter {
             final VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
         }
-
         return calendar.toString();
     }
 
@@ -187,9 +187,9 @@ public class ICal4JEmitter implements ICalEmitter {
         final ProdId prodId = new ProdId();
         prodId.setValue(com.openexchange.server.impl.Version.NAME);
         properties.add(prodId);
-        // Omit version so that outlook 2003 can import the file
-        //properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
+        properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);
+        properties.add(Method.REQUEST);
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {

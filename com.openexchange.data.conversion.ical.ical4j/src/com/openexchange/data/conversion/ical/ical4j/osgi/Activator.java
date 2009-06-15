@@ -60,6 +60,8 @@ import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.resource.ResourceService;
@@ -98,14 +100,15 @@ public class Activator implements BundleActivator {
      */
     public void start(final BundleContext context) throws Exception {
         final OXUserResolver userResolver = new OXUserResolver();
-        Participants.userResolver = userResolver;
         userTracker = new ServiceTracker(context, UserService.class.getName(), new UserServiceTrackerCustomizer(context, userResolver));
         userTracker.open();
+        Participants.userResolver = userResolver;
+        CreatedBy.userResolver = userResolver;
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
-        Participants.resourceResolver = resourceResolver;
         resourceTracker = new ServiceTracker(context, ResourceService.class.getName(), new ResourceServiceTrackerCustomizer(context, resourceResolver));
         resourceTracker.open();
+        Participants.resourceResolver = resourceResolver;
 
         calendarTracker = new ServiceTracker(context, CalendarCollectionService.class.getName(), new CalendarServiceTracker(context));
         calendarTracker.open();
@@ -122,6 +125,8 @@ public class Activator implements BundleActivator {
         parserRegistration.unregister();
         calendarTracker.close();
         resourceTracker.close();
+        CreatedBy.userResolver = UserResolver.EMPTY;
+        Participants.userResolver = UserResolver.EMPTY;
         userTracker.close();
     }
 }

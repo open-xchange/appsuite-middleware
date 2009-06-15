@@ -47,31 +47,57 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.util.ArrayList;
+import java.net.URISyntaxException;
 import java.util.List;
-
+import java.util.TimeZone;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Organizer;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.server.ServiceException;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * Test implementation to write the organizer.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface UserResolver {
+public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    UserResolver EMPTY = new UserResolver() {
-        public List<User> findUsers(List<String> mails, Context ctx) {
-            return new ArrayList<User>();
+    public static UserResolver userResolver = UserResolver.EMPTY;
+
+    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+        Organizer organizer = new Organizer();
+        try {
+            User user = userResolver.loadUser(calendar.getCreatedBy(), ctx);
+            organizer.setValue("mailto:" + user.getMail());
+        } catch (URISyntaxException e) {
+            warnings.add(new ConversionWarning(index, "URI problem.", e));
+        } catch (UserException e) {
+            warnings.add(new ConversionWarning(index, e));
+        } catch (ServiceException e) {
+            warnings.add(new ConversionWarning(index, e));
         }
-        public User loadUser(int userId, Context ctx) {
-            return null;
-        }
-    };
+        component.getProperties().add(organizer);
+    }
 
-    List<User> findUsers(List<String> mails, Context ctx) throws UserException, ServiceException;
+    public boolean hasProperty(T component) {
+        return null !=  component.getProperty(Property.ORGANIZER);
+    }
 
-    User loadUser(int userId, Context ctx) throws UserException, ServiceException;
+    public boolean isSet(U calendar) {
+        return calendar.containsCreatedBy();
+    }
+
+    public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        // Creator can not be set dynamically in OX.
+    }
 }

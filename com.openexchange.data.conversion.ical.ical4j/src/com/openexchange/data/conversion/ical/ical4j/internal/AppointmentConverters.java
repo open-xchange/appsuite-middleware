@@ -62,6 +62,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transpa
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Klass;
@@ -123,7 +124,9 @@ public final class AppointmentConverters {
 
         tmp.add(new CreatedAndDTStamp<VEvent, AppointmentObject>());
         tmp.add(new LastModified<VEvent, AppointmentObject>());
-        
+
+        tmp.add(new CreatedBy<VEvent, AppointmentObject>());
+
         ALL = tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }
