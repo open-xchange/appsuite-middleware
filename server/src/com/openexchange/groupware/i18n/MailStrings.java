@@ -69,6 +69,18 @@ public class MailStrings {
 
     public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
 
+    /**
+     * The prefixed text on inline forward:<br>
+     * 
+     * <pre>
+     * ---------- Original Message ----------
+     * From: Hotel XYZ &lt;hotel@xyz.com&gt;
+     * To: Jane Doe &lt;jane.doe@somewhere.com&gt;
+     * Date: 12 June 2009 at 08:30
+     * Subject: The message's subject
+     * 
+     * <pre>
+     */
     public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO##CC_LINE#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
 
     public static final String DEFAULT_SUBJECT = "[No Subject]";
