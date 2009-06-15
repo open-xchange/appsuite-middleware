@@ -63,21 +63,21 @@ public class CreateSubscriptionTables extends AbstractCreateTableImpl {
     public String[] getCreateStatements() {
         return new String[]{
             "CREATE TABLE subscriptions (" +
-            "id INT(10) UNSIGNED NOT NULL," +
-            "cid INT(10) UNSIGNED NOT NULL," +
-            "user_id INT(10) UNSIGNED NOT NULL," +
-            "configuration_id INT(10) UNSIGNED NOT NULL," +
+            "id INT4 UNSIGNED NOT NULL," +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "user_id INT4 UNSIGNED NOT NULL," +
+            "configuration_id INT4 UNSIGNED NOT NULL," +
             "source_id VARCHAR(255) NOT NULL," +
             "folder_id VARCHAR(255) NOT NULL," +
             "display_name VARCHAR(255) NOT NULL," +
-            "last_update BIGINT(20) UNSIGNED NOT NULL," +
+            "last_update INT8 UNSIGNED NOT NULL," +
             "PRIMARY KEY (id, cid)," +
             "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" +
             "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
             
             "CREATE TABLE sequence_subscriptions (" +
-            "cid int(10) unsigned NOT NULL," +
-            "id int(10) unsigned NOT NULL," +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "id INT4 UNSIGNED NOT NULL," +
             "PRIMARY KEY  (cid))" +
             "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
         };
