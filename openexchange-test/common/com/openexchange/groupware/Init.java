@@ -269,7 +269,7 @@ public final class Init {
         startAndInjectCalendarServices();
         startAndInjectExceptionFramework();
         startAndInjectConfigBundle();
-        startAndInjectConfiguration();
+        startAndInjectNotification();
         startAndInjectDatabaseBundle();
         startAndInjectCache();
         startAndInjectI18NBundle();
@@ -351,7 +351,7 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
-    public static void startAndInjectConfiguration() {
+    public static void startAndInjectNotification() {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         ParticipantConfig.getInstance().initialize(config);
     }
@@ -447,6 +447,7 @@ public final class Init {
     }
 
     public static void startAndInjectCache() throws CacheException {
+        JCSCacheServiceInit.initInstance();
         JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
         final CacheService cache = JCSCacheService.getInstance();
         services.put(CacheService.class, cache);
