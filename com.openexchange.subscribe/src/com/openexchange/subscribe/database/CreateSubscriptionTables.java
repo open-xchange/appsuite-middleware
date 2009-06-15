@@ -69,6 +69,7 @@ public class CreateSubscriptionTables extends AbstractCreateTableImpl {
             "configuration_id INT(10) UNSIGNED NOT NULL," +
             "source_id VARCHAR(255) NOT NULL," +
             "folder_id VARCHAR(255) NOT NULL," +
+            "display_name VARCHAR(255) NOT NULL," +
             "last_update BIGINT(20) UNSIGNED NOT NULL," +
             "PRIMARY KEY (id, cid)," +
             "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" +
