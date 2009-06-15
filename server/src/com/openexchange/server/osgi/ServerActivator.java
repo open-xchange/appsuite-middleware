@@ -104,8 +104,8 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
@@ -337,7 +337,7 @@ public final class ServerActivator extends DeferredActivator {
         serviceTrackerList.add(new ServiceTracker(context, AJAXRequestHandler.class.getName(), new AJAXRequestHandlerCustomizer(context)));
 
         // contacts
-        serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(), new ContactServiceListener(context)));
+        serviceTrackerList.add(new ServiceTracker(context, ContactInterfaceProvider.class.getName(), new ContactServiceListener(context)));
         // ICal Parser
         serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
             context,
