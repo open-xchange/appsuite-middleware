@@ -78,6 +78,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         subscription = new Subscription();
         subscription.setFolderId("12");
         subscription.setId(2);
+        subscription.setDisplayName("mySubscription");
 
         SubscriptionSource source = new SubscriptionSource();
         source.setId("com.openexchange.subscribe.test1");
@@ -97,9 +98,18 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
         JSONObject object = new SubscriptionJSONWriter().write(subscription, form);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("id").withValue(2).hasKey("folder").withValue("12").hasKey("source").withValue(
-            "com.openexchange.subscribe.test1").hasKey("com.openexchange.subscribe.test1").withValueObject().hasKey("username").withValue(
-            "My Username").hasKey("password").withValue("xxxxxxxx").hasNoMoreKeys().hasNoMoreKeys();
+        JSONAssertion assertion = 
+            new JSONAssertion()
+                .isObject()
+                .hasKey("id").withValue(2)
+                .hasKey("folder").withValue("12")
+                .hasKey("displayName").withValue("mySubscription")
+                .hasKey("source").withValue("com.openexchange.subscribe.test1")
+                .hasKey("com.openexchange.subscribe.test1").withValueObject()
+                .hasKey("username").withValue("My Username")
+                .hasKey("password").withValue("xxxxxxxx")
+                .hasNoMoreKeys()
+                .hasNoMoreKeys();
 
         assertValidates(assertion, object);
     }
@@ -115,7 +125,9 @@ public class SubscriptionJSONWriterTest extends TestCase {
             specialCols,
             Arrays.asList("com.openexchange.subscribe.test1"), form);
 
-        JSONAssertion assertion = new JSONAssertion().isArray().withValues(2, "com.openexchange.subscribe.test1", "My Username");
+        JSONAssertion assertion = 
+            new JSONAssertion()
+                .isArray().withValues(2, "com.openexchange.subscribe.test1", "My Username");
 
         assertValidates(assertion, array);
     }
