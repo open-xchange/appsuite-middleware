@@ -1,25 +1,21 @@
-# translation of server.de_DE-new.po to deutsch
-# translation of server.po to deutsch
 # translation of server.de_DE.po to deutsch
-# translation of server.new.de_DE.po to
-# translation of server.de_DE.po to
-# Antje Faber, 2007.
-# Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
+# translation of server.new.de_DE.po to
+# translation of server.de_DE.po to
 msgid ""
 msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2009-02-17 12:23+0100\n"
+"PO-Revision-Date: 2009-06-15 15:00+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: KBabel 1.10.2\n"
+"X-Generator: KBabel 1.11.4\n"
 
 #. Name of the parent folder for the private user folders.
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:60
@@ -98,12 +94,15 @@ msgstr "Kontakte"
 msgid "Collected addresses"
 msgstr "Gesammelte Adressen"
 
-#. *
-#. * Display name of group with identifier 0.
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
-msgid "All internal users"
-msgstr "Alle internen Anwender"
+#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:66
+msgid "All users"
+msgstr "Alle Anwender"
+
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:69
+msgid "Standard group"
+msgstr "Standardgruppe"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:66
 msgid "Read Acknowledgement"
@@ -126,27 +125,63 @@ msgstr ""
 "Garantie, dass der Empfänger die E-Mail gelesen oder deren Inhalt verstanden "
 "hat."
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:70
+#. *
+#. * The prefixed text on reply:
+#. *
+#. * <pre>
+#. * On 12 June 2009 at 08:30h Jane Doe &lt;jane.doe@somewhere.com&gt; wrote:
+#. * </pre>
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:77
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
+#. *
+#. * The prefixed text on inline forward:
+#. *
+#. * <pre>
+#. * ---------- Original Message ----------
+#. * From: Hotel XYZ &lt;hotel@xyz.com&gt;
+#. * To: Jane Doe &lt;jane.doe@somewhere.com&gt;
+#. * Date: 12 June 2009 at 08:30h
+#. * Subject: The message's subject
+#. *
+#. * <pre>
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:91
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
-"To: #TO#\n"
+"To: #TO##CC_LINE#\n"
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
 "---------- Ursprüngliche Nachricht ----------\n"
 "Von: #FROM#\n"
-"An: #TO#\n"
+"An: #TO#CC_LINE#\n"
 "Datum: #DATE# um #TIME#\n"
 "Betreff: #SUBJECT#"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:74
+#. *
+#. * The default subject.
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:96
 msgid "[No Subject]"
 msgstr "[Kein Betreff]"
+
+#. *
+#. * The available attachments for this E-Mail can be accessed via the links:
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+msgid "The available attachments for this E-Mail can be accessed via the links:"
+msgstr "Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+
+#. *
+#. * The links will be deleted by #DATE#
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:106
+msgid "The links will be deleted by #DATE#"
+msgstr "Die Links werden bis #DATE# gelöscht"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:59
 msgid ""
