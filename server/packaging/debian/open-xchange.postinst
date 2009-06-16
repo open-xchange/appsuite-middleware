@@ -27,6 +27,16 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-55
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mail.properties
+  if ! ox_exists_property com.openexchange.mail.mailAccessCacheShrinkerSeconds $pfile; then
+      ox_set_property com.openexchange.mail.mailAccessCacheShrinkerSeconds 3 $pfile
+  fi
+  if ! ox_exists_property com.openexchange.mail.mailAccessCacheIdleSeconds $pfile; then
+      ox_set_property com.openexchange.mail.mailAccessCacheIdleSeconds 7 $pfile
+  fi
+  
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
   if ! ox_exists_property UMASK $pfile; then

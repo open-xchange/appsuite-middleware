@@ -135,6 +135,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-55
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mail.properties
+   if ! ox_exists_property com.openexchange.mail.mailAccessCacheShrinkerSeconds $pfile; then
+      ox_set_property com.openexchange.mail.mailAccessCacheShrinkerSeconds 3 $pfile
+   fi
+   if ! ox_exists_property com.openexchange.mail.mailAccessCacheIdleSeconds $pfile; then
+      ox_set_property com.openexchange.mail.mailAccessCacheIdleSeconds 7 $pfile
+   fi
+
    # bugfix id#12859
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
