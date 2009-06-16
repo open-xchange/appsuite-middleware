@@ -35,6 +35,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 // TODO: Use logging instead of println
 public class XingContactParser {
     
+    private static final ContactSanitizer SANITIZER = new ContactSanitizer();
+
     private String XING_WEBSITE = "https://www.xing.com";
     
     private String CONTACT_PAGE = "/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=";
@@ -128,6 +130,7 @@ public class XingContactParser {
 	    		try {
 	    			VersitObject versitObject = def.parse(versitReader);
 	    			ContactObject contactObject = oxContainerConverter.convertContact(versitObject);
+	    			SANITIZER.sanitize(contactObject);
 	    			contactObjects.add(contactObject);
 	    		} catch (final VersitException e){
 	    			e.printStackTrace();

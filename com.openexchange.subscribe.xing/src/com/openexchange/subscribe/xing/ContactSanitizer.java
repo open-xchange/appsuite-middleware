@@ -49,68 +49,38 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSource;
+
 
 /**
- * {@link XingSubscribeService}
- * 
+ * {@link ContactSanitizer}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class XingSubscribeService extends AbstractSubscribeService {
+public class ContactSanitizer {
 
-    private static final String LOGIN = "login";
-
-    private static final String PASSWORD = "password";
-
-    private final SubscriptionSource SOURCE = new SubscriptionSource();
-
-    private final DynamicFormDescription FORM = new DynamicFormDescription();
-
-    public XingSubscribeService() {
-        FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
-
-        SOURCE.setDisplayName("XING");
-        SOURCE.setId("com.openexchange.subscribe.xing");
-        SOURCE.setFormDescription(FORM);
-        SOURCE.setSubscribeService(this);
-        SOURCE.setFolderModule(FolderObject.CONTACT);
+    /**
+     * @param contact
+     */
+    public void sanitize(ContactObject contact) {
+        for(int field : ContactObject.ALL_COLUMNS) {
+            if(field == ContactObject.LAST_MODIFIED_UTC) {
+                continue;
+            }
+            if(contact.contains(field)) {
+                Object value = contact.get(field);
+                if(value != null && "".equals(value)) {
+                    contact.remove(field);
+                }
+            }
+        }
+        if(contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
+            contact.removeImageContentType();
+        }
+        if(contact.containsFileAs() && "".equals(contact.getFileAs())) {
+            contact.removeFileAs();
+        }
     }
 
-    public SubscriptionSource getSubscriptionSource() {
-        return SOURCE;
-    }
-
-    public boolean handles(int folderModule) {
-        return folderModule == FolderObject.CONTACT;
-    }
-
-    public Collection<ContactObject> getContent(Subscription subscription) throws XingSubscriptionException {
-        Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
-    }
-
-    @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
-        super.modifyIncoming(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        encrypt(configuration, PASSWORD);
-    }
-
-    @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
-        super.modifyOutgoing(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        decrypt(configuration, PASSWORD);
-        subscription.setDisplayName( (String) subscription.getConfiguration().get(LOGIN) );
-    }
 }
