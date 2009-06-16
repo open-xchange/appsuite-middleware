@@ -135,6 +135,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-62 / Bugfix #13477
+   # -----------------------------------------------------------------------
+   if [ -e /opt/open-xchange/etc/groupware/foldercache.properties ]; then
+      if ! cmp /opt/open-xchange/etc/groupware/foldercache.properties /opt/open-xchange/etc/common/foldercache.properties >/dev/null; then
+	  mv /opt/open-xchange/etc/groupware/foldercache.properties /opt/open-xchange/etc/common/foldercache.properties
+      else
+	  rm -f /opt/open-xchange/etc/groupware/foldercache.properties
+      fi
+   fi
+
    # SoftwareChange_Request-55
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/mail.properties

@@ -1,6 +1,7 @@
 * 2009-06-16 - choeger@open-xchange.com
 
  - Bugfix #12859: [L3] Changing umask for Infostore documents
+ - Bugfix #13477: [L3] "Error: Invalid email address" when clearing email2 or email3 with "" 
 
 * 2009-06-16 - francisco.laguna@open-xchange.com
 
