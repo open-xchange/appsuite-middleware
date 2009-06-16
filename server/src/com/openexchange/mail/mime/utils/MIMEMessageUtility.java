@@ -173,7 +173,7 @@ public final class MIMEMessageUtility {
     }
 
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(<img[^>]*?)(src=\")([^\"]+)(u?id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
@@ -195,21 +195,29 @@ public final class MIMEMessageUtility {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             do {
                 final String uid = m.group(5);
-                if (!mfm.contains(uid)) {
-                    // Look-up image
-                    final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
-                    ImageData imageData = imageService.getImageData(session, uid);
-                    if (imageData == null) {
-                        imageData = imageService.getImageData(session.getContextId(), uid);
-                    }
-                    if (imageData != null) {
-                        imageData.touch();
+                if ("uid=".equals(m.group(4))) {
+                    // Touch image
+                    touchImage(uid, session);
+                } else {
+                    if (!mfm.contains(uid)) {
+                        touchImage(uid, session);
                     }
                 }
             } while (m.find());
             return true;
         }
         return false;
+    }
+
+    private static void touchImage(final String uid, final Session session) {
+        final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+        ImageData imageData = imageService.getImageData(session, uid);
+        if (imageData == null) {
+            imageData = imageService.getImageData(session.getContextId(), uid);
+        }
+        if (imageData != null) {
+            imageData.touch();
+        }
     }
 
     /**
