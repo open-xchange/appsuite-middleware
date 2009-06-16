@@ -149,7 +149,7 @@ public interface ContactInterface {
      * 
      * @param folderID The Folder ID
      * @param since all modification >= since
-     * @return A SearchIterator contains AppointmentObject
+     * @return A SearchIterator containing ContactObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
     public SearchIterator<ContactObject> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
@@ -159,7 +159,7 @@ public interface ContactInterface {
      * 
      * @param folderID The Folder ID
      * @param since all modification >= since
-     * @return A SearchIterator contains AppointmentObject
+     * @return A SearchIterator containing ContactObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
     public SearchIterator<ContactObject> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
@@ -172,7 +172,7 @@ public interface ContactInterface {
      * @param objectIdAndInFolder[] array with two dimensions. First dimension contains a seond array with two values. 1. value is object_id
      *            2. value if folder_id
      * @param cols The columns filled to the dataobject
-     * @return A SearchIterator contains ContactObjects
+     * @return A SearchIterator containing ContactObjects
      * @throws OXException
      */
     public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
