@@ -78,6 +78,7 @@ import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.internal.DBPoolingExceptionFactory;
@@ -462,6 +463,7 @@ public final class Init {
         final OXUserResolver userResolver = new OXUserResolver();
         userResolver.setUserService((UserService) services.get(UserService.class));
         Participants.userResolver = userResolver;
+        CreatedBy.userResolver = userResolver;
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
         resourceResolver.setResourceService((ResourceService) services.get(ResourceService.class));
