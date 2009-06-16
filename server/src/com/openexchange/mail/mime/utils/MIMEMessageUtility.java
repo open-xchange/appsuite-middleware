@@ -178,12 +178,16 @@ public final class MIMEMessageUtility {
 
     /**
      * Detects if given HTML content contains references to local image files
-     * <p>
-     * Example:
-     * 
-     * <pre>
-     * &lt;img src=&quot;[url-to-image]&amp;id=123dfr567zh&quot;&gt;
-     * </pre>
+     * <ul>
+     * <li>Example for an uploaded image file referenced within a composed mail:<br>
+     * <code>
+     * &nbsp;&nbsp;&lt;img&nbsp;src=&quot;/ajax/file?action=get&amp;session=abcdefg&amp;id=123dfr567zh&quot;&gt;
+     * </code></li>
+     * <li>Example for a stored image file referenced within a composed mail:<br>
+     * <code>
+     * &nbsp;&nbsp;&lt;img&nbsp;src=&quot;/ajax/image?uid=12gf356j7&quot;&gt;
+     * </code></li>
+     * </ul>
      * 
      * @param htmlContent The HTML content
      * @param session The user session
