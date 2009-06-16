@@ -50,7 +50,6 @@
 package com.openexchange.image.internal;
 
 import java.io.InputStream;
-
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -59,172 +58,162 @@ import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.session.Session;
 
 /**
- * {@link ImageData} - The image data
+ * {@link ImageData} - The image data.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ImageData {
 
-	static final int DEFAULT_TTL = 300000;
+    static final int DEFAULT_TTL = 300000;
 
-	private final String uniqueId;
+    private final String uniqueId;
 
-	private final DataSource imageSource;
+    private final DataSource imageSource;
 
-	private final DataArguments imageArguments;
+    private final DataArguments imageArguments;
 
-	private final int hash;
+    private final int hash;
 
-	private final String url;
+    private final String url;
 
-	private long lastAccessed;
+    private long lastAccessed;
 
-	private final int timeToLive;
+    private final int timeToLive;
 
-	/**
-	 * Initializes a new {@link ImageData} with its unique ID set to
-	 * {@link DataArguments#getID()} and default time-to-live of 5 minutes.
-	 * 
-	 * @param imageSource
-	 *            The image data source
-	 * @param imageArguments
-	 *            The image arguments
-	 */
-	ImageData(final DataSource imageSource, final DataArguments imageArguments) {
-		this(imageSource, imageArguments, DEFAULT_TTL);
-	}
+    /**
+     * Initializes a new {@link ImageData} with its unique ID set to {@link DataArguments#getID()} and default time-to-live of 5 minutes.
+     * 
+     * @param imageSource The image data source
+     * @param imageArguments The image arguments
+     */
+    ImageData(final DataSource imageSource, final DataArguments imageArguments) {
+        this(imageSource, imageArguments, DEFAULT_TTL);
+    }
 
-	/**
-	 * Initializes a new {@link ImageData} with its unique ID set to
-	 * {@link DataArguments#getID()}.
-	 * 
-	 * @param imageSource
-	 *            The image data source
-	 * @param imageArguments
-	 *            The image arguments
-	 * @param timeToLive
-	 *            The time-to-live in milliseconds; a value less than or equal
-	 *            to zero is an infinite time-to-live
-	 */
-	ImageData(final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
-		super();
-		if (imageArguments == null) {
-			throw new IllegalArgumentException("image arguments are null");
-		}
-		uniqueId = imageArguments.getID();
-		this.imageArguments = imageArguments;
-		this.imageSource = imageSource;
-		this.hash = hashCode0();
-		url = new StringBuilder(ImageServlet.ALIAS.length() + ImageServlet.PARAMETER_UID.length() + uniqueId.length()
-				+ 3).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=')
-				.append(uniqueId).toString();
-		this.timeToLive = timeToLive;
-		lastAccessed = System.currentTimeMillis();
-	}
+    /**
+     * Initializes a new {@link ImageData} with its unique ID set to {@link DataArguments#getID()}.
+     * 
+     * @param imageSource The image data source
+     * @param imageArguments The image arguments
+     * @param timeToLive The time-to-live in milliseconds; a value less than or equal to zero is an infinite time-to-live
+     */
+    ImageData(final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+        super();
+        if (imageArguments == null) {
+            throw new IllegalArgumentException("image arguments are null");
+        }
+        uniqueId = imageArguments.getID();
+        this.imageArguments = imageArguments;
+        this.imageSource = imageSource;
+        this.hash = hashCode0();
+        url = new StringBuilder(ImageServlet.ALIAS.length() + ImageServlet.PARAMETER_UID.length() + uniqueId.length() + 3).append('/').append(
+            ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(uniqueId).toString();
+        this.timeToLive = timeToLive;
+        lastAccessed = System.currentTimeMillis();
+    }
 
-	/**
-	 * Checks if specified unique ID matches this image data's unique ID
-	 * 
-	 * @param otherUniqueId
-	 *            The other unique ID to check against
-	 * @return <code>true</code> if specified unique ID matches this image
-	 *         data's unique ID; otherwise <code>false</code>
-	 */
-	public boolean matchesUniqueID(final String otherUniqueId) {
-		return uniqueId.equals(otherUniqueId);
-	}
+    /**
+     * Checks if specified unique ID matches this image data's unique ID.
+     * 
+     * @param otherUniqueId The other unique ID to check against
+     * @return <code>true</code> if specified unique ID matches this image data's unique ID; otherwise <code>false</code>
+     */
+    public boolean matchesUniqueID(final String otherUniqueId) {
+        return uniqueId.equals(otherUniqueId);
+    }
 
-	/**
-	 * Gets the unique ID (actually {@link DataArguments#getID()} from formerly
-	 * passed data arguments)
-	 * 
-	 * @return The unique ID
-	 */
-	public String getUniqueId() {
-		return uniqueId;
-	}
+    /**
+     * Gets the unique ID (actually {@link DataArguments#getID()} from formerly passed data arguments).
+     * 
+     * @return The unique ID
+     */
+    public String getUniqueId() {
+        return uniqueId;
+    }
 
-	/**
-	 * Gets the image data
-	 * 
-	 * @param session
-	 *            The session needed to obtain image's data
-	 * @return The image data
-	 * @throws DataException
-	 */
-	public Data<InputStream> getImageData(final Session session) throws DataException {
-		return imageSource.getData(InputStream.class, imageArguments, session);
-	}
+    /**
+     * Gets the image data.
+     * 
+     * @param session The session needed to obtain image's data
+     * @return The image data
+     * @throws DataException
+     */
+    public Data<InputStream> getImageData(final Session session) throws DataException {
+        return imageSource.getData(InputStream.class, imageArguments, session);
+    }
 
-	/**
-	 * Gets the URL to this image
-	 * 
-	 * @return The URL to this image
-	 */
-	public String getImageURL() {
-		return url;
-	}
+    /**
+     * Gets the URL to this image; something like:
+     * 
+     * <pre>
+     * &quot;/ajax/image?uid=1578300019-288076184-517459785&quot;
+     * </pre>
+     * 
+     * @return The URL to this image
+     */
+    public String getImageURL() {
+        return url;
+    }
 
-	/**
-	 * Gets this image data's time-to-live in milliseconds
-	 * 
-	 * @return This image data's time-to-live in milliseconds
-	 */
-	public int getTimeToLive() {
-		return timeToLive;
-	}
+    /**
+     * Gets this image data's time-to-live in milliseconds.
+     * 
+     * @return This image data's time-to-live in milliseconds
+     */
+    public int getTimeToLive() {
+        return timeToLive;
+    }
 
-	private int hashCode0() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((uniqueId == null) ? 0 : uniqueId.hashCode());
-		return result;
-	}
+    private int hashCode0() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((uniqueId == null) ? 0 : uniqueId.hashCode());
+        return result;
+    }
 
-	@Override
-	public int hashCode() {
-		return hash;
-	}
+    @Override
+    public int hashCode() {
+        return hash;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final ImageData other = (ImageData) obj;
-		if (uniqueId == null) {
-			if (other.uniqueId != null) {
-				return false;
-			}
-		} else if (!uniqueId.equals(other.uniqueId)) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ImageData other = (ImageData) obj;
+        if (uniqueId == null) {
+            if (other.uniqueId != null) {
+                return false;
+            }
+        } else if (!uniqueId.equals(other.uniqueId)) {
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Touches the last-accessed time stamp
-	 * 
-	 * @return This image data with its last-accessed time stamp touched
-	 */
-	public ImageData touch() {
-		lastAccessed = System.currentTimeMillis();
-		return this;
-	}
+    /**
+     * Touches the last-accessed time stamp.
+     * 
+     * @return This image data with its last-accessed time stamp touched
+     */
+    public ImageData touch() {
+        lastAccessed = System.currentTimeMillis();
+        return this;
+    }
 
-	/**
-	 * Gets the last-accessed time stamp
-	 * 
-	 * @return The last-accessed time stamp
-	 */
-	public long getLastAccessed() {
-		return lastAccessed;
-	}
+    /**
+     * Gets the last-accessed time stamp.
+     * 
+     * @return The last-accessed time stamp
+     */
+    public long getLastAccessed() {
+        return lastAccessed;
+    }
 }
