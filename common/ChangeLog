@@ -1,3 +1,8 @@
+* 2009-06-16 - choeger@open-xchange.com
+
+ - Bugfix ID#13385: config update script destroys parameters on update when no
+   newline is at the end of a configuration file
+
 * 2009-05-08 - carsten.hoeger@open-xchange.com
 
  - Bugfix #13565: Added script method to wait for process to stop.
