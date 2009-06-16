@@ -61,7 +61,7 @@ import com.openexchange.server.osgiservice.CompositeBundleActivator;
  */
 public class Activator extends CompositeBundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator(), new PreferencesActivator(), new CleanUpActivator()};
+    private final BundleActivator[] ACTIVATORS = {new DiscoveryActivator(), new PreferencesActivator(), new CleanUpActivator(), new CreateTableActivator()};
     
     @Override
     protected BundleActivator[] getActivators() {

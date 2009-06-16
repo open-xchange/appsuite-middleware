@@ -50,22 +50,28 @@
 package com.openexchange.publish.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.publish.database.CreatePublicationTables;
 
 
 /**
- * {@link Activator}
+ * {@link CreateTableActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class CreateTableActivator implements BundleActivator {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator(), new CreateTableActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private ServiceRegistration serviceRegistration;
+
+    public void start(BundleContext context) throws Exception {
+        serviceRegistration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        serviceRegistration.unregister();
     }
 
 }
