@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.microformats.datasources;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -66,14 +68,14 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
 
     private static final String URL = "url";
 
-    public String getData(Subscription subscription) throws SubscriptionException {
+    public Reader getData(Subscription subscription) throws SubscriptionException {
 
         HttpClient client = new HttpClient();
         
         GetMethod getMethod = new GetMethod((String) subscription.getConfiguration().get(URL));
         try {
             client.executeMethod(getMethod);
-            return getMethod.getResponseBodyAsString();
+            return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
         } catch (HttpException e) {
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage());
         } catch (IOException e) {

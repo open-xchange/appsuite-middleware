@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.microformats.parser;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +90,25 @@ public class SimOXMFParser implements OXMFParser {
         return data;
     }
     
+    public List<Map<String, String>> parse(Reader html) throws SubscriptionException {
+        this.html  = readAll(html);
+        return data;
+    }
+
+    private String readAll(Reader reader) {
+        StringBuilder builder = new StringBuilder();
+        char[] buffer = new char[1024];
+        int read = -1;
+        try {
+            while((read = reader.read(buffer)) != -1) {
+                builder.append(buffer,0,read);
+            }
+        } catch (IOException e) {
+            return e.toString();
+        }
+        return builder.toString();
+    }
+
     public String getHtml() {
         return html;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.microformats;
 
+import java.io.Reader;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,7 +78,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     private SubscriptionSource source;
 
     public Collection getContent(Subscription subscription) throws SubscriptionException {
-        String htmlData = mfSource.getData(subscription);
+        Reader htmlData = mfSource.getData(subscription);
         OXMFParser parser = parserFactory.getParser();
         configureParser(parser);
         List<Map<String, String>> parsed = parser.parse(htmlData);

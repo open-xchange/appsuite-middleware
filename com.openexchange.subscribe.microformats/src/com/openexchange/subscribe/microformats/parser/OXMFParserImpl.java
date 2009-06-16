@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.microformats.parser;
 
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,15 +122,19 @@ public final class OXMFParserImpl implements OXMFParser {
     public void addAttributePrefix(final String prefix) {
         attributePrefixes.add(prefix);
     }
-
+    
     public List<Map<String, String>> parse(final String html) throws SubscriptionException {
+        return parse(new StringReader(html));
+    }
+
+    public List<Map<String, String>> parse(final Reader html) throws SubscriptionException {
         /*
          * Create XMLStreamReader instance
          */
         final XMLInputFactory factory = XMLInputFactory.newInstance();
         final XMLStreamReader parser;
         try {
-            parser = factory.createXMLStreamReader(new StringReader(html));
+            parser = factory.createXMLStreamReader(html);
         } catch (final XMLStreamException e) {
             throw OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.microformats.datasources;
 
+import java.io.Reader;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 
@@ -60,5 +61,5 @@ import com.openexchange.subscribe.SubscriptionException;
  *
  */
 public interface OXMFDataSource {
-    public String getData(Subscription subscription) throws SubscriptionException;
+    public Reader getData(Subscription subscription) throws SubscriptionException;
 }

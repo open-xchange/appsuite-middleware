@@ -6,6 +6,8 @@
 * 2009-06-16 - francisco.laguna@open-xchange.com
 
  - Bugfix #13869: Don't overwrite contact attributes with empty strings in XING subscriptions
+ - Bugfix #13866: Use streams instead of Strings when handling websites.
+ 
 
 * 2009-06-16 - thorben.betten@open-xchange.com
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.microformats.datasources;
 
+import java.io.Reader;
+import java.io.StringReader;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 
@@ -69,9 +71,9 @@ public class SimMicroformatSource implements OXMFDataSource {
         this.data = data;
     }
     
-    public String getData(Subscription subscription) throws SubscriptionException {
+    public Reader getData(Subscription subscription) throws SubscriptionException {
         this.subscription = subscription;
-        return data;
+        return new StringReader(data);
     }
     
     public Subscription getSubscription() {

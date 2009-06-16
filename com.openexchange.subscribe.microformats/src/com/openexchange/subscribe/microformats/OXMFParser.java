@@ -1,6 +1,7 @@
 
 package com.openexchange.subscribe.microformats;
 
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.subscribe.SubscriptionException;
@@ -40,4 +41,5 @@ public interface OXMFParser {
      */
     public List<Map<String, String>> parse(final String html) throws SubscriptionException;
 
+    public List<Map<String, String>> parse(final Reader html) throws SubscriptionException;
 }
