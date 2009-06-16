@@ -271,6 +271,10 @@ public class Starter implements Initialization {
      */
     com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
     /**
+     * Image registry initialization
+     */
+    new com.openexchange.image.internal.ImageRegistryInit(),
+    /**
      * Release LoginPerformer instance on shut-down
      */
     new Initialization() {
