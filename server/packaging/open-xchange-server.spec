@@ -135,6 +135,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-70
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/system.properties
+   if ox_exists_property configDB $pfile; then
+      ox_remove_property configDB $pfile
+   fi
+
    # SoftwareChange_Request-62 / Bugfix #13477
    # -----------------------------------------------------------------------
    if [ -e /opt/open-xchange/etc/groupware/foldercache.properties ]; then
