@@ -1,3 +1,7 @@
+* 2009-06-16 - choeger@open-xchange.com
+
+ - Bugfix #12859: [L3] Changing umask for Infostore documents
+
 * 2009-06-16 - francisco.laguna@open-xchange.com
 
  - Bugfix #13869: Don't overwrite contact attributes with empty strings in XING subscriptions
