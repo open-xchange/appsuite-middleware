@@ -27,6 +27,13 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-84
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/TidyConfiguration.properties
+  if ox_exists_property clean $pfile; then
+      ox_remove_property clean $pfile
+  fi
+
   # SoftwareChange_Request-70
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/system.properties

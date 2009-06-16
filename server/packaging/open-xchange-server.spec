@@ -135,6 +135,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-84
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/TidyConfiguration.properties
+   if ox_exists_property clean $pfile; then
+      ox_remove_property clean $pfile
+   fi
+
    # SoftwareChange_Request-70
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/system.properties
