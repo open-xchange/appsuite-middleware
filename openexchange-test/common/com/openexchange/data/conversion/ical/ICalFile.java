@@ -70,15 +70,25 @@ public class ICalFile {
     private void addLine(final String line) {
         final int colonPos = line.indexOf(':');
         final String key;
+        final String parameter;
         final String value;
         if (-1 == colonPos) {
             key = line;
+            parameter = "";
             value = "";
         } else {
-            key = line.substring(0, colonPos);
+            final String tmp = line.substring(0, colonPos);
+            int semicolonPos = tmp.indexOf(';');
+            if (semicolonPos != -1) {
+                key = tmp.substring(0, semicolonPos);
+                parameter = tmp.substring(semicolonPos + 1);
+            } else {
+                key = tmp;
+                parameter = "";
+            }
             value = line.substring(colonPos + 1);
         }
-        lines.add(new String[]{key, value});
+        lines.add(new String[] { key, parameter, value });
     }
 
     public List<String[]> getLines() {
@@ -88,7 +98,7 @@ public class ICalFile {
     public String getValue(final String key) {
         for(final String[] line : lines) {
             if(line[0].equals(key)) {
-                return line[1];
+                return line[2];
             }
         }
         return null;
@@ -102,8 +112,13 @@ public class ICalFile {
         final StringBuilder sb = new StringBuilder();
         for (final String[] line : lines) {
             final String key = line[0];
-            final String value = line[1];
+            final String parameter = line[1];
+            final String value = line[2];
             sb.append(key);
+            if (!"".equals(parameter)) {
+                sb.append(';');
+                sb.append(parameter);
+            }
             if (!"".equals(value)) {
                 sb.append(':');
                 sb.append(value);
@@ -116,13 +131,26 @@ public class ICalFile {
     public boolean containsPair(final String name, final String value) {
         for (final String[] line : lines) {
             final String key = line[0];
-            final String val = line[1];
+            final String val = line[2];
             if(key.equals(name) && val.equals(value)) {
                 return true;
             }
         }
         return false;
     }
+
+    public boolean containsEntry(String name, String parameter, String value) {
+        for (final String[] line : lines) {
+            final String key = line[0];
+            final String param = line[1];
+            final String val = line[2];
+            if (key.equals(name) && param.equals(parameter) && val.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean containsLine(final String line) {
         for (final String[] l : lines) {
             final String key = l[0];

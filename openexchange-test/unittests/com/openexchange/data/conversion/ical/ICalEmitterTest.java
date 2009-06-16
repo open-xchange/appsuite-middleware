@@ -132,8 +132,8 @@ public class ICalEmitterTest extends TestCase {
 
         final ICalFile ical = serialize(app);
 
-        assertProperty(ical, "DTSTART;VALUE=DATE", "19810224");
-        assertProperty(ical, "DTEND;VALUE=DATE", "19810226");
+        assertProperty(ical, "DTSTART", "VALUE=DATE", "19810224");
+        assertProperty(ical, "DTEND", "VALUE=DATE", "19810226");
     }
 
     public void testCategoriesMayBeNullOrUnset() throws Exception {
@@ -347,10 +347,10 @@ public class ICalEmitterTest extends TestCase {
 
         ICalFile ical = serialize(app);
 
-        assertProperty(ical, "ATTENDEE", "MAILTO:user1@internal.invalid");
-        assertProperty(ical, "ATTENDEE", "MAILTO:user2@internal.invalid");
-        assertProperty(ical, "ATTENDEE", "MAILTO:external1@external.invalid");
-        assertProperty(ical, "ATTENDEE", "MAILTO:external2@external.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:user1@internal.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:user2@internal.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:external1@external.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:external2@external.invalid");
 
         app = getDefault();
 
@@ -358,9 +358,9 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(app);
 
-        assertProperty(ical, "ATTENDEE", "MAILTO:user1@test.invalid");
-        assertProperty(ical, "ATTENDEE", "MAILTO:user3@test.invalid");
-        assertProperty(ical, "ATTENDEE", "MAILTO:user5@test.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:user1@test.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:user3@test.invalid");
+        assertProperty(ical, "ATTENDEE", "mailto:user5@test.invalid");
 
 
     }
