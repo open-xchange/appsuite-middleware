@@ -54,13 +54,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.ajax.Login;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
@@ -70,8 +68,8 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -132,9 +130,10 @@ public final class ImageServlet extends HttpServlet {
 			}
 			final Session[] sessions = getSessions(req, sessiondService);
 			for (final Session session : sessions) {
-				ImageData imageData = ImageRegistry.getInstance().getImageData(session, uid);
+			    final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+				ImageData imageData = imageService.getImageData(session, uid);
 				if (imageData == null) {
-					imageData = ImageRegistry.getInstance().getImageData(session.getContextId(), uid);
+					imageData = imageService.getImageData(session.getContextId(), uid);
 				}
 				if (imageData != null) {
 					/*

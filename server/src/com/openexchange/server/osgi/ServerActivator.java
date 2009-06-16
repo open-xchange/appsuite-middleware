@@ -121,6 +121,7 @@ import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskServiceTrackerCustomizer;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.image.ImageService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
@@ -456,6 +457,8 @@ public final class ServerActivator extends DeferredActivator {
             true), null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+        registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
+            ImageService.class), null));
         // TODO: Register search service here until its encapsulated in an own bundle
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle

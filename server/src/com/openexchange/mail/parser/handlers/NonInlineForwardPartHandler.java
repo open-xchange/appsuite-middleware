@@ -139,12 +139,17 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
-        if (!isInline || imageCID != null || part.getContentDisposition().containsFilenameParameter()) {
-            /*
-             * Add if disposition is non-inline or a content ID is present
-             */
+        if (imageCID == null && (!isInline || part.getContentDisposition().containsFilenameParameter())) {
             nonInlineParts.add(part);
         }
+        /*-
+         * Previous code
+         * 
+        if (!isInline || imageCID != null || part.getContentDisposition().containsFilenameParameter()) {
+            // Add if disposition is non-inline or a content ID is present
+            nonInlineParts.add(part);
+        }
+         */
         return true;
     }
 

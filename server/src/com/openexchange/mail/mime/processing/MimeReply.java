@@ -67,12 +67,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -401,10 +398,11 @@ public final class MimeReply {
              * Compose reply mail
              */
             final MailMessage replyMail;
+            /*-
+             * Withhold inline images. Those images are inserted through image service framework on message transport
+             * 
             if (retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MIMEMessageUtility.hasEmbeddedImages(replyText)) {
-                /*
-                 * Prepare to append inline content
-                 */
+                // Prepare to append inline content
                 final Multipart multiRelated = new MimeMultipart("related");
                 {
                     final MimeBodyPart text = new MimeBodyPart();
@@ -416,20 +414,25 @@ public final class MimeReply {
                 replyMsg.setContent(multiRelated);
                 replyMsg.saveChanges();
                 replyMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(replyMsg));
-                /*
-                 * Append inline content
-                 */
+                // Append inline content
                 appendInlineContent(originalMsg, (CompositeMailMessage) replyMail, MIMEMessageUtility.getContentIDs(replyText));
             } else {
-                /*
-                 * Set message's content directly to reply text
-                 */
+                // Set message's content directly to reply text
                 replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, retvalContentType.toString()));
                 replyMsg.saveChanges();
                 replyMail = MIMEMessageConverter.convertMessage(replyMsg);
             }
+             */
+            /*
+             * Set message's content directly to reply text
+             */
+            replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
+            replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+            replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, retvalContentType.toString()));
+            replyMsg.saveChanges();
+            replyMail = MIMEMessageConverter.convertMessage(replyMsg);
             if (null != msgref) {
                 replyMail.setMsgref(msgref);
             }

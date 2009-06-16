@@ -50,45 +50,49 @@
 package com.openexchange.image.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import com.openexchange.image.ImageService;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link ImageRegistryInit} - Initialization for image registry
+ * {@link ImageRegistryInit} - Initialization for image registry.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ImageRegistryInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ImageRegistryInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageRegistryInit.class);
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	/**
-	 * Initializes a new {@link ImageRegistryInit}
-	 */
-	public ImageRegistryInit() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link ImageRegistryInit}
+     */
+    public ImageRegistryInit() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	public void start() {
-		if (started.compareAndSet(false, true)) {
-			ImageRegistry.getInstance().startHeartbeat();
-		} else {
-			LOG.warn("image registry initialized twice", new Throwable());
-		}
-	}
+    public void start() {
+        if (!started.compareAndSet(false, true)) {
+            LOG.warn("image registry initialized twice", new Throwable());
+            return;
+        }
+        ImageRegistry.initInstance();
+        ImageRegistry.getInstance().startHeartbeat();
+        ServerServiceRegistry.getInstance().addService(ImageService.class, new ImageServiceImpl());
+    }
 
-	public void stop() {
-		if (started.compareAndSet(true, false)) {
-			ImageRegistry.getInstance().stopHeartbeat();
-			ImageRegistry.getInstance().clearRegistry();
-		} else {
-			LOG.warn("image registry stopped twice", new Throwable());
-		}
-	}
+    public void stop() {
+        if (!started.compareAndSet(true, false)) {
+            LOG.warn("image registry stopped twice", new Throwable());
+            return;
+        }
+        ServerServiceRegistry.getInstance().removeService(ImageService.class);
+        final ImageRegistry registry = ImageRegistry.getInstance();
+        registry.stopHeartbeat();
+        registry.clearRegistry();
+        ImageRegistry.releaseInstance();
+    }
 
 }

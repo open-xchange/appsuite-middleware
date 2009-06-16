@@ -68,8 +68,9 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.image.ImageService;
+import com.openexchange.image.internal.ImageData;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -172,7 +173,7 @@ public final class MIMEMessageUtility {
     }
 
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(<img[^>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        "(<img[^>]*?)(src=\")([^\"]+)(u?id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
@@ -193,10 +194,17 @@ public final class MIMEMessageUtility {
         if (m.find()) {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             do {
-                try {
-                    mfm.getByID(m.group(5));
-                } catch (final ManagedFileException e) {
-                    LOG.warn(e.getMessage(), e);
+                final String uid = m.group(5);
+                if (!mfm.contains(uid)) {
+                    // Look-up image
+                    final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+                    ImageData imageData = imageService.getImageData(session, uid);
+                    if (imageData == null) {
+                        imageData = imageService.getImageData(session.getContextId(), uid);
+                    }
+                    if (imageData != null) {
+                        imageData.touch();
+                    }
                 }
             } while (m.find());
             return true;

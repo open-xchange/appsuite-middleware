@@ -95,6 +95,15 @@ public interface ManagedFileManagement {
     public ManagedFile getByID(String id) throws ManagedFileException;
 
     /**
+     * Checks for an existing managed file of which unique ID matches given unique ID. If such a managed file is found, its last-accessed
+     * time stamp is updated.
+     * 
+     * @param id The managed file's unique ID
+     * @return <code>true</code> if such a managed file is found; otherwise <code>false</code>
+     */
+    public boolean contains(String id);
+
+    /**
      * Manually removes an existing managed file by its unique ID.
      * 
      * @param id The managed file's unique ID

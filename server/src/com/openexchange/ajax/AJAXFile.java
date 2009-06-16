@@ -84,7 +84,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -352,8 +351,11 @@ public final class AJAXFile extends PermissionServlet {
                     final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
                     for (int i = 0; i < size; i++) {
                         final FileItem fileItem = iter.next();
-                        if (!fileItem.isFormField() && fileItem.getSize() > 0 && fileItem.getName() != null && fileItem.getName().length() > 0) {
-                            if (!checkFileType(fileTypeFilter, fileItem.getContentType())) {
+                        // Check for a valid file item
+                        if (isValidFile(fileItem)) {
+                            // Check file item's content type
+                            final ContentType ct = new ContentType(fileItem.getContentType());
+                            if (!checkFileType(fileTypeFilter, ct)) {
                                 throw new UploadException(
                                     UploadException.UploadCode.INVALID_FILE_TYPE,
                                     action == null ? STR_NULL : action,
@@ -414,6 +416,20 @@ public final class AJAXFile extends PermissionServlet {
         }
     }
 
+    /**
+     * Checks if specified {@link FileItem file item} denotes a valid file.
+     * 
+     * @param fileItem The file item to check
+     * @return <code>true</code> if file item denotes a valid file; otherwise <code>false</code>
+     */
+    private static boolean isValidFile(final FileItem fileItem) {
+        if (fileItem.isFormField() || fileItem.getSize() <= 0) {
+            return false;
+        }
+        final String name = fileItem.getName();
+        return (name != null && name.length() > 0);
+    }
+
     private static final String FILE_TYPE_ALL = "file";
 
     private static final String FILE_TYPE_TEXT = "text";
@@ -428,22 +444,21 @@ public final class AJAXFile extends PermissionServlet {
 
     private static final String FILE_TYPE_APPLICATION = "application";
 
-    private static boolean checkFileType(final String filter, final String fileContentType) throws MailException {
+    private static boolean checkFileType(final String filter, final ContentType fileContentType) {
         if (FILE_TYPE_ALL.equalsIgnoreCase(filter)) {
             return true;
         } else if (FILE_TYPE_TEXT.equalsIgnoreCase(filter)) {
-            return ContentType.isMimeType(fileContentType, "text/*");
+            return fileContentType.isMimeType("text/*");
         } else if (FILE_TYPE_MEDIA.equalsIgnoreCase(filter)) {
-            final ContentType tmp = new ContentType(fileContentType);
-            return tmp.isMimeType("image/*") || tmp.isMimeType("audio/*") || tmp.isMimeType("video/*");
+            return fileContentType.isMimeType("image/*") || fileContentType.isMimeType("audio/*") || fileContentType.isMimeType("video/*");
         } else if (FILE_TYPE_IMAGE.equalsIgnoreCase(filter)) {
-            return ContentType.isMimeType(fileContentType, "image/*");
+            return fileContentType.isMimeType("image/*");
         } else if (FILE_TYPE_AUDIO.equalsIgnoreCase(filter)) {
-            return ContentType.isMimeType(fileContentType, "audio/*");
+            return fileContentType.isMimeType("audio/*");
         } else if (FILE_TYPE_VIDEO.equalsIgnoreCase(filter)) {
-            return ContentType.isMimeType(fileContentType, "video/*");
+            return fileContentType.isMimeType("video/*");
         } else if (FILE_TYPE_APPLICATION.equalsIgnoreCase(filter)) {
-            return ContentType.isMimeType(fileContentType, "application/*");
+            return fileContentType.isMimeType("application/*");
         }
         return false;
     }

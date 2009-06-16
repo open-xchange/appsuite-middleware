@@ -72,14 +72,28 @@ public final class ImageRegistry {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class);
 
-    private static final ImageRegistry INSTANCE = new ImageRegistry();
+    private static ImageRegistry INSTANCE;
+
+    /**
+     * Initializes the instance of {@link ImageRegistry}.
+     */
+    static void initInstance() {
+        INSTANCE = new ImageRegistry();
+    }
+
+    /**
+     * Releases the instance of {@link ImageRegistry}.
+     */
+    static void releaseInstance() {
+        INSTANCE = null;
+    }
 
     /**
      * Gets the instance of {@link ImageRegistry}.
      * 
      * @return The instance of {@link ImageRegistry}
      */
-    public static ImageRegistry getInstance() {
+    static ImageRegistry getInstance() {
         return INSTANCE;
     }
 

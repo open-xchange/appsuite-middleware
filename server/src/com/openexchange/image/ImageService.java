@@ -58,162 +58,150 @@ import com.openexchange.session.Session;
  * {@link ImageService} - Service for storing/retrieving images
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface ImageService {
 
-	/**
-	 * Checks if this registry contains images for the specified session.
-	 * 
-	 * @param session
-	 *            The session
-	 * @param uniqueId
-	 *            The unique ID
-	 * @return <code>true</code> if this registry contains images for the
-	 *         specified session; otherwise <code>false</code>
-	 */
-	public boolean containsImageData(Session session, String uniqueId);
+    /**
+     * Checks if this registry contains images for the specified session.
+     * 
+     * @param session The session
+     * @param uniqueId The unique ID
+     * @return <code>true</code> if this registry contains images for the specified session; otherwise <code>false</code>
+     */
+    public boolean containsImageData(Session session, String uniqueId);
 
-	/**
-	 * Checks if this registry contains images for the specified context.
-	 * 
-	 * @param contextId
-	 *            The context ID
-	 * @param uniqueId
-	 *            The unique ID
-	 * @return <code>true</code> if this registry contains images for the
-	 *         specified context; otherwise <code>false</code>
-	 */
-	public boolean containsImageData(int contextId, String uniqueId);
+    /**
+     * Checks if this registry contains images for the specified context.
+     * 
+     * @param contextId The context ID
+     * @param uniqueId The unique ID
+     * @return <code>true</code> if this registry contains images for the specified context; otherwise <code>false</code>
+     */
+    public boolean containsImageData(int contextId, String uniqueId);
 
-	/**
-	 * Adds specified data source and data arguments as image data to this
-	 * registry if no matching image data is already contained in registry.
-	 * 
-	 * @param session
-	 *            The session to which the image data shall be bound
-	 * @param imageSource
-	 *            The image source
-	 * @param imageArguments
-	 *            The image arguments
-	 * @return Either the new image data from specified data source and data
-	 *         arguments or the existing one if already contained in registry.
-	 */
-	public ImageData addImageData(Session session, DataSource imageSource, DataArguments imageArguments);
+    /**
+     * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
+     * registry.
+     * 
+     * @param session The session to which the image data shall be bound
+     * @param imageSource The image source
+     * @param imageArguments The image arguments
+     * @param timeToLive The time-to-live for the new image data
+     * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
+     */
+    public ImageData addImageData(Session session, DataSource imageSource, DataArguments imageArguments, int timeToLive);
 
-	/**
-	 * Adds specified data source and data arguments as image data to this
-	 * registry if no matching image data is already contained in registry.
-	 * 
-	 * @param contextId
-	 *            The ID of the context to which the image data shall be bound
-	 * @param imageSource
-	 *            The image source
-	 * @param imageArguments
-	 *            The image arguments
-	 * @return Either the new image data from specified data source and data
-	 *         arguments or the existing one if already contained in registry.
-	 */
-	public ImageData addImageData(int contextId, DataSource imageSource, DataArguments imageArguments);
+    /**
+     * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
+     * registry.
+     * 
+     * @param contextId The ID of the context to which the image data shall be bound
+     * @param imageSource The image source
+     * @param imageArguments The image arguments
+     * @param timeToLive The time-to-live for the new image data
+     * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
+     */
+    public ImageData addImageData(int contextId, DataSource imageSource, DataArguments imageArguments, int timeToLive);
 
-	/**
-	 * Adds specified image data to this registry.
-	 * 
-	 * @param contextId
-	 *            The ID of the context to which the image data shall be bound
-	 * @param imageData
-	 *            The image data
-	 */
-	public void addImageData(int contextId, ImageData imageData);
+    /**
+     * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
+     * registry.
+     * 
+     * @param session The session to which the image data shall be bound
+     * @param imageSource The image source
+     * @param imageArguments The image arguments
+     * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
+     */
+    public ImageData addImageData(Session session, DataSource imageSource, DataArguments imageArguments);
 
-	/**
-	 * Adds specified image data to this registry.
-	 * 
-	 * @param session
-	 *            The session to which the image data shall be bound
-	 * @param imageData
-	 *            The image data
-	 */
-	public void addImageData(Session session, ImageData imageData);
+    /**
+     * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
+     * registry.
+     * 
+     * @param contextId The ID of the context to which the image data shall be bound
+     * @param imageSource The image source
+     * @param imageArguments The image arguments
+     * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
+     */
+    public ImageData addImageData(int contextId, DataSource imageSource, DataArguments imageArguments);
 
-	/**
-	 * Removes all images bound to specified session.
-	 * 
-	 * @param session
-	 *            The session to clean images from
-	 */
-	public void removeImageData(Session session);
+    /**
+     * Adds specified image data to this registry.
+     * 
+     * @param contextId The ID of the context to which the image data shall be bound
+     * @param imageData The image data
+     */
+    public void addImageData(int contextId, ImageData imageData);
 
-	/**
-	 * Removes all images bound to specified session.
-	 * 
-	 * @param contextId
-	 *            The ID of the context to clean images from
-	 */
-	public void removeImageData(int contextId);
+    /**
+     * Adds specified image data to this registry.
+     * 
+     * @param session The session to which the image data shall be bound
+     * @param imageData The image data
+     */
+    public void addImageData(Session session, ImageData imageData);
 
-	/**
-	 * Removes the images with specified unique ID bound to specified context.
-	 * 
-	 * @param contextId
-	 *            The ID of the context to clean images from
-	 * @param uniqueId
-	 *            The unique ID
-	 * @return <code>true</code> if corresponding image was successfully
-	 *         deleted; otherwise <code>false</code> if not found
-	 */
-	public boolean removeImageData(int contextId, String uniqueId);
+    /**
+     * Removes all images bound to specified session.
+     * 
+     * @param session The session to clean images from
+     */
+    public void removeImageData(Session session);
 
-	/**
-	 * Gets all images bound to specified session.
-	 * 
-	 * @param session
-	 *            The session to get images from
-	 * @return All images bound to specified session as an array of
-	 *         {@link ImageData}; an empty array is returned if no images are
-	 *         held for specified session
-	 */
-	public ImageData[] getImageData(Session session);
+    /**
+     * Removes all images bound to specified session.
+     * 
+     * @param contextId The ID of the context to clean images from
+     */
+    public void removeImageData(int contextId);
 
-	/**
-	 * Gets all images bound to specified context.
-	 * 
-	 * @param contextId
-	 *            The ID of the context to get images from
-	 * @return All images bound to specified context as an array of
-	 *         {@link ImageData}; an empty array is returned if no images are
-	 *         held for specified context
-	 */
-	public ImageData[] getImageData(int contextId);
+    /**
+     * Removes the images with specified unique ID bound to specified context.
+     * 
+     * @param contextId The ID of the context to clean images from
+     * @param uniqueId The unique ID
+     * @return <code>true</code> if corresponding image was successfully deleted; otherwise <code>false</code> if not found
+     */
+    public boolean removeImageData(int contextId, String uniqueId);
 
-	/**
-	 * Gets the image data bound to specified session and registered to
-	 * specified unique ID.
-	 * 
-	 * @param session
-	 *            The session to which the image data is bound
-	 * @param uniqueId
-	 *            The image data's unique ID
-	 * @return The image data bound to specified session and registered to
-	 *         specified unique ID, or <code>null</code> if none present
-	 */
-	public ImageData getImageData(Session session, String uniqueId);
+    /**
+     * Gets all images bound to specified session.
+     * 
+     * @param session The session to get images from
+     * @return All images bound to specified session as an array of {@link ImageData}; an empty array is returned if no images are held for
+     *         specified session
+     */
+    public ImageData[] getImageData(Session session);
 
-	/**
-	 * Gets the image data bound to specified context and registered to
-	 * specified unique ID.
-	 * 
-	 * @param contextId
-	 *            The ID of the context to which the image data is bound
-	 * @param uniqueId
-	 *            The image data's unique ID
-	 * @return The image data bound to specified context and registered to
-	 *         specified unique ID, or <code>null</code> if none present
-	 */
-	public ImageData getImageData(int contextId, String uniqueId);
+    /**
+     * Gets all images bound to specified context.
+     * 
+     * @param contextId The ID of the context to get images from
+     * @return All images bound to specified context as an array of {@link ImageData}; an empty array is returned if no images are held for
+     *         specified context
+     */
+    public ImageData[] getImageData(int contextId);
 
-	/**
-	 * Clears the registry.
-	 */
-	public void clearRegistry();
+    /**
+     * Gets the image data bound to specified session and registered to specified unique ID.
+     * 
+     * @param session The session to which the image data is bound
+     * @param uniqueId The image data's unique ID
+     * @return The image data bound to specified session and registered to specified unique ID, or <code>null</code> if none present
+     */
+    public ImageData getImageData(Session session, String uniqueId);
+
+    /**
+     * Gets the image data bound to specified context and registered to specified unique ID.
+     * 
+     * @param contextId The ID of the context to which the image data is bound
+     * @param uniqueId The image data's unique ID
+     * @return The image data bound to specified context and registered to specified unique ID, or <code>null</code> if none present
+     */
+    public ImageData getImageData(int contextId, String uniqueId);
+
+    /**
+     * Clears the registry.
+     */
+    public void clearRegistry();
 }

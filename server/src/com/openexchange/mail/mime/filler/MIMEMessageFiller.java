@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -79,6 +80,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.api2.OXException;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataException;
+import com.openexchange.conversion.DataProperties;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -94,6 +98,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.image.ImageService;
+import com.openexchange.image.internal.ImageData;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -546,8 +552,6 @@ public class MIMEMessageFiller {
         /*
          * Store some flags
          */
-        // TODO: final boolean hasNestedMessages =
-        // (msgObj.getNestedMsgs().size() > 0);
         final boolean hasNestedMessages = false;
         final boolean hasAttachments;
         final boolean isAttachmentForward;
@@ -589,9 +593,13 @@ public class MIMEMessageFiller {
         /*
          * HTML content with embedded images
          */
-        final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL))) && (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility.hasReferencedLocalImages(
-            (String) mail.getContent(),
-            session));
+        final String content = (String) mail.getContent();
+        final boolean embeddedImages;
+        if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+            embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content, session);
+        } else {
+            embeddedImages = false;
+        }
         /*
          * Compose message
          */
@@ -600,7 +608,7 @@ public class MIMEMessageFiller {
              * If any condition is true, we ought to create a multipart/ message
              */
             if (sendMultipartAlternative) {
-                final Multipart alternativeMultipart = createMultipartAlternative(mail, (String) mail.getContent(), embeddedImages);
+                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages);
                 if (primaryMultipart == null) {
                     primaryMultipart = alternativeMultipart;
                 } else {
@@ -609,7 +617,7 @@ public class MIMEMessageFiller {
                     primaryMultipart.addBodyPart(bodyPart);
                 }
             } else if (embeddedImages) {
-                final Multipart relatedMultipart = createMultipartRelated(mail, (String) mail.getContent(), new String[1]);
+                final Multipart relatedMultipart = createMultipartRelated(mail, content, new String[1]);
                 if (primaryMultipart == null) {
                     primaryMultipart = relatedMultipart;
                 } else {
@@ -628,12 +636,12 @@ public class MIMEMessageFiller {
                     /*
                      * Append text content
                      */
-                    primaryMultipart.addBodyPart(createTextBodyPart((String) mail.getContent()));
+                    primaryMultipart.addBodyPart(createTextBodyPart(content));
                 } else {
                     /*
                      * Append html content
                      */
-                    primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
+                    primaryMultipart.addBodyPart(createHtmlBodyPart(content));
                 }
             }
             /*
@@ -760,7 +768,7 @@ public class MIMEMessageFiller {
                      * Convert html content to regular text
                      */
                     HTMLParser.parse(
-                        getConformHTML((String) mail.getContent(), MailProperties.getInstance().getDefaultMimeCharset()),
+                        getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()),
                         getHTML2TextHandler().reset());
                     mailText = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
                     // mailText =
@@ -768,7 +776,7 @@ public class MIMEMessageFiller {
                     // ((String) mail.getContent()), false,
                     // usm.getAutoLinebreak());
                 } else {
-                    mailText = getConformHTML((String) mail.getContent(), mail.getContentType());
+                    mailText = getConformHTML(content, mail.getContentType());
                 }
                 mimeMessage.setContent(mailText, mail.getContentType().toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
@@ -1133,7 +1141,9 @@ public class MIMEMessageFiller {
         if (htmlContent == null || htmlContent.length() == 0) {
             textContent = "";
         } else {
-            HTMLParser.parse(getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()), getHTML2TextHandler().reset());
+            HTMLParser.parse(
+                getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()),
+                getHTML2TextHandler().reset());
             textContent = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
         }
         text.setText(textContent, MailProperties.getInstance().getDefaultMimeCharset());
@@ -1141,7 +1151,9 @@ public class MIMEMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(
+            REPLACE_CS,
+            MailProperties.getInstance().getDefaultMimeCharset()));
         return text;
     }
 
@@ -1156,7 +1168,9 @@ public class MIMEMessageFiller {
      * @throws MailException If an I/O error occurs
      */
     protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException {
-        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
+        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(
+            REPLACE_CS,
+            MailProperties.getInstance().getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
         if (htmlContent == null || htmlContent.length() == 0) {
             html.setContent(getConformHTML(HTML_SPACE, htmlCT).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
@@ -1188,23 +1202,50 @@ public class MIMEMessageFiller {
         if (m.find()) {
             msgFiller.uploadFileIDs = new HashSet<String>();
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+            final Session session = msgFiller.session;
             final StringBuilder tmp = new StringBuilder(128);
             do {
                 final String id = m.group(5);
-                final ManagedFile mf;
-                try {
-                    mf = mfm.getByID(id);
-                } catch (final ManagedFileException e) {
-                    if (LOG.isWarnEnabled()) {
+                final ImageProvider imageProvider;
+                if (mfm.contains(id)) {
+                    try {
+                        imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
+                    } catch (final ManagedFileException e) {
+                        if (LOG.isWarnEnabled()) {
+                            tmp.setLength(0);
+                            LOG.warn(tmp.append("Image with id \"").append(id).append(
+                                "\" could not be loaded. Referenced image is skipped.").toString(), e);
+                        }
+                        /*
+                         * Anyway, replace image tag
+                         */
                         tmp.setLength(0);
-                        LOG.warn(tmp.append("No upload file found with id \"").append(id).append("\". Referenced image is skipped.").toString());
+                        mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
+                            "#1#",
+                            tmp.append(id).append('@').append("notfound").toString()));
+                        continue;
                     }
-                    /*
-                     * Anyway, replace image tag
-                     */
-                    tmp.setLength(0);
-                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound").toString()));
-                    continue;
+                } else {
+                    ImageData imageData = imageService.getImageData(session, id);
+                    if (imageData == null) {
+                        imageData = imageService.getImageData(session.getContextId(), id);
+                    }
+                    if (imageData == null) {
+                        if (LOG.isWarnEnabled()) {
+                            tmp.setLength(0);
+                            LOG.warn(tmp.append("No image found with id \"").append(id).append("\". Referenced image is skipped.").toString());
+                        }
+                        /*
+                         * Anyway, replace image tag
+                         */
+                        tmp.setLength(0);
+                        mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
+                            "#1#",
+                            tmp.append(id).append('@').append("notfound").toString()));
+                        continue;
+                    }
+                    imageProvider = new ImageDataImageProvider(imageData, session);
                 }
                 final boolean appendBodyPart;
                 if (msgFiller.uploadFileIDs.contains(id)) {
@@ -1219,7 +1260,7 @@ public class MIMEMessageFiller {
                 /*
                  * Replace image tag
                  */
-                mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(mf, id, appendBodyPart, tmp, mp)));
+                mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp, mp)));
             } while (m.find());
         }
         mr.appendTail(sb);
@@ -1229,7 +1270,7 @@ public class MIMEMessageFiller {
     /**
      * Processes a local image and returns its content id
      * 
-     * @param uploadFile The uploaded file
+     * @param imageProvider The uploaded file
      * @param id uploaded file's ID
      * @param appendBodyPart
      * @param tmp An instance of {@link StringBuilder}
@@ -1238,15 +1279,15 @@ public class MIMEMessageFiller {
      * @throws MessagingException If appending as body part fails
      * @throws MailException If a mail error occurs
      */
-    protected final static String processLocalImage(final ManagedFile uploadFile, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, MailException {
+    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, MailException {
         /*
          * Determine filename
          */
         String fileName;
         try {
-            fileName = MimeUtility.encodeText(uploadFile.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q");
+            fileName = MimeUtility.encodeText(imageProvider.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q");
         } catch (final UnsupportedEncodingException e) {
-            fileName = uploadFile.getFileName();
+            fileName = imageProvider.getFileName();
         }
         /*
          * ... and cid
@@ -1259,22 +1300,15 @@ public class MIMEMessageFiller {
              * Append body part
              */
             final MimeBodyPart imgBodyPart = new MimeBodyPart();
-            imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
+            imgBodyPart.setDataHandler(new DataHandler(imageProvider.getDataSource()));
             tmp.setLength(0);
             imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-            final String disposition = imgBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
-            final ContentDisposition contentDisposition;
-            if (disposition == null) {
-                contentDisposition = new ContentDisposition(Part.INLINE);
-            } else {
-                contentDisposition = new ContentDisposition(disposition);
-                contentDisposition.setDisposition(Part.INLINE);
-            }
-            if (fileName != null && !contentDisposition.containsFilenameParameter()) {
+            final ContentDisposition contentDisposition = new ContentDisposition(Part.INLINE);
+            if (fileName != null) {
                 contentDisposition.setFilenameParameter(fileName);
             }
             imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, contentDisposition.toString()));
-            final ContentType ct = new ContentType(uploadFile.getContentType());
+            final ContentType ct = new ContentType(imageProvider.getContentType());
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
             }
@@ -1312,4 +1346,73 @@ public class MIMEMessageFiller {
         }
         return true;
     }
+
+    private static interface ImageProvider {
+
+        public String getFileName();
+
+        public DataSource getDataSource() throws MailException;
+
+        public String getContentType();
+    } // End of ImageProvider
+
+    private static class ManagedFileImageProvider implements ImageProvider {
+
+        private final ManagedFile managedFile;
+
+        public ManagedFileImageProvider(final ManagedFile managedFile) {
+            super();
+            this.managedFile = managedFile;
+        }
+
+        public String getContentType() {
+            return managedFile.getContentType();
+        }
+
+        public DataSource getDataSource() throws MailException {
+            return new FileDataSource(managedFile.getFile());
+        }
+
+        public String getFileName() {
+            return managedFile.getFileName();
+        }
+    } // End of ManagedFileImageProvider
+
+    private static class ImageDataImageProvider implements ImageProvider {
+
+        private final Data<InputStream> data;
+
+        private final String contentType;
+
+        private final String fileName;
+
+        public ImageDataImageProvider(final ImageData imageData, final Session session) throws MailException {
+            super();
+            try {
+                this.data = imageData.getImageData(session);
+            } catch (final DataException e) {
+                throw new MailException(e);
+            }
+            final DataProperties dataProperties = data.getDataProperties();
+            contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+
+        public DataSource getDataSource() throws MailException {
+            try {
+                return new MessageDataSource(data.getData(), contentType);
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+    } // End of ImageDataImageProvider
+
 }

@@ -134,7 +134,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                         iter.remove();
                     }
                 }
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 logger.error(t.getMessage(), t);
             }
         }
@@ -309,6 +309,15 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
         return mf;
+    }
+
+    public boolean contains(final String id) {
+        final ManagedFile mf = files.get(id);
+        if (null == mf || mf.isDeleted()) {
+            return false;
+        }
+        mf.touch();
+        return true;
     }
 
     public ManagedFile getByID(final String id) throws ManagedFileException {

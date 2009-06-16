@@ -70,7 +70,7 @@ import java.util.regex.Pattern;
 import org.w3c.tidy.Tidy;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.image.internal.ImageRegistry;
+import com.openexchange.image.ImageService;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -80,6 +80,7 @@ import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.text.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.regex.RegexUtility;
@@ -142,7 +143,7 @@ public final class HTMLProcessing {
      * 
      * @param content The content
      * @param charset The character encoding (only needed by HTML content; may be <code>null</code> on plain text)
-     * @param isHtml <code>true</code> if content is of type <code>text/html</code> ; otherwise <code>false</code>
+     * @param isHtml <code>true</code> if content is of type <code>text/html</code>; otherwise <code>false</code>
      * @param session The session
      * @param mailPath The message's unique path in mailbox
      * @param usm The settings used for formatting content
@@ -159,24 +160,33 @@ public final class HTMLProcessing {
                  * Filter according to white-list
                  */
                 retval = filterWhitelist(retval);
-            }
-            if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
-                if (!usm.isAllowHTMLImages()) {
+                if (DisplayMode.DISPLAY.equals(mode) && !usm.isAllowHTMLImages()) {
                     retval = filterExternalImages(retval, modified);
                 }
+                /*
+                 * Filter inlined images
+                 */
                 if (mailPath != null && session != null) {
                     retval = filterInlineImages(retval, session, mailPath);
                 }
             }
+            // if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
+            // if (!usm.isAllowHTMLImages()) {
+            // retval = filterExternalImages(retval, modified);
+            // }
+            // if (mailPath != null && session != null) {
+            // retval = filterInlineImages(retval, session, mailPath);
+            // }
+            // }
         } else {
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 retval = htmlFormat(retval);
-            }
-            if (DisplayMode.DISPLAY.equals(mode)) {
-                if (usm.isUseColorQuote()) {
-                    retval = replaceHTMLSimpleQuotesForDisplay(retval);
+                if (DisplayMode.DISPLAY.equals(mode)) {
+                    if (usm.isUseColorQuote()) {
+                        retval = replaceHTMLSimpleQuotesForDisplay(retval);
+                    }
+                    retval = formatHrefLinks(retval);
                 }
-                retval = formatHrefLinks(retval);
             }
         }
         return retval;
@@ -958,15 +968,18 @@ public final class HTMLProcessing {
                             /*
                              * Compose corresponding image data
                              */
+                            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                             final String imageURL;
-                            {
+                            if (null == imageService) {
+                                imageURL = "";
+                            } else {
                                 final InlineImageDataSource imgSource = new InlineImageDataSource();
                                 final DataArguments args = new DataArguments();
                                 final String[] argsNames = imgSource.getRequiredArguments();
                                 args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                                 args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                                 args.put(argsNames[2], filename);
-                                imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args, 60000).getImageURL();
+                                imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
                             }
                             linkBuilder.setLength(0);
                             linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
@@ -1003,15 +1016,19 @@ public final class HTMLProcessing {
                 /*
                  * Compose corresponding image data
                  */
+                final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                 final String imageURL;
-                {
+                if (null == imageService) {
+                    LOG.warn("Missing image service.", new Throwable());
+                    imageURL = "";
+                } else {
                     final InlineImageDataSource imgSource = new InlineImageDataSource();
                     final DataArguments args = new DataArguments();
                     final String[] argsNames = imgSource.getRequiredArguments();
                     args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                     args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                     args.put(argsNames[2], cid);
-                    imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args, 60000).getImageURL();
+                    imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
                 }
                 linkBuilder.setLength(0);
                 linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');

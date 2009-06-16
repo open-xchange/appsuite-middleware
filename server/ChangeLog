@@ -1,3 +1,7 @@
+* 2009-06-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #12821: Inline images made visible when composing reply/forward mail
+
 * 2009-06-15 - francisco.laguna@open-xchange.com
 
  - Bugfix #13865: React to intricacies of service dependencies correctly in templating bundle
