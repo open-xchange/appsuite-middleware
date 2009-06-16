@@ -143,7 +143,7 @@ public final class InlineContentHandler implements MailMessageHandler {
                     inlineContents.put(cid, part);
                 }
             }
-            if (inlineContents.size() == size) {
+            if (inlineContents.size() >= size) {
                 return false;
             }
         }
@@ -196,10 +196,7 @@ public final class InlineContentHandler implements MailMessageHandler {
                 inlineContents.put(cid, part);
             }
         }
-        if (inlineContents.size() == size) {
-            return false;
-        }
-        return true;
+        return (inlineContents.size() < size);
     }
 
     public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
@@ -249,10 +246,7 @@ public final class InlineContentHandler implements MailMessageHandler {
         }
         final InlineContentHandler handler = new InlineContentHandler(cids, inlineContents);
         new MailMessageParser().parseMailMessage(nestedMail, handler, id);
-        if (inlineContents.size() == size) {
-            return false;
-        }
-        return true;
+        return (inlineContents.size() < size);
     }
 
     public boolean handlePriority(final int priority) throws MailException {
