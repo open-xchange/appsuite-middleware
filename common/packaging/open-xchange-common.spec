@@ -76,6 +76,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Tue Jun 16 2009 - choeger@open-xchange.com
+ - Bugfix ID#13385: config update script destroys parameters on update when no
+   newline is at the end of a configuration file
 * Fri May 08 2009 - carsten.hoeger@open-xchange.com
  - Bugfix #13565: Added script method to wait for process to stop.
 * Mon Mar 16 2009 - choeger@open-xchange.com
