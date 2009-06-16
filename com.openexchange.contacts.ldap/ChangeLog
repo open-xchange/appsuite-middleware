@@ -1,6 +1,12 @@
 * 2009-06-16 - dennis.sieben@open-xchange.com
 
- - Bugfix #13892 contacts-ldap bundle contains documentation as odt format at
+  - Bugfix #13909 NPE when contacts-ldap is enabled to access distribution
+    lists (ADS)
+    - Surrounded code segment with if
+    
+* 2009-06-16 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13892 contacts-ldap bundle contains documentation as odt format at
    the sources
    - Removed documentation as it is now contained in the Installation and
      Administrator documentation

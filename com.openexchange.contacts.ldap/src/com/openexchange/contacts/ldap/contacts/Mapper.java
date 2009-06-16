@@ -706,10 +706,12 @@ public class Mapper {
         final String email1 = mappings.getEmail1();
         if (null != email1 && 0 != email1.length()) {
             final String mailAttribute = getter.getAttribute(email1);
-            try {
-                retval.setEmailaddress(mailAttribute);
-            } catch (final ContactException e) {
-                throw new LdapException(Code.MAIL_ADDRESS_DISTRI_INVALID, mailAttribute);
+            if (null != mailAttribute) {
+                try {
+                    retval.setEmailaddress(mailAttribute);
+                } catch (final ContactException e) {
+                    throw new LdapException(Code.MAIL_ADDRESS_DISTRI_INVALID, mailAttribute);
+                }
             }
         }
 
