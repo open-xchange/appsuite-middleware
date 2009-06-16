@@ -132,11 +132,11 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		
 		String[] cmd = new String[6];
 		cmd[0] = shellscript_to_execute; // the script, after that, the parameter 
-		cmd[1] = cid;
-		cmd[2] = usern;
-		cmd[3] = userid;
-		cmd[4] = "\""+oldpw+"\""; // for spaces in passwor
-		cmd[5] = "\""+newpw+"\""; // 
+		cmd[1] = "--cid "+cid;
+		cmd[2] = "--username "+usern;
+		cmd[3] = "--userid "+userid;
+		cmd[4] = "--oldpassword "+oldpw; // for spaces in passwor
+		cmd[5] = "--newpassword "+newpw; // 
 		
 		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
 		
