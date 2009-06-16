@@ -52,106 +52,90 @@ package com.openexchange.imap.command;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.tools.Collections.SmartLongArray;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given
- * array of <code>Message</code> as an array of <code>long</code>
+ * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given array of <code>Message</code> as an array of
+ * <code>long</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 
-	private final String[] args;
+    private final String[] args;
 
-	private final int length;
+    private final int length;
 
-	private final SmartLongArray sla;
+    private final SmartLongArray sla;
 
-	private int index;
+    private int index;
 
-	/**
-	 * Initializes a new {@link MessageUIDsIMAPCommand}
-	 * 
-	 * @param imapFolder
-	 *            The IMAP folder
-	 * @param msgs
-	 *            The messages
-	 */
-	public MessageUIDsIMAPCommand(final IMAPFolder imapFolder, final Message[] msgs) {
-		super(imapFolder);
-		if (msgs == null) {
-			returnDefaultValue = true;
-			args = ARGS_EMPTY;
-			length = -1;
-			sla = null;
-		} else {
-			args = IMAPNumArgSplitter.splitMessageArg(msgs, true, -1);
-			length = msgs.length;
-			sla = new SmartLongArray(length);
-		}
-	}
+    /**
+     * Initializes a new {@link MessageUIDsIMAPCommand}
+     * 
+     * @param imapFolder The IMAP folder
+     * @param msgs The messages
+     */
+    public MessageUIDsIMAPCommand(final IMAPFolder imapFolder, final Message[] msgs) {
+        super(imapFolder);
+        if (msgs == null) {
+            returnDefaultValue = true;
+            args = ARGS_EMPTY;
+            length = -1;
+            sla = null;
+        } else {
+            args = IMAPNumArgSplitter.splitMessageArg(msgs, true, -1);
+            length = msgs.length;
+            sla = new SmartLongArray(length);
+        }
+    }
 
-	@Override
-	protected boolean addLoopCondition() {
-		return (index < length);
-	}
+    @Override
+    protected boolean addLoopCondition() {
+        return (index < length);
+    }
 
-	@Override
-	protected String[] getArgs() {
-		return args;
-	}
+    @Override
+    protected String[] getArgs() {
+        return args;
+    }
 
-	@Override
-	protected String getCommand(final int argsIndex) {
-		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
-		sb.append("FETCH ");
-		sb.append(args[argsIndex]);
-		sb.append(" (UID)");
-		return sb.toString();
-	}
+    @Override
+    protected String getCommand(final int argsIndex) {
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        sb.append("FETCH ");
+        sb.append(args[argsIndex]);
+        sb.append(" (UID)");
+        return sb.toString();
+    }
 
-	private static final long[] EMPTY_ARR = new long[0];
+    private static final long[] EMPTY_ARR = new long[0];
 
-	@Override
-	protected long[] getDefaultValue() {
-		return EMPTY_ARR;
-	}
+    @Override
+    protected long[] getDefaultValue() {
+        return EMPTY_ARR;
+    }
 
-	@Override
-	protected long[] getReturnVal() {
-		return sla.toArray();
-	}
+    @Override
+    protected long[] getReturnVal() {
+        return sla.toArray();
+    }
 
-	@Override
-	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-		if (!lastResponse.isOK()) {
-			throw new ProtocolException(lastResponse);
-		}
-	}
-
-	@Override
-	protected void handleResponse(final Response response) throws MessagingException {
-		/*
-		 * Response is null or not a FetchResponse
-		 */
-		if (response == null) {
-			return;
-		} else if (!(response instanceof FetchResponse)) {
-			return;
-		}
-		sla.append(((UID) (((FetchResponse) response).getItem(0))).uid);
-		index++;
-	}
-
-	@Override
-	protected boolean performHandleResult() {
-		return true;
-	}
+    @Override
+    protected void handleResponse(final Response response) throws MessagingException {
+        /*
+         * Response is null or not a FetchResponse
+         */
+        if (response == null) {
+            return;
+        } else if (!(response instanceof FetchResponse)) {
+            return;
+        }
+        sla.append(((UID) (((FetchResponse) response).getItem(0))).uid);
+        index++;
+    }
 
 }

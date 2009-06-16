@@ -80,7 +80,6 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -408,15 +407,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     }
 
     @Override
-    protected Message[] getReturnVal() {
-        return retval;
-    }
-
-    @Override
-    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-        if (!lastResponse.isOK()) {
-            throw new ProtocolException(lastResponse);
+    protected Message[] getReturnVal() throws MessagingException {
+        if (index < length) {
+            // TODO: Cut off after '@'
+            throw new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(
+                " FETCH responses from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(
+                imapFolder.getStore().toString()).append("\" but got ").append(index).append('.').toString());
         }
+        return retval;
     }
 
     @Override
@@ -489,11 +487,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         if (!error) {
             retval[pos] = msg;
         }
-    }
-
-    @Override
-    protected boolean performHandleResult() {
-        return true;
     }
 
     private static final Set<Integer> ENV_FIELDS;

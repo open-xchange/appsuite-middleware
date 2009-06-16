@@ -51,7 +51,6 @@ package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
 import com.openexchange.tools.Collections.SmartIntArray;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -123,13 +122,6 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
     }
 
     @Override
-    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-        if (!lastResponse.isOK()) {
-            throw new ProtocolException(lastResponse);
-        }
-    }
-
-    @Override
     protected void handleResponse(final Response response) throws MessagingException {
         if (!(response instanceof FetchResponse)) {
             return;
@@ -145,11 +137,6 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
             return;
         }
         sia.append(f.getNumber());
-    }
-
-    @Override
-    protected boolean performHandleResult() {
-        return true;
     }
 
 }
