@@ -127,6 +127,13 @@ if [ ${1:-0} -eq 2 ]; then
 
   GLOBIGNORE='*'
 
+   # SoftwareChange_Request-70
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/admindaemon/system.properties
+   if ox_exists_property configDB $pfile; then
+      ox_remove_property configDB $pfile
+   fi
+
    # -----------------------------------------------------------------------
    # bugfix id#12517
    pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
