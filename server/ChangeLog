@@ -1,3 +1,7 @@
+* 2009-06-16 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13501: Change a daily sequence into a weekly sequence.
+
 * 2009-06-16 - choeger@open-xchange.com
 
  - Bugfix #12859: [L3] Changing umask for Infostore documents

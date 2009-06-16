@@ -1219,6 +1219,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             }
 
+            if (cdao.getRecurrenceType() > 0) {
+                calculateEndDateForNewType(cdao, edao);
+            }
+            
             cdao.setRecurrence(recColl.createDSString(cdao));
             cdao.setExceptions(null);
             cdao.setDelExceptions(null);
@@ -1248,6 +1252,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return recColl.RECURRING_EXCEPTION_DELETE;
         }
         return recColl.RECURRING_NO_ACTION;
+    }
+
+    private void calculateEndDateForNewType(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
+        Date occurrenceDate;
+        if (cdao.getOccurrence() <= 0) {
+            occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAXTC);
+        } else {
+            occurrenceDate = recColl.getOccurenceDate(cdao);
+        }
+        // Get corresponding until date
+        final Date untilDate = new Date(recColl.normalizeLong(occurrenceDate.getTime()));
+        // Set proper end time
+        cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
     }
 
     /**
