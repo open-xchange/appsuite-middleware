@@ -69,7 +69,9 @@ import com.openexchange.configuration.ConfigurationException;
 
 /**
  * {@link EasyLogin}
- * 
+ * TODO: Fix configuration loading with ConfigurationService
+ *       Put javascript line in external file and load it from file instead hardcoded in servlet
+ *       
  * @author <a href="mailto:info@open-xchange.com">Holger Achtziger</a>
  * 
  */
@@ -81,7 +83,7 @@ public class EasyLogin extends HttpServlet {
 	private static final long serialVersionUID = 7233346063627500582L;
 	private static final Log LOG = LogFactory.getLog(EasyLogin.class);
 	private static Properties props;
-    private final static String UPSELL_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/easylogin.properties";
+    private final static String EASYLOGIN_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/easylogin.properties";
 	
 	private static final String RESPONSE1 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" +
 			"	\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
@@ -387,6 +389,7 @@ public class EasyLogin extends HttpServlet {
 	private static String AJAX_ROOT = "/ajax";
 	private static String passwordPara = "password";
 	private static String loginPara ="login";
+	private static String directLinkPara ="direct_link";
 	private static  String OX_PATH_RELATIVE = "../";
 	private static boolean doGetEnabled = false;
 	
@@ -395,6 +398,13 @@ public class EasyLogin extends HttpServlet {
 	 */
 	public EasyLogin() {
 		super();
+	}
+	
+	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+	IOException {
+		
+		processLoginRequest(req,resp);
+		
 	}
 
 	@Override
@@ -406,54 +416,26 @@ public class EasyLogin extends HttpServlet {
 				initConfig();
 			}
 		}catch (ConfigurationException e) {
-            LOG.error("Error processing Upsell configuration" + UPSELL_PROPERTY_FILE + " ", e);
+            LOG.error("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
         }
-			
-		resp.setContentType("text/html");
-		
-		PrintWriter out = resp.getWriter();
 		
 		if( !doGetEnabled ){
+			// show error to user
 			resp.sendError( HttpServletResponse.SC_METHOD_NOT_ALLOWED , "GET not supported");
-		} else if (req.getParameter(passwordPara)==null || req.getParameter(passwordPara).trim().length()==0){
-			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + passwordPara + " missing");
-			LOG.error("Got request without password");
-		} else if (req.getParameter(loginPara)==null || req.getParameter(loginPara).trim().length()==0){
-			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + loginPara + " missing");
-			LOG.error("Got request without login");
-		} else{	
+		}else{
+			processLoginRequest(req,resp);
+		}	
 		
-			String login = null;
-			String password = null;
-				
-			
-			password = req.getParameter(passwordPara);
-			login = req.getParameter(loginPara).trim().toLowerCase();
-							
-			out.print(RESPONSE1);
-			out.print(AJAX_ROOT);
-			out.print(RESPONSE2);
-			out.print(OX_PATH_RELATIVE);
-			out.print(RESPONSE3);
-			out.print("authenticate(0,\"" +
-					login +
-					"\",\"" +
-					password +
-					"\",\"" +  
-					"get\"" +
-					");return;");
-			out.print(RESPONSE4);
-		}
 	}
-	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-	IOException {
+	
+	private void processLoginRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,IOException{
 		
 		try {
 			if (props == null) {
 				initConfig();
 			}
 		} catch (ConfigurationException e) {
-            LOG.error("Error processing Upsell configuration" + UPSELL_PROPERTY_FILE + " ", e);
+            LOG.error("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
         }
 		
 		resp.setContentType("text/html");
@@ -476,7 +458,12 @@ public class EasyLogin extends HttpServlet {
 			out.print(RESPONSE1);
 			out.print(AJAX_ROOT);
 			out.print(RESPONSE2);
-			out.print(OX_PATH_RELATIVE);
+			// direct links redirecting
+			if(req.getParameter(directLinkPara)!=null && req.getParameter(directLinkPara).trim().length()>0){
+				out.print(OX_PATH_RELATIVE+req.getParameter(directLinkPara));
+			}else{
+				out.print(OX_PATH_RELATIVE);
+			}			
 			out.print(RESPONSE3);
 			out.print("authenticate(0,\"" +
 					login +
@@ -487,14 +474,16 @@ public class EasyLogin extends HttpServlet {
 					");return;");
 			out.print(RESPONSE4);
 		}
+		
 	}
+	
 	
 	private static void initConfig() throws ConfigurationException {
 	    synchronized (EasyLogin.class) {
 	        if (null == props) {
-	            final File file = new File(UPSELL_PROPERTY_FILE);
+	            final File file = new File(EASYLOGIN_PROPERTY_FILE);
 	            if (!file.exists()) {
-	            	LOG.error("Error file not found: " + UPSELL_PROPERTY_FILE);
+	            	LOG.error("Error file not found: " + EASYLOGIN_PROPERTY_FILE);
 	            	throw new ConfigurationException(com.openexchange.configuration.ConfigurationException.Code.FILE_NOT_FOUND, file.getAbsolutePath());
 	            }
 	            FileInputStream fis = null;
@@ -507,7 +496,7 @@ public class EasyLogin extends HttpServlet {
 	                	passwordPara  = (String) props.get("com.openexchange.easylogin.passwordPara");
 	                	LOG.info("Set passwordPara to " + passwordPara );
 	                } else {
-	                	LOG.error("Could not find passwordPara in " + UPSELL_PROPERTY_FILE + " using default: " + 
+	                	LOG.error("Could not find passwordPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			passwordPara );
 	                }
 	                
@@ -515,7 +504,7 @@ public class EasyLogin extends HttpServlet {
 	                	loginPara = (String) props.get("com.openexchange.easylogin.loginPara");
 	                	LOG.info("Set loginPara to " +  loginPara);
 	                } else {
-	                	LOG.error("Could not find loginPara in " + UPSELL_PROPERTY_FILE + " using default: " + 
+	                	LOG.error("Could not find loginPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			loginPara );
 	                }
 	                
@@ -523,7 +512,7 @@ public class EasyLogin extends HttpServlet {
 	                	AJAX_ROOT = (String) props.get("com.openexchange.easylogin.AJAX_ROOT");
 	                	LOG.info("Set AJAX_ROOT to " +  AJAX_ROOT);
 	                } else {
-	                	LOG.error("Could not find AJAX_ROOT in " + UPSELL_PROPERTY_FILE + " using default: " + 
+	                	LOG.error("Could not find AJAX_ROOT in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			AJAX_ROOT );
 	                }
 	                
@@ -531,7 +520,7 @@ public class EasyLogin extends HttpServlet {
 	                	OX_PATH_RELATIVE = (String) props.get("com.openexchange.easylogin.OX_PATH_RELATIVE");
 	                	LOG.info("Set OX_PATH_RELATIVE to " +  OX_PATH_RELATIVE);
 	                } else {
-	                	LOG.error("Could not find OX_PATH_RELATIVE in " + UPSELL_PROPERTY_FILE + " using default: " + 
+	                	LOG.error("Could not find OX_PATH_RELATIVE in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			OX_PATH_RELATIVE );
 	                }
 	                
@@ -540,18 +529,18 @@ public class EasyLogin extends HttpServlet {
 	                	doGetEnabled = Boolean.parseBoolean(property);
 	                	LOG.info("Set doGetEnabled to " + doGetEnabled );
 	                } else {
-	                	LOG.error("Could not find doGetEnabled in " + UPSELL_PROPERTY_FILE + " using default: " + 
+	                	LOG.error("Could not find doGetEnabled in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			doGetEnabled );
 	                }
 	                
 	            } catch (IOException e) {
-	            	LOG.error("Error can't read file: " + UPSELL_PROPERTY_FILE);
+	            	LOG.error("Error can't read file: " + EASYLOGIN_PROPERTY_FILE);
 	            	throw new ConfigurationException(com.openexchange.configuration.ConfigurationException.Code.NOT_READABLE, file.getAbsolutePath());
 	            } finally {
 	                try {
 	                    fis.close();
 	                } catch (IOException e) {
-	                    LOG.error("Error closing file inputstream for file " + UPSELL_PROPERTY_FILE + 
+	                    LOG.error("Error closing file inputstream for file " + EASYLOGIN_PROPERTY_FILE + 
 	                    		" ", e);
 	                }
 	            }
