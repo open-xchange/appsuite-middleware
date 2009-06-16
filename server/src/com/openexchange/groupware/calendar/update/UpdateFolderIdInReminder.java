@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
@@ -175,7 +176,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                 if (update.size() > 0) {
                     pst3 = writecon.prepareStatement(UPDATE_REMINDER);
                     for (int a = 0; a < update.size(); a++) {
-                        final ReminderUpdate ru = (ReminderUpdate)delete.get(a);
+                        final ReminderUpdate ru = (ReminderUpdate) update.get(a);
                         pst3.setInt(1, ru.getFID());
                         pst3.setInt(2, ru.getOID());
                         pst3.setInt(3, ru.getCID());
@@ -291,7 +292,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         }
     }
     
-    private static class ReminderUpdate {
+    private class ReminderUpdate {
         private int oid;
         private int uid;
         private int fid;

@@ -162,6 +162,8 @@ public class UpdateProcess implements Runnable {
             } catch (final ContextException e) {
                 LOG.error(e.getMessage(), e);
             }
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         } finally {
             updateLock.unlock();
         }

@@ -1,3 +1,7 @@
+* 2009-06-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #13873: Catching RuntimeExceptions in database update tasks. Fixed causes of RuntimeExceptions in database update tasks.
+
 * 2009-06-02 - francisco.laguna@open-xchange.com
 
  - Bugfix #13681: Change last editor on webdav lock
