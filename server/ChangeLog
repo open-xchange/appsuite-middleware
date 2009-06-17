@@ -1,3 +1,7 @@
+* 2009-06-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #13903: Delivering empty content on "No content" error while showing message source
+
 * 2009-06-16 - martin.herfurth@open-xchange.com
 
  - Bugfix #13501: Change a daily sequence into a weekly sequence.

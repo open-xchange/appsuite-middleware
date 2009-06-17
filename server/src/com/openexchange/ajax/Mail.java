@@ -927,7 +927,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 if (showMessageSource) {
                     final UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-                    mail.writeTo(baos);
+                    try {
+                        mail.writeTo(baos);
+                    } catch (final MailException e) {
+                        if (MailException.Code.NO_CONTENT.getNumber() == e.getDetailNumber()) {
+                            LOG.debug(e.getMessage(), e);
+                            baos.reset();
+                        } else {
+                            throw e;
+                        }
+                    }
                     if (saveToDisk) {
                         /*
                          * Write message source to output stream...
