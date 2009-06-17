@@ -49,9 +49,9 @@
 
 package com.openexchange.publish.sql;
 
-import static com.openexchange.publish.PublicationErrorMessage.SQLException;
-import static com.openexchange.publish.PublicationErrorMessage.PublicationNotFound;
 import static com.openexchange.publish.PublicationErrorMessage.IDGiven;
+import static com.openexchange.publish.PublicationErrorMessage.PublicationNotFound;
+import static com.openexchange.publish.PublicationErrorMessage.SQLException;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
@@ -69,7 +69,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.Publication;
@@ -87,6 +86,7 @@ import com.openexchange.sql.tools.SQLTools;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublicationSQLStorage implements PublicationStorage {
 
@@ -118,16 +118,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (AbstractOXException e) {
             throw new PublicationException(e);
         } finally {
-            if (writeConnection != null) {
-                try {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
-                } catch (SQLException e) {
-                    throw SQLException.create(e);
-                } finally {
-                    dbProvider.releaseWriteConnection(publication.getContext(), writeConnection);
-                }
-            }
+            tryToClose(publication.getContext(), writeConnection);
         }
     }
 
@@ -265,16 +256,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (AbstractOXException e) {
             throw new PublicationException(e);
         } finally {
-            if (writeConnection != null) {
-                try {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
-                } catch (SQLException e) {
-                    throw SQLException.create(e);
-                } finally {
-                    dbProvider.releaseWriteConnection(publication.getContext(), writeConnection);
-                }
-            }
+            tryToClose(publication.getContext(), writeConnection);
         }
     }
 
@@ -294,16 +276,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (AbstractOXException e) {
             throw new PublicationException(e);
         } finally {
-            if (writeConnection != null) {
-                try {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
-                } catch (SQLException e) {
-                    throw SQLException.create(e);
-                } finally {
-                    dbProvider.releaseWriteConnection(publication.getContext(), writeConnection);
-                }
-            }
+           tryToClose(publication.getContext(), writeConnection);
         }
     }
 
@@ -351,20 +324,35 @@ public class PublicationSQLStorage implements PublicationStorage {
     }
 
     public void deletePublicationsOfUser(int userID, Context context) throws PublicationException {
+        Connection writeConnection = null;
         try {
-            Connection writeConnection = dbProvider.getWriteConnection(context);
+            writeConnection = dbProvider.getWriteConnection(context);
             writeConnection.setAutoCommit(false);
             deleteWhereUserID(userID, context, writeConnection);
             writeConnection.commit();
         } catch (GenericConfigStorageException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new PublicationException(e);
+        } catch (PublicationException e){
+            throw e;
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         } catch (TransactionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new PublicationException(e);
+        } finally {
+            tryToClose(context, writeConnection);
+        }
+    }
+
+    private void tryToClose(Context context, Connection writeConnection) throws PublicationException {
+        if (writeConnection != null) {
+            try {
+                writeConnection.rollback();
+                writeConnection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseWriteConnection(context, writeConnection);
+            }
         }
     }
 
