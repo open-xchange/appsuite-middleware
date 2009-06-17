@@ -51,6 +51,7 @@ package com.openexchange.publish.database;
 
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.schema.Tables.publications;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -101,12 +102,7 @@ public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLSto
         DeleteEvent event = new DeleteEvent(user, user.getId(), DeleteEvent.TYPE_USER, ctx);
         storage.rememberPublication(pub1);
         listener.deletePerformed(event, readCon , writeCon );
-        SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("user_id", userId).AND( new EQUALS("cid", ctx.getContextId()) ) );
+        SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("user_id", I(userId)).AND( new EQUALS("cid", I(ctx.getContextId() ) ) ) );
         assertNoResult(new StatementBuilder().buildCommand(select));
-    }
-
-    public void testShouldNotActOnDeleteEventForNonUsers() throws DeleteFailedException, SQLException {
-//        DeleteEvent event = new DeleteEvent(user, user.getId(), DeleteEvent.TYPE_GROUP, ctx);
-
     }
 }
