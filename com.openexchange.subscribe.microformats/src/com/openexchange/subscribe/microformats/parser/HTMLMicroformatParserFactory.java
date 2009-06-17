@@ -49,32 +49,20 @@
 
 package com.openexchange.subscribe.microformats.parser;
 
-import java.util.List;
-import java.util.Map;
-import junit.framework.TestCase;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.microformats.OXMFParser;
+import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 
 
 /**
- * {@link OXMFParserImplTest}
+ * {@link HTMLMicroformatParserFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OXMFParserImplTest extends ParserTest {
-    
-    private OXMFParserImpl parser;
+public class HTMLMicroformatParserFactory implements OXMFParserFactoryService {
 
-    @Override
-    public void setUp() {
-        parser = new OXMFParserImpl();
-        parser.addContainerElement("ox_contact");
-        parser.addAttributePrefix("ox_");
-    }
-
-    @Override
-    protected List<Map<String, String>> parse(String text) throws SubscriptionException {
-        return parser.parse(text);
+    public OXMFParser getParser() {
+        return new HTMLMicroformatParser();
     }
 
 }

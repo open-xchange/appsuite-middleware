@@ -56,25 +56,29 @@ import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
- * {@link OXMFParserImplTest}
+ * {@link HTMLMicrofomatParserTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OXMFParserImplTest extends ParserTest {
+public class HTMLMicrofomatParserTest extends ParserTest {
+    public void testIncorrectXML() throws SubscriptionException {
+        String text = "<html><head><meta attr=\"value\"></head><body><div class=\"ox_contact\"><span class=\"ox_givenName\">Bla</span>&</div>";
+        List<Map<String, String>> result = parse(text);
     
-    private OXMFParserImpl parser;
-
-    @Override
-    public void setUp() {
-        parser = new OXMFParserImpl();
-        parser.addContainerElement("ox_contact");
-        parser.addAttributePrefix("ox_");
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        Map<String, String> first = result.get(0);
+        
+        assertEquals("Bla", first.get("ox_givenName"));
     }
 
-    @Override
     protected List<Map<String, String>> parse(String text) throws SubscriptionException {
-        return parser.parse(text);
+        HTMLMicroformatParser microformatParser = new HTMLMicroformatParser();
+        microformatParser.addContainerElement("ox_contact");
+        microformatParser.addAttributePrefix("ox_");
+        return microformatParser.parse(text);
     }
+    
 
 }
