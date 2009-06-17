@@ -350,16 +350,13 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
-    public void deletePublicationsOfUser(int userID, Context context) {
+    public void deletePublicationsOfUser(int userID, Context context) throws PublicationException {
         try {
             Connection writeConnection = dbProvider.getWriteConnection(context);
             writeConnection.setAutoCommit(false);
             deleteWhereUserID(userID, context, writeConnection);
             writeConnection.commit();
         } catch (GenericConfigStorageException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (PublicationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SQLException e) {

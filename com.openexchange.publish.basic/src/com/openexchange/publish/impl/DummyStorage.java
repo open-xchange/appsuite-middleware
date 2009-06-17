@@ -119,4 +119,12 @@ public class DummyStorage implements PublicationStorage {
         
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationStorage#deletePublicationsOfUser(int, com.openexchange.groupware.contexts.Context)
+     */
+    public void deletePublicationsOfUser(int userID, Context context) throws PublicationException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

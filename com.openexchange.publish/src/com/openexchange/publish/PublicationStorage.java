@@ -72,4 +72,6 @@ public interface PublicationStorage {
     public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException;
     
     public void updatePublication(Publication publication) throws PublicationException;
+    
+    public void deletePublicationsOfUser(int userID, Context context) throws PublicationException;
 }
