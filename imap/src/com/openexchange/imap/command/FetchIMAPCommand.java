@@ -409,10 +409,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     @Override
     protected Message[] getReturnVal() throws MessagingException {
         if (index < length) {
-            // TODO: Cut off after '@'
-            throw new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(
-                " FETCH responses from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(
-                imapFolder.getStore().toString()).append("\" but got ").append(index).append('.').toString());
+            String server = imapFolder.getStore().toString();
+            int pos = server.indexOf('@');
+            if (pos >= 0 && ++pos < server.length()) {
+                server = server.substring(pos);
+            }
+            throw new MessagingException(
+                new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
+                    " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
         }
         return retval;
     }
