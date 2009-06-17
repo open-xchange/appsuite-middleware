@@ -92,9 +92,9 @@ public class DeleteEvent extends EventObject {
 
     private transient final Context ctx;
 
-    private final int id;
+    protected int id;
 
-    private final int type;
+    protected int type;
 
     private transient Session session;
 
