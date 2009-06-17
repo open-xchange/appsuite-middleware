@@ -582,6 +582,11 @@ public class Notifications {
      */
     public static final String STATUS_TENTATIVE = "tentative";
 
+    /**
+     * external
+     */
+    public static final String STATUS_EXTERNAL = "external";
+
     /*-
      * Line patterns
      */
