@@ -357,8 +357,7 @@ public class HeaderCollection implements Serializable {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         } else if (isInvalid(value, false)) {
-            throw new IllegalArgumentException(
-                new StringBuilder(26 + value.length()).append("Header value is invalid: ").append(value).toString());
+            throw new IllegalArgumentException(new StringBuilder(32).append("Header value is invalid: ").append(value).toString());
         }
         final HeaderName headerName = HeaderName.valueOf(name);
         List<String> values = map.get(headerName);

@@ -359,6 +359,9 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param value The header value
      */
     public void addHeader(final String name, final String value) {
+        if (null == value) {
+            return;
+        }
         if (null == headers) {
             headers = new HeaderCollection();
             b_headers = true;
@@ -372,10 +375,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param headers The header collection
      */
     public void addHeaders(final HeaderCollection headers) {
-        if (null == headers) {
-            throw new IllegalArgumentException("Headers must not be null");
-        }
-        if (headers.isEmpty()) {
+        if (null == headers || headers.isEmpty()) {
             return;
         } else if (null == this.headers) {
             this.headers = new HeaderCollection();
