@@ -80,7 +80,7 @@ public class CreatePublicationTablesTask implements UpdateTask {
         "module VARCHAR(255) NOT NULL, " +
         "configuration_id INT4 UNSIGNED NOT NULL, " + 
         "target_id VARCHAR(255) NOT NULL, " +
-        "PRIMARY KEY (id), " +
+        "PRIMARY KEY (id, cid), " +
         "FOREIGN KEY (cid, user_id) REFERENCES user(cid, id)" + 
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
