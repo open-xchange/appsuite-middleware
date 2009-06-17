@@ -49,7 +49,7 @@
 
 package com.openexchange.timer;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -167,10 +167,9 @@ public interface TimerService {
     public void purge();
 
     /**
-     * Returns an unmodifiable {@link ExecutorService} view on this timer service; meaning {@link ExecutorService#shutdown()} and
-     * {@link ExecutorService#shutdownNow()} are not supported by returned executor service.
+     * Returns an {@link Executor view on this timer service.
      * 
-     * @return An unmodifiable {@link ExecutorService} backing this timer service
+     * @return An unmodifiable {@link Executor} backing this timer service
      */
-    public ExecutorService getExecutor();
+    public Executor getExecutor();
 }
