@@ -335,7 +335,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (PublicationException e){
             throw e;
         } catch (SQLException e) {
-            
+            throw SQLException.create(e);
         } catch (TransactionException e) {
             throw new PublicationException(e);
         } finally {
