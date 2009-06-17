@@ -525,17 +525,24 @@ public class POP3StorageUtil {
      * @return The minimum allowed seconds between logins or <code>-1</code> on absence
      */
     public static int parseLoginDelaySeconds(final String capabilities) {
-        final int pos = capabilities.indexOf(LOGIN_DELAY);
+        int pos = capabilities.indexOf(LOGIN_DELAY);
         if (-1 == pos) {
             // No LOGIN-DELAY capability found
             return -1;
         }
         // Parse seconds; something like LOGIN-DELAY 60
         final StringBuilder seconds = new StringBuilder(16);
-        final char c = capabilities.charAt(pos + LOGIN_DELAY.length());
+        pos += LOGIN_DELAY.length();
+        char c = capabilities.charAt(pos++);
+        final int len = capabilities.length();
         while ('\r' != c && '\n' != c) {
             if (Character.isDigit(c)) {
                 seconds.append(c);
+            }
+            if (pos >= len) {
+                c = '\n';
+            } else {
+                c = capabilities.charAt(pos++);
             }
         }
         try {
