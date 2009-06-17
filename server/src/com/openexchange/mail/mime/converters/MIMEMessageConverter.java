@@ -1125,6 +1125,16 @@ public final class MIMEMessageConverter {
     }
 
     /**
+     * Returns a new instance of {@link MailMessage} ready to get filled with header and/or flag information, but not capable to reference
+     * to body content.
+     * 
+     * @return A new instance of {@link MailMessage}
+     */
+    public static MailMessage newMailMessage() {
+        return new MIMEMailMessage();
+    }
+
+    /**
      * Creates a message data object from given message bytes conform to RFC822.
      * 
      * @param asciiBytes The message bytes conform to RFC822
