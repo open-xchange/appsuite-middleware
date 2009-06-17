@@ -240,7 +240,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (seqNums[pos] <= 0) {
                     final int len = pos - lastPos;
                     if (len > 0) {
-                        fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
+                        try {
+                            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, false);
+                        } catch (final MessagingException e) {
+                            LOG.warn("Fetch with BODYSTRUCTURE failed.", e);
+                            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, true);
+                        }
                     }
                     // Determine next valid position
                     pos++;
@@ -253,7 +258,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (lastPos < pos) {
-                fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
+                try {
+                    fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body, false);
+                } catch (final MessagingException e) {
+                    LOG.warn("Fetch with BODYSTRUCTURE failed.", e);
+                    fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body, true);
+                }
             }
             if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
                 return setAccountInfo(MIMEMessageConverter.convertMessages(messages, fields, body));
@@ -264,11 +274,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         }
     }
 
-    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MessagingException {
+    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException {
         final int[] subarr = new int[len];
         System.arraycopy(seqNums, lastPos, subarr, 0, len);
         final long start = System.currentTimeMillis();
-        final Message[] submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
+        final Message[] submessages;
+        if (ignoreBodystructure) {
+            submessages = new FetchIMAPCommand(
+                imapFolder,
+                isRev1,
+                subarr,
+                FetchIMAPCommand.getSafeFetchProfile(fetchProfile),
+                false,
+                true,
+                body).setDetermineAttachmentyHeader(true).doCommand();
+        } else {
+            submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
+        }
         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(

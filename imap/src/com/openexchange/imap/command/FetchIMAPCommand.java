@@ -181,6 +181,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private final boolean loadBody;
 
+    private boolean determineAttachmentByHeader;
+
     /**
      * Initializes a new {@link FetchIMAPCommand}.
      * 
@@ -238,6 +240,20 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         }
         retval = new ExtendedMimeMessage[length];
         index = 0;
+    }
+
+    /**
+     * Sets whether detection if message contains attachment is performed by "Content-Type" header only.
+     * <p>
+     * If <code>true</code> a message is considered to contain attachments if its "Content-Type" header equals "multipart/mixed".
+     * 
+     * @param determineAttachmentByHeader <code>true</code> to detect if message contains attachment is performed by "Content-Type" header
+     *            only; otherwise <code>false</code>
+     * @return This FETCH IMAP command with value applied
+     */
+    public FetchIMAPCommand setDetermineAttachmentyHeader(final boolean determineAttachmentByHeader) {
+        this.determineAttachmentByHeader = determineAttachmentByHeader;
+        return this;
     }
 
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
@@ -470,6 +486,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     }
                 } else {
                     itemHandler.handleItem(item, msg, LOG);
+                }
+            }
+            if (determineAttachmentByHeader) {
+                final String cts = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                if (null != cts) {
+                    msg.setHasAttachment(new ContentType(cts).isMimeType("multipart/mixed"));
                 }
             }
         } catch (final MessagingException e) {
@@ -892,6 +914,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * ++++++++++++++ End of item handlers ++++++++++++++
      */
 
+    /**
+     * Turns given fetch profile into FETCH items to craft a FETCH command.
+     * 
+     * @param isRev1 Whether IMAP protocol is revision 1 or not
+     * @param fp The fetch profile to convert
+     * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
+     * @return The FETCH items to craft a FETCH command
+     */
     private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
         final StringBuilder command = new StringBuilder(128);
         final boolean envelope;
@@ -963,6 +993,34 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
         }
         return command.toString();
+    }
+
+    /**
+     * Strips BODYSTRUCTURE item from given fetch profile.
+     * 
+     * @param fetchProfile The fetch profile
+     * @return The fetch profile with BODYSTRUCTURE item stripped
+     */
+    public static final FetchProfile getSafeFetchProfile(final FetchProfile fetchProfile) {
+        if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
+            final FetchProfile newFetchProfile = new FetchProfile();
+            newFetchProfile.add("Content-Type");
+            if (!fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+                newFetchProfile.add(UIDFolder.FetchProfileItem.UID);
+            }
+            final javax.mail.FetchProfile.Item[] items = fetchProfile.getItems();
+            for (final javax.mail.FetchProfile.Item item : items) {
+                if (!FetchProfile.Item.CONTENT_INFO.equals(item)) {
+                    newFetchProfile.add(item);
+                }
+            }
+            final String[] names = fetchProfile.getHeaderNames();
+            for (final String name : names) {
+                newFetchProfile.add(name);
+            }
+            return newFetchProfile;
+        }
+        return fetchProfile;
     }
 
 }
