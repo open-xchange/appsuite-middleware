@@ -53,6 +53,7 @@ import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageServ
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
@@ -350,6 +352,13 @@ public class PublicationSQLStorageTest extends SQLTestCase {
         } catch (PublicationException e) {
             assertEquals("Wrong error code", PublicationErrorMessage.IDGiven.getDetailNumber(), e.getDetailNumber());
         }
+    }
+    
+    public void testDeleteAllPublicationsOfOneUser() throws PublicationException, TransactionException, SQLException{
+        storage.rememberPublication(pub1);
+        storage.deletePublicationsOfUser(userId, ctx);
+        SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("user_id", userId).AND( new EQUALS("cid", ctx.getContextId()) ) );
+        assertNoResult(new StatementBuilder().buildCommand(select));
     }
     
     protected void assertEquals(Publication expected, Publication actual) {
