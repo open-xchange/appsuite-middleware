@@ -8,7 +8,7 @@ entity INT(10) UNSIGNED NOT NULL,
 module VARCHAR(255) NOT NULL, 
 configuration_id INT(10) UNSIGNED NOT NULL, 
 target_id VARCHAR(255) NOT NULL, 
-PRIMARY KEY (id), 
+PRIMARY KEY (cid,id), 
 FOREIGN KEY(cid, user_id) REFERENCES user(cid, id)) 
 ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
