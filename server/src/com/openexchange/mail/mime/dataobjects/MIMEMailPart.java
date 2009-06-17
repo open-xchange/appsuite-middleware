@@ -67,6 +67,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -328,7 +329,10 @@ public final class MIMEMailPart extends MailPart {
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+            if ("No content".equals(e.getMessage())) {
+                throw new MailException(MailException.Code.NO_CONTENT, e, new Object[0]);
+            }
+            throw MIMEMailException.handleMessagingException(e);
         }
     }
 
