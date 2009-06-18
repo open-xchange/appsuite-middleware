@@ -32,6 +32,7 @@
         <include name="org.apache.commons.*"/>
         <include name="org.eclipse.equinox*"/>
         <include name="org.eclipse.osgi*"/>
+        <include name="classloading-utils*"/>
     </fileset>
 
     <!-- Install Constants -->
