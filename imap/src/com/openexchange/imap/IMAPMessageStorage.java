@@ -243,7 +243,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                         try {
                             fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, false);
                         } catch (final MessagingException e) {
-                            LOG.warn("Fetch with BODYSTRUCTURE failed.", e);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
+                            }
                             fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, true);
                         }
                     }
@@ -261,7 +263,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 try {
                     fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body, false);
                 } catch (final MessagingException e) {
-                    LOG.warn("Fetch with BODYSTRUCTURE failed.", e);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
+                    }
                     fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body, true);
                 }
             }
