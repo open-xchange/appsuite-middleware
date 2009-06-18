@@ -1,27 +1,42 @@
 package com.openexchange.subscribe.xing.osgi;
 
+import org.dynamicjava.osgi.classloading_utils.ClassLoaderContext;
+import org.dynamicjava.osgi.classloading_utils.OsgiEnvironmentClassLoader;
+import org.dynamicjava.osgi.classloading_utils.OsgiEnvironmentClassLoaderFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceDependentRegistration;
+import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.xing.XingContactParser;
 import com.openexchange.subscribe.xing.XingSubscribeService;
 import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
 
 public class Activator implements BundleActivator {
 
-	private ServiceRegistration registration;
     private ComponentRegistration componentRegistration;
-
+    private ServiceRegistration serviceRegistration;
+ 
+    
     public void start(BundleContext context) throws Exception {
-        SubscribeService service = new XingSubscribeService();
-	    registration = context.registerService(SubscribeService.class.getName(), service, null);
-	    componentRegistration = new ComponentRegistration(context, "XING", "com.openexchange.subscribe.xing", XingSubscriptionErrorMessage.EXCEPTIONS);
+        componentRegistration = new ComponentRegistration(context, "XING", "com.openexchange.subscribe.xing", XingSubscriptionErrorMessage.EXCEPTIONS);
+        
+        XingContactParser contactParser = new OSGiAwareXingContactParser(new ClassLoaderContext(new OsgiEnvironmentClassLoader(context, getClass().getClassLoader(), context.getBundle())));
+        XingSubscribeService subscribeService = new XingSubscribeService();
+        subscribeService.setXingContactParser(contactParser);
+        
+        serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
+        
     }
 
-	public void stop(BundleContext context) throws Exception {
-	    registration.unregister();
-	    componentRegistration.unregister();
-	}
+    public void stop(BundleContext context) throws Exception {
+        serviceRegistration.unregister();
+        componentRegistration.unregister();
+    }
 
 }

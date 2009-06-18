@@ -76,6 +76,8 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
+    private XingContactParser xingContactParser;
+
     public XingSubscribeService() {
         FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
 
@@ -84,6 +86,11 @@ public class XingSubscribeService extends AbstractSubscribeService {
         SOURCE.setFormDescription(FORM);
         SOURCE.setSubscribeService(this);
         SOURCE.setFolderModule(FolderObject.CONTACT);
+        
+    }
+    
+    public void setXingContactParser(XingContactParser xingContactParser) {
+        this.xingContactParser = xingContactParser;
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -96,7 +103,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     public Collection<ContactObject> getContent(Subscription subscription) throws XingSubscriptionException {
         Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(new XingContactParser().getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
+        return Arrays.asList(xingContactParser.getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
     }
 
     @Override
