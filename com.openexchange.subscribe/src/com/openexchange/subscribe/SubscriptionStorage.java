@@ -67,4 +67,6 @@ public interface SubscriptionStorage {
     
     public void updateSubscription(Subscription subscription) throws SubscriptionException;
 
+    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException;
+
 }

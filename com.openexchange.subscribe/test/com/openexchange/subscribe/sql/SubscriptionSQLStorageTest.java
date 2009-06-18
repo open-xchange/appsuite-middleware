@@ -49,183 +49,40 @@
 
 package com.openexchange.subscribe.sql;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.subscriptions;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
-import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.SELECT;
-import com.openexchange.sql.tools.SQLTools;
-import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.test.sql.SQLTestCase;
+
 
 /**
+ * {@link SubscriptionSQLStorageTest}
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class SubscriptionSQLStorageTest extends SQLTestCase {
-    
-    protected SubscriptionStorage storage = null;
-    
-    protected Subscription subscription = null;
-    
-    protected Subscription subscription2 = null;
-    
-    protected List<Integer> subscriptionsToDelete = new ArrayList<Integer>();
-    
-    protected Context ctx = new SimContext(1);
-    
-    protected String folderId = "eins";
-    
-    protected int userId = 44;
-    
-    protected long lastUpdate;
-    
-    public void setUp() throws Exception {
-        SubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
-        SubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("SUBS"));
-        
-        loadProperties();
-        super.setUp();
-        
-        // First
-        FormElement formElementLogin = new FormElement();
-        formElementLogin.setName("login");
-        formElementLogin.setDisplayName("Login");
-        formElementLogin.setMandatory(true);
-        formElementLogin.setWidget(FormElement.Widget.INPUT);
-        formElementLogin.setDefaultValue("default login");
-
-        FormElement formElementPassword = new FormElement();
-        formElementPassword.setName("password");
-        formElementPassword.setDisplayName("Password");
-        formElementPassword.setMandatory(true);
-        formElementPassword.setWidget(FormElement.Widget.PASSWORD);
-
-        DynamicFormDescription formDescription = new DynamicFormDescription();
-        formDescription.addFormElement(formElementLogin);
-        formDescription.addFormElement(formElementPassword);
-
-        SubscriptionSource subscriptionSource = new SubscriptionSource();
-        subscriptionSource.setId("com.openexchange.subscribe.test.basic");
-        subscriptionSource.setDisplayName("Basic Subscription for Tests");
-        subscriptionSource.setIcon("http://path/to/icon");
-        subscriptionSource.setFormDescription(formDescription);
-        subscriptionSource.setFolderModule(FolderObject.CONTACT);
-        
-        Map<String, Object> configuration = new HashMap<String, Object>();
-        configuration.put("login", "user_a");
-        configuration.put("password", "password_a");
-        
-        subscription = new Subscription();
-        subscription.setContext(ctx);
-        subscription.setFolderId(folderId);
-        lastUpdate = new Date().getTime();
-        subscription.setLastUpdate(lastUpdate);
-        subscription.setUserId(userId);
-        subscription.setSource(subscriptionSource);
-        subscription.setConfiguration(configuration);
-        
-        // Second
-        FormElement formElementLogin2 = new FormElement();
-        formElementLogin2.setName("login2");
-        formElementLogin2.setDisplayName("Login2");
-        formElementLogin2.setMandatory(true);
-        formElementLogin2.setWidget(FormElement.Widget.INPUT);
-        formElementLogin2.setDefaultValue("default login2");
-
-        FormElement formElementPassword2 = new FormElement();
-        formElementPassword2.setName("password2");
-        formElementPassword2.setDisplayName("Password2");
-        formElementPassword2.setMandatory(true);
-        formElementPassword2.setWidget(FormElement.Widget.PASSWORD);
-
-        DynamicFormDescription formDescription2 = new DynamicFormDescription();
-        formDescription2.addFormElement(formElementLogin2);
-        formDescription2.addFormElement(formElementPassword2);
-
-        SubscriptionSource subscriptionSource2 = new SubscriptionSource();
-        subscriptionSource2.setId("com.openexchange.subscribe.test.basic2");
-        subscriptionSource2.setDisplayName("Basic Subscription for Tests2");
-        subscriptionSource2.setIcon("http://path/to/icon2");
-        subscriptionSource2.setFormDescription(formDescription2);
-        subscriptionSource2.setFolderModule(FolderObject.CONTACT);
-        
-        Map<String, Object> configuration2 = new HashMap<String, Object>();
-        configuration2.put("login", "user_a2");
-        configuration2.put("password", "password_a2");
-        
-        subscription2 = new Subscription();
-        subscription2.setContext(ctx);
-        subscription2.setFolderId(folderId);
-        lastUpdate = new Date().getTime();
-        subscription2.setLastUpdate(lastUpdate);
-        subscription2.setUserId(userId);
-        subscription2.setSource(subscriptionSource2);
-        subscription2.setConfiguration(configuration2);
-        
-        
-        SimSubscriptionSourceDiscoveryService discoveryService = new SimSubscriptionSourceDiscoveryService();
-        discoveryService.addSource(subscriptionSource);
-        discoveryService.addSource(subscriptionSource2);
-        storage = new SubscriptionSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
-    }
-    
-    public void tearDown() throws Exception {
-        if (subscriptionsToDelete.size() > 0) {
-            for (int delId : subscriptionsToDelete) {
-                Subscription subscriptionToDelete = new Subscription();
-                subscriptionToDelete.setId(delId);
-                subscriptionToDelete.setContext(ctx);
-                storage.forgetSubscription(subscriptionToDelete);
-            }
-
-            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", SQLTools.createLIST(subscriptionsToDelete.size(), PLACEHOLDER))));
-
-            Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-            List<Integer> values = new ArrayList<Integer>();
-            values.add(ctx.getContextId());
-            values.addAll(subscriptionsToDelete);
-            new StatementBuilder().executeStatement(writeConnection, delete, values);
-            getDBProvider().releaseWriteConnection(ctx, writeConnection);
-        }
-        storage = null;
-
-        super.tearDown();
-    }
-    
+public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTest {
     public void testRemember() throws Exception {
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
-        subscriptionsToDelete.add(subscription2.getId());
+        subscriptionsToDelete.add(I(subscription2.getId()));
         
         SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
-        WHERE(new EQUALS("id", subscription2.getId()).
-            AND(new EQUALS("cid", ctx.getContextId())).
-            AND(new EQUALS("user_id", userId)).
+        WHERE(new EQUALS("id", I(subscription2.getId())).
+            AND(new EQUALS("cid", I(ctx.getContextId()))).
+            AND(new EQUALS("user_id", I(userId))).
             AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
             AND(new EQUALS("folder_id", folderId)).
-            AND(new EQUALS("last_update", lastUpdate)));
+            AND(new EQUALS("last_update", L(lastUpdate))));
         
         assertResult(new StatementBuilder().buildCommand(select));
     }
@@ -233,18 +90,18 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     public void testForget() throws Exception {
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
-        subscriptionsToDelete.add(subscription2.getId());
+        subscriptionsToDelete.add(I(subscription2.getId()));
         
         storage.forgetSubscription(subscription2);
         
         SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
-        WHERE(new EQUALS("id", subscription2.getId()).
-            AND(new EQUALS("cid", ctx.getContextId())).
-            AND(new EQUALS("user_id", userId)).
+        WHERE(new EQUALS("id", I(subscription2.getId())).
+            AND(new EQUALS("cid", I(ctx.getContextId()))).
+            AND(new EQUALS("user_id", I(userId))).
             AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
             AND(new EQUALS("folder_id", folderId)).
-            AND(new EQUALS("last_update", lastUpdate)));
+            AND(new EQUALS("last_update", L(lastUpdate))));
         
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
@@ -253,11 +110,11 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
         clearFolder(folderId);
         storage.rememberSubscription(subscription);
         assertTrue("Id should be greater 0", subscription.getId() > 0);
-        subscriptionsToDelete.add(subscription.getId());
+        subscriptionsToDelete.add(I(subscription.getId()));
         
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
-        subscriptionsToDelete.add(subscription2.getId());
+        subscriptionsToDelete.add(I(subscription2.getId()));
         
         List<Subscription> list = storage.getSubscriptions(ctx, folderId);
         
@@ -277,19 +134,19 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     public void testUpdate() throws Exception {
         storage.rememberSubscription(subscription);
         assertTrue("Id should be greater 0", subscription.getId() > 0);
-        subscriptionsToDelete.add(subscription.getId());
+        subscriptionsToDelete.add(I(subscription.getId()));
         subscription2.setId(subscription.getId());
         storage.updateSubscription(subscription2);
         assertEquals("Id should not changed", subscription.getId(), subscription2.getId());
         
         SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
-        WHERE(new EQUALS("id", subscription.getId()).
-            AND(new EQUALS("cid", ctx.getContextId())).
-            AND(new EQUALS("user_id", userId)).
+        WHERE(new EQUALS("id", I(subscription.getId())).
+            AND(new EQUALS("cid", I(ctx.getContextId()))).
+            AND(new EQUALS("user_id", I(userId))).
             AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
             AND(new EQUALS("folder_id", subscription2.getFolderId())).
-            AND(new EQUALS("last_update", subscription2.getLastUpdate())));
+            AND(new EQUALS("last_update", L(subscription2.getLastUpdate()))));
         
         assertResult(new StatementBuilder().buildCommand(select));
     }
@@ -298,7 +155,7 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
         subscription.setId(123);
         try {
             storage.rememberSubscription(subscription);
-            subscriptionsToDelete.add(subscription.getId());
+            subscriptionsToDelete.add(I(subscription.getId()));
             fail("Exception expected");
         } catch (SubscriptionException e) {
             assertEquals("Wrong error code", SubscriptionErrorMessage.IDGiven.getDetailNumber(), e.getDetailNumber());
@@ -308,73 +165,20 @@ public class SubscriptionSQLStorageTest extends SQLTestCase {
     public void testGet() throws Exception {
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
-        subscriptionsToDelete.add(subscription2.getId());
+        subscriptionsToDelete.add(I(subscription2.getId()));
         
         Subscription loadedSubscription = storage.getSubscription(ctx, subscription2.getId());
         
         assertEquals(subscription2, loadedSubscription);
-        
     }
     
-    protected void clearFolder(String folderId) throws Exception {
-        Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-        
-        DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("folder_id", PLACEHOLDER));
-        List<Object> values = new ArrayList<Object>();
-        values.add(folderId);
-        new StatementBuilder().executeStatement(writeConnection, delete, values);
-        
-        getDBProvider().releaseWriteConnection(ctx, writeConnection);
+    public void testDeleteAllSubscriptionsOfAUser() throws SubscriptionException, TransactionException, SQLException{
+        storage.rememberSubscription(subscription);
+        storage.deleteAllSubscriptionsForUser(userId, ctx);
+        SELECT select = 
+            new SELECT(ASTERISK).
+            FROM(subscriptions).
+            WHERE(new EQUALS("cid", I(ctx.getContextId())).AND(new EQUALS("user_id", I(userId))));
+        assertNoResult(new StatementBuilder().buildCommand(select));
     }
-    
-    protected void assertEquals(Subscription expected, Subscription actual) {
-        if (expected != null) {
-            assertNotNull(actual);
-        }
-        assertEquals(expected.getContext().getContextId(), actual.getContext().getContextId());
-        assertEquals(expected.getFolderId(), actual.getFolderId());
-        assertEquals(expected.getId(), actual.getId());
-        assertEquals(expected.getLastUpdate(), actual.getLastUpdate());
-        assertEquals(expected.getUserId(), actual.getUserId());
-        assertEquals(expected.getSource(), actual.getSource());
-        assertEquals(expected.getDescription(), actual.getDescription());
-    }
-    
-    protected void assertEquals(SubscriptionSource expected, SubscriptionSource actual) {
-        if (expected != null) {
-            assertNotNull(actual);
-        }
-        assertEquals(expected.getDisplayName(), actual.getDisplayName());
-        assertEquals(expected.getFolderModule(), actual.getFolderModule());
-        assertEquals(expected.getIcon(), actual.getIcon());
-        assertEquals(expected.getId(), actual.getId());
-        assertEquals(expected.getFormDescription(), actual.getFormDescription());
-    }
-    
-    protected void assertEquals(DynamicFormDescription expected, DynamicFormDescription actual) {
-        assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
-        for (FormElement formElementExpected : expected.getFormElements()) {
-            boolean found = false;
-            for (FormElement formElementActual : actual.getFormElements()) {
-                if (formElementExpected.getName().equals(formElementActual.getName())) {
-                    found = true;
-                    assertEquals(formElementExpected, formElementActual);
-                }
-            }
-            if (!found) {
-                fail("Missing FormElement");
-            }
-        }
-    }
-    
-    protected void assertEquals(FormElement expected, FormElement actual) {
-        if (expected != null) {
-            assertNotNull(actual);
-        }
-        assertEquals(expected.getDefaultValue(), actual.getDefaultValue());
-        assertEquals(expected.getDisplayName(), actual.getDisplayName());
-        assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getWidget(), actual.getWidget());
-    }
-
 }
