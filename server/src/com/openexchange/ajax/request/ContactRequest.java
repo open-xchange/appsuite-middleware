@@ -138,9 +138,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException,
-            JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException,
-            OXJSONException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException, OXJSONException {
         if (!session.getUserConfiguration().hasContact()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
         }
@@ -172,8 +170,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException,
-            AjaxException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
 
         final ContactObject contactObj = new ContactObject();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
@@ -187,8 +184,9 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+            contactObj.getParentFolderID(),
+            session);
 
         contactInterface.insertContactObject(contactObj);
         timestamp = contactObj.getLastModified();
@@ -198,8 +196,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            OXConcurrentModificationException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -214,16 +211,16 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+            inFolder,
+            session);
 
         contactInterface.updateContactObject(contactobject, inFolder, timestamp);
         timestamp = contactobject.getLastModified();
         return new JSONObject();
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
@@ -255,8 +252,9 @@ public class ContactRequest {
 
             final ContactWriter contactWriter = new ContactWriter(timeZone);
 
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folderId,
+                session);
 
             it = contactInterface.getModifiedContactsInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
@@ -291,8 +289,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            OXException, OXJSONException, AjaxException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
@@ -301,16 +298,16 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+            inFolder,
+            session);
 
         contactInterface.deleteContactObject(objectId, inFolder, timestamp);
 
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException,
-            SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -368,7 +365,8 @@ public class ContactRequest {
                 } else {
                     // costs more performance because every object in the array
                     // is checked
-                    final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
+                    final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
+                        ContactInterfaceDiscoveryService.class);
                     for (int a = 0; a < objectIdAndFolderId.length; a++) {
                         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                             ContactInterfaceDiscoveryService.class).newContactInterface(objectIdAndFolderId[a][1], session);
@@ -406,8 +404,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONArray actionListUser(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException,
-            OXException, AjaxException {
+    public JSONArray actionListUser(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, AjaxException {
         timestamp = new Date(0);
 
         final JSONArray jsonResponseArray = new JSONArray();
@@ -466,8 +463,9 @@ public class ContactRequest {
 
             final Context ctx = session.getContext();
 
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folderId,
+                session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
             if (rightHandLimit == 0) {
@@ -497,25 +495,27 @@ public class ContactRequest {
 
     private int[] removeVirtual(final int[] columns) {
         final List<Integer> helper = new ArrayList<Integer>(columns.length);
-        for(final int col : columns) {
-            if(col != ContactObject.LAST_MODIFIED_UTC) {
+        for (final int col : columns) {
+            if (col != ContactObject.LAST_MODIFIED_UTC) {
                 helper.add(I(col));
             }
         }
         final int[] copy = new int[helper.size()];
-        for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i).intValue(); }
+        for (int i = 0; i < copy.length; i++) {
+            copy[i] = helper.get(i).intValue();
+        }
         return copy;
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException,
-            OXJSONException, AjaxException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 
         final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+            inFolder,
+            session);
 
         timestamp = new Date(0);
 
@@ -530,8 +530,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            OXException, OXJSONException, AjaxException {
+    public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 
         final Context ctx = session.getContext();
@@ -563,7 +562,7 @@ public class ContactRequest {
         final ContactSearchObject searchObj = new ContactSearchObject();
         if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
             if (jData.get(AJAXServlet.PARAMETER_INFOLDER).getClass().equals(JSONArray.class)) {
-                for (int folder : DataParser.parseJSONIntArray(jData, AJAXServlet.PARAMETER_INFOLDER)) {
+                for (final int folder : DataParser.parseJSONIntArray(jData, AJAXServlet.PARAMETER_INFOLDER)) {
                     searchObj.addFolder(folder);
                 }
             } else {
@@ -610,12 +609,18 @@ public class ContactRequest {
 
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
-        final Context ctx = session.getContext();
+        final ContactInterface contactInterface;
+        final int[] folders = searchObj.getFolders();
+        if (null != folders && folders.length >= 1) {
+            contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folders[0],
+                session);
+        } else {
+            contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newDefaultContactInterface(
+                session);
+        }
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).newContactInterface(searchObj.getFolder(), session);
-
-        final SearchIterator<ContactObject> it =  contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
+        final SearchIterator<ContactObject> it = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
@@ -637,8 +642,7 @@ public class ContactRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            OXException, OXJSONException, AjaxException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         timestamp = new Date(0);
 
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
@@ -648,8 +652,9 @@ public class ContactRequest {
 
         final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
+        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+            folderId,
+            session);
 
         final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
         final int origObjectId = contactObj.getObjectID();
@@ -682,9 +687,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    private static void copyLinks(final int folderId, final Session session, final Context ctx,
-            final ContactObject contactObj, final int origObjectId, final int origFolderId, final User user)
-            throws OXException {
+    private static void copyLinks(final int folderId, final Session session, final Context ctx, final ContactObject contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
         /*
          * Get all
          */
@@ -696,8 +699,7 @@ public class ContactRequest {
         }
         final LinkObject[] links;
         try {
-            links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user
-                    .getGroups(), session, readCon);
+            links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user.getGroups(), session, readCon);
         } catch (final ContextException e) {
             throw new OXException(e);
         } finally {
@@ -720,14 +722,25 @@ public class ContactRequest {
             for (final LinkObject link : links) {
                 final LinkObject copy;
                 if (link.getFirstId() == origObjectId) {
-                    copy = new LinkObject(contactObj.getObjectID(), Types.CONTACT, folderId, link.getSecondId(), link
-                            .getSecondType(), link.getSecondFolder(), ctx.getContextId());
+                    copy = new LinkObject(
+                        contactObj.getObjectID(),
+                        Types.CONTACT,
+                        folderId,
+                        link.getSecondId(),
+                        link.getSecondType(),
+                        link.getSecondFolder(),
+                        ctx.getContextId());
                 } else if (link.getSecondId() == origObjectId) {
-                    copy = new LinkObject(link.getFirstId(), link.getFirstType(), link.getFirstFolder(), contactObj
-                            .getObjectID(), Types.CONTACT, folderId, ctx.getContextId());
+                    copy = new LinkObject(
+                        link.getFirstId(),
+                        link.getFirstType(),
+                        link.getFirstFolder(),
+                        contactObj.getObjectID(),
+                        Types.CONTACT,
+                        folderId,
+                        ctx.getContextId());
                 } else {
-                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject()."
-                            + " Neither first nor second ID matches!");
+                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject()." + " Neither first nor second ID matches!");
                     continue;
                 }
                 Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);
@@ -739,15 +752,12 @@ public class ContactRequest {
         }
     }
 
-    private static void copyAttachments(final int folderId, final Context ctx, final ContactObject contactObj,
-            final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc)
-            throws OXException {
+    private static void copyAttachments(final int folderId, final Context ctx, final ContactObject contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */
         final AttachmentBase attachmentBase = Attachments.getInstance();
-        final SearchIterator<?> iterator = attachmentBase.getAttachments(origFolderId, origObjectId, Types.CONTACT,
-                ctx, user, uc).results();
+        final SearchIterator<?> iterator = attachmentBase.getAttachments(origFolderId, origObjectId, Types.CONTACT, ctx, user, uc).results();
         if (iterator.hasNext()) {
             try {
                 attachmentBase.startTransaction();
@@ -757,8 +767,14 @@ public class ContactRequest {
                     copy.setFolderId(folderId);
                     copy.setAttachedId(contactObj.getObjectID());
                     copy.setId(AttachmentBase.NEW);
-                    attachmentBase.attachToObject(copy, attachmentBase.getAttachedFile(origFolderId, origObjectId,
-                            Types.CONTACT, orig.getId(), ctx, user, uc), ctx, user, uc);
+                    attachmentBase.attachToObject(copy, attachmentBase.getAttachedFile(
+                        origFolderId,
+                        origObjectId,
+                        Types.CONTACT,
+                        orig.getId(),
+                        ctx,
+                        user,
+                        uc), ctx, user, uc);
                 } while (iterator.hasNext());
                 attachmentBase.commit();
             } catch (final SearchIteratorException e) {

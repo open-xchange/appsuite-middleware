@@ -2,6 +2,7 @@
 
  - Bugfix #13891: Fixed NPE on control bundle stop
  - Bugfix #13791: Trimming mail account properties which must not contain leading/trailing whitespaces
+ - Bugfix #13450: Using proper ContactInterface on contact search
 
 * 2009-06-17 - thorben.betten@open-xchange.com
 
