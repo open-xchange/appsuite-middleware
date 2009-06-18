@@ -1,3 +1,9 @@
+* 2009-06-18 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13926 gal bundle: java.lang.Exception: The given value for authtype
+    "%s" is not a possible one
+    - Changed text to "The directory "%s" is not a context identifier."
+  
 * 2009-06-16 - dennis.sieben@open-xchange.com
 
   - Bugfix #13909 NPE when contacts-ldap is enabled to access distribution

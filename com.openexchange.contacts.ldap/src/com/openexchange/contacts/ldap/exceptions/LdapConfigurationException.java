@@ -124,7 +124,12 @@ public class LdapConfigurationException extends OXException {
         /**
          * Abstract pathname "%1$s" does not denote a directory.
          */
-        NOT_DIRECTORY("Abstract pathname \"%1$s\" does not denote a directory.", Category.SETUP_ERROR, 13);
+        NOT_DIRECTORY("Abstract pathname \"%1$s\" does not denote a directory.", Category.SETUP_ERROR, 13),
+        
+        /**
+         * The directory "%1$s" is not a context identifier.
+         */
+        DIRECTORY_IS_NOT_A_CONTEXT_ID("The directory \"%1$s\" is not a context identifier.", Category.SETUP_ERROR, 14);
 
 
         /**

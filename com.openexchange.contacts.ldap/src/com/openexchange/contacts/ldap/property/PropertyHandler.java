@@ -109,7 +109,7 @@ public class PropertyHandler {
                 contextid = Integer.parseInt(dir.getName());
             } catch (final NumberFormatException e) {
                 // TODO right exception here
-                throw new LdapConfigurationException(Code.AUTH_TYPE_WRONG);
+                throw new LdapConfigurationException(Code.DIRECTORY_IS_NOT_A_CONTEXT_ID, dir.getName());
             }
             final ContextProperties contextprops = ContextProperties.getContextPropertiesFromDir(configuration, dir, contextid, logBuilder);
             this.contextdetails.put(contextid, contextprops);
