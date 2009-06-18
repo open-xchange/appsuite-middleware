@@ -706,4 +706,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return javax.mail.Session.getInstance(imapProps, null);
     }
 
+    @Override
+    public String toString() {
+        if (null != imapStore) {
+            return imapStore.toString();
+        }
+        return "[not connected]";
+    }
+
 }
