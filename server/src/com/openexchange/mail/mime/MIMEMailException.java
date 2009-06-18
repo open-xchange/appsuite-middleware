@@ -270,7 +270,11 @@ public class MIMEMailException extends MailException {
         /**
          * Message could not be sent: %1$s
          */
-        SEND_FAILED_MSG("Message could not be sent: %1$s", Category.CODE_ERROR, 1028);
+        SEND_FAILED_MSG("Message could not be sent: %1$s", Category.CODE_ERROR, 1028),
+        /**
+         * Message cannot be displayed.
+         */
+        MESSAGE_NOT_DISPLAYED("Message cannot be displayed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1029);
 
         private final String message;
 
@@ -472,6 +476,8 @@ public class MIMEMailException extends MailException {
             if (nextException == null) {
                 if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                     return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
+                } else if ("Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                    return new MIMEMailException(Code.MESSAGE_NOT_DISPLAYED, e, EMPTY_ARGS);
                 }
                 /*
                  * Default case
