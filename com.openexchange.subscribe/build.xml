@@ -40,6 +40,7 @@
 	
     <property name="cryptojar" value="com.openexchange.crypto.jar"/>
 	
+    <property name="commonjar" value="common.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
