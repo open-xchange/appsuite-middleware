@@ -612,6 +612,15 @@ public class ContactRequest {
         final ContactInterface contactInterface;
         final int[] folders = searchObj.getFolders();
         if (null != folders && folders.length >= 1) {
+            /*-
+             * TODO: Consider possibility that multiple ContactInterface instance might be addresses by folder IDs.
+             * 
+             * By now the first folder ID determines the ContactInterface instance to use but needs to be changed to:
+             * 1. Get maybe differing ContactInterface instances to folder IDs
+             * 2. Modify SearchObject appropriate to supporting ContactInterface instance
+             * 3. Search with ContactInterface instance
+             * 4. Merge resulting collections according to specified order-by and order-direction
+             */
             contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
                 folders[0],
                 session);
