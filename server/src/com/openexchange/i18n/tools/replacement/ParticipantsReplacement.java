@@ -62,16 +62,13 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
- * {@link ParticipantsReplacement} - Replacement for
- * {@link TemplateToken#PARTICIPANTS participants}
+ * {@link ParticipantsReplacement} - Replacement for {@link TemplateToken#PARTICIPANTS participants}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ParticipantsReplacement implements TemplateReplacement {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(ParticipantsReplacement.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ParticipantsReplacement.class);
 
     private static final String CRLF = "\r\n";
 
@@ -136,8 +133,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         return b.toString();
     }
 
-    private boolean processParticipant(final StringBuilder b, final Locale l, final StringHelper stringHelper,
-            final EmailableParticipant participant) {
+    private boolean processParticipant(final StringBuilder b, final Locale l, final StringHelper stringHelper, final EmailableParticipant participant) {
         String name = participant.displayName;
         if (name == null) {
             name = participant.email;
@@ -147,37 +143,21 @@ public final class ParticipantsReplacement implements TemplateReplacement {
                 /*
                  * Participant was newly added
                  */
-                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
-                        .append(": ");
+                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED)).append(": ");
                 b.append(name);
-                if (participant.type == Participant.USER) {
-                    b.append(" (");
-                    b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-                    if (participant.confirmMessage != null) {
-                        b.append(": ").append(participant.confirmMessage);
-                    }
-                    b.append(')');
-                }
+                appendStatus(b, l, stringHelper, participant);
             } else if (participant.state == EmailableParticipant.STATE_REMOVED) {
                 /*
                  * Participant was removed
                  */
-                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
-                        .append(": ");
+                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED)).append(": ");
                 b.append(name);
             } else {
                 /*
                  * Participant was neither newly added nor removed
                  */
                 b.append(name);
-                if (participant.type == Participant.USER) {
-                    b.append(" (");
-                    b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-                    if (participant.confirmMessage != null) {
-                        b.append(": ").append(participant.confirmMessage);
-                    }
-                    b.append(')');
-                }
+                appendStatus(b, l, stringHelper, participant);
             }
             return true;
         }
@@ -186,17 +166,25 @@ public final class ParticipantsReplacement implements TemplateReplacement {
              * Just add participant's display name
              */
             b.append(name);
-            if (participant.type == Participant.USER) {
-                b.append(" (");
-                b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-                if (participant.confirmMessage != null) {
-                    b.append(": ").append(participant.confirmMessage);
-                }
-                b.append(')');
-            }
+            appendStatus(b, l, stringHelper, participant);
             return true;
         }
         return false;
+    }
+
+    private void appendStatus(final StringBuilder b, final Locale l, final StringHelper stringHelper, final EmailableParticipant participant) {
+        if (participant.type == Participant.USER) {
+            b.append(" (");
+            b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+            if (participant.confirmMessage != null) {
+                b.append(": ").append(participant.confirmMessage);
+            }
+            b.append(')');
+        } else if (participant.type == Participant.EXTERNAL_USER) {
+            b.append(" (");
+            b.append(stringHelper.getString(Notifications.STATUS_EXTERNAL));
+            b.append(')');
+        }
     }
 
     public TemplateToken getToken() {
@@ -250,8 +238,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         }
         if (!other.changed()) {
             /*
-             * Other replacement does not reflect a changed value; leave
-             * unchanged
+             * Other replacement does not reflect a changed value; leave unchanged
              */
             return false;
         }
