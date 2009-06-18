@@ -353,6 +353,7 @@ public class EasyLogin extends HttpServlet {
 			"				//#. %2$s is the corresponding HTTP status text\n" +
 			"				alert(\"Error: \"+status+\" - \"+result);\n" +
 			"			bClickedLogin = false;\n" +
+			"			window.location.href = document.referrer;\n" +
 			"			return true;\n" +
 			"		},\n" +
 			"		null\n" +
