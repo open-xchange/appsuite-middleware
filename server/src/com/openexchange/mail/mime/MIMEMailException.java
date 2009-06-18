@@ -204,6 +204,10 @@ public class MIMEMailException extends MailException {
          */
         STORE_CLOSED("Store already closed: %1$s", Category.CODE_ERROR, 1014),
         /**
+         * Connection closed to server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s
+         */
+        STORE_CLOSED_EXT("Connection closed to server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s", STORE_CLOSED.category, STORE_CLOSED.detailNumber),
+        /**
          * Could not bind mail connection to local port %1$s
          * <p>
          * Signals that an error occurred while attempting to bind a socket to a local address and port. Typically, the port is in use, or
@@ -470,6 +474,16 @@ public class MIMEMailException extends MailException {
                 }
                 return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
             } else if (e instanceof StoreClosedException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.STORE_CLOSED_EXT,
+                        e,
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        e.getMessage());
+                }
                 return new MIMEMailException(Code.STORE_CLOSED, e, e.getMessage());
             }
             final Exception nextException = e.getNextException();
