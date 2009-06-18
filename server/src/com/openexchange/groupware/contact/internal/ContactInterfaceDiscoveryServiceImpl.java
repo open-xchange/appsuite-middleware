@@ -153,6 +153,17 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         return provider.newContactInterface(session);
     }
 
+    public ContactInterface newDefaultContactInterface(final Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return rdbProviderCache.getProvider(((ServerSession) session).getContext()).newContactInterface(session);
+        }
+        try {
+            return rdbProviderCache.getProvider(ContextStorage.getStorageContext(session.getContextId())).newContactInterface(session);
+        } catch (final ContextException e) {
+            throw new OXException(e);
+        }
+    }
+
     private static final class RdbContactInterfaceProvider implements ContactInterfaceProvider {
 
         private final Context ctx;

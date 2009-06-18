@@ -85,4 +85,13 @@ public interface ContactInterfaceDiscoveryService {
      * @throws OXException If returning an appropriate {@link ContactInterface} instance fails
      */
     public ContactInterface newContactInterface(int folderId, Session session) throws OXException;
+
+    /**
+     * Gets a newly created default {@link ContactInterface} instance appropriate for specified session.
+     * 
+     * @param session The session
+     * @return A newly created {@link ContactInterface} instance
+     * @throws OXException If returning an appropriate {@link ContactInterface} instance fails
+     */
+    public ContactInterface newDefaultContactInterface(Session session) throws OXException;
 }
