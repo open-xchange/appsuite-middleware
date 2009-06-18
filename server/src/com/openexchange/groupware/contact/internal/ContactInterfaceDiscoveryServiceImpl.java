@@ -141,27 +141,24 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         final int contextId = session.getContextId();
         final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
         if (provider == null) {
-            if (session instanceof ServerSession) {
-                return rdbProviderCache.getProvider(((ServerSession) session).getContext()).newContactInterface(session);
-            }
-            try {
-                return rdbProviderCache.getProvider(ContextStorage.getStorageContext(contextId)).newContactInterface(session);
-            } catch (final ContextException e) {
-                throw new OXException(e);
-            }
+            return rdbBySession(session, contextId);
         }
         return provider.newContactInterface(session);
     }
 
-    public ContactInterface newDefaultContactInterface(final Session session) throws OXException {
+    private ContactInterface rdbBySession(final Session session, final int contextId) throws OXException {
         if (session instanceof ServerSession) {
             return rdbProviderCache.getProvider(((ServerSession) session).getContext()).newContactInterface(session);
         }
         try {
-            return rdbProviderCache.getProvider(ContextStorage.getStorageContext(session.getContextId())).newContactInterface(session);
+            return rdbProviderCache.getProvider(ContextStorage.getStorageContext(contextId)).newContactInterface(session);
         } catch (final ContextException e) {
             throw new OXException(e);
         }
+    }
+
+    public ContactInterface newDefaultContactInterface(final Session session) throws OXException {
+        return rdbBySession(session, session.getContextId());
     }
 
     private static final class RdbContactInterfaceProvider implements ContactInterfaceProvider {
