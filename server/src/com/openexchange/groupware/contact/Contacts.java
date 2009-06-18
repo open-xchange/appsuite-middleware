@@ -101,6 +101,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -2182,6 +2183,11 @@ public final class Contacts {
 
     @OXThrows(category = Category.CODE_ERROR, desc = "50", exceptionId = 50, msg = ContactException.INIT_CONNECTION_FROM_DBPOOL)
     public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
+        if (ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).hasSpecificContactInterface(
+            folderId,
+            ctx.getContextId())) {
+            return true;
+        }
 
         Connection readCon = null;
         ResultSet rs = null;
@@ -2247,15 +2253,6 @@ public final class Contacts {
     }
 
     public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
-
-        // ContactInterface contactInterface =
-        // ContactServices.getInstance().getService(folderId);
-        if (ContactInterfaceProviderRegistry.getInstance().getService(folderId, ctx.getContextId()) != null) {
-            /*
-             * Another provider is bound to folder ID/context ID pair
-             */
-            return false;
-        }
 
         try {
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);

@@ -87,6 +87,15 @@ public interface ContactInterfaceDiscoveryService {
     public ContactInterface newContactInterface(int folderId, Session session) throws OXException;
 
     /**
+     * Checks if a specific {@link ContactInterfaceProvider} instance is associated with given folder ID/context ID pair.
+     * 
+     * @param folderId The folder ID
+     * @param contextId The context ID
+     * @return <code>true</code> if a specific {@link ContactInterfaceProvider} instance is available; otherwise <code>false</code>
+     */
+    public boolean hasSpecificContactInterface(int folderId, int contextId);
+
+    /**
      * Gets a newly created default {@link ContactInterface} instance appropriate for specified session.
      * 
      * @param session The session
