@@ -1,3 +1,13 @@
+* 2009-06-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #13794: Performing a ignore-case look-up of default folders by name
+
+* 2009-06-19 - martin.herfurth@open-xchange.com
+
+ - API Change: Added field "id" (user id) to ajax confirm request to change confirm status of other users.
+ - API Change: Changed ajax confirm request to fulfil api documentation.
+ - Bugfix #13828: Change confirm status of other users (Server side).
+
 * 2009-06-18 - thorben.betten@open-xchange.com
 
  - Bugfix #13891: Fixed NPE on control bundle stop

@@ -51,6 +51,10 @@ package com.openexchange.imap;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
@@ -66,7 +70,9 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
@@ -274,35 +280,65 @@ public final class IMAPDefaultFolderChecker {
                         spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                     }
                     for (int i = 0; i < defaultFolderNames.length; i++) {
+                        final String fullname = defaultFolderFullnames[i];
                         if (StorageUtility.INDEX_CONFIRMED_HAM == i) {
                             if (spamHandler.isCreateConfirmedHam()) {
-                                final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
-                                setDefaultMailFolder(i, checkDefaultFolder(
-                                    prefixAndName[0],
-                                    prefixAndName[1],
-                                    sep,
-                                    type,
-                                    spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                    tmp));
+                                if (null == fullname || 0 == fullname.length()) {
+                                    setDefaultMailFolder(i, checkDefaultFolder(
+                                        i,
+                                        prefix,
+                                        defaultFolderNames[i],
+                                        sep,
+                                        type,
+                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                        false,
+                                        tmp));
+                                } else {
+                                    setDefaultMailFolder(i, checkDefaultFolder(
+                                        i,
+                                        "",
+                                        fullname,
+                                        sep,
+                                        type,
+                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                        true,
+                                        tmp));
+                                }
                             } else if (LOG.isDebugEnabled()) {
                                 LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
                             }
                         } else if (StorageUtility.INDEX_CONFIRMED_SPAM == i) {
                             if (spamHandler.isCreateConfirmedSpam()) {
-                                final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
-                                setDefaultMailFolder(i, checkDefaultFolder(
-                                    prefixAndName[0],
-                                    prefixAndName[1],
-                                    sep,
-                                    type,
-                                    spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                    tmp));
+                                if (null == fullname || 0 == fullname.length()) {
+                                    setDefaultMailFolder(i, checkDefaultFolder(
+                                        i,
+                                        prefix,
+                                        defaultFolderNames[i],
+                                        sep,
+                                        type,
+                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                        false,
+                                        tmp));
+                                } else {
+                                    setDefaultMailFolder(i, checkDefaultFolder(
+                                        i,
+                                        "",
+                                        fullname,
+                                        sep,
+                                        type,
+                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                        true,
+                                        tmp));
+                                }
                             } else if (LOG.isDebugEnabled()) {
                                 LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                             }
                         } else {
-                            final String[] prefixAndName = choosePrefixAndName(prefix, defaultFolderNames[i], defaultFolderFullnames[i]);
-                            setDefaultMailFolder(i, checkDefaultFolder(prefixAndName[0], prefixAndName[1], sep, type, 1, tmp));
+                            if (null == fullname || 0 == fullname.length()) {
+                                setDefaultMailFolder(i, checkDefaultFolder(i, prefix, defaultFolderNames[i], sep, type, 1, false, tmp));
+                            } else {
+                                setDefaultMailFolder(i, checkDefaultFolder(i, "", fullname, sep, type, 1, true, tmp));
+                            }
                         }
                     }
                     if (LOG.isDebugEnabled()) {
@@ -322,6 +358,7 @@ public final class IMAPDefaultFolderChecker {
          * Check for NAMESPACE capability
          */
         final char sep;
+        final String inboxfullName = inboxFolder.getFullName();
         if (imapConfig.getImapCapabilities().hasNamespace()) {
             /*
              * Perform the NAMESPACE command to detect the subfolder prefix. From rfc2342: Clients often attempt to create mailboxes for
@@ -345,10 +382,10 @@ public final class IMAPDefaultFolderChecker {
                      * Personal namespace folder allows subfolders and nested default folder are demanded, thus use INBOX as prefix although
                      * NAMESPACE signals to use no prefix.
                      */
-                    tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+                    tmp.append(inboxfullName).append(sep);
                 }
             } else {
-                tmp.append(persPrefix).append(personalNamespaces[0].getSeparator());
+                tmp.append(persPrefix).append(sep);
             }
         } else {
             /*
@@ -373,13 +410,13 @@ public final class IMAPDefaultFolderChecker {
                 tmp.append("");
             } else if (inboxInferiors && !rootInferiors) {
                 // Create folder under INBOX folder
-                tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+                tmp.append(inboxfullName).append(sep);
             } else if (inboxInferiors && rootInferiors) {
                 if (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
                     /*
                      * Only allow default folder below INBOX if inferiors are permitted nested default folder are explicitly allowed
                      */
-                    tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+                    tmp.append(inboxfullName).append(sep);
                 } else {
                     tmp.append("");
                 }
@@ -403,16 +440,104 @@ public final class IMAPDefaultFolderChecker {
         arr[index] = fullname;
     }
 
-    private String checkDefaultFolder(final String prefix, final String name, final char sep, final int type, final int subscribe, final StringBuilder tmp) throws MessagingException {
+    private String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname, final StringBuilder tmp) throws MessagingException, IMAPException {
         /*
          * Check default folder
          */
         final boolean checkSubscribed = true;
-        final Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
+        Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
         tmp.setLength(0);
         if (!f.exists() /* && !f.create(type) */) {
-            // Try with own routine to get a valid error message on failure
-            IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+            if (isFullname) {
+                /* OK, a fullname was passed. Try to create obviously non-existing IMAP folder. */
+                IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+            } else {
+                /*
+                 * A name was passed. Perform a case-insensitive look-up because some IMAP servers do not allow to create a folder of which
+                 * name equals ignore-case to an existing folder.
+                 */
+                final IMAPFolder parent;
+                final int len = prefix.length();
+                if (0 == len) {
+                    parent = (IMAPFolder) imapStore.getDefaultFolder();
+                } else {
+                    /*
+                     * Cut off trailing separator character
+                     */
+                    parent = (IMAPFolder) imapStore.getFolder(prefix.substring(0, len - 1));
+                }
+                final Folder[] folders = parent.list();
+                final List<String> candidates = new ArrayList<String>(2);
+                for (int i = 0; i < folders.length; i++) {
+                    final String folderName = folders[i].getName();
+                    if (name.equalsIgnoreCase(folderName)) {
+                        /*
+                         * Detected a similarly named folder
+                         */
+                        candidates.add(folderName);
+                    }
+                }
+                final int nCandidates = candidates.size();
+                if (nCandidates <= 0 || nCandidates > 1) {
+                    /*
+                     * Zero or more than one candidate found. Try to create IMAP folder
+                     */
+                    IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                } else {
+                    /*
+                     * Found _ONE_ candidate of which name passed ignore-case comparison
+                     */
+                    final String candidate = candidates.get(0);
+                    final MailAccountDescription mad = new MailAccountDescription();
+                    final Set<Attribute> attributes;
+                    mad.setId(accountId);
+                    switch (index) {
+                    case StorageUtility.INDEX_CONFIRMED_HAM:
+                        mad.setConfirmedHam(candidate);
+                        attributes = EnumSet.of(Attribute.CONFIRMED_HAM_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_CONFIRMED_SPAM:
+                        mad.setConfirmedSpam(candidate);
+                        attributes = EnumSet.of(Attribute.CONFIRMED_SPAM_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_DRAFTS:
+                        mad.setDrafts(candidate);
+                        attributes = EnumSet.of(Attribute.DRAFTS_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_SENT:
+                        mad.setSent(candidate);
+                        attributes = EnumSet.of(Attribute.SENT_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_SPAM:
+                        mad.setSpam(candidate);
+                        attributes = EnumSet.of(Attribute.SPAM_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_TRASH:
+                        mad.setTrash(candidate);
+                        attributes = EnumSet.of(Attribute.TRASH_LITERAL);
+                        break;
+                    default:
+                        throw new MessagingException("Unexpected index: " + index);
+                    }
+                    try {
+                        final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+                            MailAccountStorageService.class,
+                            true);
+                        storageService.updateMailAccount(
+                            mad,
+                            attributes,
+                            session.getUserId(),
+                            session.getContextId(),
+                            session.getPassword());
+                    } catch (final ServiceException e) {
+                        throw new IMAPException(e);
+                    } catch (final MailAccountException e) {
+                        throw new IMAPException(e);
+                    }
+                    f = imapStore.getFolder(tmp.append(prefix).append(candidate).toString());
+                    tmp.setLength(0);
+                }
+            }
             /*-
              * 
              * 
@@ -455,13 +580,6 @@ public final class IMAPDefaultFolderChecker {
         return f.getFullName();
     }
 
-    private static String[] choosePrefixAndName(final String prefix, final String name, final String fullname) {
-        if (null == fullname || 0 == fullname.length()) {
-            return new String[] { prefix, name };
-        }
-        return new String[] { "", fullname };
-    }
-
     private boolean isDefaultFoldersChecked() {
         final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId));
         return (b != null) && b.booleanValue();
@@ -472,7 +590,7 @@ public final class IMAPDefaultFolderChecker {
     }
 
     /**
-     * Stores specified separator character in session parameters for future look-ups
+     * Stores specified separator character in session parameters for future look-ups.
      * 
      * @param separator The separator character
      */
