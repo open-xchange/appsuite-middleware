@@ -23,11 +23,19 @@ public class Activator implements BundleActivator {
             "com.openexchange.subscribe.xing",
             XingSubscriptionErrorMessage.EXCEPTIONS);
 
-        XingContactParser contactParser = new XingContactParser();
-        XingSubscribeService subscribeService = new XingSubscribeService();
-        subscribeService.setXingContactParser(contactParser);
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(new SnoopingClassLoader(oldClassLoader));
+            XingContactParser contactParser = new XingContactParser();
+            contactParser = new SnoopingContactParser();
+            XingSubscribeService subscribeService = new XingSubscribeService();
+            subscribeService.setXingContactParser(contactParser);
 
-        serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
+            serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldClassLoader);
+        }
+        
 
     }
 
