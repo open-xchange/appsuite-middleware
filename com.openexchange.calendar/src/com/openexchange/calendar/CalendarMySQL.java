@@ -3139,7 +3139,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
             OXFolderAccess ofa = new OXFolderAccess(ctx);
             EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
-            if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.SHARED) {
+            if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
                 throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
             }
             if (!oclp.canWriteAllObjects()) {

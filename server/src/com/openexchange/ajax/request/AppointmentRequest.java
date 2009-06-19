@@ -852,7 +852,7 @@ public class AppointmentRequest {
         if (jData.has(AJAXServlet.PARAMETER_ID)) {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         }
-        String confirmMessage = DataParser.checkString(jData, CalendarFields.CONFIRM_MESSAGE);
+        String confirmMessage = jData.has(CalendarFields.CONFIRM_MESSAGE) && !jData.isNull(CalendarFields.CONFIRM_MESSAGE) ? jData.getString(CalendarFields.CONFIRM_MESSAGE) : null;
         int confirmStatus = DataParser.checkInt(jData, CalendarFields.CONFIRMATION);
 
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
