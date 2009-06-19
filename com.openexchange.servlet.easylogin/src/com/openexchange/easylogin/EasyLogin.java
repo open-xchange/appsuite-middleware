@@ -350,10 +350,12 @@ public class EasyLogin extends HttpServlet {
 			"			} else\n" +
 			"				//#. HTTP Errors from the server\n" +
 			"				//#. %1$s is the numeric HTTP status code\n" +
-			"				//#. %2$s is the corresponding HTTP status text\n" +
-			"				alert(\"Error: \"+status+\" - \"+result);\n" +
-			"			bClickedLogin = false;\n" +
-			"			window.location.href = document.referrer;\n" +
+			"				//#. %2$s is the corresponding HTTP status text\n"
+			
+	private static final String RESPONSE25 =	"				alert(\"Error: \"+status+\" - \"+result);\n" 
+		
+	private static final String RESPONSE27 =	"			bClickedLogin = false;\n" +
+			"			window.location.href = document.referrer + \"?login=failed&user=\" + u;\n" +
 			"			return true;\n" +
 			"		},\n" +
 			"		null\n" +
@@ -393,6 +395,7 @@ public class EasyLogin extends HttpServlet {
 	private static String directLinkPara ="direct_link";
 	private static  String OX_PATH_RELATIVE = "../";
 	private static boolean doGetEnabled = false;
+	private static boolean popUpOnError = true;
 	
 	/**
 	 * Initializes a new {@link EasyLogin}
@@ -459,6 +462,10 @@ public class EasyLogin extends HttpServlet {
 			out.print(RESPONSE1);
 			out.print(AJAX_ROOT);
 			out.print(RESPONSE2);
+			if( popUpOnError ) {
+				out.print(RESPONSE25);
+			}
+			out.print(RESPONSE27);
 			// direct links redirecting
 			if(req.getParameter(directLinkPara)!=null && req.getParameter(directLinkPara).trim().length()>0){
 				out.print(OX_PATH_RELATIVE+req.getParameter(directLinkPara));
@@ -532,6 +539,15 @@ public class EasyLogin extends HttpServlet {
 	                } else {
 	                	LOG.error("Could not find doGetEnabled in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			doGetEnabled );
+	                }
+	                
+	                if (props.get("com.openexchange.easylogin.popUpOnError") != null) {
+	                	String property = props.getProperty("com.openexchange.easylogin.popUpOnError","").trim();
+	                	popUpOnError = Boolean.parseBoolean(property);
+	                	LOG.info("Set popUpOnError to " +  popUpOnError);
+	                } else {
+	                	LOG.error("Could not find popUpOnError in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                			popUpOnError );
 	                }
 	                
 	            } catch (IOException e) {
