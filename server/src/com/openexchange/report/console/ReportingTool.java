@@ -163,7 +163,10 @@ public final class ReportingTool {
                 return contextId1.compareTo(contextId2);
             }
         });
-        sorted.addAll(data.keySet());
+        for (Object tmp : data.keySet()) {
+            List<Object> list = (List<Object>) tmp;
+            sorted.add(list);
+        }
         for (List<Object> tmp : sorted) {
             data2.add(tmp);
         }
