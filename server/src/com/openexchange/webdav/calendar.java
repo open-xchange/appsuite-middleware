@@ -320,7 +320,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
                     break;
                 case DataParser.CONFIRM:
-                    appointmentsSQL.setUserConfirmation(appointmentobject.getObjectID(), user, confirm,
+                    appointmentsSQL.setUserConfirmation(appointmentobject.getObjectID(), appointmentobject.getParentFolderID(), user, confirm,
                             appointmentobject.getConfirmMessage());
                     break;
                 default:

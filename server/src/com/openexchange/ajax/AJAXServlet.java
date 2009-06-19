@@ -316,6 +316,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_LIMIT = "limit";
 
     public static final String PARAMETER_TYPE = "type";
+    
+    public static final String PARAMETER_USER = "user";
 
     /**
      * The content type if the response body contains javascript data. Set it

@@ -135,7 +135,7 @@ public interface CalendarSqlImp {
 
     void deleteAppointmentsInFolder(Session so, Context ctx, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
 
-    Date setUserConfirmation(int oid, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
+    Date setUserConfirmation(int oid, int folderId, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
 
     boolean checkIfFolderContainsForeignObjects(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
 

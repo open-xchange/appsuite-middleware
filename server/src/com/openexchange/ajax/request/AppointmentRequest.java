@@ -844,21 +844,19 @@ public class AppointmentRequest {
         }
     }
 
-    public JSONObject actionConfirm(final JSONObject jsonObj) throws OXException, AjaxException {
-        final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-
-        final CalendarDataObject appointmentObj = new CalendarDataObject();
-        appointmentObj.setContext(ctx);
-
-        final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
-        appointmentParser.parse(appointmentObj, jData);
+    public JSONObject actionConfirm(final JSONObject jsonObj) throws OXException, AjaxException, OXJSONException, JSONException {
+        int objectId = DataParser.checkInt(jsonObj, DataFields.ID);
+        int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+        JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        int userId = user.getId();
+        if (jData.has(AJAXServlet.PARAMETER_ID)) {
+            userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
+        }
+        String confirmMessage = DataParser.checkString(jData, CalendarFields.CONFIRM_MESSAGE);
+        int confirmStatus = DataParser.checkInt(jData, CalendarFields.CONFIRMATION);
 
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
-        timestamp = appointmentSql.setUserConfirmation(
-            appointmentObj.getObjectID(),
-            user.getId(),
-            appointmentObj.getConfirm(),
-            appointmentObj.getConfirmMessage());
+        timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
 
         return new JSONObject();
     }

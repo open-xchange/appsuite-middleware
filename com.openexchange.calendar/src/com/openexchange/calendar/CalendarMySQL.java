@@ -110,6 +110,7 @@ import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -3050,7 +3051,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_CONFIRM2 = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
 
-    public final Date setUserConfirmation(final int oid, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
+    public final Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
+        checkConfirmPermission(folderId, uid, so, ctx);
         Connection writecon = null;
         PreparedStatement pu = null;
         PreparedStatement mo = null;
@@ -3130,6 +3132,20 @@ public class CalendarMySQL implements CalendarSqlImp {
         cdao.setParentFolderID(fid);
         collection.triggerEvent(so, getConfirmAction(confirm), cdao);
         return changeTimestamp;
+    }
+
+    private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx) throws OXException, OXPermissionException {
+        if (uid != so.getUserId()) {
+            UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
+            OXFolderAccess ofa = new OXFolderAccess(ctx);
+            EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
+            if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.SHARED) {
+                throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
+            }
+            if (!oclp.canWriteAllObjects()) {
+                throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
+            }
+        }
     }
 
     private static final int getConfirmAction(final int confirm) {

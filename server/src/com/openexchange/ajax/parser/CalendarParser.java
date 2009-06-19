@@ -255,6 +255,9 @@ public class CalendarParser extends CommonParser {
 			if (jUser.has(CalendarFields.CONFIRMATION)) {
 				user.setConfirm(jUser.getInt(CalendarFields.CONFIRMATION));
 			}
+			if (jUser.has(CalendarFields.CONFIRM_MESSAGE)) {
+			    user.setConfirmMessage(jUser.getString(CalendarFields.CONFIRM_MESSAGE));
+			}
 			
 			if (jUser.has(CalendarFields.ALARM)) {
 				user.setAlarmDate(new Date(jUser.getLong(CalendarFields.ALARM)));

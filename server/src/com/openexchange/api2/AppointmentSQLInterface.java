@@ -282,12 +282,13 @@ public interface AppointmentSQLInterface {
      * Sets the confirmation of an appointment for a user.
      *
      * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
      * @param userId unique identifier of the user.
      * @param confirm The confirm status
      * @param confirmMessage The confirm message
      * @throws OXException
      */
-    Date setUserConfirmation(int object_id, int user_id, int confirm, String confirm_message) throws OXException;
+    Date setUserConfirmation(int object_id, int folderId, int user_id, int confirm, String confirm_message) throws OXException;
 
     /**
      * Method to attach or detach attachments

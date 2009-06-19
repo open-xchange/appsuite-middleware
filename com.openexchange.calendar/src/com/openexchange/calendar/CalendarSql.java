@@ -981,7 +981,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setUserConfirmation(int, int, int, java.lang.String)
      */
-    public Date setUserConfirmation(final int oid, final int uid, final int confirm, final String confirm_message) throws OXException {
+    public Date setUserConfirmation(final int oid, int folderId, final int uid, final int confirm, final String confirm_message) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -993,7 +993,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
             }
         }
-        return cimp.setUserConfirmation(oid, uid, confirm, confirm_message, session, ctx);
+        return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirm_message, session, ctx);
     }
 
     public SearchIterator<AppointmentObject> getObjectsById(final int[][] oids, int[] cols) throws OXException {
