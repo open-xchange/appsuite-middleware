@@ -52,7 +52,7 @@ package com.openexchange.groupware.infostore.utils;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -69,7 +69,7 @@ import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_UTILS_DELUSERFOLDERDISCOVERER, component = EnumComponent.INFOSTORE)
@@ -87,35 +87,37 @@ public class DelUserFolderDiscoverer extends DBService {
 	}
 
 	public List<FolderObject> discoverFolders(final int userId, final Context ctx) throws OXException {
-		final List<FolderObject> discovered = new ArrayList<FolderObject>();
-		try {
-			final User user = UserStorage.getInstance().getUser(userId, ctx);
-			final UserConfiguration userConfig = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx);
+        final List<FolderObject> discovered = new ArrayList<FolderObject>();
+        try {
+            final User user = UserStorage.getInstance().getUser(userId, ctx);
+            final UserConfiguration userConfig = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx);
 
-			final SearchIterator iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, user
-					.getGroups(), userConfig.getAccessibleModules(), FolderObject.INFOSTORE, ctx);
-
-			folder: while (iter.hasNext()) {
-				final FolderObject fo = (FolderObject) iter.next();
-                if(isVirtual(fo)) {
+            final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                userId,
+                user.getGroups(),
+                userConfig.getAccessibleModules(),
+                FolderObject.INFOSTORE,
+                ctx)).asQueue();
+            folder: for (final FolderObject fo : queue) {
+                if (isVirtual(fo)) {
                     continue folder;
                 }
                 for (final OCLPermission perm : fo.getPermissionsAsArray()) {
-					if (someoneElseMayReadInfoitems(perm, userId)) {
-						continue folder;
-					}
-				}
-				discovered.add(fo);
-			}
+                    if (someoneElseMayReadInfoitems(perm, userId)) {
+                        continue folder;
+                    }
+                }
+                discovered.add(fo);
+            }
 
-		} catch (final AbstractOXException x) {
-			throw new InfostoreException(x);
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(0, e);
-		}
+        } catch (final AbstractOXException x) {
+            throw new InfostoreException(x);
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(0, e);
+        }
 
-		return discovered;
-	}
+        return discovered;
+    }
 
     private boolean isVirtual(final FolderObject fo) {
         final int id = fo.getObjectID();

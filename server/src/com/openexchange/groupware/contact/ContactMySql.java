@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contact;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,7 +72,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -714,19 +713,16 @@ public class ContactMySql implements ContactSql {
 
     public String buildAllFolderSearchString(final int user, final int[] group, final Session so) throws OXException, SearchIteratorException {
         final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx);
-        final SearchIterator<FolderObject> si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+        final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
             user,
             group,
             config.getAccessibleModules(),
             FolderObject.CONTACT,
-            ctx);
-        final List<Integer> tmp = new ArrayList<Integer>();
-        while (si.hasNext()) {
-            tmp.add(I(si.next().getObjectID()));
-        }
-        final int[] folders = new int[tmp.size()];
-        for (int i = 0; i < tmp.size(); i++) {
-            folders[i] = tmp.get(i).intValue();
+            ctx)).asList();
+        final int size = list.size();
+        final int[] folders = new int[size];
+        for (int i = 0; i < size; i++) {
+            folders[i] = list.get(i).getObjectID();
         }
         return buildFolderSearch(user, group, folders, so);
     }

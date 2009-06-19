@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
@@ -79,6 +80,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -146,24 +148,19 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         try {
             final int userId = user.getId();
             if (folderId == NOT_SET || folderId == NO_FOLDER) {
-                final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
                     userId,
                     user.getGroups(),
                     userConfig.getAccessibleModules(),
                     FolderObject.INFOSTORE,
-                    ctx);
-                try {
-                    while (iter.hasNext()) {
-                        final FolderObject folder = iter.next();
-                        final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
-                        if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-                            own.add(Integer.valueOf(folder.getObjectID()));
-                        } else if (perm.canReadAllObjects()){
-                            all.add(Integer.valueOf(folder.getObjectID()));
-                        }
+                    ctx)).asQueue();
+                for (final FolderObject folder : queue) {
+                    final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
+                    if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
+                        own.add(Integer.valueOf(folder.getObjectID()));
+                    } else if (perm.canReadAllObjects()) {
+                        all.add(Integer.valueOf(folder.getObjectID()));
                     }
-                } finally {
-                    iter.close();
                 }
             } else {
                 final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig);

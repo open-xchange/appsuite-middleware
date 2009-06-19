@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
+import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -425,27 +427,22 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             config = Tools.getUserConfiguration(ctx, userId);
             final int[] groups = user.getGroups();
             if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
-                final SearchIterator<FolderObject> iter = OXFolderIteratorSQL
-                    .getAllVisibleFoldersIteratorOfModule(userId,
-                        groups, config.getAccessibleModules(),
-                        FolderObject.TASK, ctx);
-                try {
-                    while (iter.hasNext()) {
-                        final FolderObject folder = iter.next();
-                        if (folder.isShared(userId)) {
-                            shared.add(Integer.valueOf(folder.getObjectID()));
-                        } else if (Permission.canOnlySeeFolder(ctx, user, config,
-                            folder)) {
-                            continue;
-                        } else if (Permission.canReadInFolder(ctx, user, config,
-                            folder)) {
-                            own.add(Integer.valueOf(folder.getObjectID()));
-                        } else {
-                            all.add(Integer.valueOf(folder.getObjectID()));
-                        }
+                final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                    userId,
+                    groups,
+                    config.getAccessibleModules(),
+                    FolderObject.TASK,
+                    ctx)).asQueue();
+                for (final FolderObject folder : queue) {
+                    if (folder.isShared(userId)) {
+                        shared.add(Integer.valueOf(folder.getObjectID()));
+                    } else if (Permission.canOnlySeeFolder(ctx, user, config, folder)) {
+                        continue;
+                    } else if (Permission.canReadInFolder(ctx, user, config, folder)) {
+                        own.add(Integer.valueOf(folder.getObjectID()));
+                    } else {
+                        all.add(Integer.valueOf(folder.getObjectID()));
                     }
-                } finally {
-                    iter.close();
                 }
             } else {
                 final FolderObject folder = Tools.getFolder(ctx,

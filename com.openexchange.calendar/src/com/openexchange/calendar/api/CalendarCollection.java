@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -65,14 +64,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
@@ -86,15 +83,15 @@ import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.CalendarSqlImp;
 import com.openexchange.calendar.RecurringResult;
 import com.openexchange.calendar.Tools;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.Types;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -116,9 +113,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -126,11 +121,11 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarCollection} - Provides calculation routines for recurring calendar items. 
@@ -570,7 +565,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
         final Calendar cal = GregorianCalendar.getInstance(CalendarCollection.ZONE_UTC);
         cal.setTimeInMillis(millis);
-        long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / Constants.MILLI_HOUR);
+        final long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / Constants.MILLI_HOUR);
         return hours >= 24 || hours < 0;
     }
 
@@ -749,8 +744,8 @@ public final class CalendarCollection implements CalendarCollectionService {
         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE);
     }
 
-    private Date calculateUntilOfSequence(CalendarDataObject cdao) throws OXException {
-        Date temp = getOccurenceDate(cdao);
+    private Date calculateUntilOfSequence(final CalendarDataObject cdao) throws OXException {
+        final Date temp = getOccurenceDate(cdao);
         temp.setTime(temp.getTime() - cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
         return temp;
     }
@@ -2351,35 +2346,27 @@ public final class CalendarCollection implements CalendarCollectionService {
     private CalendarFolderObject _getVisibleAndReadableFolderObject(final int uid, final int groups[],
             final Context c, final UserConfiguration uc, final Connection readcon, final boolean fillShared) throws SQLException,
             DBPoolingException, SearchIteratorException, OXException {
-        CalendarFolderObject cfo = null;
         final CalendarFolderObject check = new CalendarFolderObject(uid, c.getContextId(), fillShared);
-        Object o = null;
         if (cache == null) {
             cache = CalendarCache.getInstance();
         }
 
-        o = cache.get(check.getObjectKey(), check.getGroupKey());
+        final Object o = cache.get(check.getObjectKey(), check.getGroupKey());
 
+        final CalendarFolderObject cfo;
         if (o == null) {
-            final SearchIterator<FolderObject> si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid,
-                    groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c, readcon);
-            EffectivePermission oclp = null;
-            FolderObject fo = null;
+            final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid,
+                groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c, readcon)).asQueue();
+            cfo = new CalendarFolderObject(uid, c.getContextId(), fillShared);
+            for (final FolderObject fo : queue) {
+                final EffectivePermission oclp = fo.getEffectiveUserPermission(uid, uc);
+                cfo.addFolder(oclp.canReadAllObjects(), oclp.canReadOwnObjects(), fo.isShared(uid), fo
+                        .getObjectID(), fo.getType());
+            }
             try {
-                cfo = new CalendarFolderObject(uid, c.getContextId(), fillShared);
-                while (si.hasNext()) {
-                    fo = si.next();
-                    oclp = fo.getEffectiveUserPermission(uid, uc);
-                    cfo.addFolder(oclp.canReadAllObjects(), oclp.canReadOwnObjects(), fo.isShared(uid), fo
-                            .getObjectID(), fo.getType());
-                }
-                try {
-                    cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
-                } catch (final CacheException ex) {
-                    LOG.error(ex.getMessage(), ex);
-                }
-            } finally {
-                si.close();
+                cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
+            } catch (final CacheException ex) {
+                LOG.error(ex.getMessage(), ex);
             }
         } else {
             cfo = (CalendarFolderObject) o;
