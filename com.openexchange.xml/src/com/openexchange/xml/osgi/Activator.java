@@ -64,7 +64,6 @@ public class Activator implements BundleActivator {
     private ServiceRegistration springParserRegistration;
 
     public void start(final BundleContext bundleContext) throws Exception {
-        System.setProperty("org.apache.xerces.xni.parser.XMLParserConfiguration", "com.openexchange.xml.xerces.IBMCompatParserConfiguration");
         this.jdomRegistration = bundleContext.registerService(JDOMParser.class.getName(), new JDOMParserImpl(), null);
         this.springParserRegistration = bundleContext.registerService(SpringParser.class.getName(), new DefaultSpringParser(), null);
         // new javax.xml.stream.internal.Activator().start(bundleContext);
