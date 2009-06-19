@@ -120,6 +120,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
             return retval;
         } catch (SQLException x) {
+            // FIXME log at least exception
             try {
                 if(connectionHandling) {
                     writeCon.rollback();
