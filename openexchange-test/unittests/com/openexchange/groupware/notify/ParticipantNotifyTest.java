@@ -218,19 +218,15 @@ public class ParticipantNotifyTest extends TestCase{
         assertTrue(msg.internal);
 
 	}
-	
-	public void testExternal() throws Exception{
-		final Participant[] participants = getParticipants(U(),G(),S("don.external@external.invalid"), R());
+
+	public void testExternal() throws Exception {
+		final Participant[] participants = getParticipants(U(), G(), S("don.external@external.invalid"), R());
 		final Task t = getTask(participants);
-		
 		notify.taskCreated(t,session);
-		
 		final Message msg = notify.getMessages().get(0);
-		
 		final String[] participantNames = parseParticipants( msg );
-		
-		assertNames( msg.addresses, "don.external@external.invalid" );
-		assertNames( participantNames,"don.external@external.invalid" );
+		assertNames(msg.addresses, "don.external@external.invalid");
+		assertNames(participantNames, "don.external@external.invalid (external)");
         assertFalse(msg.internal);
     }
 	
@@ -413,18 +409,17 @@ public class ParticipantNotifyTest extends TestCase{
     public static final void assertLanguage(final int lang, final Message msg) {
 		assertEquals(lang,guessLanguage(msg));
 	}
-	
-	public static final void assertNames(final String[] names, final String...expected) {
-		assertNames(Arrays.asList(names),expected);
+
+	public static final void assertNames(final String[] names, final String... expected) {
+		assertNames(Arrays.asList(names), expected);
 	}
-	
-	public static final void assertNames(final Iterable<String> names, final String...expected) {
+
+	public static final void assertNames(final Iterable<String> names, final String... expected) {
 		final Set<String> expectSet = new HashSet<String>(Arrays.asList(expected));
-		
 		for(final String name : names) {
 			assertTrue(names.toString(), expectSet.remove(name));
 		}
-        assertTrue("Didn't find "+ expectSet, expectSet.isEmpty());
+        assertTrue("Didn't find " + expectSet, expectSet.isEmpty());
     }
 
     private static void assertIsSubstring(final String expected, final String string) {
