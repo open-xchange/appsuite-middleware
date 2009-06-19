@@ -52,17 +52,22 @@ package com.openexchange.publish.osgi;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.server.osgiservice.CompositeBundleActivator;
 
-
 /**
  * {@link Activator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class Activator extends CompositeBundleActivator {
 
-    private BundleActivator[] ACTIVATORS = {new DiscovererActivator(), new LoaderActivator(), new PreferencesActivator(), new CleanUpActivator(), new CreateTableActivator()};
-    
+    private BundleActivator[] ACTIVATORS = {
+        new DiscovererActivator(), 
+        new LoaderActivator(), 
+        new PreferencesActivator(), 
+        new CleanUpActivator(), 
+        new CreateTableActivator(),
+        new DeleteEventListenerActivator() 
+    };
+
     @Override
     protected BundleActivator[] getActivators() {
         return ACTIVATORS;

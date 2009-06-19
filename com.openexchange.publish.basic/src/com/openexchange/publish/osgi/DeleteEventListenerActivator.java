@@ -47,30 +47,39 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.publish.PublicationStorage;
+import com.openexchange.publish.database.PublicationUserDeleteListener;
+import com.openexchange.publish.helpers.AbstractPublicationService;
 
 
 /**
- * {@link Activator}
+ * {@link DeleteEventListenerActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class DeleteEventListenerActivator implements BundleActivator{
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new PreferencesActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private ServiceRegistration serviceRegistration;
+
+    public void start(BundleContext context) throws Exception {
+        PublicationStorage storage = AbstractPublicationService.STORAGE;
+        PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
+        listener.setStorage(storage);
+        serviceRegistration = context.registerService(DeleteListener.class.getName(), listener, null);        
     }
+
+    public void stop(BundleContext context) throws Exception {
+        if(serviceRegistration == null)
+            return;
+        serviceRegistration.unregister();
+        serviceRegistration = null;
+    }
+
 
 }
