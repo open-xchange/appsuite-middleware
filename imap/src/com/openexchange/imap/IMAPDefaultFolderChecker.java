@@ -55,6 +55,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
@@ -80,6 +84,7 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.timer.TimerService;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -189,7 +194,6 @@ public final class IMAPDefaultFolderChecker {
                         sb.append('\n');
                         LOG.debug(sb.toString());
                     }
-                    final long start = System.currentTimeMillis();
                     /*
                      * Get INBOX folder
                      */
@@ -279,66 +283,125 @@ public final class IMAPDefaultFolderChecker {
                     {
                         spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                     }
+                    final CompletionService<Object> completionService;
+                    try {
+                        completionService = new ExecutorCompletionService<Object>(IMAPServiceRegistry.getServiceRegistry().getService(
+                            TimerService.class,
+                            true).getExecutor());
+                    } catch (final ServiceException e) {
+                        throw new IMAPException(e);
+                    }
+                    int count = 0;
                     for (int i = 0; i < defaultFolderNames.length; i++) {
                         final String fullname = defaultFolderFullnames[i];
-                        if (StorageUtility.INDEX_CONFIRMED_HAM == i) {
+                        final int index = i;
+                        if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
                             if (spamHandler.isCreateConfirmedHam()) {
-                                if (null == fullname || 0 == fullname.length()) {
-                                    setDefaultMailFolder(i, checkDefaultFolder(
-                                        i,
-                                        prefix,
-                                        defaultFolderNames[i],
-                                        sep,
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        false,
-                                        tmp));
-                                } else {
-                                    setDefaultMailFolder(i, checkDefaultFolder(
-                                        i,
-                                        "",
-                                        fullname,
-                                        sep,
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        true,
-                                        tmp));
-                                }
+                                completionService.submit(new Callable<Object>() {
+
+                                    public Object call() throws Exception {
+                                        if (null == fullname || 0 == fullname.length()) {
+                                            setDefaultMailFolder(index, checkDefaultFolder(
+                                                index,
+                                                prefix,
+                                                defaultFolderNames[index],
+                                                sep,
+                                                type,
+                                                spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                                false,
+                                                tmp));
+                                        } else {
+                                            setDefaultMailFolder(index, checkDefaultFolder(
+                                                index,
+                                                "",
+                                                fullname,
+                                                sep,
+                                                type,
+                                                spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                                true,
+                                                tmp));
+                                        }
+                                        return null;
+                                    }
+                                });
+                                count++;
                             } else if (LOG.isDebugEnabled()) {
-                                LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                                LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
                             }
-                        } else if (StorageUtility.INDEX_CONFIRMED_SPAM == i) {
+                        } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
                             if (spamHandler.isCreateConfirmedSpam()) {
-                                if (null == fullname || 0 == fullname.length()) {
-                                    setDefaultMailFolder(i, checkDefaultFolder(
-                                        i,
-                                        prefix,
-                                        defaultFolderNames[i],
-                                        sep,
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        false,
-                                        tmp));
-                                } else {
-                                    setDefaultMailFolder(i, checkDefaultFolder(
-                                        i,
-                                        "",
-                                        fullname,
-                                        sep,
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        true,
-                                        tmp));
-                                }
+                                completionService.submit(new Callable<Object>() {
+
+                                    public Object call() throws Exception {
+                                        if (null == fullname || 0 == fullname.length()) {
+                                            setDefaultMailFolder(index, checkDefaultFolder(
+                                                index,
+                                                prefix,
+                                                defaultFolderNames[index],
+                                                sep,
+                                                type,
+                                                spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                                false,
+                                                tmp));
+                                        } else {
+                                            setDefaultMailFolder(index, checkDefaultFolder(
+                                                index,
+                                                "",
+                                                fullname,
+                                                sep,
+                                                type,
+                                                spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                                                true,
+                                                tmp));
+                                        }
+                                        return null;
+                                    }
+                                });
+                                count++;
                             } else if (LOG.isDebugEnabled()) {
-                                LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                                LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                             }
                         } else {
-                            if (null == fullname || 0 == fullname.length()) {
-                                setDefaultMailFolder(i, checkDefaultFolder(i, prefix, defaultFolderNames[i], sep, type, 1, false, tmp));
-                            } else {
-                                setDefaultMailFolder(i, checkDefaultFolder(i, "", fullname, sep, type, 1, true, tmp));
-                            }
+                            completionService.submit(new Callable<Object>() {
+
+                                public Object call() throws Exception {
+                                    if (null == fullname || 0 == fullname.length()) {
+                                        setDefaultMailFolder(index, checkDefaultFolder(
+                                            index,
+                                            prefix,
+                                            defaultFolderNames[index],
+                                            sep,
+                                            type,
+                                            1,
+                                            false,
+                                            tmp));
+                                    } else {
+                                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, 1, true, tmp));
+                                    }
+                                    return null;
+                                }
+                            });
+                            count++;
+                        }
+                    }
+                    final long start = System.currentTimeMillis();
+                    try {
+                        for (int i = 0; i < count; i++) {
+                            completionService.take().get();
+                        }
+                    } catch (final InterruptedException e) {
+                        // Keep interrupted status
+                        throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                    } catch (final ExecutionException e) {
+                        final Throwable t = e.getCause();
+                        if (MailException.class.isAssignableFrom(t.getClass())) {
+                            throw (MailException) t;
+                        } else if (t instanceof RuntimeException) {
+                            throw (RuntimeException) t;
+                        } else if (t instanceof Error) {
+                            throw (Error) t;
+                        } else {
+                            throw new IllegalStateException("Not unchecked", t);
                         }
                     }
                     if (LOG.isDebugEnabled()) {
@@ -430,21 +493,33 @@ public final class IMAPDefaultFolderChecker {
         return new String[] { prefix, String.valueOf(sep) };
     }
 
-    private void setDefaultMailFolder(final int index, final String fullname) {
+    /**
+     * Internally used by {@link IMAPDefaultFolderChecker}.
+     */
+    void setDefaultMailFolder(final int index, final String fullname) {
         final String key = MailSessionParameterNames.getParamDefaultFolderArray(accountId);
         String[] arr = (String[]) session.getParameter(key);
         if (null == arr) {
-            arr = new String[6];
-            session.setParameter(key, arr);
+            synchronized (this) {
+                arr = (String[]) session.getParameter(key);
+                if (null == arr) {
+                    arr = new String[6];
+                    session.setParameter(key, arr);
+                }
+            }
         }
         arr[index] = fullname;
     }
 
-    private String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname, final StringBuilder tmp) throws MessagingException, IMAPException {
+    /**
+     * Internally used by {@link IMAPDefaultFolderChecker}.
+     */
+    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname, final StringBuilder tmp) throws MessagingException, IMAPException {
         /*
          * Check default folder
          */
         final boolean checkSubscribed = true;
+        final long st = System.currentTimeMillis();
         Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
         tmp.setLength(0);
         if (!f.exists() /* && !f.create(type) */) {
@@ -573,8 +648,9 @@ public final class IMAPDefaultFolderChecker {
             }
         }
         if (LOG.isDebugEnabled()) {
+            final long dur = System.currentTimeMillis() - st;
             LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked for IMAP account ").append(
-                accountId).append(" (").append(imapConfig.getServer()).append(')').toString());
+                accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
             tmp.setLength(0);
         }
         return f.getFullName();

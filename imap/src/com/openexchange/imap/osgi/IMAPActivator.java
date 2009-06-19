@@ -61,6 +61,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -87,7 +88,8 @@ public final class IMAPActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, TimerService.class };
     }
 
     @Override
