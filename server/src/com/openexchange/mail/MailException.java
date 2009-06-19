@@ -133,9 +133,9 @@ public class MailException extends AbstractOXException {
          */
         ACCOUNT_DOES_NOT_EXIST("No mail account exists for admin user in context %1$s", Category.SETUP_ERROR, 14),
         /**
-         * Process was interrupted while waiting for a free mail connection. Please try again.
+         * Process was interrupted. Please try again.
          */
-        INTERRUPT_ERROR("Process was interrupted while waiting for a free mail connection. Please try again.", Category.TRY_AGAIN, 15),
+        INTERRUPT_ERROR("Process was interrupted. Please try again.", Category.TRY_AGAIN, 15),
         /**
          * Unsupported charset-encoding: %1$s
          */
