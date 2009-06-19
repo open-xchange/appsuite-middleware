@@ -52,7 +52,6 @@ package com.openexchange.imap.command;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Flags.Flag;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -132,6 +131,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
         if (userFlags.length > 0) {
+            if (flagsStrBuilder.length() > 0) {
+                flagsStrBuilder.append(' ');
+            }
             flagsStrBuilder.append(userFlags[0]);
             for (int i = 1; i < userFlags.length; i++) {
                 flagsStrBuilder.append(' ').append(userFlags[i]);
@@ -284,19 +286,8 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-        if (!lastResponse.isOK()) {
-            throw new ProtocolException(lastResponse);
-        }
-    }
-
-    @Override
     protected void handleResponse(final Response response) throws MessagingException {
-    }
-
-    @Override
-    protected boolean performHandleResult() {
-        return true;
+        // No intermediate response expected
     }
 
 }

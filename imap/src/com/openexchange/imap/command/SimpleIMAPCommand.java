@@ -50,7 +50,6 @@
 package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -58,85 +57,74 @@ import com.sun.mail.imap.IMAPFolder;
  * {@link SimpleIMAPCommand}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
-	private final String command;
+    private final String command;
 
-	private final String[] args;
+    private final String[] args;
 
-	/**
-	 * Initializes a new {@link SimpleIMAPCommand}
-	 * 
-	 * @param imapFolder The IMAP folder
-	 * @param command The command to execute
-	 */
-	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command) {
-		super(imapFolder);
-		this.command = command;
-		args = ARGS_EMPTY;
-	}
+    /**
+     * Initializes a new {@link SimpleIMAPCommand}
+     * 
+     * @param imapFolder The IMAP folder
+     * @param command The command to execute
+     */
+    public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command) {
+        super(imapFolder);
+        this.command = command;
+        args = ARGS_EMPTY;
+    }
 
-	/**
-	 * Initializes a new {@link SimpleIMAPCommand}
-	 * @param imapFolder The IMAP folder
-	 * @param command The command to execute
-	 * @param uids The UIDs
-	 */
-	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids) {
-		super(imapFolder);
-		if (uids == null) {
-			returnDefaultValue = true;
-		}
-		this.command = command;
-		args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true, command.length());
-	}
+    /**
+     * Initializes a new {@link SimpleIMAPCommand}
+     * 
+     * @param imapFolder The IMAP folder
+     * @param command The command to execute
+     * @param uids The UIDs
+     */
+    public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids) {
+        super(imapFolder);
+        if (uids == null) {
+            returnDefaultValue = true;
+        }
+        this.command = command;
+        args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true, command.length());
+    }
 
-	@Override
-	protected boolean addLoopCondition() {
-		return true;
-	}
+    @Override
+    protected boolean addLoopCondition() {
+        return true;
+    }
 
-	@Override
-	protected String[] getArgs() {
-		return args;
-	}
+    @Override
+    protected String[] getArgs() {
+        return args;
+    }
 
-	@Override
-	protected String getCommand(final int argsIndex) {
-		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
-		sb.append(command);
-		if (!java.util.Arrays.equals(ARGS_EMPTY, args)) {
-			sb.append(args[argsIndex]);
-		}
-		return sb.toString();
-	}
+    @Override
+    protected String getCommand(final int argsIndex) {
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        sb.append(command);
+        if (!java.util.Arrays.equals(ARGS_EMPTY, args)) {
+            sb.append(args[argsIndex]);
+        }
+        return sb.toString();
+    }
 
-	@Override
-	protected Boolean getDefaultValue() {
-		return Boolean.TRUE;
-	}
+    @Override
+    protected Boolean getDefaultValue() {
+        return Boolean.TRUE;
+    }
 
-	@Override
-	protected Boolean getReturnVal() {
-		return Boolean.TRUE;
-	}
+    @Override
+    protected Boolean getReturnVal() {
+        return Boolean.TRUE;
+    }
 
-	@Override
-	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-		if (!lastResponse.isOK()) {
-			throw new ProtocolException(lastResponse);
-		}
-	}
-
-	@Override
-	protected void handleResponse(final Response response) throws MessagingException {
-	}
-
-	@Override
-	protected boolean performHandleResult() {
-		return true;
-	}
+    @Override
+    protected void handleResponse(final Response response) throws MessagingException {
+        // Nothing to do
+    }
 
 }

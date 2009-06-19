@@ -233,7 +233,11 @@ public class MIMEMailException extends MailException {
         /**
          * The quota on mail server is exceeded
          */
-        QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024);
+        QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024),
+        /**
+         * Message cannot be displayed.
+         */
+        MESSAGE_NOT_DISPLAYED("Message cannot be displayed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1029);
 
         private final String message;
 
@@ -377,6 +381,8 @@ public class MIMEMailException extends MailException {
             if (nextException == null) {
                 if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                     return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
+                } else if ("Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                    return new MIMEMailException(Code.MESSAGE_NOT_DISPLAYED, e, EMPTY_ARGS);
                 }
                 /*
                  * Default case

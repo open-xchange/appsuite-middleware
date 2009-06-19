@@ -1,3 +1,7 @@
+* 2009-06-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #13882: Prevent UI looping.
+
 * 2009-06-16 - marcus.klein@open-xchange.com
 
  - Bugfix #13873: Catching RuntimeExceptions in database update tasks. Fixed causes of RuntimeExceptions in database update tasks.

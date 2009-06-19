@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.tools.Collections.SmartLongArray;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -211,13 +210,6 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         return retval;
     }
 
-    @Override
-    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-        if (!lastResponse.isOK()) {
-            throw new ProtocolException(lastResponse);
-        }
-    }
-
     private static final String COPYUID = "copyuid";
 
     @Override
@@ -273,11 +265,6 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
             }
             proceed = false;
         }
-    }
-
-    @Override
-    protected boolean performHandleResult() {
-        return true;
     }
 
     private static final class COPYUIDResponse {

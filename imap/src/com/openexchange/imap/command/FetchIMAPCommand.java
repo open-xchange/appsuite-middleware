@@ -73,14 +73,13 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -182,6 +181,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private final boolean loadBody;
 
+    private boolean determineAttachmentByHeader;
+
     /**
      * Initializes a new {@link FetchIMAPCommand}.
      * 
@@ -239,6 +240,20 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         }
         retval = new ExtendedMimeMessage[length];
         index = 0;
+    }
+
+    /**
+     * Sets whether detection if message contains attachment is performed by "Content-Type" header only.
+     * <p>
+     * If <code>true</code> a message is considered to contain attachments if its "Content-Type" header equals "multipart/mixed".
+     * 
+     * @param determineAttachmentByHeader <code>true</code> to detect if message contains attachment is performed by "Content-Type" header
+     *            only; otherwise <code>false</code>
+     * @return This FETCH IMAP command with value applied
+     */
+    public FetchIMAPCommand setDetermineAttachmentyHeader(final boolean determineAttachmentByHeader) {
+        this.determineAttachmentByHeader = determineAttachmentByHeader;
+        return this;
     }
 
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
@@ -408,15 +423,18 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     }
 
     @Override
-    protected Message[] getReturnVal() {
-        return retval;
-    }
-
-    @Override
-    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-        if (!lastResponse.isOK()) {
-            throw new ProtocolException(lastResponse);
+    protected Message[] getReturnVal() throws MessagingException {
+        if (index < length) {
+            String server = imapFolder.getStore().toString();
+            int pos = server.indexOf('@');
+            if (pos >= 0 && ++pos < server.length()) {
+                server = server.substring(pos);
+            }
+            throw new MessagingException(
+                new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
+                    " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
         }
+        return retval;
     }
 
     @Override
@@ -467,7 +485,13 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                         LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                     }
                 } else {
-                    itemHandler.handleItem(fetchResponse.getItem(j), msg, LOG);
+                    itemHandler.handleItem(item, msg, LOG);
+                }
+            }
+            if (determineAttachmentByHeader) {
+                final String cts = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                if (null != cts) {
+                    msg.setHasAttachment(new ContentType(cts).isMimeType("multipart/mixed"));
                 }
             }
         } catch (final MessagingException e) {
@@ -489,11 +513,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         if (!error) {
             retval[pos] = msg;
         }
-    }
-
-    @Override
-    protected boolean performHandleResult() {
-        return true;
     }
 
     private static final Set<Integer> ENV_FIELDS;
@@ -731,15 +750,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                      */
                     headerStream = ((RFC822DATA) item).getByteArrayInputStream();
                 }
+                h = new InternetHeaders();
                 if (null == headerStream) {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
                             " in folder ").append(msg.getFullname()).toString());
                     }
-                    return;
+                } else {
+                    h.load(headerStream);
                 }
-                h = new InternetHeaders();
-                h.load(headerStream);
             }
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
@@ -795,7 +814,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
             try {
-                msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailConfig.getDefaultMimeCharset());
+                msg.setSubject(
+                    env.subject == null ? "" : MimeUtility.decodeText(env.subject),
+                    MailProperties.getInstance().getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
                 logger.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -893,6 +914,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * ++++++++++++++ End of item handlers ++++++++++++++
      */
 
+    /**
+     * Turns given fetch profile into FETCH items to craft a FETCH command.
+     * 
+     * @param isRev1 Whether IMAP protocol is revision 1 or not
+     * @param fp The fetch profile to convert
+     * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
+     * @return The FETCH items to craft a FETCH command
+     */
     private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
         final StringBuilder command = new StringBuilder(128);
         final boolean envelope;
@@ -964,6 +993,34 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
         }
         return command.toString();
+    }
+
+    /**
+     * Strips BODYSTRUCTURE item from given fetch profile.
+     * 
+     * @param fetchProfile The fetch profile
+     * @return The fetch profile with BODYSTRUCTURE item stripped
+     */
+    public static final FetchProfile getSafeFetchProfile(final FetchProfile fetchProfile) {
+        if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
+            final FetchProfile newFetchProfile = new FetchProfile();
+            newFetchProfile.add("Content-Type");
+            if (!fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
+                newFetchProfile.add(UIDFolder.FetchProfileItem.UID);
+            }
+            final javax.mail.FetchProfile.Item[] items = fetchProfile.getItems();
+            for (final javax.mail.FetchProfile.Item item : items) {
+                if (!FetchProfile.Item.CONTENT_INFO.equals(item)) {
+                    newFetchProfile.add(item);
+                }
+            }
+            final String[] names = fetchProfile.getHeaderNames();
+            for (final String name : names) {
+                newFetchProfile.add(name);
+            }
+            return newFetchProfile;
+        }
+        return fetchProfile;
     }
 
 }
