@@ -57,6 +57,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -73,6 +75,8 @@ import com.openexchange.groupware.tx.TransactionException;
  */
 public class MySQLGenericConfigurationStorage implements GenericConfigurationStorageService {
 
+    private static final Log LOG = LogFactory.getLog(MySQLGenericConfigurationStorage.class);
+    
     private DBProvider provider;
 
     public void setDBProvider(DBProvider provider) {
@@ -120,13 +124,13 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
             return retval;
         } catch (SQLException x) {
-            // FIXME log at least exception
             try {
                 if(connectionHandling) {
                     writeCon.rollback();
                 }
             } catch (SQLException e) {
             }
+            LOG.error(x.getMessage(), x);
             GenericConfigStorageErrorMessage.SQLException.throwException(x, x.getMessage());
             return null;
         } catch (TransactionException e) {
@@ -213,13 +217,15 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
             public Object perform() throws SQLException {
                 UpdateIterator updateIterator = new UpdateIterator();
-                updateIterator.prepareStatements(this);
-                updateIterator.setIds(ctx.getContextId(), id);
-                updateIterator.setOriginal(original);
-                
-                Tools.iterate(content, updateIterator);
-                
-                updateIterator.close();
+                try {
+                    updateIterator.prepareStatements(this);
+                    updateIterator.setIds(ctx.getContextId(), id);
+                    updateIterator.setOriginal(original);
+                    
+                    Tools.iterate(content, updateIterator);
+                } finally {
+                    updateIterator.close();
+                }
                 updateIterator.throwException();
                 return null;
             }
