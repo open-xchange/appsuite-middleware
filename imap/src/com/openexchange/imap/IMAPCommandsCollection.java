@@ -1692,11 +1692,10 @@ public final class IMAPCommandsCollection {
      * Fetches all UIDs from given IMAP folder.
      * 
      * @param imapFolder The IMAP folder
-     * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
      * @return All UIDs from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static long[] fetchUIDs(final IMAPFolder imapFolder, final boolean ascending) throws MessagingException {
+    public static long[] fetchUIDs(final IMAPFolder imapFolder) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
