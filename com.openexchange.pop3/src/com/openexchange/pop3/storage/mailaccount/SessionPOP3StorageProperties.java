@@ -51,10 +51,16 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionPOP3StorageProperties} - Session-backed implementation of {@link POP3StorageProperties}.
@@ -80,7 +86,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
             cached = null;
         }
         if (null == cached) {
-            cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access));
+            cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access), session, key);
             session.setParameter(key, cached);
         }
         return cached;
@@ -94,34 +100,106 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
     private final POP3StorageProperties delegatee;
 
+    private final ReadWriteLock rwLock;
+
     /**
      * Initializes a new {@link SessionPOP3StorageProperties}.
      */
-    private SessionPOP3StorageProperties(final POP3StorageProperties delegatee) {
+    private SessionPOP3StorageProperties(final POP3StorageProperties delegatee, final Session session, final String key) {
         super();
+        rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
         map = new ConcurrentHashMap<String, String>();
+        final CleanMapRunnable cmr = new CleanMapRunnable(session, key, map, rwLock);
+        final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
+            cmr,
+            1000,
+            300000);
+        cmr.setTimerTask(timerTask);
     }
 
     public void addProperty(final String propertyName, final String propertyValue) throws MailException {
-        map.put(propertyName, propertyValue);
-        delegatee.addProperty(propertyName, propertyValue);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            map.put(propertyName, propertyValue);
+            delegatee.addProperty(propertyName, propertyValue);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public String getProperty(final String propertyName) throws MailException {
-        if (map.containsKey(propertyName)) {
-            return map.get(propertyName);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            if (map.containsKey(propertyName)) {
+                return map.get(propertyName);
+            }
+            final String value = delegatee.getProperty(propertyName);
+            if (null != value) {
+                map.put(propertyName, value);
+            }
+            return value;
+        } finally {
+            readLock.unlock();
         }
-        final String value = delegatee.getProperty(propertyName);
-        if (null != value) {
-            map.put(propertyName, value);
-        }
-        return value;
     }
 
     public void removeProperty(final String propertyName) throws MailException {
-        map.remove(propertyName);
-        delegatee.removeProperty(propertyName);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            map.remove(propertyName);
+            delegatee.removeProperty(propertyName);
+        } finally {
+            readLock.unlock();
+        }
     }
 
+    private static final class CleanMapRunnable implements Runnable {
+
+        private final Session tsession;
+
+        private final String tkey;
+
+        private final Map<String, String> tmap;
+
+        private final ReadWriteLock trwLock;
+
+        private ScheduledTimerTask timerTask;
+
+        private int countEmptyRuns;
+
+        public CleanMapRunnable(final Session tsession, final String tkey, final Map<String, String> tmap, final ReadWriteLock trwLock) {
+            super();
+            this.tsession = tsession;
+            this.tkey = tkey;
+            this.tmap = tmap;
+            this.trwLock = trwLock;
+        }
+
+        public void run() {
+            if (countEmptyRuns >= 2) {
+                // Destroy!
+                timerTask.cancel();
+                tsession.setParameter(tkey, null);
+            }
+            if (tmap.isEmpty()) {
+                countEmptyRuns++;
+                return;
+            }
+            final Lock writeLock = trwLock.writeLock();
+            writeLock.lock();
+            try {
+                tmap.clear();
+            } finally {
+                writeLock.unlock();
+            }
+        }
+
+        public void setTimerTask(final ScheduledTimerTask timerTask) {
+            this.timerTask = timerTask;
+        }
+    }
 }

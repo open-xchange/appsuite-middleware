@@ -65,6 +65,7 @@ import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -98,7 +99,7 @@ public final class POP3Activator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class };
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class, TimerService.class };
     }
 
     @Override

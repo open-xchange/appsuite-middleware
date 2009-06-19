@@ -54,12 +54,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionPOP3StorageUIDLMap} - Session-backed implementation of {@link POP3StorageUIDLMap}.
@@ -85,7 +91,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             cached = null;
         }
         if (null == cached) {
-            cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access));
+            cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
             session.setParameter(key, cached);
         }
         return cached;
@@ -101,20 +107,30 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private final POP3StorageUIDLMap delegatee;
 
-    /**
-     * Initializes a new {@link SessionPOP3StorageUIDLMap}.
-     * 
-     * @throws MailException If initialization fails
-     */
-    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee) throws MailException {
+    private final ReadWriteLock rwLock;
+
+    private final AtomicBoolean doInit;
+
+    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee, final Session session, final String key) throws MailException {
         super();
+        rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
         this.pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
         this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
+        doInit = new AtomicBoolean(true);
+        final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, doInit);
+        final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
+            cmr,
+            1000,
+            300000);
+        cmr.setTimerTask(timerTask);
         init();
     }
 
     private void init() throws MailException {
+        if (!doInit.compareAndSet(true, false)) {
+            return;
+        }
         final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
         final int size = all.size();
         final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
@@ -125,64 +141,198 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    private void checkInit(final Lock obtainedReadLock) throws MailException {
+        if (doInit.get()) {
+            /*
+             * Upgrade lock: unlock first to acquire write lock
+             */
+            obtainedReadLock.unlock();
+            final Lock writeLock = rwLock.writeLock();
+            writeLock.lock();
+            try {
+                init();
+            } finally {
+                /*
+                 * Downgrade lock: reacquire read without giving up write lock and...
+                 */
+                obtainedReadLock.lock();
+                /*
+                 * ... unlock write.
+                 */
+                writeLock.unlock();
+            }
+        }
+    }
+
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
-        delegatee.addMappings(uidls, fullnameUIDPairs);
-        for (int i = 0; i < fullnameUIDPairs.length; i++) {
-            final String uidl = uidls[i];
-            final FullnameUIDPair pair = fullnameUIDPairs[i];
-            pair2uidl.put(pair, uidl);
-            uidl2pair.put(uidl, pair);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            delegatee.addMappings(uidls, fullnameUIDPairs);
+            for (int i = 0; i < fullnameUIDPairs.length; i++) {
+                final String uidl = uidls[i];
+                final FullnameUIDPair pair = fullnameUIDPairs[i];
+                pair2uidl.put(pair, uidl);
+                uidl2pair.put(uidl, pair);
+            }
+        } finally {
+            readLock.unlock();
         }
     }
 
-    public FullnameUIDPair getFullnameUIDPair(final String uidl) throws POP3Exception {
-        return uidl2pair.get(uidl);
-    }
-
-    public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws POP3Exception {
-        final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
-        for (int i = 0; i < pairs.length; i++) {
-            pairs[i] = getFullnameUIDPair(uidls[i]);
+    public FullnameUIDPair getFullnameUIDPair(final String uidl) throws MailException {
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            return uidl2pair.get(uidl);
+        } finally {
+            readLock.unlock();
         }
-        return pairs;
     }
 
-    public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws POP3Exception {
-        return pair2uidl.get(fullnameUIDPair);
-    }
-
-    public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
-        final String[] uidls = new String[fullnameUIDPairs.length];
-        for (int i = 0; i < uidls.length; i++) {
-            uidls[i] = getUIDL(fullnameUIDPairs[i]);
+    public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws MailException {
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
+            for (int i = 0; i < pairs.length; i++) {
+                pairs[i] = getFullnameUIDPair(uidls[i]);
+            }
+            return pairs;
+        } finally {
+            readLock.unlock();
         }
-        return uidls;
     }
 
-    public Map<String, FullnameUIDPair> getAllUIDLs() throws POP3Exception {
-        final Map<String, FullnameUIDPair> copy = new HashMap<String, FullnameUIDPair>();
-        copy.putAll(uidl2pair);
-        return copy;
+    public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws MailException {
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            return pair2uidl.get(fullnameUIDPair);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            final String[] uidls = new String[fullnameUIDPairs.length];
+            for (int i = 0; i < uidls.length; i++) {
+                uidls[i] = getUIDL(fullnameUIDPairs[i]);
+            }
+            return uidls;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public Map<String, FullnameUIDPair> getAllUIDLs() throws MailException {
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            final Map<String, FullnameUIDPair> copy = new HashMap<String, FullnameUIDPair>();
+            copy.putAll(uidl2pair);
+            return copy;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
-        for (int i = 0; i < fullnameUIDPairs.length; i++) {
-            final String uidl = pair2uidl.remove(fullnameUIDPairs[i]);
-            if (null != uidl) {
-                uidl2pair.remove(uidl);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            for (int i = 0; i < fullnameUIDPairs.length; i++) {
+                final String uidl = pair2uidl.remove(fullnameUIDPairs[i]);
+                if (null != uidl) {
+                    uidl2pair.remove(uidl);
+                }
             }
+            delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
+        } finally {
+            readLock.unlock();
         }
-        delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
     }
 
     public void deleteUIDLMappings(final String[] uidls) throws MailException {
-        for (int i = 0; i < uidls.length; i++) {
-            final FullnameUIDPair pair = uidl2pair.remove(uidls[i]);
-            if (null != pair) {
-                pair2uidl.remove(pair);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            for (int i = 0; i < uidls.length; i++) {
+                final FullnameUIDPair pair = uidl2pair.remove(uidls[i]);
+                if (null != pair) {
+                    pair2uidl.remove(pair);
+                }
+            }
+            delegatee.deleteUIDLMappings(uidls);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private static final class ClearMapsRunnable implements Runnable {
+
+        private final Session tsession;
+
+        private final String tkey;
+
+        private final Map<String, FullnameUIDPair> tuidl2pair;
+
+        private final Map<FullnameUIDPair, String> tpair2uidl;
+
+        private final ReadWriteLock trwLock;
+
+        private final AtomicBoolean tdoInit;
+
+        private ScheduledTimerTask timerTask;
+
+        private int countEmptyRuns;
+
+        public ClearMapsRunnable(final Session tsession, final String tkey, final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final AtomicBoolean tdoInit) {
+            super();
+            this.tsession = tsession;
+            this.tkey = tkey;
+            this.trwLock = trwLock;
+            this.tuidl2pair = tuidl2pair;
+            this.tpair2uidl = tpair2uidl;
+            this.tdoInit = tdoInit;
+        }
+
+        public void run() {
+            if (countEmptyRuns >= 2) {
+                // Destroy!
+                timerTask.cancel();
+                tsession.setParameter(tkey, null);
+            }
+            if (tuidl2pair.isEmpty() && tpair2uidl.isEmpty()) {
+                countEmptyRuns++;
+                return;
+            }
+            final Lock writeLock = trwLock.writeLock();
+            writeLock.lock();
+            try {
+                tuidl2pair.clear();
+                tpair2uidl.clear();
+                tdoInit.set(true);
+            } finally {
+                writeLock.unlock();
             }
         }
-        delegatee.deleteUIDLMappings(uidls);
+
+        public void setTimerTask(final ScheduledTimerTask timerTask) {
+            this.timerTask = timerTask;
+        }
+
     }
 
 }

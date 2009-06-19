@@ -51,11 +51,20 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionPOP3StorageTrashContainer} - Session-backed implementation of {@link POP3StorageTrashContainer}.
@@ -81,7 +90,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
             cached = null;
         }
         if (null == cached) {
-            cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access));
+            cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
             session.setParameter(key, cached);
         }
         return cached;
@@ -91,45 +100,176 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
      * Member section
      */
 
+    private static final Object PRESENT = new Object();
+
+    private final ReadWriteLock rwLock;
+
+    private final AtomicBoolean doInit;
+
     private final POP3StorageTrashContainer delegatee;
 
-    private final Set<String> set;
+    private final Map<String, Object> set;
 
-    private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee) throws MailException {
+    private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee, final Session session, final String key) throws MailException {
         super();
+        rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
-        set = new HashSet<String>();
+        set = new ConcurrentHashMap<String, Object>();
+        doInit = new AtomicBoolean(true);
+        final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, rwLock, doInit);
+        final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
+            csr,
+            1000,
+            300000);
+        csr.setTimerTask(timerTask);
         init();
     }
 
     private void init() throws MailException {
-        set.addAll(delegatee.getUIDLs());
+        if (!doInit.compareAndSet(true, false)) {
+            return;
+        }
+        final Set<String> tmp = delegatee.getUIDLs();
+        for (final String uidl : tmp) {
+            set.put(uidl, PRESENT);
+        }
+    }
+
+    private void checkInit(final Lock obtainedReadLock) throws MailException {
+        if (doInit.get()) {
+            /*
+             * Upgrade lock: unlock first to acquire write lock
+             */
+            obtainedReadLock.unlock();
+            final Lock writeLock = rwLock.writeLock();
+            writeLock.lock();
+            try {
+                init();
+            } finally {
+                /*
+                 * Downgrade lock: reacquire read without giving up write lock and...
+                 */
+                obtainedReadLock.lock();
+                /*
+                 * ... unlock write.
+                 */
+                writeLock.unlock();
+            }
+        }
     }
 
     public void addUIDL(final String uidl) throws MailException {
-        set.add(uidl);
-        delegatee.addUIDL(uidl);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            set.put(uidl, PRESENT);
+            delegatee.addUIDL(uidl);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public void clear() throws MailException {
-        set.clear();
-        delegatee.clear();
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            set.clear();
+            delegatee.clear();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public Set<String> getUIDLs() throws MailException {
-        final Set<String> tmp = new HashSet<String>();
-        tmp.addAll(set);
-        return set;
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            final Set<String> tmp = new HashSet<String>();
+            tmp.addAll(set.keySet());
+            return tmp;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public void removeUIDL(final String uidl) throws MailException {
-        set.remove(uidl);
-        delegatee.removeUIDL(uidl);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            set.remove(uidl);
+            delegatee.removeUIDL(uidl);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public void addAllUIDL(final Collection<? extends String> uidls) throws MailException {
-        set.addAll(uidls);
-        delegatee.addAllUIDL(uidls);
+        final Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            checkInit(readLock);
+            for (final String uidl : uidls) {
+                set.put(uidl, PRESENT);
+            }
+            delegatee.addAllUIDL(uidls);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private static final class CleanSetRunnable implements Runnable {
+
+        private final Session tsession;
+
+        private final String tkey;
+
+        private final Map<String, Object> tset;
+
+        private final ReadWriteLock trwLock;
+
+        private final AtomicBoolean tdoInit;
+
+        private ScheduledTimerTask timerTask;
+
+        private int countEmptyRuns;
+
+        public CleanSetRunnable(final Session tsession, final String tkey, final Map<String, Object> tset, final ReadWriteLock trwLock, final AtomicBoolean tdoInit) {
+            super();
+            this.tsession = tsession;
+            this.tkey = tkey;
+            this.tset = tset;
+            this.trwLock = trwLock;
+            this.tdoInit = tdoInit;
+        }
+
+        public void run() {
+            if (countEmptyRuns >= 2) {
+                // Destroy!
+                timerTask.cancel();
+                tsession.setParameter(tkey, null);
+            }
+            if (tset.isEmpty()) {
+                countEmptyRuns++;
+                return;
+            }
+            final Lock writeLock = trwLock.writeLock();
+            writeLock.lock();
+            try {
+                tset.clear();
+                tdoInit.set(true);
+            } finally {
+                writeLock.unlock();
+            }
+        }
+
+        public void setTimerTask(final ScheduledTimerTask timerTask) {
+            this.timerTask = timerTask;
+        }
+
     }
 
 }
