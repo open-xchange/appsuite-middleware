@@ -1686,6 +1686,71 @@ public final class IMAPCommandsCollection {
         }));
     }
 
+    private static final String COMMAND_FETCH_UID = "FETCH 1:* (UID)";
+
+    /**
+     * Fetches all UIDs from given IMAP folder.
+     * 
+     * @param imapFolder The IMAP folder
+     * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
+     * @return All UIDs from given IMAP folder
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static long[] fetchUIDs(final IMAPFolder imapFolder, final boolean ascending) throws MessagingException {
+        if (imapFolder.getMessageCount() == 0) {
+            /*
+             * Empty folder...
+             */
+            return new long[0];
+        }
+        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                /*-
+                 * Arguments:  sequence set
+                 * message data item names or macro
+                 * 
+                 * Responses:  untagged responses: FETCH
+                 * 
+                 * Result:     OK - fetch completed
+                 *             NO - fetch error: can't fetch that data
+                 *             BAD - command unknown or arguments invalid
+                 */
+                final Response[] r = p.command(COMMAND_FETCH_UID, null);
+                final int len = r.length - 1;
+                final Response response = r[len];
+                final List<Long> l = new ArrayList<Long>(len);
+                if (response.isOK()) {
+                    for (int j = 0; j < len; j++) {
+                        if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                            final FetchResponse fr = (FetchResponse) r[j];
+                            l.add(Long.valueOf(getItemOf(UID.class, fr, STR_UID).uid));
+                            r[j] = null;
+                        }
+                    }
+                    p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_FETCH,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_FETCH,
+                        response.toString()));
+                } else {
+                    p.handleResult(response);
+                }
+                final long[] longs = new long[l.size()];
+                for (int i = 0; i < longs.length; i++) {
+                    longs[i] = l.get(i).longValue();
+                }
+                return longs;
+            }
+        }));
+    }
+
     private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
 
     /**
