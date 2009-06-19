@@ -6,7 +6,7 @@ Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer open-xchange-publish
-%if 0%{?suse_version}
+%if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
@@ -21,6 +21,11 @@ BuildRequires:  java-sdk-openjdk
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
+%if 0%{?sles_version} >= 11
+# SLES11 or higher
+BuildRequires:  java-1_6_0-ibm-devel
+%endif
+
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
 BuildRequires:  java-sdk-1.5.0-sun cairo
@@ -43,7 +48,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
 Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml open-xchange-dataretention open-xchange-timer open-xchange-publish
-%if 0%{?suse_version}
+%if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
 Requires:  java-1_5_0-ibm >= 1.5.0_sr9
@@ -55,6 +60,10 @@ Requires:  java-openjdk
 %if %{?suse_version} > 1010 && %{?suse_version} < 1100
 Requires:  java-1_5_0-sun
 %endif
+%endif
+%if 0%{?sles_version} >= 11
+# SLES11
+Requires:  java-1_6_0-ibm
 %endif
 %if 0%{?fedora_version}
 %if %{?fedora_version} > 8
