@@ -350,9 +350,9 @@ public class EasyLogin extends HttpServlet {
 			"			} else\n" +
 			"				//#. HTTP Errors from the server\n" +
 			"				//#. %1$s is the numeric HTTP status code\n" +
-			"				//#. %2$s is the corresponding HTTP status text\n"
+			"				//#. %2$s is the corresponding HTTP status text\n";
 			
-	private static final String RESPONSE25 =	"				alert(\"Error: \"+status+\" - \"+result);\n" 
+	private static final String RESPONSE25 =	"				alert(\"Error: \"+status+\" - \"+result);\n";
 		
 	private static final String RESPONSE27 =	"			bClickedLogin = false;\n" +
 			"			window.location.href = document.referrer + \"?login=failed&user=\" + u;\n" +
