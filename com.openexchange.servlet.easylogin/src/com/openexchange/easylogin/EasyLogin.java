@@ -343,9 +343,11 @@ public class EasyLogin extends HttpServlet {
 			"		function(result) { dologin(result); },\n" +
 			"		function(result, status) {\n" +
 			"			if (!status) {\n" +
-			"				if (result.code == \"LGI-0006\")\n" +
-			"					alert(_(\"Login failed. Please check your user name and password and try again.\"));\n" +
-			"				else\n" +
+			"				if (result.code == \"LGI-0006\")\n";
+			
+	private static final String RESPONSE23 =	"					alert(_(\"Login failed. Please check your user name and password and try again.\"));\n";
+			
+	private static final String RESPONSE24 =	"				else\n" +
 			"					alert(formatError(result));\n" +
 			"			} else\n" +
 			"				//#. HTTP Errors from the server\n" +
@@ -462,6 +464,10 @@ public class EasyLogin extends HttpServlet {
 			out.print(RESPONSE1);
 			out.print(AJAX_ROOT);
 			out.print(RESPONSE2);
+			if( popUpOnError ) {
+				out.print(RESPONSE23);
+			}
+			out.print(RESPONSE24);
 			if( popUpOnError ) {
 				out.print(RESPONSE25);
 			}
