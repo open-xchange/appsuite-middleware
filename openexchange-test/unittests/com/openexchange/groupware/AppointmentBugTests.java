@@ -2912,8 +2912,9 @@ public class AppointmentBugTests extends TestCase {
 
         final String confirm_message = "jaja";
 
-        csql.setUserConfirmation(object_id, userid, CalendarDataObject.ACCEPT, confirm_message);
-        csql2.setUserConfirmation(object_id, userid2, CalendarDataObject.ACCEPT, confirm_message);
+        int fid2 = AppointmentBugTests.getPrivateFolder(userid2);
+        csql.setUserConfirmation(object_id, fid, userid, CalendarDataObject.ACCEPT, confirm_message);
+        csql2.setUserConfirmation(object_id, fid2, userid2, CalendarDataObject.ACCEPT, confirm_message);
 
         final String user3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant1", "");
         final int userid3 = resolveUser(user3);

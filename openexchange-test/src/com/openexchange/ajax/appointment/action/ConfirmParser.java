@@ -47,42 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.action;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
+public class ConfirmParser extends AbstractAJAXParser<ConfirmResponse> {
 
-public class AppointmentAJAXSuite extends TestSuite{
 
-    private AppointmentAJAXSuite() {
-        super();
+    protected ConfirmParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        return tests;
+    @Override
+    protected ConfirmResponse createResponse(Response response) throws JSONException {
+        return new ConfirmResponse(response);
     }
+
 }

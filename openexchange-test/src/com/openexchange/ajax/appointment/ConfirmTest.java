@@ -43,7 +43,7 @@ public class ConfirmTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
-        confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondSessionId());
+        confirmAppointment(getSecondWebConversation(), objectId, sharedFolderObject.getObjectID(), AppointmentObject.ACCEPT, "Yap.", PROTOCOL + getHostName(), getSecondSessionId());
 		
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		

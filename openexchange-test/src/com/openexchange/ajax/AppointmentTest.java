@@ -407,7 +407,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		}
     }
 
-    public static void confirmAppointment(final WebConversation webCon, final int objectId,
+    public static void confirmAppointment(final WebConversation webCon, final int objectId, int folderId,
 			final int confirm, final String confirmMessage, String host, final String session)
 			throws Exception {
 		host = appendPrefix(host);
@@ -416,10 +416,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
 				AJAXServlet.ACTION_CONFIRM);
+		parameter.setParameter(DataFields.ID, objectId);
+		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, folderId);
 		
 		final JSONObject jsonObj = new JSONObject();
-		jsonObj.put(DataFields.ID, objectId);
 		jsonObj.put(CalendarFields.CONFIRMATION, confirm);
+		jsonObj.put(CalendarFields.CONFIRM_MESSAGE, confirmMessage);
 		
 		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString()
 		.getBytes());
