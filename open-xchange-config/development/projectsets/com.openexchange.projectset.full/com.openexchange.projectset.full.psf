@@ -45,13 +45,11 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.admin.contextrestore,com.openexchange.admin.contextrestore"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.pop3,com.openexchange.pop3"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.unifiedinbox,com.openexchange.unifiedinbox"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish,com.openexchange.publish"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish.json,com.openexchange.publish.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish.microformats,com.openexchange.publish.microformats"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe,com.openexchange.subscribe"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.json,com.openexchange.subscribe.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.xing,com.openexchange.subscribe.xing"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.datatypes.genericonf.storage,com.openexchange.datatypes.genericonf.storage"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.sql,com.openexchange.sql"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.crypto,com.openexchange.crypto"/>
