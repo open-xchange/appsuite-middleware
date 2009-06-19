@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server IMAP Bundle
-Requires:       open-xchange-common open-xchange-global open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-server
+Requires:       open-xchange-common open-xchange-global open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-server open-xchange-timer
 #
 
 %description
