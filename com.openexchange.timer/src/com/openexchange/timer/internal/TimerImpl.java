@@ -88,6 +88,24 @@ public final class TimerImpl implements TimerService {
             (Runtime.getRuntime().availableProcessors() + 1),
             new TimerThreadFactory("Timer-"));
         executorService.prestartAllCoreThreads();
+        /*
+         * Add a task to frequently purge canceled tasks
+         */
+        final class PurgeRunnable implements Runnable {
+
+            private final ScheduledThreadPoolExecutor exec;
+
+            public PurgeRunnable(final ScheduledThreadPoolExecutor exec) {
+                super();
+                this.exec = exec;
+            }
+
+            public void run() {
+                exec.purge();
+            }
+
+        }
+        executorService.scheduleWithFixedDelay(new PurgeRunnable(executorService), 30L, 30L, TimeUnit.SECONDS);
     }
 
     /**
