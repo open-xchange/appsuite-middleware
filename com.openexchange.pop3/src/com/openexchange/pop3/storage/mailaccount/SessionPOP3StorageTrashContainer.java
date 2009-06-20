@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -84,14 +83,16 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getTrashContainer(pop3Access.getAccountId());
         SessionPOP3StorageTrashContainer cached;
-        try {
-            cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
-        } catch (final ClassCastException e) {
-            cached = null;
-        }
-        if (null == cached) {
-            cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
-            session.setParameter(key, cached);
+        synchronized (session) {
+            try {
+                cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
+            }
+            if (null == cached) {
+                cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
+                session.setParameter(key, cached);
+            }
         }
         return cached;
     }
@@ -104,7 +105,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
     private final ReadWriteLock rwLock;
 
-    private final AtomicBoolean doInit;
+    private final int[] mode;
 
     private final POP3StorageTrashContainer delegatee;
 
@@ -115,28 +116,30 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
         set = new ConcurrentHashMap<String, Object>();
-        doInit = new AtomicBoolean(true);
-        final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, rwLock, doInit);
+        mode = new int[] { 1 };
+        final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, rwLock, mode);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
             csr,
-            1000,
-            300000);
+            SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+            SessionCacheProperties.SCHEDULED_TASK_DELAY);
         csr.setTimerTask(timerTask);
         init();
     }
 
     private void init() throws MailException {
-        if (!doInit.compareAndSet(true, false)) {
-            return;
-        }
         final Set<String> tmp = delegatee.getUIDLs();
         for (final String uidl : tmp) {
             set.put(uidl, PRESENT);
         }
+        mode[0] = 0;
     }
 
     private void checkInit(final Lock obtainedReadLock) throws MailException {
-        if (doInit.get()) {
+        final int m = mode[0];
+        if (-1 == m) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Error mode. Try again.");
+        }
+        if (1 == m) {
             /*
              * Upgrade lock: unlock first to acquire write lock
              */
@@ -231,36 +234,40 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
         private final ReadWriteLock trwLock;
 
-        private final AtomicBoolean tdoInit;
+        private final int[] tmode;
 
         private ScheduledTimerTask timerTask;
 
         private int countEmptyRuns;
 
-        public CleanSetRunnable(final Session tsession, final String tkey, final Map<String, Object> tset, final ReadWriteLock trwLock, final AtomicBoolean tdoInit) {
+        public CleanSetRunnable(final Session tsession, final String tkey, final Map<String, Object> tset, final ReadWriteLock trwLock, final int[] tmode) {
             super();
             this.tsession = tsession;
             this.tkey = tkey;
             this.tset = tset;
             this.trwLock = trwLock;
-            this.tdoInit = tdoInit;
+            this.tmode = tmode;
         }
 
         public void run() {
-            if (countEmptyRuns >= 2) {
-                // Destroy!
-                timerTask.cancel();
-                tsession.setParameter(tkey, null);
-            }
-            if (tset.isEmpty()) {
-                countEmptyRuns++;
-                return;
-            }
             final Lock writeLock = trwLock.writeLock();
             writeLock.lock();
             try {
+                if (tset.isEmpty()) {
+                    if (countEmptyRuns >= SessionCacheProperties.SCHEDULED_TASK_ALLOWED_EMPTY_RUNS) {
+                        // Destroy!
+                        timerTask.cancel();
+                        synchronized (tsession) {
+                            tsession.setParameter(tkey, null);
+                            tmode[0] = -1;
+                        }
+                    }
+                    countEmptyRuns++;
+                    return;
+                }
+                countEmptyRuns = 0;
                 tset.clear();
-                tdoInit.set(true);
+                tmode[0] = 1;
             } finally {
                 writeLock.unlock();
             }

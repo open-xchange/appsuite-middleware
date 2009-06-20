@@ -80,14 +80,16 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getStorageProperties(pop3Access.getAccountId());
         SessionPOP3StorageProperties cached;
-        try {
-            cached = (SessionPOP3StorageProperties) session.getParameter(key);
-        } catch (final ClassCastException e) {
-            cached = null;
-        }
-        if (null == cached) {
-            cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access), session, key);
-            session.setParameter(key, cached);
+        synchronized (session) {
+            try {
+                cached = (SessionPOP3StorageProperties) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
+            }
+            if (null == cached) {
+                cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access), session, key);
+                session.setParameter(key, cached);
+            }
         }
         return cached;
     }
@@ -102,26 +104,36 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
     private final ReadWriteLock rwLock;
 
+    private final boolean[] invalid;
+
     /**
      * Initializes a new {@link SessionPOP3StorageProperties}.
      */
     private SessionPOP3StorageProperties(final POP3StorageProperties delegatee, final Session session, final String key) {
         super();
         rwLock = new ReentrantReadWriteLock();
+        invalid = new boolean[] { false };
         this.delegatee = delegatee;
         map = new ConcurrentHashMap<String, String>();
-        final CleanMapRunnable cmr = new CleanMapRunnable(session, key, map, rwLock);
+        final CleanMapRunnable cmr = new CleanMapRunnable(session, key, map, rwLock, invalid);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
             cmr,
-            1000,
-            300000);
+            SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+            SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
+    }
+
+    private void checkValid() throws MailException {
+        if (invalid[0]) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Error mode. Try again.");
+        }
     }
 
     public void addProperty(final String propertyName, final String propertyValue) throws MailException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
+            checkValid();
             map.put(propertyName, propertyValue);
             delegatee.addProperty(propertyName, propertyValue);
         } finally {
@@ -133,6 +145,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
+            checkValid();
             if (map.containsKey(propertyName)) {
                 return map.get(propertyName);
             }
@@ -150,6 +163,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
+            checkValid();
             map.remove(propertyName);
             delegatee.removeProperty(propertyName);
         } finally {
@@ -169,29 +183,36 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
         private ScheduledTimerTask timerTask;
 
+        private final boolean[] tinvalid;
+
         private int countEmptyRuns;
 
-        public CleanMapRunnable(final Session tsession, final String tkey, final Map<String, String> tmap, final ReadWriteLock trwLock) {
+        public CleanMapRunnable(final Session tsession, final String tkey, final Map<String, String> tmap, final ReadWriteLock trwLock, final boolean[] tinvalid) {
             super();
             this.tsession = tsession;
             this.tkey = tkey;
             this.tmap = tmap;
             this.trwLock = trwLock;
+            this.tinvalid = tinvalid;
         }
 
         public void run() {
-            if (countEmptyRuns >= 2) {
-                // Destroy!
-                timerTask.cancel();
-                tsession.setParameter(tkey, null);
-            }
-            if (tmap.isEmpty()) {
-                countEmptyRuns++;
-                return;
-            }
             final Lock writeLock = trwLock.writeLock();
             writeLock.lock();
             try {
+                if (tmap.isEmpty()) {
+                    if (countEmptyRuns >= SessionCacheProperties.SCHEDULED_TASK_ALLOWED_EMPTY_RUNS) {
+                        // Destroy!
+                        timerTask.cancel();
+                        synchronized (tsession) {
+                            tsession.setParameter(tkey, null);
+                            tinvalid[0] = true;
+                        }
+                    }
+                    countEmptyRuns++;
+                    return;
+                }
+                countEmptyRuns = 0;
                 tmap.clear();
             } finally {
                 writeLock.unlock();

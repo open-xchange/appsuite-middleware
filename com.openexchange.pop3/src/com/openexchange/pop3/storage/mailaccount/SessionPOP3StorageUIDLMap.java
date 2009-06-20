@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -85,14 +84,16 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached;
-        try {
-            cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-        } catch (final ClassCastException e) {
-            cached = null;
-        }
-        if (null == cached) {
-            cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
-            session.setParameter(key, cached);
+        synchronized (session) {
+            try {
+                cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
+            }
+            if (null == cached) {
+                cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
+                session.setParameter(key, cached);
+            }
         }
         return cached;
     }
@@ -109,7 +110,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private final ReadWriteLock rwLock;
 
-    private final AtomicBoolean doInit;
+    private final int[] mode;
 
     private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee, final Session session, final String key) throws MailException {
         super();
@@ -117,20 +118,17 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         this.delegatee = delegatee;
         this.pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
         this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
-        doInit = new AtomicBoolean(true);
-        final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, doInit);
+        mode = new int[] { 1 };
+        final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, mode);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
             cmr,
-            1000,
-            300000);
+            SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+            SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
         init();
     }
 
     private void init() throws MailException {
-        if (!doInit.compareAndSet(true, false)) {
-            return;
-        }
         final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
         final int size = all.size();
         final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
@@ -139,10 +137,15 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             pair2uidl.put(entry.getValue(), entry.getKey());
             uidl2pair.put(entry.getKey(), entry.getValue());
         }
+        mode[0] = 0;
     }
 
     private void checkInit(final Lock obtainedReadLock) throws MailException {
-        if (doInit.get()) {
+        final int m = mode[0];
+        if (-1 == m) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Error mode. Try again.");
+        }
+        if (1 == m) {
             /*
              * Upgrade lock: unlock first to acquire write lock
              */
@@ -292,38 +295,42 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
         private final ReadWriteLock trwLock;
 
-        private final AtomicBoolean tdoInit;
+        private final int[] tmode;
 
         private ScheduledTimerTask timerTask;
 
         private int countEmptyRuns;
 
-        public ClearMapsRunnable(final Session tsession, final String tkey, final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final AtomicBoolean tdoInit) {
+        public ClearMapsRunnable(final Session tsession, final String tkey, final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final int[] tmode) {
             super();
             this.tsession = tsession;
             this.tkey = tkey;
             this.trwLock = trwLock;
             this.tuidl2pair = tuidl2pair;
             this.tpair2uidl = tpair2uidl;
-            this.tdoInit = tdoInit;
+            this.tmode = tmode;
         }
 
         public void run() {
-            if (countEmptyRuns >= 2) {
-                // Destroy!
-                timerTask.cancel();
-                tsession.setParameter(tkey, null);
-            }
-            if (tuidl2pair.isEmpty() && tpair2uidl.isEmpty()) {
-                countEmptyRuns++;
-                return;
-            }
             final Lock writeLock = trwLock.writeLock();
             writeLock.lock();
             try {
+                if (tuidl2pair.isEmpty() && tpair2uidl.isEmpty()) {
+                    if (countEmptyRuns >= SessionCacheProperties.SCHEDULED_TASK_ALLOWED_EMPTY_RUNS) {
+                        // Destroy!
+                        timerTask.cancel();
+                        synchronized (tsession) {
+                            tsession.setParameter(tkey, null);
+                            tmode[0] = -1;
+                        }
+                    }
+                    countEmptyRuns++;
+                    return;
+                }
+                countEmptyRuns = 0;
                 tuidl2pair.clear();
                 tpair2uidl.clear();
-                tdoInit.set(true);
+                tmode[0] = 1;
             } finally {
                 writeLock.unlock();
             }
