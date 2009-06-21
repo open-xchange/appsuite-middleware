@@ -137,14 +137,12 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarAdministrationService#downgradePerformed(com.openexchange.groupware.downgrade.DowngradeEvent)
-     */
-    public void downgradePerformed(final DowngradeEvent downgradeEvent)  throws DowngradeFailedException {
-
-        removePrivate(downgradeEvent);
-        removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant( downgradeEvent );
-        removeFromParticipants( downgradeEvent );
+    public void downgradePerformed(DowngradeEvent downgradeEvent) throws DowngradeFailedException {
+        if (!downgradeEvent.getNewUserConfiguration().hasCalendar()) {
+            removePrivate(downgradeEvent);
+            removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(downgradeEvent);
+            removeFromParticipants(downgradeEvent);
+        }
     }
 
     private void removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(final DowngradeEvent downgradeEvent) throws DowngradeFailedException {
