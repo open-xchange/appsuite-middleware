@@ -133,7 +133,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             dirs[i] = new File(directories[i]);
             if (!dirs[i].exists()) {
-                throw new IllegalArgumentException("Not found: " + directories[i]);
+                throw new IllegalArgumentException("Not found: \"" + directories[i] + "\".");
             } else if (!dirs[i].isDirectory()) {
                 throw new IllegalArgumentException("Not a directory: " + directories[i]);
             }
