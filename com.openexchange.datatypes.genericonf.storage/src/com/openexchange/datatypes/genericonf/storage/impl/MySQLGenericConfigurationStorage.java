@@ -49,6 +49,7 @@
 
 package com.openexchange.datatypes.genericonf.storage.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,7 +89,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     }
     
     public int save(Connection con, final Context ctx, final Map<String, Object> content) throws GenericConfigStorageException {
-        return (Integer) write(con, ctx, new TX() {
+        return ((Integer) write(con, ctx, new TX() {
 
             public Object perform() throws SQLException {
                 Connection con = getConnection();
@@ -103,10 +104,10 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 Tools.iterate(content, insertIterator);
                 insertIterator.close();
                 insertIterator.throwException();
-                return id;
+                return I(id);
             }
 
-        });
+        })).intValue();
     }
 
     private Object write(Connection con, Context ctx, TX tx) throws GenericConfigStorageException {
@@ -262,6 +263,28 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
+    public void delete(Connection con, final Context ctx) throws GenericConfigStorageException {
+
+        write(con, ctx, new TX() {
+
+            @Override
+            public Object perform() throws SQLException {
+                clearTable("genconf_attributes_strings");
+                clearTable("genconf_attributes_bools");
+                return null;
+            }
+            
+            private void clearTable(String tablename) throws SQLException {
+                PreparedStatement delete = null;
+                delete = prepare("DELETE FROM "+tablename+" WHERE cid = ?");
+                delete.setInt(1, ctx.getContextId());
+                delete.executeUpdate();
+            }
+
+        });
+
+    }
+
     public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
         return search(null, ctx, query);
     }
@@ -280,7 +303,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         builder.append("(");
         builder.append(whereIterator.getWhere());
         builder.append(") AND p.cid = ?");
-        whereIterator.addReplacement(ctx.getContextId());
+        whereIterator.addReplacement(I(ctx.getContextId()));
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -292,7 +315,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             rs = stmt.executeQuery();
             
             while(rs.next()) {
-                list.add(rs.getInt(1));
+                list.add(I(rs.getInt(1)));
             }
             
         } catch (TransactionException e) {
