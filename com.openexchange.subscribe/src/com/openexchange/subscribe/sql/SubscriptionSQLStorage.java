@@ -294,7 +294,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new SubscriptionException(e);
+            throw new SubscriptionException(e);
         } finally {
             if (writeConnection != null) {
                 try {
@@ -405,7 +405,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new SubscriptionException(e);
+            throw new SubscriptionException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -465,7 +465,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new SubscriptionException(e);
+            throw new SubscriptionException(e);
         } finally {
             try {
                 if (builder != null) {
