@@ -401,6 +401,14 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * with its first two bytes and the payload data size in bytes in the following two bytes.
      */
     int readInitialBytes(final boolean enableTimeout) throws IOException, AJPv13Exception {
+        return readInitialBytes(enableTimeout, true);
+    }
+
+    /**
+     * Reads the (mandatory) first four bytes of an incoming AJPv13 package which indicate a package from Web Server to Servlet Container
+     * with its first two bytes and the payload data size in bytes in the following two bytes.
+     */
+    int readInitialBytes(final boolean enableTimeout, final boolean processingInformation) throws IOException, AJPv13Exception {
         int dataLength = -1;
         if (enableTimeout) {
             setSoTimeout(AJPv13Config.getAJPListenerReadTimeout());
@@ -414,11 +422,13 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             long start = 0L;
             final int[] magic;
             try {
+                if (processingInformation) {
+                    markNonProcessing();
+                }
+                start = System.currentTimeMillis();
                 /*
                  * Read first two bytes
                  */
-                markNonProcessing();
-                start = System.currentTimeMillis();
                 magic = new int[] { in.read(), in.read() };
             } catch (final SocketException e) {
                 throw new AJPv13SocketClosedException(
@@ -450,7 +460,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             /*
              * Initial bytes have been read, so processing (re-)starts now
              */
-            markProcessing();
+            if (processingInformation) {
+                markProcessing();
+            }
         } finally {
             decrementWaiting();
         }

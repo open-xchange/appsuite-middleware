@@ -382,7 +382,7 @@ public class AJPv13TaskWatcher {
                         /*
                          * Swallow expected empty body chunk
                          */
-                        final int bodyRequestDataLength = ajpConnection.readInitialBytes(true);
+                        final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
                         if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
                             log.warn("Got a non-empty data chunk from web server although an empty one was requested");
                         } else if (log.isInfoEnabled()) {
