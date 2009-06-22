@@ -342,6 +342,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 mailAccess.connect();
                 close = true;
                 final MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullname(), uid.getId(), markSeen);
+                if (null == mail) {
+                    return null;
+                }
                 mail.setMailId(mailId);
                 mail.setFolder(fullname);
                 mail.loadContent();
@@ -360,6 +363,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             close = true;
             // Get message
             final MailMessage mail = mailAccess.getMessageStorage().getMessage(fa.getFullname(), mailId, markSeen);
+            if (null == mail) {
+                return null;
+            }
             mail.loadContent();
             mail.setFolder(fullname);
             return mail;

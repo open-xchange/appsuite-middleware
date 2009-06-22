@@ -1,3 +1,7 @@
+* 2009-06-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #13943: Fixed NPE if requested message does not exist
+
 * 2009-06-22 - marcus.klein@open-xchange.com
 
  - Bugfix #12352: Changed type for target_id in reminder SQL statements to string. Then existing indices are used on reminder table.
