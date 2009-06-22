@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
@@ -89,6 +88,10 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
 
     public void delete(Connection con, Context ctx, int id) throws GenericConfigStorageException {
         getDelegate().delete(con, ctx, id);
+    }
+
+    public void delete(Connection writeConnection, Context ctx) throws GenericConfigStorageException {
+        getDelegate().delete(writeConnection, ctx);
     }
 
     public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {

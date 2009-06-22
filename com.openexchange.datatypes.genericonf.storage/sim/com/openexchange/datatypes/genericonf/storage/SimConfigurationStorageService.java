@@ -76,6 +76,10 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
     public void delete(Connection con, Context ctx, int id) throws GenericConfigStorageException {
         entries.remove(id);
     }
+    
+    public void delete(Connection writeConnection, Context ctx) throws GenericConfigStorageException {
+        entries.clear();   
+    }
 
     public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
         if (!entries.containsKey(id)) {
@@ -146,4 +150,5 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
         
         return retval;
     }
+
 }

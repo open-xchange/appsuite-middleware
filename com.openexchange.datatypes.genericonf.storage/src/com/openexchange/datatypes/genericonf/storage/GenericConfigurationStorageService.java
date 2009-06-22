@@ -78,6 +78,8 @@ public interface GenericConfigurationStorageService {
 
     public abstract void delete(Connection con, final Context ctx, final int id) throws GenericConfigStorageException;
 
+    public abstract void delete(Connection writeConnection, Context ctx) throws GenericConfigStorageException;
+    
     public abstract List<Integer> search(final Context ctx, final Map<String, Object> query) throws GenericConfigStorageException;
 
     public abstract List<Integer> search(Connection con, final Context ctx, final Map<String, Object> query) throws GenericConfigStorageException;
