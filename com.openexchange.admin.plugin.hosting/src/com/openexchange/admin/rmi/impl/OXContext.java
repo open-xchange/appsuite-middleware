@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -699,19 +700,19 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
-        final MaintenanceReason reason = new MaintenanceReason(42);
+        final MaintenanceReason reason = new MaintenanceReason(I(42));
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
     }
 
-    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, OXContextException {
         try {
-            doNullCheck(ctx, dst_filestore,reason);
+            doNullCheck(ctx, dst_filestore, reason);
             doNullCheck(dst_filestore.getId(), reason.getId());
-        } catch (final InvalidDataException e1) {            
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
+        } catch (InvalidDataException e) {            
+            log.error("Invalid data sent by client!", e);
+            throw e;
         }
-        
+
         new BasicAuthenticator(context).doAuthentication(auth);
         
         Context retval = null;
@@ -729,10 +730,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             setIdOrGetIDFromNameAndIdObject(null, ctx);
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
-            } else if (!tool.existsStore(dst_filestore.getId())) {
+            } else if (!tool.existsStore(dst_filestore.getId().intValue())) {
                 throw new NoSuchFilestoreException();
-            /*} else if (!tool.existsReason(reason.getId())) {
-                throw new NoSuchReasonException();*/
             } else if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
             }
@@ -740,25 +739,25 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             oxcox.disable(ctx, reason);
             retval = oxcox.getData(ctx);
 
-            final int srcStore_id = retval.getFilestoreId();
-
-            if (srcStore_id == dst_filestore.getId()) {
+            final int srcStore_id = retval.getFilestoreId().intValue();
+            if (srcStore_id == dst_filestore.getId().intValue()) {
                 throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
             }
-
             final String ctxdir = retval.getFilestore_name();
             if (ctxdir == null) {
                 throw new OXContextException("Unable to get filestore directory " + ctx.getIdAsString());
             }
 
-            // get src and dst path from filestores
             final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(dst_filestore.getId().intValue());
+            if (!oxu.hasSpaceForAnotherContext(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another context.");
+            }
+            // get src and dst path from filestores
             try {
                 final Filestore srcfilestore = oxu.getFilestore(srcStore_id);
                 final StringBuilder src = builduppath(ctxdir, new URI(srcfilestore.getUrl()));
-                final Filestore fulldstfilestore = oxu.getFilestore(dst_filestore.getId());
-                final String dst = new URI(fulldstfilestore.getUrl()).getPath();
-                
+                final String dst = new URI(destFilestore.getUrl()).getPath();
                 final OXContextException contextException = new OXContextException("Unable to move filestore");
                 if (src == null) {
                     log.error("src is null");
@@ -767,7 +766,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     log.error("dst is null");
                     throw contextException;
                 }
-
                 final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId());
             } catch (final StorageException e) {

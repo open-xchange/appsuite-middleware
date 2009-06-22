@@ -188,6 +188,13 @@ public abstract class OXUtilStorageInterface {
     public abstract void unregisterFilestore(final int store_id) throws StorageException;
 
     /**
+     * Iterates across all existing filestores and searches for one having enough space for a context.
+     */
+    public abstract Filestore findFilestoreForContext() throws StorageException;
+
+    public abstract boolean hasSpaceForAnotherContext(Filestore filestore) throws StorageException;
+
+    /**
      * Create a new maintenance reason in configdb.They are needed to disable a
      * context.
      * 

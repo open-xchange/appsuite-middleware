@@ -125,80 +125,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OXContextMySQLStorage extends OXContextSQLStorage {
 
-    private class OXContextMySQLStorageCommonPriv extends OXContextMySQLStorageCommon {
-        @Override
-        protected int getFileStoreID(final Connection configdb_read) throws SQLException, StorageException {
-            int return_store_id = 0;
-            ResultSet rs = null;
-            PreparedStatement stmt = null;
-            try {
-                long average_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
-                average_size *= Math.pow(2, 20);// to byte
-                stmt = configdb_read.prepareStatement("SELECT id,size,max_context FROM filestore");
-
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    final int store_max_contexts = rs.getInt("max_context");
-                    // don't add contexts if 0
-                    if (store_max_contexts == 0) {
-                        continue;
-                    }
-
-                    final int store_id = rs.getInt("id");
-                    final long store_size = rs.getLong("size"); // must be as
-                                                                // byte in the
-                                                                // db
-                    final PreparedStatement pis = configdb_read.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id = ?");
-                    pis.setInt(1, store_id);
-                    final ResultSet rsi = pis.executeQuery();
-                    if (!rsi.next()) {
-                        throw new StorageException("Unable to determine usage of filestore=" + store_id);
-                    }
-                    final Integer store_count = rsi.getInt("COUNT(cid)");
-
-                    rsi.close();
-                    pis.close();
-                    // don't add if limit reached
-                    if (store_count >= store_max_contexts) {
-                        continue;
-                    }
-
-                    final long used_mb = store_count * average_size; // theoretical
-                    // used storage in store
-                    final long with_this_context = used_mb + average_size; // theoretical
-                    // used storage in store including the new one
-                    if (with_this_context <= store_size) {
-                        return_store_id = store_id;
-                        break;
-                    }
-                }
-                // all stores are set to 0 in max_context(means they should NOT
-                // be
-                // touched or increased)
-                if (return_store_id == 0) {
-                    throw new StorageException("No usable or free enough filestore found");
-                }
-            } catch (final java.lang.NumberFormatException juppes) {
-                LOG.error("Invalid average context size", juppes);
-                throw new StorageException("Invalid average context size");
-            } finally {
-                try {
-                    rs.close();
-                } catch (final SQLException exp) {
-                    LOG.error("Error closing Resultset", exp);
-                }
-                try {
-                    stmt.close();
-                } catch (final Exception e) {
-                    LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-                }
-            }
-
-            return return_store_id;
-        }
-    }
-
-    private static final Log LOG = LogFactory.getLog(OXContextMySQLStorage.class);
+    static final Log LOG = LogFactory.getLog(OXContextMySQLStorage.class);
 
     private int CONTEXTS_PER_SCHEMA = 1;
 
@@ -214,7 +141,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private int USE_UNIT = UNIT_CONTEXT;
 
-    private final OXContextMySQLStorageCommonPriv oxcontextcommon = new OXContextMySQLStorageCommonPriv();
+    private final OXContextMySQLStorageCommon oxcontextcommon = new OXContextMySQLStorageCommon();
 
     public OXContextMySQLStorage() {
         try {
@@ -1117,6 +1044,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 OXUser.checkAndSetLanguage(admin_user);
                 
                 final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+                // Find filestore for context.
+                ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
+                ctx.setFilestoreId(oxu.findFilestoreForContext().getId());
+
                 // Get config_db/ox_db connection from pool
                 configdb_write_con = cache.getConnectionForConfigDB();
 
@@ -1297,32 +1228,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private String translateGroupName(final User administrator) {
         Locale locale = LocaleTools.getLocale(administrator.getLanguage());
         return I18nServices.getInstance().translate(locale, Groups.STANDARD_GROUP);
-    }
-
-    /**
-     * Internally used object for getnextdbhandlebyweight method instead of
-     */
-    private class DatabaseHandle extends Database {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -4816706296673058930L;
-
-        private int count;
-
-        public DatabaseHandle() {
-            super();
-            this.count = -1;
-        }
-
-        public int getCount() {
-            return this.count;
-        }
-
-        public void setCount(final int count) {
-            this.count = count;
-        }
     }
 
     /*

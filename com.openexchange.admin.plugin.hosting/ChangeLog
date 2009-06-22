@@ -1,3 +1,7 @@
+* 2009-06-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #12983: Added check if destination filestore has enough space for another context on moving context.
+
 * 2009-06-15 - marcus.klein@open-xchange.com
 
  - Bugfix #13386: Improved exception message if maximum number of context for every database is reached.
