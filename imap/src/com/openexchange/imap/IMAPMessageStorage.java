@@ -1012,7 +1012,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 for (int i = 0; i < result.length; i++) {
                     set.add(Long.valueOf(result[i]));
                 }
-                IMAPSessionUtility.removeDeletedDatabaseData(set, accountId, session, sourceFullname);
+                IMAPSessionUtility.removeDeletedSessionData(set, accountId, session, sourceFullname);
             }
             return result;
         } catch (final MessagingException e) {

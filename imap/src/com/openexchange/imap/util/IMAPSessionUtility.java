@@ -140,8 +140,6 @@ public final class IMAPSessionUtility {
                             iter.remove();
                         }
                     }
-
-                    removeDeletedDatabaseData(deleted, accountId, session, fullName);
                 } else {
                     deleted = Collections.emptySet();
                 }
@@ -180,7 +178,7 @@ public final class IMAPSessionUtility {
                             final Set<Long> changedUIDs = data2UIDSet(changedSessionData);
                             newAndModified.addAll(changedUIDs);
                             /*
-                             * TODO: Write changes to DB storage??? If yes, this routine's result are only yielded per call and thus are not
+                             * Write changes to DB storage??? If yes, this routine's result are only yielded per call and thus are not
                              * reproduceable
                              */
                             for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
@@ -228,7 +226,7 @@ public final class IMAPSessionUtility {
      * @param fullName The IMAP folder's full name
      * @throws MailException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedDatabaseData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) throws MailException {
+    public static void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) throws MailException {
         synchronized (session) {
             final String key = getSessionKey(accountId, fullName);
             final Set<IMAPUpdateableData> sessionData;
@@ -247,6 +245,25 @@ public final class IMAPSessionUtility {
                     iter.remove();
                 }
             }
+        }
+    }
+
+    /**
+     * Removes specified deleted UIDs from session storage.
+     * 
+     * @param accountId The account ID
+     * @param session The session
+     * @param fullName The IMAP folder's full name
+     * @throws MailException If an error occurs while deleting UIDs
+     */
+    public static void removeDeletedFolder(final int accountId, final Session session, final String fullName) throws MailException {
+        synchronized (session) {
+            final String key = getSessionKey(accountId, fullName);
+            final Object parameter = session.getParameter(key);
+            if (null == parameter) {
+                return;
+            }
+            session.setParameter(key, null);
         }
     }
 
