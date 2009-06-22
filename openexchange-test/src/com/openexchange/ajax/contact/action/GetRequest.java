@@ -55,13 +55,12 @@ import java.util.List;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class GetRequest extends AbstractContactRequest {
+public class GetRequest extends AbstractContactRequest<GetResponse> {
 
     /**
      * Contact is requested through this folder.
@@ -73,23 +72,13 @@ public class GetRequest extends AbstractContactRequest {
      */
     private final int objectId;
 	
-	/**
-	 * Recurrence position 
-	 */
-	private final int recurrencePosition; 
-	
     /**
      * Default constructor.
      */
     public GetRequest(final int folderId, final int objectId) {
-        this(folderId, objectId, 0);
-    }
-	
-    public GetRequest(final int folderId, final int objectId, final int recurrencePosition) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
-		this.recurrencePosition = recurrencePosition;
     }
 
     public GetRequest(final int folderId, final InsertResponse insert) {
@@ -114,22 +103,17 @@ public class GetRequest extends AbstractContactRequest {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-		final List parameterList = new ArrayList();
+		final List<Parameter> parameterList = new ArrayList<Parameter>();
 		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(objectId)));
-			
-		if (recurrencePosition > 0) {
-			parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(recurrencePosition)));
-		}
-		
-		return (Parameter[])parameterList.toArray(new Parameter[parameterList.size()]);
+		return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public GetParser getParser() {
         return new GetParser();
     }
 }

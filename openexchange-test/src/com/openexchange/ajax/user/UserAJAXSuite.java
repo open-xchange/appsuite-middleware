@@ -47,63 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.user.actions;
+package com.openexchange.ajax.user;
 
-import org.json.JSONException;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.contact.action.AbstractContactRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.request.ContactRequest;
-
-/**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public class GetRequest extends AbstractContactRequest<GetResponse> {
-
-    /**
-     * Unique identifier of the user.
-     */
-    private final int userId;
-
-    /**
-     * Default constructor.
-     * @param userId unique identifier of the user.
-     */
-    public GetRequest(final int userId) {
-        super();
-        this.userId = userId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_GET_USER),
-            new Parameter(AJAXServlet.PARAMETER_ID, userId)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public GetParser getParser() {
-        return new GetParser(true);
-    }
+public class UserAJAXSuite extends TestSuite {
+	
+	public static Test suite(){
+		final TestSuite tests = new TestSuite();
+		tests.addTestSuite(Bug13911Test.class);
+		return tests;
+	}
 }
