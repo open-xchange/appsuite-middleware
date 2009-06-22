@@ -52,7 +52,6 @@ package com.openexchange.datatypes.genericonf.storage;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.contexts.Context;
 
 
