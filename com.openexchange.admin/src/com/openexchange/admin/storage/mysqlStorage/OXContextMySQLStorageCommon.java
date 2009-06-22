@@ -77,7 +77,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 
-public abstract class OXContextMySQLStorageCommon {
+public class OXContextMySQLStorageCommon {
 
     public static final String LOG_ERROR_CLOSING_STATEMENT = "Error closing statement";
 
@@ -487,10 +487,6 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    // This method could be private but due to the fact, that it is abstract, we
-    // have to set it to protected
-    protected abstract int getFileStoreID(final Connection configdb_read) throws SQLException, StorageException;
-
     private final int getMyServerID(final Connection configdb_write_con) throws SQLException, StorageException {
         PreparedStatement sstmt = null;
         int sid = 0;
@@ -542,25 +538,20 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    private final void fillContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
+    private final void fillContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-
-            final int store_id = getFileStoreID(configdb_write_con);
-            // check if all filespool infos exist and then insert into context
-            // table and login2context
-
             stmt = configdb_write_con.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
-            stmt.setInt(1, ctx.getId());
+            stmt.setInt(1, ctx.getId().intValue());
             if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
                 stmt.setString(2, ctx.getName());
             } else {
                 stmt.setString(2, ctx.getIdAsString());
             }
             stmt.setBoolean(3, true);
-            stmt.setInt(4, store_id);
-            stmt.setString(5, ctx.getIdAsString() + "_ctx_store");
-            stmt.setLong(6, ctx.getMaxQuota());
+            stmt.setInt(4, ctx.getFilestoreId().intValue());
+            stmt.setString(5, ctx.getFilestore_name());
+            stmt.setLong(6, ctx.getMaxQuota().longValue());
             stmt.executeUpdate();
             stmt.close();
         } finally {
