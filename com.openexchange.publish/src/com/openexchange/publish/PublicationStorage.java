@@ -74,4 +74,7 @@ public interface PublicationStorage {
     public void updatePublication(Publication publication) throws PublicationException;
     
     public void deletePublicationsOfUser(int userID, Context context) throws PublicationException;
+    
+    public void deletePublicationsInContext(int contextId, Context ctx) throws PublicationException;
+    
 }

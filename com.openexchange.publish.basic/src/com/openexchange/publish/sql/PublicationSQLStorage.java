@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.sql;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.publish.PublicationErrorMessage.IDGiven;
 import static com.openexchange.publish.PublicationErrorMessage.PublicationNotFound;
 import static com.openexchange.publish.PublicationErrorMessage.SQLException;
@@ -134,8 +135,8 @@ public class PublicationSQLStorage implements PublicationStorage {
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(ctx.getContextId());
-            values.add(publicationId);
+            values.add(I(ctx.getContextId()));
+            values.add(I(publicationId));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
@@ -175,7 +176,7 @@ public class PublicationSQLStorage implements PublicationStorage {
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)).AND(new EQUALS("entity", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(ctx.getContextId());
+            values.add(I(ctx.getContextId()));
             values.add(module);
             values.add(entityId);
 
@@ -213,7 +214,7 @@ public class PublicationSQLStorage implements PublicationStorage {
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("target_id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(ctx.getContextId());
+            values.add(I(ctx.getContextId()));
             values.add(publicationTarget);
 
             builder = new StatementBuilder();
@@ -342,6 +343,24 @@ public class PublicationSQLStorage implements PublicationStorage {
             tryToClose(context, writeConnection);
         }
     }
+    
+    public void deletePublicationsInContext(int contextId, Context ctx) throws PublicationException {
+        Connection writeConnection = null;
+        try {
+            writeConnection = dbProvider.getWriteConnection(ctx);
+            writeConnection.setAutoCommit(false);
+            deleteWhereContextID(contextId, ctx, writeConnection);
+            writeConnection.commit();
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (TransactionException e) {
+            throw new PublicationException(e);
+        } catch (GenericConfigStorageException e) {
+            throw new PublicationException(e);
+        } finally {
+            tryToClose(ctx, writeConnection);
+        }
+    }
 
     private void tryToClose(Context context, Connection writeConnection) throws PublicationException {
         if (writeConnection != null) {
@@ -360,20 +379,31 @@ public class PublicationSQLStorage implements PublicationStorage {
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("user_id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
         List<Object> values = new ArrayList<Object>();
-        values.add(userid);
-        values.add(context.getContextId());
+        values.add(I(userid));
+        values.add(I(context.getContextId()));
 
         new StatementBuilder().executeStatement(writeConnection, delete, values);
 
         storageService.delete(writeConnection, context, userid);
+    }
+    
+    private void deleteWhereContextID(int contextId, Context ctx, Connection writeConnection) throws SQLException, GenericConfigStorageException {
+        DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER));
+
+        List<Object> values = new ArrayList<Object>();
+        values.add(I(ctx.getContextId()));
+
+        new StatementBuilder().executeStatement(writeConnection, delete, values);
+
+        storageService.delete(writeConnection, ctx);
     }
 
     private void delete(Publication publication, Connection writeConnection) throws SQLException, GenericConfigStorageException, PublicationException {
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
         List<Object> values = new ArrayList<Object>();
-        values.add(publication.getId());
-        values.add(publication.getContext().getContextId());
+        values.add(I(publication.getId()));
+        values.add(I(publication.getContext().getContextId()));
 
         new StatementBuilder().executeStatement(writeConnection, delete, values);
 
@@ -390,12 +420,12 @@ public class PublicationSQLStorage implements PublicationStorage {
             PLACEHOLDER).SET("module", PLACEHOLDER).SET("configuration_id", PLACEHOLDER).SET("target_id", PLACEHOLDER);
 
         List<Object> values = new ArrayList<Object>();
-        values.add(id);
-        values.add(publication.getContext().getContextId());
-        values.add(publication.getUserId());
+        values.add(I(id));
+        values.add(I(publication.getContext().getContextId()));
+        values.add(I(publication.getUserId()));
         values.add(publication.getEntityId());
         values.add(publication.getModule());
-        values.add(configId);
+        values.add(I(configId));
         values.add(publication.getTarget().getId());
 
         new StatementBuilder().executeStatement(writeConnection, insert, values);
@@ -413,7 +443,7 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         if (publication.getUserId() > 0) {
             update.SET("user_id", PLACEHOLDER);
-            values.add(publication.getUserId());
+            values.add(I(publication.getUserId()));
         }
         if (publication.getEntityId() != null) {
             update.SET("entity", PLACEHOLDER);
@@ -429,8 +459,8 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
 
         update.WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
-        values.add(publication.getContext().getContextId());
-        values.add(publication.getId());
+        values.add(I(publication.getContext().getContextId()));
+        values.add(I(publication.getId()));
 
         if (values.size() > 2) {
             new StatementBuilder().executeStatement(writeConnection, update, values);
@@ -472,8 +502,8 @@ public class PublicationSQLStorage implements PublicationStorage {
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(publication.getContext().getContextId());
-            values.add(publication.getId());
+            values.add(I(publication.getContext().getContextId()));
+            values.add(I(publication.getId()));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConection, select, values);
@@ -510,8 +540,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             SELECT select = new SELECT("id").FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(ctx.getContextId());
-            values.add(id);
+            values.add(I(ctx.getContextId()));
+            values.add(I(id));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
@@ -534,5 +564,10 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         return retval;
     }
+
+
+
+
+
 
 }
