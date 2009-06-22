@@ -16,8 +16,8 @@ CREATE TABLE prg_links (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE reminder (
-    object_id INT4 UNSIGNED NOT NULL,
     cid INT4 UNSIGNED NOT NULL,
+    object_id INT4 UNSIGNED NOT NULL,
     last_modified INT8 UNSIGNED,
     target_id VARCHAR(255) NOT NULL,
     module INT1 UNSIGNED NOT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE reminder (
     recurrence TINYINT NOT NULL,
     description VARCHAR(1028),
     folder VARCHAR(1028),
-    PRIMARY KEY (cid, object_id),
-    INDEX (cid, target_id),
-    INDEX (cid, userid, alarm),
-    INDEX (cid, userid, last_modified),
-    CONSTRAINT reminder_unique UNIQUE (cid, target_id, module, userid)
+    PRIMARY KEY (cid,object_id),
+    INDEX (cid,target_id),
+    INDEX (cid,userid,alarm),
+    INDEX (cid,userid,last_modified),
+    CONSTRAINT reminder_unique UNIQUE (cid,target_id,module,userid)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE filestore_usage (
