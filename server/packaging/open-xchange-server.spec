@@ -303,6 +303,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Jun 19 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13882: Prevent UI looping.
 * Tue Jun 16 2009 - marcus.klein@open-xchange.com
  - Bugfix #13873: Catching RuntimeExceptions in database update tasks. Fixed causes of RuntimeExceptions in database update tasks.
 * Tue Jun 02 2009 - francisco.laguna@open-xchange.com
