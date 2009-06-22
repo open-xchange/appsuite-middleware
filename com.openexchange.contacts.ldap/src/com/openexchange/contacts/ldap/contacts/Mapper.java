@@ -574,7 +574,7 @@ public class Mapper {
             }
         });
         
-        commonParts(cols, folderid, adminid, retval);
+        commonParts(cols, folderid, adminid, retval, mappings, getter);
         
         return retval;
     }
@@ -655,7 +655,7 @@ public class Mapper {
             }
         }
 
-        commonParts(cols, folderid, adminid, retval);
+        commonParts(cols, folderid, adminid, retval, mappings, getter);
 
         return retval;
     }
@@ -667,8 +667,11 @@ public class Mapper {
      * @param folderid
      * @param adminid
      * @param retval
+     * @param mappings TODO
+     * @param getter TODO
+     * @throws LdapException 
      */
-    private static void commonParts(Set<Integer> cols, int folderid, int adminid, final ContactObject retval) {
+    private static void commonParts(Set<Integer> cols, int folderid, int adminid, final ContactObject retval, Mappings mappings, LdapGetter getter) throws LdapException {
         if (cols.contains(ContactObject.FOLDER_ID)) {
             retval.setParentFolderID(folderid);
         }
@@ -678,8 +681,13 @@ public class Mapper {
         
         // Finally we add the timestamps here
         if (cols.contains(DataObject.LAST_MODIFIED)) {
-            // TODO Fetch it through operational attributes
-            retval.setLastModified(new Date());
+            final String lastmodified = mappings.getLastmodified();
+            if (null != lastmodified && 0 != lastmodified.length()) {
+                retval.setLastModified(getter.getDateAttribute(lastmodified));
+            } else {
+                // A timestamp must be provided, so if it can be fetched from LDAP (due to configuration) this must be self-generated
+                retval.setLastModified(new Date());
+            }
         }
         if (cols.contains(DataObject.CREATION_DATE)) {
             // TODO Fetch it through operational attributes

@@ -50,8 +50,8 @@
 package com.openexchange.contacts.ldap.contacts;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -290,8 +290,7 @@ public class LdapContactInterface implements ContactInterface {
 
 
     public SearchIterator<ContactObject> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
-        LOG.info("Called getDeletedContactsInFolder");
-        return null;
+        return new ArrayIterator<ContactObject>(new ContactObject[0]);
     }
 
     public int getFolderId() {
@@ -305,7 +304,17 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     public SearchIterator<ContactObject> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
-        return new ArrayIterator<ContactObject>(new ContactObject[0]);
+        final Set<Integer> columns = getColumnSet(cols);
+        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, null, null, null);
+        for (int i = 0; i < arrayList.size(); i++) {
+            final ContactObject obj = arrayList.get(i);
+            final Date lastModified = obj.getLastModified();
+            if (null != lastModified && lastModified.before(since)) {
+                arrayList.remove(i--);
+            }
+        }
+        final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
+        return searchIterator;
     }
 
     public int getNumberOfContacts(final int folderId) throws OXException {
@@ -700,16 +709,27 @@ public class LdapContactInterface implements ContactInterface {
                         if (1 < attribute.size()) {
                             throw new LdapException(Code.MULTIVALUE_NOT_ALLOWED_DATE, attributename);
                         } else {
-                            final DateFormat dateInstance = DateFormat.getDateInstance();
-                            return dateInstance.parse((String) attribute.get());
+//                            final DirContext attributeDefinition = attribute.getAttributeDefinition();
+//                            final Attributes attributes2 = attributeDefinition.getAttributes("");
+//                            final Attribute syntaxattribute = attributes2.get("syntax");
+//                            final String value = (String) syntaxattribute.get();
+//                            if ("1.3.6.1.4.1.1466.115.121.1.24".equals(value)) {
+//                                // We have a "Generalized Time syntax"
+                                final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+                                final Date date = simpleDateFormat.parse((String)attribute.get());
+                                return date;
+//                            } else {
+//                                final DateFormat dateInstance = DateFormat.getDateInstance();
+//                                return dateInstance.parse((String) attribute.get());
+//                            }
                         }
                     } else {
                         return null;
                     }
                 } catch (final ParseException e) {
-                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e, e.getMessage());
                 } catch (final NamingException e) {
-                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e, e.getMessage());
                 }
             }
             

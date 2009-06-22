@@ -1,3 +1,8 @@
+* 2009-06-22 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13920 Unable to get public LDAP folders to Outlook
+    - Now returning a SearchIterator in getDeletedContactsInFolder
+  
 * 2009-06-18 - dennis.sieben@open-xchange.com
 
   - Bugfix #13926 gal bundle: java.lang.Exception: The given value for authtype
