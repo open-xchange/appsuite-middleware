@@ -92,14 +92,16 @@ public class IMAPCreateTableTask implements UpdateTask {
         return "CREATE TABLE imapFlags (" + 
         		"cid INT4 unsigned NOT NULL," + 
         		"user INT4 unsigned NOT NULL," + 
+        		"accountId INT4 unsigned NOT NULL," + 
         		"fullname VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
         		"uid INT4 unsigned NOT NULL," + 
         		"flags INT4 unsigned DEFAULT 0 NOT NULL," + 
         		"userFlags VARCHAR(1024) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
         		"lastModified INT8 DEFAULT 0 NOT NULL," + 
-        		"PRIMARY KEY (cid, user, fullname, uid)," + 
-        		"INDEX (cid, user, fullname)," + 
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
+        		"PRIMARY KEY (cid, user, accountId, fullname, uid)," + 
+        		"INDEX (cid, user, accountId, fullname)," + 
+        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
+        		"FOREIGN KEY (cid, accountId, user) REFERENCES user_mail_account (cid, id, user)" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
