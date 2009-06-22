@@ -27,7 +27,7 @@ public class Activator implements BundleActivator {
         try {
             Thread.currentThread().setContextClassLoader(new SnoopingClassLoader(oldClassLoader));
             XingContactParser contactParser = new XingContactParser();
-            contactParser = new SnoopingContactParser();
+            //contactParser = new SnoopingContactParser();
             XingSubscribeService subscribeService = new XingSubscribeService();
             subscribeService.setXingContactParser(contactParser);
 
