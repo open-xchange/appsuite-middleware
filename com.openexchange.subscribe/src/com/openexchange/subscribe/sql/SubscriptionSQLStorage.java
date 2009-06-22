@@ -52,7 +52,6 @@ package com.openexchange.subscribe.sql;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.sql.schema.Tables.publications;
 import static com.openexchange.sql.schema.Tables.subscriptions;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.IDGiven;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
@@ -72,8 +71,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -237,7 +234,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new SubscriptionException(e);
         } finally {
             try {
                 if (builder != null) {
