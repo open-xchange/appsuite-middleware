@@ -57,5 +57,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.microformats,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.templating,com.openexchange.templating"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish.basic,com.openexchange.publish.basic"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.xerces.sun,com.openexchange.xerces.sun"/>
 </provider>
 </psf>
