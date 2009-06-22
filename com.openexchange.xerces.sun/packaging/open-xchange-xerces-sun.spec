@@ -1,4 +1,4 @@
-¨
+
 # norootforbuild
 
 Name:           open-xchange-xerces-sun
