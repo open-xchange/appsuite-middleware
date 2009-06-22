@@ -126,7 +126,11 @@ public final class UnifiedINBOXException extends MIMEMailException {
         /**
          * Move operation aborted. Source and destination folder are equal.
          */
-        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", Category.CODE_ERROR, 2013);
+        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", Category.CODE_ERROR, 2013),
+        /**
+         * Request aborted due to timeout of %1$s milliseconds.
+         */
+        TIMEOUT("Request aborted due to timeout of %1$s milliseconds.", Category.CODE_ERROR, 2014);
 
         private final String message;
 
