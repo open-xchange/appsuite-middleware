@@ -184,6 +184,11 @@ if [ ${1:-0} -eq 2 ]; then
    if ! ox_exists_property UMASK $pfile; then
       ox_set_property UMASK 066 $pfile
    fi
+   # bugfix id#13928
+   # -----------------------------------------------------------------------
+   if ! ox_exists_property COMMONPROPERTIESDIR $pfile; then
+      ox_set_property COMMONPROPERTIESDIR /opt/open-xchange/etc/common $pfile
+   fi
 
    # bugfix id#13313
    # -----------------------------------------------------------------------
