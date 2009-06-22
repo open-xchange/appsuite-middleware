@@ -57,11 +57,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -735,6 +733,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             }
             final boolean backup = (!(fullname.startsWith(trashFullname)));
             blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
+            IMAPSessionUtility.removeDeletedSessionData(msgUIDs, accountId, session, fullname);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -1008,11 +1007,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (move) {
-                final Set<Long> set = new HashSet<Long>(result.length);
-                for (int i = 0; i < result.length; i++) {
-                    set.add(Long.valueOf(result[i]));
-                }
-                IMAPSessionUtility.removeDeletedSessionData(set, accountId, session, sourceFullname);
+                IMAPSessionUtility.removeDeletedSessionData(mailIds, accountId, session, sourceFullname);
             }
             return result;
         } catch (final MessagingException e) {

@@ -83,6 +83,7 @@ import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
+import com.openexchange.imap.util.IMAPSessionUtility;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailFolderStorage;
@@ -796,10 +797,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     deleteTemporaryCreatedFolder(destFolder, newName);
                     throw e;
                 }
-                /*
-                 * TODO: Remove from session storage
-                 */
-                //IMAPSessionUtility.removeDeletedFolderRecursively(accountId, session, oldFullname, separator);
             }
             /*
              * Is rename operation?
@@ -867,6 +864,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                     subscriptionStatus = null;
                 }
+                removeSessionData(moveMe);
                 /*
                  * Rename
                  */
@@ -880,10 +878,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (!success) {
                     throw IMAPException.create(IMAPException.Code.UPDATE_FAILED, imapConfig, session, moveMe.getFullName());
                 }
-                /*
-                 * TODO: Remove from session storage
-                 */
-                //IMAPSessionUtility.removeDeletedFolderRecursively(accountId, session, oldFullName, separator);
                 moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
                 if (moveMe.exists()) {
                     deleteFolder(moveMe);
@@ -1041,7 +1035,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
             }
-            final char sep = deleteMe.getSeparator();
             imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
             if (hardDelete) {
                 /*
@@ -1063,8 +1056,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final String name = deleteMe.getName();
                     int appendix = 1;
                     final StringBuilder sb = new StringBuilder();
-                    IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
-                        name).toString());
+                    IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
+                        deleteMe.getSeparator()).append(name).toString());
                     while (newFolder.exists()) {
                         /*
                          * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
@@ -1084,10 +1077,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                 }
             }
-            /*
-             * TODO: Remove from session storage
-             */
-            //IMAPSessionUtility.removeDeletedFolderRecursively(accountId, session, fullname, sep);
             return fullname;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -1127,9 +1116,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, f.getFullName());
             }
             /*
-             * TODO: Remove from session storage
+             * Remove from session storage
              */
-            // IMAPSessionUtility.removeDeletedFolder(accountId, session, fullname);
+            IMAPSessionUtility.removeDeletedFolder(accountId, session, fullname);
             f.open(Folder.READ_WRITE);
             try {
                 int msgCount = f.getMessageCount();
@@ -1499,18 +1488,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     private void deleteFolder(final IMAPFolder deleteMe) throws MailException, MessagingException {
-        if (getChecker().isDefaultFolder(deleteMe.getFullName())) {
-            throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_DELETE, imapConfig, session, deleteMe.getFullName());
+        final String fullName = deleteMe.getFullName();
+        if (getChecker().isDefaultFolder(fullName)) {
+            throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_DELETE, imapConfig, session, fullName);
         } else if (!deleteMe.exists()) {
-            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, deleteMe.getFullName());
+            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
         }
         try {
             if (imapConfig.isSupportsACLs() && isSelectable(deleteMe) && !getACLExtension().canDeleteMailbox(
                 RightsCache.getCachedRights(deleteMe, true, session, accountId))) {
-                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, deleteMe.getFullName());
+                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, fullName);
             }
         } catch (final MessagingException e) {
-            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, deleteMe.getFullName());
+            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullName);
         }
         if (deleteMe.isOpen()) {
             deleteMe.close(false);
@@ -1518,10 +1508,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         /*
          * Unsubscribe prior to deletion
          */
-        IMAPCommandsCollection.forceSetSubscribed(imapStore, deleteMe.getFullName(), false);
+        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+        removeSessionData(deleteMe);
         final long start = System.currentTimeMillis();
         if (!deleteMe.delete(true)) {
-            throw IMAPException.create(IMAPException.Code.DELETE_FAILED, imapConfig, session, deleteMe.getFullName());
+            throw IMAPException.create(IMAPException.Code.DELETE_FAILED, imapConfig, session, fullName);
         }
         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         /*
@@ -1725,6 +1716,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
          */
         RightsCache.removeCachedRights(toMove, session, accountId);
         UserFlagsCache.removeUserFlags(toMove, session, accountId);
+        IMAPSessionUtility.removeDeletedFolder(accountId, session, moveFullname);
         return newFolder;
     }
 
@@ -1913,6 +1905,18 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      */
     private static boolean inferiors(final Folder folder) throws MessagingException {
         return ((folder.getType() & Folder.HOLDS_FOLDERS) == Folder.HOLDS_FOLDERS);
+    }
+
+    private void removeSessionData(final Folder f) {
+        try {
+            final Folder[] fs = f.list();
+            for (int i = 0; i < fs.length; i++) {
+                removeSessionData(fs[i]);
+            }
+            IMAPSessionUtility.removeDeletedFolder(accountId, session, f.getFullName());
+        } catch (final MessagingException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
 }

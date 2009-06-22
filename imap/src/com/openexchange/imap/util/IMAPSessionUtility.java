@@ -226,7 +226,24 @@ public final class IMAPSessionUtility {
      * @param fullName The IMAP folder's full name
      * @throws MailException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) throws MailException {
+    public static void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final Session session, final String fullName) {
+        final Set<Long> s = new HashSet<Long>(deletedUIDs.length);
+        for (int i = 0; i < deletedUIDs.length; i++) {
+            s.add(Long.valueOf(deletedUIDs[i]));
+        }
+        removeDeletedSessionData(s, accountId, session, fullName);
+    }
+
+    /**
+     * Removes specified deleted UIDs from session storage.
+     * 
+     * @param deletedUIDs The set of deleted UIDs
+     * @param accountId The account ID
+     * @param session The session
+     * @param fullName The IMAP folder's full name
+     * @throws MailException If an error occurs while deleting UIDs
+     */
+    public static void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) {
         synchronized (session) {
             final String key = getSessionKey(accountId, fullName);
             final Set<IMAPUpdateableData> sessionData;
@@ -256,7 +273,7 @@ public final class IMAPSessionUtility {
      * @param fullName The IMAP folder's full name
      * @throws MailException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedFolder(final int accountId, final Session session, final String fullName) throws MailException {
+    public static void removeDeletedFolder(final int accountId, final Session session, final String fullName) {
         synchronized (session) {
             final String key = getSessionKey(accountId, fullName);
             final Object parameter = session.getParameter(key);
