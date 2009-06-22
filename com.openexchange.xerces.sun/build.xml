@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.xerces.sun" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property name="tmp.dir" value="tmp"/>
+    <property name="lib.dir" value="lib"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+    <property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="composite.name" value="open-xchange-xerces-sun-${version}"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+
+	 <!-- Third party libs -->
+	    <fileset dir="${basedir}" id="3rdpartyjars">
+	        <include name="${lib.dir}/*.jar"/>
+	        <exclude name="CVS"/>
+	    </fileset>
+
+	<!-- Compile -->
+    <target name="prepare">
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+
+    <target name="jar" depends="prepare">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${output..}"/>
+            <fileset refid="3rdpartyjars"/>
+        </jar>
+    </target>
+
+    <!-- Install targets -->
+    <target name="install" depends="installJar,installConfig"/>
+
+    <target name="installConfig">
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+    </target>
+
+    <target name="installJar" depends="jar">
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <copy todir="${destdir}/${bundlesdir}">
+            <fileset dir="${tmp.dir}">
+                <include name="${bundle.name}"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${tmp.dir}"/>
+        <delete dir="${output..}"/>
+    </target>
+
+</project>
