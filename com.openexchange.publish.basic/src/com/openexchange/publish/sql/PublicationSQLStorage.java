@@ -385,9 +385,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
-            writeConnection.setAutoCommit(false);
             deleteWhereContextID(contextId, ctx, writeConnection);
-            writeConnection.commit();
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (TransactionException e) {
@@ -402,7 +400,9 @@ public class PublicationSQLStorage implements PublicationStorage {
     private void tryToClose(Context context, Connection writeConnection) throws PublicationException {
         if (writeConnection != null) {
             try {
-                writeConnection.rollback();
+                if (!writeConnection.getAutoCommit()) {
+                    writeConnection.rollback();
+                }
                 writeConnection.setAutoCommit(true);
             } catch (SQLException e) {
                 throw SQLException.create(e);

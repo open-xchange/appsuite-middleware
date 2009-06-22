@@ -483,14 +483,15 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
     public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException {
         Connection writeConnection = null;
-        StatementBuilder builder = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
+            writeConnection.setAutoCommit(false);
 
             List<Subscription> subs = getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
             for(Subscription sub: subs){
                 delete(sub, writeConnection);
             }
+            writeConnection.commit();
         } catch (GenericConfigStorageException e) {
             throw SQLException.create(e);
         } catch (SQLException e) {
@@ -499,22 +500,20 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw new SubscriptionException(e);
         } finally {
             try {
-                if (builder != null) {
-                    builder.closePreparedStatement(writeConnection, null);
-                }
+                writeConnection.rollback();
+                writeConnection.setAutoCommit(true);
             } catch (SQLException e) {
                 throw SQLException.create(e);
-            } finally {
-                dbProvider.releaseWriteConnection(ctx, writeConnection);
             }
+            dbProvider.releaseWriteConnection(ctx, writeConnection);
         }
     }
 
     public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException {
         Connection writeConnection = null;
-        StatementBuilder builder = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
+            writeConnection.setAutoCommit(false);
             DELETE delete = new 
                 DELETE()
                 .FROM(subscriptions)
@@ -523,9 +522,9 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
 
-            builder = new StatementBuilder();
-            builder.executeStatement(writeConnection, delete, values);
+            new StatementBuilder().executeStatement(writeConnection, delete, values);
             storageService.delete(writeConnection, ctx);
+            writeConnection.commit();
         } catch (TransactionException e) {
             throw new SubscriptionException(e);
         } catch (SQLException e) {
@@ -534,14 +533,12 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw SQLException.create(e);
         } finally {
             try {
-                if (builder != null) {
-                    builder.closePreparedStatement(writeConnection, null);
-                }
+                writeConnection.rollback();
+                writeConnection.setAutoCommit(true);
             } catch (SQLException e) {
                 throw SQLException.create(e);
-            } finally {
-                dbProvider.releaseWriteConnection(ctx, writeConnection);
             }
+            dbProvider.releaseWriteConnection(ctx, writeConnection);
         }
     }
     
