@@ -309,9 +309,6 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 46
             // Renames the standard group of all users.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RenameGroupTask());
-            // Version 48
-            // Adds necessary tables to support missing IMAP features
-            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.IMAPCreateTableTask());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
