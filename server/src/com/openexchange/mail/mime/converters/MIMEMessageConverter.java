@@ -1333,7 +1333,10 @@ public final class MIMEMessageConverter {
              * Date: Thu, 18 Sep 1997 10:49:08 +0200
              * </pre>
              */
-            mail.setSubject(decodeMultiEncodedHeader(mail.getFirstHeader(MessageHeaders.HDR_SUBJECT)));
+            {
+                final String subject = decodeMultiEncodedHeader(mail.getFirstHeader(MessageHeaders.HDR_SUBJECT));
+                mail.setSubject(null == subject ? "" : subject);
+            }
             mail.setThreadLevel(0);
             return mail;
         } catch (final MessagingException e) {
