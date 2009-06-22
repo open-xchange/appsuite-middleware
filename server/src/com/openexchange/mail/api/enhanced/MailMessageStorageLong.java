@@ -100,7 +100,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public abstract long[] appendMessagesLong(String destFolder, MailMessage[] msgs) throws MailException;
 
     @Override
-    public final String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
         return longs2uids(copyMessagesLong(sourceFolder, destFolder, uids2longs(mailIds), fast));
     }
 
@@ -123,7 +123,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public abstract long[] copyMessagesLong(String sourceFolder, String destFolder, long[] mailIds, boolean fast) throws MailException;
 
     @Override
-    public final void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws MailException {
+    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws MailException {
         deleteMessagesLong(folder, uids2longs(mailIds), hardDelete);
     }
 
@@ -160,12 +160,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws MailException
      */
     @Override
-    public final MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
     @Override
-    public final MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
         return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
     }
 
@@ -190,7 +190,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public final MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
         return getImageAttachmentLong(folder, Long.parseLong(mailId), contentId);
     }
 
@@ -216,7 +216,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public final MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
         return getMessageLong(folder, Long.parseLong(mailId), markSeen);
     }
 
@@ -253,7 +253,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public final MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
         return getMessagesLong(folder, uids2longs(mailIds), fields);
     }
 
@@ -320,7 +320,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public final String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
         return longs2uids(moveMessagesLong(sourceFolder, destFolder, uids2longs(mailIds), fast));
     }
 
@@ -429,7 +429,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws MailException If color label cannot be updated
      */
     @Override
-    public final void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
         updateMessageColorLabelLong(folder, uids2longs(mailIds), colorLabel);
     }
 
@@ -454,7 +454,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public final void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws MailException {
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws MailException {
         updateMessageFlagsLong(folder, uids2longs(mailIds), flags, set);
     }
 
