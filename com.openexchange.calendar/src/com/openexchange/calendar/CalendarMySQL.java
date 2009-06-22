@@ -2223,7 +2223,7 @@ public class CalendarMySQL implements CalendarSqlImp {
              * Update reminders' folder ID on move operation
              */
             final ReminderSQLInterface reminderInterface = new ReminderHandler(ctx);
-            final SearchIterator<?> it = reminderInterface.listReminder(cdao.getObjectID());
+            final SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
             final List<ReminderObject> toUpdate = new ArrayList<ReminderObject>();
             try {
                 while (it.hasNext()) {

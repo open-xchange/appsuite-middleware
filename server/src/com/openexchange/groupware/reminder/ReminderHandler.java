@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.reminder;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
@@ -217,48 +219,43 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void updateReminder(final ReminderObject reminder,
-        final Connection con) throws ReminderException {
+    public void updateReminder(ReminderObject reminder, Connection con) throws ReminderException {
         isValid(reminder);
         final boolean containsId = (0 != reminder.getObjectId());
-        PreparedStatement ps = null;
+        PreparedStatement stmt = null;
         try {
             if (containsId) {
-                ps = con.prepareStatement(SQL.sqlUpdatebyId);
+                stmt = con.prepareStatement(SQL.sqlUpdatebyId);
             } else {
-                ps = con.prepareStatement(SQL.sqlUpdate);
+                stmt = con.prepareStatement(SQL.sqlUpdate);
             }
-            int a = 1;
-            ps.setTimestamp(a++, new Timestamp(reminder.getDate().getTime()));
-            ps.setBoolean(a++, reminder.isRecurrenceAppointment());
+            int pos = 1;
+            stmt.setTimestamp(pos++, new Timestamp(reminder.getDate().getTime()));
+            stmt.setBoolean(pos++, reminder.isRecurrenceAppointment());
             final String description = reminder.getDescription();
             if (description == null) {
-                ps.setNull(a++, java.sql.Types.VARCHAR);
+                stmt.setNull(pos++, java.sql.Types.VARCHAR);
             } else {
-                ps.setString(a++, description);
+                stmt.setString(pos++, description);
             }
-            ps.setLong(a++, System.currentTimeMillis());
-            ps.setInt(a++, reminder.getFolder());
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, reminder.getFolder());
             // Now the condition.
-            ps.setInt(a++, context.getContextId());
+            stmt.setInt(pos++, context.getContextId());
             if (containsId) {
-                ps.setInt(a++, reminder.getObjectId());
+                stmt.setInt(pos++, reminder.getObjectId());
             } else {
-                ps.setInt(a++, reminder.getTargetId());
-                ps.setInt(a++, reminder.getModule());
-                ps.setInt(a++, reminder.getUser());
+                stmt.setString(pos++, String.valueOf(reminder.getTargetId()));
+                stmt.setInt(pos++, reminder.getModule());
+                stmt.setInt(pos++, reminder.getUser());
             }
-            final int num = ps.executeUpdate();
-            if (1 != num) {
+            if (1 != stmt.executeUpdate()) {
                 throw new ReminderException(Code.TOO_MANY);
             }
-        } catch (final SQLException e) {
-            throw new ReminderException(Code.UPDATE_EXCEPTION, e);
+        } catch (SQLException e) {
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
-            closeSQLStuff(null, ps);
+            closeSQLStuff(stmt);
         }
     }
 
@@ -292,7 +289,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             ps.setInt(++a, reminder.getObjectId());
             final int deleted = ps.executeUpdate();
             if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, reminder, contextId);
+                throw new ReminderException(Code.NOT_FOUND, reminder, I(contextId));
             }
             reminderDeleteInterface.updateTargetObject(context, writeCon, reminder.getTargetId(), reminder.getUser());
         } catch (final SQLException exc) {
@@ -327,10 +324,10 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
     public void deleteReminder(final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
         final Connection writeCon;
         try {
-			writeCon = DBPool.pickupWriteable(context);
-		} catch (final DBPoolingException e) {
-			throw new OXException(e);
-		}
+            writeCon = DBPool.pickupWriteable(context);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
         try {
             writeCon.setAutoCommit(false);
             deleteReminder(targetId, userId, module, writeCon);
@@ -339,100 +336,80 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             DBUtils.rollback(writeCon);
             throw new ReminderException(Code.DELETE_EXCEPTION, exc);
         } finally {
-        	DBUtils.autocommit(writeCon);
-			DBPool.closeWriterSilent(context,writeCon);
-        }
-    }
-
-    public void deleteReminder(final int targetId, final int userId,
-        final int module, final Connection writeCon) throws
-        OXMandatoryFieldException, OXConflictException, OXException {
-        final int contextId = context.getContextId();
-        if (userId == 0) {
-            throw new ReminderException(Code.MANDATORY_FIELD_USER, "missing user id");
-        }
-        PreparedStatement ps = null;
-        try {
-            int a = 0;
-            ps = writeCon.prepareStatement(SQL.sqlDelete);
-            ps.setInt(++a, contextId);
-            ps.setInt(++a, targetId);
-            ps.setInt(++a, module);
-            ps.setInt(++a, userId);
-            final int deleted = ps.executeUpdate();
-            if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, Integer.valueOf(targetId), Integer.valueOf(contextId));
-            }
-            reminderDeleteInterface.updateTargetObject(context, writeCon, targetId, userId);
-        } catch (final SQLException exc) {
-            throw new ReminderException(Code.DELETE_EXCEPTION, exc);
-        } catch (final AbstractOXException e) {
-            throw new ReminderException(e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (final SQLException exc) {
-                    LOG.warn("cannot close prepared statement", exc);
-                }
-            }
-        }
-    }
-
-    public void deleteReminder(final int targetId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
-        Connection writeCon = null;
-
-        try {
-            writeCon = DBPool.pickupWriteable(context);
-            writeCon.setAutoCommit(false);
-            deleteReminder(targetId, module, writeCon);
-            writeCon.commit();
-        } catch (final SQLException exc) {
-            DBUtils.rollback(writeCon);
-            throw new ReminderException(Code.DELETE_EXCEPTION, exc);
-        } catch (final DBPoolingException exc) {
-            throw new OXException(exc);
-        } finally {
-            if (writeCon != null) {
-                try {
-                    writeCon.setAutoCommit(true);
-                } catch (final SQLException exc) {
-                    LOG.warn("cannot set autocommit to true on connection", exc);
-                }
-            }
-
+            DBUtils.autocommit(writeCon);
             DBPool.closeWriterSilent(context,writeCon);
         }
     }
 
-    public void deleteReminder(final int targetId, final int module,
-        final Connection writeCon) throws OXMandatoryFieldException,
-        OXConflictException, OXException {
+    public void deleteReminder(int targetId, int userId, int module, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
         final int contextId = context.getContextId();
-        PreparedStatement ps = null;
+        if (userId == 0) {
+            throw new ReminderException(Code.MANDATORY_FIELD_USER, "missing user id");
+        }
+        PreparedStatement stmt = null;
         try {
-            int a = 0;
-            ps = writeCon.prepareStatement(SQL.sqlDeleteReminderOfObject);
-            ps.setInt(++a, contextId);
-            ps.setInt(++a, targetId);
-            ps.setInt(++a, module);
-            final int deleted = ps.executeUpdate();
-            if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, Integer.valueOf(targetId), Integer.valueOf(contextId));
+            int pos = 1;
+            stmt = con.prepareStatement(SQL.sqlDelete);
+            stmt.setInt(pos++, contextId);
+            stmt.setString(pos++, String.valueOf(targetId));
+            stmt.setInt(pos++, module);
+            stmt.setInt(pos++, userId);
+            if (0 == stmt.executeUpdate()) {
+                throw new ReminderException(Code.NOT_FOUND, I(targetId), I(contextId));
             }
-            reminderDeleteInterface.updateTargetObject(context, writeCon, targetId);
-        } catch (final SQLException exc) {
-            throw new ReminderException(Code.DELETE_EXCEPTION, exc);
-        } catch (final AbstractOXException e) {
+            reminderDeleteInterface.updateTargetObject(context, con, targetId, userId);
+        } catch (SQLException e) {
+            throw new ReminderException(Code.DELETE_EXCEPTION, e);
+        } catch (ReminderException e) {
+            throw e;
+        } catch (AbstractOXException e) {
             throw new ReminderException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (final SQLException exc) {
-                    LOG.warn("cannot close prepared statement", exc);
-                }
+            closeSQLStuff(stmt);
+        }
+    }
+
+    public void deleteReminder(int targetId, int module) throws OXMandatoryFieldException, OXConflictException, OXException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(context);
+        } catch (DBPoolingException e) {
+            throw new OXException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            deleteReminder(targetId, module, con);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            autocommit(con);
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    public void deleteReminder(int targetId, int module, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
+        final int contextId = context.getContextId();
+        PreparedStatement stmt = null;
+        try {
+            int pos = 1;
+            stmt = con.prepareStatement(SQL.sqlDeleteReminderOfObject);
+            stmt.setInt(pos++, contextId);
+            stmt.setString(pos++, String.valueOf(targetId));
+            stmt.setInt(pos++, module);
+            if (0 == stmt.executeUpdate()) {
+                throw new ReminderException(Code.NOT_FOUND, I(targetId), I(contextId));
             }
+            reminderDeleteInterface.updateTargetObject(context, con, targetId);
+        } catch (SQLException e) {
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+        } catch (ReminderException e) {
+            throw e;
+        } catch (AbstractOXException e) {
+            throw new ReminderException(e);
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
@@ -444,7 +421,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             if (Code.NOT_FOUND.getDetailNumber() == exc.getDetailNumber()) {
                 return false;
             }
-			throw exc;
+            throw exc;
         }
     }
 
@@ -454,41 +431,38 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 
     public ReminderObject loadReminder( final String targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
         final Connection readCon;
-		try {
-			readCon = DBPool.pickup(context);
-		} catch (final DBPoolingException e) {
-			throw new OXException(e);
-		}
-		try {
-			return loadReminder(targetId, userId, module, readCon);
-		} finally {
-			DBPool.closeReaderSilent(context, readCon);
-		}
+        try {
+            readCon = DBPool.pickup(context);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        try {
+            return loadReminder(targetId, userId, module, readCon);
+        } finally {
+            DBPool.closeReaderSilent(context, readCon);
+        }
     }
 
     public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
         return loadReminder(String.valueOf(targetId), userId, module, readCon);
     }
 
-    public ReminderObject loadReminder( final String targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
+    public ReminderObject loadReminder(String targetId, int userId, int module, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            int a = 0;
-
-            ps = readCon.prepareStatement(SQL.sqlLoad);
-            ps.setInt(++a, context.getContextId());
-            ps.setString(++a, targetId);
-            ps.setInt(++a, module);
-            ps.setInt(++a, userId);
-
-            rs = ps.executeQuery();
-            return convertResult2ReminderObject(rs, ps, true);
-        } catch (final SQLException exc) {
-            throw new ReminderException(Code.LOAD_EXCEPTION, exc);
+            int pos = 1;
+            stmt = con.prepareStatement(SQL.sqlLoad);
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setString(pos++, targetId);
+            stmt.setInt(pos++, module);
+            stmt.setInt(pos++, userId);
+            result = stmt.executeQuery();
+            return result2Object(result, stmt, false);
+        } catch (SQLException e) {
+            throw new ReminderException(Code.LOAD_EXCEPTION, e);
         } finally {
-            DBUtils.closeSQLStuff(rs, ps);
+            closeSQLStuff(result, stmt);
         }
     }
 
@@ -519,27 +493,24 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
      * @return an array of found reminders.
      * @throws OXException if reading the reminder fails.
      */
-    private ReminderObject[] loadReminder(final int[] targetIds,
-            final int userId, final int module, final Connection con)
-            throws OXException {
+    private ReminderObject[] loadReminder(int[] targetIds, int userId, int module, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(DBUtils.getIN(SQL.sqlLoadMultiple, targetIds
-                    .length));
+            stmt = con.prepareStatement(DBUtils.getIN(SQL.sqlLoadMultiple, targetIds.length));
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, module);
             stmt.setInt(pos++, userId);
             for (final int targetId : targetIds) {
-                stmt.setInt(pos++, targetId);
+                stmt.setString(pos++, String.valueOf(targetId));
             }
             result = stmt.executeQuery();
-            return convertResult2Reminder(result);
-        } catch (final SQLException exc) {
-            throw new ReminderException(Code.LOAD_EXCEPTION, exc);
+            return result2Object(result);
+        } catch (SQLException e) {
+            throw new ReminderException(Code.LOAD_EXCEPTION, e);
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            closeSQLStuff(result, stmt);
         }
     }
 
@@ -550,10 +521,8 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
      * @return an array of reminder objects.
      * @throws SQLException if an error occurs.
      */
-    private ReminderObject[] convertResult2Reminder(final ResultSet result)
-    throws SQLException {
-        final Collection<ReminderObject> retval =
-                new LinkedList<ReminderObject>();
+    private ReminderObject[] result2Object(ResultSet result) throws SQLException {
+        final Collection<ReminderObject> retval = new LinkedList<ReminderObject>();
         while (result.next()) {
             int pos = 1;
             try {
@@ -568,9 +537,9 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
                 reminder.setFolder(result.getInt(pos++));
                 reminder.setLastModified(new Date(result.getLong(pos++)));
                 retval.add(reminder);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 // Nothing to do here. Missed one reminder.
-                LOG.error(e.getMessage(), e);
+                LOG.error(new ReminderException(Code.SQL_ERROR, e, e.getMessage()));
             }
         }
         return retval.toArray(new ReminderObject[retval.size()]);
@@ -601,62 +570,60 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             ps.setInt(++a, objectId);
 
             final ResultSet rs = ps.executeQuery();
-            final ReminderObject reminderObj = convertResult2ReminderObject(rs, ps, true);
+            final ReminderObject reminderObj = result2Object(rs, ps, true);
 
             if (reminderObj != null) {
                 return reminderObj;
             }
-            throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
+            throw new ReminderException(Code.NOT_FOUND, I(objectId), I(contextId));
         } catch (final SQLException exc) {
             throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
         }
     }
 
-    public ReminderObject convertResult2ReminderObject(final ResultSet rs, final PreparedStatement preparedStatement, final boolean closeStatements) throws SQLException, ReminderException {
+    public ReminderObject result2Object(ResultSet result, PreparedStatement stmt, boolean closeStatements) throws SQLException, ReminderException {
         try {
-            if (rs.next()) {
-                int a = 0;
+            if (result.next()) {
+                int pos = 1;
                 final ReminderObject reminderObj = new ReminderObject();
-                reminderObj.setObjectId(rs.getInt(++a));
-                reminderObj.setTargetId(rs.getInt(++a));
-                reminderObj.setModule(rs.getInt(++a));
-                reminderObj.setUser(rs.getInt(++a));
-                reminderObj.setDate(rs.getTimestamp(++a));
-                reminderObj.setRecurrenceAppointment(rs.getBoolean(++a));
-                reminderObj.setDescription(rs.getString(++a));
-                reminderObj.setFolder(rs.getInt(++a));
-                reminderObj.setLastModified(new Date(rs.getLong(++a))); // TODO: Fix me
-
+                reminderObj.setObjectId(result.getInt(pos++));
+                reminderObj.setTargetId(result.getInt(pos++));
+                reminderObj.setModule(result.getInt(pos++));
+                reminderObj.setUser(result.getInt(pos++));
+                reminderObj.setDate(result.getTimestamp(pos++));
+                reminderObj.setRecurrenceAppointment(result.getBoolean(pos++));
+                reminderObj.setDescription(result.getString(pos++));
+                reminderObj.setFolder(result.getInt(pos++));
+                reminderObj.setLastModified(new Date(result.getLong(pos++)));
                 return reminderObj;
             }
-            throw new ReminderException(Code.NOT_FOUND, -1, -1);
+            throw new ReminderException(Code.NOT_FOUND, I(-1), I(context.getContextId()));
         } finally {
             if (closeStatements) {
-                if (rs != null) {
-                    rs.close();
-                }
-
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
+                closeSQLStuff(result, stmt);
             }
         }
     }
 
-    public SearchIterator listReminder( final int targetId) throws OXException {
-        Connection readCon = null;
-
+    public SearchIterator<ReminderObject> listReminder(int module, int targetId) throws OXException {
+        final Connection con;
         try {
-            readCon = DBPool.pickup(context);
-
-            final PreparedStatement ps = readCon.prepareStatement(SQL.sqlListByTargetId);
-            ps.setInt(1, context.getContextId());
-            ps.setInt(2, targetId);
-
+            con = DBPool.pickup(context);
+        } catch (DBPoolingException e) {
+            throw new OXException(e);
+        }
+        try {
+            final PreparedStatement ps = con.prepareStatement(SQL.sqlListByTargetId);
+            int pos = 1;
+            ps.setInt(pos++, context.getContextId());
+            ps.setInt(pos++, module);
+            ps.setString(pos++, String.valueOf(targetId));
             final ResultSet rs = ps.executeQuery();
-            return new ReminderSearchIterator(rs, ps, readCon);
-        } catch (final Exception exc) {
-            throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+            return new ReminderSearchIterator(rs, ps, con);
+        } catch (SQLException e) {
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+        } catch (SearchIteratorException e) {
+            throw new OXException(e);
         }
     }
 
@@ -682,7 +649,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public SearchIterator listModifiedReminder(final int userId, final Date lastModified) throws OXException {
+    public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {
         Connection readCon = null;
 
         try {
@@ -722,7 +689,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             this.readCon = readCon;
             this.preparedStatement = preparedStatement;
             try {
-                next = convertResult2ReminderObject(rs, preparedStatement, false);
+                next = result2Object(rs, preparedStatement, false);
             } catch (final ReminderException exc) {
                 next = null;
             } catch (final SQLException exc) {
@@ -737,7 +704,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         public ReminderObject next() throws SearchIteratorException {
             final ReminderObject reminderObj = next;
             try {
-                next = convertResult2ReminderObject(rs, preparedStatement, false);
+                next = result2Object(rs, preparedStatement, false);
             } catch (final ReminderException exc) {
                 next = null;
             } catch (final SQLException exc) {

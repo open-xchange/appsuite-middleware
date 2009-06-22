@@ -90,12 +90,9 @@ public final class SQL {
         + "folder,last_modified FROM reminder WHERE cid=? AND module=? "
         + "AND userid=? AND target_id IN (";
 
-    /**
-     * FIXME module is missing
-     */
     public static final String sqlListByTargetId =
         "SELECT object_id,target_id,module,userid,alarm,recurrence,description,"
-        + "folder,last_modified FROM reminder WHERE cid=? AND target_id=?";
+        + "folder,last_modified FROM reminder WHERE cid=? AND module=? AND target_id=?";
 
     public static final String sqlRange =
         "SELECT object_id,target_id,module,userid,alarm,recurrence,description,"
@@ -111,6 +108,4 @@ public final class SQL {
     private SQL() {
         super();
     }
-
-    
 }

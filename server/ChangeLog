@@ -1,3 +1,7 @@
+* 2009-06-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #12352: Changed type for target_id in reminder SQL statements to string. Then existing indices are used on reminder table.
+
 * 2009-06-21 - marcus.klein@open-xchange.com
 
  - Bugfix #13749: Checking if user really lost its calendar access permission before deleting his invisible data.

@@ -113,9 +113,9 @@ public class ReminderException extends OXException {
          */
         TOO_MANY("Updated too many reminders.", 12, Category.CODE_ERROR),
         /**
-         * SQL Problem: "%s".
+         * SQL Problem: "%1$s".
          */
-        SQL_ERROR("SQL Problem: \"%s\".", 13, Category.CODE_ERROR);
+        SQL_ERROR("SQL Problem: \"%1$s\".", 13, Category.CODE_ERROR);
 
         /**
          * Message of the exception.

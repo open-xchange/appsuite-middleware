@@ -110,7 +110,7 @@ public interface ReminderSQLInterface {
     ReminderObject[] loadReminder(int[] targetIds, int userId, int module)
         throws OXException;
 
-	public SearchIterator listReminder(int targetId) throws OXException;
+	public SearchIterator listReminder(int module, int targetId) throws OXException;
 	
 	public SearchIterator<ReminderObject> listReminder(int userId, Date end) throws OXException;
 	
