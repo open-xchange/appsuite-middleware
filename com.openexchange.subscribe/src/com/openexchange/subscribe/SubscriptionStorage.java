@@ -64,9 +64,13 @@ public interface SubscriptionStorage {
     public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException;
 
     public Subscription getSubscription(Context ctx, int id) throws SubscriptionException;
-    
+
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int contextId, int userId)  throws SubscriptionException;
+
     public void updateSubscription(Subscription subscription) throws SubscriptionException;
 
     public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException;
+
+    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException;
 
 }

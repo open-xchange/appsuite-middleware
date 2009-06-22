@@ -181,4 +181,24 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             WHERE(new EQUALS("cid", I(ctx.getContextId())).AND(new EQUALS("user_id", I(userId))));
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
+    
+    public void testDeleteAllSubscriptionsOfAContext() throws SubscriptionException, TransactionException, SQLException{
+        storage.rememberSubscription(subscription);
+        storage.deleteAllSubscriptionsInContext(ctx.getContextId(), ctx);
+        SELECT select = 
+            new SELECT(ASTERISK).
+            FROM(subscriptions).
+            WHERE(new EQUALS("cid", I(ctx.getContextId())));
+        assertNoResult(new StatementBuilder().buildCommand(select));
+    }
+    
+    public void testGetAllSubscriptionsOfAUser() throws SubscriptionException{
+        storage.rememberSubscription(subscription);
+        List<Subscription> subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
+        assertEquals("should find one subscription", 1, subscriptionsOfUser.size());
+
+        storage.rememberSubscription(subscription2);
+        subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
+        assertEquals("should find two subscriptions", 2, subscriptionsOfUser.size());
+    }
 }

@@ -239,6 +239,43 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
+    public List<Publication> getPublicationsOfUser(Context ctx, int contextId, int userId)  throws PublicationException {
+        List<Publication> retval = null;
+
+        Connection readConnection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConnection = dbProvider.getReadConnection(ctx);
+            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+                new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
+
+            List<Object> values = new ArrayList<Object>();
+            values.add(I(contextId));
+            values.add(I(userId));
+
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
+            retval = parseResultSet(resultSet, ctx, readConnection);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new PublicationException(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(ctx, readConnection);
+            }
+        }
+
+        return retval;
+    }
+
     public void rememberPublication(Publication publication) throws PublicationException {
         if (publication.getId() > 0) {
             throw IDGiven.create();
@@ -376,15 +413,11 @@ public class PublicationSQLStorage implements PublicationStorage {
     }
 
     private void deleteWhereUserID(int userid, Context context, Connection writeConnection) throws SQLException, GenericConfigStorageException, PublicationException {
-        DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("user_id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
-
-        List<Object> values = new ArrayList<Object>();
-        values.add(I(userid));
-        values.add(I(context.getContextId()));
-
-        new StatementBuilder().executeStatement(writeConnection, delete, values);
-
-        storageService.delete(writeConnection, context, userid);
+        List<Publication> publicated = getPublicationsOfUser(context, context.getContextId(), userid);
+        for(Publication pub: publicated){
+            delete(pub,writeConnection);
+            storageService.delete(writeConnection, context, getConfigurationId(pub));
+        }
     }
     
     private void deleteWhereContextID(int contextId, Context ctx, Connection writeConnection) throws SQLException, GenericConfigStorageException {
@@ -490,20 +523,20 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
-    private int getConfigurationId(Publication publication) throws PublicationException {
+    private int getConfigurationId(Context ctx, int contextId, int publicationId) throws PublicationException {
         int retval = 0;
         Connection readConection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
         try {
-            readConection = dbProvider.getReadConnection(publication.getContext());
+            readConection = dbProvider.getReadConnection(ctx);
 
             SELECT select = new SELECT("configuration_id").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(I(publication.getContext().getContextId()));
-            values.add(I(publication.getId()));
+            values.add(I(contextId));
+            values.add(I(publicationId));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConection, select, values);
@@ -523,10 +556,15 @@ public class PublicationSQLStorage implements PublicationStorage {
             } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
-                dbProvider.releaseReadConnection(publication.getContext(), readConection);
+                dbProvider.releaseReadConnection(ctx, readConection);
             }
         }
         return retval;
+    }
+
+
+    private int getConfigurationId(Publication publication) throws PublicationException {
+        return getConfigurationId(publication.getContext(), publication.getContext().getContextId(), publication.getId());
     }
 
     private boolean exist(int id, Context ctx) throws PublicationException {
@@ -564,10 +602,5 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         return retval;
     }
-
-
-
-
-
 
 }

@@ -55,6 +55,7 @@ import static com.openexchange.sql.schema.Tables.publications;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -71,6 +72,7 @@ import com.openexchange.sql.grammar.SELECT;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
+    
     public void testRemember() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
@@ -226,6 +228,13 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         storage.deletePublicationsInContext(ctx.getContextId(), ctx);
         SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("cid", I(ctx.getContextId()) ) ) ;
         assertNoResult(new StatementBuilder().buildCommand(select));
+    }
+    
+    public void testGetAllPublicationsOfAUser() throws PublicationException{
+        storage.rememberPublication(pub1);
+        storage.rememberPublication(pub2);
+        List<Publication> publications = storage.getPublicationsOfUser(ctx, ctx.getContextId(), userId);
+        assertEquals("Should have two publications" , 2,  publications.size());
     }
 
 

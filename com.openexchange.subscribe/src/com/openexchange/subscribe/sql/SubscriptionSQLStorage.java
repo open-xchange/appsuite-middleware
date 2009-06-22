@@ -52,6 +52,7 @@ package com.openexchange.subscribe.sql;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import static com.openexchange.sql.schema.Tables.publications;
 import static com.openexchange.sql.schema.Tables.subscriptions;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.IDGiven;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
@@ -71,6 +72,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -196,6 +199,45 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
             throw new SubscriptionException(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(ctx, readConnection);
+            }
+        }
+
+        return retval;
+    }
+    
+
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int contextId, int userId)  throws SubscriptionException {
+        List<Subscription> retval = null;
+
+        Connection readConnection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConnection = dbProvider.getReadConnection(ctx);
+            SELECT select = new SELECT("*")
+            .FROM(subscriptions)
+            .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
+
+            List<Object> values = new ArrayList<Object>();
+            values.add(I(contextId));
+            values.add(I(userId));
+
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
+            retval = parseResultSet(resultSet, ctx, readConnection);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (AbstractOXException e) {
+            new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -447,22 +489,17 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
-            DELETE delete = new 
-                DELETE()
-                .FROM(subscriptions)
-                .WHERE(
-                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
-            values.add(I(ctx.getContextId()));
-            values.add(I(userId));
-
-            builder = new StatementBuilder();
-            builder.executeStatement(writeConnection, delete, values);
-        } catch (TransactionException e) {
-            throw new SubscriptionException(e);
+            List<Subscription> subs = getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
+            for(Subscription sub: subs){
+                delete(sub, writeConnection);
+            }
+        } catch (GenericConfigStorageException e) {
+            throw SQLException.create(e);
         } catch (SQLException e) {
             throw SQLException.create(e);
+        } catch (TransactionException e) {
+            throw new SubscriptionException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -476,4 +513,40 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
+    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException {
+        Connection writeConnection = null;
+        StatementBuilder builder = null;
+        try {
+            writeConnection = dbProvider.getWriteConnection(ctx);
+            DELETE delete = new 
+                DELETE()
+                .FROM(subscriptions)
+                .WHERE(new EQUALS("cid", PLACEHOLDER));
+
+            List<Object> values = new ArrayList<Object>();
+            values.add(I(ctx.getContextId()));
+
+            builder = new StatementBuilder();
+            builder.executeStatement(writeConnection, delete, values);
+            storageService.delete(writeConnection, ctx);
+        } catch (TransactionException e) {
+            throw new SubscriptionException(e);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } catch (GenericConfigStorageException e) {
+            throw SQLException.create(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(writeConnection, null);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseWriteConnection(ctx, writeConnection);
+            }
+        }
+    }
+    
+    
 }
