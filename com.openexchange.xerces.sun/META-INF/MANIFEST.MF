@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Xerces Compatibility Plugin for Sun JVM
+Bundle-SymbolicName: com.openexchange.xerces.sun
+Bundle-Version: 6.9.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ClassPath: lib/xerces.jar,
+ .
+Eclipse-BuddyPolicy: registered
+Export-Package:  org.apache.xerces.impl,
+ org.apache.xerces.parsers,
+ org.apache.xerces.util,
+ org.apache.xerces.xni,
+ org.apache.xerces.xni.parser
