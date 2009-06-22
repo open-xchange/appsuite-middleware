@@ -148,7 +148,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -186,7 +186,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -223,7 +223,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -260,7 +260,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -547,7 +547,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
@@ -587,7 +587,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
-            new PublicationException(e);
+            throw new PublicationException(e);
         } finally {
             try {
                 if (builder != null) {
