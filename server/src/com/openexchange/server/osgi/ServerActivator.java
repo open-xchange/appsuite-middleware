@@ -192,7 +192,8 @@ public final class ServerActivator extends DeferredActivator {
     private static final String STR_IDENTIFIER = "identifier";
 
     private static final Class<?>[] NEEDED_SERVICES_ADMIN = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, CalendarAdministrationService.class };
+        ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, CalendarAdministrationService.class,
+        CalendarCollectionService.class };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
