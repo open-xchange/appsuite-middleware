@@ -117,7 +117,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.insertReminder(reminderObj);
 		
 		int counter = 0;
-		final SearchIterator it = reminderSql.listReminder(targetId);
+		final SearchIterator it = reminderSql.listReminder(Types.APPOINTMENT, targetId);
 		while (it.hasNext()) {
 			final ReminderObject r = (ReminderObject)it.next();
 			assertNotNull("check reminder objects in iterator", r);
