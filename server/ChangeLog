@@ -1,6 +1,7 @@
 * 2009-06-22 - thorben.betten@open-xchange.com
 
  - Bugfix #13943: Fixed NPE if requested message does not exist
+ - Bugfix #13932: Fixed NPE on message forward with empty subject
 
 * 2009-06-22 - marcus.klein@open-xchange.com
 

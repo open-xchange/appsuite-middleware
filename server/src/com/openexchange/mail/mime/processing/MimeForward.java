@@ -553,8 +553,11 @@ public final class MimeForward {
             }
 
         }
-        forwardPrefix = PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(
-            Matcher.quoteReplacement(MIMEMessageUtility.decodeMultiEncodedHeader(msg.getSubject())));
+        {
+            final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(msg.getSubject());
+            forwardPrefix = PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(
+                decodedSubject == null ? "" : Matcher.quoteReplacement(decodedSubject));
+        }
         if (html) {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
         }
