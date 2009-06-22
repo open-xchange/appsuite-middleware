@@ -386,6 +386,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final int[] filter;
             if (null == searchTerm) {
+                // TODO: enable if action=updates shall be performed
+                if (false) {
+                    final String key = IMAPSessionUtility.getSessionKey(accountId, fullname);
+                    Object param = session.getParameter(key);
+                    if (null == param) {
+                        synchronized (session) {
+                            param = session.getParameter(key);
+                            if (null == param) {
+                                IMAPSessionUtility.fillSessionStorage(accountId, imapFolder, key, session);
+                            }
+                        }
+                    }
+                }
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
@@ -1491,7 +1504,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
-            final long[] uids = IMAPSessionUtility.getChanges(accountId, imapFolder, imapAccess, session, index + 1)[index];
+            final long[] uids = IMAPSessionUtility.getChanges(accountId, imapFolder, session, index + 1)[index];
             return getMessagesLong(folder, uids, fields);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);

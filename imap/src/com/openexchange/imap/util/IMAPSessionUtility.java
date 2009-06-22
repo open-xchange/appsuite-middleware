@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -83,18 +82,38 @@ public final class IMAPSessionUtility {
     }
 
     /**
+     * Fills session storage with data fetched from specified IMAP folder.
+     * 
+     * @param accountId The account ID
+     * @param imapFolder The IMAP folder
+     * @param key The session key
+     * @param session The session providing user data
+     * @throws MailException If a mail error occurs
+     */
+    public static void fillSessionStorage(final int accountId, final IMAPFolder imapFolder, final String key, final Session session) throws MailException {
+        synchronized (session) {
+            final Set<IMAPUpdateableData> sessionData = new HashSet<IMAPUpdateableData>();
+            session.setParameter(key, sessionData);
+            try {
+                sessionData.addAll(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
+        }
+    }
+
+    /**
      * Gets IMAP messages newly created, formerly deleted or of which flags have been changed since specified time stamp.
      * 
      * @param accountId The account ID
      * @param imapFolder The IMAP folder of which messages are examined
-     * @param imapAccess The IMAP access to IMAP storage
      * @param session The session providing user data
      * @param mode The mode; either <code>1</code> for new-and-modified only, <code>2</code> for deleted only, or <code>3</code> for
      *            new-and-modified and deleted
      * @return The IMAP messages of which flags have been changed since specified time stamp
      * @throws MailException If a mail error occurs
      */
-    public static long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final IMAPAccess imapAccess, final Session session, final int mode) throws MailException {
+    public static long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final Session session, final int mode) throws MailException {
         synchronized (session) {
             try {
                 final String fullName = imapFolder.getFullName();
@@ -199,7 +218,7 @@ public final class IMAPSessionUtility {
                 if (!newAndModified.isEmpty() || !deleted.isEmpty()) {
                     try {
                         MailMessageCache.getInstance().removeFolderMessages(
-                            imapAccess.getAccountId(),
+                            accountId,
                             fullName,
                             session.getUserId(),
                             session.getContextId());
@@ -330,11 +349,14 @@ public final class IMAPSessionUtility {
         return longs;
     }
 
-    private static Set<IMAPUpdateableData> cloneSet(final Set<IMAPUpdateableData> source) {
-        return new HashSet<IMAPUpdateableData>(source);
-    }
-
-    private static String getSessionKey(final int accountId, final String fullName) {
+    /**
+     * Generates the session key for given arguments.
+     * 
+     * @param accountId The account ID
+     * @param fullName The full name
+     * @return The session key for given arguments
+     */
+    public static String getSessionKey(final int accountId, final String fullName) {
         return new StringBuilder(32).append("imap.data@").append(accountId).append('@').append(fullName).toString();
     }
 
