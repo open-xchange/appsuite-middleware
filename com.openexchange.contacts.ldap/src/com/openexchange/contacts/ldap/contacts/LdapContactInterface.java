@@ -135,9 +135,8 @@ public class LdapContactInterface implements ContactInterface {
     private enum Order {
         asc,
         desc;
-        
-        
     }
+    
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class);
     
     private static final String MAPPING_TABLE_KEYS = "CONTACT_LDAP_MAPPING_TABLE_KEYS";
@@ -304,17 +303,22 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     public SearchIterator<ContactObject> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
-        final Set<Integer> columns = getColumnSet(cols);
-        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, null, null, null);
-        for (int i = 0; i < arrayList.size(); i++) {
-            final ContactObject obj = arrayList.get(i);
-            final Date lastModified = obj.getLastModified();
-            if (null != lastModified && lastModified.before(since)) {
-                arrayList.remove(i--);
+        if (folderprop.isOutlook_support()) {
+            final Set<Integer> columns = getColumnSet(cols);
+            final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, null, null, null);
+            for (int i = 0; i < arrayList.size(); i++) {
+                final ContactObject obj = arrayList.get(i);
+                final Date lastModified = obj.getLastModified();
+                if (null != lastModified && lastModified.before(since)) {
+                    arrayList.remove(i--);
+                }
             }
+            final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(
+                arrayList.toArray(new ContactObject[arrayList.size()]));
+            return searchIterator;
+        } else {
+            return new ArrayIterator<ContactObject>(new ContactObject[0]);
         }
-        final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
-        return searchIterator;
     }
 
     public int getNumberOfContacts(final int folderId) throws OXException {

@@ -82,7 +82,8 @@ public class FolderProperties {
         contactTypes("contactTypes"),
         searchfilter_distributionlist("searchfilter_distributionlist"),
         searchScope_distributionlist("searchScope_distributionlist"),
-        baseDN_distributionlist("baseDN_distributionlist");
+        baseDN_distributionlist("baseDN_distributionlist"),
+        outlook_support("outlook_support");
         
         private final String name;
         
@@ -148,6 +149,8 @@ public class FolderProperties {
     private SearchScope searchScopeDistributionlist;
     
     private String baseDNDistributionlist;
+    
+    private boolean outlook_support;
     
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -336,6 +339,10 @@ public class FolderProperties {
                 return retval.getBaseDN();
             }
         });
+
+        final String outlookSupportString = checkStringProperty(parameterObject, Parameters.outlook_support);
+        retval.setOutlook_support(Boolean.parseBoolean(outlookSupportString));
+        logBuilder.append("\toutlook_support: ").append(retval.isOutlook_support()).append('\n');
         
         final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
         
@@ -497,6 +504,10 @@ public class FolderProperties {
         return memorymapping;
     }
 
+    public final boolean isOutlook_support() {
+        return outlook_support;
+    }
+
     private void setAdminBindPW(final String adminBindPW) {
         this.adminBindPW = adminBindPW;
     }
@@ -533,6 +544,10 @@ public class FolderProperties {
 
     private void setMemorymapping(final boolean memorymapping) {
         this.memorymapping = memorymapping;
+    }
+
+    private final void setOutlook_support(boolean outlook_support) {
+        this.outlook_support = outlook_support;
     }
 
     private void setPagesize(final int pagesize) {
@@ -604,6 +619,8 @@ public class FolderProperties {
         this.userSearchFilter = userSearchFilter;
     }
 
+    
+    
     /**
      * @param userSearchScope
      */

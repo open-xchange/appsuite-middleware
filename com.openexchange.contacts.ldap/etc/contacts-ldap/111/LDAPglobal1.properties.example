@@ -90,3 +90,10 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.searchScope_distributionli
 # be specified if this baseDN is different from the normal baseDN. So if this value is empty the default
 # baseDN will be used
 com.openexchange.contacts.ldap.context111.LDAPglobal1.baseDN_distributionlist=cn=users,DC=exchange,DC=local
+
+# Specify whether Outlook offers support for this bundle. If this option is
+# enabled the contents of the folder are displayed in Outlook, otherwise only
+# the folder name is displayed in Outlook but not its contents. Note that even
+# if you enable Outlook support, Outlook will not recognize the deletion of
+# contacts in LDAP atm.
+com.openexchange.contacts.ldap.context111.LDAPglobal1.outlook_support=false
