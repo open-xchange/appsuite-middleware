@@ -64,9 +64,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountPOP3MessageStorage} - POP3 storage message storage.
@@ -79,6 +85,10 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final MailAccountPOP3Storage storage;
 
+    private final int pop3AccountId;
+
+    private final Session session;
+
     private MailAccountPOP3FolderStorage folderStorage;
 
     private final String path;
@@ -89,8 +99,12 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final POP3StorageTrashContainer trashContainer;
 
-    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage) throws MailException {
+    private MailAccount mailAccount;
+
+    MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage, final int pop3AccountId, final Session session) throws MailException {
         super();
+        this.session = session;
+        this.pop3AccountId = pop3AccountId;
         this.delegatee = delegatee;
         this.storage = storage;
         this.folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
@@ -98,6 +112,22 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         this.separator = storage.getSeparator();
         this.uidlMap = storage.getUIDLMap();
         this.trashContainer = storage.getTrashContainer();
+    }
+
+    private MailAccount getMailAccount() throws MailException {
+        if (mailAccount == null) {
+            try {
+                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
+                    MailAccountStorageService.class,
+                    true);
+                mailAccount = storageService.getMailAccount(pop3AccountId, session.getUserId(), session.getContextId());
+            } catch (final ServiceException e) {
+                throw new MailException(e);
+            } catch (final MailAccountException e) {
+                throw new MailException(e);
+            }
+        }
+        return mailAccount;
     }
 
     private MailAccountPOP3FolderStorage getFolderStorage() throws MailException {
@@ -178,9 +208,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
         final MailMessage[] mails = delegatee.getAllMessages(getRealFullname(folder), indexRange, sortField, order, fields);
         for (final MailMessage mailMessage : mails) {
-            if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
-                mailMessage.setFolder(folder);
-            }
+            setFolderAndAccount(folder, mailMessage);
         }
         return mails;
     }
@@ -197,6 +225,9 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         final MailMessage mail = delegatee.getMessage(getRealFullname(folder), mailId, markSeen);
         if (mail.containsFolder() && null != mail.getFolder()) {
             mail.setFolder(folder);
+            if (mail.containsAccountName()) {
+                setAccountInfo(mail);
+            }
         }
         return mail;
     }
@@ -204,9 +235,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
         final MailMessage[] mails = delegatee.getMessages(getRealFullname(folder), mailIds, fields);
         for (final MailMessage mailMessage : mails) {
-            if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
-                mailMessage.setFolder(folder);
-            }
+            setFolderAndAccount(folder, mailMessage);
         }
         return mails;
     }
@@ -220,9 +249,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
             searchTerm,
             fields);
         for (final MailMessage mailMessage : mails) {
-            if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
-                mailMessage.setFolder(folder);
-            }
+            setFolderAndAccount(folder, mailMessage);
         }
         return mails;
     }
@@ -230,9 +257,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
         final MailMessage[] mails = delegatee.getUnreadMessages(getRealFullname(folder), sortField, order, fields, limit);
         for (final MailMessage mailMessage : mails) {
-            if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
-                mailMessage.setFolder(folder);
-            }
+            setFolderAndAccount(folder, mailMessage);
         }
         return mails;
     }
@@ -270,9 +295,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         final MailMessage[] mails = delegatee.searchMessages(getRealFullname(folder), indexRange, sortField, order, searchTerm, fields);
         for (final MailMessage mailMessage : mails) {
-            if (mailMessage.containsFolder() && null != mailMessage.getFolder()) {
-                mailMessage.setFolder(folder);
-            }
+            setFolderAndAccount(folder, mailMessage);
         }
         return mails;
     }
@@ -283,6 +306,23 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws MailException {
         delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, set);
+    }
+
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException {
+        final MailMessage[] mails = delegatee.getDeletedMessages(folder, fields);
+        for (final MailMessage mailMessage : mails) {
+            setFolderAndAccount(folder, mailMessage);
+        }
+        return mails;
+
+    }
+
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException {
+        final MailMessage[] mails = delegatee.getNewAndModifiedMessages(folder, fields);
+        for (final MailMessage mailMessage : mails) {
+            setFolderAndAccount(folder, mailMessage);
+        }
+        return mails;
     }
 
     private String getRealFullname(final String fullname) {
@@ -299,4 +339,30 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         }
         return retval;
     }
+
+    private void setFolderAndAccount(final String folder, final MailMessage mailMessage) throws MailException {
+        if (mailMessage.containsFolder()) {
+            mailMessage.setFolder(folder);
+        }
+        if (mailMessage.containsAccountName()) {
+            setAccountInfo(mailMessage);
+        }
+    }
+
+    /**
+     * Sets account ID and name in given instance of {@link MailMessage}.
+     * 
+     * @param mailMessages The {@link MailMessage} instance
+     * @return The given instance of {@link MailMessage} with account ID and name set
+     * @throws MailException If mail account cannot be obtained
+     */
+    private MailMessage setAccountInfo(final MailMessage mailMessage) throws MailException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        mailMessage.setAccountId(id);
+        mailMessage.setAccountName(name);
+        return mailMessage;
+    }
+
 }

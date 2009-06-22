@@ -384,7 +384,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    public void actionGetUpdates(final Session session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws JSONException {
+    public void actionGetUpdates(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws JSONException {
         ResponseWriter.write(actionGetUpdates(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
     }
 
@@ -409,15 +409,94 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private final transient static JSONArray EMPTY_JSON_ARR = new JSONArray();
 
-    private final Response actionGetUpdates(final Session session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
+    private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriter(new MailListField[] { MailListField.ID })[0];
+
+    private final Response actionGetUpdates(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
         /*
-         * Send an empty array cause ACTION=UPDATES is not supported for messages
+         * Some variables
          */
         final Response response = new Response();
+        final OXJSONWriter jsonWriter = new OXJSONWriter();
+        jsonWriter.array();
+        try {
+            final String folderId = paramContainer.checkStringParam(PARAMETER_MAILFOLDER);
+            final String ignore = paramContainer.getStringParam(PARAMETER_IGNORE);
+            boolean bIgnoreDelete = false;
+            boolean bIgnoreModified = false;
+            if (ignore != null && ignore.indexOf("deleted") != -1) {
+                bIgnoreDelete = true;
+            }
+            if (ignore != null && ignore.indexOf("changed") != -1) {
+                bIgnoreModified = true;
+            }
+            if (!bIgnoreModified || !bIgnoreDelete) {
+                final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
+                MailServletInterface mailInterface = mailInterfaceArg;
+                boolean closeMailInterface = false;
+                try {
+                    if (mailInterface == null) {
+                        mailInterface = MailServletInterface.getInstance(session);
+                        closeMailInterface = true;
+                    }
+                    if (!bIgnoreModified) {
+                        final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
+                        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                        for (final MailMessage mail : modified) {
+                            final JSONArray ja = new JSONArray();
+                            if (mail == null) {
+                                for (int j = 0; j < writers.length; j++) {
+                                    ja.put(JSONObject.NULL);
+                                }
+                            } else {
+                                for (final MailFieldWriter writer : writers) {
+                                    writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                }
+                                jsonWriter.value(ja);
+                            }
+                        }
+                    }
+                    if (!bIgnoreDelete) {
+                        final MailMessage[] deleted = mailInterface.getDeletedMessages(folderId, columns);
+                        for (final MailMessage mail : deleted) {
+                            final JSONArray ja = new JSONArray();
+                            WRITER_ID.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                            jsonWriter.value(ja);
+                        }
+                    }
+                } finally {
+                    if (closeMailInterface && mailInterface != null) {
+                        mailInterface.close(true);
+                    }
+                }
+            }
+            // final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderId);
+            /*
+             * Clean session caches
+             */
+            // SessionMailCache.getInstance(session, fa.getAccountId()).clear();
+            /*
+             * Clean message cache
+             */
+            // MailMessageCache.getInstance().removeFolderMessages(fa.getAccountId(), fa.getFullname(), session.getUserId(),
+            // session.getContext());
+        } catch (final MailException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final Exception e) {
+            final AbstractOXException wrapper = getWrappingOXException(e);
+            LOG.error(wrapper.getMessage(), wrapper);
+            response.setException(wrapper);
+        }
+        jsonWriter.endArray();
         /*
          * Close response and flush print writer
          */
-        response.setData(EMPTY_JSON_ARR);
+        response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
     }
@@ -608,6 +687,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId);
                             }
+
                         }
                         jsonWriter.value(ja);
                     }
@@ -1496,79 +1576,49 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
-            try {
-                resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
-                final Writer writer;
-                if (outSelected) {
-                    /*
-                     * Output stream has already been selected
-                     */
-                    Tools.disableCaching(resp);
-                    writer = new PrintWriter(
-                        new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp.getCharacterEncoding())),
-                        true);
-                } else {
-                    writer = resp.getWriter();
-                }
-                resp.setHeader(STR_CONTENT_DISPOSITION, null);
-                final Response response = new Response();
-                response.setException(e);
-                final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
-                writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                    JS_FRAGMENT_ACTION,
-                    "error"));
-                writer.flush();
-            } catch (final UnsupportedEncodingException uee) {
-                uee.initCause(e);
-                LOG.error(uee.getMessage(), uee);
-            } catch (final IOException ioe) {
-                ioe.initCause(e);
-                LOG.error(ioe.getMessage(), ioe);
-            } catch (final IllegalStateException ise) {
-                ise.initCause(e);
-                LOG.error(ise.getMessage(), ise);
-            } catch (final JSONException je) {
-                je.initCause(e);
-                LOG.error(je.getMessage(), je);
-            }
+            callbackError(resp, outSelected, saveToDisk, e);
         } catch (final Exception e) {
-            try {
-                resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
-                final Writer writer;
-                if (outSelected) {
-                    /*
-                     * Output stream has already been selected
-                     */
-                    Tools.disableCaching(resp);
-                    writer = new PrintWriter(
-                        new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp.getCharacterEncoding())),
-                        true);
-                } else {
-                    writer = resp.getWriter();
-                }
-                resp.setHeader(STR_CONTENT_DISPOSITION, null);
-                final Response response = new Response();
-                final AbstractOXException exc = getWrappingOXException(e);
-                LOG.error(exc.getMessage(), e);
-                response.setException(exc);
-                final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
-                writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                    JS_FRAGMENT_ACTION,
-                    "error"));
-                writer.flush();
-            } catch (final UnsupportedEncodingException uee) {
-                uee.initCause(e);
-                LOG.error(uee.getMessage(), uee);
-            } catch (final IOException ioe) {
-                ioe.initCause(e);
-                LOG.error(ioe.getMessage(), ioe);
-            } catch (final IllegalStateException ise) {
-                ise.initCause(e);
-                LOG.error(ise.getMessage(), ise);
-            } catch (final JSONException je) {
-                je.initCause(e);
-                LOG.error(je.getMessage(), je);
+            final AbstractOXException exc = getWrappingOXException(e);
+            LOG.error(exc.getMessage(), exc);
+            callbackError(resp, outSelected, saveToDisk, exc);
+        }
+    }
+
+    private static void callbackError(final HttpServletResponse resp, final boolean outSelected, final boolean saveToDisk, final AbstractOXException e) {
+        try {
+            resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+            final Writer writer;
+            if (outSelected) {
+                /*
+                 * Output stream has already been selected
+                 */
+                Tools.disableCaching(resp);
+                writer = new PrintWriter(
+                    new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp.getCharacterEncoding())),
+                    true);
+            } else {
+                writer = resp.getWriter();
             }
+            resp.setHeader(STR_CONTENT_DISPOSITION, null);
+            final Response response = new Response();
+            response.setException(e);
+            final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
+            writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
+                JS_FRAGMENT_ACTION,
+                "error"));
+            writer.flush();
+        } catch (final UnsupportedEncodingException uee) {
+            uee.initCause(e);
+            LOG.error(uee.getMessage(), uee);
+        } catch (final IOException ioe) {
+            ioe.initCause(e);
+            LOG.error(ioe.getMessage(), ioe);
+        } catch (final IllegalStateException ise) {
+            ise.initCause(e);
+            LOG.error(ise.getMessage(), ise);
+        } catch (final JSONException je) {
+            je.initCause(e);
+            LOG.error(je.getMessage(), je);
         }
     }
 
@@ -2261,6 +2311,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                         closeMailInterface = true;
                     }
                     final Iterator<Map.Entry<String, List<String>>> iter = idMap.entrySet().iterator();
+                    final int userId = session.getUserId();
+                    final int contextId = session.getContextId();
                     for (int k = 0; k < size; k++) {
                         final Map.Entry<String, List<String>> entry = iter.next();
                         /*
@@ -2271,13 +2323,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                             entry.getKey(),
                             list.toArray(new String[list.size()]),
                             columns);
-                        final int userId = session.getUserId();
-                        final int contextId = session.getContextId();
                         for (int i = 0; i < mails.length; i++) {
-                            if (mails[i] != null) {
+                            final MailMessage mail = mails[i];
+                            if (mail != null) {
                                 final JSONArray ja = new JSONArray();
                                 for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(ja, mails[i], 0, false, mailInterface.getAccountID(), userId, contextId);
+                                    writers[j].writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                                 }
                                 jsonWriter.value(ja);
                             }
@@ -2656,7 +2707,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                         accountId,
                                         sentFullname,
                                         session.getUserId(),
-                                        session.getContext());
+                                        session.getContext().getContextId());
                                 } catch (final OXCachingException e) {
                                     LOG.error(e.getMessage(), e);
                                 }

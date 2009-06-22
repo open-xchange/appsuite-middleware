@@ -65,7 +65,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -501,11 +500,11 @@ public final class MailMessageCache {
     }
 
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void updateCachedMessages(final String[] uids, final int accountId, final String fullname, final int userId, final Context ctx, final MailListField[] changedFields, final Object[] newValues) {
+    public void updateCachedMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid, final MailListField[] changedFields, final Object[] newValues) {
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, ctx);
+        final CacheKey mapKey = getMapKey(userId, cid);
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
@@ -533,14 +532,14 @@ public final class MailMessageCache {
      * Detects if cache holds messages belonging to given user.
      * 
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      * @return <code>true</code> if messages are present; otherwise <code>false</code>
      */
-    public boolean containsUserMessages(final int userId, final Context ctx) {
+    public boolean containsUserMessages(final int userId, final int cid) {
         if (null == cache) {
             return false;
         }
-        return cache.get(getMapKey(userId, ctx)) != null;
+        return cache.get(getMapKey(userId, cid)) != null;
     }
 
     /**
@@ -549,15 +548,15 @@ public final class MailMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      * @return <code>true</code> if cache holds messages belonging to a certain folder; otherwise <code>false</code>
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public boolean containsFolderMessages(final int accountId, final String fullname, final int userId, final Context ctx) {
+    public boolean containsFolderMessages(final int accountId, final String fullname, final int userId, final int cid) {
         if (null == cache) {
             return false;
         }
-        final CacheKey mapKey = getMapKey(userId, ctx);
+        final CacheKey mapKey = getMapKey(userId, cid);
         final DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
         if (map == null) {
             return false;
@@ -569,15 +568,15 @@ public final class MailMessageCache {
      * Removes the messages cached for a user.
      * 
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      * @throws OXCachingException
      */
-    public void removeUserMessages(final int userId, final Context ctx) throws OXCachingException {
+    public void removeUserMessages(final int userId, final int cid) throws OXCachingException {
         if (null == cache) {
             return;
         }
         try {
-            final CacheKey mapKey = getMapKey(userId, ctx);
+            final CacheKey mapKey = getMapKey(userId, cid);
             final Lock writeLock = getLock(mapKey).writeLock();
             writeLock.lock();
             try {
@@ -596,14 +595,14 @@ public final class MailMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void removeFolderMessages(final int accountId, final String fullname, final int userId, final Context ctx) {
+    public void removeFolderMessages(final int accountId, final String fullname, final int userId, final int cid) {
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, ctx);
+        final CacheKey mapKey = getMapKey(userId, cid);
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
@@ -624,14 +623,14 @@ public final class MailMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void removeMessages(final String[] uids, final int accountId, final String fullname, final int userId, final Context ctx) {
+    public void removeMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid) {
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, ctx);
+        final CacheKey mapKey = getMapKey(userId, cid);
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
@@ -653,15 +652,15 @@ public final class MailMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      * @return An array of {@link MailMessage} containing the fetched messages or <code>null</code>
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public MailMessage[] getMessages(final String[] uids, final int accountId, final String fullname, final int userId, final Context ctx) {
+    public MailMessage[] getMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid) {
         if (null == cache) {
             return null;
         }
-        final CacheKey mapKey = getMapKey(userId, ctx);
+        final CacheKey mapKey = getMapKey(userId, cid);
         final Lock readLock = getLock(mapKey).readLock();
         readLock.lock();
         try {
@@ -698,18 +697,18 @@ public final class MailMessageCache {
      * @param accountId The account ID
      * @param mails The messages to cache
      * @param userId The user ID
-     * @param ctx The context
+     * @param cid The context ID
      * @throws OXCachingException If cache put fails
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void putMessages(final int accountId, final MailMessage[] mails, final int userId, final Context ctx) throws OXCachingException {
+    public void putMessages(final int accountId, final MailMessage[] mails, final int userId, final int cid) throws OXCachingException {
         if (null == cache) {
             return;
         } else if ((mails == null) || (mails.length == 0)) {
             return;
         }
         try {
-            final CacheKey mapKey = getMapKey(userId, ctx);
+            final CacheKey mapKey = getMapKey(userId, cid);
             final Lock writeLock = getLock(mapKey).writeLock();
             writeLock.lock();
             try {
@@ -735,8 +734,8 @@ public final class MailMessageCache {
         }
     }
 
-    private CacheKey getMapKey(final int userId, final Context ctx) {
-        return cache.newCacheKey(ctx.getContextId(), userId);
+    private CacheKey getMapKey(final int userId, final int cid) {
+        return cache.newCacheKey(cid, userId);
     }
 
     private CacheKey getEntryKey(final int accountId, final String fullname) {

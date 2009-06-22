@@ -110,6 +110,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private final MailAccess<?, ?> defaultMailAccess;
 
+    private final int pop3AccountId;
+
     private MailAccountPOP3MessageStorage messageStorage;
 
     private MailAccountPOP3FolderStorage folderStorage;
@@ -119,6 +121,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
     MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
         super();
         this.pop3Access = pop3Access;
+        pop3AccountId = pop3Access.getAccountId();
         final Session session = pop3Access.getSession();
         defaultMailAccess = MailAccess.getInstance(session);
         this.properties = properties;
@@ -241,7 +244,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public IMailMessageStorage getMessageStorage() throws MailException {
         if (null == messageStorage) {
-            messageStorage = new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this);
+            messageStorage = new MailAccountPOP3MessageStorage(
+                defaultMailAccess.getMessageStorage(),
+                this,
+                pop3AccountId,
+                pop3Access.getSession());
         }
         return messageStorage;
     }

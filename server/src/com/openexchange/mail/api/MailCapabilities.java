@@ -127,6 +127,11 @@ public abstract class MailCapabilities {
      * 
      * <pre>
      * 
+     * 
+     * 
+     * 
+     * 
+     * 
      * private static final int BIT_CUSTOM1 = 1 &lt;&lt; NEXT_SHIFT_OPERAND;
      * 
      * private static final int BIT_CUSTOM2 = 1 &lt;&lt; (NEXT_SHIFT_OPERAND + 1);

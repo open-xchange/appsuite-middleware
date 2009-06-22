@@ -288,4 +288,23 @@ public interface IMailMessageStorage {
      */
     public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws MailException;
 
+    /**
+     * Gets all new and modified messages in specified folder.
+     * 
+     * @param folder The folder fullname
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return All new and modified messages in specified folder
+     * @throws MailException If mails cannot be returned
+     */
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException;
+
+    /**
+     * Gets all deleted messages in specified folder.
+     * 
+     * @param folder The folder fullname
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return All deleted messages in specified folder
+     * @throws MailException If mails cannot be returned
+     */
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException;
 }

@@ -55,11 +55,11 @@ import java.util.Locale;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link HeaderName} - Supports an ignore-case string implementation
+ * {@link HeaderName} - Supports an ignore-case string implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HeaderName implements Serializable, Cloneable, Comparable<HeaderName> {
+public final class HeaderName implements Serializable, Cloneable, Comparable<HeaderName>, CharSequence {
 
     private static final long serialVersionUID = -4841569785169326836L;
 
@@ -129,50 +129,41 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     }
 
     /**
-     * Initializes a new header name from specified string.
+     * Initializes a new header name from specified character sequence.
      * <p>
      * Yields significantly better space and time performance by caching frequently requested headers.
      * 
-     * @param s The string
+     * @param s The character sequence
      * @return The new header name.
      */
-    public static HeaderName valueOf(final String s) {
-        final HeaderName cached = CACHE.get(s);
+    public static HeaderName valueOf(final CharSequence s) {
+        final String key = s.toString();
+        final HeaderName cached = CACHE.get(key);
         if (cached == null) {
-            return new HeaderName(s);
+            return new HeaderName(key);
         }
         return cached;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object other) {
         if (other == this) {
             return true;
-        } else if ((other instanceof HeaderName)) {
+        }
+        if ((other instanceof HeaderName)) {
             return s.equalsIgnoreCase(((HeaderName) other).s);
-        } else if ((other instanceof String)) {
+        }
+        if ((other instanceof String)) {
             return s.equalsIgnoreCase((String) other);
         }
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return s;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return hashcode;
@@ -180,6 +171,18 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
 
     public int compareTo(final HeaderName other) {
         return s.compareToIgnoreCase(other.s);
+    }
+
+    public char charAt(final int index) {
+        return s.charAt(index);
+    }
+
+    public int length() {
+        return s.length();
+    }
+
+    public CharSequence subSequence(final int start, final int end) {
+        return s.subSequence(start, end);
     }
 
 }

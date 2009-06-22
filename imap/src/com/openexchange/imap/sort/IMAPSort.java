@@ -91,19 +91,18 @@ public final class IMAPSort {
      * Sorts messages located in given IMAP folder.
      * 
      * @param imapFolder The IMAP folder
+     * @param usedFields The desired fields
      * @param filter Pre-Selected messages' sequence numbers to sort or <code>null</code> to sort all
-     * @param fields The desired fields
-     * @param sortFieldArg The sort field
+     * @param sortField The sort field
      * @param orderDir The order direction
      * @param locale The locale
-     * @param usedFields The set to fill with actually used fields
      * @return Sorted messages
      * @throws MessagingException If a messaging error occurs
      */
-    public static Message[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailField[] fields, final MailSortField sortFieldArg, final OrderDirection orderDir, final Locale locale, final MailFields usedFields, final IMAPConfig imapConfig) throws MessagingException {
+    public static Message[] sortMessages(final IMAPFolder imapFolder, final MailFields usedFields, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final Locale locale, final IMAPConfig imapConfig) throws MessagingException {
         boolean applicationSort = true;
         Message[] msgs = null;
-        final MailSortField sortField = sortFieldArg == null ? MailSortField.RECEIVED_DATE : sortFieldArg;
+        final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
         final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
         /*
          * Perform an IMAP-based sort provided that SORT capability is supported and IMAP sort is enabled through config or number of
@@ -116,7 +115,7 @@ public final class IMAPSort {
                     /*
                      * Get IMAP sort criteria
                      */
-                    final String sortCriteria = getSortCritForIMAPCommand(sortField, orderDir == OrderDirection.DESC);
+                    final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
                     final long start = System.currentTimeMillis();
                     seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -128,8 +127,7 @@ public final class IMAPSort {
                 if ((seqNums == null) || (seqNums.length == 0)) {
                     return EMPTY_MSGS;
                 }
-                final FetchProfile fetchProfile = getFetchProfile(fields, imapConfig.getIMAPProperties().isFastFetch());
-                usedFields.addAll(fields);
+                final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), imapConfig.getIMAPProperties().isFastFetch());
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 final long start = System.currentTimeMillis();
                 msgs = new FetchIMAPCommand(

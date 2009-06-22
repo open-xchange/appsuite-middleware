@@ -61,7 +61,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link MailServletInterface} - The mail interface which invokes the mail layer methods.
  * <p>
@@ -273,6 +272,28 @@ public abstract class MailServletInterface {
      * flags are set (<code>true</code>) or unset (<code>false</code>).
      */
     public abstract void updateMessageFlags(String folder, String[] msgUID, int flagBits, boolean flagVal) throws MailException;
+
+    /**
+     * Gets all updated messages in given folder
+     * 
+     * @param folder The folder fullname
+     * @param since The time stamp in UTC milliseconds
+     * @param fields The desired fields to fill in returned messages
+     * @return All updated messages in given folder
+     * @throws MailException If updated messages cannot be returned
+     */
+    public abstract MailMessage[] getUpdatedMessages(String folder, int[] fields) throws MailException;
+
+    /**
+     * Gets all deleted messages in given folder
+     * 
+     * @param folder The folder fullname
+     * @param since The time stamp in UTC milliseconds
+     * @param fields The desired fields to fill in returned messages
+     * @return All deleted messages in given folder
+     * @throws MailException If deleted messages cannot be returned
+     */
+    public abstract MailMessage[] getDeletedMessages(String folder, int[] fields) throws MailException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing the mailbox's default folder

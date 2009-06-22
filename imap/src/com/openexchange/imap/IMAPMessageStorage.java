@@ -57,9 +57,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -82,6 +84,7 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.threadsort.ThreadSortMailMessage;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
+import com.openexchange.imap.util.IMAPSessionUtility;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -204,11 +207,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] getMessagesLong(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessagesLong(final String fullname, final long[] mailIds, final MailField[] mailFields) throws MailException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
-        final MailFields fieldSet = new MailFields(fields);
+        final MailFields fieldSet = new MailFields(mailFields);
         final boolean body;
         /*
          * Check for field FULL
@@ -232,6 +235,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, mailIds);
             final Message[] messages = new Message[seqNums.length];
+            final MailField[] fields = fieldSet.toArray();
             final FetchProfile fetchProfile = getFetchProfile(fields, getIMAPProperties().isFastFetch());
             final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
             int lastPos = 0;
@@ -278,9 +282,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
-                return setAccountInfo(MIMEMessageConverter.convertMessages(messages, fields, body));
+                return setAccountInfo(convert2Mails(messages, fields, body));
             }
-            return MIMEMessageConverter.convertMessages(messages, fields, body);
+            return convert2Mails(messages, fields, body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -373,7 +377,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
             if (imapFolder.getMessageCount() == 0) {
@@ -387,7 +391,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
-                if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
+                if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(mailFields)) {
                     return performAllFetch(fullname, order, indexRange);
                 }
                 /*
@@ -405,7 +409,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             }
             MailMessage[] mails = null;
             final MailFields usedFields = new MailFields();
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, getLocale(), usedFields, imapConfig);
+            // Add desired fields
+            usedFields.addAll(mailFields);
+            // Add sort field
+            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, sortField, order, getLocale(), imapConfig);
             if (null != msgs) {
                 /*
                  * Sort was performed on IMAP server
@@ -433,7 +441,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     msgs = new Message[retvalLength];
                     System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
                 }
-                mails = MIMEMessageConverter.convertMessages(
+                mails = convert2Mails(
                     msgs,
                     usedFields.toArray(),
                     usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
@@ -445,10 +453,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Do application sort
                  */
                 final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
-                final MailField sort = MailField.toField(sortField.getListField());
-                final FetchProfile fetchProfile = getFetchProfile(fields, sort, getIMAPProperties().isFastFetch());
-                usedFields.addAll(fields);
-                usedFields.add(sort);
+                final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 final long start = System.currentTimeMillis();
                 if (filter == null) {
@@ -470,7 +475,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if ((msgs == null) || (msgs.length == 0)) {
                     return new MailMessage[0];
                 }
-                mails = MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
+                mails = convert2Mails(msgs, usedFields.toArray(), body);
                 if (usedFields.contains(MailField.ACCOUNT_NAME)) {
                     setAccountInfo(mails);
                 }
@@ -514,7 +519,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String fullname, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws MailException {
         try {
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
@@ -574,11 +579,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Fetch messages
              */
             final MailFields usedFields = new MailFields();
-            final MailField sort = null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField());
-            final FetchProfile fetchProfile = getFetchProfile(fields, sort, getIMAPProperties().isFastFetch());
-            usedFields.addAll(Arrays.asList(fields));
+            // Add desired fields
+            usedFields.addAll(mailFields);
             usedFields.add(MailField.THREAD_LEVEL);
-            usedFields.add(sort);
+            // Add sort field
+            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             Message[] msgs = new FetchIMAPCommand(
                 imapFolder,
@@ -625,9 +631,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             {
                 final MailMessage[] mails;
                 if (usedFields.contains(MailField.ACCOUNT_NAME)) {
-                    mails = setAccountInfo(MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body));
+                    mails = setAccountInfo(convert2Mails(msgs, usedFields.toArray(), body));
                 } else {
-                    mails = MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
+                    mails = convert2Mails(msgs, usedFields.toArray(), body);
                 }
                 structuredList = ThreadSortUtil.toThreadSortStructure(mails);
             }
@@ -649,11 +655,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     @Override
-    public MailMessage[] getUnreadMessages(final String fullname, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
+    public MailMessage[] getUnreadMessages(final String fullname, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final int limit) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
             MailMessage[] mails;
             {
+                /*
+                 * Ensure mail ID is contained in requested fields
+                 */
+                final MailFields fieldSet = new MailFields(mailFields);
+                final MailField[] fields = fieldSet.toArray();
                 /*
                  * Get ( & fetch) new messages
                  */
@@ -666,8 +677,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Sort
                  */
-                mails = MIMEMessageConverter.convertMessages(msgs, fields);
-                if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
+                mails = convert2Mails(msgs, fields);
+                if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
                     setAccountInfo(mails);
                 }
                 final List<MailMessage> msgList = Arrays.asList(mails);
@@ -995,6 +1006,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 } finally {
                     destFolder.close(false);
                 }
+            }
+            if (move) {
+                final Set<Long> set = new HashSet<Long>(result.length);
+                for (int i = 0; i < result.length; i++) {
+                    set.add(Long.valueOf(result[i]));
+                }
+                IMAPSessionUtility.removeDeletedDatabaseData(set, accountId, session, sourceFullname);
             }
             return result;
         } catch (final MessagingException e) {
@@ -1450,6 +1468,41 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         }
     }
 
+    @Override
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException {
+        // TODO: Needs to be thoroughly tested
+        return EMPTY_RETVAL;
+        // return getChangedMessages(folder, fields, 0);
+    }
+
+    @Override
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException {
+        // TODO: Needs to be thoroughly tested
+        return EMPTY_RETVAL;
+        // return getChangedMessages(folder, fields, 1);
+    }
+
+    private MailMessage[] getChangedMessages(final String folder, final MailField[] fields, final int index) throws MailException {
+        try {
+            imapFolder = setAndOpenFolder(imapFolder, folder, Folder.READ_ONLY);
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                        imapConfig,
+                        session,
+                        imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            final long[] uids = IMAPSessionUtility.getChanges(accountId, imapFolder, imapAccess, session, index + 1)[index];
+            return getMessagesLong(folder, uids, fields);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
+    }
+
     /*-
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * +++++++++++++++++ Helper methods +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1463,8 +1516,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
      * @param order The order direction (needed to possibly flip the results)
      * @return The fetched mail messages with only ID and folder ID set.
      * @throws MessagingException If a messaging error occurs
+     * @throws MailException If a mail error occurs
      */
-    private MailMessage[] performAllFetch(final String fullname, final OrderDirection order, final IndexRange indexRange) throws MessagingException {
+    private MailMessage[] performAllFetch(final String fullname, final OrderDirection order, final IndexRange indexRange) throws MessagingException, MailException {
         /*
          * Perform simple fetch
          */
@@ -1739,4 +1793,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         }
         return mailMessages;
     }
+
+    private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields) throws MailException {
+        return convert2Mails(msgs, fields, false);
+    }
+
+    private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final boolean includeBody) throws MailException {
+        return MIMEMessageConverter.convertMessages(msgs, fields, includeBody);
+    }
+
 }

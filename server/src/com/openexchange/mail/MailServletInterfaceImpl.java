@@ -132,6 +132,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private final Context ctx;
 
+    private final int contextId;
+
     private boolean init;
 
     private MailConfig mailConfig;
@@ -167,6 +169,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             throw new MailException(e);
         }
         this.session = session;
+        this.contextId = session.getContextId();
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
     }
 
@@ -201,7 +204,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), ctx);
+            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), contextId);
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -277,8 +280,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Update message cache
                  */
-                MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), ctx);
-                MailMessageCache.getInstance().removeFolderMessages(dest.getAccountId(), destFullname, session.getUserId(), ctx);
+                MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), contextId);
+                MailMessageCache.getInstance().removeFolderMessages(dest.getAccountId(), destFullname, session.getUserId(), contextId);
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -328,8 +331,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Update message cache
                  */
-                MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), ctx);
-                MailMessageCache.getInstance().removeFolderMessages(dest.getAccountId(), destFullname, session.getUserId(), ctx);
+                MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), contextId);
+                MailMessageCache.getInstance().removeFolderMessages(dest.getAccountId(), destFullname, session.getUserId(), contextId);
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -355,7 +358,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(argument.getAccountId(), fullname, session.getUserId(), ctx);
+            MailMessageCache.getInstance().removeFolderMessages(argument.getAccountId(), fullname, session.getUserId(), contextId);
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -377,7 +380,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(argument.getAccountId(), fullname, session.getUserId(), ctx);
+            MailMessageCache.getInstance().removeFolderMessages(argument.getAccountId(), fullname, session.getUserId(), contextId);
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -560,7 +563,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw new MailException(MailException.Code.MAIL_NOT_FOUND, fowardMsgUIDs[i], arguments[i].getFullname());
                 }
                 originalMails[i] = origMail;
-                originalMails[i].loadContent();
+                origMail.loadContent();
             } finally {
                 ma.close(true);
             }
@@ -612,7 +615,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Update cache since \Seen flag is possibly changed
              */
             try {
-                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), ctx)) {
+                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                     /*
                      * Update cache entry
                      */
@@ -621,7 +624,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         accountId,
                         fullname,
                         session.getUserId(),
-                        ctx,
+                        contextId,
                         FIELDS_FLAGS,
                         mail.isSeen() ? ARGS_FLAG_SEEN_SET : ARGS_FLAG_SEEN_UNSET);
 
@@ -674,7 +677,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             fullname = argument.getFullname();
         }
         try {
-            final MailMessage[] mails = MailMessageCache.getInstance().getMessages(uids, accountId, fullname, session.getUserId(), ctx);
+            final MailMessage[] mails = MailMessageCache.getInstance().getMessages(
+                uids,
+                accountId,
+                fullname,
+                session.getUserId(),
+                contextId);
             if (null != mails) {
                 /*
                  * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
@@ -691,8 +699,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             uids,
             MailField.toFields(MailListField.getFields(fields)));
         try {
-            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), ctx)) {
-                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), ctx);
+            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
+                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
@@ -753,12 +761,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Remove old user cache entries
              */
-            MailMessageCache.getInstance().removeUserMessages(session.getUserId(), ctx);
+            MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
             if ((mails != null) && (mails.length > 0) && (cachable)) {
                 /*
                  * ... and put new ones
                  */
-                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), ctx);
+                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
@@ -961,12 +969,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Remove old user cache entries
              */
-            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), ctx);
+            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
             if ((mails.length > 0) && (mails.length < MailProperties.getInstance().getMailFetchLimit())) {
                 /*
                  * ... and put new ones
                  */
-                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), ctx);
+                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
@@ -1327,7 +1335,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             mailAccess.getAccountId(),
                             fullname,
                             session.getUserId(),
-                            ctx)) {
+                            contextId)) {
                             /*
                              * Update cache entries
                              */
@@ -1336,7 +1344,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 mailAccess.getAccountId(),
                                 fullname,
                                 session.getUserId(),
-                                ctx,
+                                contextId,
                                 FIELDS_FLAGS,
                                 new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
                         }
@@ -1363,7 +1371,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                     mailAccess.getAccountId(),
                                     path.getFolder(),
                                     session.getUserId(),
-                                    ctx)) {
+                                    contextId)) {
                                     /*
                                      * Update cache entries
                                      */
@@ -1372,7 +1380,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                         mailAccess.getAccountId(),
                                         path.getFolder(),
                                         session.getUserId(),
-                                        ctx,
+                                        contextId,
                                         FIELDS_FLAGS,
                                         new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
                                 }
@@ -1393,7 +1401,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             mailAccess.getAccountId(),
                             fullname,
                             session.getUserId(),
-                            ctx)) {
+                            contextId)) {
                             /*
                              * Update cache entries
                              */
@@ -1402,7 +1410,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 mailAccess.getAccountId(),
                                 fullname,
                                 session.getUserId(),
-                                ctx,
+                                contextId,
                                 FIELDS_FLAGS,
                                 new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
                         }
@@ -1429,7 +1437,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     /*
                      * Update cache
                      */
-                    MailMessageCache.getInstance().removeFolderMessages(mailAccess.getAccountId(), sentFullname, session.getUserId(), ctx);
+                    MailMessageCache.getInstance().removeFolderMessages(
+                        mailAccess.getAccountId(),
+                        sentFullname,
+                        session.getUserId(),
+                        contextId);
                 } catch (final OXCachingException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -1503,7 +1515,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
         try {
-            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), ctx)) {
+            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                 /*
                  * Update cache entries
                  */
@@ -1512,7 +1524,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     accountId,
                     fullname,
                     session.getUserId(),
-                    ctx,
+                    contextId,
                     FIELDS_COLOR_LABEL,
                     new Object[] { Integer.valueOf(newColorLabel) });
             }
@@ -1533,8 +1545,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Remove from cache
              */
             try {
-                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), ctx)) {
-                    MailMessageCache.getInstance().removeMessages(msgUID, accountId, fullname, session.getUserId(), ctx);
+                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
+                    MailMessageCache.getInstance().removeMessages(msgUID, accountId, fullname, session.getUserId(), contextId);
 
                 }
             } catch (final OXCachingException e) {
@@ -1542,7 +1554,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } else {
             try {
-                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), ctx)) {
+                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                     /*
                      * Update cache entries
                      */
@@ -1551,7 +1563,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         accountId,
                         fullname,
                         session.getUserId(),
-                        ctx,
+                        contextId,
                         FIELDS_FLAGS,
                         new Object[] { Integer.valueOf(flagVal ? flagBits : (flagBits * -1)) });
                 }
@@ -1561,9 +1573,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
+    @Override
+    public MailMessage[] getUpdatedMessages(final String folder, final int[] fields) throws MailException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        return mailAccess.getMessageStorage().getNewAndModifiedMessages(fullname, MailField.getFields(fields));
+    }
+
+    @Override
+    public MailMessage[] getDeletedMessages(final String folder, final int[] fields) throws MailException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        return mailAccess.getMessageStorage().getDeletedMessages(fullname, MailField.getFields(fields));
+    }
+
     /*-
      * ################################################################################
-     * #############################   HELPER CLASSES   ######h########################
+     * #############################   HELPER CLASSES   ###############################
      * ################################################################################
      */
 

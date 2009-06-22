@@ -718,8 +718,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 /*
                  * Perform move operation
                  */
-                if (getChecker().isDefaultFolder(moveMe.getFullName())) {
-                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, moveMe.getFullName());
+                final String oldFullname = moveMe.getFullName();
+                if (getChecker().isDefaultFolder(oldFullname)) {
+                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, oldFullname);
                 }
                 IMAPFolder destFolder = ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
                 if (!destFolder.exists()) {
@@ -777,7 +778,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
                     throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
                 }
-                if (destFolder.getFullName().startsWith(moveMe.getFullName())) {
+
+                if (destFolder.getFullName().startsWith(oldFullname)) {
                     throw IMAPException.create(
                         IMAPException.Code.NO_MOVE_TO_SUBFLD,
                         imapConfig,
@@ -794,6 +796,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     deleteTemporaryCreatedFolder(destFolder, newName);
                     throw e;
                 }
+                /*
+                 * TODO: Remove from session storage
+                 */
+                //IMAPSessionUtility.removeDeletedFolderRecursively(accountId, session, oldFullname, separator);
             }
             /*
              * Is rename operation?
@@ -874,6 +880,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (!success) {
                     throw IMAPException.create(IMAPException.Code.UPDATE_FAILED, imapConfig, session, moveMe.getFullName());
                 }
+                /*
+                 * TODO: Remove from session storage
+                 */
+                //IMAPSessionUtility.removeDeletedFolderRecursively(accountId, session, oldFullName, separator);
                 moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
                 if (moveMe.exists()) {
                     deleteFolder(moveMe);
@@ -1031,48 +1041,53 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
             }
+            final char sep = deleteMe.getSeparator();
             imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
             if (hardDelete) {
                 /*
                  * Delete permanently
                  */
                 deleteFolder(deleteMe);
-                return fullname;
-            }
-            final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
-            if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName()) || !inferiors(trashFolder)) {
-                /*
-                 * Delete permanently
-                 */
-                deleteFolder(deleteMe);
             } else {
-                /*
-                 * Just move this folder to trash
-                 */
-                imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFolder.getFullName());
-                final String name = deleteMe.getName();
-                int appendix = 1;
-                final StringBuilder sb = new StringBuilder();
-                IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
-                    name).toString());
-                while (newFolder.exists()) {
+                final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
+                if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName()) || !inferiors(trashFolder)) {
                     /*
-                     * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
+                     * Delete permanently
                      */
-                    sb.setLength(0);
-                    newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
-                        name).append('_').append(++appendix).toString());
-                }
-                try {
-                    moveFolder(deleteMe, trashFolder, newFolder, false);
-                } catch (final MailException e) {
-                    deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
-                    throw e;
-                } catch (final MessagingException e) {
-                    deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
-                    throw e;
+                    deleteFolder(deleteMe);
+                } else {
+                    /*
+                     * Just move this folder to trash
+                     */
+                    imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFolder.getFullName());
+                    final String name = deleteMe.getName();
+                    int appendix = 1;
+                    final StringBuilder sb = new StringBuilder();
+                    IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
+                        name).toString());
+                    while (newFolder.exists()) {
+                        /*
+                         * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
+                         */
+                        sb.setLength(0);
+                        newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
+                            name).append('_').append(++appendix).toString());
+                    }
+                    try {
+                        moveFolder(deleteMe, trashFolder, newFolder, false);
+                    } catch (final MailException e) {
+                        deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
+                        throw e;
+                    } catch (final MessagingException e) {
+                        deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
+                        throw e;
+                    }
                 }
             }
+            /*
+             * TODO: Remove from session storage
+             */
+            //IMAPSessionUtility.removeDeletedFolderRecursively(accountId, session, fullname, sep);
             return fullname;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -1111,6 +1126,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, f.getFullName());
             }
+            /*
+             * TODO: Remove from session storage
+             */
+            // IMAPSessionUtility.removeDeletedFolder(accountId, session, fullname);
             f.open(Folder.READ_WRITE);
             try {
                 int msgCount = f.getMessageCount();

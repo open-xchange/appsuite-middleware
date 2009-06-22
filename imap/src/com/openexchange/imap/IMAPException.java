@@ -308,7 +308,11 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Parsing thread-sort string failed: %1$s.
          */
-        THREAD_SORT_PARSING_ERROR(IMAPCode.THREAD_SORT_PARSING_ERROR);
+        THREAD_SORT_PARSING_ERROR(IMAPCode.THREAD_SORT_PARSING_ERROR),
+        /**
+         * A SQL error occurred: %1$s
+         */
+        SQL_ERROR(IMAPCode.SQL_ERROR);
 
         private final IMAPCode imapCode;
 
@@ -736,7 +740,11 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Parsing thread-sort string failed: %1$s.
          */
-        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", Category.CODE_ERROR, 2051);
+        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", Category.CODE_ERROR, 2051),
+        /**
+         * A SQL error occurred: %1$s
+         */
+        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 2052);
 
         private final String message;
 
@@ -849,6 +857,8 @@ public final class IMAPException extends MIMEMailException {
         return create(code, imapConfig, session, null, messageArgs);
     }
 
+    private static final int EXT_LENGTH = 4;
+
     /**
      * Creates a new IMAP exception for specified error code.
      * 
@@ -866,10 +876,10 @@ public final class IMAPException extends MIMEMailException {
             final Object[] newArgs;
             int k;
             if (null == messageArgs) {
-                newArgs = new Object[4];
+                newArgs = new Object[EXT_LENGTH];
                 k = 0;
             } else {
-                newArgs = new Object[messageArgs.length + 4];
+                newArgs = new Object[messageArgs.length + EXT_LENGTH];
                 System.arraycopy(messageArgs, 0, newArgs, 0, messageArgs.length);
                 k = messageArgs.length;
             }

@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,7 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
+import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -1686,7 +1688,7 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    private static final String COMMAND_FETCH_UID = "FETCH 1:* (UID)";
+    private static final String COMMAND_FETCH_UID_FLAGS = "FETCH 1:* (UID FLAGS)";
 
     /**
      * Fetches all UIDs from given IMAP folder.
@@ -1695,14 +1697,14 @@ public final class IMAPCommandsCollection {
      * @return All UIDs from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static long[] fetchUIDs(final IMAPFolder imapFolder) throws MessagingException {
+    public static IMAPUpdateableData[] fetchUIDAndFlags(final IMAPFolder imapFolder) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
              */
-            return new long[0];
+            return new IMAPUpdateableData[0];
         }
-        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (IMAPUpdateableData[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 /*-
@@ -1715,15 +1717,19 @@ public final class IMAPCommandsCollection {
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
                  */
-                final Response[] r = p.command(COMMAND_FETCH_UID, null);
+                final Response[] r = p.command(COMMAND_FETCH_UID_FLAGS, null);
                 final int len = r.length - 1;
                 final Response response = r[len];
-                final List<Long> l = new ArrayList<Long>(len);
+                final List<IMAPUpdateableData> l = new ArrayList<IMAPUpdateableData>(len);
                 if (response.isOK()) {
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                             final FetchResponse fr = (FetchResponse) r[j];
-                            l.add(Long.valueOf(getItemOf(UID.class, fr, STR_UID).uid));
+                            final FLAGS flags = getItemOf(FLAGS.class, fr, "FLAGS");
+                            l.add(IMAPUpdateableData.newInstance(
+                                getItemOf(UID.class, fr, STR_UID).uid,
+                                parseSystemFlags(flags),
+                                parseUserFlags(flags)));
                             r[j] = null;
                         }
                     }
@@ -1741,13 +1747,58 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                final long[] longs = new long[l.size()];
-                for (int i = 0; i < longs.length; i++) {
-                    longs[i] = l.get(i).longValue();
-                }
-                return longs;
+                return l.toArray(new IMAPUpdateableData[l.size()]);
             }
         }));
+    }
+
+    /**
+     * Parses specified {@link Flags flags} to system flags.
+     * 
+     * @param flags The flags to parse
+     * @return The parsed system flags
+     */
+    static int parseSystemFlags(final Flags flags) {
+        int retval = 0;
+        if (flags.contains(Flags.Flag.ANSWERED)) {
+            retval |= MailMessage.FLAG_ANSWERED;
+        }
+        if (flags.contains(Flags.Flag.DELETED)) {
+            retval |= MailMessage.FLAG_DELETED;
+        }
+        if (flags.contains(Flags.Flag.DRAFT)) {
+            retval |= MailMessage.FLAG_DRAFT;
+        }
+        if (flags.contains(Flags.Flag.FLAGGED)) {
+            retval |= MailMessage.FLAG_FLAGGED;
+        }
+        if (flags.contains(Flags.Flag.RECENT)) {
+            retval |= MailMessage.FLAG_RECENT;
+        }
+        if (flags.contains(Flags.Flag.SEEN)) {
+            retval |= MailMessage.FLAG_SEEN;
+        }
+        if (flags.contains(Flags.Flag.USER)) {
+            retval |= MailMessage.FLAG_USER;
+        }
+        return retval;
+    }
+
+    /**
+     * Parses specified {@link Flags flags} to user flags.
+     * 
+     * @param flags The flags to parse
+     * @return The parsed user flags
+     */
+    static Set<String> parseUserFlags(final Flags flags) {
+        final String[] userFlags = flags.getUserFlags();
+        if (userFlags == null) {
+            return Collections.emptySet();
+        }
+        /*
+         * Mark message to contain user flags
+         */
+        return new HashSet<String>(Arrays.asList(userFlags));
     }
 
     private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
