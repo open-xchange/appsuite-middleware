@@ -1,3 +1,7 @@
+* 2009-06-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #13949: Dealing with missing From header on action=new in mail servlet
+
 * 2009-06-23 - marcus.klein@open-xchange.com
 
  - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.

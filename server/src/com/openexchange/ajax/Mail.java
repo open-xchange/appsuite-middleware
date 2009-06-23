@@ -74,6 +74,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -131,9 +132,11 @@ import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.parser.HTMLParser;
@@ -2639,7 +2642,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         JSONObject responseData = null;
         try {
             final String src = paramContainer.checkStringParam(PARAMETER_SRC);
-            if (!(STR_1.equals(src) || Boolean.parseBoolean(src))) {
+            if (!STR_1.equals(src) && !Boolean.parseBoolean(src)) {
                 throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_SRC);
             }
             final String folder = paramContainer.getStringParam(PARAMETER_FOLDERID);
@@ -2650,27 +2653,44 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get rfc822 bytes and create corresponding mail message
              */
-            final byte[] rfc822 = body.getBytes("US-ASCII");
-            final MailMessage m = MIMEMessageConverter.convertMessage(rfc822);
+            final InternetAddress from;
+            final MailMessage m;
+            {
+                final MimeMessage mm = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(
+                    body.getBytes("US-ASCII")));
+                final String fromAddr = mm.getHeader(MessageHeaders.HDR_FROM, null);
+                if (null == fromAddr) {
+                    // Add from address
+                    from = new InternetAddress(getDefaultSendAddress(session), true);
+                    mm.setFrom(from);
+                    m = MIMEMessageConverter.convertMessage(mm);
+                } else {
+                    from = new InternetAddress(fromAddr, true);
+                    m = MIMEMessageConverter.convertMessage(mm);
+                }
+            }
             /*
              * Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
              */
             if (folder == null) {
                 /*
-                 * Extract from out of RFC 822 bytes
+                 * Determine the account to transport with
                  */
-                final InternetAddress from = m.getFrom()[0];
-                int accountId;
-                try {
-                    accountId = resolveFrom2Account(session, from, true);
-                } catch (final MailException e) {
-                    if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
-                        // Re-throw
-                        throw e;
+                final int accountId;
+                {
+                    int accId;
+                    try {
+                        accId = resolveFrom2Account(session, from, true);
+                    } catch (final MailException e) {
+                        if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
+                            // Re-throw
+                            throw e;
+                        }
+                        LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                        // Send with default account's transport provider
+                        accId = MailAccount.DEFAULT_ID;
                     }
-                    LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
-                    // Send with default account's transport provider
-                    accountId = MailAccount.DEFAULT_ID;
+                    accountId = accId;
                 }
                 /*
                  * Missing "folder" element indicates to send given message via default mail account
@@ -2680,7 +2700,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Send raw message source
                      */
-                    final MailMessage sentMail = transport.sendRawMessage(rfc822);
+                    final MailMessage sentMail = transport.sendRawMessage(m.getSourceBytes());
                     if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
                         /*
                          * Copy in sent folder allowed
@@ -2754,11 +2774,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                     for (final String alias : aliases) {
                         validAddrs.add(new InternetAddress(alias));
                     }
-                    final List<InternetAddress> from = Arrays.asList(m.getFrom());
-                    if (!validAddrs.containsAll(from)) {
+                    final List<InternetAddress> froms = Arrays.asList(m.getFrom());
+                    if (!validAddrs.containsAll(froms)) {
                         throw new MailException(
                             MailException.Code.INVALID_SENDER,
-                            from.size() == 1 ? from.get(0).toString() : Arrays.toString(m.getFrom()));
+                            froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(m.getFrom()));
                     }
                 } catch (final AddressException e) {
                     throw MIMEMailException.handleMessagingException(e);
@@ -2773,7 +2793,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (flags != ParamContainer.NOT_FOUND) {
                         m.setFlags(flags);
                     }
-                    if (mailAccess.getFolderStorage().getDraftsFolder().equals(folder)) {
+                    final String draftsFolder = mailAccess.getFolderStorage().getDraftsFolder();
+                    if (draftsFolder.equals(fullnameArgument.getFullname())) {
                         m.setFlag(MailMessage.FLAG_DRAFT, true);
                     }
                     final String id = mailAccess.getMessageStorage().appendMessages(fullnameArgument.getFullname(), new MailMessage[] { m })[0];
@@ -3554,6 +3575,19 @@ public class Mail extends PermissionServlet implements UploadListener {
         return session.getUserConfiguration().hasWebMail();
     }
 
+    private static String getDefaultSendAddress(final ServerSession session) throws OXException {
+        try {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+            return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
+        } catch (final MailAccountException e) {
+            throw new OXException(e);
+        } catch (final ServiceException e) {
+            throw new OXException(e);
+        }
+    }
+
     private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport) throws MailException, OXException {
         /*
          * Resolve "From" to proper mail account to select right transport server
@@ -3565,7 +3599,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 true);
             final int user = session.getUserId();
             final int cid = session.getContextId();
-            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+            if (null == from) {
+                accountId = MailAccount.DEFAULT_ID;
+            } else {
+                accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+            }
             if (accountId != -1) {
                 if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
                     throw MailAccountExceptionMessages.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
