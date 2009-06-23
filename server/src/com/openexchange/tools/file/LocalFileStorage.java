@@ -132,7 +132,7 @@ public class LocalFileStorage extends FileStorage {
         } catch (final NullPointerException e) {
             throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, uri);
         }
-        if (!storage.exists() && !storage.mkdir()) {
+        if (!storage.exists() && !storage.mkdirs()) {
             throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
         }
     }
