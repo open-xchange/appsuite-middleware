@@ -47,40 +47,48 @@
  *
  */
 
-package com.openexchange.subscribe.xing;
+package com.openexchange.subscribe.crawler;
 
-import com.openexchange.groupware.container.ContactObject;
+import java.io.File;
+import java.io.FileNotFoundException;
 
+import org.ho.yaml.Yaml;
+
+import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionException;
 
 /**
- * {@link ContactSanitizer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Gets a text input and creates Workflow
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
-public class ContactSanitizer {
+public class WorkflowFactory {
 
-    /**
-     * @param contact
-     */
-    public void sanitize(ContactObject contact) {
-        for(int field : ContactObject.ALL_COLUMNS) {
-            if(field == ContactObject.LAST_MODIFIED_UTC) {
-                continue;
-            }
-            if(contact.contains(field)) {
-                Object value = contact.get(field);
-                if(value != null && "".equals(value)) {
-                    contact.remove(field);
-                }
-            }
-        }
-        if(contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
-            contact.removeImageContentType();
-        }
-        if(contact.containsFileAs() && "".equals(contact.getFileAs())) {
-            contact.removeFileAs();
-        }
-    }
+	public static Workflow createWorkflow(String filename) throws SubscriptionException{
+		
+		Workflow workflow = null;
+		try {
+			workflow = (Workflow) Yaml.load(new File(filename));
+			checkSanity(workflow);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return workflow;
+	}
+	
+	private static void checkSanity(Workflow workflow) throws SubscriptionException {
+		Step previousStep = null;
+		for (Step currentStep : workflow.getSteps()){
+			if (previousStep != null){
+				if (!previousStep.outputType().equals(currentStep.inputType())){
+					System.out.println("output : " + previousStep.outputType() + ", input : " + currentStep.inputType());
+					throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
+				}
+			}
+			previousStep = currentStep;
+		}
+	}
 
 }

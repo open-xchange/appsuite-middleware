@@ -57,6 +57,7 @@ import org.ho.yaml.Yaml;
 
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep;
 import com.openexchange.subscribe.crawler.LoginPageStep;
 import com.openexchange.subscribe.crawler.Step;
@@ -85,7 +86,7 @@ public class XingWorkflowTest extends TestCase {
 		ContactObject[] contacts = new ContactObject[0];
 		try {
 			contacts = xingWorkflow.execute();
-		} catch (XingSubscriptionException e) {
+		} catch (SubscriptionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -106,7 +107,7 @@ public class XingWorkflowTest extends TestCase {
 			// insert valid credentials in the file
 			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/XingWorkflow.yml");		
 			contacts = xingWorkflow.execute();
-		} catch (XingSubscriptionException e) {
+		} catch (SubscriptionException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
@@ -143,7 +144,7 @@ public class XingWorkflowTest extends TestCase {
 			// insert valid credentials in the file
 			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
 			fail("Exception expected");
-		} catch (XingSubscriptionException e) {
+		} catch (SubscriptionException e) {
 			assertEquals("Wrong exception", XingSubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
 		}
 	}

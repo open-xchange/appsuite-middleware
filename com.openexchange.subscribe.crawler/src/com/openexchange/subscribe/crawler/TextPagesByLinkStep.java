@@ -61,7 +61,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.subscribe.xing.XingSubscriptionException;
+import com.openexchange.subscribe.SubscriptionException;
 
 /**
  * This step takes a pattern of url and offset and returns all pages reachable by links meeting the specified criteria
@@ -88,7 +88,7 @@ public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextP
 		this.linkpart = linkpart;
 	}
 
-	public void execute(WebClient webClient)  throws XingSubscriptionException{
+	public void execute(WebClient webClient)  throws SubscriptionException{
 	    try {
 	    	
 	    	int tempOffset = 0;

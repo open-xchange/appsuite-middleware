@@ -80,7 +80,11 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     /**
      * Parsing error.
      */
-    ParsingError(Category.CODE_ERROR, 6, "Check value to parse.", "Parsing error.");
+    ParsingError(Category.CODE_ERROR, 6, "Check value to parse.", "Parsing error."),
+    
+    INVALID_LOGIN(Category.USER_INPUT, 1, "Please correct the password and try again", "The password you entered was wrong"),
+    COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 2, "Make sure, that the Service is still available, and there are no major changes on the website", "Service unavailable"),
+    INVALID_WORKFLOW(Category.SETUP_ERROR, 3, "Please correct the steps of this workflow so that output of one step and input of the next step match", "The steps of this crawling workflow do not fit together");
 
     private Category category;
     private int errorCode;

@@ -6,8 +6,8 @@ import java.util.Vector;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
-import com.openexchange.subscribe.xing.XingSubscriptionException;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionException;
 
 /**
  * A crawling workflow. This holds the individual Steps and the session information (WebClient instance). 
@@ -25,8 +25,19 @@ public class Workflow {
 	public Workflow (List<Step> steps){
 		this.steps = steps;
 	}
+	
+	// Convenience method for setting username and password after the workflow was created
+	public ContactObject[] execute(String username, String password) throws SubscriptionException{
+		for (Step currentStep : steps) {
+			if (currentStep instanceof LoginPageStep){
+				((LoginPageStep) currentStep).setUsername(username);
+				((LoginPageStep) currentStep).setPassword(password);
+			}
+		}	
+		return execute();
+	}
 
-	public ContactObject[] execute()  throws XingSubscriptionException {
+	public ContactObject[] execute()  throws SubscriptionException {
 		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
 		boolean workflowComplete = true;
 		
@@ -43,7 +54,7 @@ public class Workflow {
 			currentStep.execute(webClient);
 			previousStep = currentStep;
 			if (! currentStep.executedSuccessfully()) {
-				throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(); 
+				throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(); 
 			}
 		}
 		

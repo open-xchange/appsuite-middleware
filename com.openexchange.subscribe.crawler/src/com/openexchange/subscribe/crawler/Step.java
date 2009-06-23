@@ -49,48 +49,27 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.subscribe.SubscriptionException;
 
-import org.ho.yaml.Yaml;
-
-import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
-import com.openexchange.subscribe.xing.XingSubscriptionException;
 
 /**
- * Gets a text input and creates Workflow
+ * A Step in a crawling workflow
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
+ * @param <O> The Output accessible if the step executed successfully
+ * @param <I> The Input needed for the step to execute
  */
-public class WorkflowFactory {
-
-	public static Workflow createWorkflow(String filename) throws XingSubscriptionException{
-		
-		Workflow workflow = null;
-		try {
-			workflow = (Workflow) Yaml.load(new File(filename));
-			checkSanity(workflow);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		return workflow;
-	}
+public interface Step<O, I> extends HasOutput<O>, HasInput<I>{
 	
-	private static void checkSanity(Workflow workflow) throws XingSubscriptionException {
-		Step previousStep = null;
-		for (Step currentStep : workflow.getSteps()){
-			if (previousStep != null){
-				if (!previousStep.outputType().equals(currentStep.inputType())){
-					System.out.println("output : " + previousStep.outputType() + ", input : " + currentStep.inputType());
-					throw XingSubscriptionErrorMessage.INVALID_WORKFLOW.create();
-				}
-			}
-			previousStep = currentStep;
-		}
-	}
+	boolean executedSuccessfully();
+	
+	Exception getException();
+	
+	void execute(WebClient webClient)  throws SubscriptionException;
+	
+	String inputType();
+	
+	String outputType();
 
 }

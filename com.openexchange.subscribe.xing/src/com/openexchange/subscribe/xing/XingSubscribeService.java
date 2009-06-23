@@ -60,6 +60,7 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.crawler.Workflow;
 
 /**
  * {@link XingSubscribeService}
@@ -76,7 +77,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
-    private XingContactParser xingContactParser;
+    private Workflow xingWorkflow;
 
     public XingSubscribeService() {
         FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
@@ -89,8 +90,8 @@ public class XingSubscribeService extends AbstractSubscribeService {
         
     }
     
-    public void setXingContactParser(XingContactParser xingContactParser) {
-        this.xingContactParser = xingContactParser;
+    public void setXingWorkflow(Workflow xingWorkflow) {
+        this.xingWorkflow = xingWorkflow;
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -101,9 +102,9 @@ public class XingSubscribeService extends AbstractSubscribeService {
         return folderModule == FolderObject.CONTACT;
     }
 
-    public Collection<ContactObject> getContent(Subscription subscription) throws XingSubscriptionException {
+    public Collection<ContactObject> getContent(Subscription subscription) throws SubscriptionException {
         Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(xingContactParser.getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
+        return Arrays.asList(xingWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
     }
 
     @Override

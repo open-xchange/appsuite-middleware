@@ -75,6 +75,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 	
 	private List<TextPage> pages;
 	private ContactObject[] contactObjectsArray;
+	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 	
 	public ContactObjectsByVcardTextPagesStep() {
 		
@@ -93,6 +94,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
     			versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
     			VersitObject versitObject = def.parse(versitReader);
     			ContactObject contactObject = oxContainerConverter.convertContact(versitObject);
+    			SANITIZER.sanitize(contactObject);
     			contactObjects.add(contactObject);
     		} catch (final VersitException e){
     			e.printStackTrace();

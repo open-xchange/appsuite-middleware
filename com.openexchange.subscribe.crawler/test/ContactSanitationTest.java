@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.xing;
 
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.subscribe.crawler.ContactSanitizer;
+
 import junit.framework.TestCase;
 
 

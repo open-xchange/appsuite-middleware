@@ -49,27 +49,38 @@
 
 package com.openexchange.subscribe.crawler;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.xing.XingSubscriptionException;
+import com.openexchange.groupware.container.ContactObject;
 
 
 /**
- * A Step in a crawling workflow
- * 
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @param <O> The Output accessible if the step executed successfully
- * @param <I> The Input needed for the step to execute
+ * {@link ContactSanitizer}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface Step<O, I> extends HasOutput<O>, HasInput<I>{
-	
-	boolean executedSuccessfully();
-	
-	Exception getException();
-	
-	void execute(WebClient webClient)  throws XingSubscriptionException;
-	
-	String inputType();
-	
-	String outputType();
+public class ContactSanitizer {
+
+    /**
+     * @param contact
+     */
+    public void sanitize(ContactObject contact) {
+        for(int field : ContactObject.ALL_COLUMNS) {
+            if(field == ContactObject.LAST_MODIFIED_UTC) {
+                continue;
+            }
+            if(contact.contains(field)) {
+                Object value = contact.get(field);
+                if(value != null && "".equals(value)) {
+                    contact.remove(field);
+                }
+            }
+        }
+        if(contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
+            contact.removeImageContentType();
+        }
+        if(contact.containsFileAs() && "".equals(contact.getFileAs())) {
+            contact.removeFileAs();
+        }
+    }
 
 }
