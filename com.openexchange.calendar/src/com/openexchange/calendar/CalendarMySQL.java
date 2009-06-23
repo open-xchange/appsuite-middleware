@@ -2730,12 +2730,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 final int folderType = cdao.getFolderType();
                 for (int a = 0; a < modified_userparticipants.length; a++) {
                     // TODO: Enhance this and add a condition for lastid
-                    pu.setInt(1, modified_userparticipants[a].getConfirm());
-                    if (modified_userparticipants[a].getConfirmMessage() == null) {
-                        pu.setNull(2, java.sql.Types.VARCHAR);
-                    } else {
-                        pu.setString(2, modified_userparticipants[a].getConfirmMessage());
-                    }
+                    prepareConfirmation(edao, modified_userparticipants, pu, a);
                     if (modified_userparticipants[a].getIdentifier() == uid) {
                         if (FolderObject.PRIVATE == folderType) {
                             if (cdao.getGlobalFolderID() == 0) {
@@ -3028,6 +3023,44 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     }
 
+    private void prepareConfirmation(final CalendarDataObject edao, UserParticipant[] modified_userparticipants, PreparedStatement pu, int a) throws SQLException {
+        UserParticipant oldUser = searchUser(modified_userparticipants[a].getIdentifier(), edao);
+        if (!modified_userparticipants[a].containsConfirm() && oldUser != null) {
+            pu.setInt(1, oldUser.getConfirm());
+        } else {
+            pu.setInt(1, modified_userparticipants[a].getConfirm());
+        }
+        
+        if (!modified_userparticipants[a].containsConfirmMessage() && oldUser != null) {
+            if (oldUser.getConfirmMessage() == null) {
+                pu.setNull(2, java.sql.Types.VARCHAR);
+            } else {
+                pu.setString(2, oldUser.getConfirmMessage());
+            }
+        } else {
+            if (modified_userparticipants[a].getConfirmMessage() == null) {
+                pu.setNull(2, java.sql.Types.VARCHAR);
+            } else {
+                pu.setString(2, modified_userparticipants[a].getConfirmMessage());
+            }
+        }
+    }
+
+    /**
+     * Searches for the given user id in the users of the given CalendarDataObject
+     * @param id 
+     * @param calendarDataObject
+     * @return the UserParticipant if found, null otherwise.
+     */
+    private UserParticipant searchUser(int id, CalendarDataObject calendarDataObject) {
+        for (UserParticipant user : calendarDataObject.getUsers()) {
+            if (user.getIdentifier() == id) {
+                return user;
+            }
+        }
+        return null;
+    }
+    
     /**
      * Gathers all identifiers of external participants contained in specified
      * array of {@link Participant} objects whose identifier is different from
