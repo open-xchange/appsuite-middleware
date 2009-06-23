@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -14,9 +15,7 @@ import com.openexchange.subscribe.crawler.LoginPageStep;
 import com.openexchange.subscribe.crawler.Step;
 import com.openexchange.subscribe.crawler.TextPagesByLinkStep;
 import com.openexchange.subscribe.crawler.Workflow;
-import com.openexchange.subscribe.xing.XingContactParser;
 import com.openexchange.subscribe.xing.XingSubscribeService;
-import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
 
 public class Activator implements BundleActivator {
 
