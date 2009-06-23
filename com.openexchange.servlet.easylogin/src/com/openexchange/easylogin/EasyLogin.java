@@ -345,18 +345,18 @@ public class EasyLogin extends HttpServlet {
 			"			if (!status) {\n" +
 			"				if (result.code == \"LGI-0006\")\n";
 			
-	private static final String RESPONSE23 =	"					alert(_(\"Login failed. Please check your user name and password and try again.\"));\n";
+	private static final String RESPONSE23 =	"alert(_(\"Login failed. Please check your user name and password and try again.\"));\n";
 			
-	private static final String RESPONSE24 =	"				else\n" +
+	private static final String RESPONSE24 =	" else\n" +
 			"					alert(formatError(result));\n" +
 			"			} else\n" +
 			"				//#. HTTP Errors from the server\n" +
 			"				//#. %1$s is the numeric HTTP status code\n" +
 			"				//#. %2$s is the corresponding HTTP status text\n";
 			
-	private static final String RESPONSE25 =	"				alert(\"Error: \"+status+\" - \"+result);\n";
+	private static final String RESPONSE25 =	"alert(\"Error: \"+status+\" - \"+result);\n";
 		
-	private static final String RESPONSE27 =	"			bClickedLogin = false;\n" +
+	private static final String RESPONSE27 =	"bClickedLogin = false;\n" +
 			"			window.location.href = document.referrer + \"?login=failed&user=\" + u;\n" +
 			"			return true;\n" +
 			"		},\n" +
@@ -364,7 +364,22 @@ public class EasyLogin extends HttpServlet {
 			"	);\n" +
 			"	return false;\n" +
 			"}\n" +
-			"function authenticate (code,user,pass,method){\n" +
+			" function authenticate (code,user,pass,method){\n" +
+			// remove all cookies first browser session to not mix up session
+			" // get all cookies from ox\n"+
+			" var cookies = document.cookie.match(/open-xchange-session-\\w+/g);\n"+
+			" // check if we have ox cookies\n"+
+			" if(cookies){\n"+
+			" // get date object\n" + 
+			" var mydate = new Date();\n"+
+			" mydate.setTime(mydate.getTime() - 100000);\n"+ 
+			" for (var i = 0 ; i < cookies.length; i++) {\n" +
+			"  // invalidate all ox cookies\n"+
+			"  document.cookie = cookies[i]+\"=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/\" \n"+  
+			" }\n"+
+		    "}\n"+
+		    " console.log(document.cookie);\n "+
+		    "\n"+
 			"	if(code != 0)\n" +
 			"	{\n" +
 			"		alert(_(\"Login failed. Please check your user name and password and try again.\"));\n" +
@@ -377,7 +392,7 @@ public class EasyLogin extends HttpServlet {
 			"function dologin(result) {\n" +
 			"	document.location.href=\"";
 	
-	private static final String RESPONSE3 = "\";}\n" +
+	private static final String RESPONSE3 = "\";\n}\n" +
 			"\n" +
 			"function onload_fn()\n" +
 			"{\n";
