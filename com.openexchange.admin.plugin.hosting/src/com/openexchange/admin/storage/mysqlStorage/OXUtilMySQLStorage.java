@@ -1269,7 +1269,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final int numContexts = usage.getCtxCount();
             fs.setCurrentContexts(I(numContexts));
             final long average_context_size = getAverageFilestoreSpace();
-            fs.setReserved(L(toMB(average_context_size * numContexts)));
+            fs.setReserved(L(average_context_size * numContexts));
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);            
             throw new StorageException(ecp);
