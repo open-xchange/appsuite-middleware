@@ -7,5 +7,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-subscribe-xing
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-subscribe (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-subscribe (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@)
 Description: Subscribe XING address book
