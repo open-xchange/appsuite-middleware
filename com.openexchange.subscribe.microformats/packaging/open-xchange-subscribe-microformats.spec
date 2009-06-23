@@ -27,6 +27,7 @@ BuildRequires:  java-1_6_0-ibm-devel
 
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
+BuildRequires:  open-xchange-xerces-sun
 BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
 %if 0%{?fedora_version}
