@@ -147,6 +147,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    @Override
     public void changeDatabase(final Database db) throws StorageException {
 
         Connection con = null;
@@ -160,9 +161,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (db.getName() != null && db.getName().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.name = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getName());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -170,9 +171,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (db.getLogin() != null && db.getLogin().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.login = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getLogin());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -180,9 +181,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (db.getPassword() != null && db.getPassword().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.password = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getPassword());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -190,39 +191,39 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (db.getDriver() != null && db.getDriver().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.driver = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getDriver());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
             
             if (db.getPoolInitial() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.initial = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolInitial());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(1, db.getPoolInitial().intValue());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
             
             if (db.getPoolMax() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.max = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolMax());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(1, db.getPoolMax().intValue());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
             
             if (db.getPoolHardLimit() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.hardlimit = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolHardLimit());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(1, db.getPoolHardLimit().intValue());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -230,29 +231,29 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (db.getUrl() != null && db.getUrl().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.url = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getUrl());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
             
             if (db.getClusterWeight() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.weight = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getClusterWeight());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(1, db.getClusterWeight().intValue());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
             
             if (db.getMaxUnits() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.max_units = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getMaxUnits());
-                prep.setInt(2, db.getId());
-                prep.setInt(3, db.getId());
-                prep.setInt(4, db.getId());
+                prep.setInt(1, db.getMaxUnits().intValue());
+                prep.setInt(2, db.getId().intValue());
+                prep.setInt(3, db.getId().intValue());
+                prep.setInt(4, db.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -884,7 +885,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     /**
-     * @return the configured average file store space per context.
+     * @return the configured average file store space per context in mega bytes (MB).
      * @throws StorageException if parsing the configuration option fails.
      */
     private long getAverageFilestoreSpace() throws StorageException {
@@ -896,8 +897,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("Unable to parse average context filestore space from configuration file.", e);
             throw new StorageException("Unable to parse average context filestore space from configuration file.", e);
         }
-        // convert to byte
-        average_size *= Math.pow(2, 20);
         return average_size;
     }
 
@@ -1238,7 +1237,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     private static final long toMB(final long value) {
         return value / 0x100000;
     }
-    
+
     @Override
     public Filestore getFilestore(final int id) throws StorageException {
         final Connection con;
@@ -1270,7 +1269,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final int numContexts = usage.getCtxCount();
             fs.setCurrentContexts(I(numContexts));
             final long average_context_size = getAverageFilestoreSpace();
-            fs.setReserved(L(average_context_size * numContexts));
+            fs.setReserved(L(toMB(average_context_size * numContexts)));
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);            
             throw new StorageException(ecp);

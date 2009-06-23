@@ -139,7 +139,6 @@ public abstract class OXUtilStorageInterface {
         }
     }
 
-    
     /**
      * Register filestore in configbdb.
      * 
