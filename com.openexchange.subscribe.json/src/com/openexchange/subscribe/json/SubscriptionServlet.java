@@ -250,7 +250,7 @@ public class SubscriptionServlet extends AbstractSubscriptionServlet {
         List<String> dynamicColumnIdentifiers = new ArrayList<String>();
         while(parameterNames.hasMoreElements()) {
             String paramName = (String) parameterNames.nextElement();
-            if(!KNOWN_PARAMS.contains(paramName)) {
+            if(!KNOWN_PARAMS.contains(paramName) && paramName.indexOf('.') != -1) {
                 dynamicColumnIdentifiers.add(paramName);
             }
         }
