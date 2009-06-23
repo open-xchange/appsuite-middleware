@@ -120,8 +120,12 @@ public class MailAccountParser extends DataParser {
                     attributes.add(attribute);
                 }
             }
-            account.setMailProtocol(account.getMailProtocol().trim());
-            account.setMailServer(account.getMailServer().trim());
+            if (null != account.getMailProtocol()) {
+                account.setMailProtocol(account.getMailProtocol().trim());
+            }
+            if (null != account.getMailServer()) {
+                account.setMailServer(account.getMailServer().trim());
+            }
         }
         if (json.has(MailAccountFields.TRANSPORT_URL)) {
             account.parseTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL).trim());
