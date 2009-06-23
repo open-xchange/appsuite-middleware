@@ -159,7 +159,7 @@ public final class LoginPerformer {
             } catch (final LdapException e) {
                 switch (e.getDetail()) {
                 case ERROR:
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                 case NOT_FOUND:
                     throw LoginExceptionCodes.USER_NOT_FOUND.create(e, username, Integer.valueOf(contextId));
                 default:

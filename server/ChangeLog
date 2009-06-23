@@ -6,6 +6,7 @@
 
  - Bugfix #13949: Dealing with missing From header on action=new in mail servlet
  - Bugfix #13853: Displaying broken header as it is
+ - Bugfix #13952: Fixed missing argument in login exception
 
 * 2009-06-23 - marcus.klein@open-xchange.com
 
