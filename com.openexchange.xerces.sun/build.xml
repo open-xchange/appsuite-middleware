@@ -41,7 +41,7 @@
 
     <target name="installJars">
         <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
-        <mkdir dir="${bundlesdestdir}}"/>
+        <mkdir dir="${bundlesdestdir}"/>
         <property name="xercesdir" value="${bundlesdestdir}/${bundle.name}"/>
         <mkdir dir="${xercesdir}"/>
         <mkdir dir="${xercesdir}/lib"/>
