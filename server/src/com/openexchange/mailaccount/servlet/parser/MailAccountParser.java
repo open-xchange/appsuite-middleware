@@ -141,8 +141,12 @@ public class MailAccountParser extends DataParser {
                     attributes.add(attribute);
                 }
             }
-            account.setTransportProtocol(account.getTransportProtocol().trim());
-            account.setTransportServer(account.getTransportServer().trim());
+            if (null != account.getTransportProtocol()) {
+                account.setTransportProtocol(account.getTransportProtocol().trim());
+            }
+            if (null != account.getTransportServer()) {
+                account.setTransportServer(account.getTransportServer().trim());
+            }
         }
         if (json.has(MailAccountFields.TRANSPORT_LOGIN)) {
             account.setTransportLogin(parseString(json, MailAccountFields.TRANSPORT_LOGIN));
