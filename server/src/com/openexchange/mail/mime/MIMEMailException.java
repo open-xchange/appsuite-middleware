@@ -260,17 +260,29 @@ public class MIMEMailException extends MailException {
          */
         QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024),
         /**
-         * A command to mail server failed. Server response: %1$s.
+         * A command to mail server failed. Server response: %1$s
          */
         COMMAND_FAILED("A command to mail server failed. Server response: %1$s.", Category.CODE_ERROR, 1025),
         /**
-         * Mail server indicates a bad command. Server response: %1$s.
+         * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
          */
-        BAD_COMMAND("Mail server indicates a bad command. Server response: %1$s.", Category.CODE_ERROR, 1026),
+        COMMAND_FAILED_EXT("A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s", COMMAND_FAILED.category, COMMAND_FAILED.detailNumber),
         /**
-         * An error in mail server protocol. Error message: %1$s.
+         * Mail server indicates a bad command. Server response: %1$s
          */
-        PROTOCOL_ERROR("An error in mail server protocol. Error message: %1$s.", Category.CODE_ERROR, 1027),
+        BAD_COMMAND("Mail server indicates a bad command. Server response: %1$s", Category.CODE_ERROR, 1026),
+        /**
+         * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
+         */
+        BAD_COMMAND_EXT("Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s", BAD_COMMAND.category, BAD_COMMAND.detailNumber),
+        /**
+         * An error in mail server protocol. Error message: %1$s
+         */
+        PROTOCOL_ERROR("An error in mail server protocol. Error message: %1$s", Category.CODE_ERROR, 1027),
+        /**
+         * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+         */
+        PROTOCOL_ERROR_EXT("An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s", PROTOCOL_ERROR.category, PROTOCOL_ERROR.detailNumber),
         /**
          * Message could not be sent: %1$s
          */
@@ -545,10 +557,40 @@ public class MIMEMailException extends MailException {
             } else if (nextException instanceof UnknownHostException) {
                 return new MIMEMailException(Code.UNKNOWN_HOST, e, e.getMessage());
             } else if (nextException instanceof CommandFailedException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.COMMAND_FAILED_EXT,
+                        e,
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        nextException.getMessage());
+                }
                 return new MIMEMailException(Code.COMMAND_FAILED, e, nextException.getMessage());
             } else if (nextException instanceof BadCommandException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.BAD_COMMAND_EXT,
+                        e,
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        nextException.getMessage());
+                }
                 return new MIMEMailException(Code.BAD_COMMAND, e, nextException.getMessage());
             } else if (nextException instanceof ProtocolException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.PROTOCOL_ERROR_EXT,
+                        e,
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        nextException.getMessage());
+                }
                 return new MIMEMailException(Code.PROTOCOL_ERROR, e, nextException.getMessage());
             } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                 return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
