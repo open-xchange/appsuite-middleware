@@ -117,6 +117,12 @@ public class Notifications {
 		"\n" + 
 		"\n" + 
 		"========================================== ";
+    
+    /**
+     * Notification Template for user which has no access to this appointment.
+     * We use the same as for external participants, because this has no link to the appointment.
+     */
+    public static final String APPOINTMENT_CREATE_MAIL_NO_ACCESS = APPOINTMENT_CREATE_MAIL_EXT;
 	
     public static final String TASK_CREATE_MAIL = 
 		"A new task was created by [created_by].\n" +
@@ -179,6 +185,12 @@ public class Notifications {
 		"\n" +
 		"\n" + 
 		"========================================== ";
+    
+    /**
+     * Notification Template for user which has no access to this task.
+     * We use the same as for external participants, because this has no link to the task.
+     */
+    public static final String TASK_CREATE_MAIL_NO_ACCESS = TASK_CREATE_MAIL_EXT;
 
 	/*-
 	 * DELETE
@@ -315,6 +327,12 @@ public class Notifications {
 		"\n" + 
 		"\n" + 
 		"==========================================";
+    
+    /**
+     * Notification Template for user which has no access to this appointment.
+     * We use the same as for external participants, because this has no link to the appointment.
+     */
+    public static final String APPOINTMENT_UPDATE_MAIL_NO_ACCESS = APPOINTMENT_UPDATE_MAIL_EXT;
 
     public static final String TASK_UPDATE_MAIL = 
 		"This task was changed by [changed_by].\n" +
@@ -377,6 +395,12 @@ public class Notifications {
 		"\n" + 
 		"\n" + 
 		"==========================================";
+    
+    /**
+     * Notification Template for user which has no access to this task.
+     * We use the same as for external participants, because this has no link to the task.
+     */
+    public static final String TASK_UPDATE_MAIL_NO_ACCESS = TASK_UPDATE_MAIL_EXT;
 	
 	/*-
 	 * CONFIRMATION

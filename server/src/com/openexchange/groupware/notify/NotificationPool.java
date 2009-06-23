@@ -267,11 +267,13 @@ public final class NotificationPool {
                     final State state = cur.getState();
                     final CalendarObject calendarObject = cur.getCalendarObject();
                     if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
+                        boolean canRead = ParticipantNotify.userCanReadObject(p, calendarObject, cur.getSession());
                         /*
                          * Create message
                          */
                         final MailMessage mmsg = ParticipantNotify.createParticipantMessage(
                             p,
+                            canRead,
                             cur.getTitle(),
                             cur.getState().getAction(),
                             state,

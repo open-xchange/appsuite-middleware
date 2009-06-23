@@ -95,6 +95,8 @@ import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.StringTemplate;
@@ -123,6 +125,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -584,10 +587,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                                 p.email).toString());
                         }
                     } else {
+                        boolean canRead = userCanReadObject(p, newObj, session);
                         /*
                          * Compose message
                          */
-                        messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate, b));
+                        messages.add(createParticipantMessage(p, canRead, title, actionRepl, state, locale, renderMap, isUpdate, b));
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                 " (id = ").append(newObj.getObjectID()).append(") \"").append(
@@ -601,6 +605,27 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return messages;
     }
 
+    public static boolean userCanReadObject(EmailableParticipant participant, CalendarObject obj, ServerSession session) {
+        UserConfiguration userConfig;
+        try {
+            userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(participant.id, session.getContext());
+            OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
+            EffectivePermission permission = oxfa.getFolderPermission(obj.getParentFolderID(), participant.id, userConfig);
+            
+            if (permission.canReadAllObjects()) {
+                return true;
+            }
+            
+            if (permission.canReadOwnObjects() && obj.getCreatedBy() == participant.id) {
+                return true;
+            }
+        } catch (OXException e) {
+            LL.log(e);
+        }
+        
+        return false;
+    }
+    
     protected String getFolderName(final int folderId, final Locale locale, final OXFolderAccess access) {
         String folderName = FolderObject.getFolderString(folderId, locale);
         if (folderName == null) {
@@ -627,7 +652,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param b A string builder
      * @return The created message
      */
-    protected static MailMessage createParticipantMessage(final EmailableParticipant p, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+    protected static MailMessage createParticipantMessage(final EmailableParticipant p, boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
         final StringHelper strings = new StringHelper(locale);
@@ -688,7 +713,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     /*
                      * Render proper message for removed participant
                      */
-                    final String message = p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE ? Notifications.APPOINTMENT_CREATE_MAIL_EXT : Notifications.APPOINTMENT_CREATE_MAIL;
+                    final String message = getAppointmentCreateTemplate(p, canRead);
                     msg.message = new StringTemplate(message).render(p.getLocale(), clone);
                 } else {
                     msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(
@@ -697,7 +722,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     /*
                      * Render proper message for removed participant
                      */
-                    final String message = p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE ? Notifications.TASK_CREATE_MAIL_EXT : Notifications.TASK_CREATE_MAIL;
+                    final String message = getTaskCreateMessage(p, canRead);
                     msg.message = new StringTemplate(message).render(p.getLocale(), clone);
                 }
                 if (Participant.RESOURCE == p.type) {
@@ -714,6 +739,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
                     final String template = Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT : Notifications.TASK_UPDATE_MAIL_EXT;
                     msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
+                } else if (!canRead) {
+                    String template = state.getModule() == Types.APPOINTMENT ? Notifications.APPOINTMENT_UPDATE_MAIL_NO_ACCESS : Notifications.TASK_UPDATE_MAIL_NO_ACCESS;
+                    msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else {
                     msg.message = createTemplate.render(p.getLocale(), renderMap);
                 }
@@ -721,6 +749,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         } else {
             if (State.Type.NEW.equals(state.getType()) && (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                 final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CREATE_MAIL_EXT : Notifications.TASK_CREATE_MAIL_EXT);
+                msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
+            } else if (!canRead) {
+                String template = strings.getString(state.getModule() == Types.APPOINTMENT ? Notifications.APPOINTMENT_CREATE_MAIL_NO_ACCESS : Notifications.TASK_CREATE_MAIL_NO_ACCESS);
                 msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
@@ -740,6 +771,26 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         msg.folderId = p.folderId;
         msg.internal = p.type != Participant.EXTERNAL_USER;
         return msg;
+    }
+
+    private static String getTaskCreateMessage(EmailableParticipant p, boolean canRead) {
+        if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
+            return Notifications.TASK_CREATE_MAIL_EXT;
+        } else if (!canRead) {
+            return Notifications.TASK_CREATE_MAIL_NO_ACCESS;
+        } else {
+            return Notifications.TASK_CREATE_MAIL;
+        }
+    }
+
+    private static String getAppointmentCreateTemplate(EmailableParticipant p, boolean canRead) {
+        if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
+            return Notifications.APPOINTMENT_CREATE_MAIL_EXT;
+        } else if (!canRead) {
+            return Notifications.APPOINTMENT_CREATE_MAIL_NO_ACCESS;
+        } else {
+            return Notifications.APPOINTMENT_CREATE_MAIL;
+        }
     }
 
     private RenderMap createRenderMap(final CalendarObject newObj, final CalendarObject oldObj, final boolean isUpdate, final String title, final int module, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session) {
