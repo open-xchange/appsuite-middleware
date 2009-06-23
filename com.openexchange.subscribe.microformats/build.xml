@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.subscribe.microformats" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -21,7 +22,7 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common" />
-    <property name="xmlBundle" value="com.openexchange.xml" />
+    <property name="xercesBundle" value="com.openexchange.xerces.sun" />
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -31,14 +32,14 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
-	<property name="commonjar" value="common.jar"/>
+    <property name="commonjar" value="common.jar"/>
 
-	 <!-- Third party libs -->
-	<fileset dir="${basedir}" id="3rdpartyjars">
-	    <include name="${lib.dir}/*.jar"/>
-	    <exclude name="CVS"/>
-	</fileset>
-	
+     <!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
+
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -46,11 +47,11 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-        <fileset dir="${bundlesdir}/${xmlBundle}/lib" includes="**.jar"/>
+        <fileset dir="${bundlesdir}/${xercesBundle}/lib" includes="xerces.jar"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${subscribejar}"/>
-    	<fileset refid="3rdpartyjars"/>
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -68,7 +69,7 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
-        	<fileset refid="3rdpartyjars"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
