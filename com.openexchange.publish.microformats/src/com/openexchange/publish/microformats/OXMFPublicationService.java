@@ -63,6 +63,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
+import com.openexchange.publish.helpers.SecurityStrategy;
 
 /**
  * {@link OXMFPublicationService}
@@ -239,5 +240,9 @@ public class OXMFPublicationService extends AbstractPublicationService {
         return result.iterator().next();
     }
 
+    @Override
+    protected SecurityStrategy getSecurityStrategy() {
+        return FOLDER_ADMIN_ONLY;
+    }
 
 }

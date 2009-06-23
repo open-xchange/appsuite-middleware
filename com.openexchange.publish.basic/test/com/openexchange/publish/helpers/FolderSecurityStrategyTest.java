@@ -47,80 +47,42 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.helpers;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.impl.OCLPermission;
+import junit.framework.TestCase;
 
 
 /**
- * {@link PublicationErrorMessage}
+ * {@link FolderSecurityStrategyTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum PublicationErrorMessage implements OXErrorMessage {
+public class FolderSecurityStrategyTest extends TestCase {
+    public void testAllowForAdmin() throws AbstractOXException {
+        OCLPermission adminPermission = new OCLPermission();
+        adminPermission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
-    /**
-     * A SQL Error occurred.
-     */
-    SQLException(Category.CODE_ERROR, 1, "Please try again later.", "A SQL Error occurred."),
-    /**
-     * A parsing error occurred: %1$s.
-     */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
-    /**
-     * Could not load publications of type %1$s
-     */
-    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", "Could not load publications of type %1$s"),
-    /**
-     * Can not save a given ID.
-     */
-    IDGiven(Category.CODE_ERROR, 4, "Do not set a ID when saving a publication", "Unable to save a given ID."),
-    /**
-     * Could not find Publication (according ID and Context).
-     */
-    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Publication"),
-    UniquenessConstraintViolation(Category.USER_INPUT, 6, "Choose a different value", "%s has already been taken (Field: %s)"),
-    AccessDenied(Category.PERMISSION, 7, "Try again when you have the correct permissions", "You do not have the permissions to undertake the chosen action (%s)");
-    
-    private Category category;
-    private int errorCode;
-    private String help;
-    private String message;
-    
-    public static final PublicationExceptionFactory EXCEPTIONS = new PublicationExceptionFactory();
-    
-    private PublicationErrorMessage(final Category category, final int errorCode, final String help, final String message) {
-        this.category = category;
-        this.errorCode = errorCode;
-        this.help = help;
-        this.message = message;
+        TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
+        
+        assertTrue(strategy.mayCreate(null));
+        assertTrue(strategy.mayUpdate(null));
+        assertTrue(strategy.mayDelete(null));
+        
+        
     }
     
-    public Category getCategory() {
-        return category;
-    }
+    public void testDenyForNonAdmin() throws AbstractOXException {
+        OCLPermission adminPermission = new OCLPermission();
+        adminPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
-    public int getDetailNumber() {
-        return errorCode;
+        TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
+        
+        assertFalse(strategy.mayCreate(null));
+        assertFalse(strategy.mayUpdate(null));
+        assertFalse(strategy.mayDelete(null));
+        
     }
-
-    public String getHelp() {
-        return help;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-    
-    public PublicationException create(final Throwable cause, final Object...args) {
-        return EXCEPTIONS.create(this,cause, args);
-    }
-    
-    public PublicationException create(final Object...args) {
-        return EXCEPTIONS.create(this,args);
-    }
-
-
 }

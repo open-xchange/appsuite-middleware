@@ -60,6 +60,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
+import com.openexchange.publish.helpers.SecurityStrategy;
 
 
 /**
@@ -140,5 +141,10 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
             return null;
         }
         return result.iterator().next();
+    }
+    
+    @Override
+    protected SecurityStrategy getSecurityStrategy() {
+        return ALLOW_ALL;
     }
 }

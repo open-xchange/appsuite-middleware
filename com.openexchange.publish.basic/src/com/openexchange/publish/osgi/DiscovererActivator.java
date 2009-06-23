@@ -60,9 +60,11 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.helpers.AbstractPublicationService;
+import com.openexchange.publish.helpers.FolderSecurityStrategy;
 import com.openexchange.publish.sql.PublicationSQLStorage;
 import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService;
 import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -98,6 +100,8 @@ public class DiscovererActivator implements BundleActivator {
         GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
         
         AbstractPublicationService.STORAGE = new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector);
+        AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(whiteboard.getService(UserConfigurationService.class));
+        
         
         componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
     }

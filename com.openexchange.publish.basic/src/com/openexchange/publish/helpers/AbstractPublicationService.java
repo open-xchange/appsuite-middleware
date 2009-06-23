@@ -52,6 +52,7 @@ package com.openexchange.publish.helpers;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -70,9 +71,18 @@ import com.openexchange.publish.impl.DummyStorage;
  */
 public abstract class AbstractPublicationService implements PublicationService {
 
+    public static enum Permission {
+        CREATE, DELETE, UPDATE;
+    }
+    
+    public static SecurityStrategy ALLOW_ALL = new AllowEverything();
+    public static SecurityStrategy FOLDER_ADMIN_ONLY = new AllowEverything(); // Must be overwritten by activator
+    
+    
     public static PublicationStorage STORAGE = new DummyStorage();
     
     public void create(Publication publication)  throws PublicationException{
+        checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);
         beforeCreate(publication);
         STORAGE.rememberPublication(publication);
@@ -81,6 +91,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     public void delete(Publication publication)  throws PublicationException{
+        checkPermission(Permission.DELETE, publication);
         beforeDelete(publication);
         STORAGE.forgetPublication(publication);
         afterDelete(publication);
@@ -120,6 +131,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     public void update(Publication publication) throws PublicationException {
+        checkPermission(Permission.UPDATE, publication);
         modifyIncoming(publication);
         beforeUpdate(publication);
         STORAGE.updatePublication(publication);
@@ -174,5 +186,37 @@ public abstract class AbstractPublicationService implements PublicationService {
     public PublicationException uniquenessConstraintViolation(String key, String value) {
         return PublicationErrorMessage.UniquenessConstraintViolation.create(value, key);
     }
+    
+    public void checkPermission(Permission permission, Publication publication) throws PublicationException {
+        boolean allow = false;
+        try {
+            switch(permission) {
+            case CREATE : allow = mayCreate(publication); break;
+            case UPDATE : allow = mayUpdate(publication); break;
+            case DELETE : allow = mayDelete(publication); break;
+            }
+        } catch (PublicationException x) {
+            throw x;
+        } catch (AbstractOXException x) {
+            throw new PublicationException(x);
+        }
+        if(! allow) {
+            throw PublicationErrorMessage.AccessDenied.create(permission);
+        }
+    }
+
+    protected boolean mayDelete(Publication publication) throws AbstractOXException {
+        return getSecurityStrategy().mayDelete(publication);
+    }
+
+    protected boolean mayUpdate(Publication publication) throws AbstractOXException{
+        return getSecurityStrategy().mayUpdate(publication);
+    }
+
+    protected boolean mayCreate(Publication publication) throws AbstractOXException{
+        return getSecurityStrategy().mayCreate(publication);
+    }
+    
+    protected abstract SecurityStrategy getSecurityStrategy();
 
 }
