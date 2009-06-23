@@ -52,18 +52,14 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.io.Serializable;
 
 /**
- * 
  * This class represents a filestore.
  * 
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
  */
 public class Filestore implements Serializable {
-    /**
-     * For serialization
-     */
+
     private static final long serialVersionUID = -6970026864761440793L;
 
     private Integer id;
@@ -74,14 +70,23 @@ public class Filestore implements Serializable {
     
     private boolean urlset;
 
+    /**
+     * Size in mega bytes (MB).
+     */
     private Long size;
     
     private boolean sizeset;
 
+    /**
+     * Used space in mega bytes (MB)
+     */
     private Long used;
     
     private boolean usedset;
 
+    /**
+     * Reserved space in mega bytes (MB)
+     */
     private Long reserved;
     
     private boolean reservedset;
@@ -99,7 +104,6 @@ public class Filestore implements Serializable {
      */
     public Filestore() {
         super();
-        init();
     }
 
     /**
@@ -107,9 +111,8 @@ public class Filestore implements Serializable {
      * 
      * @param id An {@link Integer} containing the id
      */
-    public Filestore(final Integer id) {
+    public Filestore(Integer id) {
         super();
-        init();
         this.id = id;
     }
 
@@ -221,23 +224,13 @@ public class Filestore implements Serializable {
     }
 
     /**
-     * Sets the currently used size for this filestore object
+     * Sets the currently used size for this filestore object (in MB)
      * 
      * @param quota_used A {@link Long} containing the currently used size
      */
     public void setUsed(final Long quota_used) {
         this.used = quota_used;
         this.usedset = true;
-    }
-
-    private void init() {
-        this.maxContexts = null;
-        this.id = null;
-        this.size = null;
-        this.used = null;
-        this.currentContexts = null;
-        this.url = null;
-        this.reserved = null;
     }
 
     /**
@@ -248,35 +241,22 @@ public class Filestore implements Serializable {
      */
     @Override
     public String toString() {
-        final String TAB = "\n  ";
-
         final StringBuilder retValue = new StringBuilder();
-
-        retValue.append("Filestore ( ");
-        retValue.append(super.toString()).append(TAB);
-        if (null != this.id) {
-            retValue.append("id = ").append(this.id).append(TAB);
-        }        
-        if (null != this.url) {
-            retValue.append("url = ").append(this.url).append(TAB);
-        }        
-        if (null != this.size) {
-            retValue.append("size = ").append(this.size).append(TAB);
-        }        
-        if (null != this.used) {
-            retValue.append("used = ").append(this.used).append(TAB);
-        }        
-        if (null != this.reserved) {
-            retValue.append("reserved = ").append(this.reserved).append(TAB);
-        }        
-        if (null != this.maxContexts) {
-            retValue.append("maxContexts = ").append(this.maxContexts).append(TAB);
-        }        
-        if (null != this.currentContexts) {
-            retValue.append("currentContexts = ").append(this.currentContexts).append(TAB);
-        }        
-        retValue.append(" )");
-
+        retValue.append("Filestore (id=");
+        retValue.append(id);
+        retValue.append(" url=");
+        retValue.append(url);
+        retValue.append(" size=");
+        retValue.append(size);
+        retValue.append(" used=");
+        retValue.append(used);
+        retValue.append(" reserved=");
+        retValue.append(reserved);
+        retValue.append(" maxCtx=");
+        retValue.append(maxContexts);
+        retValue.append(" curCtx=");
+        retValue.append(currentContexts);
+        retValue.append(")");
         return retValue.toString();
     }
 
