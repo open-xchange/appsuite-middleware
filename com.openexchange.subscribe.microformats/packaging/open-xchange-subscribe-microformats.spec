@@ -8,6 +8,7 @@ BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-subscri
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
+BuildRequires:  open-xchange-xerces-ibm
 BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
 BuildRequires:  java-1_5_0-ibm-devel >= 1.5.0_sr9
 BuildRequires:  java-1_5_0-ibm-alsa >= 1.5.0_sr9
