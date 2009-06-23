@@ -29,6 +29,7 @@
     <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
 
 	 <!-- Third party libs -->
