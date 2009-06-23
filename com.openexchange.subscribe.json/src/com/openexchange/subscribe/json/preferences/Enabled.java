@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.publish.preferences;
+package com.openexchange.subscribe.json.preferences;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -69,7 +69,7 @@ public class Enabled implements PreferencesItemService {
     }
 
     public String[] getPath() {
-        return new String[] { "modules", "com.openexchange.publish" };
+        return new String[] { "modules", "com.openexchange.subscribe"};
     }
 
     public IValueHandler getSharedValue() {
@@ -79,7 +79,7 @@ public class Enabled implements PreferencesItemService {
              * {@inheritDoc}
              */
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(userConfig.isPublication()));
+                setting.setSingleValue(Boolean.valueOf(userConfig.isSubscription()));
             }
 
             /**
@@ -90,4 +90,5 @@ public class Enabled implements PreferencesItemService {
             }
         };
     }
+
 }

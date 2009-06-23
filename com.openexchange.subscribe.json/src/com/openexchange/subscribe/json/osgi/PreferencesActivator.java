@@ -47,14 +47,13 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.subscribe.preferences.Enabled;
-import com.openexchange.subscribe.preferences.Installed;
+import com.openexchange.subscribe.json.preferences.Enabled;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

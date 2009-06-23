@@ -62,7 +62,6 @@ public class Activator extends CompositeBundleActivator {
     private BundleActivator[] ACTIVATORS = {
         new DiscovererActivator(), 
         new LoaderActivator(), 
-        new PreferencesActivator(), 
         new CleanUpActivator(), 
         new CreateTableActivator(),
         new DeleteEventListenerActivator() 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.preferences;
+package com.openexchange.subscribe.json.preferences;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

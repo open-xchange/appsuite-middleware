@@ -49,116 +49,24 @@
 
 package com.openexchange.subscribe.json.osgi;
 
-import javax.servlet.Servlet;
-import org.osgi.service.http.HttpService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.json.SubscribeJSONServlet;
-import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
-import com.openexchange.subscribe.json.SubscriptionServlet;
-import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
-import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
-import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscoveryService;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.server.osgiservice.CompositeBundleActivator;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link Activator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class Activator extends DeferredActivator {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
-
-    private static final String SUBSCRIPTION_ALIAS = "ajax/subscriptions";
-
-    private static final String SUBSCRIPTION_SOURCES_ALIAS = "ajax/subscriptionSources";
-
-    private Servlet subscriptionSources;
-
-    private Servlet subscriptions;
-
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
-
-    private ComponentRegistration componentRegistration;
-
-    private WhiteboardSubscriptionSourceDiscoveryService discoverer;
-
+public class Activator extends CompositeBundleActivator {
+    
+    private static final BundleActivator[] ACTIVATORS = {new ServletActivator(), new PreferencesActivator()};
+   
+    
     @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+    protected BundleActivator[] getActivators() {
+        return ACTIVATORS;
     }
 
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final HttpService httpService = getService(HttpService.class);
-        registerServlets(httpService);
-    }
-
-    private void registerServlets(HttpService httpService) {
-        try {
-            SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
-            SubscriptionServlet.setSubscriptionExecutionService(subscriptionExecutionService);
-            
-            httpService.registerServlet(SUBSCRIPTION_SOURCES_ALIAS, (subscriptionSources = new SubscriptionSourcesServlet()), null, null);
-            httpService.registerServlet(SUBSCRIPTION_ALIAS, (subscriptions = new SubscriptionServlet()), null, null);
-            LOG.info("Registered Servlets for Subscriptions");
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private void deregisterServlets(HttpService httpService) {
-        if (subscriptionSources != null) {
-            httpService.unregister(SUBSCRIPTION_SOURCES_ALIAS);
-            subscriptionSources = null;
-        }
-        if (subscriptions != null) {
-            httpService.unregister(SUBSCRIPTION_ALIAS);
-            subscriptions = null;
-        }
-        LOG.info("Deregistered Servlets for Subscriptions");
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final HttpService httpService = getService(HttpService.class);
-        SubscriptionServlet.setSubscriptionExecutionService(null);
-        deregisterServlets(httpService);
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        discoverer = new WhiteboardSubscriptionSourceDiscoveryService(context);
-        componentRegistration = new ComponentRegistration(context, "SUBH","com.openexchange.subscribe.json", SubscriptionJSONErrorMessages.FACTORY);
-        
-        SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
-        SubscriptionServlet.setSubscriptionExecutionService(subscriptionExecutionService);
-        
-        
-        SubscriptionSourcesServlet.setSubscriptionSourceDiscoveryService(discoverer);
-        SubscriptionSourcesServlet.setSubscriptionSourceJSONWriter(new SubscriptionSourceJSONWriter());
-        
-        SubscriptionServlet.setSubscriptionSourceDiscoveryService(discoverer);
-        
-        final HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            registerServlets(httpService);
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            deregisterServlets(httpService);
-        }
-        SubscriptionServlet.setSubscriptionExecutionService(null);
-        SubscriptionSourcesServlet.setSubscriptionSourceDiscoveryService(null);
-        SubscriptionServlet.setSubscriptionSourceDiscoveryService(null);
-        discoverer.close();
-        componentRegistration.unregister();
-        
-    }
 }

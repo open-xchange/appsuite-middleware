@@ -62,26 +62,24 @@ import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.impl.DummyStorage;
 
-
 /**
  * {@link AbstractPublicationService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class AbstractPublicationService implements PublicationService {
 
     public static enum Permission {
         CREATE, DELETE, UPDATE;
     }
-    
+
     public static SecurityStrategy ALLOW_ALL = new AllowEverything();
+
     public static SecurityStrategy FOLDER_ADMIN_ONLY = new AllowEverything(); // Must be overwritten by activator
-    
-    
+
     public static PublicationStorage STORAGE = new DummyStorage();
-    
-    public void create(Publication publication)  throws PublicationException{
+
+    public void create(Publication publication) throws PublicationException {
         checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);
         beforeCreate(publication);
@@ -90,8 +88,8 @@ public abstract class AbstractPublicationService implements PublicationService {
         modifyOutgoing(publication);
     }
 
-    public void delete(Publication publication)  throws PublicationException{
-        checkPermission(Permission.DELETE, publication);
+    public void delete(Publication publication) throws PublicationException {
+        checkPermission(Permission.DELETE, publicationForPermissionCheck(publication));
         beforeDelete(publication);
         STORAGE.forgetPublication(publication);
         afterDelete(publication);
@@ -99,7 +97,7 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     public Collection<Publication> getAllPublications(Context ctx) throws PublicationException {
         List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getId());
-        for(Publication publication : publications) {
+        for (Publication publication : publications) {
             modifyOutgoing(publication);
         }
         afterLoad(publications);
@@ -108,14 +106,12 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     public Collection<Publication> getAllPublications(Context ctx, String entityId) throws PublicationException {
         List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
-        for(Publication publication : publications) {
+        for (Publication publication : publications) {
             modifyOutgoing(publication);
         }
         afterLoad(publications);
         return publications;
     }
-    
-    
 
     public boolean knows(Context ctx, int publicationId) throws PublicationException {
         return load(ctx, publicationId) != null;
@@ -123,7 +119,7 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     public Publication load(Context ctx, int publicationId) throws PublicationException {
         Publication publication = STORAGE.getPublication(ctx, publicationId);
-        if(publication.getTarget().getId().equals(getTarget().getId())) {
+        if (publication.getTarget().getId().equals(getTarget().getId())) {
             modifyOutgoing(publication);
             return publication;
         }
@@ -131,76 +127,90 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     public void update(Publication publication) throws PublicationException {
-        checkPermission(Permission.UPDATE, publication);
+        checkPermission(Permission.UPDATE, publicationForPermissionCheck(publication));
         modifyIncoming(publication);
         beforeUpdate(publication);
         STORAGE.updatePublication(publication);
         afterUpdate(publication);
     }
-    
+
+    private Publication publicationForPermissionCheck(Publication publication) throws PublicationException {
+        Publication loaded = load(publication.getContext(), publication.getId());
+        loaded.setUserId(publication.getUserId());
+        if(null != publication.getEntityId()) {
+            loaded.setEntityId(publication.getEntityId());
+        }
+        return loaded;
+    }
+
     public PublicationStorage getStorage() {
         return STORAGE;
     }
-    
+
     // Callbacks for subclasses
-    
+
     public abstract PublicationTarget getTarget() throws PublicationException;
 
-    
-    public void modifyIncoming(Publication publication) throws PublicationException{
-        
+    public void modifyIncoming(Publication publication) throws PublicationException {
+
     }
-    
-    public void modifyOutgoing(Publication publication) throws PublicationException{
-        
+
+    public void modifyOutgoing(Publication publication) throws PublicationException {
+
     }
-    
+
     public void beforeCreate(Publication publication) throws PublicationException {
-        
+
     }
-    
-    public void afterCreate(Publication publication) throws PublicationException{
-        
+
+    public void afterCreate(Publication publication) throws PublicationException {
+
     }
-    
-    public void beforeUpdate(Publication publication) throws PublicationException{
-        
+
+    public void beforeUpdate(Publication publication) throws PublicationException {
+
     }
-    
-    public void afterUpdate(Publication publication) throws PublicationException{
-        
+
+    public void afterUpdate(Publication publication) throws PublicationException {
+
     }
-    
-    public void beforeDelete(Publication publication) throws PublicationException{
-        
+
+    public void beforeDelete(Publication publication) throws PublicationException {
+
     }
-    
-    public void afterDelete(Publication publication) throws PublicationException{
-        
+
+    public void afterDelete(Publication publication) throws PublicationException {
+
     }
-    
-    public void afterLoad(Collection<Publication> publications) throws PublicationException{
-        
+
+    public void afterLoad(Collection<Publication> publications) throws PublicationException {
+
     }
-    
+
     public PublicationException uniquenessConstraintViolation(String key, String value) {
         return PublicationErrorMessage.UniquenessConstraintViolation.create(value, key);
     }
-    
+
     public void checkPermission(Permission permission, Publication publication) throws PublicationException {
         boolean allow = false;
         try {
-            switch(permission) {
-            case CREATE : allow = mayCreate(publication); break;
-            case UPDATE : allow = mayUpdate(publication); break;
-            case DELETE : allow = mayDelete(publication); break;
+            switch (permission) {
+            case CREATE:
+                allow = mayCreate(publication);
+                break;
+            case UPDATE:
+                allow = mayUpdate(publication);
+                break;
+            case DELETE:
+                allow = mayDelete(publication);
+                break;
             }
         } catch (PublicationException x) {
             throw x;
         } catch (AbstractOXException x) {
             throw new PublicationException(x);
         }
-        if(! allow) {
+        if (!allow) {
             throw PublicationErrorMessage.AccessDenied.create(permission);
         }
     }
@@ -209,14 +219,14 @@ public abstract class AbstractPublicationService implements PublicationService {
         return getSecurityStrategy().mayDelete(publication);
     }
 
-    protected boolean mayUpdate(Publication publication) throws AbstractOXException{
+    protected boolean mayUpdate(Publication publication) throws AbstractOXException {
         return getSecurityStrategy().mayUpdate(publication);
     }
 
-    protected boolean mayCreate(Publication publication) throws AbstractOXException{
+    protected boolean mayCreate(Publication publication) throws AbstractOXException {
         return getSecurityStrategy().mayCreate(publication);
     }
-    
+
     protected abstract SecurityStrategy getSecurityStrategy();
 
 }

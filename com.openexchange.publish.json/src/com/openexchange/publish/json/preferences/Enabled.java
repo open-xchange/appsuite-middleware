@@ -47,28 +47,47 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.json.preferences;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.publish.preferences.Enabled;
-import com.openexchange.publish.preferences.Installed;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class PreferencesActivator implements BundleActivator {
+public class Enabled implements PreferencesItemService {
 
-    private ServiceRegistration userConfigFlagRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        userConfigFlagRegistration = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+    public Enabled() {
+        super();
     }
 
-    public void stop(BundleContext context) throws Exception {
-        userConfigFlagRegistration.unregister();
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.publish" };
     }
 
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                setting.setSingleValue(Boolean.valueOf(userConfig.isPublication()));
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 }

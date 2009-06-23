@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.publish.preferences;
+package com.openexchange.publish.json.preferences;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

@@ -47,48 +47,28 @@
  *
  */
 
-package com.openexchange.subscribe.preferences;
+package com.openexchange.publish.json.osgi;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import com.openexchange.publish.json.preferences.Enabled;
+import com.openexchange.publish.json.preferences.Installed;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Enabled implements PreferencesItemService {
+public class PreferencesActivator implements BundleActivator {
 
-    public Enabled() {
-        super();
+    private ServiceRegistration userConfigFlagRegistration;
+
+    public void start(BundleContext context) throws Exception {
+        userConfigFlagRegistration = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
     }
 
-    public String[] getPath() {
-        return new String[] { "modules", "com.openexchange.subscribe"};
-    }
-
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(userConfig.isSubscription()));
-            }
-
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
+    public void stop(BundleContext context) throws Exception {
+        userConfigFlagRegistration.unregister();
     }
 
 }
