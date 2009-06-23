@@ -50,66 +50,64 @@
 package com.openexchange.subscribe.microformats.datasources;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+
 
 /**
- * {@link HTTPOXMFDataSource}
- * 
+ * {@link TrustAllAdapter}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class HTTPOXMFDataSource implements OXMFDataSource {
+public class TrustAllAdapter implements ProtocolSocketFactory {
+    
+    private TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
 
-    private static final String URL = "url";
-
-    private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
-
-    public Reader getData(Subscription subscription) throws SubscriptionException {
-
-        try {
-            HttpClient client = new HttpClient();
-            client.getParams().setParameter("http.socket.timeout", new Integer(5000));
-
-            String urlString = (String) subscription.getConfiguration().get(URL);
-
-            java.net.URL javaURL = new java.net.URL(urlString);
-
-            if (javaURL.getProtocol().equalsIgnoreCase("https")) {
-                int port = javaURL.getPort();
-                if(port == -1) {
-                    port = 443;
-                }
-                
-                Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
-                client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
-                
-                
-                GetMethod getMethod = new GetMethod(javaURL.getFile());
-                getMethod.setQueryString(javaURL.getQuery());
-                client.executeMethod(getMethod);
-                return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
-            } else {
-                GetMethod getMethod = new GetMethod(urlString);
-                client.executeMethod(getMethod);
-                return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
-            }
-        } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
-        }
-
+    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+        return delegate.createSocket(host, port);
     }
 
+    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
+        return delegate.createSocket(host, port, localAddress, localPort);
+    }
+
+    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+        Socket socket;
+        int timeout = params.getConnectionTimeout();
+        if (timeout == 0) {
+            socket = createSocket(host, port, localAddress, localPort);
+        } else {
+            socket = delegate.createSocket();
+            SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+            SocketAddress remoteaddr = new InetSocketAddress(host, port);
+            socket.bind(localaddr);
+            socket.connect(remoteaddr, timeout);
+            return socket;
+        }
+        
+        
+        int linger = params.getLinger();
+        if(linger == 0) {
+            socket.setSoLinger(false, 0);
+        } else if (linger > 0) {
+            socket.setSoLinger(true, linger);
+        }
+        
+        socket.setSoTimeout(params.getSoTimeout());
+        socket.setTcpNoDelay(params.getTcpNoDelay());
+        
+        return socket;
+    }
+    
+ 
 }

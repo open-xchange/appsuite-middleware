@@ -31,6 +31,7 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
+	<property name="commonjar" value="common.jar"/>
 
 	 <!-- Third party libs -->
 	<fileset dir="${basedir}" id="3rdpartyjars">
@@ -43,6 +44,7 @@
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <fileset dir="${bundlesdir}/${xmlBundle}/lib" includes="**.jar"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>

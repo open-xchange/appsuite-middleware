@@ -13,6 +13,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.datasources.HTTPOXMFDataSource;
+import com.openexchange.subscribe.microformats.datasources.TrustAllAdapter;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
 import com.openexchange.subscribe.microformats.parser.OXMFParserFactoryServiceImpl;
 import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTransformer;
@@ -23,7 +24,6 @@ public class Activator implements BundleActivator {
     private ComponentRegistration componentRegistration;
 
     public void start(BundleContext context) throws Exception {
-        
         componentRegistration = new ComponentRegistration(context, "MFS",  "com.openexchange.subscribe.microformats", OXMFSubscriptionErrorMessage.EXCEPTIONS);
         
         HTTPOXMFDataSource dataSource = new HTTPOXMFDataSource();
