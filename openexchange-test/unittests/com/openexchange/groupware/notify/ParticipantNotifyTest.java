@@ -382,6 +382,8 @@ public class ParticipantNotifyTest extends TestCase{
 
 		protected final List<Message> messageCollector = new ArrayList<Message>();
 		
+		public boolean realUsers = false;
+		
 		@Override
 		protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
 			return G(ids);
@@ -389,6 +391,9 @@ public class ParticipantNotifyTest extends TestCase{
 
 		@Override
 		protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
+		    if (realUsers) {
+		        return super.resolveUsers(ctx, ids);
+		    }
 			try {
                 return U(ids);
             } catch (final UserException e) {
