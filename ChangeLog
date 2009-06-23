@@ -1,3 +1,7 @@
+* 2009-06-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
+
 * 2009-06-15 - marcus.klein@open-xchange.com
 
  - Bugfix #6692: Renamed group 0 to "All users" and group 1 to "Standard group". An update task fixes values in the database.
