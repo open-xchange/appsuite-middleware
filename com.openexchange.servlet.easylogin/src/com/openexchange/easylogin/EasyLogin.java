@@ -378,7 +378,6 @@ public class EasyLogin extends HttpServlet {
 			"  document.cookie = cookies[i]+\"=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/\" \n"+  
 			" }\n"+
 		    "}\n"+
-		    " console.log(document.cookie);\n "+
 		    "\n"+
 			"	if(code != 0)\n" +
 			"	{\n" +
