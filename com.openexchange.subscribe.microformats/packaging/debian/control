@@ -2,7 +2,7 @@ Source: open-xchange-subscribe-microformats
 Section: unknown
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-subscribe (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-xml (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-subscribe (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-xml (>= @OXVERSION@), open-xchange-xerces-sun
 Standards-Version: 3.6.1
 
 Package: open-xchange-subscribe-microformats
