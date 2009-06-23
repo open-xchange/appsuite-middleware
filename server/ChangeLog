@@ -5,6 +5,7 @@
 * 2009-06-23 - thorben.betten@open-xchange.com
 
  - Bugfix #13949: Dealing with missing From header on action=new in mail servlet
+ - Bugfix #13853: Displaying broken header as it is
 
 * 2009-06-23 - marcus.klein@open-xchange.com
 

@@ -57,7 +57,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
@@ -70,7 +69,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.UIDFolder;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -444,45 +442,13 @@ public final class MIMEMessageConverter {
                 /*
                  * From
                  */
-                try {
-                    mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
-                } catch (final AddressException e) {
-                    final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet address" + addrStr);
-                    }
-                    mailMessage.addFrom(new PlainTextAddress(addrStr));
-                }
+                mailMessage.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, extMimeMessage));
                 /*
                  * To, Cc, and Bcc
                  */
-                try {
-                    mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.TO));
-                } catch (final AddressException e) {
-                    final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_TO);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet addresses" + Arrays.toString(addrs));
-                    }
-                    mailMessage.addTo(PlainTextAddress.getAddresses(addrs));
-                }
-                try {
-                    mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.CC));
-                } catch (final AddressException e) {
-                    final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_CC);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet addresses" + Arrays.toString(addrs));
-                    }
-                    mailMessage.addCc(PlainTextAddress.getAddresses(addrs));
-                }
-                try {
-                    mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.BCC));
-                } catch (final AddressException e) {
-                    final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_BCC);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable internet addresses" + Arrays.toString(addrs));
-                    }
-                    mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
-                }
+                mailMessage.addTo(getAddressHeader(MessageHeaders.HDR_TO, extMimeMessage));
+                mailMessage.addCc(getAddressHeader(MessageHeaders.HDR_CC, extMimeMessage));
+                mailMessage.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, extMimeMessage));
                 /*
                  * Disposition-Notification-To
                  */
@@ -614,62 +580,25 @@ public final class MIMEMessageConverter {
         FILLER_MAP_EXT.put(MailField.FROM, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-                try {
-                    mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
-                } catch (final AddressException e) {
-                    final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug(new StringBuilder(128).append("Internet address could not be properly parsed, ").append(
-                            "using plain address' string representation instead: ").append(addrStr).toString(), e);
-                    }
-                    mailMessage.addFrom(new PlainTextAddress(addrStr));
-                }
+                mailMessage.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.TO, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-                try {
-                    mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.TO));
-                } catch (final AddressException e) {
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
-                            "using plain addresses' string representation instead.").toString(), e);
-                    }
-                    mailMessage.addTo(PlainTextAddress.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_TO)));
-                }
+                mailMessage.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.CC, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-                try {
-                    mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.CC));
-                } catch (final AddressException e) {
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
-                            "using plain addresses' string representation instead.").toString(), e);
-                    }
-                    mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_CC)));
-                }
+                mailMessage.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.BCC, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-                try {
-                    mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.BCC));
-                } catch (final AddressException e) {
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
-                            "using plain addresses' string representation instead.").toString(), e);
-                    }
-                    mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_BCC)));
-                }
+                mailMessage.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.SUBJECT, new MailMessageFieldFiller() {
@@ -778,29 +707,13 @@ public final class MIMEMessageConverter {
                 /*
                  * From
                  */
-                try {
-                    mailMessage.addFrom((InternetAddress[]) msg.getFrom());
-                } catch (final AddressException e) {
-                    mailMessage.addFrom(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_FROM)));
-                }
+                mailMessage.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
                 /*
                  * To, Cc, and Bcc
                  */
-                try {
-                    mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
-                } catch (final AddressException e) {
-                    mailMessage.addTo(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_TO)));
-                }
-                try {
-                    mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
-                } catch (final AddressException e) {
-                    mailMessage.addCc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_CC)));
-                }
-                try {
-                    mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
-                } catch (final AddressException e) {
-                    mailMessage.addBcc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
-                }
+                mailMessage.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
+                mailMessage.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
+                mailMessage.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
                 /*
                  * Disposition-Notification-To
                  */
@@ -951,57 +864,25 @@ public final class MIMEMessageConverter {
         FILLER_MAP.put(MailField.FROM, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                try {
-                    mailMessage.addFrom((InternetAddress[]) msg.getFrom());
-                } catch (final AddressException e) {
-                    final String[] fromHdr = msg.getHeader(MessageHeaders.HDR_FROM);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
-                    }
-                    mailMessage.addFrom(new PlainTextAddress(fromHdr[0]));
-                }
+                mailMessage.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
             }
         });
         FILLER_MAP.put(MailField.TO, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                try {
-                    mailMessage.addTo((InternetAddress[]) msg.getRecipients(RecipientType.TO));
-                } catch (final AddressException e) {
-                    final String[] hdr = msg.getHeader(MessageHeaders.HDR_TO);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
-                    }
-                    mailMessage.addTo(new PlainTextAddress(hdr[0]));
-                }
+                mailMessage.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
             }
         });
         FILLER_MAP.put(MailField.CC, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                try {
-                    mailMessage.addCc((InternetAddress[]) msg.getRecipients(RecipientType.CC));
-                } catch (final AddressException e) {
-                    final String[] hdr = msg.getHeader(MessageHeaders.HDR_CC);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
-                    }
-                    mailMessage.addCc(new PlainTextAddress(hdr[0]));
-                }
+                mailMessage.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
             }
         });
         FILLER_MAP.put(MailField.BCC, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                try {
-                    mailMessage.addBcc((InternetAddress[]) msg.getRecipients(RecipientType.BCC));
-                } catch (final AddressException e) {
-                    final String[] hdr = msg.getHeader(MessageHeaders.HDR_BCC);
-                    if (LOG1.isDebugEnabled()) {
-                        LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
-                    }
-                    mailMessage.addBcc(new PlainTextAddress(hdr[0]));
-                }
+                mailMessage.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
             }
         });
         FILLER_MAP.put(MailField.SUBJECT, new MailMessageFieldFiller() {
@@ -1194,46 +1075,16 @@ public final class MIMEMessageConverter {
                 }
             }
             setHeaders(msg, mail);
-            try {
-                final String addresses = mail.getHeader(MessageHeaders.HDR_FROM, ",");
-                mail.addFrom(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
-                // Formerly: mail.addFrom((InternetAddress[]) msg.getFrom());
-            } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                mail.addFrom(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_FROM)));
-            }
-            try {
-                final String addresses = mail.getHeader(MessageHeaders.HDR_TO, ",");
-                mail.addTo(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
-                // mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
-            } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                mail.addTo(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_TO)));
-            }
-            try {
-                final String addresses = mail.getHeader(MessageHeaders.HDR_CC, ",");
-                mail.addCc(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
-                // mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
-            } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                mail.addCc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_CC)));
-            }
-            try {
-                final String addresses = mail.getHeader(MessageHeaders.HDR_BCC, ",");
-                mail.addBcc(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
-                // mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
-            } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                mail.addBcc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_BCC)));
-            }
+            /*
+             * From
+             */
+            mail.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
+            /*
+             * To, Cc, and Bcc
+             */
+            mail.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
+            mail.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
+            mail.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
             {
                 final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
                 if ((tmp != null) && (tmp.length > 0)) {
@@ -1764,6 +1615,45 @@ public final class MIMEMessageConverter {
             empty = ((chars[i] == ' ') || (chars[i] == '\t'));
         }
         return empty;
+    }
+
+    /**
+     * Gets the address headers denoted by specified header name in a safe manner.
+     * <p>
+     * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
+     * address header as it is.
+     * 
+     * @param name The address header name
+     * @param message The message providing the address header
+     * @return The parsed address headers as an array of {@link InternetAddress} instances
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
+        final String[] addressArray = message.getHeader(name);
+        if (null == addressArray || addressArray.length == 0) {
+            return null;
+        }
+        final String addresses;
+        if (addressArray.length > 1) {
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
+            for (int i = 1; i < addressArray.length; i++) {
+                sb.append(',').append(addressArray[i]);
+            }
+            addresses = sb.toString();
+        } else {
+            addresses = addressArray[0];
+        }
+        try {
+            return InternetAddress.parseHeader(addresses, true);
+        } catch (final AddressException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                    new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
+                        "\". Using plain addresses' string representation instead.").toString(),
+                    e);
+            }
+            return getAddressesOnParseError(addressArray);
+        }
     }
 
     private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
