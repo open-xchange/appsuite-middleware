@@ -1,3 +1,7 @@
+* 2009-06-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
+
 * 2009-06-22 - marcus.klein@open-xchange.com
 
  - Bugfix #12983: Added check if destination filestore has enough space for another context on moving context.
