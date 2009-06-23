@@ -51,7 +51,6 @@ package com.openexchange.groupware.importexport.csv;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -191,9 +190,13 @@ public class CSVParser {
 				currentLine.add( currentCell.toString().trim() );
 				currentCell = new StringBuilder();
 			} else {
-				if(! isTolerant()){
-					throw EXCEPTIONS.create(0);
-				}
+				if (!isTolerant()) {
+                    throw EXCEPTIONS.create(
+                        0,
+                        Integer.valueOf(numberOfCells),
+                        Integer.valueOf(currentLineNumber),
+                        Integer.valueOf(currentLine.size()));
+                }
 			}
 		}
 	}
