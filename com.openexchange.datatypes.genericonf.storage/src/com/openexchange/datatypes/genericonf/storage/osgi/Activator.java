@@ -55,14 +55,18 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
 
 public class Activator implements BundleActivator {
 
     private ServiceRegistration serviceRegistration;
+
+    private ServiceRegistration clearTablesServiceRegistration;
 
     private ServiceRegistration createTablesServiceRegistration;
 
@@ -73,6 +77,7 @@ public class Activator implements BundleActivator {
         
         MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
         mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
+        clearTablesServiceRegistration = context.registerService(DeleteListener.class.getName(), new ClearGenConfTables(), null);
         createTablesServiceRegistration = context.registerService(CreateTableService.class.getName(), new CreateGenConfTables(), null);
         serviceRegistration = context.registerService(
             GenericConfigurationStorageService.class.getName(),
@@ -83,6 +88,7 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception{
         serviceRegistration.unregister();
         createTablesServiceRegistration.unregister();
+        clearTablesServiceRegistration.unregister();
         componentRegistration.unregister();
     }
 

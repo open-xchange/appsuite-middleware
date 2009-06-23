@@ -215,7 +215,7 @@ public final class AssignmentStorage {
     public void removeAssignments(final int contextId) throws DBPoolingException {
         if (null != cache) {
             try {
-                cache.remove(cache.newCacheKey(contextId, (Serializable) I(Server.getServerId())));
+                cache.remove(cache.newCacheKey(contextId, Server.getServerId()));
             } catch (final CacheException e) {
                 LOG.error(e.getMessage(), e);
             }
