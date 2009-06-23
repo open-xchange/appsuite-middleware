@@ -560,7 +560,7 @@ public final class IMAPDefaultFolderChecker {
                     IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
                 } else {
                     if (MailAccount.DEFAULT_ID == accountId) {
-                        // Must not edit default mail account
+                        // Must not edit default mail account. Try to create IMAP folder
                         IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
                     } else {
                         /*
