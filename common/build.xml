@@ -1,4 +1,5 @@
-<project name="open-xchange-common" default="install" basedir=".">
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.common" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
