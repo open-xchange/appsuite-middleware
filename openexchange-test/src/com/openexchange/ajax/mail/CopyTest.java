@@ -85,7 +85,7 @@ public class CopyTest extends AbstractMailTest {
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
         clearFolder(getTrashFolder());
-        // clearFolder(getDraftsFolder());
+        clearFolder(getDraftsFolder());
 
         /*
          * Create JSON mail object

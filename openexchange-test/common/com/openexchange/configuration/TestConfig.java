@@ -34,11 +34,12 @@ public class TestConfig extends AbstractConfig {
      */
     @Override
     protected String getPropertyFileName() throws ConfigurationException {
-        final String fileName = System.getProperty(KEY);
-        if (null == fileName) {
-            throw new ConfigurationException(ConfigurationException.Code
-                .PROPERTY_MISSING, KEY);
-        }
+//        final String fileName = System.getProperty(KEY);
+//        if (null == fileName) {
+//            throw new ConfigurationException(ConfigurationException.Code
+//                .PROPERTY_MISSING, KEY);
+//        }
+    	final String fileName = "/Users/karstenwill/Documents/Development/ox_projectset_workspace/openexchange-test/conf/test.properties";
         return fileName;
     }
 
