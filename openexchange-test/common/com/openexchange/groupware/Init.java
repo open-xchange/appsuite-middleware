@@ -201,8 +201,7 @@ public final class Init {
         /**
          * Folder initialization
          */
-        new FolderInitialization(),
-        com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+        new FolderInitialization(), com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
         /**
          * Mail initialization
          */
@@ -243,8 +242,14 @@ public final class Init {
         new GroupInit() };
 
     public static void injectProperty() {
-        System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
-        System.setProperty("openexchange.propdir2", TestInit.getTestProperty("openexchange.propdir2"));
+        final String propDir1 = TestInit.getTestProperty("openexchange.propdir");
+        if (null != propDir1) {
+            System.setProperty("openexchange.propdir", propDir1);
+        }
+        final String propDir2 = TestInit.getTestProperty("openexchange.propdir2");
+        if (null != propDir2) {
+            System.setProperty("openexchange.propdir2", propDir2);
+        }
     }
 
     public static void startServer() throws Exception {
@@ -307,7 +312,9 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(ContextService.class, services.get(ContextService.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, services.get(UserService.class));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
-        ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+        ServerServiceRegistry.getInstance().addService(
+            ContactInterfaceDiscoveryService.class,
+            services.get(ContactInterfaceDiscoveryService.class));
     }
 
     /**
@@ -383,6 +390,7 @@ public final class Init {
         IMAPServiceRegistry.getServiceRegistry().addService(UserService.class, services.get(UserService.class));
         IMAPServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
         IMAPServiceRegistry.getServiceRegistry().addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
+        IMAPServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
 
         /*
          * Register IMAP bundle
@@ -437,9 +445,11 @@ public final class Init {
 
     private static void startAndInjectEventBundle() throws Exception {
         EventQueue.setNewEventDispatcher(new EventDispatcher() {
+
             public void addListener(final AppointmentEventInterface listener) {
                 // Do nothing.
             }
+
             public void addListener(final TaskEventInterface listener) {
                 // Do nothing.
             }
