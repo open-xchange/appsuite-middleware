@@ -559,58 +559,63 @@ public final class IMAPDefaultFolderChecker {
                      */
                     IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
                 } else {
-                    /*
-                     * Found _ONE_ candidate of which name passed ignore-case comparison
-                     */
-                    final String candidate = candidates.get(0);
-                    final MailAccountDescription mad = new MailAccountDescription();
-                    final Set<Attribute> attributes;
-                    mad.setId(accountId);
-                    switch (index) {
-                    case StorageUtility.INDEX_CONFIRMED_HAM:
-                        mad.setConfirmedHam(candidate);
-                        attributes = EnumSet.of(Attribute.CONFIRMED_HAM_LITERAL);
-                        break;
-                    case StorageUtility.INDEX_CONFIRMED_SPAM:
-                        mad.setConfirmedSpam(candidate);
-                        attributes = EnumSet.of(Attribute.CONFIRMED_SPAM_LITERAL);
-                        break;
-                    case StorageUtility.INDEX_DRAFTS:
-                        mad.setDrafts(candidate);
-                        attributes = EnumSet.of(Attribute.DRAFTS_LITERAL);
-                        break;
-                    case StorageUtility.INDEX_SENT:
-                        mad.setSent(candidate);
-                        attributes = EnumSet.of(Attribute.SENT_LITERAL);
-                        break;
-                    case StorageUtility.INDEX_SPAM:
-                        mad.setSpam(candidate);
-                        attributes = EnumSet.of(Attribute.SPAM_LITERAL);
-                        break;
-                    case StorageUtility.INDEX_TRASH:
-                        mad.setTrash(candidate);
-                        attributes = EnumSet.of(Attribute.TRASH_LITERAL);
-                        break;
-                    default:
-                        throw new MessagingException("Unexpected index: " + index);
+                    if (MailAccount.DEFAULT_ID == accountId) {
+                        // Must not edit default mail account
+                        IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                    } else {
+                        /*
+                         * Found _ONE_ candidate of which name passed ignore-case comparison
+                         */
+                        final String candidate = candidates.get(0);
+                        final MailAccountDescription mad = new MailAccountDescription();
+                        final Set<Attribute> attributes;
+                        mad.setId(accountId);
+                        switch (index) {
+                        case StorageUtility.INDEX_CONFIRMED_HAM:
+                            mad.setConfirmedHam(candidate);
+                            attributes = EnumSet.of(Attribute.CONFIRMED_HAM_LITERAL);
+                            break;
+                        case StorageUtility.INDEX_CONFIRMED_SPAM:
+                            mad.setConfirmedSpam(candidate);
+                            attributes = EnumSet.of(Attribute.CONFIRMED_SPAM_LITERAL);
+                            break;
+                        case StorageUtility.INDEX_DRAFTS:
+                            mad.setDrafts(candidate);
+                            attributes = EnumSet.of(Attribute.DRAFTS_LITERAL);
+                            break;
+                        case StorageUtility.INDEX_SENT:
+                            mad.setSent(candidate);
+                            attributes = EnumSet.of(Attribute.SENT_LITERAL);
+                            break;
+                        case StorageUtility.INDEX_SPAM:
+                            mad.setSpam(candidate);
+                            attributes = EnumSet.of(Attribute.SPAM_LITERAL);
+                            break;
+                        case StorageUtility.INDEX_TRASH:
+                            mad.setTrash(candidate);
+                            attributes = EnumSet.of(Attribute.TRASH_LITERAL);
+                            break;
+                        default:
+                            throw new MessagingException("Unexpected index: " + index);
+                        }
+                        try {
+                            final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+                                MailAccountStorageService.class,
+                                true);
+                            storageService.updateMailAccount(
+                                mad,
+                                attributes,
+                                session.getUserId(),
+                                session.getContextId(),
+                                session.getPassword());
+                        } catch (final ServiceException e) {
+                            throw new IMAPException(e);
+                        } catch (final MailAccountException e) {
+                            throw new IMAPException(e);
+                        }
+                        f = imapStore.getFolder(tmp.append(prefix).append(candidate).toString());
+                        tmp.setLength(0);
                     }
-                    try {
-                        final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
-                            MailAccountStorageService.class,
-                            true);
-                        storageService.updateMailAccount(
-                            mad,
-                            attributes,
-                            session.getUserId(),
-                            session.getContextId(),
-                            session.getPassword());
-                    } catch (final ServiceException e) {
-                        throw new IMAPException(e);
-                    } catch (final MailAccountException e) {
-                        throw new IMAPException(e);
-                    }
-                    f = imapStore.getFolder(tmp.append(prefix).append(candidate).toString());
-                    tmp.setLength(0);
                 }
             }
             /*-
