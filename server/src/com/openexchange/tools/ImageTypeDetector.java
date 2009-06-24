@@ -284,7 +284,7 @@ public final class ImageTypeDetector {
      * </table>
      * 
      * @param bytes The starting image bytes; at least with a length of ten to reliably detect MIME type
-     * @return The image's MIME type or "application/octet-stream" if unknown
+     * @return The image's MIME type or <code>"application/octet-stream"</code> if unknown
      */
     public static String getMimeType(final byte[] bytes) {
         if (startsWith(PREFIX_JPEG, bytes)) {
