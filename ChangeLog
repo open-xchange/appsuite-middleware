@@ -1,3 +1,7 @@
+* 2009-06-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #13360: Display, first and sure name are not mandatory attributes for a user anymore.  
+
 * 2009-06-23 - marcus.klein@open-xchange.com
 
  - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
