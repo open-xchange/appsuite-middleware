@@ -347,8 +347,7 @@ public class EasyLogin extends HttpServlet {
 			
 	private static final String RESPONSE23 =	"alert(_(\"Login failed. Please check your user name and password and try again.\"));\n";
 			
-	private static final String RESPONSE24 =	" else\n" +
-			"					alert(formatError(result));\n" +
+	private static final String RESPONSE24 =
 			"			} else\n" +
 			"				//#. HTTP Errors from the server\n" +
 			"				//#. %1$s is the numeric HTTP status code\n" +
@@ -356,9 +355,21 @@ public class EasyLogin extends HttpServlet {
 			
 	private static final String RESPONSE25 =	"alert(\"Error: \"+status+\" - \"+result);\n";
 		
-	private static final String RESPONSE27 =	"bClickedLogin = false;\n" +
+	private static final String REDIRECT_BY_REFERRER =	
 			"			window.location.href = document.referrer + \"?login=failed&user=\" + u;\n" +
-			"			return true;\n" +
+			"			return true;\n" ;
+	
+	private static final String REDIRECT_BASE =	
+		"			window.location.href = location.protocol+\"//\"+location.host;\n" +
+		"			return true;\n" ;
+		
+		
+	private String getCustomRedirectURL(String url){
+		return "window.location.href = \""+url+"\";\n" +
+				"return true;\n";
+	}
+			
+	private static final String RESPONSE28 =			
 			"		},\n" +
 			"		null\n" +
 			"	);\n" +
@@ -408,6 +419,7 @@ public class EasyLogin extends HttpServlet {
 	private static String AJAX_ROOT = "/ajax";
 	private static String passwordPara = "password";
 	private static String loginPara ="login";
+	private static String redirPara ="redirect"; // param for what should be done after error on login
 	private static String directLinkPara ="direct_link";
 	private static  String OX_PATH_RELATIVE = "../";
 	private static boolean doGetEnabled = false;
@@ -463,6 +475,8 @@ public class EasyLogin extends HttpServlet {
 		
 		String login = null;
 		String password = null;
+		
+		
 				
 		if (req.getParameter(passwordPara)==null || req.getParameter(passwordPara).trim().length()==0){
 			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + passwordPara + " missing");
@@ -480,12 +494,48 @@ public class EasyLogin extends HttpServlet {
 			out.print(RESPONSE2);
 			if( popUpOnError ) {
 				out.print(RESPONSE23);
+				
+				// for normal errors we must also redirect
+				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
+					// redir param was sent, now check what action is requested
+					if(req.getParameter(redirPara).equals("_BASE_")){
+						// send javascript redirect to /
+						out.print(REDIRECT_BASE);
+					}else{
+						// custom redirect url was requested, send this URL in javascript to redirect
+						out.print(getCustomRedirectURL(req.getParameter(redirPara).toString()));
+					}
+				}else{
+					// no special redirect was requested, do it via referrer
+					out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
+				}
 			}
 			out.print(RESPONSE24);
 			if( popUpOnError ) {
 				out.print(RESPONSE25);
+				
+				// redirect to given action
+				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
+					// redir param was sent, now check what action is requested
+					if(req.getParameter(redirPara).equals("_BASE_")){
+						// send javascript redirect to / 
+						out.print(REDIRECT_BASE);
+					}else{
+						// custom redirect url was requested, send this URL in javascript to redirect
+						out.print(getCustomRedirectURL(req.getParameter(redirPara).toString()));
+					}
+				}else{
+					// no special redirect was requested, do it via referrer
+					out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
+				}
+				
 			}
-			out.print(RESPONSE27);
+			
+			
+			
+			
+			out.print(RESPONSE28);  
+			
 			// direct links redirecting
 			if(req.getParameter(directLinkPara)!=null && req.getParameter(directLinkPara).trim().length()>0){
 				out.print(OX_PATH_RELATIVE+req.getParameter(directLinkPara));
