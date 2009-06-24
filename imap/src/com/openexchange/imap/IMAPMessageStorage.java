@@ -242,18 +242,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 if (seqNums[pos] <= 0) {
                     final int len = pos - lastPos;
                     if (len > 0) {
-                        try {
-                            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, false);
-                        } catch (final FolderClosedException e) {
-                            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-                        } catch (final StoreClosedException e) {
-                            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-                        } catch (final MessagingException e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
-                            }
-                            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, true);
-                        }
+                        fetchValidSeqNumsWithFallback(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
                     }
                     // Determine next valid position
                     pos++;
@@ -266,18 +255,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (lastPos < pos) {
-                try {
-                    fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body, false);
-                } catch (final FolderClosedException e) {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-                } catch (final StoreClosedException e) {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-                } catch (final MessagingException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
-                    }
-                    fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body, true);
-                }
+                fetchValidSeqNumsWithFallback(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
             }
             if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
                 return setAccountInfo(convert2Mails(messages, fields, body));
@@ -285,6 +263,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             return convert2Mails(messages, fields, body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
+    }
+
+    private void fetchValidSeqNumsWithFallback(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException, MessagingException {
+        try {
+            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, false);
+        } catch (final FolderClosedException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final StoreClosedException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final MessagingException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
+            }
+            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, true);
         }
     }
 

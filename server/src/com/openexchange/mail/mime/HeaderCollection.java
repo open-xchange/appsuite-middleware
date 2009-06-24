@@ -436,6 +436,33 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
+     * Get all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
+     * <code>'\0'</code>, only the first header is returned. Returns <code>null</code> if no headers with the specified name exist.
+     * 
+     * @param name The header name
+     * @param delimiter The delimiter character
+     * @return The value fields for all headers with this name, or <code>null</code> if none
+     */
+    public String getHeader(final String name, final char delimiter) {
+        if (isInvalid(name, true)) {
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+        }
+        final List<String> values = map.get(HeaderName.valueOf(name));
+        if (values == null) {
+            return null;
+        }
+        final int size;
+        if (delimiter == '\0' || (size = values.size()) == 1) {
+            return values.get(0);
+        }
+        final StringBuilder sb = new StringBuilder(values.get(0));
+        for (int i = 1; i < size; i++) {
+            sb.append(delimiter).append(values.get(i));
+        }
+        return sb.toString();
+    }
+
+    /**
      * Remove all header entries that match the given name
      * 
      * @param name The header name

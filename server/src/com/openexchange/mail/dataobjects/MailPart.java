@@ -464,12 +464,28 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
-     * null, only the first header is returned. Returns null if no headers with the specified name exist.
+     * <code>null</code>, only the first header is returned. Returns null if no headers with the specified name exist.
      * 
      * @param name The header name
+     * @param delimiter The delimiter
      * @return The header values as a single String or <code>null</code>
      */
     public String getHeader(final String name, final String delimiter) {
+        if (containsHeaders() && (null != headers)) {
+            return headers.getHeader(name, delimiter);
+        }
+        return null;
+    }
+
+    /**
+     * Gets all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
+     * <code>'\0'</code>, only the first header is returned. Returns null if no headers with the specified name exist.
+     * 
+     * @param name The header name
+     * @param delimiter The delimiter character
+     * @return The header values as a single String or <code>null</code>
+     */
+    public String getHeader(final String name, final char delimiter) {
         if (containsHeaders() && (null != headers)) {
             return headers.getHeader(name, delimiter);
         }

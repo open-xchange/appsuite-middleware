@@ -397,6 +397,11 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
+    public String getHeader(final String name, final char delimiter) {
+        return delegatee.getHeader(name, delimiter);
+    }
+
+    @Override
     public String[] getHeader(final String name) {
         return delegatee.getHeader(name);
     }
