@@ -73,7 +73,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
@@ -84,14 +83,14 @@ import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
-public class ContactServlet extends DataServlet {
+public class Contact extends DataServlet {
     
     /**
      * For serialization.
      */
     private static final long serialVersionUID = 1635881627528234660L;
     
-    private static final transient Log LOG = LogFactory.getLog(ContactServlet.class);
+    private static final transient Log LOG = LogFactory.getLog(Contact.class);
     
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
@@ -124,7 +123,7 @@ public class ContactServlet extends DataServlet {
                     session);
 
                 try {
-                    final Contact contactObj = contactInterface.getObjectById(id, inFolder);
+                    final com.openexchange.groupware.container.Contact contactObj = contactInterface.getObjectById(id, inFolder);
                     final String imageContentType = contactObj.getImageContentType();
                     if (imageContentType != null) {
                         httpServletResponse.setContentType(imageContentType);
@@ -254,7 +253,7 @@ public class ContactServlet extends DataServlet {
                         throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
                     }
 
-                    final Contact contactobject = new Contact();
+                    final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
                     final JSONObject jsonobject = new JSONObject(obj);
 
                     final ContactParser contactparser = new ContactParser(session);
@@ -308,7 +307,7 @@ public class ContactServlet extends DataServlet {
                         throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
                     }
 
-                    final Contact contactobject = new Contact();
+                    final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
                     final JSONObject jsonobject = new JSONObject(obj);
 
                     final ContactParser contactparser = new ContactParser(session);
