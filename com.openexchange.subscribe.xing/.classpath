@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/htmlunit-2.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jyaml-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xalan-2.7.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/htmlunit-core-js-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sac-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/htmlunit-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/jyaml-1.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry exported="true" kind="lib" path="lib/sac-1.3.jar" sourcepath="com.openexchange.subscribe.xingsrc.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="com.openexchange.subscribe.xingsrc.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.5.jar" sourcepath="com.openexchange.subscribe.xingsrc.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.11.jar" sourcepath="com.openexchange.subscribe.xingsrc.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/xalan-2.7.1.jar" sourcepath="com.openexchange.subscribe.xingsrc.zip"/>
 	<classpathentry kind="lib" path="/openexchange-test/lib/junit-4.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
