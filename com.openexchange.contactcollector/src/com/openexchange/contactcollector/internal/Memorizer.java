@@ -63,7 +63,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
@@ -143,7 +143,7 @@ public class Memorizer implements Runnable {
     }
 
     private int memorizeContact(final InternetAddress address, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
-        ContactObject contact;
+        Contact contact;
         try {
             contact = transformInternetAddress(address);
         } catch (final ParseException e) {
@@ -158,15 +158,15 @@ public class Memorizer implements Runnable {
         final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(
             contact.getParentFolderID(),
             ctx.getContextId()).newContactInterface(session);
-        ContactObject foundContact = null;
+        Contact foundContact = null;
         {
             final ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmailAutoComplete(true);
-            searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
+            searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
             final int[] columns = new int[] {
-                DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, ContactObject.USE_COUNT };
-            final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
+                DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
+            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
             try {
                 if (iterator.hasNext()) {
                     foundContact = iterator.next();
@@ -225,8 +225,8 @@ public class Memorizer implements Runnable {
         return enabled != null && enabled.booleanValue();
     }
 
-    private ContactObject transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {
-        final ContactObject retval = new ContactObject();
+    private Contact transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {
+        final Contact retval = new Contact();
         final String addr = decodeMultiEncodedValue(address.getAddress());
         retval.setEmail1(addr);
         final String displayName;

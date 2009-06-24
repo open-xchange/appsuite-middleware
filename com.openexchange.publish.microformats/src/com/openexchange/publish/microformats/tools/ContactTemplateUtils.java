@@ -49,7 +49,7 @@
 
 package com.openexchange.publish.microformats.tools;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 
 
@@ -66,7 +66,7 @@ public class ContactTemplateUtils {
      * @param contactObject
      * @return
      */
-    public String getImageURL(Publication publication, ContactObject contactObject) {
+    public String getImageURL(Publication publication, Contact contactObject) {
         if(publication.getConfiguration().containsKey("secret")) {
             return "/publications/contactPictures/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get("siteName")+"/"+contactObject.getObjectID()+"/image?secret="+publication.getConfiguration().get("secret");
         } else {

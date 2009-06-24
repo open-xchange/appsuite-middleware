@@ -56,14 +56,14 @@ import net.fortuna.ical4j.model.component.VEvent;
 
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
+public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
     /**
      * Default constructor.
@@ -75,7 +75,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
-    public boolean isSet(final AppointmentObject appointment) {
+    public boolean isSet(final Appointment appointment) {
         // Ignore this always on output.
         return false;
     }
@@ -83,7 +83,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final AppointmentObject appointment, final VEvent vEvent,
+    public void emit(final int index, final Appointment appointment, final VEvent vEvent,
         final List<ConversionWarning> warnings, final Context ctx) {
         // Ignore this always on output.
     }
@@ -99,7 +99,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
-    public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment,
+    public void parse(final int index, final VEvent vEvent, final Appointment appointment,
         final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         // Set it always on input.
         appointment.setIgnoreConflicts(true);

@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.search.SearchAttributeFetcher;
 
 /**
@@ -61,13 +61,13 @@ import com.openexchange.search.SearchAttributeFetcher;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AppointmentAttributeFetcher implements SearchAttributeFetcher<AppointmentObject> {
+public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appointment> {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AttributeGetter.class);
 
     private static interface AttributeGetter {
 
-        public Object getObject(AppointmentObject candidate);
+        public Object getObject(Appointment candidate);
     }
 
     private static final Map<String, AttributeGetter> GETTERS;
@@ -77,35 +77,35 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.FULL_TIME, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getFullTime());
             }
         });
 
         m.put(AppointmentFields.IGNORE_CONFLICTS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getIgnoreConflicts());
             }
         });
 
         m.put(AppointmentFields.LOCATION, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getLocation();
             }
         });
 
         m.put(AppointmentFields.SHOW_AS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getShownAs());
             }
         });
 
         m.put(AppointmentFields.TIMEZONE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getTimezone();
             }
         });
@@ -116,167 +116,167 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.ALARM, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getAlarm());
             }
         });
 
         m.put(AppointmentFields.CHANGE_EXCEPTIONS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getChangeException();
             }
         });
 
         m.put(AppointmentFields.CONFIRM_MESSAGE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getConfirmMessage();
             }
         });
 
         m.put(AppointmentFields.CONFIRMATION, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getConfirm());
             }
         });
 
         m.put(AppointmentFields.DAY_IN_MONTH, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getDayInMonth());
             }
         });
 
         m.put(AppointmentFields.DAYS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getDays());
             }
         });
 
         m.put(AppointmentFields.DELETE_EXCEPTIONS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getDeleteException();
             }
         });
 
         m.put(AppointmentFields.END_DATE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getEndDate();
             }
         });
 
         m.put(AppointmentFields.INTERVAL, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getInterval());
             }
         });
 
         m.put(AppointmentFields.MONTH, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getMonth());
             }
         });
 
         m.put(AppointmentFields.NOTE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getNote();
             }
         });
 
         m.put(AppointmentFields.NOTIFICATION, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getNotification());
             }
         });
 
         m.put(AppointmentFields.OCCURRENCES, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getOccurrence());
             }
         });
 
         m.put(AppointmentFields.PARTICIPANTS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getParticipants();
             }
         });
 
         m.put(AppointmentFields.RECURRENCE_CALCULATOR, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrenceCalculator());
             }
         });
 
         m.put(AppointmentFields.RECURRENCE_DATE_POSITION, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getRecurrenceDatePosition();
             }
         });
 
         m.put(AppointmentFields.RECURRENCE_ID, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrenceID());
             }
         });
 
         m.put(AppointmentFields.RECURRENCE_POSITION, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrencePosition());
             }
         });
 
         m.put(AppointmentFields.RECURRENCE_START, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Long.valueOf(candidate.getRecurringStart());
             }
         });
 
         m.put(AppointmentFields.RECURRENCE_TYPE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrenceType());
             }
         });
 
         m.put(AppointmentFields.START_DATE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getStartDate();
             }
         });
 
         m.put(AppointmentFields.TITLE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getTitle();
             }
         });
 
         m.put(AppointmentFields.UNTIL, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getUntil();
             }
         });
         m.put(AppointmentFields.USERS, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getUsers();
             }
         });
@@ -287,63 +287,63 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.CATEGORIES, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getCategories();
             }
         });
 
         m.put(AppointmentFields.COLORLABEL, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getLabel());
             }
         });
 
         m.put(AppointmentFields.CREATED_BY, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getCreatedBy());
             }
         });
 
         m.put(AppointmentFields.CREATION_DATE, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getCreationDate();
             }
         });
 
         m.put(AppointmentFields.FOLDER_ID, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getParentFolderID());
             }
         });
 
         m.put(AppointmentFields.ID, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getObjectID());
             }
         });
 
         m.put(AppointmentFields.LAST_MODIFIED, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return candidate.getLastModified();
             }
         });
 
         m.put(AppointmentFields.MODIFIED_BY, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getModifiedBy());
             }
         });
 
         m.put(AppointmentFields.PRIVATE_FLAG, new AttributeGetter() {
 
-            public Object getObject(final AppointmentObject candidate) {
+            public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getPrivateFlag());
             }
         });
@@ -369,7 +369,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
         super();
     }
 
-    public <T> T getAttribute(final String attributeName, final AppointmentObject candidate) {
+    public <T> T getAttribute(final String attributeName, final Appointment candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
             if (LOG.isInfoEnabled()) {

@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -264,7 +264,7 @@ public class freebusy extends HttpServlet {
         try {
             final Session sessionObj = SessionObjectWrapper.createSessionObject(context.getMailadmin(), context, "freebusysessionobject");
             final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(sessionObj);
-            SearchIterator<AppointmentObject> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
+            SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
             try {
                 while (it.hasNext()) {
                     writeFreeBusy(it.next(), printWriter, outputFormat);
@@ -285,19 +285,19 @@ public class freebusy extends HttpServlet {
         printWriter.flush();
     }
 
-    private void writeFreeBusy(final AppointmentObject appointment, final PrintWriter pw, final DateFormat format) {
+    private void writeFreeBusy(final Appointment appointment, final PrintWriter pw, final DateFormat format) {
         pw.print("FREEBUSY;");
         switch (appointment.getShownAs()) {
-        case AppointmentObject.ABSENT:
+        case Appointment.ABSENT:
             pw.print("FBTYPE=BUSY:");
             break;
-        case AppointmentObject.RESERVED:
+        case Appointment.RESERVED:
             pw.print("FBTYPE=BUSY-TENTATIVE:");
             break;
-        case AppointmentObject.TEMPORARY:
+        case Appointment.TEMPORARY:
             pw.print("FBTYPE=BUSY-UNAVAILABLE:");
             break;
-        case AppointmentObject.FREE:
+        case Appointment.FREE:
             pw.print("FBTYPE=FREE:");
             break;
         default:

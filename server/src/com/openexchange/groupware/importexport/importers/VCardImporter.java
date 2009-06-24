@@ -71,7 +71,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
@@ -233,7 +233,7 @@ public class VCardImporter extends AbstractImporter {
 
 						importResult.setFolder(String.valueOf(contactFolderId));
 
-						final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
+						final Contact contactObj = oxContainerConverter.convertContact(versitObject);
 						contactObj.setParentFolderID(contactFolderId);
 						importResult.setDate(new Date());
 						try {

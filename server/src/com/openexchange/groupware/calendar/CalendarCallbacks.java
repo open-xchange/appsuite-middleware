@@ -51,7 +51,7 @@ package com.openexchange.groupware.calendar;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
 
@@ -115,7 +115,7 @@ public class CalendarCallbacks implements CalendarListener {
         return copyForReading;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(AppointmentObject master, AppointmentObject changeException, int inFolder, Session session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException, int inFolder, Session session) throws AbstractOXException {
         ServerSession serverSession = getServerSession(session);
         createdChangeExceptionInRecurringAppointment(master, changeException, inFolder, serverSession);
     }
@@ -127,7 +127,7 @@ public class CalendarCallbacks implements CalendarListener {
         return new ServerSessionAdapter(session);
     }
 
-    public void createdChangeExceptionInRecurringAppointment(AppointmentObject master, AppointmentObject changeException,int inFolder, ServerSession serverSession) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException,int inFolder, ServerSession serverSession) throws AbstractOXException {
         List<String> exceptionIDs = new ArrayList<String>();
         for (CalendarListener listener : getListeners()) {
             try {

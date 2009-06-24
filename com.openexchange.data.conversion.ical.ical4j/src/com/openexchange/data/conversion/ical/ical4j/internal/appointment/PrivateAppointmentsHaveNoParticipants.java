@@ -53,16 +53,16 @@ import java.util.List;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Verifies if a private flagged appointment does not have participants.
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class PrivateAppointmentsHaveNoParticipants implements ObjectVerifier<AppointmentObject> {
+public class PrivateAppointmentsHaveNoParticipants implements ObjectVerifier<Appointment> {
 
-    public void verify(final int index, final AppointmentObject object, final List<ConversionWarning> warnings) throws ConversionError {
+    public void verify(final int index, final Appointment object, final List<ConversionWarning> warnings) throws ConversionError {
         if (object.getParticipants() != null && object.getParticipants().length > 0 && object.getPrivateFlag()) {
             object.removeParticipants();
             warnings.add(new ConversionWarning(index, ConversionWarning.Code.PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS));

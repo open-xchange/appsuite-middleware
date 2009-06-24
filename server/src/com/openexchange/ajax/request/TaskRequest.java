@@ -77,7 +77,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
@@ -538,7 +538,7 @@ public class TaskRequest {
     private int[] removeVirtualColumns(final int[] columns) {
             final List<Integer> helper = new ArrayList<Integer>(columns.length);
             for(final int col : columns) {
-                if(col != ContactObject.LAST_MODIFIED_UTC) {
+                if(col != Contact.LAST_MODIFIED_UTC) {
                     helper.add(col);
                 }
             }

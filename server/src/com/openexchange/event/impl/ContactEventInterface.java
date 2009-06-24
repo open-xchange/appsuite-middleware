@@ -51,7 +51,7 @@
 
 package com.openexchange.event.impl;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
 
 /**
@@ -62,11 +62,11 @@ import com.openexchange.session.Session;
 
 public interface ContactEventInterface {
 	
-    public void contactCreated(ContactObject contactObj, Session sessionObj);
+    public void contactCreated(Contact contactObj, Session sessionObj);
 	
-    public void contactModified(ContactObject contactObj, Session sessionObj);
+    public void contactModified(Contact contactObj, Session sessionObj);
 		
-    public void contactDeleted(ContactObject contactObj, Session sessionObj);
+    public void contactDeleted(Contact contactObj, Session sessionObj);
 	
 }
 

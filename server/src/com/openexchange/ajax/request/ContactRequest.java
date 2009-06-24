@@ -83,7 +83,7 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
@@ -172,7 +172,7 @@ public class ContactRequest {
 
     public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
 
-        final ContactObject contactObj = new ContactObject();
+        final Contact contactObj = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
         final ContactParser contactparser = new ContactParser(session);
@@ -201,7 +201,7 @@ public class ContactRequest {
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 
-        final ContactObject contactobject = new ContactObject();
+        final Contact contactobject = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
         final ContactParser contactparser = new ContactParser(session);
@@ -237,7 +237,7 @@ public class ContactRequest {
 
         final JSONArray jsonResponseArray = new JSONArray();
 
-        SearchIterator<ContactObject> it = null;
+        SearchIterator<Contact> it = null;
 
         try {
             boolean bIgnoreDelete = false;
@@ -258,7 +258,7 @@ public class ContactRequest {
 
             it = contactInterface.getModifiedContactsInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
-                final ContactObject contactObj = it.next();
+                final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
                 contactWriter.writeArray(contactObj, columns, jsonContactArray);
                 jsonResponseArray.put(jsonContactArray);
@@ -271,7 +271,7 @@ public class ContactRequest {
             if (!bIgnoreDelete) {
                 it = contactInterface.getDeletedContactsInFolder(folderId, internalColumns, requestedTimestamp);
                 while (it.hasNext()) {
-                    final ContactObject contactObj = it.next();
+                    final Contact contactObj = it.next();
 
                     jsonResponseArray.put(contactObj.getObjectID());
 
@@ -312,7 +312,7 @@ public class ContactRequest {
 
         Date lastModified = null;
 
-        SearchIterator<ContactObject> it = null;
+        SearchIterator<Contact> it = null;
 
         final JSONArray jsonResponseArray = new JSONArray();
 
@@ -353,7 +353,7 @@ public class ContactRequest {
                     it = contactInterface.getObjectsById(objectIdAndFolderId, internalColumns);
 
                     while (it.hasNext()) {
-                        final ContactObject contactObj = it.next();
+                        final Contact contactObj = it.next();
                         final JSONArray jsonContactArray = new JSONArray();
                         contactwriter.writeArray(contactObj, columns, jsonContactArray);
                         jsonResponseArray.put(jsonContactArray);
@@ -377,7 +377,7 @@ public class ContactRequest {
                         it = contactInterface.getObjectsById(newObjectIdAndFolderId, internalColumns);
 
                         while (it.hasNext()) {
-                            final ContactObject contactObj = it.next();
+                            final Contact contactObj = it.next();
                             final JSONArray jsonContactArray = new JSONArray();
                             contactwriter.writeArray(contactObj, columns, jsonContactArray);
                             jsonResponseArray.put(jsonContactArray);
@@ -425,7 +425,7 @@ public class ContactRequest {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
 
             for (int a = 0; a < userIdArray.length; a++) {
-                final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
+                final Contact contactObj = contactInterface.getUserById(userIdArray[a]);
                 final JSONArray jsonContactArray = new JSONArray();
                 contactwriter.writeArray(contactObj, columns, jsonContactArray);
                 jsonResponseArray.put(jsonContactArray);
@@ -456,7 +456,7 @@ public class ContactRequest {
 
         final JSONArray jsonResponseArray = new JSONArray();
 
-        SearchIterator<ContactObject> it = null;
+        SearchIterator<Contact> it = null;
 
         try {
             final int[] internalColumns = checkLastModified(columnsToLoad);
@@ -475,7 +475,7 @@ public class ContactRequest {
             }
 
             while (it.hasNext()) {
-                final ContactObject contactObj = it.next();
+                final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
                 contactwriter.writeArray(contactObj, columns, jsonContactArray);
                 jsonResponseArray.put(jsonContactArray);
@@ -496,7 +496,7 @@ public class ContactRequest {
     private int[] removeVirtual(final int[] columns) {
         final List<Integer> helper = new ArrayList<Integer>(columns.length);
         for (final int col : columns) {
-            if (col != ContactObject.LAST_MODIFIED_UTC) {
+            if (col != Contact.LAST_MODIFIED_UTC) {
                 helper.add(I(col));
             }
         }
@@ -519,7 +519,7 @@ public class ContactRequest {
 
         timestamp = new Date(0);
 
-        final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
+        final Contact contactObj = contactInterface.getObjectById(id, inFolder);
         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
@@ -540,7 +540,7 @@ public class ContactRequest {
 
         timestamp = new Date(0);
 
-        final ContactObject contactObj = contactInterface.getUserById(id);
+        final Contact contactObj = contactInterface.getUserById(id);
         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
@@ -629,12 +629,12 @@ public class ContactRequest {
                 session);
         }
 
-        final SearchIterator<ContactObject> it = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
+        final SearchIterator<Contact> it = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
             while (it.hasNext()) {
-                final ContactObject contactObj = it.next();
+                final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
                 contactwriter.writeArray(contactObj, columns, jsonContactArray);
                 jsonResponseArray.put(jsonContactArray);
@@ -665,7 +665,7 @@ public class ContactRequest {
             folderId,
             session);
 
-        final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
+        final Contact contactObj = contactInterface.getObjectById(id, inFolder);
         final int origObjectId = contactObj.getObjectID();
         contactObj.removeObjectID();
         final int origFolderId = contactObj.getParentFolderID();
@@ -696,7 +696,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    private static void copyLinks(final int folderId, final Session session, final Context ctx, final ContactObject contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
+    private static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
         /*
          * Get all
          */
@@ -761,7 +761,7 @@ public class ContactRequest {
         }
     }
 
-    private static void copyAttachments(final int folderId, final Context ctx, final ContactObject contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
+    private static void copyAttachments(final int folderId, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */

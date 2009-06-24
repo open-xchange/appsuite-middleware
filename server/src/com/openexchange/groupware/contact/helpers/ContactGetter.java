@@ -56,7 +56,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * This switcher enables us to get the values of a contact object.
@@ -87,7 +87,7 @@ public class ContactGetter implements ContactSwitcher {
 	    if(objects.length < 1){
 	      throw EXCEPTIONS.create(0, "DisplayName");
 	    }
-	    final ContactObject conObj = (ContactObject) objects[0];
+	    final Contact conObj = (Contact) objects[0];
 	    return conObj.getDisplayName();
 	  }
 
@@ -95,7 +95,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "SurName");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getSurName();
   }
 
@@ -103,7 +103,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "GivenName");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getGivenName();
   }
 
@@ -111,7 +111,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "MiddleName");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getMiddleName();
   }
 
@@ -119,7 +119,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Suffix");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getSuffix();
   }
 
@@ -127,7 +127,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Title");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTitle();
   }
 
@@ -135,7 +135,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "StreetHome");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getStreetHome();
   }
 
@@ -143,7 +143,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "PostalCodeHome");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getPostalCodeHome();
   }
 
@@ -151,7 +151,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CityHome");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCityHome();
   }
 
@@ -159,7 +159,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "StateHome");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getStateHome();
   }
 
@@ -167,7 +167,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CountryHome");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCountryHome();
   }
 
@@ -175,7 +175,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "MaritalStatus");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getMaritalStatus();
   }
 
@@ -183,7 +183,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "NumberOfChildren");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNumberOfChildren();
   }
 
@@ -191,7 +191,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Profession");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getProfession();
   }
 
@@ -199,7 +199,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Nickname");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNickname();
   }
 
@@ -207,7 +207,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "SpouseName");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getSpouseName();
   }
 
@@ -215,7 +215,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Note");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNote();
   }
 
@@ -223,7 +223,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Company");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCompany();
   }
 
@@ -231,7 +231,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Department");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getDepartment();
   }
 
@@ -239,7 +239,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Position");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getPosition();
   }
 
@@ -247,7 +247,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "EmployeeType");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getEmployeeType();
   }
 
@@ -255,7 +255,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "RoomNumber");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getRoomNumber();
   }
 
@@ -263,7 +263,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "StreetBusiness");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getStreetBusiness();
   }
 
@@ -271,7 +271,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "PostalCodeBusiness");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getPostalCodeBusiness();
   }
 
@@ -279,7 +279,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CityBusiness");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCityBusiness();
   }
 
@@ -287,7 +287,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "StateBusiness");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getStateBusiness();
   }
 
@@ -295,7 +295,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CountryBusiness");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCountryBusiness();
   }
 
@@ -303,7 +303,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "NumberOfEmployee");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNumberOfEmployee();
   }
 
@@ -311,7 +311,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "SalesVolume");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getSalesVolume();
   }
 
@@ -319,7 +319,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TaxID");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTaxID();
   }
 
@@ -327,7 +327,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CommercialRegister");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCommercialRegister();
   }
 
@@ -335,7 +335,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Branches");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getBranches();
   }
 
@@ -343,7 +343,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "BusinessCategory");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getBusinessCategory();
   }
 
@@ -351,7 +351,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Info");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getInfo();
   }
 
@@ -359,7 +359,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "ManagerName");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getManagerName();
   }
 
@@ -367,7 +367,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "AssistantName");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getAssistantName();
   }
 
@@ -375,7 +375,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "StreetOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getStreetOther();
   }
 
@@ -383,7 +383,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "PostalCodeOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getPostalCodeOther();
   }
 
@@ -391,7 +391,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CityOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCityOther();
   }
 
@@ -399,7 +399,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "StateOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getStateOther();
   }
 
@@ -407,7 +407,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CountryOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCountryOther();
   }
 
@@ -415,7 +415,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneAssistant");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneAssistant();
   }
 
@@ -423,7 +423,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneBusiness1");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneBusiness1();
   }
 
@@ -431,7 +431,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneBusiness2");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneBusiness2();
   }
 
@@ -439,7 +439,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "FaxBusiness");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getFaxBusiness();
   }
 
@@ -447,7 +447,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneCallback");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneCallback();
   }
 
@@ -455,7 +455,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneCar");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneCar();
   }
 
@@ -463,7 +463,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneCompany");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneCompany();
   }
 
@@ -471,7 +471,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneHome1");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneHome1();
   }
 
@@ -479,7 +479,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneHome2");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneHome2();
   }
 
@@ -487,7 +487,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "FaxHome");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getFaxHome();
   }
 
@@ -495,7 +495,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneISDN");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneISDN();
   }
 
@@ -503,7 +503,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CellularTelephone1");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCellularTelephone1();
   }
 
@@ -511,7 +511,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CellularTelephone2");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCellularTelephone2();
   }
 
@@ -519,7 +519,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneOther();
   }
 
@@ -527,7 +527,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "FaxOther");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getFaxOther();
   }
 
@@ -535,7 +535,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephonePager");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephonePager();
   }
 
@@ -543,7 +543,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephonePrimary");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephonePrimary();
   }
 
@@ -551,7 +551,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneRadio");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneRadio();
   }
 
@@ -559,7 +559,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneTelex");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneTelex();
   }
 
@@ -567,7 +567,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneTTYTTD");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneTTYTTD();
   }
 
@@ -575,7 +575,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "InstantMessenger1");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getInstantMessenger1();
   }
 
@@ -583,7 +583,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "InstantMessenger2");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getInstantMessenger2();
   }
 
@@ -591,7 +591,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "TelephoneIP");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getTelephoneIP();
   }
 
@@ -599,7 +599,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Email1");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getEmail1();
   }
 
@@ -607,7 +607,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Email2");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getEmail2();
   }
 
@@ -615,7 +615,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Email3");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getEmail3();
   }
 
@@ -623,7 +623,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "URL");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getURL();
   }
 
@@ -631,7 +631,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Categories");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCategories();
   }
 
@@ -639,7 +639,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField01");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField01();
   }
 
@@ -647,7 +647,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField02");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField02();
   }
 
@@ -655,7 +655,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField03");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField03();
   }
 
@@ -663,7 +663,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField04");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField04();
   }
 
@@ -671,7 +671,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField05");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField05();
   }
 
@@ -679,7 +679,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField06");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField06();
   }
 
@@ -687,7 +687,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField07");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField07();
   }
 
@@ -695,7 +695,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField08");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField08();
   }
 
@@ -703,7 +703,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField09");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField09();
   }
 
@@ -711,7 +711,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField10");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField10();
   }
 
@@ -719,7 +719,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField11");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField11();
   }
 
@@ -727,7 +727,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField12");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField12();
   }
 
@@ -735,7 +735,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField13");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField13();
   }
 
@@ -743,7 +743,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField14");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField14();
   }
 
@@ -751,7 +751,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField15");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField15();
   }
 
@@ -759,7 +759,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField16");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField16();
   }
 
@@ -767,7 +767,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField17");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField17();
   }
 
@@ -775,7 +775,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField18");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField18();
   }
 
@@ -783,7 +783,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField19");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField19();
   }
 
@@ -791,7 +791,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "UserField20");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getUserField20();
   }
 
@@ -799,7 +799,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "ObjectID");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getObjectID();
   }
 
@@ -807,7 +807,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "NumberOfDistributionLists");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNumberOfDistributionLists();
   }
 
@@ -815,7 +815,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "NumberOfLinks");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNumberOfLinks();
   }
 
@@ -823,7 +823,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "DistributionList");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getDistributionList();
   }
 
@@ -831,7 +831,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Links");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getLinks();
   }
 
@@ -839,7 +839,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "ParentFolderID");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getParentFolderID();
   }
 
@@ -847,7 +847,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "ContextId");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getContextId();
   }
 
@@ -855,7 +855,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "PrivateFlag");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getPrivateFlag();
   }
 
@@ -863,7 +863,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CreatedBy");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCreatedBy();
   }
 
@@ -871,7 +871,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "ModifiedBy");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getModifiedBy();
   }
 
@@ -879,7 +879,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "CreationDate");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getCreationDate();
   }
 
@@ -887,7 +887,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "LastModified");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getLastModified();
   }
 
@@ -895,7 +895,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Birthday");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getBirthday();
   }
 
@@ -903,7 +903,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Anniversary");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getAnniversary();
   }
 
@@ -911,7 +911,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "ImageLastModified");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getImageLastModified();
   }
 
@@ -919,7 +919,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "InternalUserId");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getInternalUserId();
   }
 
@@ -927,7 +927,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "Label");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getLabel();
   }
 
@@ -935,7 +935,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "FileAs");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getFileAs();
   }
 
@@ -943,7 +943,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "DefaultAddress");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getDefaultAddress();
   }
 
@@ -951,7 +951,7 @@ public class ContactGetter implements ContactSwitcher {
     if(objects.length < 1){
       throw EXCEPTIONS.create(0, "NumberOfAttachments");
     }
-    final ContactObject conObj = (ContactObject) objects[0];
+    final Contact conObj = (Contact) objects[0];
     return conObj.getNumberOfAttachments();
   }
 }

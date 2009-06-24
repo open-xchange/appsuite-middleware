@@ -3,7 +3,7 @@ package com.openexchange.subscribe;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.parser.FacebookContactParser;
 import com.openexchange.subscribe.parser.LinkedInContactParser;
 

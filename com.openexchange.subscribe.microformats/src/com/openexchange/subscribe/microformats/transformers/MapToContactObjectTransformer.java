@@ -63,7 +63,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -76,11 +76,11 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
     
     private static final Log LOG = LogFactory.getLog(MapToContactObjectTransformer.class);
     
-	public List<ContactObject> transform (List<Map<String, String>> inlist){
-		ArrayList<ContactObject> outlist = new ArrayList<ContactObject>();
+	public List<Contact> transform (List<Map<String, String>> inlist){
+		ArrayList<Contact> outlist = new ArrayList<Contact>();
 		
 		for (Map<String,String> map : inlist){
-		ContactObject contact = new ContactObject();	
+		Contact contact = new Contact();	
 			if (map.containsKey("ox_display_name")){
 				contact.setDisplayName((String)map.get("ox_display_name"));
 			}  
@@ -375,7 +375,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	}
 	
 	// Shamelessly stolen from OXContainerConverter. Thanks. :)
-	private static void loadImageFromURL(final ContactObject contactContainer, final URL url) {
+	private static void loadImageFromURL(final Contact contactContainer, final URL url) {
         String mimeType = null;
         byte[] bytes = null;
         try {

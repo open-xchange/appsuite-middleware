@@ -89,7 +89,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -125,11 +125,11 @@ public class AppointmentRequest {
 
     private final static int[] _appointmentFields = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, AppointmentObject.LOCATION,
+        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
         CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION,
-        CalendarObject.PARTICIPANTS, CalendarObject.USERS, AppointmentObject.SHOWN_AS, AppointmentObject.DELETE_EXCEPTIONS,
-        AppointmentObject.CHANGE_EXCEPTIONS, AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL, AppointmentObject.TIMEZONE };
+        CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS,
+        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE };
 
     private final ServerSession session;
 
@@ -218,7 +218,7 @@ public class AppointmentRequest {
         }
 
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
-        final AppointmentObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
+        final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
         final JSONObject jsonResponseObj = new JSONObject();
 
@@ -255,7 +255,7 @@ public class AppointmentRequest {
         appointmentObj.setObjectID(objectId);
 
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
-        final AppointmentObject[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
+        final Appointment[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
 
         final JSONObject jsonResponseObj = new JSONObject();
 
@@ -320,7 +320,7 @@ public class AppointmentRequest {
         final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        SearchIterator<AppointmentObject> it = null;
+        SearchIterator<Appointment> it = null;
         Date lastModified = null;
         try {
             if (!bIgnoreModified) {
@@ -348,7 +348,7 @@ public class AppointmentRequest {
                 }
 
                 while (it.hasNext()) {
-                    final AppointmentObject appointmentObj = it.next();
+                    final Appointment appointmentObj = it.next();
                     boolean written = false;
                     if (appointmentObj.getRecurrenceType() != CalendarObject.NONE && appointmentObj.getRecurrencePosition() == 0) {
                         if (bRecurrenceMaster) {
@@ -423,7 +423,7 @@ public class AppointmentRequest {
             if (!bIgnoreDelete) {
                 it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
                 while (it.hasNext()) {
-                    final AppointmentObject appointmentObj = it.next();
+                    final Appointment appointmentObj = it.next();
 
                     jsonResponseArray.put(appointmentObj.getObjectID());
 
@@ -478,7 +478,7 @@ public class AppointmentRequest {
 
         Date lastModified = null;
 
-        SearchIterator<AppointmentObject> it = null;
+        SearchIterator<Appointment> it = null;
 
         final HashMap<Integer, ArrayList<Integer>> recurrencePositionMap = new HashMap<Integer, ArrayList<Integer>>();
 
@@ -536,7 +536,7 @@ public class AppointmentRequest {
             int counter = 0;
             final JSONArray jsonResponseArray = new JSONArray();
             while (it.hasNext()) {
-                final AppointmentObject appointment = it.next();
+                final Appointment appointment = it.next();
                 if (null == appointment) {
                     continue;
                 }
@@ -641,7 +641,7 @@ public class AppointmentRequest {
     public JSONArray actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         timestamp = new Date(0);
 
-        SearchIterator<AppointmentObject> it = null;
+        SearchIterator<Appointment> it = null;
 
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -685,7 +685,7 @@ public class AppointmentRequest {
             }
             Date lastModified = new Date(0);
             while (it.hasNext()) {
-                final AppointmentObject appointment = it.next();
+                final Appointment appointment = it.next();
                 final AppointmentWriter writer = new AppointmentWriter(timeZone);
                 boolean written = false;
                 if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
@@ -775,12 +775,12 @@ public class AppointmentRequest {
 
                 if (asc) {
                     for (int a = 0; a < dateOrderObjectArray.length; a++) {
-                        final AppointmentObject appointmentObj = (AppointmentObject) dateOrderObjectArray[a].getObject();
+                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
                         appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
                     }
                 } else {
                     for (int a = dateOrderObjectArray.length - 1; a >= 0; a--) {
-                        final AppointmentObject appointmentObj = (AppointmentObject) dateOrderObjectArray[a].getObject();
+                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
                         appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
                     }
                 }
@@ -805,7 +805,7 @@ public class AppointmentRequest {
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         try {
-            final AppointmentObject appointmentobject = appointmentsql.getObjectById(id, inFolder);
+            final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
             final JSONObject jsonResponseObj = new JSONObject();
@@ -931,7 +931,7 @@ public class AppointmentRequest {
 
         final JSONArray jsonResponseArray = new JSONArray();
 
-        SearchIterator<AppointmentObject> it = null;
+        SearchIterator<Appointment> it = null;
         try {
             final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
             CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
@@ -958,7 +958,7 @@ public class AppointmentRequest {
 
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
             while (it.hasNext()) {
-                final AppointmentObject appointment = it.next();
+                final Appointment appointment = it.next();
 
                 if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
                     if (start != null && end != null) {
@@ -1107,11 +1107,11 @@ public class AppointmentRequest {
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
         searchObj.setRange(new Date[] { start, end });
 
-        final LinkedList<AppointmentObject> appointmentList = new LinkedList<AppointmentObject>();
+        final LinkedList<Appointment> appointmentList = new LinkedList<Appointment>();
 
         final JSONArray jsonResponseArray = new JSONArray();
 
-        SearchIterator<AppointmentObject> searchIterator = null;
+        SearchIterator<Appointment> searchIterator = null;
         try {
             final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
             CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
@@ -1120,7 +1120,7 @@ public class AppointmentRequest {
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
             while (searchIterator.hasNext()) {
-                final AppointmentObject appointmentobject = searchIterator.next();
+                final Appointment appointmentobject = searchIterator.next();
                 boolean processed = false;
                 if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
                     // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -1171,7 +1171,7 @@ public class AppointmentRequest {
             }
 
             for (int a = 0; a < appointmentList.size(); a++) {
-                final AppointmentObject appointmentObj = appointmentList.get(a);
+                final Appointment appointmentObj = appointmentList.get(a);
                 if (appointmentObj.getFullTime()) {
                     appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
                 } else {
@@ -1197,7 +1197,7 @@ public class AppointmentRequest {
 
         timestamp = new Date(0);
 
-        SearchIterator<AppointmentObject> it = null;
+        SearchIterator<Appointment> it = null;
 
         final JSONArray jsonResponseArray = new JSONArray();
 
@@ -1207,7 +1207,7 @@ public class AppointmentRequest {
             final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
             it = appointmentsql.getFreeBusyInformation(userId, type, start, end);
             while (it.hasNext()) {
-                final AppointmentObject appointmentObj = it.next();
+                final Appointment appointmentObj = it.next();
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(appointmentObj, jsonAppointmentObj);
                 jsonResponseArray.put(jsonAppointmentObj);
@@ -1245,7 +1245,7 @@ public class AppointmentRequest {
         appointmentObj.removeObjectID();
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(ignoreConflicts);
-        final AppointmentObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
+        final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
         final JSONObject jsonResponseObj = new JSONObject();
 
@@ -1265,12 +1265,12 @@ public class AppointmentRequest {
         return jsonResponseObj;
     }
 
-    private void compareStartDateForList(final LinkedList<AppointmentObject> appointmentList, final AppointmentObject appointmentObj, final int limit) {
+    private void compareStartDateForList(final LinkedList<Appointment> appointmentList, final Appointment appointmentObj, final int limit) {
         if (limit > 0) {
             boolean found = false;
 
             for (int a = 0; a < appointmentList.size(); a++) {
-                final AppointmentObject compareAppointment = appointmentList.get(a);
+                final Appointment compareAppointment = appointmentList.get(a);
                 if (appointmentObj.getStartDate().getTime() < compareAppointment.getStartDate().getTime()) {
                     appointmentList.add(a, appointmentObj);
                     found = true;
@@ -1290,7 +1290,7 @@ public class AppointmentRequest {
         }
     }
 
-    private Date getDateByFieldId(final int field, final AppointmentObject appointmentObj, final TimeZone timeZone) {
+    private Date getDateByFieldId(final int field, final Appointment appointmentObj, final TimeZone timeZone) {
         final Date date = null;
         if (field == CalendarObject.START_DATE) {
             return appointmentObj.getStartDate();

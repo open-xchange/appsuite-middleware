@@ -54,8 +54,8 @@ package com.openexchange.event.impl;
 import java.util.Date;
 
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
@@ -79,7 +79,7 @@ public class EventObject {
 	
 	private Date creationDate;
 	
-	public EventObject(final AppointmentObject obj, final int action, final Session session) {
+	public EventObject(final Appointment obj, final int action, final Session session) {
 		init(obj, Types.APPOINTMENT, action, session);
 	}
 	
@@ -87,7 +87,7 @@ public class EventObject {
 		init(obj, Types.TASK, action, session);
 	}
 	
-	public EventObject(final ContactObject obj, final int action, final Session session) {
+	public EventObject(final Contact obj, final int action, final Session session) {
 		init(obj, Types.CONTACT, action, session);
 	}
 	

@@ -62,7 +62,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.MBoolean;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -150,10 +150,10 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Checks if given columns contain fields
-     * {@link AppointmentObject#RECURRENCE_TYPE}, if so fields
-     * {@link AppointmentObject#CHANGE_EXCEPTIONS},
-     * {@link AppointmentObject#DELETE_EXCEPTIONS}, and
-     * {@link AppointmentObject#RECURRENCE_CALCULATOR} are added to specified
+     * {@link Appointment#RECURRENCE_TYPE}, if so fields
+     * {@link Appointment#CHANGE_EXCEPTIONS},
+     * {@link Appointment#DELETE_EXCEPTIONS}, and
+     * {@link Appointment#RECURRENCE_CALCULATOR} are added to specified
      * columns if not already present.
      * 
      * @param cols The columns to check
@@ -173,7 +173,7 @@ public interface CalendarCommonCollectionInterface {
      */
     public int[] enhanceCols(final int cols[], final int ara[], final int i);
 
-    public void triggerEvent(final Session session, final int action, final AppointmentObject appointmentobject) throws OXException;
+    public void triggerEvent(final Session session, final int action, final Appointment appointmentobject) throws OXException;
 
     public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment, final CalendarDataObject newAppointment) throws OXCalendarException;
 
@@ -370,7 +370,7 @@ public interface CalendarCommonCollectionInterface {
      * @return The loaded calendar objects
      * @throws OXException If calendar objects cannot be loaded
      */
-    public AppointmentObject[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException;
+    public Appointment[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException;
 
     /**
      * Determines appointment's valid folder ID for specified user

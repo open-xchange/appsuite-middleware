@@ -68,7 +68,7 @@ import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -678,8 +678,8 @@ public final class OXFolderAdminHelper {
      * Propagates modifications <b>already</b> performed on an existing user throughout folder module.
      * 
      * @param userId The ID of the user who has been modified
-     * @param changedFields The changed fields of the user taken from constants defined in {@link ContactObject}; e.g.
-     *            {@link ContactObject#DISPLAY_NAME}
+     * @param changedFields The changed fields of the user taken from constants defined in {@link Contact}; e.g.
+     *            {@link Contact#DISPLAY_NAME}
      * @param lastModified The last modified timestamp that should be taken on folder modifications
      * @param readCon A readable connection if a writable connection should not be used for read access to database
      * @param writeCon A writable connection
@@ -689,7 +689,7 @@ public final class OXFolderAdminHelper {
     public static void propagateUserModification(final int userId, final int[] changedFields, final long lastModified, final Connection readCon, final Connection writeCon, final int cid) throws OXException {
         Arrays.sort(changedFields);
         final int adminID = getContextAdminID(cid, writeCon);
-        if (Arrays.binarySearch(changedFields, ContactObject.DISPLAY_NAME) > -1) {
+        if (Arrays.binarySearch(changedFields, Contact.DISPLAY_NAME) > -1) {
             propagateDisplayNameModification(userId, lastModified, adminID, readCon, writeCon, cid);
         }
     }
@@ -747,7 +747,7 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private static final String SQL_SELECT_DISPLAY_NAME = "SELECT " + Contacts.mapping[ContactObject.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND " + Contacts.mapping[ContactObject.INTERNAL_USERID].getDBFieldName() + " = ?";
+    private static final String SQL_SELECT_DISPLAY_NAME = "SELECT " + Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND " + Contacts.mapping[Contact.INTERNAL_USERID].getDBFieldName() + " = ?";
 
     /**
      * Load specified user's display name with given connection (which is possibly in non-auto-commit mode). Thus we obtain most up-to-date

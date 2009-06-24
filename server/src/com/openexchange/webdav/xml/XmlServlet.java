@@ -71,7 +71,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
@@ -461,7 +461,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     }
 
     protected void writeResponse(final DataObject dataobject, final int status, final String message,
-            final String client_id, final OutputStream os, final XMLOutputter xo, final AppointmentObject[] conflicts)
+            final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts)
             throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(message + ':' + status);

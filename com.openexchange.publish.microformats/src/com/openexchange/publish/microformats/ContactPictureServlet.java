@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
@@ -116,7 +116,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
             int folderId = Integer.parseInt(publication.getEntityId());
             int contactId = Integer.parseInt(args.get(CONTACT_ID));
             
-            ContactObject contact = loadContact(publication, folderId, contactId);
+            Contact contact = loadContact(publication, folderId, contactId);
             
             writeImage(contact, resp);
             
@@ -128,16 +128,16 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
 
     }
 
-    private void writeImage(ContactObject contact, HttpServletResponse resp) throws IOException {
+    private void writeImage(Contact contact, HttpServletResponse resp) throws IOException {
         resp.setContentType(contact.getImageContentType());
         ServletOutputStream outputStream = resp.getOutputStream();
         outputStream.write(contact.getImage1());
         outputStream.flush();
     }
 
-    private ContactObject loadContact(Publication publication, int folderId, int contactId) throws OXException {
+    private Contact loadContact(Publication publication, int folderId, int contactId) throws OXException {
         ContactInterface contactInterface = contacts.newContactInterface(folderId, new PublicationSession(publication));
-        contactInterface.getObjectsById(new int[][]{{contactId, folderId}}, new int[]{ContactObject.IMAGE1, ContactObject.IMAGE1_CONTENT_TYPE});
+        contactInterface.getObjectsById(new int[][]{{contactId, folderId}}, new int[]{Contact.IMAGE1, Contact.IMAGE1_CONTENT_TYPE});
         return contactInterface.getObjectById(contactId, folderId);
     }
 

@@ -103,7 +103,7 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.OXCalendarException.Code;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -179,34 +179,34 @@ public final class CalendarCollection implements CalendarCollectionService {
     
     public CalendarCollection() {
         super();
-        fieldMap.put(Integer.valueOf(AppointmentObject.TITLE), "field01");
+        fieldMap.put(Integer.valueOf(Appointment.TITLE), "field01");
         
-        fieldMap.put(Integer.valueOf(AppointmentObject.LOCATION), "field02");
-        fieldMap.put(Integer.valueOf(AppointmentObject.NOTE), "field04");
-        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_TYPE), "field06");
-        fieldMap.put(Integer.valueOf(AppointmentObject.DELETE_EXCEPTIONS), "field07");
-        fieldMap.put(Integer.valueOf(AppointmentObject.CHANGE_EXCEPTIONS), "field08");
-        fieldMap.put(Integer.valueOf(AppointmentObject.CATEGORIES), "field09");
+        fieldMap.put(Integer.valueOf(Appointment.LOCATION), "field02");
+        fieldMap.put(Integer.valueOf(Appointment.NOTE), "field04");
+        fieldMap.put(Integer.valueOf(Appointment.RECURRENCE_TYPE), "field06");
+        fieldMap.put(Integer.valueOf(Appointment.DELETE_EXCEPTIONS), "field07");
+        fieldMap.put(Integer.valueOf(Appointment.CHANGE_EXCEPTIONS), "field08");
+        fieldMap.put(Integer.valueOf(Appointment.CATEGORIES), "field09");
         
-        fieldMap.put(Integer.valueOf(AppointmentObject.START_DATE),  "timestampfield01");
-        fieldMap.put(Integer.valueOf(AppointmentObject.END_DATE), "timestampfield02");
+        fieldMap.put(Integer.valueOf(Appointment.START_DATE),  "timestampfield01");
+        fieldMap.put(Integer.valueOf(Appointment.END_DATE), "timestampfield02");
         
-        fieldMap.put(Integer.valueOf(AppointmentObject.OBJECT_ID), "intfield01");
-        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_ID), "intfield02");
-        fieldMap.put(Integer.valueOf(AppointmentObject.COLOR_LABEL), "intfield03");
-        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_CALCULATOR), "intfield04");
-        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_POSITION), "intfield05");
-        fieldMap.put(Integer.valueOf(AppointmentObject.SHOWN_AS), "intfield06");
-        fieldMap.put(Integer.valueOf(AppointmentObject.FULL_TIME), "intfield07");
-        fieldMap.put(Integer.valueOf(AppointmentObject.NUMBER_OF_ATTACHMENTS), "intfield08");
-        fieldMap.put(Integer.valueOf(AppointmentObject.PRIVATE_FLAG), "pflag");
+        fieldMap.put(Integer.valueOf(Appointment.OBJECT_ID), "intfield01");
+        fieldMap.put(Integer.valueOf(Appointment.RECURRENCE_ID), "intfield02");
+        fieldMap.put(Integer.valueOf(Appointment.COLOR_LABEL), "intfield03");
+        fieldMap.put(Integer.valueOf(Appointment.RECURRENCE_CALCULATOR), "intfield04");
+        fieldMap.put(Integer.valueOf(Appointment.RECURRENCE_POSITION), "intfield05");
+        fieldMap.put(Integer.valueOf(Appointment.SHOWN_AS), "intfield06");
+        fieldMap.put(Integer.valueOf(Appointment.FULL_TIME), "intfield07");
+        fieldMap.put(Integer.valueOf(Appointment.NUMBER_OF_ATTACHMENTS), "intfield08");
+        fieldMap.put(Integer.valueOf(Appointment.PRIVATE_FLAG), "pflag");
         
-        fieldMap.put(Integer.valueOf(AppointmentObject.CREATED_BY), "pd.created_from");
-        fieldMap.put(Integer.valueOf(AppointmentObject.MODIFIED_BY),  "pd.changed_from");
-        fieldMap.put(Integer.valueOf(AppointmentObject.CREATION_DATE), "pd.creating_date");
-        fieldMap.put(Integer.valueOf(AppointmentObject.LAST_MODIFIED), "pd.changing_date");
+        fieldMap.put(Integer.valueOf(Appointment.CREATED_BY), "pd.created_from");
+        fieldMap.put(Integer.valueOf(Appointment.MODIFIED_BY),  "pd.changed_from");
+        fieldMap.put(Integer.valueOf(Appointment.CREATION_DATE), "pd.creating_date");
+        fieldMap.put(Integer.valueOf(Appointment.LAST_MODIFIED), "pd.changing_date");
         
-        fieldMap.put(Integer.valueOf(AppointmentObject.FOLDER_ID), "fid");
+        fieldMap.put(Integer.valueOf(Appointment.FOLDER_ID), "fid");
         fieldMap.put(Integer.valueOf(CalendarDataObject.TIMEZONE), "timezone");
     }
     
@@ -1448,7 +1448,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      *            date shall be replaced
      * @throws OXException If calculating the first occurrence fails
      */
-    public void replaceDatesWithFirstOccurence(final AppointmentObject appointment) throws OXException {
+    public void replaceDatesWithFirstOccurence(final Appointment appointment) throws OXException {
         final RecurringResultsInterface results = calculateFirstRecurring(appointment);
         if (0 == results.size()) {
             throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_FIRST_RECURRING);
@@ -1465,7 +1465,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @param cdao The recurring appointment whose start/end date shall be set to its first occurrence
      */
     public void safelySetStartAndEndDateForRecurringAppointment(final CalendarDataObject cdao) {
-        if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
+        if (cdao.getRecurrenceType() != Appointment.NO_RECURRENCE) {
             try {
                 final RecurringResultsInterface rrs = calculateRecurring(
                     cdao,
@@ -2045,15 +2045,15 @@ public final class CalendarCollection implements CalendarCollectionService {
         Arrays.sort(sorted);
         int c = 0;
         final int ara[] = new int[3];
-        if (Arrays.binarySearch(sorted, AppointmentObject.RECURRENCE_TYPE) >= 0) {
-            if (Arrays.binarySearch(sorted, AppointmentObject.CHANGE_EXCEPTIONS) < 0) {
-                ara[c++] = AppointmentObject.CHANGE_EXCEPTIONS;
+        if (Arrays.binarySearch(sorted, Appointment.RECURRENCE_TYPE) >= 0) {
+            if (Arrays.binarySearch(sorted, Appointment.CHANGE_EXCEPTIONS) < 0) {
+                ara[c++] = Appointment.CHANGE_EXCEPTIONS;
             }
-            if (Arrays.binarySearch(sorted, AppointmentObject.DELETE_EXCEPTIONS) < 0) {
-                ara[c++] = AppointmentObject.DELETE_EXCEPTIONS;
+            if (Arrays.binarySearch(sorted, Appointment.DELETE_EXCEPTIONS) < 0) {
+                ara[c++] = Appointment.DELETE_EXCEPTIONS;
             }
-            if (Arrays.binarySearch(sorted, AppointmentObject.RECURRENCE_CALCULATOR) < 0) {
-                ara[c++] = AppointmentObject.RECURRENCE_CALCULATOR;
+            if (Arrays.binarySearch(sorted, Appointment.RECURRENCE_CALCULATOR) < 0) {
+                ara[c++] = Appointment.RECURRENCE_CALCULATOR;
             }
             cols = enhanceCols(cols, ara, c);
         }
@@ -2074,7 +2074,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#triggerEvent(com.openexchange.session.Session, int, com.openexchange.groupware.container.AppointmentObject)
      */
-    public void triggerEvent(final Session session, final int action, final AppointmentObject appointmentobject) throws OXException {
+    public void triggerEvent(final Session session, final int action, final Appointment appointmentobject) throws OXException {
         final EventClient eventclient = new EventClient(session);
         switch (action) {
             case CalendarOperation.INSERT:
@@ -3070,7 +3070,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getAppointmentsByID(int, int[], int[], com.openexchange.session.Session)
      */
-    public AppointmentObject[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException {
+    public Appointment[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException {
         if (null == ids || ids.length == 0) {
             return null;
         }
@@ -3119,7 +3119,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                  */
                 it.close();
             }
-            final AppointmentObject[] retval = new CalendarDataObject[ids.length];
+            final Appointment[] retval = new CalendarDataObject[ids.length];
             for (int i = 0; i < ids.length; i++) {
                 retval[i] = m.get(Integer.valueOf(ids[i]));
             }
@@ -3294,8 +3294,8 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
 
     private final Set<Integer> IGNORE_FIELDS = new HashSet<Integer>(Arrays.asList(Integer
-            .valueOf(AppointmentObject.ALARM), Integer.valueOf(AppointmentObject.LAST_MODIFIED), Integer
-            .valueOf(AppointmentObject.MODIFIED_BY), Integer.valueOf(0)));
+            .valueOf(Appointment.ALARM), Integer.valueOf(Appointment.LAST_MODIFIED), Integer
+            .valueOf(Appointment.MODIFIED_BY), Integer.valueOf(0)));
 
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkForSoloReminderUpdate(com.openexchange.calendar.CalendarDataObject, int[], com.openexchange.calendar.MBoolean)
@@ -3534,13 +3534,13 @@ public final class CalendarCollection implements CalendarCollectionService {
      */
     public String getString(final CalendarDataObject cdao, final int fieldID) {
         switch(fieldID) {
-            case AppointmentObject.TITLE : return cdao.getTitle();
-            case AppointmentObject.LOCATION  : return cdao.getLocation();
-            case AppointmentObject.NOTE : return cdao.getNote();
-            case AppointmentObject.CATEGORIES : return cdao.getCategories();
-            case AppointmentObject.TIMEZONE : return cdao.getTimezoneFallbackUTC();
-            case AppointmentObject.DELETE_EXCEPTIONS : return cdao.getDelExceptions();
-            case AppointmentObject.CHANGE_EXCEPTIONS : return cdao.getExceptions();
+            case Appointment.TITLE : return cdao.getTitle();
+            case Appointment.LOCATION  : return cdao.getLocation();
+            case Appointment.NOTE : return cdao.getNote();
+            case Appointment.CATEGORIES : return cdao.getCategories();
+            case Appointment.TIMEZONE : return cdao.getTimezoneFallbackUTC();
+            case Appointment.DELETE_EXCEPTIONS : return cdao.getDelExceptions();
+            case Appointment.CHANGE_EXCEPTIONS : return cdao.getExceptions();
         }
         return null;
     }

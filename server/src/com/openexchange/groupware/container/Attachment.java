@@ -57,7 +57,7 @@ import java.io.InputStream;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class AttachmentObject extends DataObject {
+public class Attachment extends DataObject {
 
     protected String filename = null;
 
@@ -79,7 +79,7 @@ public class AttachmentObject extends DataObject {
 
     protected boolean b_is = false;
 
-    public AttachmentObject() {
+    public Attachment() {
 
     }
 
@@ -186,8 +186,8 @@ public class AttachmentObject extends DataObject {
 
     @Override
     public boolean equals(final Object o) {
-        if (o instanceof AttachmentObject) {
-            final AttachmentObject attachmentobject = (AttachmentObject) o;
+        if (o instanceof Attachment) {
+            final Attachment attachmentobject = (Attachment) o;
 
             if (filename.equals(attachmentobject.getFilename())) {
                 return true;

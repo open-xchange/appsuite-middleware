@@ -60,7 +60,7 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -73,7 +73,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class SimContactSQLInterface implements ContactSQLInterface {
 
-    private Map<Integer, List<ContactObject>> folders = new HashMap<Integer, List<ContactObject>>();
+    private Map<Integer, List<Contact>> folders = new HashMap<Integer, List<Contact>>();
     
     /*
      * (non-Javadoc)
@@ -88,7 +88,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#insertContactObject(com.openexchange.groupware.container.ContactObject)
      */
-    public void insertContactObject(ContactObject contactObj) throws OXException {
+    public void insertContactObject(Contact contactObj) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -98,7 +98,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * @see com.openexchange.api2.ContactSQLInterface#updateContactObject(com.openexchange.groupware.container.ContactObject, int,
      * java.util.Date)
      */
-    public void updateContactObject(ContactObject contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException {
+    public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException {
         // TODO Auto-generated method stub
 
     }
@@ -109,12 +109,12 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * com.openexchange.groupware.contact.ContactInterface#getContactsByExtendedSearch(com.openexchange.groupware.search.ContactSearchObject
      * , int, java.lang.String, int[])
      */
-    public SearchIterator<ContactObject> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public SearchIterator<ContactObject> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
         return new SearchIteratorAdapter(getFolderList(folderId).iterator());
     }
 
@@ -122,7 +122,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getDeletedContactsInFolder(int, int[], java.util.Date)
      */
-    public SearchIterator<ContactObject> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+    public SearchIterator<Contact> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -149,7 +149,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getModifiedContactsInFolder(int, int[], java.util.Date)
      */
-    public SearchIterator<ContactObject> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+    public SearchIterator<Contact> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -166,7 +166,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getObjectById(int, int)
      */
-    public ContactObject getObjectById(int objectId, int inFolder) throws OXException {
+    public Contact getObjectById(int objectId, int inFolder) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -175,7 +175,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getObjectsById(int[][], int[])
      */
-    public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException {
+    public SearchIterator<Contact> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -184,7 +184,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getUserById(int)
      */
-    public ContactObject getUserById(int userId) throws OXException {
+    public Contact getUserById(int userId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -193,7 +193,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#searchContacts(java.lang.String, int, int, java.lang.String, int[])
      */
-    public SearchIterator<ContactObject> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -208,7 +208,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     }
 
     public void simulateContact(int cid, int folderId, int id1, String surname) {
-        ContactObject contact = new ContactObject();
+        Contact contact = new Contact();
         contact.setContextId(cid);
         contact.setParentFolderID(folderId);
         contact.setObjectID(id1);
@@ -218,7 +218,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     }
 
     public void simulateDistributionList(int cid, int folderId, int id1, String name) {
-        ContactObject contact = new ContactObject();
+        Contact contact = new Contact();
         contact.setContextId(cid);
         contact.setParentFolderID(folderId);
         contact.setObjectID(id1);
@@ -228,11 +228,11 @@ public class SimContactSQLInterface implements ContactSQLInterface {
         getFolderList(folderId).add(contact);
     }
 
-    private List<ContactObject> getFolderList(int folderId) {
+    private List<Contact> getFolderList(int folderId) {
         if (folders.containsKey(folderId)) {
             return folders.get(folderId);
         }
-        folders.put(folderId, new LinkedList<ContactObject>());
+        folders.put(folderId, new LinkedList<Contact>());
         return folders.get(folderId);
     }
 

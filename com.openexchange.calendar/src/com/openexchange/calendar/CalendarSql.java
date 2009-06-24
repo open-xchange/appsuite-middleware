@@ -73,7 +73,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -156,11 +156,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> getAppointmentsBetweenInFolder(final int fid, final int[] cols, final Date start, final Date end, final int orderBy, final String orderDir) throws OXException, SQLException {
+    public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int fid, final int[] cols, final Date start, final Date end, final int orderBy, final String orderDir) throws OXException, SQLException {
         return getAppointmentsBetweenInFolder(fid, cols, start, end, 0, 0, orderBy, orderDir);
     }
 
-    public SearchIterator<AppointmentObject> getAppointmentsBetweenInFolder(final int fid, int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final String orderDir) throws OXException, SQLException {
+    public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int fid, int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final String orderDir) throws OXException, SQLException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -261,7 +261,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since, final boolean includePrivateFlag) throws OXException {
+    public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since, final boolean includePrivateFlag) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -337,11 +337,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since, final boolean includePrivateFlag) throws OXException {
+    public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since, final boolean includePrivateFlag) throws OXException {
         return getModifiedAppointmentsInFolder(fid, null, null, cols, since, includePrivateFlag);
     }
 
-    public SearchIterator<AppointmentObject> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException {
+    public SearchIterator<Appointment> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -996,7 +996,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirm_message, session, ctx);
     }
 
-    public SearchIterator<AppointmentObject> getObjectsById(final int[][] oids, int[] cols) throws OXException {
+    public SearchIterator<Appointment> getObjectsById(final int[][] oids, int[] cols) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1039,11 +1039,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         return SearchIteratorAdapter.createEmptyIterator();
     }
 
-    public SearchIterator<AppointmentObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, final int cols[]) throws OXException, SQLException {
+    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, final int cols[]) throws OXException, SQLException {
         return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols, 0, 0);
     }
 
-    private SearchIterator<AppointmentObject> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException, SQLException {
+    private SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException, SQLException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1060,7 +1060,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 co.setRequestedFolder(searchobject.getFolder());
             } else {
                 final int ara[] = new int[1];
-                ara[0] = AppointmentObject.PARTICIPANTS;
+                ara[0] = Appointment.PARTICIPANTS;
                 cols = recColl.enhanceCols(cols, ara, 1);
             }
             cols = recColl.checkAndAlterCols(cols);
@@ -1114,7 +1114,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> searchAppointments(final String searchpattern, final int fid, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Appointment> searchAppointments(final String searchpattern, final int fid, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final AppointmentSearchObject searchobject = new AppointmentSearchObject();
         searchobject.setPattern(searchpattern);
         searchobject.setFolder(fid);
@@ -1129,7 +1129,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.attachmentAction(oid, uid, c, action);
     }
 
-    public SearchIterator<AppointmentObject> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
+    public SearchIterator<Appointment> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1192,7 +1192,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> getActiveAppointments(final int user_uid, final Date start, final Date end, int cols[]) throws OXException {
+    public SearchIterator<Appointment> getActiveAppointments(final int user_uid, final Date start, final Date end, int cols[]) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1228,7 +1228,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> getModifiedAppointmentsBetween(final int userId, final Date start, final Date end, int[] cols, final Date since, final int orderBy, final String orderDir) throws OXException, SQLException {
+    public SearchIterator<Appointment> getModifiedAppointmentsBetween(final int userId, final Date start, final Date end, int[] cols, final Date since, final int orderBy, final String orderDir) throws OXException, SQLException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -1271,7 +1271,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<AppointmentObject> getAppointmentsBetween(final int user_uid, final Date start, final Date end, final int cols[], final int orderBy, final String orderDir) throws OXException, SQLException {
+    public SearchIterator<Appointment> getAppointmentsBetween(final int user_uid, final Date start, final Date end, final int cols[], final int orderBy, final String orderDir) throws OXException, SQLException {
         return getModifiedAppointmentsBetween(user_uid, start, end, cols, null, orderBy, orderDir);
     }
 

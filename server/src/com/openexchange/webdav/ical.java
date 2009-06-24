@@ -81,7 +81,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -128,8 +128,8 @@ public final class ical extends PermissionServlet {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED,
         FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, CommonObject.PRIVATE_FLAG, CommonObject.COLOR_LABEL, CalendarObject.TITLE,
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_ID,
-        CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, AppointmentObject.LOCATION,
-        AppointmentObject.FULL_TIME, AppointmentObject.SHOWN_AS, AppointmentObject.TIMEZONE };
+        CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.LOCATION,
+        Appointment.FULL_TIME, Appointment.SHOWN_AS, Appointment.TIMEZONE };
 
     private final static int[] TASK_FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
@@ -203,12 +203,12 @@ public final class ical extends PermissionServlet {
 
             final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
             CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            SearchIterator<AppointmentObject> iter = null;
+            SearchIterator<Appointment> iter = null;
             try {
                 final Map<Integer, SeriesUIDPatcher> patchers = new HashMap<Integer, SeriesUIDPatcher>();
                 iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0), true);
                 while (iter.hasNext()) {
-                    final AppointmentObject appointment = iter.next();
+                    final Appointment appointment = iter.next();
                     if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
                         if (!appointment.containsTimezone()) {
                             appointment.setTimezone(user.getTimeZone());

@@ -78,7 +78,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.AbstractImporter;
@@ -281,7 +281,7 @@ public class ICalImporter extends AbstractImporter {
                     // Check for possible full-time appointment
                     check4FullTime(appointmentObj);
                     try {
-                        final AppointmentObject[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
+                        final Appointment[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
                         if (conflicts == null || conflicts.length == 0) {
                             importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
                             importResult.setDate(appointmentObj.getLastModified());
@@ -496,7 +496,7 @@ public class ICalImporter extends AbstractImporter {
      * 
      * @param appointmentObj The appointment to check
      */
-    private void check4FullTime(final AppointmentObject appointmentObj) {
+    private void check4FullTime(final Appointment appointmentObj) {
         final long start = appointmentObj.getStartDate().getTime();
         final long end = appointmentObj.getEndDate().getTime();
         if (Constants.MILLI_DAY == (end - start)) {

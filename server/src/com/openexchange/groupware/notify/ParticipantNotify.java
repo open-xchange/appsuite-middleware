@@ -78,7 +78,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -249,22 +249,22 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
     }
 
-    public void appointmentCreated(final AppointmentObject appointmentObj, final Session session) {
+    public void appointmentCreated(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_NEW), Notifications.APPOINTMENT_CREATE_MAIL, State.Type.NEW), false, false, false);
     }
 
-    public void appointmentModified(final AppointmentObject appointmentObj, final Session session) {
+    public void appointmentModified(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
-    public void appointmentModified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment, final Session session) {
+    public void appointmentModified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
         sendNotification(oldAppointment, newAppointment, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
-    public void appointmentAccepted(final AppointmentObject appointmentObj, final Session session) {
+    public void appointmentAccepted(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_ACCEPTED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED),
@@ -272,7 +272,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.ACCEPTED), false, false, false);
     }
 
-    public void appointmentDeclined(final AppointmentObject appointmentObj, final Session session) {
+    public void appointmentDeclined(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DECLINED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED),
@@ -280,7 +280,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.DECLINED), false, false, false);
     }
 
-    public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session session) {
+    public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
@@ -288,7 +288,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
-    public void appointmentDeleted(final AppointmentObject appointmentObj, final Session session) {
+    public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
         /*
          * Clear calendar object from notification pool
          */
@@ -435,8 +435,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             newObj.setCreationDate(oldObj.getCreationDate());
         }
         if (Types.APPOINTMENT == state.getModule()) {
-            final AppointmentObject newApp = (AppointmentObject) newObj;
-            final AppointmentObject oldApp = oldObj == null ? null : ((AppointmentObject) oldObj);
+            final Appointment newApp = (Appointment) newObj;
+            final Appointment oldApp = oldObj == null ? null : ((Appointment) oldObj);
             if (!newApp.containsFullTime() && oldApp != null && oldApp.containsFullTime()) {
                 newApp.setFullTime(oldApp.getFullTime());
             }
@@ -904,7 +904,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             if (isTask) {
                 isFulltime = true;
             } else {
-                isFulltime = ((AppointmentObject) newObj).getFullTime();
+                isFulltime = ((Appointment) newObj).getFullTime();
             }
             final Date start = newObj.getStartDate();
             renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(

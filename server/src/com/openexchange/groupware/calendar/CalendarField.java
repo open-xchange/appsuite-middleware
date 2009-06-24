@@ -50,7 +50,7 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * This class is meant for translating the different names and IDs
@@ -68,39 +68,39 @@ import com.openexchange.groupware.container.AppointmentObject;
  *
  */
 public enum CalendarField {
-    OBJECTID ( AppointmentObject.OBJECT_ID , "ObjectID" ),
-    CREATEDBY ( AppointmentObject.CREATED_BY , "CreatedBy" ),
-    CREATIONDATE ( AppointmentObject.CREATION_DATE , "CreationDate" ),
-    MODIFIEDBY ( AppointmentObject.MODIFIED_BY , "ModifiedBy" ),
-    LASTMODIFIED ( AppointmentObject.LAST_MODIFIED , "LastModified" ),
-    PARENTFOLDERID ( AppointmentObject.FOLDER_ID , "ParentFolderID" ),
-    TITLE ( AppointmentObject.TITLE , "Title" ),
-    STARTDATE ( AppointmentObject.START_DATE , "StartDate" ),
-    ENDDATE ( AppointmentObject.END_DATE , "EndDate" ),
-    SHOWNAS ( AppointmentObject.SHOWN_AS , "ShownAs" ),
-    LOCATION ( AppointmentObject.LOCATION , "Location" ),
-    CATEGORIES ( AppointmentObject.CATEGORIES , "Categories" ),
-    LABEL ( AppointmentObject.COLOR_LABEL , "Label" ),
-    PRIVATEFLAG ( AppointmentObject.PRIVATE_FLAG , "PrivateFlag" ),
-    FULLTIME ( AppointmentObject.FULL_TIME , "FullTime" ),
-    NOTE ( AppointmentObject.NOTE , "Note" ),
-    RECURRENCETYPE ( AppointmentObject.RECURRENCE_TYPE , "RecurrenceType" ),
-    INTERVAL ( AppointmentObject.INTERVAL , "Interval" ),
-    DAYS ( AppointmentObject.DAYS , "Days" ),
-    DAYINMONTH ( AppointmentObject.DAY_IN_MONTH , "DayInMonth" ),
-    MONTH ( AppointmentObject.MONTH , "Month" ),
-    UNTIL ( AppointmentObject.UNTIL , "Until" ),
-    OCCURRENCE ( AppointmentObject.RECURRENCE_COUNT , "Occurrence" ),
-    RECURRENCEDATEPOSITION ( AppointmentObject.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition" ),
-    RECURRENCEPOSITION ( AppointmentObject.RECURRENCE_POSITION , "RecurrencePosition" ),
-    TIMEZONE ( AppointmentObject.TIMEZONE , "Timezone" ),
-    CHANGEEXCEPTION ( AppointmentObject.CHANGE_EXCEPTIONS, "ChangeExceptions" ),
-    DELETEEXCEPTION ( AppointmentObject.DELETE_EXCEPTIONS, "DeleteExceptions" ),
-    PARTICIPANTS ( AppointmentObject.PARTICIPANTS, "Participants" ),
-    USERS ( AppointmentObject.USERS, "Users" ),
-    RECURRINGOCCURRENCE ( AppointmentObject.NOTIFICATION, "Notification"),
-    RECURRENCECALCULATOR ( AppointmentObject.RECURRENCE_CALCULATOR, "RecurrenceCalculator"),
-    ALARM ( AppointmentObject.ALARM, "Alarm");
+    OBJECTID ( Appointment.OBJECT_ID , "ObjectID" ),
+    CREATEDBY ( Appointment.CREATED_BY , "CreatedBy" ),
+    CREATIONDATE ( Appointment.CREATION_DATE , "CreationDate" ),
+    MODIFIEDBY ( Appointment.MODIFIED_BY , "ModifiedBy" ),
+    LASTMODIFIED ( Appointment.LAST_MODIFIED , "LastModified" ),
+    PARENTFOLDERID ( Appointment.FOLDER_ID , "ParentFolderID" ),
+    TITLE ( Appointment.TITLE , "Title" ),
+    STARTDATE ( Appointment.START_DATE , "StartDate" ),
+    ENDDATE ( Appointment.END_DATE , "EndDate" ),
+    SHOWNAS ( Appointment.SHOWN_AS , "ShownAs" ),
+    LOCATION ( Appointment.LOCATION , "Location" ),
+    CATEGORIES ( Appointment.CATEGORIES , "Categories" ),
+    LABEL ( Appointment.COLOR_LABEL , "Label" ),
+    PRIVATEFLAG ( Appointment.PRIVATE_FLAG , "PrivateFlag" ),
+    FULLTIME ( Appointment.FULL_TIME , "FullTime" ),
+    NOTE ( Appointment.NOTE , "Note" ),
+    RECURRENCETYPE ( Appointment.RECURRENCE_TYPE , "RecurrenceType" ),
+    INTERVAL ( Appointment.INTERVAL , "Interval" ),
+    DAYS ( Appointment.DAYS , "Days" ),
+    DAYINMONTH ( Appointment.DAY_IN_MONTH , "DayInMonth" ),
+    MONTH ( Appointment.MONTH , "Month" ),
+    UNTIL ( Appointment.UNTIL , "Until" ),
+    OCCURRENCE ( Appointment.RECURRENCE_COUNT , "Occurrence" ),
+    RECURRENCEDATEPOSITION ( Appointment.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition" ),
+    RECURRENCEPOSITION ( Appointment.RECURRENCE_POSITION , "RecurrencePosition" ),
+    TIMEZONE ( Appointment.TIMEZONE , "Timezone" ),
+    CHANGEEXCEPTION ( Appointment.CHANGE_EXCEPTIONS, "ChangeExceptions" ),
+    DELETEEXCEPTION ( Appointment.DELETE_EXCEPTIONS, "DeleteExceptions" ),
+    PARTICIPANTS ( Appointment.PARTICIPANTS, "Participants" ),
+    USERS ( Appointment.USERS, "Users" ),
+    RECURRINGOCCURRENCE ( Appointment.NOTIFICATION, "Notification"),
+    RECURRENCECALCULATOR ( Appointment.RECURRENCE_CALCULATOR, "RecurrenceCalculator"),
+    ALARM ( Appointment.ALARM, "Alarm");
 
 
     private int appointmentObjectID; //this is the ID of AppointmentObject

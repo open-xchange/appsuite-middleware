@@ -51,7 +51,7 @@
 
 package com.openexchange.event.impl;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 
 /**
@@ -61,9 +61,9 @@ import com.openexchange.session.Session;
  */
 public interface AppointmentEventInterface {
 	
-    public void appointmentCreated(AppointmentObject appointmentObj, Session sessionObj);
+    public void appointmentCreated(Appointment appointmentObj, Session sessionObj);
 	
-    public void appointmentModified(AppointmentObject appointmentObj, Session sessionObj);
+    public void appointmentModified(Appointment appointmentObj, Session sessionObj);
 
     /**
 	 * Invoked if one of appointment's participants changed his confirmation
@@ -74,7 +74,7 @@ public interface AppointmentEventInterface {
 	 * @param sessionObj
 	 *            The user session
 	 */
-	public void appointmentAccepted(AppointmentObject appointmentObj, Session sessionObj);
+	public void appointmentAccepted(Appointment appointmentObj, Session sessionObj);
 
 	/**
 	 * Invoked if one of appointment's participants changed his confirmation
@@ -85,7 +85,7 @@ public interface AppointmentEventInterface {
 	 * @param sessionObj
 	 *            The user session
 	 */
-	public void appointmentDeclined(AppointmentObject appointmentObj, Session sessionObj);
+	public void appointmentDeclined(Appointment appointmentObj, Session sessionObj);
 
 	/**
 	 * Invoked if one of appointment's participants changed his confirmation
@@ -96,9 +96,9 @@ public interface AppointmentEventInterface {
 	 * @param sessionObj
 	 *            The user session
 	 */
-	public void appointmentTentativelyAccepted(AppointmentObject appointmentObj, Session sessionObj);
+	public void appointmentTentativelyAccepted(Appointment appointmentObj, Session sessionObj);
 		
-    public void appointmentDeleted(AppointmentObject appointmentObj, Session sessionObj);
+    public void appointmentDeleted(Appointment appointmentObj, Session sessionObj);
 	
 }
 

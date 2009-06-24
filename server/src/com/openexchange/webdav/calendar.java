@@ -71,7 +71,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -178,7 +178,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     }
 
     // Sets default values as needed
-    private void sanitize(final AppointmentObject appointmentobject) {
+    private void sanitize(final Appointment appointmentobject) {
         if (!appointmentobject.getAlarmFlag()) {
             appointmentobject.setAlarm(-1);
         }
@@ -192,7 +192,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
         }
     }
 
-    private boolean isLimitedSeries(final AppointmentObject appointmentobject) {
+    private boolean isLimitedSeries(final Appointment appointmentobject) {
         return appointmentobject.containsOccurrence() || appointmentobject.containsUntil();
     }
 
@@ -285,7 +285,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
             try {
                 boolean hasConflicts = false;
-                AppointmentObject[] conflicts = null;
+                Appointment[] conflicts = null;
                 switch (action) {
                 case DataParser.SAVE:
                     if (appointmentobject.containsObjectID()) {

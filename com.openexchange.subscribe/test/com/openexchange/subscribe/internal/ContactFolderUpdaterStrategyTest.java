@@ -51,7 +51,7 @@ package com.openexchange.subscribe.internal;
 
 import java.util.Date;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import junit.framework.TestCase;
 
@@ -64,7 +64,7 @@ import junit.framework.TestCase;
  */
 public class ContactFolderUpdaterStrategyTest extends TestCase {
     
-    private FolderUpdaterStrategy<ContactObject> strategy;
+    private FolderUpdaterStrategy<Contact> strategy;
     
     public void setUp() {
         this.strategy = new ContactFolderUpdaterStrategy();
@@ -83,11 +83,11 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
     
     public void testScoring() throws AbstractOXException {
         // First name is not enough
-        ContactObject contact = new ContactObject();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         
-        ContactObject contact2 = new ContactObject();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Wurst");
 

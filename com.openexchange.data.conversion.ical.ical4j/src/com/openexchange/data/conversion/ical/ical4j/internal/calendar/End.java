@@ -61,7 +61,7 @@ import net.fortuna.ical4j.model.property.DtEnd;
 
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
@@ -89,7 +89,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
     }
 
     private boolean needsDate(final U calendar) {
-        return AppointmentObject.class.isAssignableFrom(calendar.getClass()) && ((AppointmentObject)calendar).getFullTime();
+        return Appointment.class.isAssignableFrom(calendar.getClass()) && ((Appointment)calendar).getFullTime();
     }
 
     /**

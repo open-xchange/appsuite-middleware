@@ -73,13 +73,13 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Recurrence
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Title;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public final class AppointmentConverters {
-    public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
+    public static final AttributeConverter<VEvent, Appointment>[] ALL;
 
     /**
      * Prevent instantiation.
@@ -89,43 +89,43 @@ public final class AppointmentConverters {
     }
 
     static {
-        final List<AttributeConverter<VEvent, AppointmentObject>> tmp = new ArrayList<AttributeConverter<VEvent, AppointmentObject>>();
-        tmp.add(new Title<VEvent, AppointmentObject>());
-        tmp.add(new Note<VEvent, AppointmentObject>());
+        final List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
+        tmp.add(new Title<VEvent, Appointment>());
+        tmp.add(new Note<VEvent, Appointment>());
 
-        final Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
+        final Start<VEvent, Appointment> start = new Start<VEvent, Appointment>();
         start.setVerifier(new RequireStartDate());
         tmp.add(start);
 
-        tmp.add(new End<VEvent, AppointmentObject>());
+        tmp.add(new End<VEvent, Appointment>());
 
-        final Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
+        final Duration<VEvent, Appointment> duration = new Duration<VEvent, Appointment>();
         duration.setVerifier(new RequireEndDate());
         tmp.add(duration);
 
-        tmp.add(new Klass<VEvent, AppointmentObject>());
+        tmp.add(new Klass<VEvent, Appointment>());
 
         tmp.add(new Location());
         tmp.add(new Transparency());
 
-        final Participants<VEvent, AppointmentObject> participants = new Participants<VEvent, AppointmentObject>();
+        final Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
         participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
         tmp.add(participants);
 
-        tmp.add(new Categories<VEvent, AppointmentObject>());
+        tmp.add(new Categories<VEvent, Appointment>());
 
-        tmp.add(new Recurrence<VEvent, AppointmentObject>());
+        tmp.add(new Recurrence<VEvent, Appointment>());
         tmp.add(new DeleteExceptions());
         tmp.add(new ChangeExceptions());
 
-        tmp.add(new Alarm<VEvent, AppointmentObject>());
+        tmp.add(new Alarm<VEvent, Appointment>());
         tmp.add(new IgnoreConflicts());
-        tmp.add(new Uid<VEvent, AppointmentObject>());
+        tmp.add(new Uid<VEvent, Appointment>());
 
-        tmp.add(new CreatedAndDTStamp<VEvent, AppointmentObject>());
-        tmp.add(new LastModified<VEvent, AppointmentObject>());
+        tmp.add(new CreatedAndDTStamp<VEvent, Appointment>());
+        tmp.add(new LastModified<VEvent, Appointment>());
 
-        tmp.add(new CreatedBy<VEvent, AppointmentObject>());
+        tmp.add(new CreatedBy<VEvent, Appointment>());
 
         ALL = tmp.toArray(new AttributeConverter[tmp.size()]);
     }

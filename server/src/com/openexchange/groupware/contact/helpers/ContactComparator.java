@@ -51,14 +51,14 @@ package com.openexchange.groupware.contact.helpers;
 
 import java.util.Comparator;
 import com.davekoelle.AlphanumComparator;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * A special implementation of a comparator that uses the first not null attribute of a contact in order of surname, display name, company,
  * business email address, private email address.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ContactComparator implements Comparator<ContactObject> {
+public class ContactComparator implements Comparator<Contact> {
 
     private static final AlphanumComparator alphanumComparator = new AlphanumComparator();
 
@@ -69,13 +69,13 @@ public class ContactComparator implements Comparator<ContactObject> {
         super();
     }
 
-    public int compare(final ContactObject contact1, final ContactObject contact2) {
+    public int compare(final Contact contact1, final Contact contact2) {
         final String s1 = getFirstNotNull(contact1);
         final String s2 = getFirstNotNull(contact2);
         return alphanumComparator.compare(s1, s2);
     }
 
-    private String getFirstNotNull(final ContactObject contact) {
+    private String getFirstNotNull(final Contact contact) {
         final String retval;
         if (contact.containsSurName()) {
             retval = contact.getSurName();

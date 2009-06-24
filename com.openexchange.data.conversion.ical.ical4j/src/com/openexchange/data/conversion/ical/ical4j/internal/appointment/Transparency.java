@@ -55,23 +55,23 @@ import net.fortuna.ical4j.model.property.Transp;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
-    public boolean isSet(final AppointmentObject appointment) {
+public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
+    public boolean isSet(final Appointment appointment) {
         return appointment.containsShownAs();
     }
 
-    public void emit(final int index, final AppointmentObject appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         switch(appointment.getShownAs()) {
-            case AppointmentObject.RESERVED :
+            case Appointment.RESERVED :
                 event.getProperties().add(new Transp("OPAQUE"));
                 break;
-            case AppointmentObject.FREE :
+            case Appointment.FREE :
                 event.getProperties().add(new Transp("TRANSPARENT"));
                 break;
             default:
@@ -82,12 +82,12 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
         return event.getTransparency() != null;
     }
 
-    public void parse(final int index, final VEvent event, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final String value = event.getProperty("TRANSP").getValue().toLowerCase();
         if("opaque".equals(value))  {
-            appointment.setShownAs(AppointmentObject.RESERVED);
+            appointment.setShownAs(Appointment.RESERVED);
         } else if ("transparent".equals(value)) {
-            appointment.setShownAs(AppointmentObject.FREE);
+            appointment.setShownAs(Appointment.FREE);
         }
     }
 }

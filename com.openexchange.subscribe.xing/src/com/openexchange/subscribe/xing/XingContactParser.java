@@ -14,7 +14,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -45,8 +45,8 @@ public class XingContactParser {
     
     private String LOGOUT_PAGE = "/app/user?op=logout";
 	
-	public ContactObject[] getXingContactsForUser(String xingUser, String xingPassword) throws XingSubscriptionException {
-	    Vector<ContactObject> contactObjects = new Vector<ContactObject>();
+	public Contact[] getXingContactsForUser(String xingUser, String xingPassword) throws XingSubscriptionException {
+	    Vector<Contact> contactObjects = new Vector<Contact>();
 	    
 	    try {
     		// emulate a known client, hopefully keeping our profile low
@@ -92,7 +92,7 @@ public class XingContactParser {
     	    	tempNextContactsPage = linkToNextContactsPage.click();
     	    	currentPage = tempNextContactsPage;
     	    	List<HtmlAnchor> tempAllLinks = tempNextContactsPage.getAnchors();
-    	    	Vector<ContactObject> tempNextContacts = getContactsFromVcardLinks(tempAllLinks);
+    	    	Vector<Contact> tempNextContacts = getContactsFromVcardLinks(tempAllLinks);
     	    	contactObjects.addAll(tempNextContacts);
     	    	offset += 10;
     	    	linkToNextContactsPage = getLinkToNextContactsPage(tempAllLinks, offset);
@@ -108,15 +108,15 @@ public class XingContactParser {
             throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
 	    
-	    ContactObject[] contactObjectsArray = new ContactObject[contactObjects.size()];
+	    Contact[] contactObjectsArray = new Contact[contactObjects.size()];
 	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
 	    	contactObjectsArray[i] = contactObjects.get(i);
 	    }
 		return contactObjectsArray;
 	}
 
-	private Vector<ContactObject> getContactsFromVcardLinks (List<HtmlAnchor> allLinks) throws IOException{
-		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
+	private Vector<Contact> getContactsFromVcardLinks (List<HtmlAnchor> allLinks) throws IOException{
+		Vector<Contact> contactObjects = new Vector<Contact>();
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 	    for (HtmlAnchor tempLink : allLinks){
 	    	// there should be some vcard links here. If there are none something is probably wrong
@@ -129,7 +129,7 @@ public class XingContactParser {
 	    		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
 	    		try {
 	    			VersitObject versitObject = def.parse(versitReader);
-	    			ContactObject contactObject = oxContainerConverter.convertContact(versitObject);
+	    			Contact contactObject = oxContainerConverter.convertContact(versitObject);
 	    			SANITIZER.sanitize(contactObject);
 	    			contactObjects.add(contactObject);
 	    		} catch (final VersitException e){

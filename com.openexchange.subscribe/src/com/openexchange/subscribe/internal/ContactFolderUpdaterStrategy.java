@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
@@ -69,20 +69,20 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<ContactObject> {
+public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
     
     private static final int SQL_INTERFACE = 1;
     private static final int SUBSCRIPTION = 2;
     
     private static final int[] COMPARISON_COLUMNS = {
-        ContactObject.OBJECT_ID,
-        ContactObject.FOLDER_ID,
-        ContactObject.GIVEN_NAME,
-        ContactObject.SUR_NAME,
-        ContactObject.BIRTHDAY
+        Contact.OBJECT_ID,
+        Contact.FOLDER_ID,
+        Contact.GIVEN_NAME,
+        Contact.SUR_NAME,
+        Contact.BIRTHDAY
     };
     
-    public int calculateSimilarityScore(ContactObject original, ContactObject candidate, Object session) throws AbstractOXException {
+    public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
         int score = 0;
         if(eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
@@ -109,13 +109,13 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         
     }
 
-    public Collection<ContactObject> getData(Subscription subscription, Object session) throws AbstractOXException {
+    public Collection<Contact> getData(Subscription subscription, Object session) throws AbstractOXException {
         RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
         
         int folderId = subscription.getFolderIdAsInt();
         int numberOfContacts = contacts.getNumberOfContacts(folderId);
-        SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.OBJECT_ID, "ASC", COMPARISON_COLUMNS);
-        List<ContactObject> retval = new ArrayList<ContactObject>();
+        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.OBJECT_ID, "ASC", COMPARISON_COLUMNS);
+        List<Contact> retval = new ArrayList<Contact>();
         while(contactsInFolder.hasNext()) {
             retval.add(contactsInFolder.next());
         }
@@ -130,7 +130,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return folder.getModule() == FolderObject.CONTACT;
     }
 
-    public void save(ContactObject newElement, Object session) throws AbstractOXException {
+    public void save(Contact newElement, Object session) throws AbstractOXException {
         RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
@@ -150,7 +150,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return userInfo;
     }
 
-    public void update(ContactObject original, ContactObject update, Object session) throws AbstractOXException {
+    public void update(Contact original, Contact update, Object session) throws AbstractOXException {
         RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
 
         update.setParentFolderID(original.getParentFolderID());

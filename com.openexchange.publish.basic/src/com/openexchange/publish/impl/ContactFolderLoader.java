@@ -54,7 +54,7 @@ import java.util.LinkedList;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
@@ -85,14 +85,14 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
      * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
      */
     public Collection<? extends Object> load(final Publication publication) throws PublicationException {
-        final LinkedList<ContactObject> list = new LinkedList<ContactObject>();
+        final LinkedList<Contact> list = new LinkedList<Contact>();
         try {
             final int folderId = Integer.parseInt(publication.getEntityId());
             final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            final SearchIterator<ContactObject> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, ContactObject.GIVEN_NAME, "ASC", ContactObject.ALL_COLUMNS);
+            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, "ASC", Contact.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
-                ContactObject next = contactsInFolder.next();
+                Contact next = contactsInFolder.next();
                 if(!next.getMarkAsDistribtuionlist()) {
                     list.add(next);
                 }

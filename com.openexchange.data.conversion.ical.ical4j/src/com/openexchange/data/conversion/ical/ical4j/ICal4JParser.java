@@ -84,7 +84,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverte
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
@@ -100,13 +100,13 @@ public class ICal4JParser implements ICalParser {
 
     private static final Map<String, Integer> weekdays = new HashMap<String, Integer>();
     static {
-        weekdays.put("MO", Integer.valueOf(AppointmentObject.MONDAY));
-        weekdays.put("TU", Integer.valueOf(AppointmentObject.TUESDAY));
-        weekdays.put("WE", Integer.valueOf(AppointmentObject.WEDNESDAY));
-        weekdays.put("TH", Integer.valueOf(AppointmentObject.THURSDAY));
-        weekdays.put("FR", Integer.valueOf(AppointmentObject.FRIDAY));
-        weekdays.put("SA", Integer.valueOf(AppointmentObject.SATURDAY));
-        weekdays.put("SO", Integer.valueOf(AppointmentObject.SUNDAY));
+        weekdays.put("MO", Integer.valueOf(Appointment.MONDAY));
+        weekdays.put("TU", Integer.valueOf(Appointment.TUESDAY));
+        weekdays.put("WE", Integer.valueOf(Appointment.WEDNESDAY));
+        weekdays.put("TH", Integer.valueOf(Appointment.THURSDAY));
+        weekdays.put("FR", Integer.valueOf(Appointment.FRIDAY));
+        weekdays.put("SA", Integer.valueOf(Appointment.SATURDAY));
+        weekdays.put("SO", Integer.valueOf(Appointment.SUNDAY));
     }
 
     public ICal4JParser() {
@@ -199,7 +199,7 @@ public class ICal4JParser implements ICalParser {
 
         final TimeZone tz = determineTimeZone(vevent, defaultTZ);
 
-        for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
+        for (final AttributeConverter<VEvent, Appointment> converter : AppointmentConverters.ALL) {
             if (converter.hasProperty(vevent)) {
                 converter.parse(index, vevent, appointment, tz, ctx, warnings);
             }

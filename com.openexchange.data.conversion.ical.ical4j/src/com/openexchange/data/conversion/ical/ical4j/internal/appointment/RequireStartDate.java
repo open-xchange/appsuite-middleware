@@ -53,13 +53,13 @@ import java.util.List;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class RequireStartDate implements ObjectVerifier<AppointmentObject> {
-    public void verify(final int index, final AppointmentObject object, final List<ConversionWarning> warnings) throws ConversionError {
+public class RequireStartDate implements ObjectVerifier<Appointment> {
+    public void verify(final int index, final Appointment object, final List<ConversionWarning> warnings) throws ConversionError {
         if(!object.containsStartDate()) {
             throw new ConversionError(index, ConversionWarning.Code.MISSING_DTSTART);
         }

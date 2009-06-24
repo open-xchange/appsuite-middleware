@@ -54,7 +54,7 @@ import java.util.Date;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * ContactSQLInterface
@@ -69,7 +69,7 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param contactObj
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void insertContactObject(ContactObject contactObj) throws OXException;
+	public void insertContactObject(Contact contactObj) throws OXException;
 
 	/**
 	 * update the contact
@@ -78,7 +78,7 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param clientLastModified
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void updateContactObject(ContactObject contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException;
+	public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException;
 	
 	/**
 	 * deletes the ContactObject

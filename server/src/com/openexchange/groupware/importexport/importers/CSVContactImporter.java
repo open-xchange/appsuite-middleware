@@ -78,7 +78,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
@@ -247,7 +247,7 @@ public class CSVContactImporter extends AbstractImporter {
      */
     protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSwitcher conSet, final int lineNumber, final ServerSession session){
         final ImportResult result = new ImportResult();
-        final ContactObject contactObj = new ContactObject();
+        final Contact contactObj = new Contact();
         result.setFolder(folder);
         try{
             final List<String> wrongFields = new LinkedList<String>();

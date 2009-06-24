@@ -65,7 +65,7 @@ import net.fortuna.ical4j.model.property.DtStart;
 
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
@@ -93,7 +93,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     }
 
     private boolean needsDate(final U calendar) {
-        return AppointmentObject.class.isAssignableFrom(calendar.getClass()) && ((AppointmentObject)calendar).getFullTime();
+        return Appointment.class.isAssignableFrom(calendar.getClass()) && ((Appointment)calendar).getFullTime();
     }
 
     /**
@@ -139,8 +139,8 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
             calendarUTC.add(Calendar.DATE, 1);
             calendar.setEndDate(calendarUTC.getTime());
             // Special flag for appointments.
-            if (calendar instanceof AppointmentObject) {
-                final AppointmentObject appointment = (AppointmentObject) calendar;
+            if (calendar instanceof Appointment) {
+                final Appointment appointment = (Appointment) calendar;
                 appointment.setFullTime(true);
             }
         }

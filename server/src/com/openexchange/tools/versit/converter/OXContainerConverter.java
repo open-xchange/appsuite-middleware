@@ -82,10 +82,10 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -231,14 +231,14 @@ public class OXContainerConverter {
         SET_INT_METHODS.put(Integer.valueOf(CalendarObject.RECURRENCE_CALCULATOR), getSetIntegerMethod(
             CalendarObject.class,
             "setRecurrenceCalculator"));
-        SET_INT_METHODS.put(Integer.valueOf(CalendarObject.ALARM), getSetIntegerMethod(AppointmentObject.class, "setAlarm"));
+        SET_INT_METHODS.put(Integer.valueOf(CalendarObject.ALARM), getSetIntegerMethod(Appointment.class, "setAlarm"));
 
         SET_INT_METHODS.put(Integer.valueOf(Task.STATUS), getSetIntegerMethod(Task.class, "setStatus"));
         SET_INT_METHODS.put(Integer.valueOf(Task.PERCENT_COMPLETED), getSetIntegerMethod(Task.class, "setPercentComplete"));
         SET_INT_METHODS.put(Integer.valueOf(Task.PROJECT_ID), getSetIntegerMethod(Task.class, "setProjectID"));
         SET_INT_METHODS.put(Integer.valueOf(Task.PRIORITY), getSetIntegerMethod(Task.class, "setPriority"));
 
-        SET_INT_METHODS.put(Integer.valueOf(AppointmentObject.SHOWN_AS), getSetIntegerMethod(AppointmentObject.class, "setShownAs"));
+        SET_INT_METHODS.put(Integer.valueOf(Appointment.SHOWN_AS), getSetIntegerMethod(Appointment.class, "setShownAs"));
 
         // setter methods for long values
         SET_LONG_METHODS.put(Integer.valueOf(Task.ACTUAL_DURATION), getSetLongMethod(Task.class, "setActualDuration"));
@@ -268,8 +268,8 @@ public class OXContainerConverter {
 
         SET_DATE_METHODS.put(Integer.valueOf(Task.DATE_COMPLETED), getSetDateMethod(Task.class, "setDateCompleted"));
 
-        SET_DATE_METHODS.put(Integer.valueOf(ContactObject.BIRTHDAY), getSetDateMethod(ContactObject.class, "setBirthday"));
-        SET_DATE_METHODS.put(Integer.valueOf(ContactObject.ANNIVERSARY), getSetDateMethod(ContactObject.class, "setAnniversary"));
+        SET_DATE_METHODS.put(Integer.valueOf(Contact.BIRTHDAY), getSetDateMethod(Contact.class, "setBirthday"));
+        SET_DATE_METHODS.put(Integer.valueOf(Contact.ANNIVERSARY), getSetDateMethod(Contact.class, "setAnniversary"));
 
         // setter methods for string values
         SET_STRING_METHODS.put(Integer.valueOf(CommonObject.CATEGORIES), getSetStringMethod(CommonObject.class, "setCategories"));
@@ -282,140 +282,140 @@ public class OXContainerConverter {
         SET_STRING_METHODS.put(Integer.valueOf(Task.TRIP_METER), getSetStringMethod(Task.class, "setTripMeter"));
         SET_STRING_METHODS.put(Integer.valueOf(Task.COMPANIES), getSetStringMethod(Task.class, "setCompanies"));
 
-        SET_STRING_METHODS.put(Integer.valueOf(AppointmentObject.LOCATION), getSetStringMethod(AppointmentObject.class, "setLocation"));
+        SET_STRING_METHODS.put(Integer.valueOf(Appointment.LOCATION), getSetStringMethod(Appointment.class, "setLocation"));
 
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.DISPLAY_NAME), getSetStringMethod(ContactObject.class, "setDisplayName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.GIVEN_NAME), getSetStringMethod(ContactObject.class, "setGivenName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.SUR_NAME), getSetStringMethod(ContactObject.class, "setSurName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.MIDDLE_NAME), getSetStringMethod(ContactObject.class, "setMiddleName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.SUFFIX), getSetStringMethod(ContactObject.class, "setSuffix"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TITLE), getSetStringMethod(ContactObject.class, "setTitle"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.STREET_HOME), getSetStringMethod(ContactObject.class, "setStreetHome"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.STREET_BUSINESS), getSetStringMethod(ContactObject.class, "setStreetBusiness"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.STREET_OTHER), getSetStringMethod(ContactObject.class, "setStreetOther"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.DISPLAY_NAME), getSetStringMethod(Contact.class, "setDisplayName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.GIVEN_NAME), getSetStringMethod(Contact.class, "setGivenName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.SUR_NAME), getSetStringMethod(Contact.class, "setSurName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.MIDDLE_NAME), getSetStringMethod(Contact.class, "setMiddleName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.SUFFIX), getSetStringMethod(Contact.class, "setSuffix"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TITLE), getSetStringMethod(Contact.class, "setTitle"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.STREET_HOME), getSetStringMethod(Contact.class, "setStreetHome"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.STREET_BUSINESS), getSetStringMethod(Contact.class, "setStreetBusiness"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.STREET_OTHER), getSetStringMethod(Contact.class, "setStreetOther"));
         SET_STRING_METHODS.put(
-            Integer.valueOf(ContactObject.POSTAL_CODE_HOME),
-            getSetStringMethod(ContactObject.class, "setPostalCodeHome"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.POSTAL_CODE_BUSINESS), getSetStringMethod(
-            ContactObject.class,
+            Integer.valueOf(Contact.POSTAL_CODE_HOME),
+            getSetStringMethod(Contact.class, "setPostalCodeHome"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.POSTAL_CODE_BUSINESS), getSetStringMethod(
+            Contact.class,
             "setPostalCodeBusiness"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.POSTAL_CODE_OTHER), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.POSTAL_CODE_OTHER), getSetStringMethod(
+            Contact.class,
             "setPostalCodeOther"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.CITY_HOME), getSetStringMethod(ContactObject.class, "setCityHome"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.CITY_BUSINESS), getSetStringMethod(ContactObject.class, "setCityBusiness"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.CITY_OTHER), getSetStringMethod(ContactObject.class, "setCityOther"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.STATE_HOME), getSetStringMethod(ContactObject.class, "setStateHome"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.STATE_BUSINESS), getSetStringMethod(ContactObject.class, "setStateBusiness"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.STATE_OTHER), getSetStringMethod(ContactObject.class, "setStateOther"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.COUNTRY_HOME), getSetStringMethod(ContactObject.class, "setCountryHome"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.COUNTRY_BUSINESS), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.CITY_HOME), getSetStringMethod(Contact.class, "setCityHome"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.CITY_BUSINESS), getSetStringMethod(Contact.class, "setCityBusiness"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.CITY_OTHER), getSetStringMethod(Contact.class, "setCityOther"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.STATE_HOME), getSetStringMethod(Contact.class, "setStateHome"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.STATE_BUSINESS), getSetStringMethod(Contact.class, "setStateBusiness"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.STATE_OTHER), getSetStringMethod(Contact.class, "setStateOther"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.COUNTRY_HOME), getSetStringMethod(Contact.class, "setCountryHome"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.COUNTRY_BUSINESS), getSetStringMethod(
+            Contact.class,
             "setCountryBusiness"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.COUNTRY_OTHER), getSetStringMethod(ContactObject.class, "setCountryOther"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.MARITAL_STATUS), getSetStringMethod(ContactObject.class, "setMaritalStatus"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.NUMBER_OF_CHILDREN), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.COUNTRY_OTHER), getSetStringMethod(Contact.class, "setCountryOther"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.MARITAL_STATUS), getSetStringMethod(Contact.class, "setMaritalStatus"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.NUMBER_OF_CHILDREN), getSetStringMethod(
+            Contact.class,
             "setNumberOfChildren"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.PROFESSION), getSetStringMethod(ContactObject.class, "setProfession"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.NICKNAME), getSetStringMethod(ContactObject.class, "setNickname"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.SPOUSE_NAME), getSetStringMethod(ContactObject.class, "setSpouseName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.NOTE), getSetStringMethod(ContactObject.class, "setNote"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.DEPARTMENT), getSetStringMethod(ContactObject.class, "setDepartment"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.POSITION), getSetStringMethod(ContactObject.class, "setPosition"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.EMPLOYEE_TYPE), getSetStringMethod(ContactObject.class, "setEmployeeType"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.ROOM_NUMBER), getSetStringMethod(ContactObject.class, "setRoomNumber"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.NUMBER_OF_EMPLOYEE), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.PROFESSION), getSetStringMethod(Contact.class, "setProfession"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.NICKNAME), getSetStringMethod(Contact.class, "setNickname"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.SPOUSE_NAME), getSetStringMethod(Contact.class, "setSpouseName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.NOTE), getSetStringMethod(Contact.class, "setNote"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.DEPARTMENT), getSetStringMethod(Contact.class, "setDepartment"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.POSITION), getSetStringMethod(Contact.class, "setPosition"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.EMPLOYEE_TYPE), getSetStringMethod(Contact.class, "setEmployeeType"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.ROOM_NUMBER), getSetStringMethod(Contact.class, "setRoomNumber"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.NUMBER_OF_EMPLOYEE), getSetStringMethod(
+            Contact.class,
             "setNumberOfEmployee"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.SALES_VOLUME), getSetStringMethod(ContactObject.class, "setSalesVolume"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TAX_ID), getSetStringMethod(ContactObject.class, "setTaxID"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.COMMERCIAL_REGISTER), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.SALES_VOLUME), getSetStringMethod(Contact.class, "setSalesVolume"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TAX_ID), getSetStringMethod(Contact.class, "setTaxID"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.COMMERCIAL_REGISTER), getSetStringMethod(
+            Contact.class,
             "setCommercialRegister"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.BRANCHES), getSetStringMethod(ContactObject.class, "setBranches"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.BUSINESS_CATEGORY), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.BRANCHES), getSetStringMethod(Contact.class, "setBranches"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.BUSINESS_CATEGORY), getSetStringMethod(
+            Contact.class,
             "setBusinessCategory"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.INFO), getSetStringMethod(ContactObject.class, "setInfo"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.MANAGER_NAME), getSetStringMethod(ContactObject.class, "setManagerName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.ASSISTANT_NAME), getSetStringMethod(ContactObject.class, "setAssistantName"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS1), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.INFO), getSetStringMethod(Contact.class, "setInfo"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.MANAGER_NAME), getSetStringMethod(Contact.class, "setManagerName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.ASSISTANT_NAME), getSetStringMethod(Contact.class, "setAssistantName"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_BUSINESS1), getSetStringMethod(
+            Contact.class,
             "setTelephoneBusiness1"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS2), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_BUSINESS2), getSetStringMethod(
+            Contact.class,
             "setTelephoneBusiness2"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_HOME1), getSetStringMethod(ContactObject.class, "setTelephoneHome1"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_HOME2), getSetStringMethod(ContactObject.class, "setTelephoneHome2"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_OTHER), getSetStringMethod(ContactObject.class, "setTelephoneOther"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_ASSISTANT), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_HOME1), getSetStringMethod(Contact.class, "setTelephoneHome1"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_HOME2), getSetStringMethod(Contact.class, "setTelephoneHome2"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_OTHER), getSetStringMethod(Contact.class, "setTelephoneOther"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_ASSISTANT), getSetStringMethod(
+            Contact.class,
             "setTelephoneAssistant"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_CALLBACK), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_CALLBACK), getSetStringMethod(
+            Contact.class,
             "setTelephoneCallback"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_CAR), getSetStringMethod(ContactObject.class, "setTelephoneCar"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_COMPANY), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_CAR), getSetStringMethod(Contact.class, "setTelephoneCar"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_COMPANY), getSetStringMethod(
+            Contact.class,
             "setTelephoneCompany"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_IP), getSetStringMethod(ContactObject.class, "setTelephoneIP"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_ISDN), getSetStringMethod(ContactObject.class, "setTelephoneISDN"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_PAGER), getSetStringMethod(ContactObject.class, "setTelephonePager"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_PRIMARY), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_IP), getSetStringMethod(Contact.class, "setTelephoneIP"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_ISDN), getSetStringMethod(Contact.class, "setTelephoneISDN"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_PAGER), getSetStringMethod(Contact.class, "setTelephonePager"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_PRIMARY), getSetStringMethod(
+            Contact.class,
             "setTelephonePrimary"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_RADIO), getSetStringMethod(ContactObject.class, "setTelephoneRadio"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_TELEX), getSetStringMethod(ContactObject.class, "setTelephoneTelex"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.TELEPHONE_TTYTDD), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_RADIO), getSetStringMethod(Contact.class, "setTelephoneRadio"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_TELEX), getSetStringMethod(Contact.class, "setTelephoneTelex"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.TELEPHONE_TTYTDD), getSetStringMethod(
+            Contact.class,
             "setTelephoneTTYTTD"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.FAX_HOME), getSetStringMethod(ContactObject.class, "setFaxHome"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.FAX_BUSINESS), getSetStringMethod(ContactObject.class, "setFaxBusiness"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.FAX_OTHER), getSetStringMethod(ContactObject.class, "setFaxOther"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE1), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.FAX_HOME), getSetStringMethod(Contact.class, "setFaxHome"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.FAX_BUSINESS), getSetStringMethod(Contact.class, "setFaxBusiness"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.FAX_OTHER), getSetStringMethod(Contact.class, "setFaxOther"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.CELLULAR_TELEPHONE1), getSetStringMethod(
+            Contact.class,
             "setCellularTelephone1"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE2), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.CELLULAR_TELEPHONE2), getSetStringMethod(
+            Contact.class,
             "setCellularTelephone2"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.EMAIL1), getSetStringMethod(ContactObject.class, "setEmail1"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.EMAIL2), getSetStringMethod(ContactObject.class, "setEmail2"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.EMAIL3), getSetStringMethod(ContactObject.class, "setEmail3"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.URL), getSetStringMethod(ContactObject.class, "setURL"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.INSTANT_MESSENGER1), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.EMAIL1), getSetStringMethod(Contact.class, "setEmail1"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.EMAIL2), getSetStringMethod(Contact.class, "setEmail2"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.EMAIL3), getSetStringMethod(Contact.class, "setEmail3"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.URL), getSetStringMethod(Contact.class, "setURL"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.INSTANT_MESSENGER1), getSetStringMethod(
+            Contact.class,
             "setInstantMessenger1"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.INSTANT_MESSENGER2), getSetStringMethod(
-            ContactObject.class,
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.INSTANT_MESSENGER2), getSetStringMethod(
+            Contact.class,
             "setInstantMessenger2"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD01), getSetStringMethod(ContactObject.class, "setUserField01"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD02), getSetStringMethod(ContactObject.class, "setUserField02"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD03), getSetStringMethod(ContactObject.class, "setUserField03"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD04), getSetStringMethod(ContactObject.class, "setUserField04"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD05), getSetStringMethod(ContactObject.class, "setUserField05"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD06), getSetStringMethod(ContactObject.class, "setUserField06"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD07), getSetStringMethod(ContactObject.class, "setUserField07"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD08), getSetStringMethod(ContactObject.class, "setUserField08"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD09), getSetStringMethod(ContactObject.class, "setUserField09"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD10), getSetStringMethod(ContactObject.class, "setUserField10"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD11), getSetStringMethod(ContactObject.class, "setUserField11"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD12), getSetStringMethod(ContactObject.class, "setUserField12"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD13), getSetStringMethod(ContactObject.class, "setUserField13"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD14), getSetStringMethod(ContactObject.class, "setUserField14"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD15), getSetStringMethod(ContactObject.class, "setUserField15"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD16), getSetStringMethod(ContactObject.class, "setUserField16"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD17), getSetStringMethod(ContactObject.class, "setUserField17"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD18), getSetStringMethod(ContactObject.class, "setUserField18"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD19), getSetStringMethod(ContactObject.class, "setUserField19"));
-        SET_STRING_METHODS.put(Integer.valueOf(ContactObject.USERFIELD20), getSetStringMethod(ContactObject.class, "setUserField20"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD01), getSetStringMethod(Contact.class, "setUserField01"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD02), getSetStringMethod(Contact.class, "setUserField02"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD03), getSetStringMethod(Contact.class, "setUserField03"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD04), getSetStringMethod(Contact.class, "setUserField04"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD05), getSetStringMethod(Contact.class, "setUserField05"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD06), getSetStringMethod(Contact.class, "setUserField06"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD07), getSetStringMethod(Contact.class, "setUserField07"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD08), getSetStringMethod(Contact.class, "setUserField08"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD09), getSetStringMethod(Contact.class, "setUserField09"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD10), getSetStringMethod(Contact.class, "setUserField10"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD11), getSetStringMethod(Contact.class, "setUserField11"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD12), getSetStringMethod(Contact.class, "setUserField12"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD13), getSetStringMethod(Contact.class, "setUserField13"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD14), getSetStringMethod(Contact.class, "setUserField14"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD15), getSetStringMethod(Contact.class, "setUserField15"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD16), getSetStringMethod(Contact.class, "setUserField16"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD17), getSetStringMethod(Contact.class, "setUserField17"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD18), getSetStringMethod(Contact.class, "setUserField18"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD19), getSetStringMethod(Contact.class, "setUserField19"));
+        SET_STRING_METHODS.put(Integer.valueOf(Contact.USERFIELD20), getSetStringMethod(Contact.class, "setUserField20"));
 
         // setter methods for boolean values
         SET_BOOLEAN_METHODS.put(Integer.valueOf(CommonObject.PRIVATE_FLAG), getSetBooleanMethod(CommonObject.class, "setPrivateFlag"));
 
         SET_BOOLEAN_METHODS.put(Integer.valueOf(CalendarObject.NOTIFICATION), getSetBooleanMethod(CalendarObject.class, "setNotification"));
 
-        SET_BOOLEAN_METHODS.put(Integer.valueOf(AppointmentObject.FULL_TIME), getSetBooleanMethod(AppointmentObject.class, "setFullTime"));
+        SET_BOOLEAN_METHODS.put(Integer.valueOf(Appointment.FULL_TIME), getSetBooleanMethod(Appointment.class, "setFullTime"));
     }
 
     private static final String atdomain;
@@ -605,7 +605,7 @@ public class OXContainerConverter {
         PrivacyProperty(appContainer, object, P_CLASS, SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
         // CREATED is ignored
         // DESCRIPTION
-        StringProperty(appContainer, object, P_DESCRIPTION, SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.NOTE)));
+        StringProperty(appContainer, object, P_DESCRIPTION, SET_STRING_METHODS.get(Integer.valueOf(Appointment.NOTE)));
         // DTSTART
         Property property = object.getProperty(P_DTSTART);
         if (property != null) {
@@ -621,22 +621,22 @@ public class OXContainerConverter {
         // GEO is ignored
         // LAST-MODIFIED is ignored
         // LOCATION
-        StringProperty(appContainer, object, "LOCATION", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.LOCATION)));
+        StringProperty(appContainer, object, "LOCATION", SET_STRING_METHODS.get(Integer.valueOf(Appointment.LOCATION)));
         // ORGANIZER is ignored
         // PRIORITY is ignored
         // DTSTAMP is ignored
         // TODO SEQUENCE
         // STATUS is ignored
         // SUMMARY
-        StringProperty(appContainer, object, P_SUMMARY, SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.TITLE)));
+        StringProperty(appContainer, object, P_SUMMARY, SET_STRING_METHODS.get(Integer.valueOf(Appointment.TITLE)));
         // TRANSP
         property = object.getProperty("TRANSP");
         if (property != null) {
             final String transp = ((String) property.getValue()).toUpperCase();
             if ("OPAQUE".equals(transp)) {
-                appContainer.setShownAs(AppointmentObject.RESERVED);
+                appContainer.setShownAs(Appointment.RESERVED);
             } else if ("TRANSPARENT".equals(transp)) {
-                appContainer.setShownAs(AppointmentObject.FREE);
+                appContainer.setShownAs(Appointment.FREE);
             } else {
                 throw new ConverterException("Invalid transparency");
             }
@@ -652,13 +652,13 @@ public class OXContainerConverter {
         // URL is ignored
         // TODO RECURRENCE-ID
         // DTEND and DURATION
-        if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE))) && !DurationProperty(
+        if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(Integer.valueOf(Appointment.END_DATE))) && !DurationProperty(
             appContainer,
             object,
             "DURATION",
             P_DTSTART,
-            SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE)))) {
-            DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE)));
+            SET_DATE_METHODS.get(Integer.valueOf(Appointment.END_DATE)))) {
+            DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(Integer.valueOf(Appointment.END_DATE)));
         }
         // Multiple properties
         final StringBuilder cats = new StringBuilder();
@@ -723,13 +723,13 @@ public class OXContainerConverter {
         return appContainer;
     }
 
-    public ContactObject convertContact(final VersitObject object) throws ConverterException {
-        final ContactObject contactContainer = new ContactObject();
+    public Contact convertContact(final VersitObject object) throws ConverterException {
+        final Contact contactContainer = new Contact();
         // SOURCE is ignored
         // NAME is ignored
         // PROFILE is ignored
         // FN
-        StringProperty(contactContainer, object, "FN", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.DISPLAY_NAME)));
+        StringProperty(contactContainer, object, "FN", SET_STRING_METHODS.get(Integer.valueOf(Contact.DISPLAY_NAME)));
         // N
         Property property = object.getProperty("N");
         if (property != null) {
@@ -744,14 +744,14 @@ public class OXContainerConverter {
             if (N.size() != 5) {
                 throw new ConverterException("Invalid property N, has " + N.size() + " elements, not 5.");
             }
-            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.SUR_NAME)), N.get(0), " ");
-            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.GIVEN_NAME)), N.get(1), " ");
-            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.MIDDLE_NAME)), N.get(2), " ");
-            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TITLE)), N.get(3), " ");
-            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.SUFFIX)), N.get(4), " ");
+            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.SUR_NAME)), N.get(0), " ");
+            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.GIVEN_NAME)), N.get(1), " ");
+            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.MIDDLE_NAME)), N.get(2), " ");
+            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.TITLE)), N.get(3), " ");
+            ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.SUFFIX)), N.get(4), " ");
         }
         // NICKNAME
-        StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.NICKNAME)));
+        StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer.valueOf(Contact.NICKNAME)));
         // PHOTO
         property = object.getProperty("PHOTO");
         if (property != null) {
@@ -809,14 +809,14 @@ public class OXContainerConverter {
             }
         }
         // BDAY
-        DateTimeProperty(contactContainer, object, "BDAY", SET_DATE_METHODS.get(Integer.valueOf(ContactObject.BIRTHDAY)));
+        DateTimeProperty(contactContainer, object, "BDAY", SET_DATE_METHODS.get(Integer.valueOf(Contact.BIRTHDAY)));
         // MAILER is ignored
         // TZ is ignored
         // GEO is ignored
         // TITLE
-        StringProperty(contactContainer, object, "TITLE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMPLOYEE_TYPE)));
+        StringProperty(contactContainer, object, "TITLE", SET_STRING_METHODS.get(Integer.valueOf(Contact.EMPLOYEE_TYPE)));
         // ROLE
-        StringProperty(contactContainer, object, "ROLE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSITION)));
+        StringProperty(contactContainer, object, "ROLE", SET_STRING_METHODS.get(Integer.valueOf(Contact.POSITION)));
         // LOGO is ignored
         // TODO AGENT
         // ORG
@@ -842,13 +842,13 @@ public class OXContainerConverter {
             }
         }
         // NOTE
-        StringProperty(contactContainer, object, "NOTE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.NOTE)));
+        StringProperty(contactContainer, object, "NOTE", SET_STRING_METHODS.get(Integer.valueOf(Contact.NOTE)));
         // PRODID is ignored
         // REV is ignored
         // SORT-STRING is ignored
         // SOUND is ignored
         // URL
-        StringProperty(contactContainer, object, "URL", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.URL)));
+        StringProperty(contactContainer, object, "URL", SET_STRING_METHODS.get(Integer.valueOf(Contact.URL)));
         // TODO UID
         // property = object.getProperty("UID");
         // if (property != null) {
@@ -877,31 +877,31 @@ public class OXContainerConverter {
         final Method[][][] phones = {
             {
                 {
-                    SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS1)),
-                    SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS2)) },
-                { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.FAX_BUSINESS)) } },
+                    SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_BUSINESS1)),
+                    SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_BUSINESS2)) },
+                { SET_STRING_METHODS.get(Integer.valueOf(Contact.FAX_BUSINESS)) } },
             {
                 {
-                    SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_HOME1)),
-                    SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_HOME2)) },
-                { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.FAX_HOME)) } },
+                    SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_HOME1)),
+                    SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_HOME2)) },
+                { SET_STRING_METHODS.get(Integer.valueOf(Contact.FAX_HOME)) } },
             {
                 {
-                    SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE1)),
-                    SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE2)) }, {} },
-            { { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_CAR)) }, {} },
-            { { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_ISDN)) }, {} },
-            { { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_PAGER)) }, {} },
+                    SET_STRING_METHODS.get(Integer.valueOf(Contact.CELLULAR_TELEPHONE1)),
+                    SET_STRING_METHODS.get(Integer.valueOf(Contact.CELLULAR_TELEPHONE2)) }, {} },
+            { { SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_CAR)) }, {} },
+            { { SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_ISDN)) }, {} },
+            { { SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_PAGER)) }, {} },
             {
-                { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_OTHER)) },
-                { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.FAX_OTHER)) } } };
+                { SET_STRING_METHODS.get(Integer.valueOf(Contact.TELEPHONE_OTHER)) },
+                { SET_STRING_METHODS.get(Integer.valueOf(Contact.FAX_OTHER)) } } };
 
         final int[][][] index = {
             { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } } };
 
         final Method[] emails = {
-            SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL1)), SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL2)),
-            SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL3)) };
+            SET_STRING_METHODS.get(Integer.valueOf(Contact.EMAIL1)), SET_STRING_METHODS.get(Integer.valueOf(Contact.EMAIL2)),
+            SET_STRING_METHODS.get(Integer.valueOf(Contact.EMAIL3)) };
 
         final int[] emailIndex = { 0 };
 
@@ -934,18 +934,18 @@ public class OXContainerConverter {
                     throw new ConverterException("Invalid property ADR");
                 }
                 if (isWork) {
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_BUSINESS)), A.get(2), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_BUSINESS)), A.get(3), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_BUSINESS)), A.get(4), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_BUSINESS)), A.get(5), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_BUSINESS)), A.get(6), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.STREET_BUSINESS)), A.get(2), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.CITY_BUSINESS)), A.get(3), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.STATE_BUSINESS)), A.get(4), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.POSTAL_CODE_BUSINESS)), A.get(5), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.COUNTRY_BUSINESS)), A.get(6), "\n");
                 }
                 if (isHome) {
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_HOME)), A.get(2), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_HOME)), A.get(3), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_HOME)), A.get(4), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_HOME)), A.get(5), "\n");
-                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_HOME)), A.get(6), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.STREET_HOME)), A.get(2), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.CITY_HOME)), A.get(3), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.STATE_HOME)), A.get(4), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.POSTAL_CODE_HOME)), A.get(5), "\n");
+                    ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.COUNTRY_HOME)), A.get(6), "\n");
                 }
             }
             // LABEL is ignored
@@ -1035,20 +1035,20 @@ public class OXContainerConverter {
                 }
             }
         }
-        ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CATEGORIES)), cats, ",");
+        ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.CATEGORIES)), cats, ",");
 
         return contactContainer;
     }
 
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection and put into given {@link ContactObject contact container}.
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
      * 
      * @param contactContainer The contact container to fill
      * @param uri The URI parameter's value
      * @throws ConverterException If converting image's data fails
      */
-    private static void loadImageFromURL(final ContactObject contactContainer, final String uri) throws ConverterException {
+    private static void loadImageFromURL(final Contact contactContainer, final String uri) throws ConverterException {
         try {
             loadImageFromURL(contactContainer, new URL(uri));
         } catch (final MalformedURLException e) {
@@ -1058,13 +1058,13 @@ public class OXContainerConverter {
 
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection and put into given {@link ContactObject contact container}.
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
      * 
      * @param contactContainer The contact container to fill
      * @param url The image URL
      * @throws ConverterException If converting image's data fails
      */
-    private static void loadImageFromURL(final ContactObject contactContainer, final URL url) throws ConverterException {
+    private static void loadImageFromURL(final Contact contactContainer, final URL url) throws ConverterException {
         String mimeType = null;
         byte[] bytes = null;
         try {
@@ -1391,8 +1391,8 @@ public class OXContainerConverter {
                         }
                         time = (int) (((DateTimeValue) property.getValue()).calendar.getTimeInMillis() - trigger.calendar.getTimeInMillis());
                     }
-                    if (calContainerObj instanceof AppointmentObject) {
-                        final AppointmentObject appObj = (AppointmentObject) calContainerObj;
+                    if (calContainerObj instanceof Appointment) {
+                        final Appointment appObj = (Appointment) calContainerObj;
                         appObj.setAlarm(time);
                         appObj.setAlarmFlag(true); // bugfix: 7473
                     } else if (calContainerObj instanceof Task) {
@@ -1529,7 +1529,7 @@ public class OXContainerConverter {
         return object;
     }
 
-    public VersitObject convertAppointment(final AppointmentObject app) throws ConverterException {
+    public VersitObject convertAppointment(final Appointment app) throws ConverterException {
         modifyRecurring(app);
         final VersitObject object = new VersitObject("VEVENT");
         // TODO CLASS
@@ -1563,7 +1563,7 @@ public class OXContainerConverter {
         // SUMMARY
         addProperty(object, P_SUMMARY, app.getTitle());
         // TRANSP
-        addProperty(object, "TRANSP", app.getShownAs() == AppointmentObject.FREE ? "TRANSPARENT" : "OPAQUE");
+        addProperty(object, "TRANSP", app.getShownAs() == Appointment.FREE ? "TRANSPARENT" : "OPAQUE");
         // UID
         addProperty(object, "UID", app.getObjectID() + atdomain);
         // URL is ignored
@@ -1639,7 +1639,7 @@ public class OXContainerConverter {
         return object;
     }
 
-    private static void modifyRecurring(final AppointmentObject app) throws ConverterException {
+    private static void modifyRecurring(final Appointment app) throws ConverterException {
         if (app.getRecurrenceType() != CalendarObject.NONE) {
             RecurringResultsInterface result;
             try {
@@ -1658,7 +1658,7 @@ public class OXContainerConverter {
         }
     }
 
-    public VersitObject convertContact(final ContactObject contact, final String version) throws ConverterException {
+    public VersitObject convertContact(final Contact contact, final String version) throws ConverterException {
         final VersitObject object = new VersitObject("VCARD");
         // VERSION
         addProperty(object, "VERSION", version);
@@ -1718,21 +1718,21 @@ public class OXContainerConverter {
             object,
             contact,
             new String[] { PARAM_WORK },
-            ContactObject.STREET_BUSINESS,
-            ContactObject.CITY_BUSINESS,
-            ContactObject.STATE_BUSINESS,
-            ContactObject.POSTAL_CODE_BUSINESS,
-            ContactObject.COUNTRY_BUSINESS);
+            Contact.STREET_BUSINESS,
+            Contact.CITY_BUSINESS,
+            Contact.STATE_BUSINESS,
+            Contact.POSTAL_CODE_BUSINESS,
+            Contact.COUNTRY_BUSINESS);
         // ADR HOME
         addADR(
             object,
             contact,
             new String[] { PARAM_HOME },
-            ContactObject.STREET_HOME,
-            ContactObject.CITY_HOME,
-            ContactObject.STATE_HOME,
-            ContactObject.POSTAL_CODE_HOME,
-            ContactObject.COUNTRY_HOME);
+            Contact.STREET_HOME,
+            Contact.CITY_HOME,
+            Contact.STATE_HOME,
+            Contact.POSTAL_CODE_HOME,
+            Contact.COUNTRY_HOME);
         // LABEL is ignored
         // TEL
         addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
@@ -1803,7 +1803,7 @@ public class OXContainerConverter {
         return object;
     }
 
-    private void addADR(final VersitObject object, final ContactObject contactContainer, final String[] type, final int street, final int city, final int state, final int postalCode, final int country) throws ConverterException {
+    private void addADR(final VersitObject object, final Contact contactContainer, final String[] type, final int street, final int city, final int state, final int postalCode, final int country) throws ConverterException {
         try {
             final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
             adr.add(null);
@@ -1819,70 +1819,70 @@ public class OXContainerConverter {
         }
     }
 
-    private String getStreet(final int id, final ContactObject contactContainer) throws Exception {
+    private String getStreet(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case ContactObject.STREET_BUSINESS:
+        case Contact.STREET_BUSINESS:
             return contactContainer.getStreetBusiness();
-        case ContactObject.STREET_HOME:
+        case Contact.STREET_HOME:
             return contactContainer.getStreetHome();
-        case ContactObject.STREET_OTHER:
+        case Contact.STREET_OTHER:
             return contactContainer.getStreetOther();
         default:
             throw new Exception("Unknown street constant " + id);
         }
     }
 
-    private String getCity(final int id, final ContactObject contactContainer) throws Exception {
+    private String getCity(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case ContactObject.CITY_BUSINESS:
+        case Contact.CITY_BUSINESS:
             return contactContainer.getCityBusiness();
-        case ContactObject.CITY_HOME:
+        case Contact.CITY_HOME:
             return contactContainer.getCityHome();
-        case ContactObject.CITY_OTHER:
+        case Contact.CITY_OTHER:
             return contactContainer.getCityOther();
         default:
             throw new Exception("Unknown city constant " + id);
         }
     }
 
-    private String getState(final int id, final ContactObject contactContainer) throws Exception {
+    private String getState(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case ContactObject.STATE_BUSINESS:
+        case Contact.STATE_BUSINESS:
             return contactContainer.getStateBusiness();
-        case ContactObject.STATE_HOME:
+        case Contact.STATE_HOME:
             return contactContainer.getStateHome();
-        case ContactObject.STATE_OTHER:
+        case Contact.STATE_OTHER:
             return contactContainer.getStateOther();
         default:
             throw new Exception("Unknown state constant " + id);
         }
     }
 
-    private String getCountry(final int id, final ContactObject contactContainer) throws Exception {
+    private String getCountry(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case ContactObject.COUNTRY_BUSINESS:
+        case Contact.COUNTRY_BUSINESS:
             return contactContainer.getCountryBusiness();
-        case ContactObject.COUNTRY_HOME:
+        case Contact.COUNTRY_HOME:
             return contactContainer.getCountryHome();
-        case ContactObject.COUNTRY_OTHER:
+        case Contact.COUNTRY_OTHER:
             return contactContainer.getCountryOther();
         default:
             throw new Exception("Unknown country constant " + id);
         }
     }
 
-    private String getPostalCode(final int id, final ContactObject contactContainer) throws Exception {
+    private String getPostalCode(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case ContactObject.POSTAL_CODE_BUSINESS:
+        case Contact.POSTAL_CODE_BUSINESS:
             return contactContainer.getPostalCodeBusiness();
-        case ContactObject.POSTAL_CODE_HOME:
+        case Contact.POSTAL_CODE_HOME:
             return contactContainer.getPostalCodeHome();
-        case ContactObject.POSTAL_CODE_OTHER:
+        case Contact.POSTAL_CODE_OTHER:
             return contactContainer.getPostalCodeOther();
         default:
             throw new Exception("Unknown postal code constant " + id);

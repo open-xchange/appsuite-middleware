@@ -51,7 +51,7 @@ package com.openexchange.groupware.calendar;
 
 import java.util.Date;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -59,7 +59,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * CalendarDataObject
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-public class CalendarDataObject extends AppointmentObject {
+public class CalendarDataObject extends Appointment {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
             .getLog(CalendarDataObject.class);

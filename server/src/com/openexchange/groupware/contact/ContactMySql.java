@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.Contacts.mapper;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -291,29 +291,29 @@ public class ContactMySql implements ContactSql {
                 final String[] values = cso.getDynamicSearchFieldValue();
 
                 for (int i = 0; i < fields.length; i++) {
-                    if ((fields[i] == ContactObject.ANNIVERSARY) || (fields[i] == ContactObject.BIRTHDAY)) {
+                    if ((fields[i] == Contact.ANNIVERSARY) || (fields[i] == Contact.BIRTHDAY)) {
                         String field = "";
-                        if (fields[i] == ContactObject.ANNIVERSARY) {
-                            field = Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName();
-                        } else if (fields[i] == ContactObject.BIRTHDAY) {
-                            field = Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName();
+                        if (fields[i] == Contact.ANNIVERSARY) {
+                            field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
+                        } else if (fields[i] == Contact.BIRTHDAY) {
+                            field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
                         }
                         /*
                          * TODO: BIRTHDAY: `timestampfield01` date default NULL, ANNIVERSARY: `timestampfield02` date default NULL,
                          */
                         final String value = values[i];
                         sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(search_habit).append(' ');
-                    } else if (fields[i] == ContactObject.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == ContactObject.NUMBER_OF_LINKS) {
+                    } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == Contact.NUMBER_OF_LINKS) {
                         String field = "";
-                        if (fields[i] == ContactObject.NUMBER_OF_DISTRIBUTIONLIST) {
-                            field = Contacts.mapping[ContactObject.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
-                        } else if (fields[i] == ContactObject.NUMBER_OF_LINKS) {
-                            field = Contacts.mapping[ContactObject.NUMBER_OF_LINKS].getDBFieldName();
+                        if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
+                            field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
+                        } else if (fields[i] == Contact.NUMBER_OF_LINKS) {
+                            field = Contacts.mapping[Contact.NUMBER_OF_LINKS].getDBFieldName();
                         }
                         final String value = values[i];
                         sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(search_habit).append(' ');
-                    } else if (fields[i] == ContactObject.CATEGORIES) {
-                        final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
+                    } else if (fields[i] == Contact.CATEGORIES) {
+                        final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
                         String value = values[i];
 
                         if (!"*".equals(value) && null != value) {
@@ -358,7 +358,7 @@ public class ContactMySql implements ContactSql {
             if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
                 final Date[] d = cso.getAnniversaryRange();
                 try {
-                    final String field = Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName();
+                    final String field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
                     sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
                     sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
                     injectors.add(new TimestampSQLInjector(d[0]));
@@ -375,7 +375,7 @@ public class ContactMySql implements ContactSql {
             if (cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0) {
                 final Date[] d = cso.getBirthdayRange();
                 try {
-                    final String field = Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName();
+                    final String field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
                     sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
                     sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
                     injectors.add(new TimestampSQLInjector(d[0]));
@@ -391,12 +391,12 @@ public class ContactMySql implements ContactSql {
             }
             if (cso.getBusinessPostalCodeRange() != null && cso.getBusinessPostalCodeRange().length > 0) {
                 final String[] x = cso.getBusinessPostalCodeRange();
-                sb.append(getRangeSearch(Contacts.mapping[ContactObject.POSTAL_CODE_BUSINESS].getDBFieldName(), x[0], x[1], search_habit));
+                sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_BUSINESS].getDBFieldName(), x[0], x[1], search_habit));
             }
             if (cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0) {
                 final Date[] d = cso.getCreationDateRange();
                 try {
-                    final String field = Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName();
+                    final String field = Contacts.mapping[Contact.CREATION_DATE].getDBFieldName();
                     sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
                     sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
                     injectors.add(new TimestampSQLInjector(d[0]));
@@ -413,7 +413,7 @@ public class ContactMySql implements ContactSql {
             if (cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0) {
                 final Date[] d = cso.getLastModifiedRange();
                 try {
-                    final String field = Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName();
+                    final String field = Contacts.mapping[Contact.LAST_MODIFIED].getDBFieldName();
                     sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
                     sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
                     injectors.add(new TimestampSQLInjector(d[0]));
@@ -429,25 +429,25 @@ public class ContactMySql implements ContactSql {
             }
             if (cso.getNumberOfEmployeesRange() != null && cso.getNumberOfEmployeesRange().length > 0) {
                 final String[] x = cso.getNumberOfEmployeesRange();
-                sb.append(getRangeSearch(Contacts.mapping[ContactObject.NUMBER_OF_EMPLOYEE].getDBFieldName(), x[0], x[1], search_habit));
+                sb.append(getRangeSearch(Contacts.mapping[Contact.NUMBER_OF_EMPLOYEE].getDBFieldName(), x[0], x[1], search_habit));
             }
             if (cso.getOtherPostalCodeRange() != null && cso.getOtherPostalCodeRange().length > 0) {
                 final String[] x = cso.getOtherPostalCodeRange();
-                sb.append(getRangeSearch(Contacts.mapping[ContactObject.POSTAL_CODE_OTHER].getDBFieldName(), x[0], x[1], search_habit));
+                sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_OTHER].getDBFieldName(), x[0], x[1], search_habit));
             }
             if (cso.getPrivatePostalCodeRange() != null && cso.getPrivatePostalCodeRange().length > 0) {
                 final String[] x = cso.getPrivatePostalCodeRange();
-                sb.append(getRangeSearch(Contacts.mapping[ContactObject.POSTAL_CODE_HOME].getDBFieldName(), x[0], x[1], search_habit));
+                sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_HOME].getDBFieldName(), x[0], x[1], search_habit));
             }
             if (cso.getSalesVolumeRange() != null && cso.getSalesVolumeRange().length > 0) {
                 final String[] x = cso.getSalesVolumeRange();
-                sb.append(getRangeSearch(Contacts.mapping[ContactObject.SALES_VOLUME].getDBFieldName(), x[0], x[1], search_habit));
+                sb.append(getRangeSearch(Contacts.mapping[Contact.SALES_VOLUME].getDBFieldName(), x[0], x[1], search_habit));
             }
 
             /*********************** * search single field * ***********************/
 
             if (cso.getGivenName() != null && cso.getGivenName().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.GIVEN_NAME].getDBFieldName();
+                final String field = Contacts.mapping[Contact.GIVEN_NAME].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getGivenName());
 
@@ -459,7 +459,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getSurname() != null && cso.getSurname().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.SUR_NAME].getDBFieldName();
+                final String field = Contacts.mapping[Contact.SUR_NAME].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getSurname());
 
@@ -471,7 +471,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getDisplayName() != null && cso.getDisplayName().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.DISPLAY_NAME].getDBFieldName();
+                final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getDisplayName());
 
@@ -483,7 +483,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getEmail1() != null && cso.getEmail1().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.EMAIL1].getDBFieldName();
+                final String field = Contacts.mapping[Contact.EMAIL1].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getEmail1());
 
@@ -495,7 +495,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getEmail2() != null && cso.getEmail2().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.EMAIL2].getDBFieldName();
+                final String field = Contacts.mapping[Contact.EMAIL2].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getEmail2());
 
@@ -507,7 +507,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getEmail3() != null && cso.getEmail3().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.EMAIL3].getDBFieldName();
+                final String field = Contacts.mapping[Contact.EMAIL3].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getEmail3());
 
@@ -519,7 +519,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
+                final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
                 String value = cso.getCatgories().trim();
 
                 if (!"*".equals(value)) {
@@ -546,7 +546,7 @@ public class ContactMySql implements ContactSql {
                 }
             }
             if (cso.getCompany() != null && cso.getCompany().length() > 0) {
-                final String field = Contacts.mapping[ContactObject.COMPANY].getDBFieldName();
+                final String field = Contacts.mapping[Contact.COMPANY].getDBFieldName();
 
                 final String value = StringCollection.prepareForSearch(cso.getCompany());
 
@@ -580,13 +580,13 @@ public class ContactMySql implements ContactSql {
             // Special condition for email auto complete
             if (cso.getEmailAutoComplete()) {
                 sb.append('(');
-                sb.append(Contacts.mapping[ContactObject.EMAIL1].getDBFieldName());
+                sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
                 sb.append(" is not null OR ");
-                sb.append(Contacts.mapping[ContactObject.EMAIL2].getDBFieldName());
+                sb.append(Contacts.mapping[Contact.EMAIL2].getDBFieldName());
                 sb.append(" is not null OR ");
-                sb.append(Contacts.mapping[ContactObject.EMAIL3].getDBFieldName());
+                sb.append(Contacts.mapping[Contact.EMAIL3].getDBFieldName());
                 sb.append(" is not null OR ");
-                sb.append(Contacts.mapping[ContactObject.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
+                sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
                 sb.append(" > 0) AND ");
             }
         }

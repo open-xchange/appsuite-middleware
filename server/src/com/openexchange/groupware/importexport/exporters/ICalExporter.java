@@ -72,7 +72,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -148,7 +148,7 @@ public class ICalExporter implements Exporter {
         CommonObject.PRIVATE_FLAG,
         CommonObject.CATEGORIES,
         CalendarObject.TITLE,
-        AppointmentObject.LOCATION,
+        Appointment.LOCATION,
         CalendarObject.START_DATE,
         CalendarObject.END_DATE,
         CalendarObject.NOTE,
@@ -157,10 +157,10 @@ public class ICalExporter implements Exporter {
         CalendarObject.RECURRENCE_ID,
         CalendarObject.PARTICIPANTS,
         CalendarObject.USERS,
-        AppointmentObject.SHOWN_AS,
-        AppointmentObject.FULL_TIME,
-        AppointmentObject.COLOR_LABEL,
-        AppointmentObject.TIMEZONE
+        Appointment.SHOWN_AS,
+        Appointment.FULL_TIME,
+        Appointment.COLOR_LABEL,
+        Appointment.TIMEZONE
     };
     
     protected final static int[] _taskFields = {
@@ -270,12 +270,12 @@ public class ICalExporter implements Exporter {
                 
                 final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessObj);
                 CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-                final SearchIterator<AppointmentObject> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
-                final List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
+                final SearchIterator<Appointment> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
+                final List<Appointment> appointments = new LinkedList<Appointment>();
                 try {
                     while (searchIterator.hasNext()) {
-                        final AppointmentObject appointment = searchIterator.next();
-                        if (AppointmentObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                        final Appointment appointment = searchIterator.next();
+                        if (Appointment.NO_RECURRENCE != appointment.getRecurrenceType()) {
                             if (!appointment.containsTimezone()) {
                                 appointment.setTimezone(user.getTimeZone());
                             }
@@ -366,7 +366,7 @@ public class ICalExporter implements Exporter {
             }
             if (fo.getModule() == FolderObject.CALENDAR) {
                 final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessObj);
-                final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, Integer.parseInt(folder));
+                final Appointment appointmentObj = appointmentSql.getObjectById(objectId, Integer.parseInt(folder));
                 try {
                     exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
                     versitDefinition.writeEnd(versitWriter, versitObjectContainer);
@@ -397,7 +397,7 @@ public class ICalExporter implements Exporter {
                 Format.ICAL);
     }
     
-    protected void exportAppointment(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final AppointmentObject appointmentObj) throws Exception {
+    protected void exportAppointment(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Appointment appointmentObj) throws Exception {
         final VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj);
         versitDef.write(writer, versitObject);
         writer.flush();

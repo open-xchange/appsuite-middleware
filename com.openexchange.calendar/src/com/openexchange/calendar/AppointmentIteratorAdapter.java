@@ -52,18 +52,18 @@ package com.openexchange.calendar;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This is a delegating iterator for converting the {@link SearchIterator} specialized for {@link CalendarDataObject}s into a
- * {@link SearchIterator} for {@link AppointmentObject}s. This delegating {@link SearchIterator} is necessary to seperate internal calendar
+ * {@link SearchIterator} for {@link Appointment}s. This delegating {@link SearchIterator} is necessary to seperate internal calendar
  * module iterators from external ones. 
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class AppointmentIteratorAdapter implements SearchIterator<AppointmentObject> {
+public final class AppointmentIteratorAdapter implements SearchIterator<Appointment> {
 
     private final SearchIterator<CalendarDataObject> delegate;
 
@@ -95,7 +95,7 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
         return delegate.hasWarnings();
     }
 
-    public AppointmentObject next() throws SearchIteratorException, OXException {
+    public Appointment next() throws SearchIteratorException, OXException {
         return delegate.next();
     }
 

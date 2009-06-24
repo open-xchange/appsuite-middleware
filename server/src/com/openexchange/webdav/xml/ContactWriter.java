@@ -63,7 +63,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -93,107 +93,107 @@ public class ContactWriter extends CommonWriter {
 		FolderChildObject.FOLDER_ID,
 		CommonObject.PRIVATE_FLAG,
 		CommonObject.CATEGORIES,
-		ContactObject.GIVEN_NAME,
-		ContactObject.SUR_NAME,
-		ContactObject.ANNIVERSARY,
-		ContactObject.ASSISTANT_NAME,
-		ContactObject.BIRTHDAY,
-		ContactObject.BRANCHES,
-		ContactObject.BUSINESS_CATEGORY,
-		ContactObject.CATEGORIES,
-		ContactObject.CELLULAR_TELEPHONE1,
-		ContactObject.CELLULAR_TELEPHONE2,
-		ContactObject.CITY_BUSINESS,
-		ContactObject.CITY_HOME,
-		ContactObject.CITY_OTHER,
-		ContactObject.COMMERCIAL_REGISTER,
-		ContactObject.COMPANY,
-		ContactObject.COUNTRY_BUSINESS,
-		ContactObject.COUNTRY_HOME,
-		ContactObject.COUNTRY_OTHER,
-		ContactObject.DEPARTMENT,
-		ContactObject.DISPLAY_NAME,
-		ContactObject.DISTRIBUTIONLIST,
-		ContactObject.EMAIL1,
-		ContactObject.EMAIL2,
-		ContactObject.EMAIL3,
-		ContactObject.EMPLOYEE_TYPE,
-		ContactObject.FAX_BUSINESS,
-		ContactObject.FAX_HOME,
-		ContactObject.FAX_OTHER,
-		ContactObject.FILE_AS,
-		ContactObject.FOLDER_ID,
-		ContactObject.GIVEN_NAME,
-		ContactObject.IMAGE1,
-		ContactObject.IMAGE1_CONTENT_TYPE,
-		ContactObject.INFO,
-		ContactObject.INSTANT_MESSENGER1,
-		ContactObject.INSTANT_MESSENGER2,
-		ContactObject.LINKS,
-		ContactObject.MANAGER_NAME,
-		ContactObject.MARITAL_STATUS,
-		ContactObject.MIDDLE_NAME,
-		ContactObject.NICKNAME,
-		ContactObject.NOTE,
-		ContactObject.NUMBER_OF_CHILDREN,
-		ContactObject.NUMBER_OF_EMPLOYEE,
-		ContactObject.POSITION,
-		ContactObject.POSTAL_CODE_BUSINESS,
-		ContactObject.POSTAL_CODE_HOME,
-		ContactObject.POSTAL_CODE_OTHER,
-		ContactObject.PRIVATE_FLAG,
-		ContactObject.PROFESSION,
-		ContactObject.ROOM_NUMBER,
-		ContactObject.SALES_VOLUME,
-		ContactObject.SPOUSE_NAME,
-		ContactObject.STATE_BUSINESS,
-		ContactObject.STATE_HOME,
-		ContactObject.STATE_OTHER,
-		ContactObject.STREET_BUSINESS,
-		ContactObject.STREET_HOME,
-		ContactObject.STREET_OTHER,
-		ContactObject.SUFFIX,
-		ContactObject.TAX_ID,
-		ContactObject.TELEPHONE_ASSISTANT,
-		ContactObject.TELEPHONE_BUSINESS1,
-		ContactObject.TELEPHONE_BUSINESS2,
-		ContactObject.TELEPHONE_CALLBACK,
-		ContactObject.TELEPHONE_CAR,
-		ContactObject.TELEPHONE_COMPANY,
-		ContactObject.TELEPHONE_HOME1,
-		ContactObject.TELEPHONE_HOME2,
-		ContactObject.TELEPHONE_IP,
-		ContactObject.TELEPHONE_ISDN,
-		ContactObject.TELEPHONE_OTHER,
-		ContactObject.TELEPHONE_PAGER,
-		ContactObject.TELEPHONE_PRIMARY,
-		ContactObject.TELEPHONE_RADIO,
-		ContactObject.TELEPHONE_TELEX,
-		ContactObject.TELEPHONE_TTYTDD,
-		ContactObject.TITLE,
-		ContactObject.URL,
-		ContactObject.USERFIELD01,
-		ContactObject.USERFIELD02,
-		ContactObject.USERFIELD03,
-		ContactObject.USERFIELD04,
-		ContactObject.USERFIELD05,
-		ContactObject.USERFIELD06,
-		ContactObject.USERFIELD07,
-		ContactObject.USERFIELD08,
-		ContactObject.USERFIELD09,
-		ContactObject.USERFIELD10,
-		ContactObject.USERFIELD11,
-		ContactObject.USERFIELD12,
-		ContactObject.USERFIELD13,
-		ContactObject.USERFIELD14,
-		ContactObject.USERFIELD15,
-		ContactObject.USERFIELD16,
-		ContactObject.USERFIELD17,
-		ContactObject.USERFIELD18,
-		ContactObject.USERFIELD19,
-		ContactObject.USERFIELD20,
-		ContactObject.DEFAULT_ADDRESS,
-                ContactObject.NUMBER_OF_ATTACHMENTS
+		Contact.GIVEN_NAME,
+		Contact.SUR_NAME,
+		Contact.ANNIVERSARY,
+		Contact.ASSISTANT_NAME,
+		Contact.BIRTHDAY,
+		Contact.BRANCHES,
+		Contact.BUSINESS_CATEGORY,
+		Contact.CATEGORIES,
+		Contact.CELLULAR_TELEPHONE1,
+		Contact.CELLULAR_TELEPHONE2,
+		Contact.CITY_BUSINESS,
+		Contact.CITY_HOME,
+		Contact.CITY_OTHER,
+		Contact.COMMERCIAL_REGISTER,
+		Contact.COMPANY,
+		Contact.COUNTRY_BUSINESS,
+		Contact.COUNTRY_HOME,
+		Contact.COUNTRY_OTHER,
+		Contact.DEPARTMENT,
+		Contact.DISPLAY_NAME,
+		Contact.DISTRIBUTIONLIST,
+		Contact.EMAIL1,
+		Contact.EMAIL2,
+		Contact.EMAIL3,
+		Contact.EMPLOYEE_TYPE,
+		Contact.FAX_BUSINESS,
+		Contact.FAX_HOME,
+		Contact.FAX_OTHER,
+		Contact.FILE_AS,
+		Contact.FOLDER_ID,
+		Contact.GIVEN_NAME,
+		Contact.IMAGE1,
+		Contact.IMAGE1_CONTENT_TYPE,
+		Contact.INFO,
+		Contact.INSTANT_MESSENGER1,
+		Contact.INSTANT_MESSENGER2,
+		Contact.LINKS,
+		Contact.MANAGER_NAME,
+		Contact.MARITAL_STATUS,
+		Contact.MIDDLE_NAME,
+		Contact.NICKNAME,
+		Contact.NOTE,
+		Contact.NUMBER_OF_CHILDREN,
+		Contact.NUMBER_OF_EMPLOYEE,
+		Contact.POSITION,
+		Contact.POSTAL_CODE_BUSINESS,
+		Contact.POSTAL_CODE_HOME,
+		Contact.POSTAL_CODE_OTHER,
+		Contact.PRIVATE_FLAG,
+		Contact.PROFESSION,
+		Contact.ROOM_NUMBER,
+		Contact.SALES_VOLUME,
+		Contact.SPOUSE_NAME,
+		Contact.STATE_BUSINESS,
+		Contact.STATE_HOME,
+		Contact.STATE_OTHER,
+		Contact.STREET_BUSINESS,
+		Contact.STREET_HOME,
+		Contact.STREET_OTHER,
+		Contact.SUFFIX,
+		Contact.TAX_ID,
+		Contact.TELEPHONE_ASSISTANT,
+		Contact.TELEPHONE_BUSINESS1,
+		Contact.TELEPHONE_BUSINESS2,
+		Contact.TELEPHONE_CALLBACK,
+		Contact.TELEPHONE_CAR,
+		Contact.TELEPHONE_COMPANY,
+		Contact.TELEPHONE_HOME1,
+		Contact.TELEPHONE_HOME2,
+		Contact.TELEPHONE_IP,
+		Contact.TELEPHONE_ISDN,
+		Contact.TELEPHONE_OTHER,
+		Contact.TELEPHONE_PAGER,
+		Contact.TELEPHONE_PRIMARY,
+		Contact.TELEPHONE_RADIO,
+		Contact.TELEPHONE_TELEX,
+		Contact.TELEPHONE_TTYTDD,
+		Contact.TITLE,
+		Contact.URL,
+		Contact.USERFIELD01,
+		Contact.USERFIELD02,
+		Contact.USERFIELD03,
+		Contact.USERFIELD04,
+		Contact.USERFIELD05,
+		Contact.USERFIELD06,
+		Contact.USERFIELD07,
+		Contact.USERFIELD08,
+		Contact.USERFIELD09,
+		Contact.USERFIELD10,
+		Contact.USERFIELD11,
+		Contact.USERFIELD12,
+		Contact.USERFIELD13,
+		Contact.USERFIELD14,
+		Contact.USERFIELD15,
+		Contact.USERFIELD16,
+		Contact.USERFIELD17,
+		Contact.USERFIELD18,
+		Contact.USERFIELD19,
+		Contact.USERFIELD20,
+		Contact.DEFAULT_ADDRESS,
+                Contact.NUMBER_OF_ATTACHMENTS
 	};
 	
 	//private ContactSQLInterface contactsql;
@@ -222,7 +222,7 @@ public class ContactWriter extends CommonWriter {
 		try {
 		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
 	            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessionObj);
-			final ContactObject contactobject = contactInterface.getObjectById(objectId, folderId);
+			final Contact contactobject = contactInterface.getObjectById(objectId, folderId);
 			writeObject(contactobject, eProp, false, xo, os);
 		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
@@ -237,7 +237,7 @@ public class ContactWriter extends CommonWriter {
          * Fist send all 'deletes', than all 'modified'
          */
 		if (bDeleted) {
-			SearchIterator<ContactObject> it = null;
+			SearchIterator<Contact> it = null;
 			try {
 			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
 	                ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
@@ -251,7 +251,7 @@ public class ContactWriter extends CommonWriter {
 		}
 
 		if (bModified) {
-            SearchIterator<ContactObject> it = null;
+            SearchIterator<Contact> it = null;
             try {
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
@@ -265,7 +265,7 @@ public class ContactWriter extends CommonWriter {
         }
 		
 		if (bList) {
-			SearchIterator<ContactObject> it = null;
+			SearchIterator<Contact> it = null;
 			try {
 			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
 	                ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
@@ -279,17 +279,17 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	public void writeIterator(final SearchIterator<ContactObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator<Contact> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
 			writeObject(it.next(), delete, xo, os);
 		}
 	}
 	
-	public void writeObject(final ContactObject contactObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+	public void writeObject(final Contact contactObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		writeObject(contactObj, new Element("prop", "D", "DAV:"), delete, xo, os); 
 	}
 	
-	public void writeObject(final ContactObject contactObj, final Element eProp, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+	public void writeObject(final Contact contactObj, final Element eProp, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		int status = 200;
 		String description = "OK";
 		int object_id = 0;
@@ -299,7 +299,7 @@ public class ContactWriter extends CommonWriter {
 			if (contactObj.containsImage1()&& !delete) {
 			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
 	                ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), sessionObj);
-				final ContactObject contactObjectWithImage = contactInterface.getObjectById(object_id, contactObj.getParentFolderID());
+				final Contact contactObjectWithImage = contactInterface.getObjectById(object_id, contactObj.getParentFolderID());
 				addContent2PropElement(eProp, contactObjectWithImage, delete);
 			} else {
 				addContent2PropElement(eProp, contactObj, delete);
@@ -314,11 +314,11 @@ public class ContactWriter extends CommonWriter {
 		writeResponseElement(eProp, object_id, status, description, xo, os);
 	}
 	
-	protected void addContent2PropElement(final Element e, final ContactObject contactobject, final boolean delete) throws Exception {
+	protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete) throws Exception {
 		addContent2PropElement(e, contactobject, delete, false);
 	}
 	
-	protected void addContent2PropElement(final Element e, final ContactObject contactobject, final boolean delete, final boolean externalUser) throws Exception {
+	protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws Exception {
 		if (delete) {
 			addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
 			addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
@@ -345,7 +345,7 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	protected void writeContactElement(final ContactObject contactobject, final Element e) throws Exception {
+	protected void writeContactElement(final Contact contactobject, final Element e) throws Exception {
 		addElement("object_status", "CREATE", e);
 		addElement(ContactFields.LAST_NAME, contactobject.getSurName(), e);
 		addElement(ContactFields.FIRST_NAME, contactobject.getGivenName(), e);
@@ -442,7 +442,7 @@ public class ContactWriter extends CommonWriter {
 		addElement(ContactFields.DEFAULTADDRESS, contactobject.getDefaultAddress(), e);
 	}
 	
-	protected void writeLinks(final ContactObject contactobject, final Element e_prop) throws Exception {
+	protected void writeLinks(final Contact contactobject, final Element e_prop) throws Exception {
 		final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
 		
 		final LinkEntryObject[] links = contactobject.getLinks();
@@ -463,7 +463,7 @@ public class ContactWriter extends CommonWriter {
 		e_prop.addContent(e_links);
 	}
 	
-	protected void writeDistributionList(final ContactObject contactobject, final Element e_prop) throws Exception {
+	protected void writeDistributionList(final Contact contactobject, final Element e_prop) throws Exception {
 		final Element e_distributionlist = new Element(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS);
 		
 		final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();

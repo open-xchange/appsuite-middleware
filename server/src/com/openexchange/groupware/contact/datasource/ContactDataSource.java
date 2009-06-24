@@ -69,7 +69,7 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -131,7 +131,7 @@ public final class ContactDataSource implements DataSource {
         /*
          * Get contact
          */
-        final ContactObject[] contacts = new ContactObject[folderIds.length];
+        final Contact[] contacts = new Contact[folderIds.length];
         try {
             final Map<Integer, ContactInterface> tmp = new HashMap<Integer, ContactInterface>(contacts.length);
             for (int i = 0; i < contacts.length; i++) {
@@ -154,7 +154,7 @@ public final class ContactDataSource implements DataSource {
          */
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(folderIds.length << 12);
         final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
-        for (final ContactObject contact : contacts) {
+        for (final Contact contact : contacts) {
             writeVCard2Stream(contact, byteArrayOutputStream, contactDef, session);
         }
         /*
@@ -174,7 +174,7 @@ public final class ContactDataSource implements DataSource {
             properties);
     }
 
-    private static void writeVCard2Stream(final ContactObject contact, final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session) throws DataException {
+    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session) throws DataException {
         final VersitDefinition.Writer versitWriter;
         try {
             versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");

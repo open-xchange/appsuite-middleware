@@ -68,7 +68,7 @@ import com.openexchange.groupware.contact.ContactException;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
- * @see com.openexchange.groupware.container.ContactObject
+ * @see com.openexchange.groupware.container.Contact
  */
 public interface ContactSwitcher{
 	  public Object displayname(Object... objects) throws ContactException;

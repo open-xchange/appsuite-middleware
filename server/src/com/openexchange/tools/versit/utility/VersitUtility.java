@@ -60,7 +60,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -119,7 +119,7 @@ public final class VersitUtility {
             // final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, ctx);
             final VersitObject vo = def.parse(r);
             if (vo != null) {
-                final ContactObject contactObj = oxc.convertContact(vo);
+                final Contact contactObj = oxc.convertContact(vo);
                 contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CONTACT).getObjectID());
                 contactObj.setContextId(ctx.getContextId());
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(

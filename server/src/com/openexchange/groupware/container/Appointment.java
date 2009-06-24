@@ -57,7 +57,7 @@ import com.openexchange.groupware.calendar.Constants;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class AppointmentObject extends CalendarObject implements Cloneable {
+public class Appointment extends CalendarObject implements Cloneable {
 
     public static final int LOCATION = 400;
 
@@ -123,9 +123,9 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     protected boolean b_recurring_start;
 
     /**
-     * Initializes a new {@link AppointmentObject}
+     * Initializes a new {@link Appointment}
      */
-    public AppointmentObject() {
+    public Appointment() {
         super();
     }
 
@@ -296,8 +296,8 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 
     @Override
     public boolean equals(final Object o) {
-        if (o instanceof AppointmentObject) {
-            if (((AppointmentObject) o).hashCode() == hashCode()) {
+        if (o instanceof Appointment) {
+            if (((Appointment) o).hashCode() == hashCode()) {
                 return true;
             }
             return false;
@@ -308,7 +308,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     @Override
     public Object clone() {
         try {
-            final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/* new AppointmentObject(); */
+            final Appointment appointmentobject = (Appointment) super.clone();/* new AppointmentObject(); */
             if (containsLabel()) {
                 appointmentobject.setLabel(getLabel());
             }
@@ -343,7 +343,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
             return differingFields;
         }
 
-        AppointmentObject other = (AppointmentObject) dataObject;
+        Appointment other = (Appointment) dataObject;
 
         if ((!containsAlarm() && other.containsAlarm()) || (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm())) {
             differingFields.add(ALARM);

@@ -59,8 +59,8 @@ import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
@@ -80,7 +80,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
 	
-	public final void appointmentDeleted(final AppointmentObject appointmentObj,
+	public final void appointmentDeleted(final Appointment appointmentObj,
 			final Session sessionObj) {
 		deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj );
 	}
@@ -90,19 +90,19 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 		deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
 	}
 	
-	public final void contactDeleted(final ContactObject contactObj,
+	public final void contactDeleted(final Contact contactObj,
 			final Session sessionObj) {
 		deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
 		
 	}
 
-	public final void appointmentCreated(final AppointmentObject appointmentObj,
+	public final void appointmentCreated(final Appointment appointmentObj,
 			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void appointmentModified(final AppointmentObject appointmentObj,
+	public final void appointmentModified(final Appointment appointmentObj,
 			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
@@ -118,13 +118,13 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
 	}
 
-	public final void contactCreated(final ContactObject contactObj,
+	public final void contactCreated(final Contact contactObj,
 			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void contactModified(final ContactObject contactObj,
+	public final void contactModified(final Contact contactObj,
 			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
@@ -187,15 +187,15 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 		LL.log(x);
 	}
 
-	public void appointmentAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
 		// Nothing to do
 	}
 
-	public void appointmentDeclined(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
 		// Nothing to do
 	}
 
-	public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
 		// Nothing to do
 	}
 

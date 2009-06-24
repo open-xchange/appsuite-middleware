@@ -57,7 +57,7 @@ import junit.framework.TestCase;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
@@ -118,7 +118,7 @@ public class ContactFolderLoaderTest extends TestCase {
         assertEquals("Folder should contain two contacts", 2, collection.size());
         final Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
         for (final Object object : collection) {
-            final ContactObject contact = (ContactObject) object;
+            final Contact contact = (Contact) object;
             assertTrue("Did not expect: "+contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
         }
     }

@@ -67,7 +67,7 @@ import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
 
@@ -100,13 +100,13 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         this.appointmentListeners.add(listener);
     }
 
-    public void created(final AppointmentObject appointment, final Session session) {
+    public void created(final Appointment appointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentCreated(appointment, session);
         }
     }
 
-    public void modified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment, final Session session) {
+    public void modified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             if (oldAppointment != null && AppointmentEventInterface2.class.isAssignableFrom(listener.getClass())) {
                 ((AppointmentEventInterface2) listener).appointmentModified(oldAppointment, newAppointment, session);
@@ -116,25 +116,25 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         }
     }
 
-    public void accepted(final AppointmentObject appointment, final Session session) {
+    public void accepted(final Appointment appointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentAccepted(appointment, session);
         }
     }
 
-    public void declined(final AppointmentObject appointment, final Session session) {
+    public void declined(final Appointment appointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentDeclined(appointment, session);
         }
     }
 
-    public void tentativelyAccepted(final AppointmentObject appointment, final Session session) {
+    public void tentativelyAccepted(final Appointment appointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentTentativelyAccepted(appointment, session);
         }
     }
 
-    public void deleted(final AppointmentObject appointment, final Session session) {
+    public void deleted(final Appointment appointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentDeleted(appointment, session);
         }
@@ -198,17 +198,17 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
 
             if (commonEvent.getModule() == Types.APPOINTMENT) {
                 if (commonEvent.getAction() == CommonEvent.INSERT) {
-                    created((AppointmentObject) actionObj, session);
+                    created((Appointment) actionObj, session);
                 } else if (commonEvent.getAction() == CommonEvent.UPDATE || commonEvent.getAction() == CommonEvent.MOVE) {
-                    modified((AppointmentObject) oldObj, (AppointmentObject) actionObj, session);
+                    modified((Appointment) oldObj, (Appointment) actionObj, session);
                 } else if (commonEvent.getAction() == CommonEvent.DELETE) {
-                    deleted((AppointmentObject) actionObj, session);
+                    deleted((Appointment) actionObj, session);
                 } else if (commonEvent.getAction() == CommonEvent.CONFIRM_ACCEPTED) {
-                    accepted((AppointmentObject) actionObj, session);
+                    accepted((Appointment) actionObj, session);
                 } else if (commonEvent.getAction() == CommonEvent.CONFIRM_DECLINED) {
-                    declined((AppointmentObject) actionObj, session);
+                    declined((Appointment) actionObj, session);
                 } else if (commonEvent.getAction() == CommonEvent.CONFIRM_TENTATIVE) {
-                    tentativelyAccepted((AppointmentObject) actionObj, session);
+                    tentativelyAccepted((Appointment) actionObj, session);
                 }
             } else if (commonEvent.getModule() == Types.TASK) {
                 if (commonEvent.getAction() == CommonEvent.INSERT) {

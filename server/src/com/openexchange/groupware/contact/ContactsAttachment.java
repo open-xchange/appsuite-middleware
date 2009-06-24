@@ -64,7 +64,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -89,7 +89,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 
 	public long attached(final AttachmentEvent e) throws OXException {
 		try{
-			final ContactObject co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
+			final Contact co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
 			co.setNumberOfAttachments(co.getNumberOfAttachments()+1);
 			final Date d = new Date(System.currentTimeMillis());
 			Contacts.performContactStorageUpdate(co,co.getParentFolderID(),d,e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig());
@@ -107,7 +107,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 	)
 	public long detached(final AttachmentEvent e) throws OXException {
 		try{
-			final ContactObject co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
+			final Contact co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
 			if (co.getNumberOfAttachments() < 1){
 				throw EXCEPTIONS.create(0);
 				//throw new OXException("Numer of Attached Documents to this Contact is below zero. You can not remove more Attachments!");

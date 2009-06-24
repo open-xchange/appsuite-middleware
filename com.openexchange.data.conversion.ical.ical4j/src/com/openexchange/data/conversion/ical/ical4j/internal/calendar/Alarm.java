@@ -66,7 +66,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -82,12 +82,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
-        }  else if ( AppointmentObject.class.isAssignableFrom(calendar.getClass())) {
-            emitAppointmentAlarm((AppointmentObject)calendar, (VEvent) component, warnings);
+        }  else if ( Appointment.class.isAssignableFrom(calendar.getClass())) {
+            emitAppointmentAlarm((Appointment)calendar, (VEvent) component, warnings);
         }
     }
 
-    private void emitAppointmentAlarm(final AppointmentObject appointmentObject, final VEvent component, final List<ConversionWarning> warnings) {
+    private void emitAppointmentAlarm(final Appointment appointmentObject, final VEvent component, final List<ConversionWarning> warnings) {
         if(0 >= appointmentObject.getAlarm()) {
             return;
         }
@@ -161,8 +161,8 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         final int delta = (int) (cObj.getStartDate().getTime() - remindOn.getTime());
 
-        if(AppointmentObject.class.isAssignableFrom(cObj.getClass())) {
-            final AppointmentObject appObj = (AppointmentObject) cObj;
+        if(Appointment.class.isAssignableFrom(cObj.getClass())) {
+            final Appointment appObj = (Appointment) cObj;
             appObj.setAlarm(delta / 60000);
             appObj.setAlarmFlag(true); // bugfix: 7473
         } else {

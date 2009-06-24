@@ -59,7 +59,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
 
@@ -77,7 +77,7 @@ public class AppointmentParser extends CalendarParser {
 		this.sessionObj = sessionObj;	
 	}
 	
-	public void parse(final XmlPullParser parser, final AppointmentObject appointmentobject) throws OXException, XmlPullParserException {
+	public void parse(final XmlPullParser parser, final Appointment appointmentobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -94,7 +94,7 @@ public class AppointmentParser extends CalendarParser {
 		}
 	}
 	
-	protected void parseElementAppointment(final AppointmentObject ao, final XmlPullParser parser) throws Exception {
+	protected void parseElementAppointment(final Appointment ao, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("unknown namespace in tag: " + parser.getName());

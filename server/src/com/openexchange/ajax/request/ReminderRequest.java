@@ -76,7 +76,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
@@ -313,7 +313,7 @@ public final class ReminderRequest {
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
         final AppointmentSQLInterface calendarSql = appointmentFactory.createAppointmentSql(sessionObj);
         CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        final AppointmentObject calendarDataObject;
+        final Appointment calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
@@ -345,7 +345,7 @@ public final class ReminderRequest {
     private static final ReminderObject getNextRecurringReminder(final Session sessionObj, final TimeZone tz, final ReminderObject reminder) throws OXException {
         final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
         CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        final AppointmentObject calendarDataObject;
+        final Appointment calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {

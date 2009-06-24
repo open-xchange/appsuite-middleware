@@ -68,7 +68,7 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -440,7 +440,7 @@ public class MailObject {
                     final Context ctx = ContextStorage.getStorageContext(session);
                     final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                         ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
-                    final ContactObject c = contactInterface.getObjectById(
+                    final Contact c = contactInterface.getObjectById(
                         UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx).getContactId(),
                         FolderObject.SYSTEM_LDAP_FOLDER_ID);
                     if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {

@@ -8,7 +8,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -101,7 +101,7 @@ public class FacebookContactParser {
 	private String getUniqueAttribute(String page, String start, String end){
 		String returnString = "";
 		
-		Pattern pattern = Pattern.compile(start + "[0-9a-zA-Z+ŠšŸ\\s/:\\._]*" + end);
+		Pattern pattern = Pattern.compile(start + "[0-9a-zA-Z+ï¿½ï¿½ï¿½\\s/:\\._]*" + end);
         Matcher matcher = pattern.matcher(page);
     
         if (matcher.find()) {

@@ -56,7 +56,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.session.ServerSession;
@@ -74,7 +74,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
         this.attachmentBase = attachmentBase;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(AppointmentObject master, AppointmentObject exception,int inFolder, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment exception,int inFolder, ServerSession session) throws AbstractOXException {
         try {
             attachmentBase.startTransaction();
             Context ctx = session.getContext();

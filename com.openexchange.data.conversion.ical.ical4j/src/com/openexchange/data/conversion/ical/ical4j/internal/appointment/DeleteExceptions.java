@@ -61,13 +61,13 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAt
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
+public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
     /**
      * Default constructor.
@@ -76,11 +76,11 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
         super();
     }
     
-    public boolean isSet(final AppointmentObject appointment) {
+    public boolean isSet(final Appointment appointment) {
         return appointment.isMaster() && appointment.containsDeleteExceptions();
     }
 
-    public void emit(final int index, final AppointmentObject appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         final java.util.Date[] dates = appointment.getDeleteException();
         if (null == dates) {
             return;
@@ -106,7 +106,7 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
         return null != vEvent.getProperty("EXDATE");
     }
 
-    public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final PropertyList exdates = vEvent.getProperties("EXDATE");
         final int size = exdates.size();
         for (int i = 0; i < size; i++) {

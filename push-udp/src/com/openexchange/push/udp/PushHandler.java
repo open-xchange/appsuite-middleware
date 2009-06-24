@@ -63,8 +63,8 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -124,7 +124,7 @@ public class PushHandler implements EventHandler {
 
         if (module == Types.APPOINTMENT) {
             final int[] users = getAffectedUsers4Object(parentFolder, ctx);
-            final AppointmentObject appointmentObj = (AppointmentObject) genericEvent.getActionObj();
+            final Appointment appointmentObj = (Appointment) genericEvent.getActionObj();
             event(
                 userId,
                 appointmentObj.getObjectID(),
@@ -134,7 +134,7 @@ public class PushHandler implements EventHandler {
                 ctx,
                 getTimestamp(appointmentObj.getLastModified()));
             // Check for move action
-            check4MoveAction(userId, (AppointmentObject) genericEvent.getOldObj(), appointmentObj.getParentFolderID(), module, ctx);
+            check4MoveAction(userId, (Appointment) genericEvent.getOldObj(), appointmentObj.getParentFolderID(), module, ctx);
         } else if (module == Types.TASK) {
             final int[] users = getAffectedUsers4Object(parentFolder, ctx);
             final Task taskObj = (Task) genericEvent.getActionObj();
@@ -143,7 +143,7 @@ public class PushHandler implements EventHandler {
             check4MoveAction(userId, (Task) genericEvent.getOldObj(), taskObj.getParentFolderID(), module, ctx);
         } else if (module == Types.CONTACT) {
             final int[] users = getAffectedUsers4Object(parentFolder, ctx);
-            final ContactObject contactObj = (ContactObject) genericEvent.getActionObj();
+            final Contact contactObj = (Contact) genericEvent.getActionObj();
             event(
                 userId,
                 contactObj.getObjectID(),
@@ -153,7 +153,7 @@ public class PushHandler implements EventHandler {
                 ctx,
                 getTimestamp(contactObj.getLastModified()));
             // Check for move action
-            check4MoveAction(userId, (ContactObject) genericEvent.getOldObj(), contactObj.getParentFolderID(), module, ctx);
+            check4MoveAction(userId, (Contact) genericEvent.getOldObj(), contactObj.getParentFolderID(), module, ctx);
         } else if (module == Types.FOLDER) {
             final int[] users = getAffectedUsers4Folder(parentFolder, ctx);
             final FolderObject folderObj = (FolderObject) genericEvent.getActionObj();

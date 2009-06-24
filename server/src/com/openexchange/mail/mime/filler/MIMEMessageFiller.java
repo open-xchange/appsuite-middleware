@@ -90,7 +90,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -267,7 +267,7 @@ public class MIMEMessageFiller {
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
 
-                final ContactObject c = contactInterface.getUserById(ctx.getMailadmin());
+                final Contact c = contactInterface.getUserById(ctx.getMailadmin());
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                     final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(
                         c.getCompany(),
@@ -837,7 +837,7 @@ public class MIMEMessageFiller {
             final OXContainerConverter converter = new OXContainerConverter(session, ctx);
             try {
                 readCon = DBPool.pickup(ctx);
-                ContactObject contactObj = null;
+                Contact contactObj = null;
                 try {
                     contactObj = Contacts.getContactById(
                         userObj.getContactId(),

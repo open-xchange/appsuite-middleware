@@ -65,7 +65,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -73,7 +73,7 @@ import com.openexchange.groupware.contexts.Context;
  * time stamp.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
+public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
     private static final Log LOG = LogFactory.getLog(ChangeExceptions.class);
 
@@ -83,11 +83,11 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
         super();
     }
 
-    public boolean isSet(final AppointmentObject appointment) {
+    public boolean isSet(final Appointment appointment) {
         return appointment.isException();
     }
 
-    public void emit(final int index, final AppointmentObject appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         final java.util.Date changeException = appointment.getRecurrenceDatePosition();
         if (null == changeException) {
             return;
@@ -131,7 +131,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
         return false;
     }
 
-    public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         // Currently unimplemented. Series must be changed for change exceptions.
     }
 

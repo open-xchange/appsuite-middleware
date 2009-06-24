@@ -73,7 +73,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
@@ -87,13 +87,13 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     private static final List<Integer> allDays = new LinkedList<Integer>();
     private static final SimpleDateFormat date;
     static {
-        weekdays.put("MO", Integer.valueOf(AppointmentObject.MONDAY));
-        weekdays.put("TU", Integer.valueOf(AppointmentObject.TUESDAY));
-        weekdays.put("WE", Integer.valueOf(AppointmentObject.WEDNESDAY));
-        weekdays.put("TH", Integer.valueOf(AppointmentObject.THURSDAY));
-        weekdays.put("FR", Integer.valueOf(AppointmentObject.FRIDAY));
-        weekdays.put("SA", Integer.valueOf(AppointmentObject.SATURDAY));
-        weekdays.put("SU", Integer.valueOf(AppointmentObject.SUNDAY));
+        weekdays.put("MO", Integer.valueOf(Appointment.MONDAY));
+        weekdays.put("TU", Integer.valueOf(Appointment.TUESDAY));
+        weekdays.put("WE", Integer.valueOf(Appointment.WEDNESDAY));
+        weekdays.put("TH", Integer.valueOf(Appointment.THURSDAY));
+        weekdays.put("FR", Integer.valueOf(Appointment.FRIDAY));
+        weekdays.put("SA", Integer.valueOf(Appointment.SATURDAY));
+        weekdays.put("SU", Integer.valueOf(Appointment.SUNDAY));
 
         for(final Map.Entry<String, Integer> entry : weekdays.entrySet()) {
             allDays.add(entry.getValue());
@@ -243,18 +243,18 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
         final Recur rrule = ((RRule) list.get(0)).getRecur();
         if ("DAILY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.DAILY);
+            cObj.setRecurrenceType(Appointment.DAILY);
             if (!rrule.getMonthList().isEmpty()) {
                 throw new ConversionError(index, Code.BYMONTH_NOT_SUPPORTED);
             }
         } else if ("WEEKLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.WEEKLY);
+            cObj.setRecurrenceType(Appointment.WEEKLY);
             setDays(index, cObj, rrule, startDate);
         } else if ("MONTHLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.MONTHLY);
+            cObj.setRecurrenceType(Appointment.MONTHLY);
             setMonthDay(index, cObj, rrule, startDate);
         } else if ("YEARLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.YEARLY);
+            cObj.setRecurrenceType(Appointment.YEARLY);
             final NumberList monthList = rrule.getMonthList();
             if (!monthList.isEmpty()) {
                 cObj.setMonth(((Integer) monthList.get(0)).intValue() - 1);
@@ -282,7 +282,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     private void setOccurrenceIfNeededRecoveryFIXME(final U cObj, final int recurrenceCount) {
-        if (AppointmentObject.class.isAssignableFrom(cObj.getClass())) {
+        if (Appointment.class.isAssignableFrom(cObj.getClass())) {
             cObj.setOccurrence(recurrenceCount);
         }
     }
@@ -338,25 +338,25 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             int days = -1;
             switch (day_of_week) {
             case Calendar.MONDAY:
-                days = AppointmentObject.MONDAY;
+                days = Appointment.MONDAY;
                 break;
             case Calendar.TUESDAY:
-                days = AppointmentObject.TUESDAY;
+                days = Appointment.TUESDAY;
                 break;
             case Calendar.WEDNESDAY:
-                days = AppointmentObject.WEDNESDAY;
+                days = Appointment.WEDNESDAY;
                 break;
             case Calendar.THURSDAY:
-                days = AppointmentObject.THURSDAY;
+                days = Appointment.THURSDAY;
                 break;
             case Calendar.FRIDAY:
-                days = AppointmentObject.FRIDAY;
+                days = Appointment.FRIDAY;
                 break;
             case Calendar.SATURDAY:
-                days = AppointmentObject.SATURDAY;
+                days = Appointment.SATURDAY;
                 break;
             case Calendar.SUNDAY:
-                days = AppointmentObject.SUNDAY;
+                days = Appointment.SUNDAY;
                 break;
             default:
             }

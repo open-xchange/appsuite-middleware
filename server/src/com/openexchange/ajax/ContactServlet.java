@@ -73,7 +73,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
@@ -84,153 +84,153 @@ import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
-public class Contact extends DataServlet {
-	
-	/**
-	 * For serialization.
-	 */
-	private static final long serialVersionUID = 1635881627528234660L;
-	
-	private static final transient Log LOG = LogFactory.getLog(Contact.class);
-	
-	@Override
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final Response response = new Response();
-		try {
-			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final ServerSession session = getSessionObject(httpServletRequest);
-			
-			JSONObject jsonObj = null;
-			try {
-				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (final JSONException e) {
-				LOG.error(_doGet, e);
-				response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-				writeResponse(response, httpServletResponse);
-				return;
-			}
-			
-			if (action.equals(ACTION_IMAGE)) {
-				final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-				final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
-				
-				OutputStream os = null;
-				
-				
-				final Context ctx = session.getContext();
+public class ContactServlet extends DataServlet {
+    
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = 1635881627528234660L;
+    
+    private static final transient Log LOG = LogFactory.getLog(ContactServlet.class);
+    
+    @Override
+    protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        final Response response = new Response();
+        try {
+            final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ServerSession session = getSessionObject(httpServletRequest);
+            
+            JSONObject jsonObj = null;
+            try {
+                jsonObj = convertParameter2JSONObject(httpServletRequest);
+            } catch (final JSONException e) {
+                LOG.error(_doGet, e);
+                response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                writeResponse(response, httpServletResponse);
+                return;
+            }
+            
+            if (action.equals(ACTION_IMAGE)) {
+                final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+                final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
+                
+                OutputStream os = null;
+                
+                
+                final Context ctx = session.getContext();
 
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(inFolder, ctx.getContextId()).newContactInterface(
                     session);
 
                 try {
-					final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
-					final String imageContentType = contactObj.getImageContentType();
-					if (imageContentType != null) {
-						httpServletResponse.setContentType(imageContentType);
-					/*
-					 * Reset response header values since we are going to directly
-					 * write into servlet's output stream and then some browsers do
-					 * not allow header "Pragma"
-					 */
-						Tools.removeCachingHeader(httpServletResponse);
-						os = httpServletResponse.getOutputStream();
-						if (contactObj.getImage1() != null) {
-							os.write(contactObj.getImage1());
-						}
-					} else {
-						LOG.warn("image doesn't contain a content type: object_id=" + id);
-					}
-				} catch (final OXException e) {
-					LOG.error("actionImage", e);
-					httpServletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "");
-				}
-				
-				if (os != null) {
-					os.flush();
-				}
-				
-				return;
-			}
-			
-			final ContactRequest contactRequest = new ContactRequest(session);
-			final JSONValue responseObj = contactRequest.action(action, jsonObj);
-			response.setTimestamp(contactRequest.getTimestamp());
-			response.setData(responseObj);
-		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code
-					.JSON_WRITE_ERROR, e);
-			LOG.error(oje.getMessage(), oje);
-			response.setException(oje);
-		} catch (final AbstractOXException e) {
-			Logging.log(LOG, e);
-			response.setException(e);
-		}
-		
-		writeResponse(response, httpServletResponse);
-		
-	}
-	
-	@Override
-	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final Response response = new Response();
-		try {
-			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final ServerSession session = getSessionObject(httpServletRequest);
-			
-			final String data = getBody(httpServletRequest);
-			if (data.length() > 0) {
-				final JSONObject jsonObj;
-				
-				try {
-					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (final JSONException e) {
-					LOG.error(e.getMessage(), e);
-					response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-					writeResponse(response, httpServletResponse);
-					return;
-				}
+                    final Contact contactObj = contactInterface.getObjectById(id, inFolder);
+                    final String imageContentType = contactObj.getImageContentType();
+                    if (imageContentType != null) {
+                        httpServletResponse.setContentType(imageContentType);
+                    /*
+                     * Reset response header values since we are going to directly
+                     * write into servlet's output stream and then some browsers do
+                     * not allow header "Pragma"
+                     */
+                        Tools.removeCachingHeader(httpServletResponse);
+                        os = httpServletResponse.getOutputStream();
+                        if (contactObj.getImage1() != null) {
+                            os.write(contactObj.getImage1());
+                        }
+                    } else {
+                        LOG.warn("image doesn't contain a content type: object_id=" + id);
+                    }
+                } catch (final OXException e) {
+                    LOG.error("actionImage", e);
+                    httpServletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "");
+                }
+                
+                if (os != null) {
+                    os.flush();
+                }
+                
+                return;
+            }
+            
+            final ContactRequest contactRequest = new ContactRequest(session);
+            final JSONValue responseObj = contactRequest.action(action, jsonObj);
+            response.setTimestamp(contactRequest.getTimestamp());
+            response.setData(responseObj);
+        } catch (final JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code
+                    .JSON_WRITE_ERROR, e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        } catch (final AbstractOXException e) {
+            Logging.log(LOG, e);
+            response.setException(e);
+        }
+        
+        writeResponse(response, httpServletResponse);
+        
+    }
+    
+    @Override
+    protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        final Response response = new Response();
+        try {
+            final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ServerSession session = getSessionObject(httpServletRequest);
+            
+            final String data = getBody(httpServletRequest);
+            if (data.length() > 0) {
+                final JSONObject jsonObj;
+                
+                try {
+                    jsonObj = convertParameter2JSONObject(httpServletRequest);
+                } catch (final JSONException e) {
+                    LOG.error(e.getMessage(), e);
+                    response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                    writeResponse(response, httpServletResponse);
+                    return;
+                }
 
-				final ContactRequest contactRequest = new ContactRequest(session);
-				
-				if (data.charAt(0) == '[') {
-					final JSONArray jsonDataArray = new JSONArray(data);
-					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
-					
-					final JSONValue responseObj = contactRequest.action(action, jsonObj);
-					response.setTimestamp(contactRequest.getTimestamp());
-					response.setData(responseObj);
-				} else if (data.charAt(0) == '{') {
-					final JSONObject jsonDataObj = new JSONObject(data);
-					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
-					
-					final Object responseObj = contactRequest.action(action, jsonObj);
-					response.setTimestamp(contactRequest.getTimestamp());
-					response.setData(responseObj);
-				} else {
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
-				}
-				if (null != contactRequest.getTimestamp()) {
-					response.setTimestamp(contactRequest.getTimestamp());
-				}
-			} else {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
-			}
-		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code
-					.JSON_WRITE_ERROR, e);
-			LOG.error(oje.getMessage(), oje);
-			response.setException(oje);
-		} catch (final AbstractOXException e) {
-			Logging.log(LOG, e);
-			response.setException(e);
-		}
-		
-		writeResponse(response, httpServletResponse);
-		
-	}
+                final ContactRequest contactRequest = new ContactRequest(session);
+                
+                if (data.charAt(0) == '[') {
+                    final JSONArray jsonDataArray = new JSONArray(data);
+                    jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
+                    
+                    final JSONValue responseObj = contactRequest.action(action, jsonObj);
+                    response.setTimestamp(contactRequest.getTimestamp());
+                    response.setData(responseObj);
+                } else if (data.charAt(0) == '{') {
+                    final JSONObject jsonDataObj = new JSONObject(data);
+                    jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
+                    
+                    final Object responseObj = contactRequest.action(action, jsonObj);
+                    response.setTimestamp(contactRequest.getTimestamp());
+                    response.setData(responseObj);
+                } else {
+                    httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
+                }
+                if (null != contactRequest.getTimestamp()) {
+                    response.setTimestamp(contactRequest.getTimestamp());
+                }
+            } else {
+                httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
+            }
+        } catch (final JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code
+                    .JSON_WRITE_ERROR, e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        } catch (final AbstractOXException e) {
+            Logging.log(LOG, e);
+            response.setException(e);
+        }
+        
+        writeResponse(response, httpServletResponse);
+        
+    }
 
-	@Override
+    @Override
     protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
         httpServletResponse.setContentType("text/html");
         String callbackSite = null;
@@ -254,7 +254,7 @@ public class Contact extends DataServlet {
                         throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
                     }
 
-                    final ContactObject contactobject = new ContactObject();
+                    final Contact contactobject = new Contact();
                     final JSONObject jsonobject = new JSONObject(obj);
 
                     final ContactParser contactparser = new ContactParser(session);
@@ -308,7 +308,7 @@ public class Contact extends DataServlet {
                         throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
                     }
 
-                    final ContactObject contactobject = new ContactObject();
+                    final Contact contactobject = new Contact();
                     final JSONObject jsonobject = new JSONObject(obj);
 
                     final ContactParser contactparser = new ContactParser(session);
@@ -371,9 +371,9 @@ public class Contact extends DataServlet {
         }
 
     }
-	
-	@Override
-	protected boolean hasModulePermission(final ServerSession session) {
-		return session.getUserConfiguration().hasContact();
-	}
+    
+    @Override
+    protected boolean hasModulePermission(final ServerSession session) {
+        return session.getUserConfiguration().hasContact();
+    }
 }

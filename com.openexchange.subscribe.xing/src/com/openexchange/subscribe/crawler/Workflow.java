@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
 import com.openexchange.subscribe.xing.XingSubscriptionException;
 
@@ -26,8 +26,8 @@ public class Workflow {
 		this.steps = steps;
 	}
 
-	public ContactObject[] execute()  throws XingSubscriptionException {
-		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
+	public Contact[] execute()  throws XingSubscriptionException {
+		Vector<Contact> contactObjects = new Vector<Contact>();
 		boolean workflowComplete = true;
 		
 		// emulate a known client, hopefully keeping our profile low
@@ -48,7 +48,7 @@ public class Workflow {
 		}
 		
 		webClient.closeAllWindows();
-		return (ContactObject[]) previousStep.getOutput();
+		return (Contact[]) previousStep.getOutput();
 	}
 
 	public List<Step> getSteps() {

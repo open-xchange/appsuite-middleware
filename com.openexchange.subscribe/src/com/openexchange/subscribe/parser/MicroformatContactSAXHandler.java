@@ -2,11 +2,11 @@ package com.openexchange.subscribe.parser;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 
 public class MicroformatContactSAXHandler extends 
-AbstractMicroformatSAXHandler<ContactObject> {
+AbstractMicroformatSAXHandler<Contact> {
     
     public MicroformatContactSAXHandler(){
         super();
@@ -55,7 +55,7 @@ AbstractMicroformatSAXHandler<ContactObject> {
     }
 
     @Override
-    public ContactObject instantiate() {
-        return new ContactObject();
+    public Contact instantiate() {
+        return new Contact();
     }
 }

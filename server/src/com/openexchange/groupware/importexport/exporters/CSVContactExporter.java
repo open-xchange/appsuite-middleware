@@ -74,7 +74,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
@@ -122,105 +122,105 @@ public class CSVContactExporter implements Exporter {
 		DataObject.MODIFIED_BY,
 //		CommonObject.PRIVATE_FLAG,
 //		CommonObject.CATEGORIES,
-		ContactObject.SUR_NAME,
-		ContactObject.ANNIVERSARY,
-		ContactObject.ASSISTANT_NAME,
-		ContactObject.BIRTHDAY,
-		ContactObject.BRANCHES,
-		ContactObject.BUSINESS_CATEGORY,
-		ContactObject.CATEGORIES,
-		ContactObject.CELLULAR_TELEPHONE1,
-		ContactObject.CELLULAR_TELEPHONE2,
-		ContactObject.CITY_BUSINESS,
-		ContactObject.CITY_HOME,
-		ContactObject.CITY_OTHER,
-		ContactObject.COMMERCIAL_REGISTER,
-		ContactObject.COMPANY,
-		ContactObject.COUNTRY_BUSINESS,
-		ContactObject.COUNTRY_HOME,
-		ContactObject.COUNTRY_OTHER,
-		ContactObject.DEPARTMENT,
-		ContactObject.DISPLAY_NAME,
+		Contact.SUR_NAME,
+		Contact.ANNIVERSARY,
+		Contact.ASSISTANT_NAME,
+		Contact.BIRTHDAY,
+		Contact.BRANCHES,
+		Contact.BUSINESS_CATEGORY,
+		Contact.CATEGORIES,
+		Contact.CELLULAR_TELEPHONE1,
+		Contact.CELLULAR_TELEPHONE2,
+		Contact.CITY_BUSINESS,
+		Contact.CITY_HOME,
+		Contact.CITY_OTHER,
+		Contact.COMMERCIAL_REGISTER,
+		Contact.COMPANY,
+		Contact.COUNTRY_BUSINESS,
+		Contact.COUNTRY_HOME,
+		Contact.COUNTRY_OTHER,
+		Contact.DEPARTMENT,
+		Contact.DISPLAY_NAME,
 //		ContactObject.DISTRIBUTIONLIST,
-		ContactObject.EMAIL1,
-		ContactObject.EMAIL2,
-		ContactObject.EMAIL3,
-		ContactObject.EMPLOYEE_TYPE,
-		ContactObject.FAX_BUSINESS,
-		ContactObject.FAX_HOME,
-		ContactObject.FAX_OTHER,
+		Contact.EMAIL1,
+		Contact.EMAIL2,
+		Contact.EMAIL3,
+		Contact.EMPLOYEE_TYPE,
+		Contact.FAX_BUSINESS,
+		Contact.FAX_HOME,
+		Contact.FAX_OTHER,
 //		ContactObject.FILE_AS,
-		ContactObject.FOLDER_ID,
-		ContactObject.GIVEN_NAME,
+		Contact.FOLDER_ID,
+		Contact.GIVEN_NAME,
 //		ContactObject.IMAGE1,
 //		ContactObject.IMAGE1_CONTENT_TYPE,
-		ContactObject.INFO,
-		ContactObject.INSTANT_MESSENGER1,
-		ContactObject.INSTANT_MESSENGER2,
+		Contact.INFO,
+		Contact.INSTANT_MESSENGER1,
+		Contact.INSTANT_MESSENGER2,
 //		ContactObject.LINKS,
-		ContactObject.MANAGER_NAME,
-		ContactObject.MARITAL_STATUS,
-		ContactObject.MIDDLE_NAME,
-		ContactObject.NICKNAME,
-		ContactObject.NOTE,
-		ContactObject.NUMBER_OF_CHILDREN,
-		ContactObject.NUMBER_OF_EMPLOYEE,
-		ContactObject.POSITION,
-		ContactObject.POSTAL_CODE_BUSINESS,
-		ContactObject.POSTAL_CODE_HOME,
-		ContactObject.POSTAL_CODE_OTHER,
+		Contact.MANAGER_NAME,
+		Contact.MARITAL_STATUS,
+		Contact.MIDDLE_NAME,
+		Contact.NICKNAME,
+		Contact.NOTE,
+		Contact.NUMBER_OF_CHILDREN,
+		Contact.NUMBER_OF_EMPLOYEE,
+		Contact.POSITION,
+		Contact.POSTAL_CODE_BUSINESS,
+		Contact.POSTAL_CODE_HOME,
+		Contact.POSTAL_CODE_OTHER,
 //		ContactObject.PRIVATE_FLAG,
-		ContactObject.PROFESSION,
-		ContactObject.ROOM_NUMBER,
-		ContactObject.SALES_VOLUME,
-		ContactObject.SPOUSE_NAME,
-		ContactObject.STATE_BUSINESS,
-		ContactObject.STATE_HOME,
-		ContactObject.STATE_OTHER,
-		ContactObject.STREET_BUSINESS,
-		ContactObject.STREET_HOME,
-		ContactObject.STREET_OTHER,
-		ContactObject.SUFFIX,
-		ContactObject.TAX_ID,
-		ContactObject.TELEPHONE_ASSISTANT,
-		ContactObject.TELEPHONE_BUSINESS1,
-		ContactObject.TELEPHONE_BUSINESS2,
-		ContactObject.TELEPHONE_CALLBACK,
-		ContactObject.TELEPHONE_CAR,
-		ContactObject.TELEPHONE_COMPANY,
-		ContactObject.TELEPHONE_HOME1,
-		ContactObject.TELEPHONE_HOME2,
-		ContactObject.TELEPHONE_IP,
-		ContactObject.TELEPHONE_ISDN,
-		ContactObject.TELEPHONE_OTHER,
-		ContactObject.TELEPHONE_PAGER,
-		ContactObject.TELEPHONE_PRIMARY,
-		ContactObject.TELEPHONE_RADIO,
-		ContactObject.TELEPHONE_TELEX,
-		ContactObject.TELEPHONE_TTYTDD,
-		ContactObject.TITLE,
-		ContactObject.URL,
-		ContactObject.USERFIELD01,
-		ContactObject.USERFIELD02,
-		ContactObject.USERFIELD03,
-		ContactObject.USERFIELD04,
-		ContactObject.USERFIELD05,
-		ContactObject.USERFIELD06,
-		ContactObject.USERFIELD07,
-		ContactObject.USERFIELD08,
-		ContactObject.USERFIELD09,
-		ContactObject.USERFIELD10,
-		ContactObject.USERFIELD11,
-		ContactObject.USERFIELD12,
-		ContactObject.USERFIELD13,
-		ContactObject.USERFIELD14,
-		ContactObject.USERFIELD15,
-		ContactObject.USERFIELD16,
-		ContactObject.USERFIELD17,
-		ContactObject.USERFIELD18,
-		ContactObject.USERFIELD19,
-		ContactObject.USERFIELD20,
-		ContactObject.DEFAULT_ADDRESS};
+		Contact.PROFESSION,
+		Contact.ROOM_NUMBER,
+		Contact.SALES_VOLUME,
+		Contact.SPOUSE_NAME,
+		Contact.STATE_BUSINESS,
+		Contact.STATE_HOME,
+		Contact.STATE_OTHER,
+		Contact.STREET_BUSINESS,
+		Contact.STREET_HOME,
+		Contact.STREET_OTHER,
+		Contact.SUFFIX,
+		Contact.TAX_ID,
+		Contact.TELEPHONE_ASSISTANT,
+		Contact.TELEPHONE_BUSINESS1,
+		Contact.TELEPHONE_BUSINESS2,
+		Contact.TELEPHONE_CALLBACK,
+		Contact.TELEPHONE_CAR,
+		Contact.TELEPHONE_COMPANY,
+		Contact.TELEPHONE_HOME1,
+		Contact.TELEPHONE_HOME2,
+		Contact.TELEPHONE_IP,
+		Contact.TELEPHONE_ISDN,
+		Contact.TELEPHONE_OTHER,
+		Contact.TELEPHONE_PAGER,
+		Contact.TELEPHONE_PRIMARY,
+		Contact.TELEPHONE_RADIO,
+		Contact.TELEPHONE_TELEX,
+		Contact.TELEPHONE_TTYTDD,
+		Contact.TITLE,
+		Contact.URL,
+		Contact.USERFIELD01,
+		Contact.USERFIELD02,
+		Contact.USERFIELD03,
+		Contact.USERFIELD04,
+		Contact.USERFIELD05,
+		Contact.USERFIELD06,
+		Contact.USERFIELD07,
+		Contact.USERFIELD08,
+		Contact.USERFIELD09,
+		Contact.USERFIELD10,
+		Contact.USERFIELD11,
+		Contact.USERFIELD12,
+		Contact.USERFIELD13,
+		Contact.USERFIELD14,
+		Contact.USERFIELD15,
+		Contact.USERFIELD16,
+		Contact.USERFIELD17,
+		Contact.USERFIELD18,
+		Contact.USERFIELD19,
+		Contact.USERFIELD20,
+		Contact.DEFAULT_ADDRESS};
 
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
 	private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
@@ -268,7 +268,7 @@ public class CSVContactExporter implements Exporter {
 			s1.retainAll(s2);
 			cols = transformSetToIntArray( s1 );
 		}
-		SearchIterator<ContactObject> conIter;
+		SearchIterator<Contact> conIter;
 		try {
 		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
@@ -280,7 +280,7 @@ public class CSVContactExporter implements Exporter {
 		ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
 		
 		while(conIter.hasNext()){
-			ContactObject current;
+			Contact current;
 			try {
 				current = conIter.next();
 				ret.append( convertToLine( convertToList(current, cols) ) );
@@ -315,7 +315,7 @@ public class CSVContactExporter implements Exporter {
 		} else {
 			cols = fieldsToBeExported;
 		}
-		ContactObject conObj;
+		Contact conObj;
 		try {
 		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
@@ -339,7 +339,7 @@ public class CSVContactExporter implements Exporter {
 		}
 	}
 	
-	protected List<String> convertToList(final ContactObject conObj, final int[] cols){
+	protected List<String> convertToList(final Contact conObj, final int[] cols){
 		final List<String> l = new LinkedList<String>();
 		final ContactStringGetter getter = new ContactStringGetter();
 		getter.setDelegate( new ContactGetter() );

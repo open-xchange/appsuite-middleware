@@ -66,7 +66,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -155,7 +155,7 @@ public final class Tools {
         return zone;
     }
 
-    private static final String SQL_TITLE = "SELECT " + calColl.getFieldName(AppointmentObject.TITLE) + " FROM prg_dates AS pd WHERE cid = ? AND " + calColl.getFieldName(AppointmentObject.OBJECT_ID) + " = ?";
+    private static final String SQL_TITLE = "SELECT " + calColl.getFieldName(Appointment.TITLE) + " FROM prg_dates AS pd WHERE cid = ? AND " + calColl.getFieldName(Appointment.OBJECT_ID) + " = ?";
 
     /**
      * Gets the appointment's title associated with given object ID in given context.
@@ -191,7 +191,7 @@ public final class Tools {
         }
     }
 
-    private static final String SQL_FOLDER1 = "SELECT " + calColl.getFieldName(AppointmentObject.FOLDER_ID) + " FROM prg_dates WHERE cid = ? AND " + calColl.getFieldName(AppointmentObject.OBJECT_ID) + " = ?";
+    private static final String SQL_FOLDER1 = "SELECT " + calColl.getFieldName(Appointment.FOLDER_ID) + " FROM prg_dates WHERE cid = ? AND " + calColl.getFieldName(Appointment.OBJECT_ID) + " = ?";
 
     private static final String SQL_FOLDER2 = "SELECT pfid FROM prg_dates_members WHERE cid = ? AND object_id = ? AND member_uid = ?";
 

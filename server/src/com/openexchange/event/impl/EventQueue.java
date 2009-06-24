@@ -58,8 +58,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.EventException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
@@ -341,7 +341,7 @@ public final class EventQueue {
         case EventClient.CREATED:
             for (int a = 0; a < appointmentEventList.size(); a++) {
                 try {
-                    appointmentEventList.get(a).appointmentCreated((AppointmentObject) eventObj.getObject(), eventObj.getSessionObject());
+                    appointmentEventList.get(a).appointmentCreated((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -350,7 +350,7 @@ public final class EventQueue {
         case EventClient.CHANGED:
             for (int a = 0; a < appointmentEventList.size(); a++) {
                 try {
-                    appointmentEventList.get(a).appointmentModified((AppointmentObject) eventObj.getObject(), eventObj.getSessionObject());
+                    appointmentEventList.get(a).appointmentModified((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -359,7 +359,7 @@ public final class EventQueue {
         case EventClient.DELETED:
             for (int a = 0; a < appointmentEventList.size(); a++) {
                 try {
-                    appointmentEventList.get(a).appointmentDeleted((AppointmentObject) eventObj.getObject(), eventObj.getSessionObject());
+                    appointmentEventList.get(a).appointmentDeleted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -368,7 +368,7 @@ public final class EventQueue {
         case EventClient.CONFIRM_ACCEPTED:
             for (int a = 0; a < appointmentEventList.size(); a++) {
                 try {
-                    appointmentEventList.get(a).appointmentAccepted((AppointmentObject) eventObj.getObject(), eventObj.getSessionObject());
+                    appointmentEventList.get(a).appointmentAccepted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -377,7 +377,7 @@ public final class EventQueue {
         case EventClient.CONFIRM_DECLINED:
             for (int a = 0; a < appointmentEventList.size(); a++) {
                 try {
-                    appointmentEventList.get(a).appointmentDeclined((AppointmentObject) eventObj.getObject(), eventObj.getSessionObject());
+                    appointmentEventList.get(a).appointmentDeclined((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -387,7 +387,7 @@ public final class EventQueue {
             for (int a = 0; a < appointmentEventList.size(); a++) {
                 try {
                     appointmentEventList.get(a).appointmentTentativelyAccepted(
-                        (AppointmentObject) eventObj.getObject(),
+                        (Appointment) eventObj.getObject(),
                         eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
@@ -408,7 +408,7 @@ public final class EventQueue {
         case EventClient.CREATED:
             for (int a = 0; a < contactEventList.size(); a++) {
                 try {
-                    contactEventList.get(a).contactCreated((ContactObject) eventObj.getObject(), eventObj.getSessionObject());
+                    contactEventList.get(a).contactCreated((Contact) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -417,7 +417,7 @@ public final class EventQueue {
         case EventClient.CHANGED:
             for (int a = 0; a < contactEventList.size(); a++) {
                 try {
-                    contactEventList.get(a).contactModified((ContactObject) eventObj.getObject(), eventObj.getSessionObject());
+                    contactEventList.get(a).contactModified((Contact) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -426,7 +426,7 @@ public final class EventQueue {
         case EventClient.DELETED:
             for (int a = 0; a < contactEventList.size(); a++) {
                 try {
-                    contactEventList.get(a).contactDeleted((ContactObject) eventObj.getObject(), eventObj.getSessionObject());
+                    contactEventList.get(a).contactDeleted((Contact) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }

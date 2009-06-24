@@ -60,7 +60,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.session.Session;
@@ -81,7 +81,7 @@ public class ContactParser extends CommonParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(final XmlPullParser parser, final ContactObject contactobject) throws OXException, XmlPullParserException {
+	public void parse(final XmlPullParser parser, final Contact contactobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -98,7 +98,7 @@ public class ContactParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementContact(final ContactObject contactobject, final XmlPullParser parser) throws Exception {
+	protected void parseElementContact(final Contact contactobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("unknown namespace in tag: " + parser.getName());
@@ -408,7 +408,7 @@ public class ContactParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementDistributionlists(final ContactObject oxobject, final XmlPullParser parser) throws OXException {
+	protected void parseElementDistributionlists(final Contact oxobject, final XmlPullParser parser) throws OXException {
 		final ArrayList<DistributionListEntryObject> distributionlist = new ArrayList<DistributionListEntryObject>();
 		
 		try {
@@ -461,7 +461,7 @@ public class ContactParser extends CommonParser {
 		entry.setEmailaddress(getValue(parser));
 	} 
 
-	protected void parseElementLinks(final ContactObject oxobject, final XmlPullParser parser) throws OXException {
+	protected void parseElementLinks(final Contact oxobject, final XmlPullParser parser) throws OXException {
 		final ArrayList<LinkEntryObject> links = new ArrayList<LinkEntryObject>();
 		
 		try {

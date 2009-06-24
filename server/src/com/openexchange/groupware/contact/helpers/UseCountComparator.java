@@ -50,13 +50,13 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.util.Comparator;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UseCountComparator implements Comparator<ContactObject> {
+public class UseCountComparator implements Comparator<Contact> {
 
     private ContactComparator contactComparator;
 
@@ -68,7 +68,7 @@ public class UseCountComparator implements Comparator<ContactObject> {
         this.contactComparator = new ContactComparator();
     }
 
-    public int compare(ContactObject o1, ContactObject o2) {
+    public int compare(Contact o1, Contact o2) {
         if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
             if (specialSort) {
                 return contactComparator.compare(o1, o2);

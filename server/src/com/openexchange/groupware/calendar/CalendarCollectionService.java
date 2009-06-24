@@ -63,7 +63,7 @@ import java.util.TimeZone;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.MBoolean;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -162,10 +162,10 @@ public interface CalendarCollectionService {
 
     /**
      * Checks if given columns contain fields
-     * {@link AppointmentObject#RECURRENCE_TYPE}, if so fields
-     * {@link AppointmentObject#CHANGE_EXCEPTIONS},
-     * {@link AppointmentObject#DELETE_EXCEPTIONS}, and
-     * {@link AppointmentObject#RECURRENCE_CALCULATOR} are added to specified
+     * {@link Appointment#RECURRENCE_TYPE}, if so fields
+     * {@link Appointment#CHANGE_EXCEPTIONS},
+     * {@link Appointment#DELETE_EXCEPTIONS}, and
+     * {@link Appointment#RECURRENCE_CALCULATOR} are added to specified
      * columns if not already present.
      * 
      * @param cols The columns to check
@@ -185,7 +185,7 @@ public interface CalendarCollectionService {
      */
     public int[] enhanceCols(final int cols[], final int ara[], final int i);
 
-    public void triggerEvent(final Session session, final int action, final AppointmentObject appointmentobject) throws OXException;
+    public void triggerEvent(final Session session, final int action, final Appointment appointmentobject) throws OXException;
 
     public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment, final CalendarDataObject newAppointment) throws OXCalendarException;
 
@@ -382,7 +382,7 @@ public interface CalendarCollectionService {
      * @return The loaded calendar objects
      * @throws OXException If calendar objects cannot be loaded
      */
-    public AppointmentObject[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException;
+    public Appointment[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException;
 
     /**
      * Determines appointment's valid folder ID for specified user
@@ -858,7 +858,7 @@ public interface CalendarCollectionService {
      * @param appointment The recurring appointment whose start date and end date shall be replaced
      * @throws OXException If calculating the first occurrence fails
      */
-    public void replaceDatesWithFirstOccurence(final AppointmentObject appointment) throws OXException;
+    public void replaceDatesWithFirstOccurence(final Appointment appointment) throws OXException;
 
     /**
      * Sets the start/end date of specified recurring appointment to its first occurrence. A possible exception is swallowed and recurring

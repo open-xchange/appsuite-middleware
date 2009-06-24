@@ -72,7 +72,7 @@ import com.openexchange.groupware.AbstractOXException.Truncated;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -159,7 +159,7 @@ public final class ContactInsertDataHandler implements DataHandler {
                     /*
                      * Convert to a contact object
                      */
-                    final ContactObject contact = converter.convertContact(versitObject);
+                    final Contact contact = converter.convertContact(versitObject);
                     contact.setParentFolderID(folder);
                     /*
                      * Store contact object

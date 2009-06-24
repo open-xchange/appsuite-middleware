@@ -69,7 +69,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -115,7 +115,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
              */
             parser.nextTag();
 
-            final ContactObject contactobject = new ContactObject();
+            final Contact contactobject = new Contact();
 
             final ContactParser contactparser = new ContactParser(session);
             contactparser.parse(parser, contactobject);
@@ -209,7 +209,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
     private final class QueuedContact implements QueuedAction<ContactInterface> {
 
-        private final ContactObject contactObject;
+        private final Contact contactObject;
 
         private final String clientId;
 
@@ -233,7 +233,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
          * @param inFolder The contact's folder
          * @param session The session
          */
-        public QueuedContact(final ContactObject contactObject, final String clientId, final int action,
+        public QueuedContact(final Contact contactObject, final String clientId, final int action,
                 final Date lastModified, final int inFolder, final Session session) {
             super();
             this.contactObject = contactObject;

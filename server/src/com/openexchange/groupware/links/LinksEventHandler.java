@@ -63,8 +63,8 @@ import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.event.impl.NoDelayEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -88,15 +88,15 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
 		super();
 	}
 
-	public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
 		// nix
 	}
 
-	public void appointmentModified(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentModified(final Appointment appointmentObj, final Session sessionObj) {
 		updateLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
 	}
 
-	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
 		deleteLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
 	}
 
@@ -112,15 +112,15 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
 		deleteLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
 	}
 
-	public void contactCreated(final ContactObject contactObj, final Session sessionObj) {
+	public void contactCreated(final Contact contactObj, final Session sessionObj) {
 		// nix
 	}
 
-	public void contactModified(final ContactObject contactObj, final Session sessionObj) {
+	public void contactModified(final Contact contactObj, final Session sessionObj) {
 		updateLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
 	}
 
-	public void contactDeleted(final ContactObject contactObj, final Session sessionObj) {
+	public void contactDeleted(final Contact contactObj, final Session sessionObj) {
 		deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
 	}
 
@@ -288,15 +288,15 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
 		}
 	}
 
-	public void appointmentAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
 		// nothing to do
 	}
 
-	public void appointmentDeclined(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
 		// nothing to do
 	}
 
-	public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+	public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
 		// nothing to do
 	}
 

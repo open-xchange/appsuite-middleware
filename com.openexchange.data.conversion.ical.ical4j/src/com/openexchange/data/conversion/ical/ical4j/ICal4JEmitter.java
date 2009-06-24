@@ -72,7 +72,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
@@ -81,11 +81,11 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class ICal4JEmitter implements ICalEmitter {
 
-    public String writeAppointments(final List<AppointmentObject> appointmentObjects, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+    public String writeAppointments(final List<Appointment> appointmentObjects, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
         int i = 0;
-        for(final AppointmentObject appointment : appointmentObjects) {
+        for(final Appointment appointment : appointmentObjects) {
             final VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
         }
@@ -113,10 +113,10 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
-    private VEvent createEvent(final int index, final AppointmentObject appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+    private VEvent createEvent(final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
 
         final VEvent vevent = new VEvent();
-        for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
+        for (final AttributeConverter<VEvent, Appointment> converter : AppointmentConverters.ALL) {
             if (converter.isSet(appointment)) {
                 try {
                     converter.emit(index, appointment, vevent, warnings, ctx);
@@ -151,7 +151,7 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
     public ICalItem writeAppointment(final ICalSession session,
-        final AppointmentObject appointment, final Context ctx,
+        final Appointment appointment, final Context ctx,
         final List<ConversionError> errors, final List<ConversionWarning> warnings)
         throws ConversionError {
         final Calendar calendar = getCalendar(session);

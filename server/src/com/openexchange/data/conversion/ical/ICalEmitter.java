@@ -51,7 +51,7 @@ package com.openexchange.data.conversion.ical;
 
 import java.io.OutputStream;
 import java.util.List;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
@@ -63,7 +63,7 @@ import com.openexchange.groupware.tasks.Task;
 public interface ICalEmitter {
 
     // TODO: What about mixed exports?Tasks and Appointments
-    public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    public String writeAppointments(List<Appointment> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
@@ -72,7 +72,7 @@ public interface ICalEmitter {
     /**
      * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */
-    public ICalItem writeAppointment(ICalSession session, AppointmentObject appointment, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     /**
      * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.

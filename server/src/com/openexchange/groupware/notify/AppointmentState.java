@@ -66,7 +66,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.tasks.Task;
@@ -163,13 +163,13 @@ public class AppointmentState extends LinkableState {
 	public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
 			final EmailableParticipant p) {
 		super.addSpecial(obj, oldObj, renderMap, p);
-		String location = ((AppointmentObject) obj).getLocation();
+		String location = ((Appointment) obj).getLocation();
 		if (location == null) {
 			location = "";
 		}
 		final TemplateReplacement tr = new LocationReplacement(location);
 		tr.setLocale(p.getLocale());
-		tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareStrings(location, ((AppointmentObject) oldObj)
+		tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareStrings(location, ((Appointment) oldObj)
 				.getLocation()));
 		renderMap.put(tr);
 	}
@@ -196,10 +196,10 @@ public class AppointmentState extends LinkableState {
 	}
 
 	public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-		addICALAttachment(mail, (AppointmentObject) obj, sessObj);
+		addICALAttachment(mail, (Appointment) obj, sessObj);
 	}
 
-	private void addICALAttachment(final MailObject mail, final AppointmentObject obj, final ServerSession sessObj) {
+	private void addICALAttachment(final MailObject mail, final Appointment obj, final ServerSession sessObj) {
 		final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
 		if (emitter == null) {
 			LOGGER.warn("Could not find ical emitter service. Skipping attachment");
@@ -250,8 +250,8 @@ public class AppointmentState extends LinkableState {
 	}
 
 	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
-        AppointmentObject.ALARM,
-        AppointmentObject.LAST_MODIFIED
+        Appointment.ALARM,
+        Appointment.LAST_MODIFIED
     ));
     
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {

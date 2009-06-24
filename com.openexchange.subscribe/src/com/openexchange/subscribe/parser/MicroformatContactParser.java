@@ -13,7 +13,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -23,7 +23,7 @@ import com.openexchange.subscribe.SubscriptionSession;
 
 
 public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
-    protected Collection<ContactObject> contacts;
+    protected Collection<Contact> contacts;
     protected SubscribeService service;
     
     public MicroformatContactParser(){
@@ -96,7 +96,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
         }
     }
 
-    public Collection<ContactObject> getContacts() {
+    public Collection<Contact> getContacts() {
         return contacts;
     }
 

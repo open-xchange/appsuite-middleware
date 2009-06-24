@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -79,16 +79,16 @@ public class ContactHandler {
      * @throws ContextException
      * @throws OXException
      */
-    protected void storeContacts(Session session, int folderId, Collection<ContactObject> updatedContacts) throws ContextException, OXException{
+    protected void storeContacts(Session session, int folderId, Collection<Contact> updatedContacts) throws ContextException, OXException{
        
         
         RdbContactSQLInterface storage = new RdbContactSQLInterface(session);
         
-        for(ContactObject updatedContact: updatedContacts){
-            SearchIterator<ContactObject> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, ContactObject.ALL_COLUMNS);
+        for(Contact updatedContact: updatedContacts){
+            SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, Contact.ALL_COLUMNS);
             boolean foundMatch = false;
             while( existingContacts.hasNext() && ! foundMatch ){
-                ContactObject existingContact = null;
+                Contact existingContact = null;
                 try {
                     existingContact = existingContacts.next();
                 } catch (SearchIteratorException e) {
@@ -114,7 +114,7 @@ public class ContactHandler {
     }
     
 
-    protected boolean isSame(ContactObject first, ContactObject second){
+    protected boolean isSame(Contact first, Contact second){
         if(first.containsGivenName()) {
             if(!first.getGivenName().equals(second.getGivenName())) {
                 return false;

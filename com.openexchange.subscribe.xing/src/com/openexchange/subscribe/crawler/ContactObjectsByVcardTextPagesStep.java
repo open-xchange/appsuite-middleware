@@ -57,7 +57,7 @@ import java.util.Vector;
 
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -71,17 +71,17 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
-		Step<ContactObject[], List<TextPage>> {
+		Step<Contact[], List<TextPage>> {
 	
 	private List<TextPage> pages;
-	private ContactObject[] contactObjectsArray;
+	private Contact[] contactObjectsArray;
 	
 	public ContactObjectsByVcardTextPagesStep() {
 		
 	}
 
 	public void execute(WebClient webClient) {
-		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
+		Vector<Contact> contactObjects = new Vector<Contact>();
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		
 		for (TextPage page : pages) {
@@ -92,7 +92,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
     		try {
     			versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
     			VersitObject versitObject = def.parse(versitReader);
-    			ContactObject contactObject = oxContainerConverter.convertContact(versitObject);
+    			Contact contactObject = oxContainerConverter.convertContact(versitObject);
     			contactObjects.add(contactObject);
     		} catch (final VersitException e){
     			e.printStackTrace();
@@ -107,7 +107,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 			executedSuccessfully = true;
 		}
 		
-		contactObjectsArray = new ContactObject[contactObjects.size()];
+		contactObjectsArray = new Contact[contactObjects.size()];
 	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
 	    	contactObjectsArray[i] = contactObjects.get(i);
 	    }
@@ -123,7 +123,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 		return LIST_OF_CONTACT_OBJECTS;
 	}
 
-	public ContactObject[] getOutput() {
+	public Contact[] getOutput() {
 		return contactObjectsArray;
 	}
 
@@ -139,11 +139,11 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 		this.pages = pages;
 	}
 
-	public ContactObject[] getContactObjectsArray() {
+	public Contact[] getContactObjectsArray() {
 		return contactObjectsArray;
 	}
 
-	public void setContactObjectsArray(ContactObject[] contactObjectsArray) {
+	public void setContactObjectsArray(Contact[] contactObjectsArray) {
 		this.contactObjectsArray = contactObjectsArray;
 	}
 

@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.xing;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import junit.framework.TestCase;
 
 
@@ -63,7 +63,7 @@ public class ContactSanitationTest extends TestCase {
     
     
     public void testSanitizesEmptyStrings() {
-        ContactObject contact = new ContactObject();
+        Contact contact = new Contact();
         contact.setDisplayName("");
         contact.setGivenName("");
         contact.setSurName("");

@@ -11,7 +11,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
 import com.openexchange.server.osgiservice.Whiteboard;
@@ -53,7 +53,7 @@ public class DiscoveryActivator implements BundleActivator {
         componentRegistration = new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
         
         List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(1);
-        folderUpdaters.add(new StrategyFolderUpdaterService<ContactObject>(new ContactFolderUpdaterStrategy()));
+        folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         executionRegistration = context.registerService(SubscriptionExecutionService.class.getName(), executor, null);
     

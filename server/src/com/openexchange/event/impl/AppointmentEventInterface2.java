@@ -1,6 +1,6 @@
 package com.openexchange.event.impl;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 
 /**
@@ -8,6 +8,6 @@ import com.openexchange.session.Session;
  */
 public interface AppointmentEventInterface2 extends AppointmentEventInterface {
 
-    public void appointmentModified(AppointmentObject oldAppointment, AppointmentObject newAppointment, Session sessionObj);
+    public void appointmentModified(Appointment oldAppointment, Appointment newAppointment, Session sessionObj);
 
 }

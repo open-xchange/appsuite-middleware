@@ -49,7 +49,7 @@
 
 package com.openexchange.publish.microformats;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
@@ -64,7 +64,7 @@ import junit.framework.TestCase;
  */
 public class ContactTemplateUtilsTest extends TestCase {
     public void testImageURL() {
-        ContactObject contactObject = new ContactObject();
+        Contact contactObject = new Contact();
         contactObject.setObjectID(12);
         
         SimContext context = new SimContext(1337);
@@ -81,7 +81,7 @@ public class ContactTemplateUtilsTest extends TestCase {
     }
     
     public void testImageURLWithSecret() {
-        ContactObject contactObject = new ContactObject();
+        Contact contactObject = new Contact();
         contactObject.setObjectID(12);
         
         SimContext context = new SimContext(1337);

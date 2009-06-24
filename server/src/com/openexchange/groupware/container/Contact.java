@@ -62,7 +62,7 @@ import java.util.Set;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 
-public class ContactObject extends CommonObject {
+public class Contact extends CommonObject {
 
     public static final int DISPLAY_NAME = 500;
 
@@ -745,7 +745,7 @@ public class ContactObject extends CommonObject {
 
     protected DistributionListEntryObject[] dlists;
 
-    public ContactObject() {
+    public Contact() {
         reset();
     }
 
@@ -2658,7 +2658,7 @@ public class ContactObject extends CommonObject {
             return differingFields;
         }
 
-        ContactObject other = (ContactObject) dataObject;
+        Contact other = (Contact) dataObject;
 
         if ((!containsURL() && other.containsURL()) || (containsURL() && other.containsURL() && getURL() != other.getURL() && (getURL() == null || !getURL().equals(
             other.getURL())))) {

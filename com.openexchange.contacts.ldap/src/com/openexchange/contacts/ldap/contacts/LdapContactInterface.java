@@ -88,7 +88,7 @@ import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -211,7 +211,7 @@ public class LdapContactInterface implements ContactInterface {
         throw new LdapException(Code.DELETE_NOT_POSSIBLE);
     }
 
-    public SearchIterator<ContactObject> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         final Set<Integer> columns = getColumnSet(cols);
         final int[] folders = searchobject.getFolders();
@@ -225,7 +225,7 @@ public class LdapContactInterface implements ContactInterface {
         } else {
             throw new LdapException(Code.FOLDERID_OBJECT_NULL);
         }
-        final ArrayList<ContactObject> arrayList;
+        final ArrayList<Contact> arrayList;
 
         final Mappings mappings = folderprop.getMappings();
         final ContactTypes contacttype = folderprop.getContacttypes();
@@ -261,35 +261,35 @@ public class LdapContactInterface implements ContactInterface {
         }
         
         sorting(orderBy, orderDir, valueOf, arrayList);
-        return new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
+        return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
     }
 
 
     // The all request...
-    public SearchIterator<ContactObject> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         
         final Set<Integer> columns = getColumnSet(cols);
         if (0 == orderBy) {
-            columns.add(ContactObject.SUR_NAME);
-            columns.add(ContactObject.DISPLAY_NAME);
-            columns.add(ContactObject.COMPANY);
-            columns.add(ContactObject.EMAIL1);
-            columns.add(ContactObject.EMAIL2);
+            columns.add(Contact.SUR_NAME);
+            columns.add(Contact.DISPLAY_NAME);
+            columns.add(Contact.COMPANY);
+            columns.add(Contact.EMAIL1);
+            columns.add(Contact.EMAIL2);
         }
-        final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, null, null, null);
+        final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null);
         
         // Get only the needed parts...
-        final List<ContactObject> subList = getSubList(from, to, arrayList);
+        final List<Contact> subList = getSubList(from, to, arrayList);
         
         sorting(orderBy, orderDir, valueOf, subList);
-        final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(subList.toArray(new ContactObject[subList.size()]));
+        final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));
         return searchIterator;
     }
 
 
-    public SearchIterator<ContactObject> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
-        return new ArrayIterator<ContactObject>(new ContactObject[0]);
+    public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+        return new ArrayIterator<Contact>(new Contact[0]);
     }
 
     public int getFolderId() {
@@ -302,22 +302,22 @@ public class LdapContactInterface implements ContactInterface {
         return ldapServer;
     }
 
-    public SearchIterator<ContactObject> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+    public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         if (folderprop.isOutlook_support()) {
             final Set<Integer> columns = getColumnSet(cols);
-            final ArrayList<ContactObject> arrayList = getLDAPContacts(folderId, columns, null, null, null);
+            final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null);
             for (int i = 0; i < arrayList.size(); i++) {
-                final ContactObject obj = arrayList.get(i);
+                final Contact obj = arrayList.get(i);
                 final Date lastModified = obj.getLastModified();
                 if (null != lastModified && lastModified.before(since)) {
                     arrayList.remove(i--);
                 }
             }
-            final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(
-                arrayList.toArray(new ContactObject[arrayList.size()]));
+            final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(
+                arrayList.toArray(new Contact[arrayList.size()]));
             return searchIterator;
         } else {
-            return new ArrayIterator<ContactObject>(new ContactObject[0]);
+            return new ArrayIterator<Contact>(new Contact[0]);
         }
     }
 
@@ -326,14 +326,14 @@ public class LdapContactInterface implements ContactInterface {
         return 0;
     }
 
-    public ContactObject getObjectById(final int objectId, final int inFolder) throws OXException {
+    public Contact getObjectById(final int objectId, final int inFolder) throws OXException {
         LOG.info("Called getObjectById");
         return null;
     }
 
-    public SearchIterator<ContactObject> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
         final Set<Integer> columns = getColumnSet(cols);
-        final ArrayList<ContactObject> contacts = new ArrayList<ContactObject>();
+        final ArrayList<Contact> contacts = new ArrayList<Contact>();
         for (final int[] object : objectIdAndInFolder) {
             final int object_id = object[0];
             final int folder_id = object[1];
@@ -354,19 +354,19 @@ public class LdapContactInterface implements ContactInterface {
                 contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null));
             }
         }
-        return new ArrayIterator<ContactObject>(contacts.toArray(new ContactObject[contacts.size()]));
+        return new ArrayIterator<Contact>(contacts.toArray(new Contact[contacts.size()]));
     }
 
-    public ContactObject getUserById(final int userId) throws OXException {
+    public Contact getUserById(final int userId) throws OXException {
         LOG.info("Called getUserById");
         return null;
     }
 
-    public void insertContactObject(final ContactObject co) throws OXException {
+    public void insertContactObject(final Contact co) throws OXException {
         throw new LdapException(Code.INSERT_NOT_POSSIBLE);
     }
 
-    public SearchIterator<ContactObject> searchContacts(final String searchpattern, final int folderId, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         LOG.info("Called searchContacts");
         return null;
     }
@@ -376,7 +376,7 @@ public class LdapContactInterface implements ContactInterface {
         initMappingTable();
     }
     
-    public void updateContactObject(final ContactObject co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
+    public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
         LOG.info("Called updateContactObject");
     }
 
@@ -416,81 +416,81 @@ public class LdapContactInterface implements ContactInterface {
     private String getFieldFromColumn(final Integer col, final boolean distributionlist) {
         final Mappings mappings = folderprop.getMappings();
         switch (col) {
-        case ContactObject.ANNIVERSARY:
+        case Contact.ANNIVERSARY:
             return mappings.getAnniversary();
-        case ContactObject.ASSISTANT_NAME:
+        case Contact.ASSISTANT_NAME:
             return mappings.getAssistant_name();
-        case ContactObject.BIRTHDAY:
+        case Contact.BIRTHDAY:
             return mappings.getBirthday();
-        case ContactObject.BRANCHES:
+        case Contact.BRANCHES:
             return mappings.getBranches();
-        case ContactObject.BUSINESS_CATEGORY:
+        case Contact.BUSINESS_CATEGORY:
             return mappings.getBusiness_category();
-        case ContactObject.CELLULAR_TELEPHONE1:
+        case Contact.CELLULAR_TELEPHONE1:
             return mappings.getCellular_telephone1();
-        case ContactObject.CELLULAR_TELEPHONE2:
+        case Contact.CELLULAR_TELEPHONE2:
             return mappings.getCellular_telephone2();
-        case ContactObject.CITY_BUSINESS:
+        case Contact.CITY_BUSINESS:
             return mappings.getCity_business();
-        case ContactObject.CITY_HOME:
+        case Contact.CITY_HOME:
             return mappings.getCity_home();
-        case ContactObject.CITY_OTHER:
+        case Contact.CITY_OTHER:
             return mappings.getCity_other();
-        case ContactObject.COMMERCIAL_REGISTER:
+        case Contact.COMMERCIAL_REGISTER:
             return mappings.getCommercial_register();
-        case ContactObject.COMPANY:
+        case Contact.COMPANY:
             return mappings.getCompany();
-        case ContactObject.COUNTRY_BUSINESS:
+        case Contact.COUNTRY_BUSINESS:
             return mappings.getCountry_business();
-        case ContactObject.COUNTRY_HOME:
+        case Contact.COUNTRY_HOME:
             return mappings.getCountry_home();
-        case ContactObject.COUNTRY_OTHER:
+        case Contact.COUNTRY_OTHER:
             return mappings.getCountry_other();
-        case ContactObject.DEFAULT_ADDRESS:
+        case Contact.DEFAULT_ADDRESS:
             return mappings.getDefaultaddress();
-        case ContactObject.DEPARTMENT:
+        case Contact.DEPARTMENT:
             return mappings.getDepartment();
-        case ContactObject.DISPLAY_NAME:
+        case Contact.DISPLAY_NAME:
             if (distributionlist) {
                 return mappings.getDistributionlistname();
             } else {
                 return mappings.getDisplayname();
             }
-        case ContactObject.EMAIL1:
+        case Contact.EMAIL1:
             return mappings.getEmail1();
-        case ContactObject.EMAIL2:
+        case Contact.EMAIL2:
             return mappings.getEmail2();
-        case ContactObject.EMAIL3:
+        case Contact.EMAIL3:
             return mappings.getEmail3();
-        case ContactObject.EMPLOYEE_TYPE:
+        case Contact.EMPLOYEE_TYPE:
             return mappings.getEmployeetype();
-        case ContactObject.FAX_BUSINESS:
+        case Contact.FAX_BUSINESS:
             return mappings.getFax_business();
-        case ContactObject.FAX_HOME:
+        case Contact.FAX_HOME:
             return mappings.getFax_home();
-        case ContactObject.FAX_OTHER:
+        case Contact.FAX_OTHER:
             return mappings.getFax_other();
-        case ContactObject.GIVEN_NAME:
+        case Contact.GIVEN_NAME:
             return mappings.getGivenname();
-        case ContactObject.INFO:
+        case Contact.INFO:
             return mappings.getInfo();
-        case ContactObject.INSTANT_MESSENGER1:
+        case Contact.INSTANT_MESSENGER1:
             return mappings.getInstant_messenger1();
-        case ContactObject.INSTANT_MESSENGER2:
+        case Contact.INSTANT_MESSENGER2:
             return mappings.getInstant_messenger2();
-        case ContactObject.MANAGER_NAME:
+        case Contact.MANAGER_NAME:
             return mappings.getManager_name();
-        case ContactObject.MARITAL_STATUS:
+        case Contact.MARITAL_STATUS:
             return mappings.getMarital_status();
-        case ContactObject.MIDDLE_NAME:
+        case Contact.MIDDLE_NAME:
             return mappings.getMiddle_name();
-        case ContactObject.NICKNAME:
+        case Contact.NICKNAME:
             return mappings.getNickname();
-        case ContactObject.NOTE:
+        case Contact.NOTE:
             return mappings.getNote();
-        case ContactObject.NUMBER_OF_CHILDREN:
+        case Contact.NUMBER_OF_CHILDREN:
             return mappings.getNumber_of_children();
-        case ContactObject.NUMBER_OF_EMPLOYEE:
+        case Contact.NUMBER_OF_EMPLOYEE:
             return mappings.getNumber_of_employee();
         case DataObject.OBJECT_ID:
             if (distributionlist) {
@@ -498,115 +498,115 @@ public class LdapContactInterface implements ContactInterface {
             } else {
                 return mappings.getUniqueid();
             }
-        case ContactObject.POSITION:
+        case Contact.POSITION:
             return mappings.getPosition();
-        case ContactObject.POSTAL_CODE_BUSINESS:
+        case Contact.POSTAL_CODE_BUSINESS:
             return mappings.getPostal_code_business();
-        case ContactObject.POSTAL_CODE_HOME:
+        case Contact.POSTAL_CODE_HOME:
             return mappings.getPostal_code_home();
-        case ContactObject.POSTAL_CODE_OTHER:
+        case Contact.POSTAL_CODE_OTHER:
             return mappings.getPostal_code_other();
-        case ContactObject.PROFESSION:
+        case Contact.PROFESSION:
             return mappings.getProfession();
-        case ContactObject.ROOM_NUMBER:
+        case Contact.ROOM_NUMBER:
             return mappings.getRoom_number();
-        case ContactObject.SALES_VOLUME:
+        case Contact.SALES_VOLUME:
             return mappings.getSales_volume();
-        case ContactObject.SPOUSE_NAME:
+        case Contact.SPOUSE_NAME:
             return mappings.getSpouse_name();
-        case ContactObject.STATE_BUSINESS:
+        case Contact.STATE_BUSINESS:
             return mappings.getState_business();
-        case ContactObject.STATE_HOME:
+        case Contact.STATE_HOME:
             return mappings.getState_home();
-        case ContactObject.STATE_OTHER:
+        case Contact.STATE_OTHER:
             return mappings.getState_other();
-        case ContactObject.STREET_BUSINESS:
+        case Contact.STREET_BUSINESS:
             return mappings.getStreet_business();
-        case ContactObject.STREET_HOME:
+        case Contact.STREET_HOME:
             return mappings.getStreet_home();
-        case ContactObject.STREET_OTHER:
+        case Contact.STREET_OTHER:
             return mappings.getStreet_other();
-        case ContactObject.SUFFIX:
+        case Contact.SUFFIX:
             return mappings.getSuffix();
-        case ContactObject.SUR_NAME:
+        case Contact.SUR_NAME:
             return mappings.getSurname();
-        case ContactObject.TAX_ID:
+        case Contact.TAX_ID:
             return mappings.getTax_id();
-        case ContactObject.TELEPHONE_ASSISTANT:
+        case Contact.TELEPHONE_ASSISTANT:
             return mappings.getTelephone_assistant();
-        case ContactObject.TELEPHONE_BUSINESS1:
+        case Contact.TELEPHONE_BUSINESS1:
             return mappings.getTelephone_business1();
-        case ContactObject.TELEPHONE_BUSINESS2:
+        case Contact.TELEPHONE_BUSINESS2:
             return mappings.getTelephone_business2();
-        case ContactObject.TELEPHONE_CALLBACK:
+        case Contact.TELEPHONE_CALLBACK:
             return mappings.getTelephone_callback();
-        case ContactObject.TELEPHONE_CAR:
+        case Contact.TELEPHONE_CAR:
             return mappings.getTelephone_car();
-        case ContactObject.TELEPHONE_COMPANY:
+        case Contact.TELEPHONE_COMPANY:
             return mappings.getTelephone_company();
-        case ContactObject.TELEPHONE_HOME1:
+        case Contact.TELEPHONE_HOME1:
             return mappings.getTelephone_home1();
-        case ContactObject.TELEPHONE_HOME2:
+        case Contact.TELEPHONE_HOME2:
             return mappings.getTelephone_home2();
-        case ContactObject.TELEPHONE_IP:
+        case Contact.TELEPHONE_IP:
             return mappings.getTelephone_ip();
-        case ContactObject.TELEPHONE_ISDN:
+        case Contact.TELEPHONE_ISDN:
             return mappings.getTelephone_isdn();
-        case ContactObject.TELEPHONE_OTHER:
+        case Contact.TELEPHONE_OTHER:
             return mappings.getTelephone_other();
-        case ContactObject.TELEPHONE_PAGER:
+        case Contact.TELEPHONE_PAGER:
             return mappings.getTelephone_pager();
-        case ContactObject.TELEPHONE_PRIMARY:
+        case Contact.TELEPHONE_PRIMARY:
             return mappings.getTelephone_primary();
-        case ContactObject.TELEPHONE_RADIO:
+        case Contact.TELEPHONE_RADIO:
             return mappings.getTelephone_radio();
-        case ContactObject.TELEPHONE_TELEX:
+        case Contact.TELEPHONE_TELEX:
             return mappings.getTelephone_telex();
-        case ContactObject.TELEPHONE_TTYTDD:
+        case Contact.TELEPHONE_TTYTDD:
             return mappings.getTelephone_ttytdd();
-        case ContactObject.TITLE:
+        case Contact.TITLE:
             return mappings.getTitle();
-        case ContactObject.URL:
+        case Contact.URL:
             return mappings.getUrl();
-        case ContactObject.USERFIELD01:
+        case Contact.USERFIELD01:
             return mappings.getUserfield01();
-        case ContactObject.USERFIELD02:
+        case Contact.USERFIELD02:
             return mappings.getUserfield02();
-        case ContactObject.USERFIELD03:
+        case Contact.USERFIELD03:
             return mappings.getUserfield03();
-        case ContactObject.USERFIELD04:
+        case Contact.USERFIELD04:
             return mappings.getUserfield04();
-        case ContactObject.USERFIELD05:
+        case Contact.USERFIELD05:
             return mappings.getUserfield05();
-        case ContactObject.USERFIELD06:
+        case Contact.USERFIELD06:
             return mappings.getUserfield06();
-        case ContactObject.USERFIELD07:
+        case Contact.USERFIELD07:
             return mappings.getUserfield07();
-        case ContactObject.USERFIELD08:
+        case Contact.USERFIELD08:
             return mappings.getUserfield08();
-        case ContactObject.USERFIELD09:
+        case Contact.USERFIELD09:
             return mappings.getUserfield09();
-        case ContactObject.USERFIELD10:
+        case Contact.USERFIELD10:
             return mappings.getUserfield10();
-        case ContactObject.USERFIELD11:
+        case Contact.USERFIELD11:
             return mappings.getUserfield11();
-        case ContactObject.USERFIELD12:
+        case Contact.USERFIELD12:
             return mappings.getUserfield12();
-        case ContactObject.USERFIELD13:
+        case Contact.USERFIELD13:
             return mappings.getUserfield13();
-        case ContactObject.USERFIELD14:
+        case Contact.USERFIELD14:
             return mappings.getUserfield14();
-        case ContactObject.USERFIELD15:
+        case Contact.USERFIELD15:
             return mappings.getUserfield15();
-        case ContactObject.USERFIELD16:
+        case Contact.USERFIELD16:
             return mappings.getUserfield16();
-        case ContactObject.USERFIELD17:
+        case Contact.USERFIELD17:
             return mappings.getUserfield17();
-        case ContactObject.USERFIELD18:
+        case Contact.USERFIELD18:
             return mappings.getUserfield18();
-        case ContactObject.USERFIELD19:
+        case Contact.USERFIELD19:
             return mappings.getUserfield19();
-        case ContactObject.USERFIELD20:
+        case Contact.USERFIELD20:
             return mappings.getUserfield20();
         case DataObject.LAST_MODIFIED:
             return mappings.getLastmodified();
@@ -628,8 +628,8 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private ArrayList<ContactObject> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField) throws LdapException {
-        final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
+    private ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField) throws LdapException {
+        final ArrayList<Contact> arrayList = new ArrayList<Contact>();
         final LdapContext context;
         try {
             context = LdapUtility.createContext(getLogin(), session.getPassword(), folderprop);
@@ -885,7 +885,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private List<ContactObject> getSubList(int from, int to, final ArrayList<ContactObject> arrayList) {
+    private List<Contact> getSubList(int from, int to, final ArrayList<Contact> arrayList) {
         final int size = arrayList.size();
         if (from <= 0 && to >= size) {
             return arrayList;
@@ -972,7 +972,7 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
 
-    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<ContactObject> arrayList, final LdapContext context, final int pagesize) throws NamingException, LdapException, IOException {
+    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapContext context, final int pagesize) throws NamingException, LdapException, IOException {
         final SearchControls searchControls;
         if (distributionslist) {
             searchControls = getSearchControlDistri(columns);
@@ -987,10 +987,10 @@ public class LdapContactInterface implements ContactInterface {
                 final Attributes attributes = next.getAttributes();
                 final LdapGetter ldapGetter = getLdapGetter(attributes, context, next.getNameInNamespace());
                 if (distributionslist) {
-                    final ContactObject retval = Mapper.getDistriContact(ldapGetter, columns, this.folderprop, getUidInterface(), folderId, this.admin_id);
+                    final Contact retval = Mapper.getDistriContact(ldapGetter, columns, this.folderprop, getUidInterface(), folderId, this.admin_id);
                     arrayList.add(retval);
                 } else {
-                    final ContactObject contact = Mapper.getContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, this.admin_id);
+                    final Contact contact = Mapper.getContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, this.admin_id);
                     arrayList.add(contact);
                 }
             }
@@ -1009,7 +1009,7 @@ public class LdapContactInterface implements ContactInterface {
         } while (null != cookie);
     }
 
-    private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<ContactObject> subList) {
+    private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<Contact> subList) {
         if (null != orderDir && folderprop.getSorting().equals(Sorting.groupware)) {
             Collections.sort(subList, new ContactComparator(orderBy));
         } else {

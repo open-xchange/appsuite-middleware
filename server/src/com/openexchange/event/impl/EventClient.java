@@ -58,8 +58,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -99,7 +99,7 @@ public class EventClient {
         contextId = session.getContextId();
     }
 
-    public void create(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+    public void create(final Appointment appointmentObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
@@ -109,7 +109,7 @@ public class EventClient {
         }
     }
 
-    public void create(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
+    public void create(final Appointment appointmentObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.APPOINTMENT, appointmentObj, null, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -122,7 +122,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+    public void modify(final Appointment appointmentObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
@@ -132,7 +132,7 @@ public class EventClient {
         }
     }
 
-    public void modify(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+    public void modify(final Appointment oldAppointmentObj, final Appointment newAppointmentObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -145,7 +145,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void accepted(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+    public void accepted(final Appointment appointmentObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
@@ -155,7 +155,7 @@ public class EventClient {
         }
     }
 
-    public void accepted(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+    public void accepted(final Appointment oldAppointmentObj, final Appointment newAppointmentObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_ACCEPTED, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -168,7 +168,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void declined(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+    public void declined(final Appointment appointmentObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
@@ -178,7 +178,7 @@ public class EventClient {
         }
     }
 
-    public void declined(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+    public void declined(final Appointment oldAppointmentObj, final Appointment newAppointmentObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_DECLINED, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -191,7 +191,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void tentative(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+    public void tentative(final Appointment appointmentObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
@@ -201,7 +201,7 @@ public class EventClient {
         }
     }
 
-    public void tentative(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+    public void tentative(final Appointment oldAppointmentObj, final Appointment newAppointmentObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_TENTATIVE, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -214,7 +214,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+    public void delete(final Appointment appointmentObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
@@ -224,7 +224,7 @@ public class EventClient {
         }
     }
 
-    public void delete(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
+    public void delete(final Appointment appointmentObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.APPOINTMENT, appointmentObj, null, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -237,7 +237,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void move(final AppointmentObject appointmentObj, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
+    public void move(final Appointment appointmentObj, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.APPOINTMENT, appointmentObj, null, sourceFolder, destinationFolder, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -393,7 +393,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final ContactObject contactObj) throws EventException, OXException, ContextException {
+    public void create(final Contact contactObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = contactObj.getParentFolderID();
@@ -403,7 +403,7 @@ public class EventClient {
         }
     }
 
-    public void create(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
+    public void create(final Contact contactObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.CONTACT, contactObj, null, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -416,7 +416,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final ContactObject oldObj, final ContactObject contactObj, final FolderObject folderObj) throws EventException {
+    public void modify(final Contact oldObj, final Contact contactObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, oldObj, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -429,7 +429,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final ContactObject contactObj) throws EventException, OXException, ContextException {
+    public void delete(final Contact contactObj) throws EventException, OXException, ContextException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = contactObj.getParentFolderID();
@@ -439,7 +439,7 @@ public class EventClient {
         }
     }
 
-    public void delete(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
+    public void delete(final Contact contactObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.CONTACT, contactObj, null, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -452,7 +452,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void move(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
+    public void move(final Contact contactObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.CONTACT, contactObj, null, folderObj, null, session);
 
         final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();

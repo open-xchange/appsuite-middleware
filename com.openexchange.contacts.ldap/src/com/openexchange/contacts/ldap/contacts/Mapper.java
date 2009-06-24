@@ -59,7 +59,7 @@ import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 
@@ -91,9 +91,9 @@ public class Mapper {
 
     }
 
-    public static ContactObject getContact(final LdapGetter getter, final Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, int folderid, int adminid) throws LdapException {
+    public static Contact getContact(final LdapGetter getter, final Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, int folderid, int adminid) throws LdapException {
         final Mappings mappings = folderprop.getMappings();
-        final ContactObject retval = new ContactObject();
+        final Contact retval = new Contact();
         if (cols.contains(DataObject.OBJECT_ID)) {
             final String uniqueid = mappings.getUniqueid();
             if (null != uniqueid && 0 != uniqueid.length()) {
@@ -113,462 +113,462 @@ public class Mapper {
             }
         }
         final ParameterObject parameterObject = new ParameterObject(getter, cols);
-        stringSetter(parameterObject, mappings.getDisplayname(), ContactObject.DISPLAY_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getDisplayname(), Contact.DISPLAY_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setDisplayName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getGivenname(), ContactObject.GIVEN_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getGivenname(), Contact.GIVEN_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setGivenName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getSurname(), ContactObject.SUR_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getSurname(), Contact.SUR_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setSurName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getEmail1(), ContactObject.EMAIL1, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getEmail1(), Contact.EMAIL1, new SetterClosure() {
             public void set(String attribute) {
                 retval.setEmail1(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getDepartment(), ContactObject.DEPARTMENT, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getDepartment(), Contact.DEPARTMENT, new SetterClosure() {
             public void set(String attribute) {
                 retval.setDepartment(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCompany(), ContactObject.COMPANY, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCompany(), Contact.COMPANY, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCompany(attribute);
             }
         });
-        dateSetter(parameterObject, mappings.getBirthday(), ContactObject.BIRTHDAY, new SetterDateClosure() {
+        dateSetter(parameterObject, mappings.getBirthday(), Contact.BIRTHDAY, new SetterDateClosure() {
             public void set(final Date attribute) {
                 retval.setBirthday(attribute);
             }
         });
-        dateSetter(parameterObject, mappings.getAnniversary(), ContactObject.ANNIVERSARY, new SetterDateClosure() {
+        dateSetter(parameterObject, mappings.getAnniversary(), Contact.ANNIVERSARY, new SetterDateClosure() {
             public void set(final Date attribute) {
                 retval.setAnniversary(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getBranches(), ContactObject.BRANCHES, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getBranches(), Contact.BRANCHES, new SetterClosure() {
             public void set(String attribute) {
                 retval.setBranches(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getBusiness_category(), ContactObject.BUSINESS_CATEGORY, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getBusiness_category(), Contact.BUSINESS_CATEGORY, new SetterClosure() {
             public void set(String attribute) {
                 retval.setBusinessCategory(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getPostal_code_business(), ContactObject.POSTAL_CODE_BUSINESS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getPostal_code_business(), Contact.POSTAL_CODE_BUSINESS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setPostalCodeBusiness(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getState_business(), ContactObject.STATE_BUSINESS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getState_business(), Contact.STATE_BUSINESS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setStateBusiness(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getStreet_business(), ContactObject.STREET_BUSINESS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getStreet_business(), Contact.STREET_BUSINESS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setStreetBusiness(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_callback(), ContactObject.TELEPHONE_CALLBACK, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_callback(), Contact.TELEPHONE_CALLBACK, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneCallback(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCity_home(), ContactObject.CITY_HOME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCity_home(), Contact.CITY_HOME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCityHome(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCommercial_register(), ContactObject.COMMERCIAL_REGISTER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCommercial_register(), Contact.COMMERCIAL_REGISTER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCommercialRegister(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCountry_home(), ContactObject.COUNTRY_HOME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCountry_home(), Contact.COUNTRY_HOME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCountryHome(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getEmail2(), ContactObject.EMAIL2, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getEmail2(), Contact.EMAIL2, new SetterClosure() {
             public void set(String attribute) {
                 retval.setEmail2(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getEmail3(), ContactObject.EMAIL3, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getEmail3(), Contact.EMAIL3, new SetterClosure() {
             public void set(String attribute) {
                 retval.setEmail3(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getEmployeetype(), ContactObject.EMPLOYEE_TYPE, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getEmployeetype(), Contact.EMPLOYEE_TYPE, new SetterClosure() {
             public void set(String attribute) {
                 retval.setEmployeeType(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getFax_business(), ContactObject.FAX_BUSINESS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getFax_business(), Contact.FAX_BUSINESS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setFaxBusiness(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getFax_home(), ContactObject.FAX_HOME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getFax_home(), Contact.FAX_HOME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setFaxHome(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getFax_other(), ContactObject.FAX_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getFax_other(), Contact.FAX_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setFaxOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getInstant_messenger1(), ContactObject.INSTANT_MESSENGER1, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getInstant_messenger1(), Contact.INSTANT_MESSENGER1, new SetterClosure() {
             public void set(String attribute) {
                 retval.setInstantMessenger1(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getInstant_messenger2(), ContactObject.INSTANT_MESSENGER2, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getInstant_messenger2(), Contact.INSTANT_MESSENGER2, new SetterClosure() {
             public void set(String attribute) {
                 retval.setInstantMessenger2(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_ip(), ContactObject.TELEPHONE_IP, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_ip(), Contact.TELEPHONE_IP, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneIP(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_isdn(), ContactObject.TELEPHONE_ISDN, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_isdn(), Contact.TELEPHONE_ISDN, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneISDN(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getManager_name(), ContactObject.MANAGER_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getManager_name(), Contact.MANAGER_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setManagerName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getMarital_status(), ContactObject.MARITAL_STATUS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getMarital_status(), Contact.MARITAL_STATUS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setMaritalStatus(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCellular_telephone1(), ContactObject.CELLULAR_TELEPHONE1, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCellular_telephone1(), Contact.CELLULAR_TELEPHONE1, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCellularTelephone1(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCellular_telephone2(), ContactObject.CELLULAR_TELEPHONE2, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCellular_telephone2(), Contact.CELLULAR_TELEPHONE2, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCellularTelephone2(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getInfo(), ContactObject.INFO, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getInfo(), Contact.INFO, new SetterClosure() {
             public void set(String attribute) {
                 retval.setInfo(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getNickname(), ContactObject.NICKNAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getNickname(), Contact.NICKNAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setNickname(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getNumber_of_children(), ContactObject.NUMBER_OF_CHILDREN, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getNumber_of_children(), Contact.NUMBER_OF_CHILDREN, new SetterClosure() {
             public void set(String attribute) {
                 retval.setNumberOfChildren(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getNote(), ContactObject.NOTE, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getNote(), Contact.NOTE, new SetterClosure() {
             public void set(String attribute) {
                 retval.setNote(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getNumber_of_employee(), ContactObject.NUMBER_OF_EMPLOYEE, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getNumber_of_employee(), Contact.NUMBER_OF_EMPLOYEE, new SetterClosure() {
             public void set(String attribute) {
                 retval.setNumberOfEmployee(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_pager(), ContactObject.TELEPHONE_PAGER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_pager(), Contact.TELEPHONE_PAGER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephonePager(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_assistant(), ContactObject.TELEPHONE_ASSISTANT, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_assistant(), Contact.TELEPHONE_ASSISTANT, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneAssistant(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_business1(), ContactObject.TELEPHONE_BUSINESS1, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_business1(), Contact.TELEPHONE_BUSINESS1, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneBusiness1(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_business2(), ContactObject.TELEPHONE_BUSINESS2, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_business2(), Contact.TELEPHONE_BUSINESS2, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneBusiness2(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_car(), ContactObject.TELEPHONE_CAR, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_car(), Contact.TELEPHONE_CAR, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneCar(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_company(), ContactObject.TELEPHONE_COMPANY, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_company(), Contact.TELEPHONE_COMPANY, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneCompany(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_home1(), ContactObject.TELEPHONE_HOME1, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_home1(), Contact.TELEPHONE_HOME1, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneHome1(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_home2(), ContactObject.TELEPHONE_HOME2, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_home2(), Contact.TELEPHONE_HOME2, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneHome2(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_other(), ContactObject.TELEPHONE_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_other(), Contact.TELEPHONE_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getPostal_code_home(), ContactObject.POSTAL_CODE_HOME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getPostal_code_home(), Contact.POSTAL_CODE_HOME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setPostalCodeHome(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getProfession(), ContactObject.PROFESSION, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getProfession(), Contact.PROFESSION, new SetterClosure() {
             public void set(String attribute) {
                 retval.setProfession(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_radio(), ContactObject.TELEPHONE_RADIO, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_radio(), Contact.TELEPHONE_RADIO, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneRadio(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getRoom_number(), ContactObject.ROOM_NUMBER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getRoom_number(), Contact.ROOM_NUMBER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setRoomNumber(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getSales_volume(), ContactObject.SALES_VOLUME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getSales_volume(), Contact.SALES_VOLUME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setSalesVolume(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCity_other(), ContactObject.CITY_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCity_other(), Contact.CITY_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCityOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCountry_other(), ContactObject.COUNTRY_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCountry_other(), Contact.COUNTRY_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCountryOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getMiddle_name(), ContactObject.MIDDLE_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getMiddle_name(), Contact.MIDDLE_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setMiddleName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getPostal_code_other(), ContactObject.POSTAL_CODE_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getPostal_code_other(), Contact.POSTAL_CODE_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setPostalCodeOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getState_other(), ContactObject.STATE_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getState_other(), Contact.STATE_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setStateOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getStreet_other(), ContactObject.STREET_OTHER, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getStreet_other(), Contact.STREET_OTHER, new SetterClosure() {
             public void set(String attribute) {
                 retval.setStreetOther(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getSpouse_name(), ContactObject.SPOUSE_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getSpouse_name(), Contact.SPOUSE_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setSpouseName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getState_home(), ContactObject.STATE_HOME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getState_home(), Contact.STATE_HOME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setStateHome(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getStreet_home(), ContactObject.STREET_HOME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getStreet_home(), Contact.STREET_HOME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setStreetHome(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getSuffix(), ContactObject.SUFFIX, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getSuffix(), Contact.SUFFIX, new SetterClosure() {
             public void set(String attribute) {
                 retval.setSuffix(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTax_id(), ContactObject.TAX_ID, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTax_id(), Contact.TAX_ID, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTaxID(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_telex(), ContactObject.TELEPHONE_TELEX, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_telex(), Contact.TELEPHONE_TELEX, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneTelex(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_ttytdd(), ContactObject.TELEPHONE_TTYTDD, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_ttytdd(), Contact.TELEPHONE_TTYTDD, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephoneTTYTTD(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUrl(), ContactObject.URL, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUrl(), Contact.URL, new SetterClosure() {
             public void set(String attribute) {
                 retval.setURL(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield01(), ContactObject.USERFIELD01, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield01(), Contact.USERFIELD01, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField01(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield02(), ContactObject.USERFIELD02, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield02(), Contact.USERFIELD02, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField02(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield03(), ContactObject.USERFIELD03, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield03(), Contact.USERFIELD03, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField03(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield04(), ContactObject.USERFIELD04, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield04(), Contact.USERFIELD04, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField04(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield05(), ContactObject.USERFIELD05, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield05(), Contact.USERFIELD05, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField05(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield06(), ContactObject.USERFIELD06, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield06(), Contact.USERFIELD06, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField06(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield07(), ContactObject.USERFIELD07, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield07(), Contact.USERFIELD07, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField07(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield08(), ContactObject.USERFIELD08, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield08(), Contact.USERFIELD08, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField08(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield09(), ContactObject.USERFIELD09, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield09(), Contact.USERFIELD09, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField09(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield10(), ContactObject.USERFIELD10, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield10(), Contact.USERFIELD10, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField10(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield11(), ContactObject.USERFIELD11, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield11(), Contact.USERFIELD11, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField11(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield12(), ContactObject.USERFIELD12, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield12(), Contact.USERFIELD12, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField12(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield13(), ContactObject.USERFIELD13, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield13(), Contact.USERFIELD13, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField13(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield14(), ContactObject.USERFIELD14, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield14(), Contact.USERFIELD14, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField14(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield15(), ContactObject.USERFIELD15, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield15(), Contact.USERFIELD15, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField15(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield16(), ContactObject.USERFIELD16, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield16(), Contact.USERFIELD16, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField16(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield17(), ContactObject.USERFIELD17, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield17(), Contact.USERFIELD17, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField17(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield18(), ContactObject.USERFIELD18, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield18(), Contact.USERFIELD18, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField18(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield19(), ContactObject.USERFIELD19, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield19(), Contact.USERFIELD19, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField19(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getUserfield20(), ContactObject.USERFIELD20, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getUserfield20(), Contact.USERFIELD20, new SetterClosure() {
             public void set(String attribute) {
                 retval.setUserField20(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCity_business(), ContactObject.CITY_BUSINESS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCity_business(), Contact.CITY_BUSINESS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCityBusiness(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCountry_business(), ContactObject.COUNTRY_BUSINESS, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCountry_business(), Contact.COUNTRY_BUSINESS, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCountryBusiness(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getAssistant_name(), ContactObject.ASSISTANT_NAME, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getAssistant_name(), Contact.ASSISTANT_NAME, new SetterClosure() {
             public void set(String attribute) {
                 retval.setAssistantName(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTelephone_primary(), ContactObject.TELEPHONE_PRIMARY, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTelephone_primary(), Contact.TELEPHONE_PRIMARY, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTelephonePrimary(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCategories(), ContactObject.CATEGORIES, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCategories(), Contact.CATEGORIES, new SetterClosure() {
             public void set(String attribute) {
                 retval.setCategories(attribute);
             }
         });
-        intSetter(parameterObject, mappings.getDefaultaddress(), ContactObject.DEFAULT_ADDRESS, new SetterIntClosure() {
+        intSetter(parameterObject, mappings.getDefaultaddress(), Contact.DEFAULT_ADDRESS, new SetterIntClosure() {
             public void set(final int attribute) {
                 retval.setDefaultAddress(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getTitle(), ContactObject.TITLE, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getTitle(), Contact.TITLE, new SetterClosure() {
             public void set(String attribute) {
                 retval.setTitle(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getPosition(), ContactObject.POSITION, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getPosition(), Contact.POSITION, new SetterClosure() {
             public void set(String attribute) {
                 retval.setPosition(attribute);
             }
@@ -632,14 +632,14 @@ public class Mapper {
         }
     }
     
-    public static ContactObject getDistriContact(final LdapGetter getter, Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, int folderid, int adminid) throws LdapException {
-        final ContactObject retval = new ContactObject();
+    public static Contact getDistriContact(final LdapGetter getter, Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, int folderid, int adminid) throws LdapException {
+        final Contact retval = new Contact();
 
         final Mappings mappings = folderprop.getMappings();
         retval.setDistributionList(getDistributionlist(getter, folderid, mappings));
         retval.setMarkAsDistributionlist(true);
 
-        if (cols.contains(ContactObject.DISPLAY_NAME)) {
+        if (cols.contains(Contact.DISPLAY_NAME)) {
             final String displayname = mappings.getDistributionlistname();
             if (null != displayname && 0 != displayname.length()) {
                 retval.setDisplayName(getter.getAttribute(displayname));
@@ -671,11 +671,11 @@ public class Mapper {
      * @param getter TODO
      * @throws LdapException 
      */
-    private static void commonParts(Set<Integer> cols, int folderid, int adminid, final ContactObject retval, Mappings mappings, LdapGetter getter) throws LdapException {
-        if (cols.contains(ContactObject.FOLDER_ID)) {
+    private static void commonParts(Set<Integer> cols, int folderid, int adminid, final Contact retval, Mappings mappings, LdapGetter getter) throws LdapException {
+        if (cols.contains(Contact.FOLDER_ID)) {
             retval.setParentFolderID(folderid);
         }
-        if (cols.contains(ContactObject.CREATED_BY)) {
+        if (cols.contains(Contact.CREATED_BY)) {
             retval.setCreatedBy(adminid);
         }
         

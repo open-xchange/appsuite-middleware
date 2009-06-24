@@ -56,18 +56,18 @@ import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Location extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
-    public boolean isSet(final AppointmentObject appointmentObject) {
+public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
+    public boolean isSet(final Appointment appointmentObject) {
         return appointmentObject.containsLocation() && null != appointmentObject.getLocation() && appointmentObject.getLocation().length() != 0;
     }
 
-    public void emit(final int index, final AppointmentObject appointmentObject, final VEvent event, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Appointment appointmentObject, final VEvent event, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         final net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
         event.getProperties().add(location);
     }
@@ -76,7 +76,7 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
         return event.getLocation() != null;
     }
 
-    public void parse(final int index, final VEvent event, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         appointment.setLocation(event.getProperty("LOCATION").getValue());
     }
 }

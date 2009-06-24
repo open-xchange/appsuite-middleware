@@ -55,7 +55,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -85,7 +85,7 @@ public final class ImageRegistryDeleteListener implements DeleteListener {
 			 * Remove user image from registry
 			 */
 			final Session session = deleteEvent.getSession();
-			final ContactObject contact;
+			final Contact contact;
 			try {
 				final RdbContactSQLInterface contactSql = new RdbContactSQLInterface(session);
 				contact = contactSql.getUserById(deleteEvent.getId(), writeCon);
