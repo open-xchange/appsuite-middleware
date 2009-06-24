@@ -291,7 +291,7 @@ public final class ImageTypeDetector {
             return "image/jpeg";
         }
         if (startsWith(PREFIX_BITMAP, bytes)) {
-            return "image/bmp";
+            return "image/x-ms-bmp";
         }
         if (startsWith(PREFIX_PNG, bytes)) {
             return "image/png";
