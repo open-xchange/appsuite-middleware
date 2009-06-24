@@ -513,18 +513,21 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void parseAndSetMandatoryOptionsWithoutUsernameInUser(final AdminParser parser, final User usr) {
-        final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
+        String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
         if (null != optionValue2) {
+            if ("".equals(optionValue2)) { optionValue2 = null; }
             usr.setDisplay_name(optionValue2);
         }        
         
-        final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
+        String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
         if (null != optionValue3) {
+            if ("".equals(optionValue3)) { optionValue3 = null; }
             usr.setGiven_name(optionValue3);
         }
         
-        final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
+        String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
         if (null != optionValue4) {
+            if ("".equals(optionValue4)) { optionValue4 = null; }
             usr.setSur_name(optionValue4);
         }        
 
@@ -778,10 +781,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, false,true);
         this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, false,true);
         this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD,"on/off","Edit Password access (Default is off)", true, false,true);
-        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, false,true);;
-        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, false,true);;
-        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);;
-        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);;
+        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, false,true);
+        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, false,true);
+        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);
+        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
@@ -946,7 +949,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void parseAndSetUserId(final AdminParser parser, final User usr) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
-            userid = Integer.parseInt(optionValue);
+            userid = Integer.valueOf(optionValue);
             usr.setId(userid);
         }
     }
