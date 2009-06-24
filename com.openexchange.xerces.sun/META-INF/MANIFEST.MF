@@ -13,3 +13,6 @@ Export-Package:  org.apache.xerces.impl,
  org.apache.xerces.util,
  org.apache.xerces.xni,
  org.apache.xerces.xni.parser
+Import-Package: org.w3c.dom,
+ org.w3c.dom.html,
+ org.xml.sax
