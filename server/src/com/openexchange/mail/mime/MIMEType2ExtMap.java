@@ -221,6 +221,9 @@ public final class MIMEType2ExtMap {
         if (!initialized.get()) {
             init();
         }
+        if (null == fileName) {
+            return MIMETypes.MIME_APPL_OCTET;
+        }
         final int pos = fileName.lastIndexOf('.');
         if (pos < 0) {
             return MIMETypes.MIME_APPL_OCTET;
