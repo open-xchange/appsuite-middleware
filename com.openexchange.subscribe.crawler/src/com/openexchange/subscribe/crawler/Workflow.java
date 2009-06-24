@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 
@@ -27,7 +27,7 @@ public class Workflow {
 	}
 	
 	// Convenience method for setting username and password after the workflow was created
-	public ContactObject[] execute(String username, String password) throws SubscriptionException{
+	public Contact[] execute(String username, String password) throws SubscriptionException{
 		for (Step currentStep : steps) {
 			if (currentStep instanceof LoginPageStep){
 				((LoginPageStep) currentStep).setUsername(username);
@@ -37,8 +37,8 @@ public class Workflow {
 		return execute();
 	}
 
-	public ContactObject[] execute()  throws SubscriptionException {
-		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
+	public Contact[] execute()  throws SubscriptionException {
+		Vector<Contact> contactObjects = new Vector<Contact>();
 		boolean workflowComplete = true;
 		
 		// emulate a known client, hopefully keeping our profile low
@@ -59,7 +59,7 @@ public class Workflow {
 		}
 		
 		webClient.closeAllWindows();
-		return (ContactObject[]) previousStep.getOutput();
+		return (Contact[]) previousStep.getOutput();
 	}
 
 	public List<Step> getSteps() {

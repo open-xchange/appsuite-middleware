@@ -55,7 +55,7 @@ import java.util.Map;
 
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -103,7 +103,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
         return folderModule == FolderObject.CONTACT;
     }
 
-    public Collection<ContactObject> getContent(Subscription subscription) throws SubscriptionException {
+    public Collection<Contact> getContent(Subscription subscription) throws SubscriptionException {
         Map<String, Object> configuration = subscription.getConfiguration();
         return Arrays.asList(linkedInWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
     }

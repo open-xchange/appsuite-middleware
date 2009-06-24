@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 
 /**
@@ -63,9 +63,9 @@ public class ContactSanitizer {
     /**
      * @param contact
      */
-    public void sanitize(ContactObject contact) {
-        for(int field : ContactObject.ALL_COLUMNS) {
-            if(field == ContactObject.LAST_MODIFIED_UTC) {
+    public void sanitize(Contact contact) {
+        for(int field : Contact.ALL_COLUMNS) {
+            if(field == Contact.LAST_MODIFIED_UTC) {
                 continue;
             }
             if(contact.contains(field)) {

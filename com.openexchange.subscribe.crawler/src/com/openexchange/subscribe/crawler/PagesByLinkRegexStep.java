@@ -60,7 +60,6 @@ import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.subscribe.SubscriptionException;
 
 /**

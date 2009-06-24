@@ -59,7 +59,7 @@ import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -75,10 +75,10 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 //TODO: Expand this to handle single fields (consisting of fieldname and a regex) of a contact by extracting them from a webpage
 public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
-		Step<ContactObject[], List<HtmlPage>> {
+		Step<Contact[], List<HtmlPage>> {
 	
 	private List<HtmlPage> pages;
-	private ContactObject[] contactObjectsArray;
+	private Contact[] contactObjectsArray;
 	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 	private String vcardUrl, pictureUrl;
 	
@@ -89,7 +89,7 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 	}
 
 	public void execute(WebClient webClient) {
-		Vector<ContactObject> contactObjects = new Vector<ContactObject>();
+		Vector<Contact> contactObjects = new Vector<Contact>();
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
 		VersitDefinition.Reader versitReader;
@@ -97,7 +97,7 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 		
 		for (HtmlPage page : pages) {			
     		try {
-    			ContactObject contactObject = new ContactObject();
+    			Contact contactObject = new Contact();
     			TextPage vcardPage = null;
     			String imageUrl = "";
     			
@@ -151,7 +151,7 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 			executedSuccessfully = true;
 		}
 		
-		contactObjectsArray = new ContactObject[contactObjects.size()];
+		contactObjectsArray = new Contact[contactObjects.size()];
 	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
 	    	contactObjectsArray[i] = contactObjects.get(i);
 	    }
@@ -167,7 +167,7 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 		return LIST_OF_CONTACT_OBJECTS;
 	}
 
-	public ContactObject[] getOutput() {
+	public Contact[] getOutput() {
 		return contactObjectsArray;
 	}
 
@@ -183,11 +183,11 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 		this.pages = pages;
 	}
 
-	public ContactObject[] getContactObjectsArray() {
+	public Contact[] getContactObjectsArray() {
 		return contactObjectsArray;
 	}
 
-	public void setContactObjectsArray(ContactObject[] contactObjectsArray) {
+	public void setContactObjectsArray(Contact[] contactObjectsArray) {
 		this.contactObjectsArray = contactObjectsArray;
 	}
 

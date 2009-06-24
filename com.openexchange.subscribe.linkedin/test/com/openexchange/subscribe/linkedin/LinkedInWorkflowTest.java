@@ -57,7 +57,7 @@ import java.util.ArrayList;
 import org.ho.yaml.Yaml;
 
 import com.openexchange.exceptions.StringComponent;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.ContactObjectsByHTMLPagesStep;
@@ -90,7 +90,7 @@ public class LinkedInWorkflowTest extends TestCase {
 		
 		Workflow linkedInWorkflow = new Workflow(listOfSteps);
 		
-		ContactObject[] contacts = new ContactObject[0];
+		Contact[] contacts = new Contact[0];
 		try {
 			contacts = linkedInWorkflow.execute();
 		} catch (SubscriptionException e) {
@@ -99,9 +99,9 @@ public class LinkedInWorkflowTest extends TestCase {
 		}
 		
 		assertTrue("There should be some contacts", contacts.length != 0);
-		ContactObject firstContact = contacts[0];
+		Contact firstContact = contacts[0];
 		System.out.println("First contact retrieved is : " + firstContact.getDisplayName());
-		ContactObject lastContact = contacts[contacts.length-1];
+		Contact lastContact = contacts[contacts.length-1];
         System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
 	}
