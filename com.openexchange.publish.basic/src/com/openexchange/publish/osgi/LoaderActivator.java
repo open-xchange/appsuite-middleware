@@ -56,6 +56,7 @@ import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.impl.CachingLoader;
 import com.openexchange.publish.impl.CompositeLoaderService;
 import com.openexchange.publish.impl.ContactFolderLoader;
 import com.openexchange.publish.impl.InfostoreDocumentLoader;
@@ -88,7 +89,7 @@ public class LoaderActivator implements BundleActivator {
         ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactInterfaceFactory.class));
         compositeLoader.registerLoader("contacts", contactLoader);
         
-        dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), compositeLoader, null);
+        dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), new CachingLoader(whiteboard, compositeLoader), null);
     }
 
     public void stop(BundleContext context) throws Exception {

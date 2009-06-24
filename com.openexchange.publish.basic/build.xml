@@ -35,6 +35,7 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="sqljar" value="com.openexchange.sql.jar"/>
     <property name="publishjar" value="com.openexchange.publish.jar"/>
+	<property name="cachingjar" value="com.openexchange.caching.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -48,6 +49,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${sqljar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
+    	<pathelement location="${bundlesdir}/${cachingjar}"/>
     </path>
 
     <!-- Compile -->
