@@ -166,6 +166,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
 
         // Mail
+        tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
         /*
          * tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
          * tests.addTestSuite(com.openexchange.mail.MailConverterTest.class);
