@@ -72,6 +72,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.exceptions.Exception2Message;
 import com.openexchange.ajax.exceptions.InfostoreException2Message;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.helper.DownloadUtility;
+import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
@@ -202,7 +204,7 @@ public class Attachment extends PermissionServlet {
 				return;
 			}
 			
-			document(res,isIE(req),isIE7(req), folderId,attachedId,moduleId,id,contentType,ctx,user,userConfig);
+			document(res, req.getHeader("user-agent"), isIE(req),isIE7(req), folderId,attachedId,moduleId,id,contentType,ctx,user,userConfig);
 		} else {
 			final OXJSONWriter writer = new OXJSONWriter();
 			final AttachmentRequest attRequest = new AttachmentRequest(session,writer);
@@ -386,32 +388,44 @@ public class Attachment extends PermissionServlet {
 	}
 
 
-	private void document(final HttpServletResponse res, final boolean ie,final boolean ie7, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
+	private void document(final HttpServletResponse res, final String userAgent, final boolean ie,final boolean ie7, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
 		InputStream documentData = null;
 		OutputStream os = null;
 		
 		try {
 			ATTACHMENT_BASE.startTransaction();
 			final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId,attachedId,moduleId,id,ctx,user,userConfig);
-			res.setContentType(contentType == null ? attachment.getFileMIMEType() : contentType);
+
 			res.setContentLength((int) attachment.getFilesize());
 			
-			documentData = ATTACHMENT_BASE.getAttachedFile(folderId,attachedId,moduleId,id,ctx,user,userConfig);
-			
-			if(contentType != null && contentType.equals(SAVE_AS_TYPE)) {
-				res.setHeader("Content-Disposition", "attachment; filename=\""+Helper.encodeFilename(attachment.getFilename(),"UTF-8",ie)+"\"");
-			} else {
-				res.setHeader("Content-Disposition", "filename=\""+Helper.encodeFilename(attachment.getFilename(),"UTF-8",ie)+"\"");	
-			}
+			documentData = ATTACHMENT_BASE.getAttachedFile(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+
+            if (SAVE_AS_TYPE.equals(contentType)) {
+                res.setContentType(contentType);
+                res.setHeader("Content-Disposition", "attachment; filename=\"" + Helper.encodeFilename(
+                    attachment.getFilename(),
+                    "UTF-8",
+                    ie) + "\"");
+            } else {
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
+                    documentData,
+                    attachment.getFilename(),
+                    attachment.getFileMIMEType(),
+                    userAgent);
+
+                res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+                res.setContentType(checkedDownload.getContentType());
+                documentData = checkedDownload.getInputStream();
+            }
 
             // Browsers doesn't like the Pragma header the way we usually set
             // this. Especially if files are sent to the browser. So removing
             // pragma header
-			Tools.removeCachingHeader(res);
+            Tools.removeCachingHeader(res);
 
-			os = res.getOutputStream();
+            os = res.getOutputStream();
 			
-			final byte[] buffer = new byte[200];
+			final byte[] buffer = new byte[0xFFFF];
 			int bytesRead = 0;
 			
 			while((bytesRead = documentData.read(buffer))!=-1){

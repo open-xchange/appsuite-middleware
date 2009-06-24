@@ -55,8 +55,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -225,8 +223,6 @@ public final class DownloadUtility {
         return new StringBuilder(fileName.substring(0, pos)).append(".").append(ext).toString();
     }
 
-    private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
-
     private static final String DEFAULT_FILENAME = "file.dat";
 
     private static final String MIME_TEXT_PLAIN = "text/plain";
@@ -250,16 +246,15 @@ public final class DownloadUtility {
             return DEFAULT_FILENAME;
         }
         final StringBuilder tmp = new StringBuilder(32);
-        final Matcher m = PART_FILENAME_PATTERN.matcher(fileName);
-        if (m.matches()) {
-            tmp.append(fileName.replaceAll(" ", "_"));
-        } else {
-            try {
+        try {
+            if (fileName.indexOf(' ') >= 0) {
+                tmp.append(Helper.encodeFilename(fileName.replaceAll(" ", "_"), "UTF-8", internetExplorer));
+            } else {
                 tmp.append(Helper.encodeFilename(fileName, "UTF-8", internetExplorer));
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error(e.getMessage(), e);
-                return fileName;
             }
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+            return fileName;
         }
         if (null != baseCT) {
             if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
