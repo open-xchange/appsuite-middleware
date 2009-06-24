@@ -497,6 +497,7 @@ public class EasyLogin extends HttpServlet {
 				
 				// for normal errors we must also redirect
 				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
+					
 					// redir param was sent, now check what action is requested
 					if(req.getParameter(redirPara).equals("_BASE_")){
 						// send javascript redirect to /
