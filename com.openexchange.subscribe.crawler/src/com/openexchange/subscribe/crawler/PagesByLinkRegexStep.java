@@ -49,46 +49,113 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
-import org.ho.yaml.Yaml;
-
-import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.subscribe.SubscriptionException;
 
 /**
- * Gets a text input and creates Workflow
+ * This step takes a page and returns all pages linked from this page via links that fulfill a regular expression
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public class WorkflowFactory {
-
-	public static Workflow createWorkflow(String filename) throws SubscriptionException{
+public class PagesByLinkRegexStep extends AbstractStep implements Step<List<HtmlPage>, HtmlPage> {
+	
+	private HtmlPage htmlPage;
+	private String linkRegex;
+	
+	private List<HtmlPage> returnedPages = new ArrayList<HtmlPage>();
+	
+	public PagesByLinkRegexStep() {
 		
-		Workflow workflow = null;
-		try {
-			workflow = (Workflow) Yaml.load(new File(filename));
-			checkSanity(workflow);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		return workflow;
 	}
 	
-	private static void checkSanity(Workflow workflow) throws SubscriptionException {
-		Step previousStep = null;
-		for (Step currentStep : workflow.getSteps()){
-			if (previousStep != null){
-				if (!previousStep.outputType().equals(currentStep.inputType())){
-					//System.out.println("output : " + previousStep.outputType() + ", input : " + currentStep.inputType());
-					throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
-				}
-			}
-			previousStep = currentStep;
-		}
+	public PagesByLinkRegexStep(String description, String linkRegex) {
+		this.description = description;
+		this.linkRegex = linkRegex;
 	}
 
+	public void execute(WebClient webClient)  throws SubscriptionException{
+	    try {
+	    	
+	    	for (HtmlAnchor link: htmlPage.getAnchors()) {
+	    		
+	    		if (link.getHrefAttribute().matches(linkRegex)){
+	    			HtmlPage tempPage = link.click();
+	    			returnedPages.add(tempPage);
+	    		}
+	    	
+	    	}
+	    	executedSuccessfully = true;
+			
+		} catch (FailingHttpStatusCodeException e) {
+			e.printStackTrace();
+			this.exception = e;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			this.exception = e;
+		} catch (IOException e) {
+			e.printStackTrace();
+			this.exception = e;
+		}
+	    
+	}
+
+	public boolean executedSuccessfully() {
+		return executedSuccessfully;
+	}
+
+	public Exception getException() {
+		return exception;
+	}
+
+	public String inputType() {
+		return HTML_PAGE;
+	}
+
+	public String outputType() {
+		return LIST_OF_HTML_PAGES;
+	}
+
+	public List<HtmlPage> getOutput() {
+		return returnedPages;
+	}
+
+	public void setInput(HtmlPage input) {
+		this.htmlPage = input;
+	}
+
+	public HtmlPage getHtmlPage() {
+		return htmlPage;
+	}
+
+	public void setHtmlPage(HtmlPage htmlPage) {
+		this.htmlPage = htmlPage;
+	}
+
+	public List<HtmlPage> getReturnedPages() {
+		return returnedPages;
+	}
+
+	public void setReturnedPages(List<HtmlPage> returnedPages) {
+		this.returnedPages = returnedPages;
+	}
+
+	public String getLinkRegex() {
+		return linkRegex;
+	}
+
+	public void setLinkRegex(String linkRegex) {
+		this.linkRegex = linkRegex;
+	}
+	
 }

@@ -54,6 +54,7 @@ public class AbstractStep {
 	protected Exception exception;
 	protected boolean executedSuccessfully;
 	static final String HTML_PAGE = "HtmlPage";
+	static final String LIST_OF_HTML_PAGES = "List of HtmlPages";
 	static final String TEXT_PAGE = "TextPage";
 	static final String LIST_OF_TEXT_PAGES = "List of TextPages";
 	static final String URL_STRING = "URL String";
