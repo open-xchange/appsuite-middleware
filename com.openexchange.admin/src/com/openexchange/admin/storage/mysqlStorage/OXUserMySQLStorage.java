@@ -85,7 +85,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -583,7 +583,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.getDisplay_name() != null) {
                 // update folder name via ox api if displayname was changed
-                final int[] changedfields = new int[] { ContactObject.DISPLAY_NAME };
+                final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
 
                 OXFolderAdminHelper.propagateUserModification(user_id, changedfields, System.currentTimeMillis(), write_ox_con, write_ox_con, ctx.getId().intValue());
             }
