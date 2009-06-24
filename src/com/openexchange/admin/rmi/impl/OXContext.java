@@ -94,6 +94,7 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
+import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -118,7 +119,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         this.context = context;
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
-        }        
+        }
+        final AdminCacheExtended cache = new AdminCacheExtended();
+        cache.initCache();
+        ClientAdminThreadExtended.cache = cache;
         prop = ClientAdminThreadExtended.cache.getProperties();
     }
 

@@ -57,7 +57,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.Permission;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,6 +83,7 @@ public class PluginStarter {
     private static MonitorAgent moni = null;
 
     public PluginStarter() {
+        super();
     }
 
     public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException {
