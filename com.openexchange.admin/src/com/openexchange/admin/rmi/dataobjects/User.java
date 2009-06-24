@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.rmi.dataobjects;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -565,7 +566,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public User(final int id) {
         super();
         init();
-        this.id = id;
+        this.id = I(id);
     }
 
     /**
@@ -3283,12 +3284,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * 
      * @return A {@link String} containing the timezone
      */
-    final public String getTimezone() {
-        if( this.timezone == null ) {
-            return null;
-        } else {
-            return timezone;
-        }
+    public final String getTimezone() {
+        return timezone;
     }
 
     /**
@@ -3861,12 +3858,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param alias A {@link String} containing the E-Mail alias to be removed
      * @return true if removing was successful; false otherwise
      */
-    final public boolean removeAlias(final String alias) {
-        if (null != this.aliases) {
-            return this.aliases.remove(alias);
-        } else {
-            return false;
-        }
+    public final boolean removeAlias(String alias) {
+        return null != aliases && aliases.remove(alias);
     }
 
     /**
@@ -4037,7 +4030,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
                     ht.put(tname, ob);
                 }
             } catch (final IllegalArgumentException e) {
+                // ignore
             } catch (final IllegalAccessException e) {
+                // ignore
             }
         }
         return ht;
@@ -4203,6 +4198,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param extension
      * @deprecated 
      */
+    @Deprecated
     final public void addExtension(final OXUserExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
     }
@@ -4225,12 +4221,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @return
      * @deprecated 
      */
+    @Deprecated
     final public boolean removeExtension(final OXUserExtensionInterface o) {
-        if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
-            return false;
-        } else {
-            return true;
-        }
+        return null != getAllExtensionsAsHash().remove(o.getClass().getName());
     }
 
     /**
@@ -4238,6 +4231,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @return
      * @deprecated 
      */
+    @Deprecated
     final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
         final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(getAllExtensionsAsHash().values());
         final OXCommonExtension commonExtensionInterface = retval.get(index);
@@ -4254,6 +4248,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @return the ArrayList of {@link OXUserExtensionInterface} with extname
      * @deprecated 
      */
+    @Deprecated
     final public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
         for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
@@ -4273,13 +4268,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @return
      * @deprecated 
      */
+    @Deprecated
     final public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);
         if (!list.isEmpty() && list.size() == 1) {
             return list.get(0);
-        } else {
-            return null;
         }
+        return null;
     }
 
     /* (non-Javadoc)
@@ -4530,7 +4525,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     @Override
     public final String[] getMandatoryMembersCreate() {
-        return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
+        return new String[]{ "name", "password", "primaryEmail" };
     }
     
     /**
