@@ -51,6 +51,7 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
@@ -62,7 +63,7 @@ import java.util.Set;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 
-public class Contact extends CommonObject {
+public class Contact extends CommonObject implements Serializable{
 
     public static final int DISPLAY_NAME = 500;
 
