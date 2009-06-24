@@ -259,7 +259,11 @@ public class OXCalendarException extends OXException {
         /**
          * Incomplete recurring information: Missing recurrence type.
          */
-        INCOMPLETE_REC_INFOS_TYPE("Incomplete recurring information: Missing recurrence type.", 92, Category.USER_INPUT);
+        INCOMPLETE_REC_INFOS_TYPE("Incomplete recurring information: Missing recurrence type.", 92, Category.USER_INPUT),
+        /**
+         * Move of recurring appointments is not supported
+         */
+        RCURRING_FOLDER_MOVE("Move of a recurring appointment to another folder is not supported.", 93, Category.USER_INPUT);
 
         /**
          * Message of the exception.

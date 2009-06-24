@@ -1889,6 +1889,10 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC && edao.getPrivateFlag()) {
             throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.PRIVATE_MOVE_TO_PUBLIC));
         }
+        
+        if (cdao.getFolderMove() && edao.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+            throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.RCURRING_FOLDER_MOVE));
+        }
 
         collection.detectFolderMoveAction(cdao, edao);
 
