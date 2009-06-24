@@ -129,7 +129,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * Unknown module: %s.
          */
-        UNKNOWN_MODULE("Unknown module: %s.", Category.CODE_ERROR, 7);
+        UNKNOWN_MODULE("Unknown module: %s.", Category.CODE_ERROR, 7),
+        /**
+         * A harmful attachment was detected.
+         */
+        HARMFUL_ATTACHMENT("A harmful attachment was detected.", Category.CODE_ERROR, 8);
 
         /**
          * Message of the exception.

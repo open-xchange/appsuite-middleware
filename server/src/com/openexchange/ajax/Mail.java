@@ -88,7 +88,10 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.helper.BrowserDetector;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -134,7 +137,6 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -180,27 +182,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 
-    private static final String STR_INLINE_FILENAME = "inline; filename=\"";
-
-    private static final String STR_NAME = "name";
-
-    private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
-
     private static final String MIME_TEXT_PLAIN = "text/plain";
 
     private static final String MIME_TEXT_HTML = "text/htm";
 
-    private static final String STR_ATTACHMENT_FILENAME = "attachment; filename=\"";
-
     private static final String STR_CONTENT_DISPOSITION = "Content-disposition";
-
-    private static final String STR_OCTET_STREAM = "octet-stream";
-
-    private static final String STR_APPLICATION = "application";
-
-    private static final String STR_WINDOWS = "windows";
-
-    private static final String STR_MSIE = "msie";
 
     private static final String STR_USER_AGENT = "user-agent";
 
@@ -237,8 +223,6 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static final String UPLOAD_PARAM_HOSTNAME = "hostn";
 
     private static final String UPLOAD_PARAM_PROTOCOL = "proto";
-
-    private static final String STR_CHARSET = "charset";
 
     private static final String STR_UTF8 = "UTF-8";
 
@@ -1024,18 +1008,24 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Write message source to output stream...
                          */
-                        final String userAgent = paramContainer.getHeader(STR_USER_AGENT).toLowerCase(Locale.ENGLISH);
-                        final boolean internetExplorer = (userAgent != null && userAgent.indexOf(STR_MSIE) > -1 && userAgent.indexOf(STR_WINDOWS) > -1);
+                        final String userAgent = paramContainer.getHeader("user-agent").toLowerCase(Locale.ENGLISH);
+                        final boolean internetExplorer = (userAgent != null && userAgent.indexOf("msie") > -1 && userAgent.indexOf("windows") > -1);
+                        final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
+                        // Content-Type
                         final ContentType contentType = new ContentType();
-                        contentType.setPrimaryType(STR_APPLICATION);
-                        contentType.setSubType(STR_OCTET_STREAM);
-                        final String fileName = new StringBuilder(mail.getSubject().replaceAll(" ", "_")).append(".eml").toString();
-                        paramContainer.getHttpServletResponse().setHeader(
-                            STR_CONTENT_DISPOSITION,
-                            new StringBuilder(50).append(STR_ATTACHMENT_FILENAME).append(
-                                getSaveAsFileName(fileName, internetExplorer, null)).append('"').toString());
-                        paramContainer.getHttpServletResponse().setContentType(contentType.toString());
-                        final OutputStream out = paramContainer.getHttpServletResponse().getOutputStream();
+                        contentType.setPrimaryType("application");
+                        contentType.setSubType("octet-stream");
+                        httpResponse.setContentType(contentType.toString());
+                        // Content-Disposition
+                        final String fileName = getSaveAsFileName(
+                            new StringBuilder(mail.getSubject().replaceAll(" ", "_")).append(".eml").toString(),
+                            internetExplorer,
+                            null);
+                        httpResponse.setHeader("Content-disposition", new StringBuilder(64).append("attachment; filename=\"").append(
+                            fileName).append('"').toString());
+                        httpResponse.setContentType(contentType.toString());
+                        // Write output stream
+                        final OutputStream out = httpResponse.getOutputStream();
                         out.write(baos.toByteArray());
                         /*
                          * ... and return
@@ -1050,7 +1040,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final int unreadMsgs = mail.getUnreadMessages();
                         mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
-                    data = new String(baos.toByteArray(), ct.containsParameter(STR_CHARSET) ? ct.getParameter(STR_CHARSET) : STR_UTF8);
+                    data = new String(baos.toByteArray(), ct.containsCharsetParameter() ? ct.getCharsetParameter() : STR_UTF8);
                     if (doUnseen) {
                         /*
                          * Leave mail as unseen
@@ -1478,7 +1468,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         " | ").append(PARAMETER_MAILCID).toString());
                 }
                 final MailPart mailPart;
-                final InputStream attachmentInputStream;
+                InputStream attachmentInputStream;
                 if (imageContentId == null) {
                     mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                     if (mailPart == null) {
@@ -1518,41 +1508,35 @@ public class Mail extends PermissionServlet implements UploadListener {
                     attachmentInputStream = mailPart.getInputStream();
                 }
                 /*
-                 * Write to response
+                 * Set Content-Type and Content-Disposition header
                  */
-                final String userAgent = req.getHeader(STR_USER_AGENT) == null ? null : req.getHeader(STR_USER_AGENT).toLowerCase(
-                    Locale.ENGLISH);
-                final boolean internetExplorer = (userAgent != null && userAgent.indexOf(STR_MSIE) > -1 && userAgent.indexOf(STR_WINDOWS) > -1);
-                final ContentType contentType;
+                final String fileName = mailPart.getFileName();
                 if (saveToDisk) {
-                    contentType = new ContentType();
-                    contentType.setPrimaryType(STR_APPLICATION);
-                    contentType.setSubType(STR_OCTET_STREAM);
-                    resp.setHeader(
-                        STR_CONTENT_DISPOSITION,
-                        new StringBuilder(64).append(STR_ATTACHMENT_FILENAME).append(
-                            getSaveAsFileName(mailPart.getFileName(), internetExplorer, mailPart.getContentType().toString())).append('"').toString());
-                } else {
-                    final String fileName = getSaveAsFileName(
-                        mailPart.getFileName(),
-                        internetExplorer,
+                    /*
+                     * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
+                     * disposition.
+                     */
+                    final ContentType contentType = new ContentType();
+                    contentType.setPrimaryType("application");
+                    contentType.setSubType("octet-stream");
+                    resp.setContentType(contentType.toString());
+                    final String preparedFileName = getSaveAsFileName(
+                        fileName,
+                        isMSIEOnWindows(req.getHeader(STR_USER_AGENT)),
                         mailPart.getContentType().toString());
-                    contentType = mailPart.getContentType();
-                    if (contentType.isMimeType(MIME_APPLICATION_OCTET_STREAM)) {
-                        /*
-                         * Try to determine MIME type
-                         */
-                        final String ct = MIMEType2ExtMap.getContentType(fileName);
-                        final int pos = ct.indexOf('/');
-                        contentType.setPrimaryType(ct.substring(0, pos));
-                        contentType.setSubType(ct.substring(pos + 1));
-                    }
-                    contentType.setParameter(STR_NAME, fileName);
                     resp.setHeader(
-                        STR_CONTENT_DISPOSITION,
-                        new StringBuilder(50).append(STR_INLINE_FILENAME).append(fileName).append('"').toString());
+                        "Content-disposition",
+                        new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                } else {
+                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
+                        attachmentInputStream,
+                        fileName,
+                        mailPart.getContentType().toString(),
+                        req.getHeader(STR_USER_AGENT));
+                    resp.setContentType(checkedDownload.getContentType());
+                    resp.setHeader("Content-disposition", checkedDownload.getContentDisposition());
+                    attachmentInputStream = checkedDownload.getInputStream();
                 }
-                resp.setContentType(contentType.toString());
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -1623,6 +1607,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             je.initCause(e);
             LOG.error(je.getMessage(), je);
         }
+    }
+
+    private static boolean isMSIEOnWindows(final String userAgent) {
+        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+        return (browserDetector.isMSIE() && browserDetector.isWindows());
     }
 
     private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
