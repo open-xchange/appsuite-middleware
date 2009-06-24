@@ -622,8 +622,8 @@ public class Infostore extends PermissionServlet {
 
 			while ((bytesRead = documentData.read(buffer)) != -1) {
 				os.write(buffer, 0, bytesRead);
-				os.flush();
 			}
+			os.flush();
 			os = null;
 
 		} catch (final AbstractOXException x) {

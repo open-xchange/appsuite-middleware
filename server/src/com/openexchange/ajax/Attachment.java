@@ -430,8 +430,8 @@ public class Attachment extends PermissionServlet {
 			
 			while((bytesRead = documentData.read(buffer))!=-1){
 				os.write(buffer,0,bytesRead);
-				os.flush();
 			}
+			os.flush();
 			os=null; // No need to close the IS anymore
 			
 			ATTACHMENT_BASE.commit();
