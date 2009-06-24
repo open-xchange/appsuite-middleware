@@ -192,13 +192,14 @@ public final class RFC2231Tools {
         final char[] chars = toEncode.toCharArray();
         try {
             for (int i = 0; i < chars.length; i++) {
-                if (!isAscii(chars[i]) || (chars[i] == ' ')) {
-                    final byte[] bytes = String.valueOf(chars[i]).getBytes(charset);
+                final char c = chars[i];
+                if (!isAscii(c) || (c == ' ')) {
+                    final byte[] bytes = String.valueOf(c).getBytes(charset);
                     for (int j = 0; j < bytes.length; j++) {
                         retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
                     }
                 } else {
-                    retval.append(chars[i]);
+                    retval.append(c);
                 }
             }
         } catch (final java.io.UnsupportedEncodingException e) {
