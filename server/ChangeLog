@@ -1,6 +1,7 @@
 * 2009-06-23 - martin.herfurth@open-xchange.com
 
  - Bugfix #13184: Don't send notifications with link to appointment/task which the can not see.
+ - Bugfix #13942: Changing reminder does not affect confirmation status.
 
 * 2009-06-23 - thorben.betten@open-xchange.com
 
