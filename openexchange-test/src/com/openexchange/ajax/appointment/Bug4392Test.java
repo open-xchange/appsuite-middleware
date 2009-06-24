@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -27,17 +27,17 @@ public class Bug4392Test extends AppointmentTest {
 		CommonObject.PRIVATE_FLAG,
 		CommonObject.CATEGORIES,
 		CalendarObject.TITLE,
-		AppointmentObject.LOCATION,
+		Appointment.LOCATION,
 		CalendarObject.START_DATE,
 		CalendarObject.END_DATE,
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
-		AppointmentObject.SHOWN_AS,
-		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL,
-		AppointmentObject.TIMEZONE
+		Appointment.SHOWN_AS,
+		Appointment.FULL_TIME,
+		Appointment.COLOR_LABEL,
+		Appointment.TIMEZONE
 	};
 
 	private static final Log LOG = LogFactory.getLog(Bug4392Test.class);
@@ -67,8 +67,8 @@ public class Bug4392Test extends AppointmentTest {
 		calendar.add(Calendar.DAY_OF_MONTH, occurrences-1);
 		final Date until = calendar.getTime();
 		
-		final AppointmentObject appointmentObj = createAppointmentObject("testBug4392");
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		final Appointment appointmentObj = createAppointmentObject("testBug4392");
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setOccurrence(4);
 		appointmentObj.setIgnoreConflicts(true);
@@ -76,7 +76,7 @@ public class Bug4392Test extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setUntil(until);
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		try {
 			compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		} catch (final TestException exc) {

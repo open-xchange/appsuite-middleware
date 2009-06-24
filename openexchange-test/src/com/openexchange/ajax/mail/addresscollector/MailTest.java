@@ -21,7 +21,7 @@ import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.tools.servlet.AjaxException;
@@ -104,8 +104,8 @@ public class MailTest extends AbstractMailTest {
     }
     
     private void checkContacts(final int folderId) throws Exception {
-        final int[] cols = new int[]{ContactObject.OBJECT_ID, ContactObject.EMAIL1};
-        final ContactObject[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
+        final int[] cols = new int[]{Contact.OBJECT_ID, Contact.EMAIL1};
+        final Contact[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
         assertEquals("Number of collected Contacts not correct.", 1, contacts.length);
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());
     }

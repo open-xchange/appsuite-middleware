@@ -47,8 +47,8 @@ import org.jdom.Namespace;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
@@ -235,15 +235,15 @@ public class ResponseParser {
         return response;
     }
 
-    protected static AppointmentObject parseAppointmentResponse(final Element eProp) throws OXConflictException {
-        final AppointmentObject appointmentObj = new AppointmentObject();
+    protected static Appointment parseAppointmentResponse(final Element eProp) throws OXConflictException {
+        final Appointment appointmentObj = new Appointment();
         final AppointmentParser appointmentParser = new AppointmentParser();
         appointmentParser.parse(appointmentObj, eProp);
         return appointmentObj;
     }
 
-    protected static ContactObject parseContactResponse(final Element eProp) {
-        final ContactObject contactObj = new ContactObject();
+    protected static Contact parseContactResponse(final Element eProp) {
+        final Contact contactObj = new Contact();
         final ContactParser contactParser = new ContactParser();
         contactParser.parse(contactObj, eProp);
         return contactObj;
@@ -263,8 +263,8 @@ public class ResponseParser {
         return taskObj;
     }
 
-    protected static ContactObject parseUserResponse(final Element eProp) {
-        final ContactObject contactObj = new ContactObject();
+    protected static Contact parseUserResponse(final Element eProp) {
+        final Contact contactObj = new Contact();
         final ContactParser contactParser = new ContactParser();
         contactParser.parse(contactObj, eProp);
 

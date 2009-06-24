@@ -15,7 +15,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class MultipleTest extends AppointmentTest {
 	
@@ -31,7 +31,7 @@ public class MultipleTest extends AppointmentTest {
 	}
 	
 	public void testMultipleInsert() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
+		final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
@@ -50,7 +50,7 @@ public class MultipleTest extends AppointmentTest {
 		final int objectId2 = ((CommonInsertResponse)multipleInsertResponse.getResponse(1)).getId();
 		final int objectId3 = ((CommonInsertResponse)multipleInsertResponse.getResponse(2)).getId();
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId3, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId3, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();
 		
 		final DeleteRequest deleteRequest1 = new DeleteRequest(objectId1, appointmentFolderId, modified);
@@ -72,7 +72,7 @@ public class MultipleTest extends AppointmentTest {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         final InsertRequest[] inserts = new InsertRequest[1000];
         for (int i = 0; i < inserts.length; i++) {
-            final AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
+            final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");
             appointmentObj.setIgnoreConflicts(true);
             inserts[i] = new InsertRequest(appointmentObj, client.getValues().getTimeZone(), true);
         }

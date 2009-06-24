@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * Stores parameters for the delete request.
@@ -81,7 +81,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
         this.failOnError = failOnError;
     }
 
-    public DeleteRequest(final ContactObject contact, boolean failOnError) {
+    public DeleteRequest(final Contact contact, boolean failOnError) {
         this(contact.getParentFolderID(), contact.getObjectID(),
             contact.getLastModified(), failOnError);
     }
@@ -90,7 +90,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
         this(folderId, objectId, lastModified, true);
 	}
 
-    public DeleteRequest(final ContactObject contact) {
+    public DeleteRequest(final Contact contact) {
         this(contact.getParentFolderID(), contact.getObjectID(),
             contact.getLastModified(), true);
     }

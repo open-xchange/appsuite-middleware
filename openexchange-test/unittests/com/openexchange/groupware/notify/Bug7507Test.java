@@ -52,7 +52,7 @@ package com.openexchange.groupware.notify;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 
 
@@ -63,7 +63,7 @@ public class Bug7507Test extends ParticipantNotifyTest {
         final EmailableParticipant p = new EmailableParticipant(0, 0, 0, null, "", "", null, null, 0, 23, 0, null, false); //FolderId: 23
         final Task task = new Task();
         task.setObjectID(42);
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setObjectID(43);
         String hostname = null;
         try {

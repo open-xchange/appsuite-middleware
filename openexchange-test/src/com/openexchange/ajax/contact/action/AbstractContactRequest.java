@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * 
@@ -84,7 +84,7 @@ public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> imp
         return URL;
     }
 
-    protected JSONObject convert(final ContactObject contactObj)
+    protected JSONObject convert(final Contact contactObj)
         throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
         final ContactWriter contactWriter = new ContactWriter(TimeZone.getTimeZone("UTC"));

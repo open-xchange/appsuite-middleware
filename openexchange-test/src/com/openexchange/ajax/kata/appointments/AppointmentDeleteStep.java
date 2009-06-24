@@ -53,7 +53,7 @@ package com.openexchange.ajax.kata.appointments;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -63,11 +63,11 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class AppointmentDeleteStep extends NeedExistingStep<AppointmentObject> {
+public class AppointmentDeleteStep extends NeedExistingStep<Appointment> {
 
-    private AppointmentObject entry;
+    private Appointment entry;
 
-    public AppointmentDeleteStep(AppointmentObject entry, String name, String expectedError) {
+    public AppointmentDeleteStep(Appointment entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }

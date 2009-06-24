@@ -63,7 +63,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginTest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.URLParameter;
@@ -146,7 +146,7 @@ public final class BundleTestCache extends AbstractBundleTest {
 
     private static final String USER_URL = "/ajax/contacts";
 
-    private final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, ContactObject.INTERNAL_USERID, ContactObject.EMAIL1, };
+    private final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, Contact.INTERNAL_USERID, Contact.EMAIL1, };
 
     private static JSONObject searchUser(final WebConversation webCon, final String searchpattern, final String host, final String session) throws Exception {
 

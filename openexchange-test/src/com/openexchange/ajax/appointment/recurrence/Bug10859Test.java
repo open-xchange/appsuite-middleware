@@ -57,7 +57,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  *
@@ -77,7 +77,7 @@ public final class Bug10859Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folder = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         {
             final Calendar calendar = Calendar.getInstance(tz);
             calendar.set(Calendar.HOUR_OF_DAY, 12);
@@ -89,7 +89,7 @@ public final class Bug10859Test extends AbstractAJAXSession {
             appointment.setStartDate(calendar.getTime());
             calendar.add(Calendar.HOUR, 1);
             appointment.setEndDate(calendar.getTime());
-            appointment.setRecurrenceType(AppointmentObject.YEARLY);
+            appointment.setRecurrenceType(Appointment.YEARLY);
             appointment.setInterval(1);
             appointment.setMonth(-1); // this was the cause for the endless loop.
             appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));

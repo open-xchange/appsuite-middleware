@@ -64,7 +64,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -97,7 +97,7 @@ public class Bug8653 extends AbstractICalImportTest {
 		final ImportResult res = performOneEntryCheck( ical, Format.ICAL, FolderObject.CALENDAR, "8475", ctx, false);
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
-		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
+		final Appointment appointmentObj = appointmentSql.getObjectById(oid, folderId);
 		assertEquals("Title is correct?","testtermin-\u00dcberschrift",appointmentObj.getTitle());
 	}
 	

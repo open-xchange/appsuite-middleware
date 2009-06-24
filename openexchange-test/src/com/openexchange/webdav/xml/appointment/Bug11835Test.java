@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -68,20 +68,20 @@ public class Bug11835Test extends AppointmentTest {
         int objectId = -1;
 
         try {
-            final AppointmentObject appointmentObj = new AppointmentObject();
+            final Appointment appointmentObj = new Appointment();
             appointmentObj.setTitle("testBug11835");
             appointmentObj.setStartDate(startTime);
             appointmentObj.setEndDate(endTime);
-            appointmentObj.setShownAs(AppointmentObject.ABSENT);
+            appointmentObj.setShownAs(Appointment.ABSENT);
             appointmentObj.setParentFolderID(appointmentFolderId);
-            appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+            appointmentObj.setRecurrenceType(Appointment.DAILY);
             appointmentObj.setInterval(1);
             appointmentObj.setOccurrence(3);
             appointmentObj.setIgnoreConflicts(true);
     
             final UserParticipant[] users = new UserParticipant[1];
             users[0] = new UserParticipant(userId);
-            users[0].setConfirm(AppointmentObject.ACCEPT);
+            users[0].setConfirm(Appointment.ACCEPT);
     
             appointmentObj.setUsers(users);
     
@@ -93,9 +93,9 @@ public class Bug11835Test extends AppointmentTest {
             
             updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
             
-            AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
             
-            assertEquals("No recurrence type expected.", AppointmentObject.NO_RECURRENCE, loadAppointment.getRecurrenceType());
+            assertEquals("No recurrence type expected.", Appointment.NO_RECURRENCE, loadAppointment.getRecurrenceType());
         } finally {
             if (objectId != -1) {
                 deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

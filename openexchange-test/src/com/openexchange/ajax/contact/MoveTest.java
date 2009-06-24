@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
 public class MoveTest extends ContactTest {
@@ -22,7 +22,7 @@ public class MoveTest extends ContactTest {
 	}
 	
 	public void testMove2PrivateFolder() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testMove2PrivateFolder");
 		contactObj.setParentFolderID(contactFolderId);
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -35,7 +35,7 @@ public class MoveTest extends ContactTest {
 
 		contactObj.setParentFolderID(targetFolder);
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		contactObj.setObjectID(objectId);
 		compareObject(contactObj, loadContact);
 		
@@ -44,7 +44,7 @@ public class MoveTest extends ContactTest {
 	}	
 	
 	public void testMove2PublicFolder() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testMove2PublicFolder");
 		contactObj.setParentFolderID(contactFolderId);
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -57,7 +57,7 @@ public class MoveTest extends ContactTest {
 
 		contactObj.setParentFolderID(targetFolder);
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		contactObj.setObjectID(objectId);
 		compareObject(contactObj, loadContact);
 		

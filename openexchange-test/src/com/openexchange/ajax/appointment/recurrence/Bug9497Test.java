@@ -6,7 +6,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -32,21 +32,21 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 		final Date endDate = simpleDateFormat.parse("1969-12-29 00:00:00");
 		
 		final String title = "testBug9497";
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(title);
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
 		appointmentObj.setFullTime(true);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.YEARLY);
+		appointmentObj.setRecurrenceType(Appointment.YEARLY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setDayInMonth(28);
 		appointmentObj.setMonth(Calendar.DECEMBER);
 		appointmentObj.setIgnoreConflicts(true);
 		objectId  = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
 
     @Override

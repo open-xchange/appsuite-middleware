@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  *
@@ -76,7 +76,7 @@ public final class Bug12372Test extends AbstractAJAXSession {
     public void testDeleteOfStrangeApp() throws Throwable {
         final AJAXClient client = getClient();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("bug 12372 test");
         appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
@@ -86,7 +86,7 @@ public final class Bug12372Test extends AbstractAJAXSession {
         calendar.set(Calendar.HOUR_OF_DAY, 12);
         appointment.setEndDate(calendar.getTime());
         // Recurrence start should be yesterday.
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         calendar.add(Calendar.DATE, -1);
         calendar.set(Calendar.HOUR_OF_DAY, 2);

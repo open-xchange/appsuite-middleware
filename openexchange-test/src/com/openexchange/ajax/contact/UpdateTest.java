@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.test.OXTestToolkit;
@@ -23,7 +23,7 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdate() throws Exception {
-		final ContactObject contactObj = createContactObject("testUpdate");
+		final Contact contactObj = createContactObject("testUpdate");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		contactObj.setObjectID(objectId);
@@ -36,14 +36,14 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdateWithDistributionList() throws Exception {
-		final ContactObject contactEntry = createContactObject("internal contact");
+		final Contact contactEntry = createContactObject("internal contact");
 		contactEntry.setEmail1("internalcontact@x.de");
 		final int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
 		contactEntry.setObjectID(contactId);
 		
 		final int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testUpdateWithDistributionList");
 		contactObj.setParentFolderID(contactFolderId);
 		contactObj.setObjectID(objectId);
@@ -60,8 +60,8 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdateWithLinks() throws Exception {
-		final ContactObject link1 = createContactObject("link1");
-		final ContactObject link2 = createContactObject("link2");
+		final Contact link1 = createContactObject("link1");
+		final Contact link2 = createContactObject("link2");
 		final int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
 		link1.setObjectID(linkId1);
 		final int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
@@ -69,10 +69,10 @@ public class UpdateTest extends ContactTest {
 		
 		final int objectId = createContactWithLinks("testUpdateWithLinks", link1, link2);
 		
-		final ContactObject link3 = createContactObject("link3");
+		final Contact link3 = createContactObject("link3");
 		final int linkId3 = insertContact(getWebConversation(), link3, PROTOCOL + getHostName(), getSessionId());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testUpdateWithLinks");
 		contactObj.setParentFolderID(contactFolderId);
 		contactObj.setObjectID(objectId);
@@ -90,7 +90,7 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testContactWithImage() throws Exception {
-		final ContactObject contactObj = createContactObject("testContactWithImage");
+		final Contact contactObj = createContactObject("testContactWithImage");
 		contactObj.setImage1(image);
 		contactObj.setImageContentType("image/png");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -101,7 +101,7 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdateContactWithImage() throws Exception {
-		final ContactObject contactObj = createContactObject("testUpdateContactWithImageUpdate");
+		final Contact contactObj = createContactObject("testUpdateContactWithImageUpdate");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		contactObj.setImage1(image);

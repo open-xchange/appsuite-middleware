@@ -69,7 +69,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
@@ -140,7 +140,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         // checking participants
         final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-        final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, folderId);
+        final Appointment appointmentObj = appointmentSql.getObjectById(objectId, folderId);
         assertTrue("Has participants", appointmentObj.containsParticipants());
         final Participant[] participants = appointmentObj.getParticipants();
         assertEquals("Two participants", Integer.valueOf(2), Integer.valueOf(participants.length)); // ugly, but necessary to bridge
@@ -198,7 +198,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7703", ctx, false);
 
         final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-        final AppointmentObject app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
+        final Appointment app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
             res.getFolder()).intValue());
         assertEquals("Comparing interval: ", Integer.valueOf(interval), Integer.valueOf(app.getInterval())); // ugly, but necessary to
                                                                                                              // bridge JUnit 3/4
@@ -281,7 +281,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7473", ctx, false);
 
         final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-        final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
+        final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
         assertTrue("Has alarm", appointmentObj.containsAlarm());
         assertEquals("Alarm is " + alarm + " minutes earlier", Integer.valueOf(alarm), Integer.valueOf(appointmentObj.getAlarm()));
     }
@@ -297,9 +297,9 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_positive", ctx, false);
         assertFalse(res.hasError());
         final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-        final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
-        assertTrue(AppointmentObject.YEARLY == appointmentObj.getRecurrenceType());
-        assertTrue(AppointmentObject.SUNDAY == appointmentObj.getDays());
+        final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
+        assertTrue(Appointment.YEARLY == appointmentObj.getRecurrenceType());
+        assertTrue(Appointment.SUNDAY == appointmentObj.getDays());
         assertTrue(1 == appointmentObj.getDayInMonth());
         assertTrue(Calendar.APRIL == appointmentObj.getMonth());
     }
@@ -314,9 +314,9 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", ctx, false);
         assertFalse(res.hasError());
         final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-        final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
-        assertTrue(AppointmentObject.YEARLY == appointmentObj.getRecurrenceType());
-        assertTrue(AppointmentObject.SUNDAY == appointmentObj.getDays());
+        final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
+        assertTrue(Appointment.YEARLY == appointmentObj.getRecurrenceType());
+        assertTrue(Appointment.SUNDAY == appointmentObj.getDays());
         assertTrue(5 == appointmentObj.getDayInMonth());
         assertTrue(Calendar.APRIL == appointmentObj.getMonth());
     }
@@ -338,7 +338,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7470", ctx, false);
         final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-        final AppointmentObject app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
+        final Appointment app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
             res.getFolder()).intValue());
         final Participant[] participants = app.getParticipants();
         assertEquals("Two participants?", Integer.valueOf(2), Integer.valueOf(participants.length));

@@ -11,7 +11,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug10733Test extends AppointmentTest {
 	
@@ -40,11 +40,11 @@ public class Bug10733Test extends AppointmentTest {
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 	
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(stringBuffer.toString());
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 

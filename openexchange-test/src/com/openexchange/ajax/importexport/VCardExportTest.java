@@ -6,7 +6,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 
 public class VCardExportTest extends AbstractVCardTest {
@@ -32,7 +32,7 @@ public class VCardExportTest extends AbstractVCardTest {
 	public void testExportVCard() throws Exception {
 		final String surname = "testImportVCard" + System.currentTimeMillis();
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName(surname);
 		contactObj.setGivenName("givenName");
 		contactObj.setBirthday(simpleDateFormat.parse("2007-04-04"));
@@ -40,7 +40,7 @@ public class VCardExportTest extends AbstractVCardTest {
 		
 		final int objectId = ContactTest.insertContact(getWebConversation(), contactObj, getHostName(), getLogin(), getPassword());
 
-		final ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final Contact[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		for (int a = 0; a < contactArray.length; a++) {

@@ -1,6 +1,6 @@
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -25,7 +25,7 @@ public class ConfirmTest extends AppointmentTest {
 		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
-        final AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
+        final Appointment appointmentObj = createAppointmentObject("testConfirm");
 		appointmentObj.setIgnoreConflicts(true);
 		UserParticipant[] participants = new UserParticipant[2];
 		participants[0] = new UserParticipant();
@@ -37,9 +37,9 @@ public class ConfirmTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 
-        confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+        confirmAppointment(getSecondWebConversation(), objectId, Appointment.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		
@@ -47,7 +47,7 @@ public class ConfirmTest extends AppointmentTest {
 		for (int a = 0; a < participants.length; a++) {
 			if (participants[a].getIdentifier() == secondUserId) {
 				found = true;
-				assertEquals("wrong confirm status", AppointmentObject.ACCEPT, participants[a].getConfirm());
+				assertEquals("wrong confirm status", Appointment.ACCEPT, participants[a].getConfirm());
 			}
 		}
 		

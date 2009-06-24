@@ -51,7 +51,7 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * 
@@ -60,11 +60,11 @@ import com.openexchange.groupware.container.ContactObject;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class ContactUpdateStep extends NeedExistingStep<ContactObject>{
+public class ContactUpdateStep extends NeedExistingStep<Contact>{
 
-    private ContactObject entry;
+    private Contact entry;
 
-    public ContactUpdateStep(ContactObject entry, String name, String expectedError) {
+    public ContactUpdateStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }

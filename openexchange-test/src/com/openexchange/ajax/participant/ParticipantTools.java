@@ -63,7 +63,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public final class ParticipantTools {
 
-    private static final int[] COLUMNS = new int[] { ContactObject.INTERNAL_USERID };
+    private static final int[] COLUMNS = new int[] { Contact.INTERNAL_USERID };
 
     /**
      * Prevent instantiation
@@ -89,11 +89,11 @@ public final class ParticipantTools {
     public static List<Participant> getParticipants(
         final WebConversation conversation, final String hostName,
         final String sessionId) throws Exception {
-        final ContactObject[] userContacts = ContactTest.searchContact(
+        final Contact[] userContacts = ContactTest.searchContact(
             conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID, COLUMNS, AbstractAJAXTest.PROTOCOL
             + hostName, sessionId);
         final List<Participant> participants = new ArrayList<Participant>();
-        for (final ContactObject userContact : userContacts) {
+        for (final Contact userContact : userContacts) {
             final UserParticipant user = new UserParticipant(userContact
                 .getInternalUserId());
             participants.add(user);

@@ -63,7 +63,7 @@ import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 import com.openexchange.groupware.AbstractOXException.Truncated;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -109,7 +109,7 @@ public final class Bug12414Test extends AbstractAJAXSession {
         assertTrue("Not a truncated problem.", problem instanceof Truncated);
         Truncated truncated = (Truncated) problem;
         assertEquals("Some other attribute is reported as truncated.",
-            ContactObject.DISPLAY_NAME, truncated.getId());
+            Contact.DISPLAY_NAME, truncated.getId());
     }
 
     public static final String vCard =

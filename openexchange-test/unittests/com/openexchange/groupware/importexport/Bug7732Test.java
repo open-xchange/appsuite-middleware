@@ -65,7 +65,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapException;
 
@@ -103,7 +103,7 @@ public class Bug7732Test extends AbstractICalImportTest {
 
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732", ctx, false);
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
+		final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
 	}
 	

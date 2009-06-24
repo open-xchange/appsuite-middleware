@@ -56,7 +56,7 @@ import java.util.TimeZone;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 
 
@@ -74,7 +74,7 @@ public class Bug12571Test extends CalendarSqlTest {
                 appointment.setFullTime(false);
                 appointment.setRecurrenceType(CalendarObject.YEARLY);
                 appointment.setInterval(1);
-                appointment.setDays(AppointmentObject.DAY);
+                appointment.setDays(Appointment.DAY);
                 appointment.setDayInMonth(1);
                 appointment.setMonth(10);
                 appointment.setOccurrence(10);
@@ -104,7 +104,7 @@ public class Bug12571Test extends CalendarSqlTest {
                 appointment.setFullTime(false);
                 appointment.setRecurrenceType(CalendarObject.YEARLY);
                 appointment.setInterval(1);
-                appointment.setDays(AppointmentObject.TUESDAY);
+                appointment.setDays(Appointment.TUESDAY);
                 appointment.setDayInMonth(1);
                 appointment.setMonth(3);
                 appointment.setOccurrence(10);

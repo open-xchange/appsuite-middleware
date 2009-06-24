@@ -18,7 +18,7 @@ import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -32,9 +32,9 @@ public class Bug9742Test extends AbstractAJAXSession {
 			DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
 			FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES,
 			CalendarObject.TITLE, CalendarObject.START_DATE, CalendarObject.END_DATE,
-			AppointmentObject.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
-			CalendarObject.PARTICIPANTS, CalendarObject.USERS, AppointmentObject.SHOWN_AS,
-			AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL };
+			Appointment.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
+			CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS,
+			Appointment.FULL_TIME, Appointment.COLOR_LABEL };
 
 	public Bug9742Test(final String name) {
 		super(name);
@@ -74,13 +74,13 @@ public class Bug9742Test extends AbstractAJAXSession {
 
 		final int appointmentFolderId = ajaxClient.getValues().getPrivateAppointmentFolder();
 
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug9742");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setRecurrenceCount(5);
 		appointmentObj.setIgnoreConflicts(true);
@@ -107,11 +107,11 @@ public class Bug9742Test extends AbstractAJAXSession {
 		final String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
 		final WebConversation webCon = ajaxSession.getConversation();
 		
-		final AppointmentObject loadAppointment = AppointmentTest.loadAppointment(webCon, objectId, appointmentFolderId, timeZone, hostname, ajaxSession.getId());
+		final Appointment loadAppointment = AppointmentTest.loadAppointment(webCon, objectId, appointmentFolderId, timeZone, hostname, ajaxSession.getId());
 		final Date modified = loadAppointment.getLastModified();
 
 
-		final AppointmentObject[] appointmentArray = AppointmentTest.listAppointment(webCon,
+		final Appointment[] appointmentArray = AppointmentTest.listAppointment(webCon,
 				appointmentFolderId, APPOINTMENT_FIELDS, start, end, timeZone, false, hostname, ajaxSession
 						.getId());
 		

@@ -25,7 +25,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -38,8 +38,8 @@ public class Bug12495Test extends AbstractAJAXSession {
 		super(name);
 	}
 
-	public AppointmentObject createAppointmentInOneHour(String title){
-		AppointmentObject appointment = new AppointmentObject();
+	public Appointment createAppointmentInOneHour(String title){
+		Appointment appointment = new Appointment();
 		appointment.setParentFolderID(privateFolderOfUser1);
 		Calendar calendar = TimeTools.createCalendar(myLocalTimeZone);
 		calendar.setTime(new Date());
@@ -51,8 +51,8 @@ public class Bug12495Test extends AbstractAJAXSession {
 		return appointment;
 	}
 	
-	public AppointmentObject makeAppointmentRecurrDaily(AppointmentObject appointment, int numberOfTimes){
-		appointment.setRecurrenceType(AppointmentObject.DAILY);
+	public Appointment makeAppointmentRecurrDaily(Appointment appointment, int numberOfTimes){
+		appointment.setRecurrenceType(Appointment.DAILY);
 		appointment.setInterval(1);
 		appointment.setOccurrence(numberOfTimes);
 		appointment.setDays(127);
@@ -73,7 +73,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 		privateFolderOfUser2 = client2.getValues().getPrivateAppointmentFolder();
 		
 		//appointment
-		AppointmentObject series = createAppointmentInOneHour("Bug 12495");
+		Appointment series = createAppointmentInOneHour("Bug 12495");
 		makeAppointmentRecurrDaily(series,3);
 		series.addParticipant(new UserParticipant( client2.getValues().getUserId() ) );
 		
@@ -91,7 +91,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 			client2.execute(deleteRequest);
 			
 			//find exception id via all request
-	        int columns[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_DATE_POSITION};
+	        int columns[] = new int[]{ Appointment.OBJECT_ID, Appointment.RECURRENCE_DATE_POSITION};
 			AllRequest allRequest = new AllRequest(privateFolderOfUser1, columns, series.getStartDate(), new Date(Long.MAX_VALUE), myLocalTimeZone);
 			CommonAllResponse allResponse = client1.execute(allRequest);
 			int exceptionId = -1;
@@ -116,7 +116,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 			//get exception with user1
 			GetRequest getRequest = new GetRequest(privateFolderOfUser1, exceptionId);
 			GetResponse getResponse = client1.execute(getRequest);
-			AppointmentObject exception = getResponse.getAppointment(myLocalTimeZone);
+			Appointment exception = getResponse.getAppointment(myLocalTimeZone);
 			assertTrue("Must contain recurrence_date_position in get request", exception.containsRecurrenceDatePosition());
 			
 		} finally {

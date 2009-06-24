@@ -53,7 +53,7 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
 
@@ -63,15 +63,15 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AppointmentUpdateStep extends NeedExistingStep<AppointmentObject> {
+public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
 
-    private AppointmentObject entry;
+    private Appointment entry;
     
     /**
      * Initializes a new {@link AppointmentUpdateStep}.
      * @param entry
      */
-    public AppointmentUpdateStep(AppointmentObject entry, String name, String expectedError) {
+    public AppointmentUpdateStep(Appointment entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }

@@ -54,7 +54,7 @@ import java.util.Date;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
 
@@ -66,8 +66,8 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 
 	private ContactTestManager manager;
 	private AJAXClient client; 
-	ContactObject contactObject1;
-	ContactObject contactObject2;
+	Contact contactObject1;
+	Contact contactObject2;
 	
 	public ExemplaryContactTestManagerTest(final String name) {
 		super(name);
@@ -79,14 +79,14 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		client = getClient();
 		manager = new ContactTestManager(getClient());
         //create a contact in the private folder
-        contactObject1 = new ContactObject();
+        contactObject1 = new Contact();
         contactObject1.setDisplayName("Herbert Meier");
         contactObject1.setEmail1("herbert.meier@example.com");
         contactObject1.setNote("created by ExemplaryContactTestManagerTest");
         contactObject1.setParentFolderID(client.getValues().getPrivateContactFolder());
         manager.insertContactOnServer(contactObject1);
         //create a second contact in the private folder
-        contactObject2 = new ContactObject();
+        contactObject2 = new Contact();
         contactObject2.setDisplayName("Herbert M\u00fcller");
         contactObject2.setEmail1("herbert.mueller@example.com");
         contactObject2.setParentFolderID(client.getValues().getPrivateContactFolder());
@@ -99,16 +99,16 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 	}
 	
 	public void testCreatedContactsAreReturnedByGetRequest () throws Exception {
-		ContactObject co = manager.getContactFromServer(contactObject1.getParentFolderID(), contactObject1.getObjectID());
+		Contact co = manager.getContactFromServer(contactObject1.getParentFolderID(), contactObject1.getObjectID());
 		assertEquals("The contact was not returned.", co.getDisplayName(), contactObject1.getDisplayName());
 	}
 	
 	public void testCreatedContactsAppearInAllRequestForSameFolder () throws Exception {
 		boolean found1 = false;
 		boolean found2 = false;
-		ContactObject [] allContacts = manager.getAllContactsOnServer(client.getValues().getPrivateContactFolder());
+		Contact [] allContacts = manager.getAllContactsOnServer(client.getValues().getPrivateContactFolder());
 		for (int i=0; i<allContacts.length; i++) {
-			ContactObject co = allContacts[i];
+			Contact co = allContacts[i];
 			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
 			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
 		}
@@ -121,9 +121,9 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		boolean found2 = false;
 		int[] firstContact = new int [] {contactObject1.getParentFolderID(), contactObject1.getObjectID()};
 		int[] secondContact = new int [] {contactObject2.getParentFolderID(), contactObject2.getObjectID()};
-		ContactObject [] allContacts = manager.listContactsOnServer(firstContact, secondContact);
+		Contact [] allContacts = manager.listContactsOnServer(firstContact, secondContact);
 		for (int i=0; i<allContacts.length; i++) {
-			ContactObject co = allContacts[i];
+			Contact co = allContacts[i];
 			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
 			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
 		}
@@ -135,9 +135,9 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		boolean found1 = false;
 		boolean found2 = false;
 		// folderId "-1" means searching in all folders
-		ContactObject [] allContacts = manager.searchForContactsOnServer("Herbert", -1);
+		Contact [] allContacts = manager.searchForContactsOnServer("Herbert", -1);
 		for (int i=0; i<allContacts.length; i++) {
-			ContactObject co = allContacts[i];
+			Contact co = allContacts[i];
 			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
 			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
 		}
@@ -150,9 +150,9 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		boolean found2 = false;
 		Date date = new Date();
 		date.setDate(date.getDate()-1);
-		ContactObject [] allContacts = manager.getUpdatedContactsOnServer(client.getValues().getPrivateContactFolder(), date);
+		Contact [] allContacts = manager.getUpdatedContactsOnServer(client.getValues().getPrivateContactFolder(), date);
 		for (int i=0; i<allContacts.length; i++) {
-			ContactObject co = allContacts[i];
+			Contact co = allContacts[i];
 			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
 			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
 		}

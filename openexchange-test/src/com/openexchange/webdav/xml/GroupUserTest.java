@@ -21,7 +21,7 @@ import org.jdom.output.XMLOutputter;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceGroup;
 import com.openexchange.webdav.xml.parser.ResponseParser;
@@ -44,7 +44,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchUser() throws Exception {
-		final ContactObject[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		final Contact[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 		for (int a = 0; a < contactObj.length; a++) {
 			assertTrue("id > 0 expected", contactObj[a].getInternalUserId() > 0);
 			assertNotNull("last modified is null", contactObj[a].getLastModified());
@@ -142,7 +142,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		assertTrue("context id for login user not found", contextId != -1);
 	}
 	
-	public static ContactObject[] searchUser(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
+	public static Contact[] searchUser(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eUsers = new Element("user", XmlServlet.NS);
@@ -177,13 +177,13 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.GROUPUSER);
 		
-		final ContactObject[] contactArray = new ContactObject[response.length];
+		final Contact[] contactArray = new Contact[response.length];
 		for (int a = 0; a < contactArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
 			}
 			
-			contactArray[a] = (ContactObject)response[a].getDataObject();
+			contactArray[a] = (Contact)response[a].getDataObject();
 		}
 		
 		return contactArray;
@@ -321,9 +321,9 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	public static int getUserId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
-		final ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		final Contact[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {
-			final ContactObject contactObj = contactArray[a];
+			final Contact contactObj = contactArray[a];
 			final Map m = contactObj.getMap();
 			if (m != null && m.containsKey("myidentity")) {
 				return contactObj.getInternalUserId();
@@ -335,9 +335,9 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	public static int getContextId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
-		final ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		final Contact[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {
-			final ContactObject contactObj = contactArray[a];
+			final Contact contactObj = contactArray[a];
 			final Map m = contactObj.getMap();
 			if (m != null && m.containsKey("context_id")) {
 				return Integer.parseInt(m.get("context_id").toString());

@@ -70,7 +70,7 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Mapper;
@@ -288,7 +288,7 @@ public class TaskTestManager {
         final Object retval;
         switch (column) {
         case Task.CREATION_DATE:
-        case AppointmentObject.LAST_MODIFIED:
+        case Appointment.LAST_MODIFIED:
         case Task.START_DATE:
         case Task.END_DATE:
         case Task.RECURRENCE_DATE_POSITION:

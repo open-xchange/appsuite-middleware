@@ -52,7 +52,7 @@ package com.openexchange.groupware.container;
 import java.util.Set;
 import junit.framework.TestCase;
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static com.openexchange.groupware.container.AppointmentObject.*;
+import static com.openexchange.groupware.container.Appointment.*;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -60,64 +60,64 @@ import static com.openexchange.groupware.container.AppointmentObject.*;
 public class AppointmentObjectTest extends CalendarObjectTest {
 
     public void testCloneShouldNotChangeContainsStatus() {
-        AppointmentObject a = new AppointmentObject();
+        Appointment a = new Appointment();
         assertFalse(a.containsShownAs());
-        AppointmentObject b = (AppointmentObject) a.clone();
+        Appointment b = (Appointment) a.clone();
         assertFalse(b.containsShownAs());
     }
 
     public void testFindDifferingFields() {
-        AppointmentObject dataObject = getAppointmentObject();
-        AppointmentObject otherDataObject = getAppointmentObject();
+        Appointment dataObject = getAppointmentObject();
+        Appointment otherDataObject = getAppointmentObject();
 
         otherDataObject.setAlarm(12);
-        assertDifferences(dataObject, otherDataObject, AppointmentObject.ALARM);
+        assertDifferences(dataObject, otherDataObject, Appointment.ALARM);
 
         otherDataObject.setFullTime(true);
-        assertDifferences(dataObject, otherDataObject, AppointmentObject.ALARM, AppointmentObject.FULL_TIME);
+        assertDifferences(dataObject, otherDataObject, Appointment.ALARM, Appointment.FULL_TIME);
 
         otherDataObject.setLocation("Blupp");
         assertDifferences(
             dataObject,
             otherDataObject,
-            AppointmentObject.ALARM,
-            AppointmentObject.FULL_TIME,
-            AppointmentObject.LOCATION);
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION);
 
         otherDataObject.setRecurringStart(D("24/02/2008 10:00").getTime());
         assertDifferences(
             dataObject,
             otherDataObject,
-            AppointmentObject.ALARM,
-            AppointmentObject.FULL_TIME,
-            AppointmentObject.LOCATION,
-            AppointmentObject.RECURRENCE_START);
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION,
+            Appointment.RECURRENCE_START);
 
         otherDataObject.setShownAs(12);
         assertDifferences(
             dataObject,
             otherDataObject,
-            AppointmentObject.ALARM,
-            AppointmentObject.FULL_TIME,
-            AppointmentObject.LOCATION,
-            AppointmentObject.RECURRENCE_START,
-            AppointmentObject.SHOWN_AS);
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION,
+            Appointment.RECURRENCE_START,
+            Appointment.SHOWN_AS);
 
         otherDataObject.setTimezone("Blupp");
         assertDifferences(
             dataObject,
             otherDataObject,
-            AppointmentObject.ALARM,
-            AppointmentObject.FULL_TIME,
-            AppointmentObject.LOCATION,
-            AppointmentObject.RECURRENCE_START,
-            AppointmentObject.SHOWN_AS,
-            AppointmentObject.TIMEZONE);
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION,
+            Appointment.RECURRENCE_START,
+            Appointment.SHOWN_AS,
+            Appointment.TIMEZONE);
 
     }
     
     public void testAttrAccessors() {
-        AppointmentObject object = new AppointmentObject();
+        Appointment object = new Appointment();
         
         // SHOWN_AS
         assertFalse(object.contains(SHOWN_AS));
@@ -231,15 +231,15 @@ public class AppointmentObjectTest extends CalendarObjectTest {
     }
     
 
-    public AppointmentObject getAppointmentObject() {
-        AppointmentObject object = new AppointmentObject();
+    public Appointment getAppointmentObject() {
+        Appointment object = new Appointment();
 
         fillAppointmentObject(object);
 
         return object;
     }
 
-    public void fillAppointmentObject(AppointmentObject object) {
+    public void fillAppointmentObject(Appointment object) {
         super.fillCalendarObject(object);
 
         object.setAlarm(-12);

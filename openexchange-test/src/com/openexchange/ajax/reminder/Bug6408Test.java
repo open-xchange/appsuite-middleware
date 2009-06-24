@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
 
@@ -38,11 +38,11 @@ public class Bug6408Test extends ReminderTest {
 		
 		final int alarmMinutes = 60;
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug6408");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setAlarm(alarmMinutes);
 		appointmentObj.setParentFolderID(folderId);
 		appointmentObj.setIgnoreConflicts(true);

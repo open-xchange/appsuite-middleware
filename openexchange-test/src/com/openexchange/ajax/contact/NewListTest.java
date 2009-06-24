@@ -65,7 +65,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  *
@@ -101,7 +101,7 @@ public class NewListTest extends AbstractAJAXSession {
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
 
-    		final ContactObject contactObj = new ContactObject();
+    		final Contact contactObj = new Contact();
     		contactObj.setSurName("NewTestList"+i);
     		contactObj.setParentFolderID(folderA);
             
@@ -112,7 +112,7 @@ public class NewListTest extends AbstractAJAXSession {
         final MultipleResponse mInsert = Executor.execute(getClient(), mRequest);
 
         // A now gets all of the folder.
-        final int[] columns = new int[] { ContactObject.SUR_NAME, ContactObject.OBJECT_ID, ContactObject.FOLDER_ID };
+        final int[] columns = new int[] { Contact.SUR_NAME, Contact.OBJECT_ID, Contact.FOLDER_ID };
         
         
         final CommonAllResponse allR = (CommonAllResponse) Executor.execute(clientA, new AllRequest(folderA, columns, listStart, listEnd));

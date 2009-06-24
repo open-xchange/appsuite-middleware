@@ -56,7 +56,7 @@ import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Test class for bug 10382.
@@ -78,7 +78,7 @@ public class Bug10382Test extends AbstractAJAXSession {
      */
     public void testBug() throws Throwable {
         final AJAXClient client = getClient();
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("Bug10382Test");
         final ICalImportResponse response = Executor.execute(client,
             new ICalImportRequest(21, Tools.toICal(client, appointment),

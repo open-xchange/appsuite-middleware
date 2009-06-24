@@ -66,7 +66,7 @@ import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.URLParameter;
 
 /**
@@ -90,7 +90,7 @@ public class Bug6335Test extends ContactTest {
 	
 	public void testBug6335() throws Exception {
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("\u001f");
 		contactObj.setParentFolderID(contactFolderId);
 		

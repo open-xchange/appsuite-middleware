@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -33,11 +33,11 @@ public class Bug8123Test extends AppointmentTest {
 			fail("no resource found for this test");
 		}
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug8123");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setShownAs(Appointment.FREE);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
@@ -52,7 +52,7 @@ public class Bug8123Test extends AppointmentTest {
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		appointmentObj.setObjectID(objectId);
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = new Date(loadAppointment.getCreationDate().getTime()-1000);

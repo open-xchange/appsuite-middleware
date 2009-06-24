@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -77,7 +77,7 @@ public class Bug13214Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         int objectId = 0;
         Date lastModified = null;
 
@@ -105,7 +105,7 @@ public class Bug13214Test extends AbstractAJAXSession {
 
             // Step 2
             // Prepare update appointment
-            AppointmentObject updateAppointment = new AppointmentObject();
+            Appointment updateAppointment = new Appointment();
             updateAppointment.setObjectID(objectId);
             updateAppointment.setParentFolderID(folderId);
             updateAppointment.setIgnoreConflicts(true);

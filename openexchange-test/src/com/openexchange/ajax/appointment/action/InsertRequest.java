@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Stores the parameters for inserting the appointment.
@@ -68,7 +68,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
     /**
      * Appointment to insert.
      */
-    final AppointmentObject appointmentObj;
+    final Appointment appointmentObj;
 
     /**
      * Time zone of the user.
@@ -87,7 +87,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
      * @param failOnError <code>true</code> to check the response for error
      * messages.
      */
-    public InsertRequest(final AppointmentObject appointmentObj, final TimeZone timeZone,
+    public InsertRequest(final Appointment appointmentObj, final TimeZone timeZone,
         final boolean failOnError) {
         super();
         this.appointmentObj = appointmentObj;
@@ -100,7 +100,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
      * @param appointmentObj appointment to insert.
      * @param timeZone time zone of the user.
      */
-    public InsertRequest(final AppointmentObject appointmentObj, final TimeZone timeZone) {
+    public InsertRequest(final Appointment appointmentObj, final TimeZone timeZone) {
         this(appointmentObj, timeZone, true);
     }
     

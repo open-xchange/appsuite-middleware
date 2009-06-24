@@ -9,7 +9,7 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -40,7 +40,7 @@ public class ICalTest extends AbstractWebdavTest {
 		
 		assertEquals(200, initresponse.getResponseCode());
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testUpload");
 		appointmentObj.setStartDate(new Date());
 		appointmentObj.setEndDate(new Date());

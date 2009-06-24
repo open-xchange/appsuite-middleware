@@ -57,7 +57,7 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -67,8 +67,8 @@ import com.openexchange.groupware.container.FolderObject;
 */
 public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
 	
-	ContactObject contactObject1;
-	ContactObject contactObject2;
+	Contact contactObject1;
+	Contact contactObject2;
 	FolderObject newFolderObject;
 	int privateFolderId;
 	int newFolderId;
@@ -87,7 +87,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         newFolderObject = Create.createPublicFolder(client, "Testfolder2", FolderObject.CONTACT);
         newFolderId = newFolderObject.getObjectID();
         //create a contact in the private folder
-        contactObject1 = new ContactObject();
+        contactObject1 = new Contact();
         contactObject1.setDisplayName("Herbert Meier");
         contactObject1.setEmail1("herbert.meier@example.com");
         contactObject1.setParentFolderID(privateFolderId);
@@ -95,7 +95,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         InsertResponse insertResponse = client.execute(insertContact1);
         insertResponse.fillObject(contactObject1);
         //create a contact in the new folder
-        contactObject2 = new ContactObject();
+        contactObject2 = new Contact();
         contactObject2.setDisplayName("Herbert M\u00fcller");
         contactObject2.setEmail1("herbert.mueller@example.com");
         contactObject2.setParentFolderID(newFolderId);
@@ -121,13 +121,13 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
 	public void testAllContactFoldersSearch() throws Throwable {
     	final AJAXClient client = getClient();
 		//execute a search over first name and last name in all folders (folder id -1) that matches both contacts
-		int [] columns = new int [] {ContactObject.OBJECT_ID};
+		int [] columns = new int [] {Contact.OBJECT_ID};
 		SearchRequest searchRequest = new SearchRequest("Herbert", -1, columns, true);
 		
 		SearchResponse searchResponse = client.execute(searchRequest);
 		boolean foundFirst = false;
 		boolean foundSecond = false;
-		final int idPos = searchResponse.getColumnPos(ContactObject.OBJECT_ID);
+		final int idPos = searchResponse.getColumnPos(Contact.OBJECT_ID);
 		for (Object[] obj : searchResponse) {
 		    if (contactObject1.getObjectID() == ((Integer) obj[idPos]).intValue()) {
 		        foundFirst = true;

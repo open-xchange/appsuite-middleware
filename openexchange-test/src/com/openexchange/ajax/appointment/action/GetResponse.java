@@ -58,7 +58,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.AppointmentObject;
  */
 public class GetResponse extends AbstractAJAXResponse {
 
-    private AppointmentObject appointmentObj;
+    private Appointment appointmentObj;
 
     /**
      * @param response
@@ -80,10 +80,10 @@ public class GetResponse extends AbstractAJAXResponse {
      * @throws OXException parsing the appointment out of the response fails.
      * @throws JSONException if parsing of some extra values fails. 
      */
-    public AppointmentObject getAppointment(final TimeZone timeZone)
+    public Appointment getAppointment(final TimeZone timeZone)
         throws OXException, JSONException {
         if (null == appointmentObj) {
-            this.appointmentObj = new AppointmentObject();
+            this.appointmentObj = new Appointment();
             final JSONObject json = (JSONObject) getResponse().getData();
             new AppointmentParser(true, timeZone).parse(appointmentObj, json);
         }
@@ -93,7 +93,7 @@ public class GetResponse extends AbstractAJAXResponse {
     /**
      * @param appointmentObj the appointment to set
      */
-    public void setAppointment(final AppointmentObject appointmentObj) {
+    public void setAppointment(final Appointment appointmentObj) {
         this.appointmentObj = appointmentObj;
     }
 }

@@ -64,8 +64,8 @@ import com.openexchange.ajax.links.actions.DeleteRequest;
 import com.openexchange.ajax.links.actions.InsertRequest;
 import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.tasks.Task;
 
@@ -90,7 +90,7 @@ public final class FunctionTests extends AbstractAJAXSession {
         final int fid1 = client.getValues().getPrivateContactFolder();
         int oid1;
         {
-            final ContactObject co = new ContactObject();
+            final Contact co = new Contact();
             co.setSurName("Meier");
             co.setGivenName("Herbert");
             co.setDisplayName("Meier, Herbert");
@@ -103,7 +103,7 @@ public final class FunctionTests extends AbstractAJAXSession {
         final int fid2 = client.getValues().getPrivateAppointmentFolder();
         int oid2;
         {
-            final AppointmentObject ao = new AppointmentObject();
+            final Appointment ao = new Appointment();
             ao.setTitle("Nasenmann");
             final Calendar c = Calendar.getInstance();
             c.set(Calendar.HOUR_OF_DAY, 8);
@@ -118,7 +118,7 @@ public final class FunctionTests extends AbstractAJAXSession {
             ao.setStartDate(new Date(startTime));
             ao.setEndDate(new Date(endTime));
             ao.setLocation("Location");
-            ao.setShownAs(AppointmentObject.ABSENT);
+            ao.setShownAs(Appointment.ABSENT);
             ao.setParentFolderID(fid2);
             ao.setIgnoreConflicts(true);
 
@@ -162,7 +162,7 @@ public final class FunctionTests extends AbstractAJAXSession {
             task.setObjectID(response.getId());
             task.setLastModified(response.getTimestamp());
         }
-        final ContactObject contact = new ContactObject();
+        final Contact contact = new Contact();
         {
             contact.setDisplayName("Link contact and task test.");
             contact.setParentFolderID(contactFolder);

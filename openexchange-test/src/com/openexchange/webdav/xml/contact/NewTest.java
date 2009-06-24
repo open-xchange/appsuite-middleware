@@ -7,7 +7,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
@@ -22,15 +22,15 @@ public class NewTest extends ContactTest {
 	}
 	
 	public void testNewContact() throws Exception {
-		final ContactObject contactObj = createContactObject("testNewContact");
+		final Contact contactObj = createContactObject("testNewContact");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		contactObj.setObjectID(objectId);
-		final ContactObject loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
 		compareObject(contactObj, loadContact);		
 	}
 	
 	public void testNewContactWithAttachment() throws Exception {
-		final ContactObject contactObj = createContactObject("testNewContactWithAttachment");
+		final Contact contactObj = createContactObject("testNewContactWithAttachment");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		contactObj.setNumberOfAttachments(2);
 		contactObj.setObjectID(objectId);
@@ -50,7 +50,7 @@ public class NewTest extends ContactTest {
 		byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
 		final int attachmentId2 = AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
 		
-		final ContactObject loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
 		compareObject(contactObj, loadContact);	
 	}
 	
@@ -69,7 +69,7 @@ public class NewTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testContactInPrivateFlagInPublicFolder");
 		contactObj.setPrivateFlag(true);
 		contactObj.setParentFolderID(parentFolderId);
@@ -84,7 +84,7 @@ public class NewTest extends ContactTest {
 	}	
 	
 	public void testContactWithAttachment() throws Exception {
-		final ContactObject contactObj = createContactObject("testContactWithAttachment");
+		final Contact contactObj = createContactObject("testContactWithAttachment");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		contactObj.setObjectID(objectId);
 		contactObj.setNumberOfAttachments(1);
@@ -99,8 +99,8 @@ public class NewTest extends ContactTest {
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("test".getBytes());
 		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword());
 		
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
-		final ContactObject[] contactArray = listContact(getWebConversation(), contactFolderId, loadContact.getLastModified(), true, false, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, loadContact.getLastModified(), true, false, getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		for (int a = 0; a < contactArray.length; a++) {

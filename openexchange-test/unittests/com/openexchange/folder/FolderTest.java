@@ -16,7 +16,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -1083,7 +1083,7 @@ public class FolderTest extends TestCase {
         }
     }
 
-    private static final void fillDatesInDao(final AppointmentObject cdao) {
+    private static final void fillDatesInDao(final Appointment cdao) {
         long s = System.currentTimeMillis();
         long cals = s;
         final long calsmod = s % Constants.MILLI_DAY;

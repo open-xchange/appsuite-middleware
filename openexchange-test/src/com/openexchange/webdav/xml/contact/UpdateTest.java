@@ -2,7 +2,7 @@ package com.openexchange.webdav.xml.contact;
 
 import java.util.Date;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -25,20 +25,20 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdateContact() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContact");
+		Contact contactObj = createContactObject("testUpdateContact");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContact");
 		contactObj.setEmail1(null);
 		
 		updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password);
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testUpdateContactWithImage() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContactWithImage");
+		Contact contactObj = createContactObject("testUpdateContactWithImage");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContactWithImage");
@@ -47,14 +47,14 @@ public class UpdateTest extends ContactTest {
 		contactObj.setImage1(image);
 		
 		updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password);
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		contactObj.removeImage1();
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testUpdateConcurentConflict() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContactConcurentConflict");
+		Contact contactObj = createContactObject("testUpdateContactConcurentConflict");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContactConcurentConflict2");
@@ -71,7 +71,7 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdateNotFound() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContactNotFound");
+		Contact contactObj = createContactObject("testUpdateContactNotFound");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContactNotFound");

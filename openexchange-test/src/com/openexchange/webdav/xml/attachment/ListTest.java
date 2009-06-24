@@ -7,7 +7,7 @@ import java.io.InputStream;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.ContactTest;
@@ -22,7 +22,7 @@ public class ListTest extends AttachmentTest {
 	public void testLoadAttachment() throws Exception {
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		final int contactFolderId = folderObj.getObjectID();
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testLoadAttachment");
 		contactObj.setParentFolderID(contactFolderId);
 		
@@ -55,7 +55,7 @@ public class ListTest extends AttachmentTest {
 	public void testLoadAttachmentWithRtf() throws Exception {
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		final int contactFolderId = folderObj.getObjectID();
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testLoadAttachmentWithRtf");
 		contactObj.setParentFolderID(contactFolderId);
 		

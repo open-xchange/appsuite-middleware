@@ -69,7 +69,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
 /**
@@ -106,7 +106,7 @@ public class NewListTest extends AbstractAJAXSession {
         final Date listEnd = new Date(TimeTools.getHour(2));
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
-            final AppointmentObject app = new AppointmentObject();
+            final Appointment app = new Appointment();
             app.setTitle("New List Test " + (i + 1));
             app.setParentFolderID(folderA);
             app.setStartDate(appStart);
@@ -124,8 +124,8 @@ public class NewListTest extends AbstractAJAXSession {
         }
 
         // A now gets all of the folder.
-        final int[] columns = new int[] { AppointmentObject.TITLE, AppointmentObject
-            .OBJECT_ID, AppointmentObject.FOLDER_ID };
+        final int[] columns = new int[] { Appointment.TITLE, Appointment
+            .OBJECT_ID, Appointment.FOLDER_ID };
         final CommonAllResponse allR = clientA.execute(new AllRequest(folderA,
             columns, listStart, listEnd, tzA));
         

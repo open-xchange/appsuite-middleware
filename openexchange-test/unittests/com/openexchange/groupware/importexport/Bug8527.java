@@ -64,7 +64,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
@@ -152,7 +152,7 @@ public class Bug8527 extends AbstractICalImportTest {
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
-		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
+		final Appointment appointmentObj = appointmentSql.getObjectById(oid, folderId);
 		assertTrue("Has participants" , appointmentObj.containsParticipants());
 		final Participant[] participants = appointmentObj.getParticipants();
 		assertEquals("Has three participants", 3, participants.length);

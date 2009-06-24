@@ -53,7 +53,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Implements creating the necessary values for a appointment update request. All necessary values are read from the appointment object. The
@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.AppointmentObject;
  */
 public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
-    private final AppointmentObject appointmentObj;
+    private final Appointment appointmentObj;
 
     private final TimeZone timeZone;
 
@@ -77,16 +77,16 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
      * @param appointmentObj Appointment object with updated attributes. This appointment must contain the attributes parent folder
      *            identifier, object identifier and last modification timestamp.
      */
-    public UpdateRequest(final AppointmentObject appointmentObj, final TimeZone timeZone) {
+    public UpdateRequest(final Appointment appointmentObj, final TimeZone timeZone) {
         this(appointmentObj, timeZone, true);
     }
 
-    public UpdateRequest(final AppointmentObject appointment, final TimeZone timezone, final boolean failOnError) {
+    public UpdateRequest(final Appointment appointment, final TimeZone timezone, final boolean failOnError) {
         this(appointment.getParentFolderID(), appointment, timezone, failOnError);
 
     }
 
-    public UpdateRequest(final int originFolder, final AppointmentObject appointment, final TimeZone timezone, final boolean failOnError) {
+    public UpdateRequest(final int originFolder, final Appointment appointment, final TimeZone timezone, final boolean failOnError) {
         super();
         this.appointmentObj = appointment;
         this.timeZone = timezone;
@@ -129,7 +129,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
     /**
      * @return the appointment
      */
-    protected AppointmentObject getAppointment() {
+    protected Appointment getAppointment() {
         return appointmentObj;
     }
 }

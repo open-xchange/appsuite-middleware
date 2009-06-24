@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 public class RangeTest extends AbstractAJAXSession {
@@ -89,13 +89,13 @@ public class RangeTest extends AbstractAJAXSession {
 
         final int folderId = client.getValues().getPrivateAppointmentFolder();
 
-        final AppointmentObject appointmentObj = new AppointmentObject();
+        final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testRange");
         appointmentObj.setStartDate(c.getTime());
         c.add(Calendar.HOUR, 1);
         appointmentObj.setEndDate(c.getTime());
         c.add(Calendar.HOUR, -1);
-        appointmentObj.setShownAs(AppointmentObject.ABSENT);
+        appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setAlarm(45);
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);

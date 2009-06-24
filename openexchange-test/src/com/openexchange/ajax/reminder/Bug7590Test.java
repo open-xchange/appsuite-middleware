@@ -63,7 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -79,7 +79,7 @@ public class Bug7590Test extends AbstractAJAXSession {
 
     private Calendar calendar;
 
-    private AppointmentObject appointment;
+    private Appointment appointment;
 
     public Bug7590Test(final String name) {
         super(name);
@@ -124,8 +124,8 @@ public class Bug7590Test extends AbstractAJAXSession {
         ReminderTest.compareReminder(expected, actual);
     }
 
-    private AppointmentObject createAppointment() throws AjaxException, IOException, SAXException, JSONException {
-        final AppointmentObject appointmentObj = new AppointmentObject();
+    private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
+        final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug7590");
 
         calendar.set(Calendar.HOUR_OF_DAY, 8);
@@ -134,9 +134,9 @@ public class Bug7590Test extends AbstractAJAXSession {
         appointmentObj.setEndDate(calendar.getTime());
         appointmentObj.setAlarm(alarmMinutes);
 
-        appointmentObj.setShownAs(AppointmentObject.ABSENT);
+        appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(folderId);
-        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+        appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setOccurrence(3);
         appointmentObj.setIgnoreConflicts(true);

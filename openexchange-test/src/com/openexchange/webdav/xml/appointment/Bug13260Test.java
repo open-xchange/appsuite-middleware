@@ -53,7 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
@@ -85,13 +85,13 @@ public class Bug13260Test extends AppointmentTest {
         int objectId = -1;
         try {
             // Create Appointment
-            final AppointmentObject appointmentObj = new AppointmentObject();
+            final Appointment appointmentObj = new Appointment();
             appointmentObj.setTitle("testBug13260");
             appointmentObj.setStartDate(startTime);
             appointmentObj.setEndDate(endTime);
             appointmentObj.setFullTime(fullTime);
             appointmentObj.setParentFolderID(appointmentFolderId);
-            appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+            appointmentObj.setRecurrenceType(Appointment.DAILY);
             appointmentObj.setInterval(1);
             if (!endless) {
                 appointmentObj.setOccurrence(10);
@@ -111,7 +111,7 @@ public class Bug13260Test extends AppointmentTest {
             updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 
             // Load Appointment
-            AppointmentObject loadApointment = loadAppointment(
+            Appointment loadApointment = loadAppointment(
                 getWebConversation(),
                 objectId,
                 appointmentFolderId,

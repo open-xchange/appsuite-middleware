@@ -59,7 +59,7 @@ import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -104,7 +104,7 @@ public class UserResolver {
     public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(identifier);
         GetResponse response = client.execute(request);
-        ContactObject contact = response.getContact();
+        Contact contact = response.getContact();
         UserImpl4Test user = new UserImpl4Test();
         
         user.setDisplayName(contact.getDisplayName());

@@ -53,7 +53,7 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 
 /**
@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.ContactObject;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactMoveStep extends NeedExistingStep<ContactObject>{
+public class ContactMoveStep extends NeedExistingStep<Contact>{
 
     private int destinationFolder;
     
@@ -77,7 +77,7 @@ public class ContactMoveStep extends NeedExistingStep<ContactObject>{
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         
-        ContactObject entry = new ContactObject();
+        Contact entry = new Contact();
         assumeIdentity(entry);
         int inFolder = entry.getParentFolderID();
         entry.setParentFolderID(destinationFolder);

@@ -62,7 +62,7 @@ import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -131,7 +131,7 @@ public class ContactCollectorTest extends TestCase {
             addresses.add(address);
             collector.memorizeAddresses(addresses, session);
             Thread.sleep(1000);
-            final List<ContactObject> contacts = searchContact(mail);
+            final List<Contact> contacts = searchContact(mail);
             assertEquals("No object found", 1, contacts.size());
             assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
         } finally {
@@ -152,7 +152,7 @@ public class ContactCollectorTest extends TestCase {
             Thread.sleep(1000);
             collector.memorizeAddresses(addresses, session);
             Thread.sleep(1000);
-            final List<ContactObject> contacts = searchContact(mail);
+            final List<Contact> contacts = searchContact(mail);
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
             assertEquals("Count does not match", 3, contacts.get(0).getUseCount());
         } finally {
@@ -172,7 +172,7 @@ public class ContactCollectorTest extends TestCase {
         return fo;
     }
 
-    private List<ContactObject> searchContact(final String pattern) throws Exception {
+    private List<Contact> searchContact(final String pattern) throws Exception {
         final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
             ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
             session);
@@ -185,12 +185,12 @@ public class ContactCollectorTest extends TestCase {
         searchObject.addFolder(contactFolder.getObjectID());
 
         final int[] columns = new int[] {
-            ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED, ContactObject.OBJECT_ID, ContactObject.USERFIELD20 };
-        final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
+            Contact.FOLDER_ID, Contact.LAST_MODIFIED, Contact.OBJECT_ID, Contact.USERFIELD20 };
+        final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
 
-        final List<ContactObject> contacts = new ArrayList<ContactObject>();
+        final List<Contact> contacts = new ArrayList<Contact>();
         while (iterator.hasNext()) {
-            ContactObject foundContact;
+            Contact foundContact;
             try {
                 foundContact = iterator.next();
             } catch (final SearchIteratorException e) {
@@ -203,9 +203,9 @@ public class ContactCollectorTest extends TestCase {
     }
 
     private void deleteContactFromFolder(final String pattern) throws Exception {
-        final List<ContactObject> contacts = searchContact(pattern);
+        final List<Contact> contacts = searchContact(pattern);
 
-        for (final ContactObject contact : contacts) {
+        for (final Contact contact : contacts) {
             final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
                 session);

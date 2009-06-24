@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -128,9 +128,9 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
 							users.add((UserParticipant)participant);
 						} else if (Participant.GROUP == participant.getType()) {
 							final GroupParticipant group = (GroupParticipant)participant;
-							final ContactObject[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
+							final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
 							if (null != groupMembers) {
-								for (ContactObject groupMember : groupMembers) {
+								for (Contact groupMember : groupMembers) {
 									final UserParticipant userParticipant = new UserParticipant(groupMember.getInternalUserId());
 									userParticipant.setDisplayName(groupMember.getDisplayName());
 									userParticipant.setEmailAddress(groupMember.getEmail1());

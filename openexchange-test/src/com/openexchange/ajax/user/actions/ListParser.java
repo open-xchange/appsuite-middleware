@@ -54,7 +54,7 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractListParser;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link ListParser}
@@ -73,16 +73,16 @@ public class ListParser extends AbstractListParser<ListResponse> {
     @Override
     protected ListResponse createResponse(final Response response) throws JSONException {
         final ListResponse listR = super.createResponse(response);
-        final List<ContactObject> users = new ArrayList<ContactObject>();
+        final List<Contact> users = new ArrayList<Contact>();
         for (final Object[] data : listR) {
             assertEquals("Object data array length is different as column array length.", getColumns().length, data.length);
-            final ContactObject user = new ContactObject();
+            final Contact user = new Contact();
             for (int i = 0; i < getColumns().length; i++) {
                 user.set(getColumns()[i], data[i]);
             }
             users.add(user);
         }
-        listR.setUsers(users.toArray(new ContactObject[users.size()]));
+        listR.setUsers(users.toArray(new Contact[users.size()]));
         return listR;
     }
 

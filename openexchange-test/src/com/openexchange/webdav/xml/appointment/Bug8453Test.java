@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -41,31 +41,31 @@ public class Bug8453Test extends AppointmentTest {
 		
 		final Date until = calendar.getTime();
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug8453");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final UserParticipant[] users = new UserParticipant[1];
 		users[0] = new UserParticipant(userId);
-		users[0].setConfirm(AppointmentObject.ACCEPT);
+		users[0].setConfirm(Appointment.ACCEPT);
 		
 		appointmentObj.setUsers(users);
 
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final AppointmentObject recurrenceUpdate = new AppointmentObject();
+		final Appointment recurrenceUpdate = new Appointment();
 		recurrenceUpdate.setTitle("testBug8453 - exception");
 		recurrenceUpdate.setStartDate(new Date(startTime.getTime()+600000));
 		recurrenceUpdate.setEndDate(new Date(endTime.getTime()+600000));
 		recurrenceUpdate.setRecurrenceDatePosition(recurrenceDatePosition);
-		recurrenceUpdate.setShownAs(AppointmentObject.ABSENT);
+		recurrenceUpdate.setShownAs(Appointment.ABSENT);
 		recurrenceUpdate.setParentFolderID(appointmentFolderId);
 		recurrenceUpdate.setIgnoreConflicts(true);
 		recurrenceUpdate.setUsers(users);
@@ -74,7 +74,7 @@ public class Bug8453Test extends AppointmentTest {
 		updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 		
 		appointmentObj.setObjectID(objectId);
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = loadAppointment.getLastModified();

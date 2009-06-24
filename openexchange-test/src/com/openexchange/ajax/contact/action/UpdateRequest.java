@@ -52,7 +52,7 @@ package com.openexchange.ajax.contact.action;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * Implements creating the necessary values for a contact update request. All
@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
 
-    private final ContactObject contactObj;
+    private final Contact contactObj;
     private boolean failOnError;
     private int originFolder;
 
@@ -72,15 +72,15 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
      * the attributes parent folder identifier, object identifier and last
      * modification timestamp.
      */
-    public UpdateRequest(final ContactObject contactObj) {
+    public UpdateRequest(final Contact contactObj) {
         this(contactObj, true);
     }
     
-    public UpdateRequest(final ContactObject contactObj, boolean failOnError) {
+    public UpdateRequest(final Contact contactObj, boolean failOnError) {
         this(contactObj.getParentFolderID(), contactObj, failOnError);
     }
 
-    public UpdateRequest(int inFolder, ContactObject entry, boolean failOnError) {
+    public UpdateRequest(int inFolder, Contact entry, boolean failOnError) {
         super();
         this.contactObj = entry;
         this.failOnError = failOnError;
@@ -127,7 +127,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     /**
      * @return the contact
      */
-    protected ContactObject getContact() {
+    protected Contact getContact() {
         return contactObj;
     }
 }

@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 
@@ -82,7 +82,7 @@ public final class Bug12444Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("Test for bug 12444");
         final Calendar calendar = TimeTools.createCalendar(tz);
         appointment.setStartDate(calendar.getTime());

@@ -49,7 +49,7 @@ import java.util.List;
 
 import org.jdom.Element;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -67,7 +67,7 @@ public class ContactParser extends CommonParser {
 		
 	}
 	
-	protected void parse(final ContactObject contactObj, final Element eProp) {
+	protected void parse(final Contact contactObj, final Element eProp) {
 		if (hasElement(eProp.getChild("uid", XmlServlet.NS))) {
 			contactObj.setInternalUserId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		}
@@ -463,7 +463,7 @@ public class ContactParser extends CommonParser {
 	}
 	
 	
-	protected void parseElementDistributionlists(final ContactObject contactObj, final Element eDistributionList) {
+	protected void parseElementDistributionlists(final Contact contactObj, final Element eDistributionList) {
 		final ArrayList distributionlist = new ArrayList();
 		
 		final List elementEntries = eDistributionList.getChildren("email", XmlServlet.NS);
@@ -499,7 +499,7 @@ public class ContactParser extends CommonParser {
 		entry.setEmailaddress(getValue(e));
 	}
 	
-	protected void parseElementLinks(final ContactObject contactObj, final Element eLinks) {
+	protected void parseElementLinks(final Contact contactObj, final Element eLinks) {
 		final ArrayList links = new ArrayList();
 		
 		final List elementEntries = eLinks.getChildren("link", XmlServlet.NS);

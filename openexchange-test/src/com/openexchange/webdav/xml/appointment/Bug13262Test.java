@@ -53,7 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
@@ -65,7 +65,7 @@ import com.openexchange.webdav.xml.AppointmentTest;
 public class Bug13262Test extends AppointmentTest {
     
     private int objectId = -1;
-    private AppointmentObject appointment;
+    private Appointment appointment;
     private Calendar thirdOccurrence;
 
     public Bug13262Test(String name) {
@@ -82,14 +82,14 @@ public class Bug13262Test extends AppointmentTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setTitle("testBug13262");
         appointment.setStartDate(cal.getTime());
         cal.add(Calendar.DATE, 1);
         appointment.setEndDate(cal.getTime());
         appointment.setFullTime(true);
         appointment.setParentFolderID(appointmentFolderId);
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(5);
         appointment.setIgnoreConflicts(true);
@@ -112,23 +112,23 @@ public class Bug13262Test extends AppointmentTest {
         assertTrue("No object Id returned after creation", objectId > 0);
         
         // Create Exception with update
-        AppointmentObject exception = createException();
+        Appointment exception = createException();
         int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 
         // Load Appointment
-        AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
 
         // Load exception
-        AppointmentObject loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+        Appointment loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword());
         assertNotNull("Loaded Exception is null", loadException);
         
         // Checks
         assertEquals("Start date of exception is wrong", thirdOccurrence.getTimeInMillis(), loadException.getStartDate().getTime());
     }
 
-    private AppointmentObject createException() {
-        AppointmentObject exception = new AppointmentObject();
+    private Appointment createException() {
+        Appointment exception = new Appointment();
         exception.setObjectID(objectId);
         exception.setParentFolderID(appointmentFolderId);
         exception.setLastModified(appointment.getLastModified());

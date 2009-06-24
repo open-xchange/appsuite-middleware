@@ -68,7 +68,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -95,7 +95,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject series = new AppointmentObject();
+        final Appointment series = new Appointment();
         {
             series.setTitle("Bug 12099 test");
             series.setParentFolderID(folderId);
@@ -110,7 +110,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
             calendar.add(Calendar.HOUR, 1);
             series.setEndDate(calendar.getTime());
             // Configure daily series with 2 occurences
-            series.setRecurrenceType(AppointmentObject.DAILY);
+            series.setRecurrenceType(Appointment.DAILY);
             series.setInterval(1);
             series.setOccurrence(2);
         }
@@ -131,7 +131,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
             final GetRequest request = new GetRequest(folderId, series.getObjectID());
             final GetResponse response = client.execute(request);
             series.setLastModified(response.getTimestamp());
-            final AppointmentObject test = response.getAppointment(tz);
+            final Appointment test = response.getAppointment(tz);
             assertEquals("Editor of appointment series must not be 0.", 
                 client.getValues().getUserId(), test.getModifiedBy());
         }
@@ -171,7 +171,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
                 new com.openexchange.ajax.folder.actions.InsertRequest(folder));
             response.fillObject(folder);
         }
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         try {
             final AJAXClient clientC = new AJAXClient(User.User3);
             final int userIdC = clientC.getValues().getUserId();
@@ -202,7 +202,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
                 final GetRequest request = new GetRequest(folder.getObjectID(),
                     appointment.getObjectID());
                 final GetResponse response = clientB.execute(request);
-                final AppointmentObject test = response.getAppointment(tzB);
+                final Appointment test = response.getAppointment(tzB);
                 assertEquals("Appointment modified badly updated.", userIdC, test.getModifiedBy());
             }
         } finally {

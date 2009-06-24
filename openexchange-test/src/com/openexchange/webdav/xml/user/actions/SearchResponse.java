@@ -54,7 +54,7 @@ import java.util.Iterator;
 
 import org.jdom.Document;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
 import com.openexchange.webdav.xml.types.Response;
 
@@ -62,9 +62,9 @@ import com.openexchange.webdav.xml.types.Response;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SearchResponse extends AbstractWebDAVResponse implements Iterable<ContactObject> {
+public final class SearchResponse extends AbstractWebDAVResponse implements Iterable<Contact> {
 
-    private ContactObject[] contacts;
+    private Contact[] contacts;
 
     /**
      * @param document
@@ -76,18 +76,18 @@ public final class SearchResponse extends AbstractWebDAVResponse implements Iter
     /**
      * @return the contacts
      */
-    public final ContactObject[] getContacts() {
+    public final Contact[] getContacts() {
         return contacts;
     }
 
     /**
      * @param contacts the contacts to set
      */
-    final void setContacts(final ContactObject[] contacts) {
+    final void setContacts(final Contact[] contacts) {
         this.contacts = contacts;
     }
 
-    public Iterator<ContactObject> iterator() {
+    public Iterator<Contact> iterator() {
         return Arrays.asList(contacts).iterator();
     }
 }

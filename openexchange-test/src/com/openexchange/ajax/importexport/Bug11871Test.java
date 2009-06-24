@@ -64,7 +64,7 @@ import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
 import com.openexchange.data.conversion.ical.Assert;
 import com.openexchange.data.conversion.ical.ICalFile;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -98,13 +98,13 @@ public final class Bug11871Test extends AbstractAJAXSession {
             folder.setObjectID(response.getId());
             folder.setLastModified(response.getTimestamp());
         }
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         final Calendar calendar = Calendar.getInstance(tz);
         {
             appointment.setTitle("Bug 11871 test appointment");
             appointment.setParentFolderID(folder.getObjectID());
             appointment.setIgnoreConflicts(true);
-            appointment.setRecurrenceType(AppointmentObject.DAILY);
+            appointment.setRecurrenceType(Appointment.DAILY);
             appointment.setInterval(1);
             appointment.setRecurrenceCount(5);
             appointment.setTimezone(tz.getID());

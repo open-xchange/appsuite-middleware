@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -30,11 +30,11 @@ public class Bug8196Test extends AppointmentTest {
 		final int secondAppointmentFolderId = folderObj.getObjectID();
 		final int secondUserId = folderObj.getCreatedBy();
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug8196");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setAlarmFlag(true);
@@ -60,7 +60,7 @@ public class Bug8196Test extends AppointmentTest {
 		appointmentObj.setAlarmFlag(false);
 		appointmentObj.setParentFolderID(secondAppointmentFolderId);
 
-		AppointmentObject loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondAppointmentFolderId, getHostName(), getSecondLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondAppointmentFolderId, getHostName(), getSecondLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = new Date(loadAppointment.getLastModified().getTime()-1000);

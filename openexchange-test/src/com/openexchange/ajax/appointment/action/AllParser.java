@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.CommonAllParser;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  *
@@ -90,8 +90,8 @@ public class AllParser extends CommonAllParser {
         final CommonAllResponse retval = super.createResponse(response);
         final Iterator<Object[]> iter = retval.iterator();
         final ListIDs list = new ListIDs();
-        final int folderPos = retval.getColumnPos(AppointmentObject.FOLDER_ID);
-        final int identifierPos = retval.getColumnPos(AppointmentObject
+        final int folderPos = retval.getColumnPos(Appointment.FOLDER_ID);
+        final int identifierPos = retval.getColumnPos(Appointment
             .OBJECT_ID);
         while (iter.hasNext()) {
             final Object[] row = iter.next();

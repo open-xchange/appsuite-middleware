@@ -56,7 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.user.UserImpl4Test;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * Stores the response of searched users.
@@ -81,26 +81,26 @@ public final class SearchResponse extends CommonSearchResponse {
             for (final int attribute : userImplAttributes) {
                 final Object value = data[getColumnPos(attribute)];
                 switch (attribute) {
-                case ContactObject.INTERNAL_USERID:
+                case Contact.INTERNAL_USERID:
                     if(JSONObject.NULL == value) {
                         break;
                     }
                     user.setId(((Integer) value).intValue());
                     break;
-                case ContactObject.EMAIL1:
+                case Contact.EMAIL1:
                     if(JSONObject.NULL == value) {
                         user.setMail(null);
                         break;
                     }
                     user.setMail((String) value);
                     break;
-                case ContactObject.DISPLAY_NAME:
+                case Contact.DISPLAY_NAME:
                     user.setDisplayName((value == JSONObject.NULL) ? null : (String) value);
                     break;
-                case ContactObject.GIVEN_NAME:
+                case Contact.GIVEN_NAME:
                     user.setGivenName((value == JSONObject.NULL) ? null : (String) value);
                     break;
-                case ContactObject.SUR_NAME:
+                case Contact.SUR_NAME:
                     user.setSurname((value == JSONObject.NULL) ? null : (String) value);
                     break;
                 }

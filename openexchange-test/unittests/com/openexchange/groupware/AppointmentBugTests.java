@@ -74,7 +74,7 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -97,7 +97,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 
 public class AppointmentBugTests extends TestCase {
 
-    int cols[] = new int[] { AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.FULL_TIME };
+    int cols[] = new int[] { Appointment.START_DATE, Appointment.END_DATE, Appointment.TITLE, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS, Appointment.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     // Override these in setup
@@ -146,9 +146,9 @@ public class AppointmentBugTests extends TestCase {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);
-        final SearchIterator<AppointmentObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
-            final AppointmentObject cdao = si.next();
+            final Appointment cdao = si.next();
             CalendarTest.testDelete(cdao);
         }
         si.close();
@@ -233,7 +233,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTitle("testBug4467");
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
         cdao.setInterval(1);
-        cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
+        cdao.setDays(Appointment.MONDAY + Appointment.WEDNESDAY + Appointment.FRIDAY);
         new CalendarCollection().fillDAO(cdao);
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 10, m.size());
@@ -362,14 +362,14 @@ public class AppointmentBugTests extends TestCase {
         final CalendarDataObject update = new CalendarDataObject();
         update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
-        update.setRecurrenceType(AppointmentObject.WEEKLY);
+        update.setRecurrenceType(Appointment.WEEKLY);
         update.setInterval(1);
-        update.setDays(AppointmentObject.MONDAY);
+        update.setDays(Appointment.MONDAY);
         update.setIgnoreConflicts(true);
         csql.updateAppointmentObject(update, fid, new Date());
 
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
-        assertEquals("Test that app is a recurring appointment", AppointmentObject.WEEKLY, testobject.getRecurrenceType());
+        assertEquals("Test that app is a recurring appointment", Appointment.WEEKLY, testobject.getRecurrenceType());
 
     }
 
@@ -1660,7 +1660,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
 
         final UserParticipant userparticipants = new UserParticipant(userid);
-        userparticipants.setConfirm(AppointmentObject.ACCEPT);
+        userparticipants.setConfirm(Appointment.ACCEPT);
         cdao.setUsers(new UserParticipant[] { userparticipants });
 
         final CalendarSql csql = new CalendarSql(so);
@@ -2128,7 +2128,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setRecurrenceType(CalendarDataObject.WEEKLY);
         cdao.setInterval(1);
-        cdao.setDays(AppointmentObject.MONDAY);
+        cdao.setDays(Appointment.MONDAY);
         cdao.setOccurrence(3);
 
         new CalendarCollection().fillDAO(cdao);
@@ -2736,7 +2736,7 @@ public class AppointmentBugTests extends TestCase {
 
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up[a].getIdentifier(), AppointmentObject.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm state for user "+up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
             }
         }
 
@@ -2747,7 +2747,7 @@ public class AppointmentBugTests extends TestCase {
         update.setLocation("UPDATE");
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid2) {
-                up[a].setConfirm(AppointmentObject.ACCEPT);
+                up[a].setConfirm(Appointment.ACCEPT);
             }
         }
         update.setUsers(up);
@@ -2757,7 +2757,7 @@ public class AppointmentBugTests extends TestCase {
         final CalendarDataObject temp2 = csql.getObjectById(object_id, fid);
         final UserParticipant up_check2[] = temp2.getUsers();
         for (int a = 0; a < up_check2.length; a++) {
-            assertEquals("Check confirm state for user "+up_check2[a].getIdentifier(), AppointmentObject.ACCEPT, up_check2[a].getConfirm());
+            assertEquals("Check confirm state for user "+up_check2[a].getIdentifier(), Appointment.ACCEPT, up_check2[a].getConfirm());
         }
 
         final CalendarDataObject update_with_time_change = new CalendarDataObject();
@@ -2775,9 +2775,9 @@ public class AppointmentBugTests extends TestCase {
         final UserParticipant up_check3[] = temp3.getUsers();
         for (int a = 0; a < up_check3.length; a++) {
             if (up_check3[a].getIdentifier() == userid2) {
-                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), AppointmentObject.NONE, up_check3[a].getConfirm());
+                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), Appointment.NONE, up_check3[a].getConfirm());
             } else if (up_check3[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), AppointmentObject.ACCEPT, up_check3[a].getConfirm());
+                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), Appointment.ACCEPT, up_check3[a].getConfirm());
             }
         }
     }
@@ -2935,10 +2935,10 @@ public class AppointmentBugTests extends TestCase {
 
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up[a].getIdentifier(), AppointmentObject.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm state for user "+up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
                 assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());
             } else if (up[a].getIdentifier() == userid2) {
-                assertEquals("Check confirm state for user "+up[a].getIdentifier(), AppointmentObject.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm state for user "+up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
                 assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());
             }
         }

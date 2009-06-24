@@ -50,7 +50,7 @@
 package com.openexchange.groupware.notify;
 
 import java.util.Date;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.mail.mime.ContentType;
 
 
@@ -59,7 +59,7 @@ public class AddICalAttachmentTest extends ParticipantNotifyTest {
     public void testAddICalAttachment(){
         final AppointmentState state = new AppointmentState(null, null, null);
         final TestMailObject mailObject = new TestMailObject();
-        final AppointmentObject obj = new AppointmentObject();
+        final Appointment obj = new Appointment();
 
         obj.setCreatedBy(5);
         obj.setStartDate(new Date(0));
@@ -78,7 +78,7 @@ public class AddICalAttachmentTest extends ParticipantNotifyTest {
 
         try {
 
-            final AppointmentObject obj2 = convertFromICal(mailObject.getTheInputStream());
+            final Appointment obj2 = convertFromICal(mailObject.getTheInputStream());
 
             assertEquals(obj.getStartDate().getTime(), obj2.getStartDate().getTime());
             assertEquals(obj.getEndDate().getTime(), obj2.getEndDate().getTime());

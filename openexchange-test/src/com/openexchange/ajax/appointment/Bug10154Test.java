@@ -69,7 +69,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
@@ -117,7 +117,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
         }
         try {
         	final TimeZone tzA = clientA.getValues().getTimeZone();
-        	final AppointmentObject appointment = new AppointmentObject();
+        	final Appointment appointment = new Appointment();
         	final List<Participant> onInsert = ParticipantTools.createParticipants(
 				userIdA, clientB.getValues().getUserId());
         	final Participant[] expected = onInsert.toArray(new Participant[onInsert.size()]);
@@ -135,7 +135,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
         	}
         	final TimeZone tzB = clientB.getValues().getTimeZone();
         	{
-        		final AppointmentObject change = new AppointmentObject();
+        		final Appointment change = new Appointment();
         		change.setObjectID(appointment.getObjectID());
         		change.setParentFolderID(folder.getObjectID());
         		change.setLastModified(appointment.getLastModified());
@@ -149,7 +149,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
         	{
         		final GetRequest request = new GetRequest(folder.getObjectID(), appointment.getObjectID());
         		final GetResponse response = clientA.execute(request);
-        		final AppointmentObject reload = response.getAppointment(tzA);
+        		final Appointment reload = response.getAppointment(tzA);
         		final Participant[] participants = reload.getParticipants();
         		assertEquals("Participants should not be changed.", expected.length, participants.length);
         		final Comparator<Participant> comparator = new Comparator<Participant>() {

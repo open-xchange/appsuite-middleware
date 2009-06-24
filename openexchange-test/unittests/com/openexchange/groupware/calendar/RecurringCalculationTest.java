@@ -59,7 +59,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -72,7 +72,7 @@ public class RecurringCalculationTest extends TestCase {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
         final TimeZone ny = TimeZone.getTimeZone("America/New York");
 
-        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.YEARLY,1,0);
+        final RecurringCalculation calc = new RecurringCalculation(Appointment.YEARLY,1,0);
 
         final Date start = recalculate(D("07/02/1981 19:00"), utc, ny); // Will be ignored
         final Date end = recalculate(D("09/02/1981 23:00"), utc, ny);   // Will be ignored
@@ -98,9 +98,9 @@ public class RecurringCalculationTest extends TestCase {
         final Date start = D("05/12/2007 10:00");
         final Date end = D("05/12/2007 12:00");
 
-        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
+        final RecurringCalculation calc = new RecurringCalculation(Appointment.MONTHLY,1,0);
         calc.setStartAndEndTime(start.getTime(), end.getTime());
-        calc.setDays(AppointmentObject.WEEKDAY);
+        calc.setDays(Appointment.WEEKDAY);
         calc.setDayInMonth(3);
         calc.setOccurrence(5);
 
@@ -127,9 +127,9 @@ public class RecurringCalculationTest extends TestCase {
         final Date start = D("02/12/2007 10:00");
         final Date end = D("02/12/2007 12:00");
 
-        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
+        final RecurringCalculation calc = new RecurringCalculation(Appointment.MONTHLY,1,0);
         calc.setStartAndEndTime(start.getTime(), end.getTime());
-        calc.setDays(AppointmentObject.WEEKENDDAY);
+        calc.setDays(Appointment.WEEKENDDAY);
         calc.setDayInMonth(2);
         calc.setOccurrence(5);
 
@@ -152,7 +152,7 @@ public class RecurringCalculationTest extends TestCase {
 
     // Bug 11730
     public void testRecurrencesGoOnUntil99YearsInTheFuture() throws RecurringException {
-        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.YEARLY,1,0);
+        final RecurringCalculation calc = new RecurringCalculation(Appointment.YEARLY,1,0);
         final Date start = D("05/11/1900 10:00");
         calc.setStartAndEndTime(start.getTime(), D("05/11/1900 12:00").getTime());
         calc.setDayInMonth(11);

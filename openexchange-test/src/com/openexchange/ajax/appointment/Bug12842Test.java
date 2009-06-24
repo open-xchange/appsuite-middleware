@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 
 /**
@@ -212,8 +212,8 @@ public class Bug12842Test extends AbstractAJAXSession {
      */
     private void rangeTest(final int start, final int end, final int conflictStart, final int conflictEnd, final int type, final boolean shouldConflict) throws Throwable {
         AJAXClient client = null;
-        AppointmentObject appointment = new AppointmentObject();
-        final AppointmentObject conflictAppointment = new AppointmentObject();
+        Appointment appointment = new Appointment();
+        final Appointment conflictAppointment = new Appointment();
 
         try {
             client = getClient();
@@ -221,7 +221,7 @@ public class Bug12842Test extends AbstractAJAXSession {
             final TimeZone tz = client.getValues().getTimeZone();
 
             // Sequence
-            appointment = new AppointmentObject();
+            appointment = new Appointment();
             appointment.setTitle("Bug12842Test");
             appointment.setParentFolderID(folderId);
             appointment.setIgnoreConflicts(true);

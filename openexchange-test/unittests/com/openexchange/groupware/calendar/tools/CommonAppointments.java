@@ -67,7 +67,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -257,19 +257,19 @@ public class CommonAppointments {
 
     }
 
-    public List<AppointmentObject> getPrivateAppointments() throws OXException {
+    public List<Appointment> getPrivateAppointments() throws OXException {
        return getAppointmentsInFolder(privateFolder);
 
     }
 
-    public List<AppointmentObject> getAppointmentsInFolder(final int folderId) throws OXException {
+    public List<Appointment> getAppointmentsInFolder(final int folderId) throws OXException {
         return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
     }
     
-    public List<AppointmentObject> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
-        final List<AppointmentObject> cdao = new ArrayList<AppointmentObject>();
+    public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
+        final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
-            final SearchIterator<AppointmentObject> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
+            final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
@@ -285,11 +285,11 @@ public class CommonAppointments {
         }
     }
 
-    public List<AppointmentObject> getModifiedInFolder(final int folderId, final long since) throws OXException {
-        final List<AppointmentObject> cdao = new ArrayList<AppointmentObject>();
+    public List<Appointment> getModifiedInFolder(final int folderId, final long since) throws OXException {
+        final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
-            final SearchIterator<AppointmentObject> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since), true);
+            final SearchIterator<Appointment> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since), true);
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
@@ -302,11 +302,11 @@ public class CommonAppointments {
         }
     }
 
-    public List<AppointmentObject> getDeletedInFolder(final int folderId, final long since) throws OXException {
-        final List<AppointmentObject> cdao = new ArrayList<AppointmentObject>();
+    public List<Appointment> getDeletedInFolder(final int folderId, final long since) throws OXException {
+        final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
-            final SearchIterator<AppointmentObject> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
+            final SearchIterator<Appointment> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }

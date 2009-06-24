@@ -52,7 +52,7 @@ package com.openexchange.webdav.xml.appointment.recurrence;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.AbstractWebDAVSession;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
@@ -80,13 +80,13 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("Test appointment for bug 10859");
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
-        appointment.setRecurrenceType(AppointmentObject.YEARLY);
+        appointment.setRecurrenceType(Appointment.YEARLY);
         appointment.setInterval(1);
         appointment.setMonth(-1);
         appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));

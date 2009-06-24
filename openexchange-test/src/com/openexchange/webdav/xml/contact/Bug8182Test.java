@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml.contact;
 
 import java.util.Date;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 
 public class Bug8182Test extends ContactTest {
@@ -61,15 +61,15 @@ public class Bug8182Test extends ContactTest {
     }
 
     public void testBug8182() throws Throwable {
-        final ContactObject contactObj = createContactObject("testPropFindWithModified");
+        final Contact contactObj = createContactObject("testPropFindWithModified");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-        final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
         final Date modified = loadContact.getLastModified();
         assertTrue("Can't get last modified of contact.", modified.getTime() > 0);
         deleteContact(getWebConversation(), objectId, contactFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword());
         // prevent master/slave problem
         Thread.sleep(1000);
-        final ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+        final Contact[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
         boolean found = true;
         if (contactArray.length == 0) {
             found = false;

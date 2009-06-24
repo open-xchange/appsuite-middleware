@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 public class DeleteTest extends ContactTest {
 
@@ -21,7 +21,7 @@ public class DeleteTest extends ContactTest {
 	
 	
 	public void testDelete() throws Exception {
-		final ContactObject contactObj = createContactObject("testDelete");
+		final Contact contactObj = createContactObject("testDelete");
 		final int id = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		deleteContact(getWebConversation(), id, contactFolderId, PROTOCOL + getHostName(), getSessionId());

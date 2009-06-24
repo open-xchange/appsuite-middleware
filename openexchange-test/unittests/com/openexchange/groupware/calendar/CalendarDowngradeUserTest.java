@@ -68,7 +68,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -148,7 +148,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         runDelete(user);
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
-        assertDeleteEvent(AppointmentObject.class, cdao.getParentFolderID(), cdao.getObjectID());
+        assertDeleteEvent(Appointment.class, cdao.getParentFolderID(), cdao.getObjectID());
     }
 
     public void testRemoveFromParticipants() throws OXException{
@@ -156,7 +156,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         runDelete(user);
 
         assertNotInUserParticipants(cdao.getParentFolderID(), cdao.getObjectID(), user);
-        assertModificationEvent(AppointmentObject.class, cdao.getParentFolderID(), cdao.getObjectID());
+        assertModificationEvent(Appointment.class, cdao.getParentFolderID(), cdao.getObjectID());
     }
 
     public void testRemoveAppointmentWhenOnlyParticipant() throws OXException {
@@ -164,7 +164,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         runDelete(user);
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
-        assertDeleteEvent(AppointmentObject.class, cdao.getParentFolderID(), cdao.getObjectID());
+        assertDeleteEvent(Appointment.class, cdao.getParentFolderID(), cdao.getObjectID());
         
     }
 

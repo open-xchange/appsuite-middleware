@@ -52,7 +52,7 @@ package com.openexchange.ajax.contact.action;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * Stores the parameters for inserting the contact.
@@ -63,7 +63,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	/**
 	 * Contact to insert.
 	 */
-	final ContactObject contactObj;
+	final Contact contactObj;
 	
 	/**
 	 * Should the parser fail on error in server response.
@@ -75,7 +75,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	 * Default constructor.
 	 * @param contactObj contact to insert.
 	 */
-	public InsertRequest(final ContactObject contactObj) {
+	public InsertRequest(final Contact contactObj) {
 		this(contactObj, true);
 	}
 	
@@ -85,7 +85,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	 * @param failOnError <code>true</code> to check the response for error
 	 * messages.
 	 */
-	public InsertRequest(final ContactObject contactObj, final boolean failOnError) {
+	public InsertRequest(final Contact contactObj, final boolean failOnError) {
 		super();
 		this.contactObj = contactObj;
 		this.failOnError = failOnError;

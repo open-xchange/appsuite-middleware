@@ -69,7 +69,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
@@ -109,7 +109,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-		final AppointmentObject series = new AppointmentObject();
+		final Appointment series = new Appointment();
         final Calendar calendar = TimeTools.createCalendar(tz);
 		{
 			series.setTitle("Test for bug 11865");
@@ -121,7 +121,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
             calendar.add(Calendar.HOUR, 1);
             series.setEndDate(calendar.getTime());
             // Configure daily series with 5 occurences
-            series.setRecurrenceType(AppointmentObject.DAILY);
+            series.setRecurrenceType(Appointment.DAILY);
             series.setInterval(1);
             series.setOccurrence(5);
 		}
@@ -133,14 +133,14 @@ public final class Bug11865Test extends AbstractAJAXSession {
 		try {
 		    final int recurrence_position = 3;
 			// Load third occurence
-		    final AppointmentObject occurence;
+		    final Appointment occurence;
 			{
 				final GetRequest request= new GetRequest(folderId, series.getObjectID(), recurrence_position);
 				final GetResponse response = client.execute(request);
 				occurence = response.getAppointment(tz);
 			}
 			// Try to create exception series
-            final AppointmentObject exception = new AppointmentObject();
+            final Appointment exception = new Appointment();
 			{
                 exception.setObjectID(occurence.getObjectID());
                 exception.setParentFolderID(folderId);
@@ -162,7 +162,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
 			// Update exception to the exception with recurrence position 0.
 			// This tries to create again an exception which must be denied.
 			{
-			    final AppointmentObject exception2 = new AppointmentObject();
+			    final Appointment exception2 = new Appointment();
                 exception2.setObjectID(exception.getObjectID());
                 exception2.setParentFolderID(folderId);
                 exception2.setLastModified(exception.getLastModified());
@@ -193,7 +193,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         folderId = client.getValues().getPrivateAppointmentFolder();
         
         //Create an objectId, which does not longer exist in the database.
-        final AppointmentObject dummyAppointment = new AppointmentObject();
+        final Appointment dummyAppointment = new Appointment();
         dummyAppointment.setTitle("bug 11865 dummy appointment");
         dummyAppointment.setParentFolderID(folderId);
         dummyAppointment.setIgnoreConflicts(true);
@@ -217,7 +217,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         client.execute(deleteRequest);
         
         //Create an Appointment
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("Bug 11865 Corrupted Data Appointment.");
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);

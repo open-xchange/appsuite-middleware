@@ -65,7 +65,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -82,7 +82,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
 
     private FolderObject folder;
 
-    private AppointmentObject appointment;
+    private Appointment appointment;
 
     public ConfirmOthers(String name) {
         super(name);
@@ -125,7 +125,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(folder));
         response.fillObject(folder);
 
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setTitle("Confirm others test");
         appointment.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         appointment.setStartDate(Calendar.getInstance().getTime());
@@ -143,26 +143,26 @@ public class ConfirmOthers extends AbstractAJAXSession {
     }
 
     public void testConfirmOthersAllowed() throws Exception {
-        clientB.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), AppointmentObject.ACCEPT, "yap!", userIdA, true));
+        clientB.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, true));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
-        AppointmentObject loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
+        Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
         appointment.setLastModified(getResponse.getTimestamp());
         for (UserParticipant user : loadedAppointment.getUsers()) {
             if (user.getIdentifier() == userIdA) {
-                assertEquals("Wrong confirm status.", AppointmentObject.ACCEPT, user.getConfirm());
+                assertEquals("Wrong confirm status.", Appointment.ACCEPT, user.getConfirm());
                 assertEquals("Wrong confirm message.", "yap!", user.getConfirmMessage());
             }
         }
     }
     
     public void testConfirmOthersNotAllowed() throws Exception {
-        clientC.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), AppointmentObject.ACCEPT, "yap!", userIdA, false));
+        clientC.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, false));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
-        AppointmentObject loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
+        Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
         appointment.setLastModified(getResponse.getTimestamp());
         for (UserParticipant user : loadedAppointment.getUsers()) {
             if (user.getIdentifier() == userIdA) {
-                assertEquals("Wrong confirm status.", AppointmentObject.NONE, user.getConfirm());
+                assertEquals("Wrong confirm status.", Appointment.NONE, user.getConfirm());
                 assertEquals("Wrong confirm message.", null, user.getConfirmMessage());
             }
         }

@@ -70,7 +70,7 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
@@ -92,7 +92,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	}
 
 	protected void checkFirstResult(final int objectID ) throws OXException, ContextException, ParseException {
-		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
+		final Contact co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
 		
@@ -177,7 +177,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		List<ImportResult> results = importStuff(file);
 		assertEquals("Only one result", (Integer) 1, (Integer) results.size());
 		ImportResult res = results.get(0);
-		ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertTrue("Is private?", conObj.getPrivateFlag());
 		
 		file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,\u00d6FFENTLICH";
@@ -200,7 +200,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		final List<ImportResult> results = importStuff(file, "cp1252");
 		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
 		final ImportResult res = results.get(0);
-		final ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
 		assertEquals("Position", conObj.getPosition() );
 		assertEquals("Raumnummer", conObj.getRoomNumber() );
@@ -220,7 +220,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		final List<ImportResult> results = importStuff(file, "cp1252");
 		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
 		final ImportResult res = results.get(0);
-		final ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
 		assertEquals("Position", conObj.getPosition() );
 		assertEquals("Raumnummer", conObj.getRoomNumber() );
@@ -240,7 +240,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		final List<ImportResult> results = importStuff(file, "cp1252");
 		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
 		final ImportResult res = results.get(0);
-		final ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
 		assertEquals("Position", conObj.getPosition() );
 		assertEquals("Raumnummer", conObj.getRoomNumber() );

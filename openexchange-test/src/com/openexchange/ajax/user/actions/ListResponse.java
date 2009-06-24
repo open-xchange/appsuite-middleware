@@ -51,7 +51,7 @@ package com.openexchange.ajax.user.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link ListResponse}
@@ -60,17 +60,17 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class ListResponse extends CommonListResponse {
 
-    private ContactObject[] users;
+    private Contact[] users;
 
     public ListResponse(final Response response) {
         super(response);
     }
 
-    public ContactObject[] getUsers() {
+    public Contact[] getUsers() {
         return users;
     }
 
-    void setUsers(final ContactObject[] users) {
+    void setUsers(final Contact[] users) {
         this.users = users;
     }
 }

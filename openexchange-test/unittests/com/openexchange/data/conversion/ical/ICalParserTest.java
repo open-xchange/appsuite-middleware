@@ -61,7 +61,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -100,7 +100,7 @@ public class ICalParserTest extends TestCase {
         // Local Time
 
         String icalText = fixtures.veventWithLocalDTStartAndDTEnd(start, end);
-        AppointmentObject appointment = parseAppointment(icalText, utc);
+        Appointment appointment = parseAppointment(icalText, utc);
         
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
@@ -142,7 +142,7 @@ public class ICalParserTest extends TestCase {
 
         final String icalText = fixtures.veventWithDTStartAsDateWithoutValue(start);
 
-        final AppointmentObject appointment = parseAppointment(icalText);
+        final Appointment appointment = parseAppointment(icalText);
         assertNotNull(appointment.getStartDate());
 
     }
@@ -155,7 +155,7 @@ public class ICalParserTest extends TestCase {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String icalText = fixtures.veventWithLocalDTStartAndDuration(start, duration);
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
@@ -172,7 +172,7 @@ public class ICalParserTest extends TestCase {
         // Private
 
         String icalText = fixtures.veventWithSimpleProperties(start, end, "CLASS", "PRIVATE");
-        AppointmentObject appointment = parseAppointment(icalText, utc);
+        Appointment appointment = parseAppointment(icalText, utc);
 
         assertTrue(appointment.getPrivateFlag());
 
@@ -191,7 +191,7 @@ public class ICalParserTest extends TestCase {
 
         
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "CREATED", "20081023T100000Z");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals(D("23/10/2008 10:00"), appointment.getCreationDate());
 
@@ -205,7 +205,7 @@ public class ICalParserTest extends TestCase {
 
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "LAST-MODIFIED", "20081023T100000Z");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals(D("23/10/2008 10:00"), appointment.getLastModified());
         
@@ -219,7 +219,7 @@ public class ICalParserTest extends TestCase {
 
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "DTSTAMP", "20081023T100000Z");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals(D("23/10/2008 10:00"), appointment.getCreationDate());   
     }
@@ -232,7 +232,7 @@ public class ICalParserTest extends TestCase {
 
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "DESCRIPTION", "A fine description");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals("A fine description", appointment.getNote());
 
@@ -248,7 +248,7 @@ public class ICalParserTest extends TestCase {
 
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "LOCATION", "Mars");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals("Mars", appointment.getLocation());
     }
@@ -260,7 +260,7 @@ public class ICalParserTest extends TestCase {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "SUMMARY", "A fine title");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals("A fine title", appointment.getTitle());
     }
@@ -272,9 +272,9 @@ public class ICalParserTest extends TestCase {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "TRANSP", "OPAQUE");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
-        assertEquals(AppointmentObject.RESERVED, appointment.getShownAs());
+        assertEquals(Appointment.RESERVED, appointment.getShownAs());
     }
 
     public void testAppFree() throws ConversionError {
@@ -284,9 +284,9 @@ public class ICalParserTest extends TestCase {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "TRANSP", "TRANSPARENT");
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
-        assertEquals(AppointmentObject.FREE, appointment.getShownAs());
+        assertEquals(Appointment.FREE, appointment.getShownAs());
     }
 
     public void testAppAttendees() throws ConversionError {
@@ -304,7 +304,7 @@ public class ICalParserTest extends TestCase {
         // Internal Users
 
         String icalText = fixtures.veventWithAttendees(start, end, mails);
-        AppointmentObject appointment = parseAppointment(icalText, utc);
+        Appointment appointment = parseAppointment(icalText, utc);
 
         final Set<Integer> ids = new HashSet<Integer>(Arrays.asList(1,2,5));
         assertNotNull(appointment.getParticipants());
@@ -346,7 +346,7 @@ public class ICalParserTest extends TestCase {
         final String[] resources = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
 
         final String icalText = fixtures.veventWithResources(start, end, resources);
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         final Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1,2,3));
 
@@ -371,7 +371,7 @@ public class ICalParserTest extends TestCase {
         final String[] resources = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
 
         final String icalText = fixtures.veventWithResourcesInAttendees(start, end, resources);
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         final Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1,2,3));
 
@@ -396,7 +396,7 @@ public class ICalParserTest extends TestCase {
         final String categoriesString = "Toaster,Deflector,Subspace Anomaly";
 
         final String icalText = fixtures.veventWithCategories(start, end, categories);
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals(categoriesString, appointment.getCategories());
     }
@@ -408,9 +408,9 @@ public class ICalParserTest extends TestCase {
 
         // DAILY
 
-        AppointmentObject appointment = appointmentWithRecurrence("FREQ=DAILY;INTERVAL=2;COUNT=3", start, end);
+        Appointment appointment = appointmentWithRecurrence("FREQ=DAILY;INTERVAL=2;COUNT=3", start, end);
         assertEquals(3, appointment.getOccurrence());
-        assertEquals(AppointmentObject.DAILY, appointment.getRecurrenceType());
+        assertEquals(Appointment.DAILY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
 
         // WEEKLY
@@ -418,18 +418,18 @@ public class ICalParserTest extends TestCase {
         appointment = appointmentWithRecurrence("FREQ=WEEKLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE,FR", start, end);
 
         assertEquals(3, appointment.getOccurrence());
-        assertEquals(AppointmentObject.WEEKLY, appointment.getRecurrenceType());
+        assertEquals(Appointment.WEEKLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
 
         int days = appointment.getDays();
-        assertTrue(AppointmentObject.MONDAY == (AppointmentObject.MONDAY & days));
-        assertTrue(AppointmentObject.WEDNESDAY == (AppointmentObject.WEDNESDAY & days));
-        assertTrue(AppointmentObject.FRIDAY == (AppointmentObject.FRIDAY & days));
+        assertTrue(Appointment.MONDAY == (Appointment.MONDAY & days));
+        assertTrue(Appointment.WEDNESDAY == (Appointment.WEDNESDAY & days));
+        assertTrue(Appointment.FRIDAY == (Appointment.FRIDAY & days));
 
-        assertFalse(AppointmentObject.TUESDAY == (AppointmentObject.TUESDAY & days));
-        assertFalse(AppointmentObject.THURSDAY == (AppointmentObject.THURSDAY & days));
-        assertFalse(AppointmentObject.SATURDAY == (AppointmentObject.SATURDAY & days));
-        assertFalse(AppointmentObject.SUNDAY == (AppointmentObject.SUNDAY & days));
+        assertFalse(Appointment.TUESDAY == (Appointment.TUESDAY & days));
+        assertFalse(Appointment.THURSDAY == (Appointment.THURSDAY & days));
+        assertFalse(Appointment.SATURDAY == (Appointment.SATURDAY & days));
+        assertFalse(Appointment.SUNDAY == (Appointment.SUNDAY & days));
 
 
         // Default Day taken from DTSTART
@@ -438,9 +438,9 @@ public class ICalParserTest extends TestCase {
         days = appointment.getDays();
 
         assertEquals(3, appointment.getOccurrence());
-        assertEquals(AppointmentObject.WEEKLY, appointment.getRecurrenceType());
+        assertEquals(Appointment.WEEKLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
-        assertTrue(AppointmentObject.TUESDAY == (AppointmentObject.TUESDAY & days)); // Start Date is a Tuesday
+        assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days)); // Start Date is a Tuesday
 
         // MONTHLY
 
@@ -448,7 +448,7 @@ public class ICalParserTest extends TestCase {
 
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYMONTHDAY=23", start, end);
         assertEquals(3, appointment.getOccurrence());
-        assertEquals(AppointmentObject.MONTHLY, appointment.getRecurrenceType());
+        assertEquals(Appointment.MONTHLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
         assertEquals(23, appointment.getDayInMonth());
 
@@ -457,8 +457,8 @@ public class ICalParserTest extends TestCase {
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYWEEKNO=3", start, end);
         days = appointment.getDays();
         assertEquals(3, appointment.getDayInMonth());
-        assertTrue(AppointmentObject.MONDAY == (AppointmentObject.MONDAY & days));
-        assertTrue(AppointmentObject.TUESDAY == (AppointmentObject.TUESDAY & days)); // Is this correct? Can an appintment recur on more than one day in MONTHLY series?
+        assertTrue(Appointment.MONDAY == (Appointment.MONDAY & days));
+        assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days)); // Is this correct? Can an appintment recur on more than one day in MONTHLY series?
 
 
         // Second form : the last tuesday every 2 months
@@ -466,7 +466,7 @@ public class ICalParserTest extends TestCase {
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYWEEKNO=-1", start, end);
         days = appointment.getDays();
         assertEquals(5, appointment.getDayInMonth());
-        assertTrue(AppointmentObject.TUESDAY == (AppointmentObject.TUESDAY & days));
+        assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days));
 
 
         // Default taken from start date
@@ -476,7 +476,7 @@ public class ICalParserTest extends TestCase {
 
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=3", start, end);
         days = appointment.getDays();
-        assertTrue(AppointmentObject.TUESDAY == (AppointmentObject.TUESDAY & days));
+        assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days));
 
 
         // YEARLY
@@ -484,7 +484,7 @@ public class ICalParserTest extends TestCase {
         // First form: Every 2 years, the 23rd of March
         appointment = appointmentWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTHDAY=23;BYMONTH=3", start, end);
 
-        assertEquals(AppointmentObject.YEARLY, appointment.getRecurrenceType());
+        assertEquals(Appointment.YEARLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getMonth());
         assertEquals(23, appointment.getDayInMonth());
 
@@ -495,22 +495,22 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(3, appointment.getMonth());
         assertEquals(2, appointment.getDayInMonth());
-        assertTrue(AppointmentObject.MONDAY == (AppointmentObject.MONDAY & days));
-        assertTrue(AppointmentObject.WEDNESDAY == (AppointmentObject.WEDNESDAY & days)); // Is this correct? Can an appintment recur on more than one day in YEARLY series?
+        assertTrue(Appointment.MONDAY == (Appointment.MONDAY & days));
+        assertTrue(Appointment.WEDNESDAY == (Appointment.WEDNESDAY & days)); // Is this correct? Can an appintment recur on more than one day in YEARLY series?
 
         // Third form: every second sunday in april
 
         appointment = appointmentWithRecurrence("FREQ=YEARLY;BYDAY=2SU;BYMONTH=4", start, end);
         assertEquals(3, appointment.getMonth());
         assertEquals(2, appointment.getDayInMonth());
-        assertEquals(AppointmentObject.SUNDAY, appointment.getDays());
+        assertEquals(Appointment.SUNDAY, appointment.getDays());
         assertEquals(1, appointment.getInterval());
 
         // Third form: last sunday in april
         appointment = appointmentWithRecurrence("FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4", start, end);
         assertEquals(3, appointment.getMonth());
         assertEquals(5, appointment.getDayInMonth());
-        assertEquals(AppointmentObject.SUNDAY, appointment.getDays());
+        assertEquals(Appointment.SUNDAY, appointment.getDays());
         assertEquals(1, appointment.getInterval());
         
 
@@ -518,7 +518,7 @@ public class ICalParserTest extends TestCase {
 
         appointment = appointmentWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3", start, end);
 
-        assertEquals(AppointmentObject.YEARLY, appointment.getRecurrenceType());
+        assertEquals(Appointment.YEARLY, appointment.getRecurrenceType());
         assertEquals(1, appointment.getMonth());
         assertEquals(24, appointment.getDayInMonth());
 
@@ -541,7 +541,7 @@ public class ICalParserTest extends TestCase {
         final Date[] exceptions = new Date[]{D("26/01/1981 12:00"), D("30/01/1981 12:00")};
 
         String icalText = fixtures.veventWithDeleteExceptionsAsDateTime(start, end, rrule, exceptions);
-        AppointmentObject appointment = parseAppointment(icalText, utc);
+        Appointment appointment = parseAppointment(icalText, utc);
 
         // Do we need the "time" in an exception?
 
@@ -582,7 +582,7 @@ public class ICalParserTest extends TestCase {
         final int MINUTES = 1;
 
         String icalText = fixtures.veventWithDisplayAlarm(start, end, "TRIGGER:-PT15M", "Description");
-        AppointmentObject appointment = parseAppointment(icalText, utc);
+        Appointment appointment = parseAppointment(icalText, utc);
 
 
         assertEquals(15 *MINUTES ,appointment.getAlarm());
@@ -609,7 +609,7 @@ public class ICalParserTest extends TestCase {
 
     public void testAppFullTime() throws ConversionError {
         final String icalText = fixtures.veventWithWholeDayEvent(D("24/02/1990 12:00"));
-        final AppointmentObject appointment = parseAppointment(icalText);
+        final Appointment appointment = parseAppointment(icalText);
 
         assertTrue(appointment.getFullTime());
 
@@ -1159,7 +1159,7 @@ public class ICalParserTest extends TestCase {
 
         assertWarningWhenParsingAppointment(icalText, "Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.");
 
-        final AppointmentObject appointment = parseAppointment(icalText);
+        final Appointment appointment = parseAppointment(icalText);
 
         assertNull(appointment.getParticipants());
     }
@@ -1169,8 +1169,8 @@ public class ICalParserTest extends TestCase {
     	final String timezone = "BEGIN:VTIMEZONE\nTZID:/mozilla.org/20050126_1/America/New_York\nX-LIC-LOCATION:America/New_York\nBEGIN:STANDARD\nTZOFFSETFROM:-0400\nTZOFFSETTO:-0500\nTZNAME:EST\nDTSTART:19701025T020000\nRRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=-1SU;BYMONTH=10\nEND:STANDARD\nBEGIN:DAYLIGHT\nTZOFFSETFROM:-0500\nTZOFFSETTO:-0400\nTZNAME:EDT\nDTSTART:19700405T020000\nRRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=1SU;BYMONTH=4\nEND:DAYLIGHT\nEND:VTIMEZONE\n";
     	final String icalText1 = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n"+timezone+"BEGIN:VEVENT\nCREATED:20080216T152600Z\nLAST-MODIFIED:20080216T152600Z\nDTSTAMP:20080216T152600Z\nUID:3a289f91-f83a-4614-83c6-660c7740abd8\nSUMMARY:New York, 2008-08-31 09:00 - 10:00 (EST)\nDTSTART;TZID=/mozilla.org/20050126_1/America/New_York:20080831T090000\nDTEND;TZID=/mozilla.org/20050126_1/America/New_York:20080831T100000\nEND:VEVENT\nEND:VCALENDAR\n";
     	final String icalText2 = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\nBEGIN:VEVENT\nCREATED:20080216T152600Z\nLAST-MODIFIED:20080216T152600Z\nDTSTAMP:20080216T152600Z\nUID:3a289f91-f83a-4614-83c6-660c7740abd8\nSUMMARY:New York, 2008-08-31 09:00 - 10:00 (EST)\nDTSTART;TZID=/mozilla.org/20050126_1/America/New_York:20080831T090000\nDTEND;TZID=/mozilla.org/20050126_1/America/New_York:20080831T100000\nEND:VEVENT\n"+ timezone + "END:VCALENDAR\n";
-    	final AppointmentObject appointmentThatTroublesUs = parseAppointment(icalText1);
-        final AppointmentObject appointmentAsExpected = parseAppointment(icalText2);
+    	final Appointment appointmentThatTroublesUs = parseAppointment(icalText1);
+        final Appointment appointmentAsExpected = parseAppointment(icalText2);
         assertEquals("Start dates should be equal, independent of the placement of the timezone information", 
         		appointmentAsExpected.getStartDate(), 
         		appointmentThatTroublesUs.getStartDate());
@@ -1187,7 +1187,7 @@ public class ICalParserTest extends TestCase {
     	final String foldedSummary = "This is a so called 'folded' argument\n meaning it is split\n into multiple lines\n each starting with a whitespace character";
     	final String unfoldedSummary = foldedSummary.replace("\n ","");
     	final String icalText = fixtures.veventWithSimpleProperties(new Date(), new Date(), "SUMMARY", foldedSummary);
-    	final AppointmentObject appointment = parseAppointment(icalText);
+    	final Appointment appointment = parseAppointment(icalText);
     	assertEquals("Unfolded summary does not match transformed title", unfoldedSummary, appointment.getTitle());
     }
 
@@ -1272,11 +1272,11 @@ public class ICalParserTest extends TestCase {
         super.tearDown();
     }
 
-    protected AppointmentObject parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
+    protected Appointment parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
         return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() ).get(0);
     }
 
-    protected AppointmentObject parseAppointment(final String icalText) throws ConversionError {
+    protected Appointment parseAppointment(final String icalText) throws ConversionError {
         return parseAppointment(icalText, TimeZone.getDefault());
     }
 
@@ -1288,12 +1288,12 @@ public class ICalParserTest extends TestCase {
         return parser.parseTasks(icalText, TimeZone.getDefault(), new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>()).get(0);
     }
 
-    protected AppointmentObject appointmentWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
+    protected Appointment appointmentWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "RRULE", recurrence);
-        final AppointmentObject appointment = parseAppointment(icalText, utc);
+        final Appointment appointment = parseAppointment(icalText, utc);
 
         return appointment;
     }

@@ -48,15 +48,15 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.fixtures.FixtureException;
 
 public class ShowAsTransformator implements Transformator {
     public Object transform(final String value) throws FixtureException {
-        if("RESERVED".equalsIgnoreCase(value)) { return AppointmentObject.RESERVED; }
-        else if("TEMPORARY".equalsIgnoreCase(value)) { return AppointmentObject.TEMPORARY; }
-        else if("ABSENT".equalsIgnoreCase(value)) { return AppointmentObject.ABSENT; }
-        else if("FREE".equalsIgnoreCase(value)) { return AppointmentObject.FREE; }
+        if("RESERVED".equalsIgnoreCase(value)) { return Appointment.RESERVED; }
+        else if("TEMPORARY".equalsIgnoreCase(value)) { return Appointment.TEMPORARY; }
+        else if("ABSENT".equalsIgnoreCase(value)) { return Appointment.ABSENT; }
+        else if("FREE".equalsIgnoreCase(value)) { return Appointment.FREE; }
         else {
             throw new FixtureException("Don't know how to show appointments as : "+value);
         }

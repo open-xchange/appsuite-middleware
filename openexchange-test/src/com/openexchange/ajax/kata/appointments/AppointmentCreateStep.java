@@ -56,7 +56,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.AbstractStep;
 import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
 
@@ -66,9 +66,9 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AppointmentCreateStep extends AbstractStep implements IdentitySource<AppointmentObject> {
+public class AppointmentCreateStep extends AbstractStep implements IdentitySource<Appointment> {
 
-    private AppointmentObject entry;
+    private Appointment entry;
     private CalendarTestManager manager;
     private boolean inserted;
 
@@ -76,7 +76,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
      * Initializes a new {@link AppointmentCreateStep}.
      * @param entry
      */
-    public AppointmentCreateStep(AppointmentObject entry, String name, String expectedError) {
+    public AppointmentCreateStep(Appointment entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
         this.expectedError = expectedError;
@@ -110,23 +110,23 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         checkError(insertResponse);
     }
 
-    public void assumeIdentity(AppointmentObject newApp) {
+    public void assumeIdentity(Appointment newApp) {
         newApp.setObjectID( entry.getObjectID() );
         newApp.setParentFolderID( entry.getParentFolderID());
         newApp.setLastModified( entry.getLastModified());
     }
 
-    public void rememberIdentityValues(AppointmentObject appointment) {
+    public void rememberIdentityValues(Appointment appointment) {
         entry.setLastModified(appointment.getLastModified());
         entry.setParentFolderID(appointment.getParentFolderID());
     }
 
-    public void forgetIdentity(AppointmentObject entry) {
+    public void forgetIdentity(Appointment entry) {
         inserted = false;
     }
     
-    public Class<AppointmentObject> getType() {
-        return AppointmentObject.class;
+    public Class<Appointment> getType() {
+        return Appointment.class;
     }
     
  

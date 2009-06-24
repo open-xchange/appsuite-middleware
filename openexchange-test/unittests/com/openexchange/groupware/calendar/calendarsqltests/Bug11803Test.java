@@ -53,7 +53,7 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.Date;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -76,7 +76,7 @@ public class Bug11803Test extends CalendarSqlTest {
 
         // Ask for freebusy information in one week containing one ocurrence
 
-        final SearchIterator<AppointmentObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
+        final SearchIterator<Appointment> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
             userId,
             Participant.USER,
             D("18/02/2008 00:00"),
@@ -84,7 +84,7 @@ public class Bug11803Test extends CalendarSqlTest {
         // Verify only one ocurrence was returned
         try {
             assertTrue("Should find exactly one ocurrence. Found none.", iterator.hasNext());
-            final AppointmentObject occurrence = iterator.next();
+            final Appointment occurrence = iterator.next();
             assertFalse("Should find exactly one ocurrence. Found more than one", iterator.hasNext());
 
             assertEquals(D("20/02/2008 10:00"), occurrence.getStartDate());

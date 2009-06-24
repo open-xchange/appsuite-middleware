@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 	
@@ -31,27 +31,27 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		final Date startDate = simpleDateFormatUTC.parse("2007-03-05 08:00:00");
 		final Date endDate = simpleDateFormatUTC.parse("2007-03-05 10:00:00");
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testWeeklyRecurrenceFromWinter2SummerTime");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.WEEKLY);
-		appointmentObj.setDays(AppointmentObject.MONDAY);
+		appointmentObj.setRecurrenceType(Appointment.WEEKLY);
+		appointmentObj.setDays(Appointment.MONDAY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 		
 		boolean found = false;
 		
 		final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 		
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -87,27 +87,27 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		final Date startDate = simpleDateFormatUTC.parse("2007-10-01 08:00:00");
 		final Date endDate = simpleDateFormatUTC.parse("2007-10-01 10:00:00");
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testWeeklyRecurrenceFromSummer2WinterTime");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.WEEKLY);
-		appointmentObj.setDays(AppointmentObject.MONDAY);
+		appointmentObj.setRecurrenceType(Appointment.WEEKLY);
+		appointmentObj.setDays(Appointment.MONDAY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 		
 		boolean found = false;
 		
 		final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 		
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));

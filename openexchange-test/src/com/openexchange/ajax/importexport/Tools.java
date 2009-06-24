@@ -67,7 +67,7 @@ import com.openexchange.ajax.importexport.actions.OutlookCSVImportRequest;
 import com.openexchange.ajax.importexport.actions.OutlookCSVImportResponse;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -114,7 +114,7 @@ public final class Tools {
     }
 
     public static InputStream toICal(final AJAXClient client,
-        final AppointmentObject appointment) throws AjaxException, IOException,
+        final Appointment appointment) throws AjaxException, IOException,
         SAXException, JSONException, ConverterException {
         final VersitDefinition definition = ICalendar.vEvent2;
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();

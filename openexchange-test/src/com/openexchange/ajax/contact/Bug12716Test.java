@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -75,7 +75,7 @@ public final class Bug12716Test extends AbstractAJAXSession {
 
     private int folderId;
 
-    private ContactObject contact;
+    private Contact contact;
 
     /**
      * Default constructor.
@@ -123,9 +123,9 @@ public final class Bug12716Test extends AbstractAJAXSession {
         }
     }
 
-    private ContactObject insertContact() throws AjaxException, IOException,
+    private Contact insertContact() throws AjaxException, IOException,
         SAXException, JSONException {
-        final ContactObject contact = new ContactObject();
+        final Contact contact = new Contact();
         contact.setParentFolderID(folderId);
         contact.setDisplayName("Test for bug 12716");
         final InsertRequest request = new InsertRequest(contact);

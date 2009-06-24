@@ -71,7 +71,7 @@ import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
@@ -169,7 +169,7 @@ public class Bug7470Test extends AbstractContactTest {
 		assertEquals("Shouldn't have error" , null, res.getException());
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
+		final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertTrue("Exists" , appointmentObj != null);
 		final Participant[] participants = appointmentObj.getParticipants();
 		assertEquals("Number of attendees?" , 2, participants.length);

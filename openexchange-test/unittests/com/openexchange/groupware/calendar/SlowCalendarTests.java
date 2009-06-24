@@ -62,7 +62,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -102,16 +102,16 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             SearchIterator iter = sqlInterface.getActiveAppointments(USER_ID, SUPER_START, SUPER_END, COLS);
             assertContains(iter, cdao);
 
-            iter = sqlInterface.getAppointmentsBetween(USER_ID, SUPER_START, SUPER_END, COLS, AppointmentObject.OBJECT_ID, null);
+            iter = sqlInterface.getAppointmentsBetween(USER_ID, SUPER_START, SUPER_END, COLS, Appointment.OBJECT_ID, null);
             assertContains(iter, cdao);
 
-            iter = sqlInterface.getAppointmentsBetweenInFolder(FOLDER_ID, COLS, SUPER_START, SUPER_END, AppointmentObject.OBJECT_ID, null);
+            iter = sqlInterface.getAppointmentsBetweenInFolder(FOLDER_ID, COLS, SUPER_START, SUPER_END, Appointment.OBJECT_ID, null);
             assertContains(iter, cdao);
 
             final AppointmentSearchObject search = new AppointmentSearchObject();
             search.setFolder(cdao.getParentFolderID());
             search.setPattern("*");
-            iter = sqlInterface.getAppointmentsByExtendedSearch(search, AppointmentObject.OBJECT_ID, null, COLS);
+            iter = sqlInterface.getAppointmentsByExtendedSearch(search, Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);
 
             iter = sqlInterface.getFreeBusyInformation(USER_ID, Participant.USER, SUPER_START, SUPER_END);
@@ -123,14 +123,14 @@ public class SlowCalendarTests extends AbstractCalendarTest {
                 SUPER_END,
                 COLS,
                 SUPER_START,
-                AppointmentObject.OBJECT_ID,
+                Appointment.OBJECT_ID,
                 null);
             assertContains(iter, cdao);
 
             iter = sqlInterface.getObjectsById(new int[][] { { cdao.getObjectID(), cdao.getParentFolderID() } }, COLS);
             assertContains(iter, cdao);
 
-            iter = sqlInterface.searchAppointments("*", cdao.getParentFolderID(), AppointmentObject.OBJECT_ID, null, COLS);
+            iter = sqlInterface.searchAppointments("*", cdao.getParentFolderID(), Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);
 
             sqlInterface.hasAppointmentsBetween(SUPER_START, new Date(SUPER_START.getTime() + 3600000l * 24 * 30));
@@ -218,7 +218,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
                 SearchFields.PATTERN,
                 "*",
                 AJAXServlet.PARAMETER_INFOLDER,
-                cdao.getParentFolderID()), AJAXServlet.PARAMETER_SORT, AppointmentObject.START_DATE, AJAXServlet.PARAMETER_ORDER, "ASC");
+                cdao.getParentFolderID()), AJAXServlet.PARAMETER_SORT, Appointment.START_DATE, AJAXServlet.PARAMETER_ORDER, "ASC");
             arr = req.actionSearch(requestData);
             assertContains(arr, cdao);
 

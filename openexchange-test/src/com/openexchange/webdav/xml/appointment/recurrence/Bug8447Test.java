@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 
@@ -30,14 +30,14 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 
 		final Date until = simpleDateFormatUTC.parse("2007-06-15 00:00:00");
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug8447");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
 		appointmentObj.setFullTime(true);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
@@ -49,13 +49,13 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 		
 		final Date recurrenceDatePosition = simpleDateFormatUTC.parse("2007-06-06 00:00:00");
 		
-		final AppointmentObject exceptionAppointmentObject = new AppointmentObject();
+		final Appointment exceptionAppointmentObject = new Appointment();
 		exceptionAppointmentObject.setTitle("testBug8447 - change exception (2007-06-06)");
 		exceptionAppointmentObject.setStartDate(exceptionStartDate);
 		exceptionAppointmentObject.setEndDate(exceptionEndDate);
 		exceptionAppointmentObject.setFullTime(true);
 		exceptionAppointmentObject.setRecurrenceDatePosition(recurrenceDatePosition);
-		exceptionAppointmentObject.setShownAs(AppointmentObject.ABSENT);
+		exceptionAppointmentObject.setShownAs(Appointment.ABSENT);
 		exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
 		exceptionAppointmentObject.setIgnoreConflicts(true);
 
@@ -67,7 +67,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());		
 		
 		try {
-			final AppointmentObject loadAppointment = loadAppointment(webCon, exceptionObjectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+			final Appointment loadAppointment = loadAppointment(webCon, exceptionObjectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 			fail("object not found exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);

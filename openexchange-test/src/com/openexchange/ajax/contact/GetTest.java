@@ -11,7 +11,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 public class GetTest extends ContactTest {
 	
@@ -27,25 +27,25 @@ public class GetTest extends ContactTest {
 	}
 	
 	public void testGet() throws Exception {
-		final ContactObject contactObj = createContactObject("testGet");
+		final Contact contactObj = createContactObject("testGet");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGetWithAllFields() throws Exception {
-		final ContactObject contactObject = createCompleteContactObject();
+		final Contact contactObject = createCompleteContactObject();
 		
 		final int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
 		
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
 	
 	public void testGetWithAllFieldsOnUpdate() throws Exception {
-		ContactObject contactObject = new ContactObject();
+		Contact contactObject = new Contact();
 		contactObject.setSurName("testGetWithAllFieldsOnUpdate");
 		contactObject.setParentFolderID(contactFolderId);
 		
@@ -55,14 +55,14 @@ public class GetTest extends ContactTest {
 		
 		updateContact(getWebConversation(), contactObject, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
-		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
 	
 	public void testGetUser() throws Exception {
-		ContactObject loadContact = loadUser(getWebConversation(), userId, getHostName(), getSessionId());
+		Contact loadContact = loadUser(getWebConversation(), userId, getHostName(), getSessionId());
 		assertNotNull("contact object is null", loadContact);
 		assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
 		assertTrue("object id not set", loadContact.getObjectID() > 0);
@@ -78,7 +78,7 @@ public class GetTest extends ContactTest {
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
 
-        final ContactObject contactObj = createContactObject("testNew");
+        final Contact contactObj = createContactObject("testNew");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         try {
             final GetRequest req = new GetRequest(contactFolderId, objectId);

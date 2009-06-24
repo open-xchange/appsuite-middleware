@@ -55,7 +55,7 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -84,7 +84,7 @@ public class VCardTest extends TestCase {
 		try {
 			VersitObject versitObject = def.parse(versitReader);
 			while (versitObject != null) {
-				final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
+				final Contact contactObj = oxContainerConverter.convertContact(versitObject);
 				versitObject = def.parse(versitReader);
 			}
 			assertTrue(testName + " passed", true);

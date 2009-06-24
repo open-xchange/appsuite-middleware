@@ -13,7 +13,7 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug12432Test extends AbstractAJAXSession {
 
@@ -23,18 +23,18 @@ public class Bug12432Test extends AbstractAJAXSession {
     
     public void testFirstReservedThenFree() throws Throwable {
         AJAXClient client = null;
-        AppointmentObject appointmentReserved = null;
-        AppointmentObject appointmentFree = null;
+        Appointment appointmentReserved = null;
+        Appointment appointmentFree = null;
         
         try {
             client = getClient();
             int folderId = client.getValues().getPrivateAppointmentFolder();
             TimeZone tz = client.getValues().getTimeZone();
             
-            appointmentReserved = createAppointment("Bug12432Test - reserved", AppointmentObject.RESERVED, folderId, tz);
+            appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
             appointmentReserved.setIgnoreConflicts(true);
-            appointmentFree = createAppointment("Bug12432Test - free", AppointmentObject.FREE, folderId, tz);
+            appointmentFree = createAppointment("Bug12432Test - free", Appointment.FREE, folderId, tz);
             // Must conflict.
             appointmentFree.setIgnoreConflicts(false);
             
@@ -56,18 +56,18 @@ public class Bug12432Test extends AbstractAJAXSession {
     
     public void testFirstFreeThenReserved() throws Throwable {
         AJAXClient client = null;
-        AppointmentObject appointmentReserved = null;
-        AppointmentObject appointmentFree = null;
+        Appointment appointmentReserved = null;
+        Appointment appointmentFree = null;
         
         try {
             client = getClient();
             int folderId = client.getValues().getPrivateAppointmentFolder();
             TimeZone tz = client.getValues().getTimeZone();
             
-            appointmentReserved = createAppointment("Bug12432Test - reserved", AppointmentObject.RESERVED, folderId, tz);
+            appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
             appointmentReserved.setIgnoreConflicts(true);
-            appointmentFree = createAppointment("Bug12432Test - free", AppointmentObject.FREE, folderId, tz);
+            appointmentFree = createAppointment("Bug12432Test - free", Appointment.FREE, folderId, tz);
             // Must conflict.
             appointmentFree.setIgnoreConflicts(false);
             
@@ -89,18 +89,18 @@ public class Bug12432Test extends AbstractAJAXSession {
     
     public void testChangeFree() throws Throwable {
         AJAXClient client = null;
-        AppointmentObject appointmentReserved = null;
-        AppointmentObject appointmentFree = null;
+        Appointment appointmentReserved = null;
+        Appointment appointmentFree = null;
         
         try {
             client = getClient();
             int folderId = client.getValues().getPrivateAppointmentFolder();
             TimeZone tz = client.getValues().getTimeZone();
             
-            appointmentReserved = createAppointment("Bug12432Test - reserved", AppointmentObject.RESERVED, folderId, tz);
+            appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
             appointmentReserved.setIgnoreConflicts(true);
-            appointmentFree = createAppointment("Bug12432Test - free", AppointmentObject.FREE, folderId, tz);
+            appointmentFree = createAppointment("Bug12432Test - free", Appointment.FREE, folderId, tz);
             // Prevent conflicting dring creation.
             appointmentFree.setIgnoreConflicts(true);
             
@@ -114,7 +114,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentFree.setObjectID(response.getId());
             appointmentFree.setLastModified(response.getTimestamp());
             
-            AppointmentObject updateAppointment = new AppointmentObject();
+            Appointment updateAppointment = new Appointment();
             updateAppointment.setParentFolderID(folderId);
             updateAppointment.setObjectID(appointmentFree.getObjectID());
             updateAppointment.setLastModified(appointmentFree.getLastModified());
@@ -141,18 +141,18 @@ public class Bug12432Test extends AbstractAJAXSession {
     
     public void testChangeReserved() throws Throwable {
         AJAXClient client = null;
-        AppointmentObject appointmentReserved = null;
-        AppointmentObject appointmentFree = null;
+        Appointment appointmentReserved = null;
+        Appointment appointmentFree = null;
         
         try {
             client = getClient();
             int folderId = client.getValues().getPrivateAppointmentFolder();
             TimeZone tz = client.getValues().getTimeZone();
             
-            appointmentReserved = createAppointment("Bug12432Test - reserved", AppointmentObject.RESERVED, folderId, tz);
+            appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
             appointmentReserved.setIgnoreConflicts(true);
-            appointmentFree = createAppointment("Bug12432Test - free", AppointmentObject.FREE, folderId, tz);
+            appointmentFree = createAppointment("Bug12432Test - free", Appointment.FREE, folderId, tz);
             // Prevent conflicting dring creation.
             appointmentFree.setIgnoreConflicts(true);
             
@@ -166,7 +166,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentFree.setObjectID(response.getId());
             appointmentFree.setLastModified(response.getTimestamp());
             
-            AppointmentObject updateAppointment = new AppointmentObject();
+            Appointment updateAppointment = new Appointment();
             updateAppointment.setParentFolderID(folderId);
             updateAppointment.setObjectID(appointmentReserved.getObjectID());
             updateAppointment.setLastModified(appointmentReserved.getLastModified());
@@ -197,8 +197,8 @@ public class Bug12432Test extends AbstractAJAXSession {
     
     public void testBugAsWritten() throws Throwable {
         AJAXClient client = null;
-        AppointmentObject appointmentA = null;
-        AppointmentObject appointmentB = null;
+        Appointment appointmentA = null;
+        Appointment appointmentB = null;
         
         try {
             client = getClient();
@@ -206,7 +206,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             TimeZone tz = client.getValues().getTimeZone();
 
             //Step 1
-            appointmentA = createAppointment("Just-for-Info", AppointmentObject.FREE, folderId, tz);
+            appointmentA = createAppointment("Just-for-Info", Appointment.FREE, folderId, tz);
             Calendar calendar = TimeTools.createCalendar(tz);
             calendar.set(Calendar.HOUR_OF_DAY, 10);
             appointmentA.setStartDate(calendar.getTime());
@@ -221,7 +221,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentA.setLastModified(response.getTimestamp());
             
             //Step 2
-            appointmentB = createAppointment("Conf-Call", AppointmentObject.RESERVED, folderId, tz);
+            appointmentB = createAppointment("Conf-Call", Appointment.RESERVED, folderId, tz);
             calendar = TimeTools.createCalendar(tz);
             calendar.set(Calendar.HOUR_OF_DAY, 12);
             appointmentB.setStartDate(calendar.getTime());
@@ -236,7 +236,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentB.setLastModified(response.getTimestamp());
             
             //Step 3
-            AppointmentObject updateAppointmentA = new AppointmentObject();
+            Appointment updateAppointmentA = new Appointment();
             updateAppointmentA.setParentFolderID(folderId);
             updateAppointmentA.setObjectID(appointmentA.getObjectID());
             updateAppointmentA.setLastModified(appointmentA.getLastModified());
@@ -256,8 +256,8 @@ public class Bug12432Test extends AbstractAJAXSession {
         }
     }
     
-    private AppointmentObject createAppointment(String title, int shownAs, int folderId, TimeZone tz) {
-        AppointmentObject appointment = new AppointmentObject();
+    private Appointment createAppointment(String title, int shownAs, int folderId, TimeZone tz) {
+        Appointment appointment = new Appointment();
         appointment.setTitle(title);
         appointment.setParentFolderID(folderId);
         appointment.setShownAs(shownAs);
@@ -270,7 +270,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         return appointment;
     }
     
-    private void deleteAppointment(AppointmentObject appointment, AJAXClient client) throws Throwable{
+    private void deleteAppointment(Appointment appointment, AJAXClient client) throws Throwable{
         if (client != null && appointment.getObjectID() != 0 && appointment.getLastModified() != null) {
             DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
             client.execute(deleteRequest);

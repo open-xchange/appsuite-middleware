@@ -55,7 +55,7 @@ import java.util.Map;
 import org.jdom.JDOMException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.user.actions.SearchRequest;
@@ -89,7 +89,7 @@ public final class GroupUserTools {
         if (0 == userId) {
             final SearchRequest request = new SearchRequest();
             final SearchResponse response = client.execute(host, request);
-            for (final ContactObject contact : response) {
+            for (final Contact contact : response) {
                 final Map<?, ?> map = contact.getMap();
                 if (map != null && map.containsKey("myidentity")) {
                     userId = contact.getInternalUserId();

@@ -60,7 +60,7 @@ import com.openexchange.ajax.appointment.action.HasResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class HasTest extends AbstractAJAXSession {
 
@@ -94,7 +94,7 @@ public class HasTest extends AbstractAJAXSession {
         c.add(Calendar.DATE, hasInterval);
         final Date end = c.getTime();
 
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("testHasAppointment");
         c.setTime(start);
         final int posInArray = 3;
@@ -102,7 +102,7 @@ public class HasTest extends AbstractAJAXSession {
         appointment.setStartDate(c.getTime());
         c.add(Calendar.HOUR, 1);
         appointment.setEndDate(c.getTime());
-        appointment.setShownAs(AppointmentObject.ABSENT);
+        appointment.setShownAs(Appointment.ABSENT);
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
         final AppointmentInsertResponse insertR = client.execute(new InsertRequest(appointment, tz));
@@ -129,7 +129,7 @@ public class HasTest extends AbstractAJAXSession {
         c.add(Calendar.DATE, hasInterval);
         final Date end = c.getTime();
 
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("testHasAppointmentFullTime");
         c.setTime(start);
         final int posInArray = 3;
@@ -137,7 +137,7 @@ public class HasTest extends AbstractAJAXSession {
         appointment.setStartDate(c.getTime());
         c.add(Calendar.DATE, 1);
         appointment.setEndDate(c.getTime());
-        appointment.setShownAs(AppointmentObject.ABSENT);
+        appointment.setShownAs(Appointment.ABSENT);
         appointment.setFullTime(true);
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);

@@ -61,7 +61,7 @@ import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.AppointmentWriter;
 import com.openexchange.webdav.xml.framework.RequestTools;
@@ -72,9 +72,9 @@ import com.openexchange.webdav.xml.framework.RequestTools;
  */
 public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
 
-    private final AppointmentObject appointment;
+    private final Appointment appointment;
 
-    public InsertRequest(final AppointmentObject appointment) {
+    public InsertRequest(final Appointment appointment) {
         super();
         this.appointment = appointment;
     }

@@ -18,7 +18,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Checks, if a change of the time of a sequence forces deletion of all exceptions.
@@ -35,7 +35,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject sequence = new AppointmentObject();
+        final Appointment sequence = new Appointment();
         int objectId = 0;
         Date lastModified = null;
         
@@ -51,7 +51,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
             sequence.setStartDate(calendar.getTime());
             calendar.set(Calendar.HOUR_OF_DAY, 9);
             sequence.setEndDate(calendar.getTime());
-            sequence.setRecurrenceType(AppointmentObject.DAILY);
+            sequence.setRecurrenceType(Appointment.DAILY);
             sequence.setInterval(1);
             
             //Insert
@@ -67,10 +67,10 @@ public final class Bug12463Test extends AbstractAJAXSession {
             //Load occurrence for changing
             GetRequest getRequest= new GetRequest(folderId, sequence.getObjectID(), 3);
             GetResponse getResponse = client.execute(getRequest);
-            AppointmentObject occurrence = getResponse.getAppointment(tz);
+            Appointment occurrence = getResponse.getAppointment(tz);
             
             //Create exception
-            AppointmentObject exception = new AppointmentObject();
+            Appointment exception = new Appointment();
             exception.setObjectID(occurrence.getObjectID());
             exception.setParentFolderID(folderId);
             exception.setLastModified(occurrence.getLastModified());
@@ -90,7 +90,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
             
             //Step 3
             //Create whole sequence change
-            AppointmentObject changeSequence = new AppointmentObject();
+            Appointment changeSequence = new Appointment();
             changeSequence.setIgnoreConflicts(true);
             changeSequence.setObjectID(sequence.getObjectID());
             changeSequence.setParentFolderID(sequence.getParentFolderID());
@@ -127,15 +127,15 @@ public final class Bug12463Test extends AbstractAJAXSession {
             
             //Check if sequence still has any exceptions
             int[] columns = new int[]{
-                AppointmentObject.START_DATE,
-                AppointmentObject.END_DATE,
-                AppointmentObject.OBJECT_ID,
-                AppointmentObject.RECURRENCE_ID
+                Appointment.START_DATE,
+                Appointment.END_DATE,
+                Appointment.OBJECT_ID,
+                Appointment.RECURRENCE_ID
             };
             UpdatesRequest updatesRequest = new UpdatesRequest(folderId, columns, lastModifiedOfOccurenceUpdate, true);
             UpdatesResponse updatesResponse = client.execute(updatesRequest);
-            List<AppointmentObject> appointments = updatesResponse.getAppointments(tz);
-            for(AppointmentObject current: appointments) {
+            List<Appointment> appointments = updatesResponse.getAppointments(tz);
+            for(Appointment current: appointments) {
                 if(current.getObjectID() != sequence.getObjectID() && current.getRecurrenceID() == sequence.getObjectID()) {
                     fail("Found exception of sequence.");
                 }

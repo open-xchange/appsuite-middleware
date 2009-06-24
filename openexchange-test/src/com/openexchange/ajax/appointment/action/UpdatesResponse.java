@@ -11,7 +11,7 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -27,9 +27,9 @@ public class UpdatesResponse extends AbstractAJAXResponse {
         this.columns = columns;
     }
     
-    public List<AppointmentObject> getAppointments(final TimeZone timeZone) throws OXConflictException, JSONException {
+    public List<Appointment> getAppointments(final TimeZone timeZone) throws OXConflictException, JSONException {
         //TODO extract functionality from test...
-        AppointmentObject[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray)getData(), columns, timeZone);
+        Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray)getData(), columns, timeZone);
         return Arrays.asList(objects);
     }
 

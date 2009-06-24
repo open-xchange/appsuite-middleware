@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.user.actions.GetRequest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
@@ -72,13 +72,13 @@ public class Bug13911Test extends AbstractAJAXSession {
     private static final Log LOG = LogFactory.getLog(Bug13911Test.class);
 
     private static final int[] COLUMNS = new int[] {
-        ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.DISPLAY_NAME, ContactObject.EMAIL1,
-        ContactObject.MARK_AS_DISTRIBUTIONLIST, ContactObject.INTERNAL_USERID, ContactObject.EMAIL2, ContactObject.EMAIL3,
-        ContactObject.SUR_NAME, ContactObject.GIVEN_NAME };
+        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1,
+        Contact.MARK_AS_DISTRIBUTIONLIST, Contact.INTERNAL_USERID, Contact.EMAIL2, Contact.EMAIL3,
+        Contact.SUR_NAME, Contact.GIVEN_NAME };
 
     private AJAXClient client;
 
-    private ContactObject contact;
+    private Contact contact;
 
     public Bug13911Test(String name) {
         super(name);
@@ -115,7 +115,7 @@ public class Bug13911Test extends AbstractAJAXSession {
             SearchResponse response = client.execute(new MultipleRequest<SearchResponse>(searches)).getResponse(0);
             boolean found = false;
             for (Object[] test : response) {
-                int id = ((Integer) test[response.getColumnPos(ContactObject.OBJECT_ID)]).intValue();
+                int id = ((Integer) test[response.getColumnPos(Contact.OBJECT_ID)]).intValue();
                 if (id == contact.getObjectID()) {
                     found = true;
                     break;

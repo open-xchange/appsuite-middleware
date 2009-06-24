@@ -2,7 +2,7 @@ package com.openexchange.webdav.xml.appointment;
 
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarException.Code;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -26,11 +26,11 @@ public class Bug6455Test extends AppointmentTest {
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 	
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(stringBuffer.toString());
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		

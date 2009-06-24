@@ -52,7 +52,7 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.events.TestEventAdmin;
 
@@ -76,7 +76,7 @@ public class Bug5557Test extends CalendarSqlTest {
 
         final CommonEvent event = TestEventAdmin.getInstance().getNewest();
 
-        final AppointmentObject appointmentFromEvent = (AppointmentObject) event.getActionObj();
+        final Appointment appointmentFromEvent = (Appointment) event.getActionObj();
 
         assertNotNull(appointmentFromEvent.getUsers());
         for (final UserParticipant userParticipant : appointmentFromEvent.getUsers()) {

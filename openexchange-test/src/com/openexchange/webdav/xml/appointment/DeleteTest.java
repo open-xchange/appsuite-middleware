@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -16,7 +16,7 @@ public class DeleteTest extends AppointmentTest {
 	}
 	
 	public void testDelete() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testDelete");
+		final Appointment appointmentObj = createAppointmentObject("testDelete");
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		final int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -27,7 +27,7 @@ public class DeleteTest extends AppointmentTest {
 	}
 	
 	public void testDeleteConcurentConflict() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
+		final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
@@ -42,7 +42,7 @@ public class DeleteTest extends AppointmentTest {
 	}
 	
 	public void testDeleteNotFound() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
+		final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
@@ -68,19 +68,19 @@ public class DeleteTest extends AppointmentTest {
 		
 		final int changeExceptionPosition = 3;
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testDeleteRecurrenceWithDatePosition");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		appointmentObj.setObjectID(objectId);
-		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		Appointment loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = loadAppointment.getLastModified();
@@ -105,20 +105,20 @@ public class DeleteTest extends AppointmentTest {
 		
 		final int changeExceptionPosition = 3;
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testDeleteRecurrenceWithDeleteExceptions");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		appointmentObj.setObjectID(objectId);
 		
-		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		Appointment loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		final Date modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, modified, PROTOCOL + hostName, login, password);

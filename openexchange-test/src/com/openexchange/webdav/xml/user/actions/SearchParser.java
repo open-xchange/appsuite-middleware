@@ -53,7 +53,7 @@ import org.jdom.Document;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
 import com.openexchange.webdav.xml.types.Response;
@@ -83,12 +83,12 @@ public final class SearchParser extends AbstractWebDAVParser<SearchResponse> {
     protected SearchResponse createResponse(final Document document, final Response[] responses)
         throws OXConflictException, TestException {
         final SearchResponse retval = new SearchResponse(document, responses);
-        final ContactObject[] contacts = new ContactObject[responses.length];
+        final Contact[] contacts = new Contact[responses.length];
         for (int a = 0; a < contacts.length; a++) {
             if (responses[a].hasError()) {
                 fail(responses[a].getErrorMessage());
             }
-            contacts[a] = (ContactObject) responses[a].getDataObject();
+            contacts[a] = (Contact) responses[a].getDataObject();
         }
         retval.setContacts(contacts);
         return retval;

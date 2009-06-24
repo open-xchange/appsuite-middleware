@@ -4,8 +4,8 @@ import java.io.File;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -35,8 +35,8 @@ public class FixtureLoaderFactory {
     	AJAXUserConfigFactory userConfigFactory = new AJAXUserConfigFactory();
     	
     	loader.addFixtureFactory(new TaskFixtureFactory(groupResolver, loader), Task.class);
-    	loader.addFixtureFactory(new AppointmentFixtureFactory(groupResolver, loader), AppointmentObject.class);
-        loader.addFixtureFactory(new ContactFixtureFactory(loader), ContactObject.class);
+    	loader.addFixtureFactory(new AppointmentFixtureFactory(groupResolver, loader), Appointment.class);
+        loader.addFixtureFactory(new ContactFixtureFactory(loader), Contact.class);
         loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
         loader.addFixtureFactory(new CredentialFixtureFactory(userConfigFactory, contactFinder, loader), SimpleCredentials.class);
         loader.addFixtureFactory(new GroupFixtureFactory(loader), Group.class);

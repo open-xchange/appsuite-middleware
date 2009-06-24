@@ -12,7 +12,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.URLParameter;
 
 public class MultipleTest extends AbstractAJAXTest {
@@ -34,7 +34,7 @@ public class MultipleTest extends AbstractAJAXTest {
 		jsonObj.put(Multiple.MODULE, Multiple.MODULE_CONTACT);
 		jsonObj.put(Multiple.PARAMETER_ACTION, Multiple.ACTION_NEW);
 		
-		ContactObject contactObj = new ContactObject();
+		Contact contactObj = new Contact();
 		contactObj.setSurName("testMultiple1");
 		contactObj.setParentFolderID(folderId);
 		
@@ -49,7 +49,7 @@ public class MultipleTest extends AbstractAJAXTest {
 		jsonObj.put(Multiple.MODULE, Multiple.MODULE_CONTACT);
 		jsonObj.put(Multiple.PARAMETER_ACTION, Multiple.ACTION_NEW);
 		
-		contactObj = new ContactObject();
+		contactObj = new Contact();
 		contactObj.setSurName("testMultiple2");
 		contactObj.setParentFolderID(folderId);
 		

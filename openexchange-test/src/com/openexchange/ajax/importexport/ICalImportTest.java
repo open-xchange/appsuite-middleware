@@ -57,7 +57,7 @@ import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -77,12 +77,12 @@ public class ICalImportTest extends AbstractICalTest {
 	}
 	
 	public void testImportICalWithAppointment() throws Exception {
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testImportICalWithAppointment" + System.currentTimeMillis());
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.RESERVED);
-		final ImportResult[] importResult = importICal(getWebConversation(), new AppointmentObject[] {appointmentObj}, appointmentFolderId, getHostName(), getSessionId());
+		appointmentObj.setShownAs(Appointment.RESERVED);
+		final ImportResult[] importResult = importICal(getWebConversation(), new Appointment[] {appointmentObj}, appointmentFolderId, getHostName(), getSessionId());
 		
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
@@ -91,7 +91,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
+		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
 		
 		boolean found = false;
 		
@@ -232,7 +232,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
+		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

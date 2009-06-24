@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.group.Group;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -113,7 +113,7 @@ public class ParticipantTransformator implements Transformator {
 	}
 
 	private Participant getExternalUserParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
-		final ContactObject contact = fixtureLoader.getFixtures(fixtureName, ContactObject.class).getEntry(fixtureEntry).getEntry();
+		final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
 		String email = null;
 		if (contact.containsEmail1()) {
 			email = contact.getEmail1();
@@ -137,7 +137,7 @@ public class ParticipantTransformator implements Transformator {
 	}
 
 	private UserParticipant getUserParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
-		final ContactObject user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class)
+		final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class)
 		    .getEntry(fixtureEntry)
 		        .getEntry()
 		            .asContact();

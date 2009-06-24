@@ -48,7 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
 import com.openexchange.test.fixtures.transformators.DistributionListTransformator;
 
@@ -61,7 +61,7 @@ import java.util.HashMap;
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
-public class ContactFixtureFactory implements FixtureFactory<ContactObject> {
+public class ContactFixtureFactory implements FixtureFactory<Contact> {
 
     private FixtureLoader fixtureLoader;
 
@@ -70,22 +70,22 @@ public class ContactFixtureFactory implements FixtureFactory<ContactObject> {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<ContactObject> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	public Fixtures<Contact> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
 		return new ContactFixtures(fixtureName, entries, fixtureLoader);
     }
 
-    private class ContactFixtures  extends DefaultFixtures<ContactObject> implements Fixtures<ContactObject>{
+    private class ContactFixtures  extends DefaultFixtures<Contact> implements Fixtures<Contact>{
         private Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<ContactObject>>  contacts = new HashMap<String,Fixture<ContactObject>>();
+        private final Map<String, Fixture<Contact>>  contacts = new HashMap<String,Fixture<Contact>>();
 
         public ContactFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
-            super(ContactObject.class, entries, fixtureLoader);
+            super(Contact.class, entries, fixtureLoader);
             this.entries = entries;
             addTransformator(new DistributionListTransformator(fixtureLoader), "distribution_list");
             addTransformator(new BooleanTransformator(), "private_flag");
         }
 
-        public Fixture<ContactObject> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Contact> getEntry(final String entryName) throws FixtureException {
             if (contacts.containsKey(entryName)) {
                 return contacts.get(entryName);
             }
@@ -94,10 +94,10 @@ public class ContactFixtureFactory implements FixtureFactory<ContactObject> {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
             defaults(values);
-            final ContactObject contact = new ContactObject();
+            final Contact contact = new Contact();
             apply(contact,values);
 
-            final Fixture<ContactObject> fixture = new Fixture<ContactObject>(contact, values.keySet().toArray(new String[values.size()]), values) {
+            final Fixture<Contact> fixture = new Fixture<Contact>(contact, values.keySet().toArray(new String[values.size()]), values) {
             	public Comparator getComparator(final String field) {
             		if("birthday".equals(field) || "anniversary".equals(field)) {
             			return new DayOnlyDateComparator();

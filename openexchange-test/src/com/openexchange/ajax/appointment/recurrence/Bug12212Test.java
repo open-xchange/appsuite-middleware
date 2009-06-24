@@ -70,7 +70,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.servlet.AjaxException;
 
 public class Bug12212Test extends AbstractAJAXSession {
@@ -80,9 +80,9 @@ public class Bug12212Test extends AbstractAJAXSession {
 		super(name);
 	}
 	
-	public AppointmentObject createDailyRecurringAppointment(final TimeZone timezone, final int folderId){
+	public Appointment createDailyRecurringAppointment(final TimeZone timezone, final int folderId){
 		final Calendar calendar = TimeTools.createCalendar(timezone);
-		final AppointmentObject series = new AppointmentObject();
+		final Appointment series = new Appointment();
 		
 		series.setTitle(bugname);
 		series.setParentFolderID(folderId);
@@ -91,13 +91,13 @@ public class Bug12212Test extends AbstractAJAXSession {
 		series.setStartDate(calendar.getTime());
 		calendar.add(Calendar.HOUR, 1);
 		series.setEndDate(calendar.getTime());
-		series.setRecurrenceType(AppointmentObject.DAILY);
+		series.setRecurrenceType(Appointment.DAILY);
 		series.setInterval(1);
 		series.setOccurrence(5);
 		return series;
 	}
 	
-	public void shiftAppointmentDateOneHour(final AppointmentObject appointment, final TimeZone tz){
+	public void shiftAppointmentDateOneHour(final Appointment appointment, final TimeZone tz){
 		final Calendar calendar = TimeTools.createCalendar(tz);
 		calendar.setTime(appointment.getStartDate());
 		calendar.add(Calendar.HOUR, 1);
@@ -114,7 +114,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 	    final TimeZone tz = client.getValues().getTimeZone();
 
 	    //create appointment
-		final AppointmentObject appointmentSeries = createDailyRecurringAppointment(tz, folderId);
+		final Appointment appointmentSeries = createDailyRecurringAppointment(tz, folderId);
 	    
 		{//send appointment
 			final InsertRequest request = new InsertRequest(appointmentSeries, tz);
@@ -125,7 +125,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 		try {
 			//get one occurrence
 	        final int recurrence_position = 3;
-		    final AppointmentObject occurrence;
+		    final Appointment occurrence;
 			{
 				final GetRequest request= new GetRequest(folderId, appointmentSeries.getObjectID(), recurrence_position);
 				final GetResponse response = client.execute(request);
@@ -133,7 +133,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 	        
 			//make an exception out of the occurrence
-	        AppointmentObject exception = new AppointmentObject();
+	        Appointment exception = new Appointment();
 	        exception.setObjectID(occurrence.getObjectID());
 	        exception.setParentFolderID(folderId);
 	        exception.setLastModified(occurrence.getLastModified());
@@ -169,7 +169,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 	
 			{//assert no duplicate exists
-				final AllRequest request = new AllRequest(folderId, new int[] { AppointmentObject.TITLE , AppointmentObject.START_DATE, AppointmentObject.END_DATE},
+				final AllRequest request = new AllRequest(folderId, new int[] { Appointment.TITLE , Appointment.START_DATE, Appointment.END_DATE},
 						exception.getStartDate(), exception.getEndDate(),
 						tz, false);
 				final CommonAllResponse response = client.execute(request);

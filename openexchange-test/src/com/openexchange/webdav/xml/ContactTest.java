@@ -24,7 +24,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
@@ -63,7 +63,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		dateTime = c.getTimeInMillis();
 	}
 	
-	public static void compareObject(final ContactObject contactObj1, final ContactObject contactObj2) throws Exception {
+	public static void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
 		assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -167,8 +167,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
 	
-	protected ContactObject createContactObject(final String displayname) {
-		final ContactObject contactObj = new ContactObject();
+	protected Contact createContactObject(final String displayname) {
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("Meier");
 		contactObj.setGivenName("Herbert");
 		contactObj.setDisplayName(displayname);
@@ -183,8 +183,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactObj;
 	}
 	
-	protected ContactObject createCompleteContactObject() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+	protected Contact createCompleteContactObject() throws Exception {
+		final Contact contactObj = new Contact();
 		contactObj.setPrivateFlag(true);
 		contactObj.setCategories("categories");
 		contactObj.setGivenName("given name");
@@ -282,8 +282,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		
 		contactObj.setParentFolderID(contactFolderId);
 		
-		final ContactObject link1 = createContactObject("link1");
-		final ContactObject link2 = createContactObject("link2");
+		final Contact link1 = createContactObject("link1");
+		final Contact link2 = createContactObject("link2");
 		final int linkId1 = insertContact(webCon, link1, PROTOCOL + hostName, login, password);
 		link1.setObjectID(linkId1);
 		final int linkId2 = insertContact(webCon, link2, PROTOCOL + hostName, login, password);
@@ -309,7 +309,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactObj;
 	}
 	
-	public static int insertContact(final WebConversation webCon, final ContactObject contactObj, String host, final String login, final String password) throws OXException, Exception {
+	public static int insertContact(final WebConversation webCon, final Contact contactObj, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		contactObj.removeObjectID();
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -331,7 +331,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 			throw new TestException(response[0].getErrorMessage());
 		}
         assertEquals("check response status", 200, response[0].getStatus());
-		final ContactObject contactObj2 = (ContactObject) response[0].getDataObject();
+		final Contact contactObj2 = (Contact) response[0].getDataObject();
 		final int objectId = contactObj2.getObjectID();
 		assertNotNull("last modified is null", contactObj2.getLastModified());
 		assertTrue("last modified is not > 0", contactObj2.getLastModified().getTime() > 0);
@@ -339,11 +339,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static void updateContact(final WebConversation webCon, final ContactObject contactObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
+	public static void updateContact(final WebConversation webCon, final Contact contactObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
 		updateContact(webCon, contactObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
-	public static void updateContact(final WebConversation webCon, ContactObject contactObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
+	public static void updateContact(final WebConversation webCon, Contact contactObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		contactObj.setObjectID(objectId);
@@ -380,7 +380,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		if (response[0].hasError()) {
 			throw new TestException(response[0].getErrorMessage());
 		} else {
-			contactObj = (ContactObject)response[0].getDataObject();
+			contactObj = (Contact)response[0].getDataObject();
 			objectId = contactObj.getObjectID();
 			
 			assertNotNull("last modified is null", contactObj.getLastModified());
@@ -413,7 +413,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setObjectID(objectId);
 		contactObj.setParentFolderID(inFolder);
 		contactObj.setLastModified(lastModified);
@@ -488,10 +488,10 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return (int[])response[0].getDataObject();
 	}
 	
-	public static ContactObject[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
+	public static Contact[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		if (!changed && !deleted) {
-			return new ContactObject[] { };
+			return new Contact[] { };
 		}
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -529,18 +529,18 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check propfind response", 207, status);
 		final InputStream input = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(input), Types.CONTACT);
-		final ContactObject[] contactArray = new ContactObject[response.length];
+		final Contact[] contactArray = new Contact[response.length];
 		for (int a = 0; a < contactArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
 			}
-			contactArray[a] = (ContactObject) response[a].getDataObject();
+			contactArray[a] = (Contact) response[a].getDataObject();
 			assertNotNull("last modified is null", contactArray[a].getLastModified());
 		}
 		return contactArray;
 	}
 	
-	public static ContactObject loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
+	public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -571,7 +571,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		}
 		// This status must be checked after throwing TestException.
         assertEquals("check response status", 200, response[0].getStatus());
-		return (ContactObject) response[0].getDataObject();
+		return (Contact) response[0].getDataObject();
 	}
 	
 	private static HashSet links2String(final LinkEntryObject[] linkEntryObject) throws Exception {

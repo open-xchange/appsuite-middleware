@@ -55,7 +55,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -175,7 +175,7 @@ public class OXContainerConverterTest extends TestCase {
 		return oxContainerConverter.convertTask(versitObject);
 	}
 	
-	public AppointmentObject convertAppointment(final String versitData) throws Exception{
+	public Appointment convertAppointment(final String versitData) throws Exception{
 		final VersitDefinition def = ICalendar.definition;
 		
 		final VersitDefinition.Reader versitReader = def.getReader(
@@ -200,7 +200,7 @@ public class OXContainerConverterTest extends TestCase {
 		
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 		
-		final AppointmentObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);; 
+		final Appointment appointmentObj = oxContainerConverter.convertAppointment(versitObject);; 
 		return appointmentObj.getPrivateFlag();
 	}
 	

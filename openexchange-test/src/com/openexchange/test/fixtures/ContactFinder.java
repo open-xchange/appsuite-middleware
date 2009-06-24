@@ -1,7 +1,7 @@
 package com.openexchange.test.fixtures;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 public interface ContactFinder {
-	public ContactObject getContact(SimpleCredentials credentials);
+	public Contact getContact(SimpleCredentials credentials);
 }

@@ -80,7 +80,7 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -90,14 +90,14 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
 */
 public class ContactTestManager {
-	private Vector<ContactObject> insertedOrUpdatedContacts;
+	private Vector<Contact> insertedOrUpdatedContacts;
 	private AJAXClient client;
 	private ContactParser contactParser;
 	private ContactWriter contactWriter;
 	
 	public ContactTestManager(AJAXClient client) {
 		this.client = client;
-		insertedOrUpdatedContacts = new Vector<ContactObject>();
+		insertedOrUpdatedContacts = new Vector<Contact>();
 		contactParser = new ContactParser();
 		try {
 			contactWriter = new ContactWriter(client.getValues().getTimeZone());
@@ -118,7 +118,7 @@ public class ContactTestManager {
 	 * such requests. Remembers this contact for cleanup later.
 	 *
 	 */
-	public ContactObject insertContactOnServer(ContactObject contactToCreate){
+	public Contact insertContactOnServer(Contact contactToCreate){
 		InsertRequest request = new InsertRequest(contactToCreate);
 		InsertResponse response = null;
 		try {
@@ -140,7 +140,7 @@ public class ContactTestManager {
 	/**
 	 * Create multiple contacts via the HTTP-API at once
 	 */
-	public void insertContactsOnServer(ContactObject[] contacts) {
+	public void insertContactsOnServer(Contact[] contacts) {
 		for (int i=0; i<contacts.length; i++) {
 			this.insertContactOnServer(contacts[i]);
 		}
@@ -150,7 +150,7 @@ public class ContactTestManager {
 	 * Updates a contact via HTTP-API
 	 * and returns the same contact for convenience
 	 */
-	public ContactObject updateContactOnServer(ContactObject contact){
+	public Contact updateContactOnServer(Contact contact){
 		UpdateRequest request = new UpdateRequest(contact);
 		try {
 			client.execute(request);
@@ -171,7 +171,7 @@ public class ContactTestManager {
 	 * Deletes a contact via HTTP-API
 	 * 
 	 */
-	public void deleteContactOnServer(ContactObject contactToDelete){
+	public void deleteContactOnServer(Contact contactToDelete){
 		deleteContactOnServer(contactToDelete, true);
 	}
 	
@@ -179,7 +179,7 @@ public class ContactTestManager {
 	 * Deletes a contact via HTTP-API
 	 * 
 	 */
-	public void deleteContactOnServer(ContactObject contactToDelete, boolean failOnError){
+	public void deleteContactOnServer(Contact contactToDelete, boolean failOnError){
 		try{
 		    contactToDelete.setLastModified( new Date( Long.MAX_VALUE ) );
 			DeleteRequest request = new DeleteRequest(contactToDelete, failOnError);
@@ -202,29 +202,29 @@ public class ContactTestManager {
 	/**
 	 * Get a contact via HTTP-API with an existing ContactObject
 	 */
-	public ContactObject getContactFromServer(ContactObject contact){
+	public Contact getContactFromServer(Contact contact){
 		return getContactFromServer(contact.getParentFolderID(), contact.getObjectID(), true);
 	}
 	
 	/**
 	 * Get a contact via HTTP-API with an existing ContactObject
 	 */
-	public ContactObject getContactFromServer(ContactObject contact, boolean failOnError){
+	public Contact getContactFromServer(Contact contact, boolean failOnError){
 		return getContactFromServer(contact.getParentFolderID(), contact.getObjectID(), failOnError);
 	}
 	
 	/**
 	 * Get a contact via HTTP-API with no existing ContactObject
 	 */
-	public ContactObject getContactFromServer(final int folderId, final int objectId ) {
+	public Contact getContactFromServer(final int folderId, final int objectId ) {
 		return getContactFromServer( folderId, objectId, true);
 	}
 	
 	/**
 	 * Get a contact via HTTP-API with no existing ContactObject
 	 */
-	public ContactObject getContactFromServer(final int folderId, final int objectId, boolean failOnError ) {
-		ContactObject returnedContact = null;
+	public Contact getContactFromServer(final int folderId, final int objectId, boolean failOnError ) {
+		Contact returnedContact = null;
 		GetRequest request = new GetRequest(folderId, objectId);
 		GetResponse response = null;
 		try {
@@ -253,7 +253,7 @@ public class ContactTestManager {
 	 * removes all contacts inserted or updated by this Manager
 	 */
 	public void cleanUp(){
-		for(ContactObject contact: insertedOrUpdatedContacts){
+		for(Contact contact: insertedOrUpdatedContacts){
 			deleteContactOnServer(contact);
 		}
 	}
@@ -261,9 +261,9 @@ public class ContactTestManager {
 	/**
 	 * get all contacts in one folder via the HTTP-API
 	 */
-	public ContactObject[] getAllContactsOnServer (int folderId) {
-		Vector <ContactObject> allContacts = new Vector<ContactObject>();
-		AllRequest request = new AllRequest (folderId, new int [] {ContactObject.OBJECT_ID});
+	public Contact[] getAllContactsOnServer (int folderId) {
+		Vector <Contact> allContacts = new Vector<Contact>();
+		AllRequest request = new AllRequest (folderId, new int [] {Contact.OBJECT_ID});
 		try {
 			CommonAllResponse response = client.execute(request);
 			final JSONArray data = (JSONArray) response.getResponse().getData();
@@ -271,7 +271,7 @@ public class ContactTestManager {
 				JSONArray temp = (JSONArray) data.optJSONArray(i);
 				int tempObjectId = temp.getInt(0);
 				int tempFolderId = temp.getInt(1);
-				ContactObject tempContact = getContactFromServer(tempFolderId, tempObjectId);
+				Contact tempContact = getContactFromServer(tempFolderId, tempObjectId);
 				allContacts.add(tempContact);
 			}
 		} catch (AjaxException e) {
@@ -283,7 +283,7 @@ public class ContactTestManager {
 		} catch (JSONException e) {
 			fail("JSONException occured while getting all contacts for folder with id: " + folderId + ": " + e.getMessage());
 		}
-		ContactObject[] contactArray = new ContactObject[allContacts.size()];
+		Contact[] contactArray = new Contact[allContacts.size()];
 		allContacts.copyInto(contactArray);
 		return contactArray;
 	}
@@ -291,9 +291,9 @@ public class ContactTestManager {
 	/**
 	 * get all contacts specified by multiple int-arrays with 2 slots each (1st slot: folderId, 2nd slot objectId) via the HTTP-API
 	 */
-	public ContactObject[] listContactsOnServer (final int[]... folderAndObjectIds) {
-		Vector <ContactObject> allContacts = new Vector<ContactObject>();
-		ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), ContactObject.ALL_COLUMNS ,true);
+	public Contact[] listContactsOnServer (final int[]... folderAndObjectIds) {
+		Vector <Contact> allContacts = new Vector<Contact>();
+		ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), Contact.ALL_COLUMNS ,true);
 		try {
 			CommonListResponse response = client.execute(request);
 			final JSONArray data = (JSONArray) response.getResponse().getData();
@@ -309,7 +309,7 @@ public class ContactTestManager {
 		} catch (Exception e) {
 			fail("Exception occured while getting a list of contacts : " + e.getMessage());
 		}
-		ContactObject[] contactArray = new ContactObject[allContacts.size()];
+		Contact[] contactArray = new Contact[allContacts.size()];
 		allContacts.copyInto(contactArray);
 		return contactArray;
 	}
@@ -317,9 +317,9 @@ public class ContactTestManager {
 	/**
 	 * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
 	 */
-	public ContactObject [] searchForContactsOnServer (String pattern, int folderId) {
-		Vector <ContactObject> allContacts = new Vector<ContactObject>();
-		SearchRequest request = new SearchRequest(pattern, folderId, ContactObject.ALL_COLUMNS, true);
+	public Contact [] searchForContactsOnServer (String pattern, int folderId) {
+		Vector <Contact> allContacts = new Vector<Contact>();
+		SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
 		try {
 			SearchResponse response = client.execute(request);
 			final JSONArray data = (JSONArray) response.getResponse().getData();
@@ -335,7 +335,7 @@ public class ContactTestManager {
 		} catch (Exception e) {
 			fail("Exception occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		}
-		ContactObject[] contactArray = new ContactObject[allContacts.size()];
+		Contact[] contactArray = new Contact[allContacts.size()];
 		allContacts.copyInto(contactArray);
 		return contactArray;
 	}
@@ -343,9 +343,9 @@ public class ContactTestManager {
 	/**
 	 * Get contacts in a folder that were updated since a specific date via the HTTP-API 
 	 */
-	public ContactObject [] getUpdatedContactsOnServer (int folderId, Date lastModified) {
-		Vector <ContactObject> allContacts = new Vector<ContactObject>();
-		UpdatesRequest request = new UpdatesRequest(folderId, ContactObject.ALL_COLUMNS, -1, null, lastModified);
+	public Contact [] getUpdatedContactsOnServer (int folderId, Date lastModified) {
+		Vector <Contact> allContacts = new Vector<Contact>();
+		UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
 		try {
 			CommonUpdatesResponse response = (CommonUpdatesResponse) client.execute(request);
 			final JSONArray data = (JSONArray) response.getResponse().getData();
@@ -361,13 +361,13 @@ public class ContactTestManager {
 		} catch (Exception e) {
 			fail("Exception occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		}
-		ContactObject[] contactArray = new ContactObject[allContacts.size()];
+		Contact[] contactArray = new Contact[allContacts.size()];
 		allContacts.copyInto(contactArray);
 		return contactArray;
 	}
 	
-	private void remember (ContactObject contact) {
-		for (ContactObject tempContact: insertedOrUpdatedContacts) {
+	private void remember (Contact contact) {
+		for (Contact tempContact: insertedOrUpdatedContacts) {
 			if (tempContact.getObjectID() == contact.getObjectID()) {
 				insertedOrUpdatedContacts.set(insertedOrUpdatedContacts.indexOf(tempContact), contact);
 			}
@@ -383,11 +383,11 @@ public class ContactTestManager {
 			JSONObject jsonObject = new JSONObject();
 			for (int a=0; a < jsonArray.length(); a++){
 				if (!"null".equals(jsonArray.getString(a))){
-					String fieldname = ContactMapping.columnToFieldName(ContactObject.ALL_COLUMNS[a]);
+					String fieldname = ContactMapping.columnToFieldName(Contact.ALL_COLUMNS[a]);
 					jsonObject.put(fieldname, jsonArray.getString(a));
 				}	
 			}
-			ContactObject contactObject = new ContactObject();
+			Contact contactObject = new Contact();
 			contactParser.parse(contactObject, jsonObject);
 			allContacts.add(contactObject);	
 		}	
@@ -405,117 +405,117 @@ final class ContactMapping extends TestCase{
 		columns2fields = new HashMap();
 		
 		try {
-			put(ContactFields.ANNIVERSARY, ContactObject.ANNIVERSARY);
-			put(ContactFields.ASSISTANT_NAME, ContactObject.ASSISTANT_NAME);
-			put(ContactFields.BIRTHDAY, ContactObject.BIRTHDAY);
-			put(ContactFields.BRANCHES, ContactObject.BRANCHES);
-			put(ContactFields.BUSINESS_CATEGORY, ContactObject.BUSINESS_CATEGORY);
-			put(ContactFields.CELLULAR_TELEPHONE1, ContactObject.CELLULAR_TELEPHONE1);
-			put(ContactFields.CELLULAR_TELEPHONE2, ContactObject.CELLULAR_TELEPHONE2);
-			put(ContactFields.CITY_BUSINESS, ContactObject.CITY_BUSINESS);
-			put(ContactFields.CITY_HOME, ContactObject.CITY_HOME);
-			put(ContactFields.CITY_OTHER, ContactObject.CITY_OTHER);
-			put(ContactFields.COMMERCIAL_REGISTER, ContactObject.COMMERCIAL_REGISTER);
-			put(ContactFields.COMPANY, ContactObject.COMPANY);
+			put(ContactFields.ANNIVERSARY, Contact.ANNIVERSARY);
+			put(ContactFields.ASSISTANT_NAME, Contact.ASSISTANT_NAME);
+			put(ContactFields.BIRTHDAY, Contact.BIRTHDAY);
+			put(ContactFields.BRANCHES, Contact.BRANCHES);
+			put(ContactFields.BUSINESS_CATEGORY, Contact.BUSINESS_CATEGORY);
+			put(ContactFields.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE1);
+			put(ContactFields.CELLULAR_TELEPHONE2, Contact.CELLULAR_TELEPHONE2);
+			put(ContactFields.CITY_BUSINESS, Contact.CITY_BUSINESS);
+			put(ContactFields.CITY_HOME, Contact.CITY_HOME);
+			put(ContactFields.CITY_OTHER, Contact.CITY_OTHER);
+			put(ContactFields.COMMERCIAL_REGISTER, Contact.COMMERCIAL_REGISTER);
+			put(ContactFields.COMPANY, Contact.COMPANY);
 			//has no equivalent in ContactObject put(ContactFields.CONTAINS_IMAGE1, ContactObject);
-			put(ContactFields.COUNTRY_BUSINESS, ContactObject.COUNTRY_BUSINESS);
-			put(ContactFields.COUNTRY_HOME, ContactObject.COUNTRY_HOME);
-			put(ContactFields.COUNTRY_OTHER, ContactObject.COUNTRY_OTHER);
-			put(ContactFields.DEFAULT_ADDRESS, ContactObject.DEFAULT_ADDRESS);
-			put(ContactFields.DEPARTMENT, ContactObject.DEPARTMENT);
-			put(ContactFields.DISPLAY_NAME, ContactObject.DISPLAY_NAME);
-			put(ContactFields.DISTRIBUTIONLIST, ContactObject.DISTRIBUTIONLIST);
-			put(ContactFields.EMAIL1, ContactObject.EMAIL1);
-			put(ContactFields.EMAIL2, ContactObject.EMAIL2);
-			put(ContactFields.EMAIL3, ContactObject.EMAIL3);
-			put(ContactFields.EMPLOYEE_TYPE, ContactObject.EMPLOYEE_TYPE);
-			put(ContactFields.FAX_BUSINESS, ContactObject.FAX_BUSINESS);
-			put(ContactFields.FAX_HOME, ContactObject.FAX_HOME);
-			put(ContactFields.FAX_OTHER, ContactObject.FAX_OTHER);
-			put(ContactFields.FIRST_NAME, ContactObject.GIVEN_NAME);
-			put(ContactFields.IMAGE1, ContactObject.IMAGE1);
-			put(ContactFields.INFO, ContactObject.INFO);
-			put(ContactFields.INSTANT_MESSENGER1, ContactObject.INSTANT_MESSENGER1);
-			put(ContactFields.INSTANT_MESSENGER2, ContactObject.INSTANT_MESSENGER2);
-			put(ContactFields.LAST_NAME, ContactObject.SUR_NAME);
-			put(ContactFields.LINKS, ContactObject.LINKS);
-			put(ContactFields.MANAGER_NAME, ContactObject.MANAGER_NAME);
-			put(ContactFields.MARITAL_STATUS, ContactObject.MARITAL_STATUS);
-			put(ContactFields.MARK_AS_DISTRIBUTIONLIST, ContactObject.MARK_AS_DISTRIBUTIONLIST);
-			put(ContactFields.NICKNAME, ContactObject.NICKNAME);
-			put(ContactFields.NOTE, ContactObject.NOTE);
-			put(ContactFields.NUMBER_OF_CHILDREN, ContactObject.NUMBER_OF_CHILDREN);
-			put(ContactFields.NUMBER_OF_DISTRIBUTIONLIST, ContactObject.NUMBER_OF_DISTRIBUTIONLIST);
-			put(ContactFields.NUMBER_OF_EMPLOYEE, ContactObject.NUMBER_OF_EMPLOYEE);
-			put(ContactFields.NUMBER_OF_LINKS, ContactObject.NUMBER_OF_LINKS);
-			put(ContactFields.POSITION, ContactObject.POSITION);
-			put(ContactFields.POSTAL_CODE_BUSINESS, ContactObject.POSTAL_CODE_BUSINESS);
-			put(ContactFields.POSTAL_CODE_HOME, ContactObject.POSTAL_CODE_HOME);
-			put(ContactFields.POSTAL_CODE_OTHER, ContactObject.POSTAL_CODE_OTHER);
-			put(ContactFields.PROFESSION, ContactObject.PROFESSION);
-			put(ContactFields.ROOM_NUMBER, ContactObject.ROOM_NUMBER);
-			put(ContactFields.SALES_VOLUME, ContactObject.SALES_VOLUME);
-			put(ContactFields.SECOND_NAME, ContactObject.MIDDLE_NAME);
-			put(ContactFields.SPOUSE_NAME, ContactObject.SPOUSE_NAME);
-			put(ContactFields.STATE_BUSINESS, ContactObject.STATE_BUSINESS);
-			put(ContactFields.STATE_HOME, ContactObject.STATE_HOME);
-			put(ContactFields.STATE_OTHER, ContactObject.STATE_OTHER);
-			put(ContactFields.STREET_BUSINESS, ContactObject.STREET_BUSINESS);
-			put(ContactFields.STREET_HOME, ContactObject.STREET_HOME);
-			put(ContactFields.STREET_OTHER, ContactObject.STREET_OTHER);
-			put(ContactFields.SUFFIX, ContactObject.SUFFIX);
-			put(ContactFields.TAX_ID, ContactObject.TAX_ID);
-			put(ContactFields.TELEPHONE_ASSISTANT, ContactObject.TELEPHONE_ASSISTANT);
-			put(ContactFields.TELEPHONE_BUSINESS1, ContactObject.TELEPHONE_BUSINESS1);
-			put(ContactFields.TELEPHONE_BUSINESS2, ContactObject.TELEPHONE_BUSINESS2);
-			put(ContactFields.TELEPHONE_CALLBACK, ContactObject.TELEPHONE_CALLBACK);
-			put(ContactFields.TELEPHONE_CAR, ContactObject.TELEPHONE_CAR);
-			put(ContactFields.TELEPHONE_COMPANY, ContactObject.TELEPHONE_COMPANY);
-			put(ContactFields.TELEPHONE_HOME1, ContactObject.TELEPHONE_HOME1);
-			put(ContactFields.TELEPHONE_HOME2, ContactObject.TELEPHONE_HOME2);
-			put(ContactFields.TELEPHONE_IP, ContactObject.TELEPHONE_IP);
-			put(ContactFields.TELEPHONE_ISDN, ContactObject.TELEPHONE_ISDN);
-			put(ContactFields.TELEPHONE_OTHER, ContactObject.TELEPHONE_OTHER);
-			put(ContactFields.TELEPHONE_PAGER, ContactObject.TELEPHONE_PAGER);
-			put(ContactFields.TELEPHONE_PRIMARY, ContactObject.TELEPHONE_PRIMARY);
-			put(ContactFields.TELEPHONE_RADIO, ContactObject.TELEPHONE_RADIO);
-			put(ContactFields.TELEPHONE_TELEX, ContactObject.TELEPHONE_TELEX);
-			put(ContactFields.TELEPHONE_TTYTDD, ContactObject.TELEPHONE_TTYTDD);
-			put(ContactFields.TITLE, ContactObject.TITLE);
-			put(ContactFields.URL, ContactObject.URL);
+			put(ContactFields.COUNTRY_BUSINESS, Contact.COUNTRY_BUSINESS);
+			put(ContactFields.COUNTRY_HOME, Contact.COUNTRY_HOME);
+			put(ContactFields.COUNTRY_OTHER, Contact.COUNTRY_OTHER);
+			put(ContactFields.DEFAULT_ADDRESS, Contact.DEFAULT_ADDRESS);
+			put(ContactFields.DEPARTMENT, Contact.DEPARTMENT);
+			put(ContactFields.DISPLAY_NAME, Contact.DISPLAY_NAME);
+			put(ContactFields.DISTRIBUTIONLIST, Contact.DISTRIBUTIONLIST);
+			put(ContactFields.EMAIL1, Contact.EMAIL1);
+			put(ContactFields.EMAIL2, Contact.EMAIL2);
+			put(ContactFields.EMAIL3, Contact.EMAIL3);
+			put(ContactFields.EMPLOYEE_TYPE, Contact.EMPLOYEE_TYPE);
+			put(ContactFields.FAX_BUSINESS, Contact.FAX_BUSINESS);
+			put(ContactFields.FAX_HOME, Contact.FAX_HOME);
+			put(ContactFields.FAX_OTHER, Contact.FAX_OTHER);
+			put(ContactFields.FIRST_NAME, Contact.GIVEN_NAME);
+			put(ContactFields.IMAGE1, Contact.IMAGE1);
+			put(ContactFields.INFO, Contact.INFO);
+			put(ContactFields.INSTANT_MESSENGER1, Contact.INSTANT_MESSENGER1);
+			put(ContactFields.INSTANT_MESSENGER2, Contact.INSTANT_MESSENGER2);
+			put(ContactFields.LAST_NAME, Contact.SUR_NAME);
+			put(ContactFields.LINKS, Contact.LINKS);
+			put(ContactFields.MANAGER_NAME, Contact.MANAGER_NAME);
+			put(ContactFields.MARITAL_STATUS, Contact.MARITAL_STATUS);
+			put(ContactFields.MARK_AS_DISTRIBUTIONLIST, Contact.MARK_AS_DISTRIBUTIONLIST);
+			put(ContactFields.NICKNAME, Contact.NICKNAME);
+			put(ContactFields.NOTE, Contact.NOTE);
+			put(ContactFields.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_CHILDREN);
+			put(ContactFields.NUMBER_OF_DISTRIBUTIONLIST, Contact.NUMBER_OF_DISTRIBUTIONLIST);
+			put(ContactFields.NUMBER_OF_EMPLOYEE, Contact.NUMBER_OF_EMPLOYEE);
+			put(ContactFields.NUMBER_OF_LINKS, Contact.NUMBER_OF_LINKS);
+			put(ContactFields.POSITION, Contact.POSITION);
+			put(ContactFields.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_BUSINESS);
+			put(ContactFields.POSTAL_CODE_HOME, Contact.POSTAL_CODE_HOME);
+			put(ContactFields.POSTAL_CODE_OTHER, Contact.POSTAL_CODE_OTHER);
+			put(ContactFields.PROFESSION, Contact.PROFESSION);
+			put(ContactFields.ROOM_NUMBER, Contact.ROOM_NUMBER);
+			put(ContactFields.SALES_VOLUME, Contact.SALES_VOLUME);
+			put(ContactFields.SECOND_NAME, Contact.MIDDLE_NAME);
+			put(ContactFields.SPOUSE_NAME, Contact.SPOUSE_NAME);
+			put(ContactFields.STATE_BUSINESS, Contact.STATE_BUSINESS);
+			put(ContactFields.STATE_HOME, Contact.STATE_HOME);
+			put(ContactFields.STATE_OTHER, Contact.STATE_OTHER);
+			put(ContactFields.STREET_BUSINESS, Contact.STREET_BUSINESS);
+			put(ContactFields.STREET_HOME, Contact.STREET_HOME);
+			put(ContactFields.STREET_OTHER, Contact.STREET_OTHER);
+			put(ContactFields.SUFFIX, Contact.SUFFIX);
+			put(ContactFields.TAX_ID, Contact.TAX_ID);
+			put(ContactFields.TELEPHONE_ASSISTANT, Contact.TELEPHONE_ASSISTANT);
+			put(ContactFields.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS1);
+			put(ContactFields.TELEPHONE_BUSINESS2, Contact.TELEPHONE_BUSINESS2);
+			put(ContactFields.TELEPHONE_CALLBACK, Contact.TELEPHONE_CALLBACK);
+			put(ContactFields.TELEPHONE_CAR, Contact.TELEPHONE_CAR);
+			put(ContactFields.TELEPHONE_COMPANY, Contact.TELEPHONE_COMPANY);
+			put(ContactFields.TELEPHONE_HOME1, Contact.TELEPHONE_HOME1);
+			put(ContactFields.TELEPHONE_HOME2, Contact.TELEPHONE_HOME2);
+			put(ContactFields.TELEPHONE_IP, Contact.TELEPHONE_IP);
+			put(ContactFields.TELEPHONE_ISDN, Contact.TELEPHONE_ISDN);
+			put(ContactFields.TELEPHONE_OTHER, Contact.TELEPHONE_OTHER);
+			put(ContactFields.TELEPHONE_PAGER, Contact.TELEPHONE_PAGER);
+			put(ContactFields.TELEPHONE_PRIMARY, Contact.TELEPHONE_PRIMARY);
+			put(ContactFields.TELEPHONE_RADIO, Contact.TELEPHONE_RADIO);
+			put(ContactFields.TELEPHONE_TELEX, Contact.TELEPHONE_TELEX);
+			put(ContactFields.TELEPHONE_TTYTDD, Contact.TELEPHONE_TTYTDD);
+			put(ContactFields.TITLE, Contact.TITLE);
+			put(ContactFields.URL, Contact.URL);
 			//has no equivalent in ContactObject put(ContactFields.USER_ID, ContactObject);
-			put(ContactFields.USERFIELD01, ContactObject.USERFIELD01);
-			put(ContactFields.USERFIELD02, ContactObject.USERFIELD02);
-			put(ContactFields.USERFIELD03, ContactObject.USERFIELD03);
-			put(ContactFields.USERFIELD04, ContactObject.USERFIELD04);
-			put(ContactFields.USERFIELD05, ContactObject.USERFIELD05);
-			put(ContactFields.USERFIELD06, ContactObject.USERFIELD06);
-			put(ContactFields.USERFIELD07, ContactObject.USERFIELD07);
-			put(ContactFields.USERFIELD08, ContactObject.USERFIELD08);
-			put(ContactFields.USERFIELD09, ContactObject.USERFIELD09);
-			put(ContactFields.USERFIELD10, ContactObject.USERFIELD10);
-			put(ContactFields.USERFIELD11, ContactObject.USERFIELD11);
-			put(ContactFields.USERFIELD12, ContactObject.USERFIELD12);
-			put(ContactFields.USERFIELD13, ContactObject.USERFIELD13);
-			put(ContactFields.USERFIELD14, ContactObject.USERFIELD14);
-			put(ContactFields.USERFIELD15, ContactObject.USERFIELD15);
-			put(ContactFields.USERFIELD16, ContactObject.USERFIELD16);
-			put(ContactFields.USERFIELD17, ContactObject.USERFIELD17);
-			put(ContactFields.USERFIELD18, ContactObject.USERFIELD18);
-			put(ContactFields.USERFIELD19, ContactObject.USERFIELD19);
-			put(ContactFields.USERFIELD20, ContactObject.USERFIELD20);
+			put(ContactFields.USERFIELD01, Contact.USERFIELD01);
+			put(ContactFields.USERFIELD02, Contact.USERFIELD02);
+			put(ContactFields.USERFIELD03, Contact.USERFIELD03);
+			put(ContactFields.USERFIELD04, Contact.USERFIELD04);
+			put(ContactFields.USERFIELD05, Contact.USERFIELD05);
+			put(ContactFields.USERFIELD06, Contact.USERFIELD06);
+			put(ContactFields.USERFIELD07, Contact.USERFIELD07);
+			put(ContactFields.USERFIELD08, Contact.USERFIELD08);
+			put(ContactFields.USERFIELD09, Contact.USERFIELD09);
+			put(ContactFields.USERFIELD10, Contact.USERFIELD10);
+			put(ContactFields.USERFIELD11, Contact.USERFIELD11);
+			put(ContactFields.USERFIELD12, Contact.USERFIELD12);
+			put(ContactFields.USERFIELD13, Contact.USERFIELD13);
+			put(ContactFields.USERFIELD14, Contact.USERFIELD14);
+			put(ContactFields.USERFIELD15, Contact.USERFIELD15);
+			put(ContactFields.USERFIELD16, Contact.USERFIELD16);
+			put(ContactFields.USERFIELD17, Contact.USERFIELD17);
+			put(ContactFields.USERFIELD18, Contact.USERFIELD18);
+			put(ContactFields.USERFIELD19, Contact.USERFIELD19);
+			put(ContactFields.USERFIELD20, Contact.USERFIELD20);
 			
-			put(ContactFields.CATEGORIES, ContactObject.CATEGORIES);
-			put(ContactFields.COLORLABEL, ContactObject.COLOR_LABEL);
-			put(ContactFields.CREATED_BY, ContactObject.CREATED_BY);
-			put(ContactFields.CREATION_DATE, ContactObject.CREATION_DATE);
-			put(ContactFields.FOLDER_ID, ContactObject.FOLDER_ID);
-			put(ContactFields.ID, ContactObject.OBJECT_ID);
-			put(ContactFields.LAST_MODIFIED, ContactObject.LAST_MODIFIED);
-			put(ContactFields.LAST_MODIFIED_UTC, ContactObject.LAST_MODIFIED_UTC);
-			put(ContactFields.MODIFIED_BY, ContactObject.MODIFIED_BY);
-			put(ContactFields.NUMBER_OF_ATTACHMENTS, ContactObject.NUMBER_OF_ATTACHMENTS);
-			put(ContactFields.PRIVATE_FLAG, ContactObject.PRIVATE_FLAG);
+			put(ContactFields.CATEGORIES, Contact.CATEGORIES);
+			put(ContactFields.COLORLABEL, Contact.COLOR_LABEL);
+			put(ContactFields.CREATED_BY, Contact.CREATED_BY);
+			put(ContactFields.CREATION_DATE, Contact.CREATION_DATE);
+			put(ContactFields.FOLDER_ID, Contact.FOLDER_ID);
+			put(ContactFields.ID, Contact.OBJECT_ID);
+			put(ContactFields.LAST_MODIFIED, Contact.LAST_MODIFIED);
+			put(ContactFields.LAST_MODIFIED_UTC, Contact.LAST_MODIFIED_UTC);
+			put(ContactFields.MODIFIED_BY, Contact.MODIFIED_BY);
+			put(ContactFields.NUMBER_OF_ATTACHMENTS, Contact.NUMBER_OF_ATTACHMENTS);
+			put(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG);
 			
 			
 			

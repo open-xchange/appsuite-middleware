@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 
 public class MoveTest extends AppointmentTest {
@@ -24,14 +24,14 @@ public class MoveTest extends AppointmentTest {
 	}
 	
 	public void testMove2PrivateFolder() throws Exception {
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		final String date = String.valueOf(System.currentTimeMillis());
 		appointmentObj.setTitle("testMove2PrivateFolder" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setShownAs(Appointment.RESERVED);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
@@ -42,7 +42,7 @@ public class MoveTest extends AppointmentTest {
 
 		appointmentObj.setParentFolderID(targetFolder);
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
@@ -51,14 +51,14 @@ public class MoveTest extends AppointmentTest {
 	}	
 	
 	public void testMove2PublicFolder() throws Exception {
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		final String date = String.valueOf(System.currentTimeMillis());
 		appointmentObj.setTitle("testMove2PublicFolder" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setShownAs(Appointment.RESERVED);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
@@ -69,7 +69,7 @@ public class MoveTest extends AppointmentTest {
 
 		appointmentObj.setParentFolderID(targetFolder);
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		

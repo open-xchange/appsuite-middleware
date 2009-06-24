@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -84,7 +84,7 @@ public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse>
         return URL;
     }
 
-    protected JSONObject convert(final AppointmentObject appointmentObj, final TimeZone timeZone)
+    protected JSONObject convert(final Appointment appointmentObj, final TimeZone timeZone)
         throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
         final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);

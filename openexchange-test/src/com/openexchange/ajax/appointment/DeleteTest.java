@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class DeleteTest extends AppointmentTest {
 
@@ -24,7 +24,7 @@ public class DeleteTest extends AppointmentTest {
 	}
 	
     public void testDelete() throws Exception {
-        final AppointmentObject appointmentObj = createAppointmentObject("testDelete");
+        final Appointment appointmentObj = createAppointmentObject("testDelete");
 		appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         final int id = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -50,26 +50,26 @@ public class DeleteTest extends AppointmentTest {
 		
 		final int changeExceptionPosition = 3;
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testDeleteRecurrenceWithPosition");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startTime, endTime);
 		
-		appointmentObj = new AppointmentObject();
+		appointmentObj = new Appointment();
 		appointmentObj.setTitle("testDeleteRecurrenceWithPosition - exception");
 		appointmentObj.setStartDate(new Date(startTime + 60*60*1000));
 		appointmentObj.setEndDate(new Date(endTime + 60*60*1000));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrencePosition(changeExceptionPosition);
 		appointmentObj.setIgnoreConflicts(true);
@@ -105,19 +105,19 @@ public class DeleteTest extends AppointmentTest {
         final int changeExceptionPosition = 3;
         final Date exceptionDate = new Date(c.getTimeInMillis() + (changeExceptionPosition * dayInMillis));
 
-        final AppointmentObject appointmentObj = new AppointmentObject();
+        final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testDeleteRecurrenceWithDate");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(AppointmentObject.ABSENT);
+        appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+        appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         appointmentObj.setObjectID(objectId);
-        AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
 
 

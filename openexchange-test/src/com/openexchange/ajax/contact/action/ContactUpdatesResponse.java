@@ -58,7 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link ContactUpdatesResponse}
@@ -67,18 +67,18 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class ContactUpdatesResponse extends CommonUpdatesResponse {
 
-    private List<ContactObject> contacts = new ArrayList<ContactObject>();
+    private List<Contact> contacts = new ArrayList<Contact>();
 
     public ContactUpdatesResponse(Response response) {
         super(response);
     }
 
     
-    public void setContacts(List<ContactObject> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
     
-    public List<ContactObject> getContacts() {
+    public List<Contact> getContacts() {
         return contacts;
     }
 }

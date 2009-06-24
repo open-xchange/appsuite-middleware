@@ -55,7 +55,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
@@ -109,7 +109,7 @@ public class DistributionListTransformator implements Transformator {
 	}
 
 	private DistributionListEntryObject getContactDistributionListEntry(final String fixtureName, final String fixtureEntry) throws FixtureException {
-		final ContactObject contact = fixtureLoader.getFixtures(fixtureName, ContactObject.class).getEntry(fixtureEntry).getEntry();
+		final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
 		String email = null;
 		if (contact.containsEmail1()) {
 			email = contact.getEmail1();
@@ -127,7 +127,7 @@ public class DistributionListTransformator implements Transformator {
 	}
 
 	private DistributionListEntryObject getUserDistributionListEntry(final String fixtureName, final String fixtureEntry) throws FixtureException {
-		final ContactObject user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact();
+		final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact();
 		DistributionListEntryObject entry = new DistributionListEntryObject();
 		entry.setDisplayname(user.getDisplayName());
 		try {

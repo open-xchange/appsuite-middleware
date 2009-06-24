@@ -1,9 +1,9 @@
 package com.openexchange.test.fixtures;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 public interface GroupResolver {
 	
-	public ContactObject[] resolveGroup(final String simpleName);
-	public ContactObject[] resolveGroup(final int groupId);
+	public Contact[] resolveGroup(final String simpleName);
+	public Contact[] resolveGroup(final int groupId);
 }

@@ -21,7 +21,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 
@@ -45,11 +45,11 @@ public class SearchTest extends ContactTest {
             username = getLogin();
         }
 
-        final ContactObject[] contactArray = searchContact(
+        final Contact[] contactArray = searchContact(
             getWebConversation(),
             username,
             FolderObject.SYSTEM_LDAP_FOLDER_ID,
-            new int[] { ContactObject.INTERNAL_USERID },
+            new int[] { Contact.INTERNAL_USERID },
             PROTOCOL + getHostName(),
             getSessionId());
         assertTrue("contact array size is 0", contactArray.length > 0);
@@ -57,17 +57,17 @@ public class SearchTest extends ContactTest {
     }
 
     public void testSearchStartCharacter() throws Exception {
-        final ContactObject contactObj = new ContactObject();
+        final Contact contactObj = new Contact();
         contactObj.setSurName("Meier");
         contactObj.setParentFolderID(contactFolderId);
         final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         final int objectId2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 
-        final ContactObject[] contactArray = searchContact(
+        final Contact[] contactArray = searchContact(
             getWebConversation(),
             "M",
             contactFolderId,
-            new int[] { ContactObject.INTERNAL_USERID },
+            new int[] { Contact.INTERNAL_USERID },
             true,
             PROTOCOL + getHostName(),
             getSessionId());
@@ -77,19 +77,19 @@ public class SearchTest extends ContactTest {
     }
 
     public void testSearchEmailComplete() throws Exception {
-        final ContactObject contactObj = new ContactObject();
+        final Contact contactObj = new Contact();
         contactObj.setSurName("Mustermann");
         contactObj.setGivenName("Tom");
         contactObj.setEmail1("tom.mustermann@email.com");
         contactObj.setParentFolderID(contactFolderId);
 
-        final ContactObject contactObj2 = new ContactObject();
+        final Contact contactObj2 = new Contact();
         contactObj2.setSurName("Mustermann");
         contactObj2.setGivenName("Ute");
         contactObj2.setEmail1("ute.mustermann@email.com");
         contactObj2.setParentFolderID(contactFolderId);
 
-        final ContactObject contactObj3 = new ContactObject();
+        final Contact contactObj3 = new Contact();
         contactObj3.setSurName("Gloreich");
         contactObj3.setGivenName("Guenter");
         contactObj3.setEmail1("g.gloreich@email.com");
@@ -103,11 +103,11 @@ public class SearchTest extends ContactTest {
         cso.setSurname("Must*");
         cso.setEmailAutoComplete(true);
 
-        final ContactObject[] contactArray = searchContactAdvanced(
+        final Contact[] contactArray = searchContactAdvanced(
             getWebConversation(),
             cso,
             contactFolderId,
-            new int[] { ContactObject.INTERNAL_USERID },
+            new int[] { Contact.INTERNAL_USERID },
             PROTOCOL + getHostName(),
             getSessionId());
         assertTrue("contact array size >= 2", contactArray.length >= 2);
@@ -116,11 +116,11 @@ public class SearchTest extends ContactTest {
         cso.setEmail1("*email.com");
         cso.setEmailAutoComplete(true);
 
-        final ContactObject[] contactArray2 = searchContactAdvanced(
+        final Contact[] contactArray2 = searchContactAdvanced(
             getWebConversation(),
             cso,
             contactFolderId,
-            new int[] { ContactObject.INTERNAL_USERID },
+            new int[] { Contact.INTERNAL_USERID },
             PROTOCOL + getHostName(),
             getSessionId());
         assertTrue("contact array size >= 3", contactArray2.length >= 3);
@@ -131,9 +131,9 @@ public class SearchTest extends ContactTest {
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        final int cols[] = new int[] { ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED_UTC };
+        final int cols[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
 
-        final ContactObject contactObj = createContactObject("testLastModifiedUTC");
+        final Contact contactObj = createContactObject("testLastModifiedUTC");
         final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         try {
 
@@ -168,19 +168,19 @@ public class SearchTest extends ContactTest {
             searchObject.addFolder(6);
             searchObject.addFolder(collectFolderId);
             
-            int[] columns = new int[] {ContactObject.FOLDER_ID, ContactObject.OBJECT_ID, ContactObject.USE_COUNT};
+            int[] columns = new int[] {Contact.FOLDER_ID, Contact.OBJECT_ID, Contact.USE_COUNT};
             
             List<Parameter> parameters = new ArrayList<Parameter>();
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, ContactObject.USE_COUNT_GLOBAL_FIRST));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, Contact.USE_COUNT_GLOBAL_FIRST));
             parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "ASC"));
             com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
             com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
             
-            ContactObject[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
+            Contact[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
             
             boolean stillGlobal = true;
             int previousCount = Integer.MAX_VALUE;
-            for (ContactObject contactObject : result) {
+            for (Contact contactObject : result) {
                 if (!stillGlobal) {
                     assertFalse("Did not expect global contacts any more.", contactObject.getParentFolderID() == 6);
                 }
@@ -201,21 +201,21 @@ public class SearchTest extends ContactTest {
     // Node 3087
 
     private int[] insertSearchableContacts(int folderId) throws IOException, SAXException, JSONException, Exception {
-        final ContactObject contactObj = new ContactObject();
+        final Contact contactObj = new Contact();
         contactObj.setSurName("Mustermann");
         contactObj.setGivenName("Tom");
         contactObj.setEmail1("tom.mustermann@email.com");
         contactObj.setParentFolderID(folderId);
         contactObj.setUseCount(1);
 
-        final ContactObject contactObj2 = new ContactObject();
+        final Contact contactObj2 = new Contact();
         contactObj2.setSurName("Mustermann");
         contactObj2.setGivenName("Ute");
         contactObj2.setEmail1("ute.mustermann@email.com");
         contactObj2.setParentFolderID(folderId);
         contactObj2.setUseCount(2);
 
-        final ContactObject contactObj3 = new ContactObject();
+        final Contact contactObj3 = new Contact();
         contactObj3.setSurName("Gloreich");
         contactObj3.setGivenName("Guenter");
         contactObj3.setParentFolderID(folderId);
@@ -250,7 +250,7 @@ public class SearchTest extends ContactTest {
 
             SearchRequest search = new SearchRequest(
                 cso,
-                new int[] { ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.GIVEN_NAME },
+                new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME },
                 true);
 
             AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
@@ -285,7 +285,7 @@ public class SearchTest extends ContactTest {
             
             SearchRequest search = new SearchRequest(
                 cso,
-                new int[] { ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.GIVEN_NAME },
+                new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME },
                 true);
 
             AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));

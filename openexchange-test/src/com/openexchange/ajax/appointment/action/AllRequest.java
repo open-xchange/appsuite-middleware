@@ -57,7 +57,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
 
 /**
@@ -67,11 +67,11 @@ import com.openexchange.groupware.search.Order;
 public class AllRequest extends CommonAllRequest {
 
     public static final int[] GUI_COLUMNS = new int[] {
-        AppointmentObject.OBJECT_ID,
-        AppointmentObject.FOLDER_ID
+        Appointment.OBJECT_ID,
+        Appointment.FOLDER_ID
     };
 
-    public static final int GUI_SORT = AppointmentObject.START_DATE;
+    public static final int GUI_SORT = Appointment.START_DATE;
 
     public static final Order GUI_ORDER = Order.ASCENDING;
 

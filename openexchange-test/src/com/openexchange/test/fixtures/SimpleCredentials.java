@@ -52,7 +52,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -62,7 +62,7 @@ public class SimpleCredentials implements Cloneable {
     private String login;
     private String imapLogin;
     private String password;
-    private ContactObject contact;
+    private Contact contact;
     private TestUserConfig config;
     private TestUserConfigFactory userConfigFactory = null;
 	private ContactFinder contactFinder;
@@ -97,7 +97,7 @@ public class SimpleCredentials implements Cloneable {
         this.password = password;
     }
 
-    public ContactObject asContact() {
+    public Contact asContact() {
     	if (null == this.contact) {
     		this.contact = contactFinder.getContact(this);
     	}

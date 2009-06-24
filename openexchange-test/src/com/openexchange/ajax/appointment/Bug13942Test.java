@@ -68,7 +68,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.servlet.AjaxException;
@@ -78,7 +78,7 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class Bug13942Test extends AbstractAJAXSession {
 
-    private AppointmentObject appointment, updateAppointment;
+    private Appointment appointment, updateAppointment;
     
     private int userIdA, userIdB, userIdC;
     
@@ -95,7 +95,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         userIdB = getClientB().getValues().getUserId();
         userIdC = getClientC().getValues().getUserId();
         
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test Bug 13942");
         appointment.setStartDate(new Date(TimeTools.getHour(0, getClient().getValues().getTimeZone())));
@@ -111,7 +111,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         ConfirmResponse confirmResponse = getClientB().execute(confirmRequest);
         appointment.setLastModified(confirmResponse.getTimestamp());
         
-        updateAppointment = new AppointmentObject();
+        updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setParentFolderID(getClientB().getValues().getPrivateAppointmentFolder());
         updateAppointment.setLastModified(appointment.getLastModified());
@@ -132,7 +132,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         appointment.setLastModified(updateResponse.getTimestamp());
         GetRequest getRequest = new GetRequest(getClientB().getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         GetResponse getResponse = getClientB().execute(getRequest);
-        AppointmentObject loadedAppointment = getResponse.getAppointment(getClientB().getValues().getTimeZone());
+        Appointment loadedAppointment = getResponse.getAppointment(getClientB().getValues().getTimeZone());
         for (UserParticipant user : loadedAppointment.getUsers()) {
             if (user.getIdentifier() == userIdB) {
                 assertEquals("Lost confirmation status", CalendarObject.ACCEPT, user.getConfirm());

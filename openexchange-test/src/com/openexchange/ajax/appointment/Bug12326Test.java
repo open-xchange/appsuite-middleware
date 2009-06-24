@@ -65,7 +65,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Checks if the data of recurring appointment exceptions is correctly stored
@@ -75,11 +75,11 @@ import com.openexchange.groupware.container.AppointmentObject;
 public final class Bug12326Test extends AbstractAJAXSession {
 
     private static final int[] columns = new int[] {
-        AppointmentObject.OBJECT_ID,
-        AppointmentObject.FOLDER_ID,
-        AppointmentObject.RECURRENCE_TYPE,
-        AppointmentObject.RECURRENCE_POSITION,
-        AppointmentObject.RECURRENCE_ID
+        Appointment.OBJECT_ID,
+        Appointment.FOLDER_ID,
+        Appointment.RECURRENCE_TYPE,
+        Appointment.RECURRENCE_POSITION,
+        Appointment.RECURRENCE_ID
     };
 
 	/**
@@ -98,7 +98,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-		final AppointmentObject series = new AppointmentObject();
+		final Appointment series = new Appointment();
         final Calendar calendar = TimeTools.createCalendar(tz);
 		{
 			series.setTitle("Test for bug 12326");
@@ -110,7 +110,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
             calendar.add(Calendar.HOUR, 1);
             series.setEndDate(calendar.getTime());
             // Configure daily series with 5 occurences
-            series.setRecurrenceType(AppointmentObject.DAILY);
+            series.setRecurrenceType(Appointment.DAILY);
             series.setInterval(1);
             series.setOccurrence(5);
 		}
@@ -123,7 +123,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
 		try {
 		    final int recurrence_position = 3;
 			// Load third occurence
-		    final AppointmentObject occurence;
+		    final Appointment occurence;
 			{
 				final GetRequest request= new GetRequest(folderId, series.getObjectID(), recurrence_position);
 				final GetResponse response = client.execute(request);
@@ -133,7 +133,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
 			// Create exception
 			final int exceptionId;
 			{
-				final AppointmentObject exception = new AppointmentObject();
+				final Appointment exception = new Appointment();
                 exception.setObjectID(occurence.getObjectID());
                 exception.setParentFolderID(folderId);
                 exception.setLastModified(occurence.getLastModified());
@@ -153,10 +153,10 @@ public final class Bug12326Test extends AbstractAJAXSession {
 			{
 			    final GetRequest request = new GetRequest(folderId, exceptionId);
 			    final GetResponse response = client.execute(request);
-	            final AppointmentObject exception = response.getAppointment(tz);
+	            final Appointment exception = response.getAppointment(tz);
 	            series.setLastModified(exception.getLastModified());
 	            // Check exception
-	            assertEquals("Exception is still a series.", AppointmentObject.NO_RECURRENCE, exception.getRecurrenceType());
+	            assertEquals("Exception is still a series.", Appointment.NO_RECURRENCE, exception.getRecurrenceType());
 	            assertEquals("Exception must have a recurrence position.", occurence.getRecurrencePosition(), exception.getRecurrencePosition());
 	            assertEquals("Exception is missing reference to series.", series.getObjectID(), exception.getRecurrenceID());
 			}
@@ -166,7 +166,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
 			    final ListRequest request = new ListRequest(ids, columns);
 			    final CommonListResponse response = client.execute(request);
 			    final Object[] data = response.getArray()[0];
-	            assertEquals("Exception is still a series.", Integer.valueOf(AppointmentObject.NO_RECURRENCE), data[2]);
+	            assertEquals("Exception is still a series.", Integer.valueOf(Appointment.NO_RECURRENCE), data[2]);
 	            assertEquals("Exception must have a recurrence position.", Integer.valueOf(occurence.getRecurrencePosition()), data[3]);
 	            assertEquals("Exception is missing reference to series.", Integer.valueOf(series.getObjectID()), data[4]);
 	            series.setLastModified(response.getTimestamp());

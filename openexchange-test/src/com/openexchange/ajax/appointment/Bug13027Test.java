@@ -67,7 +67,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -83,7 +83,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("America/New York");
         String formerTimeZone = "Europe/Berlin";
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         int objectId = 0;
         Date lastModified = null;
 
@@ -143,7 +143,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         String formerTimeZone = "Europe/Berlin";
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         int objectId = 0;
         Date lastModified = null;
 
@@ -203,7 +203,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("UTC");
         String formerTimeZone = "Europe/Berlin";
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         int objectId = 0;
         Date lastModified = null;
 
@@ -263,7 +263,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("America/New York");
         String formerTimeZone = "Europe/Berlin";
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         int objectId = 0;
         Date lastModified = null;
 
@@ -341,7 +341,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
         AllRequest request = new AllRequest(
             folderId,
-            new int[] { AppointmentObject.OBJECT_ID, AppointmentObject.LAST_MODIFIED },
+            new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED },
             start.getTime(),
             end.getTime(),
             tz);

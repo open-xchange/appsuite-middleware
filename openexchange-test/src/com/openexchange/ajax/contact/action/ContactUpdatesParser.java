@@ -61,7 +61,7 @@ import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 
@@ -84,21 +84,21 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
     @Override
     protected ContactUpdatesResponse createResponse(Response response) throws JSONException {
         ContactUpdatesResponse contactUpdatesResponse = super.createResponse(response);
-        List<ContactObject> contacts = new ArrayList<ContactObject>();
+        List<Contact> contacts = new ArrayList<Contact>();
         JSONArray rows = (JSONArray) response.getData();
         if (rows == null) {
             return contactUpdatesResponse;
         }
         for (int i = 0, size = rows.length(); i < size; i++) {
             JSONArray row = rows.getJSONArray(i);
-            ContactObject contact = new ContactObject();
+            Contact contact = new Contact();
             for (int colIndex = 0; colIndex < columns.length; colIndex++) {
                 Object value = row.get(colIndex);
                 if (value == JSONObject.NULL) {
                     continue;
                 }
                 int column = columns[colIndex];
-                if (column == ContactObject.LAST_MODIFIED_UTC) {
+                if (column == Contact.LAST_MODIFIED_UTC) {
                     continue;
                 }
                 value = transform(value, column);
@@ -117,16 +117,16 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
     
     private Object transform(Object actual, int column) throws JSONException {
         switch (column) {
-            case ContactObject.CREATION_DATE:
-            case ContactObject.LAST_MODIFIED:
-            case ContactObject.ANNIVERSARY:
-            case ContactObject.BIRTHDAY:
+            case Contact.CREATION_DATE:
+            case Contact.LAST_MODIFIED:
+            case Contact.ANNIVERSARY:
+            case Contact.BIRTHDAY:
                 return new Date( ( (Long) actual ).intValue() );
-            case ContactObject.IMAGE1:
+            case Contact.IMAGE1:
                 return ((String) actual).getBytes();
-            case ContactObject.LINKS:
+            case Contact.LINKS:
                 return transformLinks( (JSONArray) actual );
-            case ContactObject.DISTRIBUTIONLIST:
+            case Contact.DISTRIBUTIONLIST:
                 return transformDistributionList( (JSONArray) actual);
 
         }

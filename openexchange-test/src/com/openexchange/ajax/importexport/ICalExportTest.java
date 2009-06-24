@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
@@ -68,17 +68,17 @@ public class ICalExportTest extends AbstractICalTest {
 	public void testExportICalAppointment() throws Exception {
 		final String title = "testExportICalAppointment" + System.currentTimeMillis();
 
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(title);
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setShownAs(Appointment.RESERVED);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 
 		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
+		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
 
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {

@@ -11,7 +11,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug12610Test extends AbstractAJAXSession {
 
@@ -21,7 +21,7 @@ public class Bug12610Test extends AbstractAJAXSession {
 
     public void testBugAsWritten() throws Throwable{
         AJAXClient client = null;
-        AppointmentObject appointment = new AppointmentObject();
+        Appointment appointment = new Appointment();
         
         try {
             client = getClient();
@@ -39,7 +39,7 @@ public class Bug12610Test extends AbstractAJAXSession {
             appointment.setStartDate(calendar.getTime());
             calendar.set(Calendar.HOUR_OF_DAY, 9);
             appointment.setEndDate(calendar.getTime());
-            appointment.setRecurrenceType(AppointmentObject.YEARLY);
+            appointment.setRecurrenceType(Appointment.YEARLY);
             appointment.setDayInMonth(15);
             appointment.setMonth(Calendar.JUNE);
             final Calendar until = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));

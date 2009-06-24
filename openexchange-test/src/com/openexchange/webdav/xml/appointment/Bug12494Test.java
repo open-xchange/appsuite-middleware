@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -46,20 +46,20 @@ public class Bug12494Test extends AppointmentTest {
 			/*
 			 * Create daily recurring appointment
 			 */
-			final AppointmentObject appointmentObj = new AppointmentObject();
+			final Appointment appointmentObj = new Appointment();
 			appointmentObj.setTitle("testBug12494");
 			appointmentObj.setStartDate(startTime);
 			appointmentObj.setEndDate(endTime);
-			appointmentObj.setShownAs(AppointmentObject.ABSENT);
+			appointmentObj.setShownAs(Appointment.ABSENT);
 			appointmentObj.setParentFolderID(appointmentFolderId);
-			appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+			appointmentObj.setRecurrenceType(Appointment.DAILY);
 			appointmentObj.setInterval(1);
 			appointmentObj.setUntil(until);
 			appointmentObj.setIgnoreConflicts(true);
 
 			final UserParticipant[] users = new UserParticipant[1];
 			users[0] = new UserParticipant(userId);
-			users[0].setConfirm(AppointmentObject.ACCEPT);
+			users[0].setConfirm(Appointment.ACCEPT);
 
 			appointmentObj.setUsers(users);
 
@@ -69,12 +69,12 @@ public class Bug12494Test extends AppointmentTest {
 			/*
 			 * Create a change exception
 			 */
-			final AppointmentObject recurrenceUpdate = new AppointmentObject();
+			final Appointment recurrenceUpdate = new Appointment();
 			recurrenceUpdate.setTitle("testBug12494 - exception");
 			recurrenceUpdate.setStartDate(new Date(startTime.getTime() + 600000));
 			recurrenceUpdate.setEndDate(new Date(endTime.getTime() + 600000));
 			recurrenceUpdate.setRecurrenceDatePosition(recurrenceDatePosition);
-			recurrenceUpdate.setShownAs(AppointmentObject.ABSENT);
+			recurrenceUpdate.setShownAs(Appointment.ABSENT);
 			recurrenceUpdate.setParentFolderID(appointmentFolderId);
 			recurrenceUpdate.setIgnoreConflicts(true);
 			recurrenceUpdate.setUsers(users);
@@ -96,7 +96,7 @@ public class Bug12494Test extends AppointmentTest {
 			/*
 			 * Load updated change exception
 			 */
-			final AppointmentObject loadedChangeException = loadAppointment(getWebConversation(), exceptionId,
+			final Appointment loadedChangeException = loadAppointment(getWebConversation(), exceptionId,
 					appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			compareObject(recurrenceUpdate, loadedChangeException);
 		} finally {

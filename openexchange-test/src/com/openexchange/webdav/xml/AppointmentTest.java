@@ -23,7 +23,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -97,7 +97,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		userId = folderObj.getCreatedBy();
 	}
 	
-	public static void compareObject(final AppointmentObject appointmentObj1, final AppointmentObject appointmentObj2) throws Exception {
+	public static void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) throws Exception {
 		assertEquals("id is not equals", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
 		assertEqualsAndNotNull("title is not equals", appointmentObj1.getTitle(), appointmentObj2.getTitle());
 		assertEqualsAndNotNull("start is not equals", appointmentObj1.getStartDate(), appointmentObj2.getStartDate());
@@ -124,19 +124,19 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("users are not equals" , users2String(appointmentObj1.getUsers()), users2String(appointmentObj2.getUsers()));
 	}
 	
-	protected AppointmentObject createAppointmentObject(final String title) throws Exception {
-		final AppointmentObject appointmentobject = new AppointmentObject();
+	protected Appointment createAppointmentObject(final String title) throws Exception {
+		final Appointment appointmentobject = new Appointment();
 		appointmentobject.setTitle(title);
 		appointmentobject.setStartDate(startTime);
 		appointmentobject.setEndDate(endTime);
 		appointmentobject.setLocation("Location");
-		appointmentobject.setShownAs(AppointmentObject.ABSENT);
+		appointmentobject.setShownAs(Appointment.ABSENT);
 		appointmentobject.setParentFolderID(appointmentFolderId);
 		
 		return appointmentobject;
 	}
 	
-	public static int insertAppointment(final WebConversation webCon, AppointmentObject appointmentObj, String host, final String login, final String password) throws OXException, Exception {
+	public static int insertAppointment(final WebConversation webCon, Appointment appointmentObj, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		int objectId = 0;
@@ -174,7 +174,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check response status", 200, response[0].getStatus());
 		
-		appointmentObj = (AppointmentObject)response[0].getDataObject();
+		appointmentObj = (Appointment)response[0].getDataObject();
 		objectId = appointmentObj.getObjectID();
 		
 		assertNotNull("last modified is null", appointmentObj.getLastModified());
@@ -185,11 +185,11 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static int updateAppointment(final WebConversation webCon, final AppointmentObject appointmentObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
+	public static int updateAppointment(final WebConversation webCon, final Appointment appointmentObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
 		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 
-	public static int updateAppointment(final WebConversation webCon, AppointmentObject appointmentObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
+	public static int updateAppointment(final WebConversation webCon, Appointment appointmentObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		appointmentObj.setObjectID(objectId);
@@ -223,7 +223,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		if (response[0].hasError()) {
 			throw new TestException(response[0].getErrorMessage());
 		} else {
-			appointmentObj = (AppointmentObject)response[0].getDataObject();
+			appointmentObj = (Appointment)response[0].getDataObject();
 			objectId = appointmentObj.getObjectID();
 			
 			assertNotNull("last modified is null", appointmentObj.getLastModified());
@@ -245,7 +245,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setParentFolderID(inFolder);
 		appointmentObj.setLastModified(lastModified);
@@ -305,7 +305,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setParentFolderID(inFolder);
 		appointmentObj.setLastModified(lastModified);
@@ -447,11 +447,11 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return (int[])response[0].getDataObject();
 	}
 	
-	public static AppointmentObject[] listAppointment(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
+	public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		if (!changed && !deleted) {
-			return new AppointmentObject[] { };
+			return new Appointment[] { };
 		}
 		
 		final Element ePropfind = new Element("propfind", webdav);
@@ -508,21 +508,21 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.APPOINTMENT);
 		
-		final AppointmentObject[] appointmentArray = new AppointmentObject[response.length];
+		final Appointment[] appointmentArray = new Appointment[response.length];
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
 			}
 			
-			appointmentArray[a] = (AppointmentObject)response[a].getDataObject();
+			appointmentArray[a] = (Appointment)response[a].getDataObject();
 			assertNotNull("last modified is null", appointmentArray[a].getLastModified());
 		}
 		
 		return appointmentArray;
 	}
 	
-	public static AppointmentObject loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password) throws TestException, Exception {
-		final AppointmentObject[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password);
+	public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password) throws TestException, Exception {
+		final Appointment[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password);
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
@@ -533,7 +533,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		throw new TestException("object not found");
 	}
 	
-	public static AppointmentObject loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
+	public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
@@ -582,7 +582,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		assertEquals("check response status", 200, response[0].getStatus());
 		
-		return (AppointmentObject)response[0].getDataObject();
+		return (Appointment)response[0].getDataObject();
 	}
 	
 	private static HashSet participants2String(final Participant[] participant) throws Exception {

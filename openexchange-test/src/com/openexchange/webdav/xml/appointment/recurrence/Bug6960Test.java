@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug6960Test extends AbstractRecurrenceTest {
 	
@@ -37,13 +37,13 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		
 		final Date until = calendar.getTime();
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug6960");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
@@ -60,23 +60,23 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		
 		final Date exceptionEndDate = calendarException.getTime();
 		
-		final AppointmentObject exceptionAppointmentObject = new AppointmentObject();
+		final Appointment exceptionAppointmentObject = new Appointment();
 		exceptionAppointmentObject.setTitle("testBug6960 - change exception");
 		exceptionAppointmentObject.setStartDate(exceptionStartDate);
 		exceptionAppointmentObject.setEndDate(exceptionEndDate);
 		exceptionAppointmentObject.setRecurrenceDatePosition(recurrenceDatePosition);
-		exceptionAppointmentObject.setShownAs(AppointmentObject.ABSENT);
+		exceptionAppointmentObject.setShownAs(Appointment.ABSENT);
 		exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
 		exceptionAppointmentObject.setIgnoreConflicts(true);
 
 		final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadAppointment.getLastModified();
 		
 		deleteAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, recurrenceDatePosition, getHostName(), getLogin(), getPassword());
 		
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, modified, true, true, getHostName(), getLogin(), getPassword());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, modified, true, true, getHostName(), getLogin(), getPassword());
 		boolean found = false;
 		
 		for (int a = 0; a < appointmentArray.length; a++) {

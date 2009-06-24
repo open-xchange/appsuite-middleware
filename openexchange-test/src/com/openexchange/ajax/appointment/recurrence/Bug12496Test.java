@@ -64,7 +64,7 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Verifies the until date of a full time daily series appointment.
@@ -76,7 +76,7 @@ public final class Bug12496Test extends AbstractAJAXSession {
 
     private int folderId;
 
-    private AppointmentObject appointment;
+    private Appointment appointment;
 
     /**
      * Default constructor.
@@ -113,16 +113,16 @@ public final class Bug12496Test extends AbstractAJAXSession {
 
     public void testDailyFullTimeUntil() throws Throwable {
         final AJAXClient client = getClient();
-        final AppointmentObject changed = changeAppointment();
+        final Appointment changed = changeAppointment();
         final UpdateRequest request = new SpecialUpdateRequest(changed, tz);
         final UpdateResponse response = client.execute(request);
         appointment.setLastModified(response.getTimestamp());
     }
 
-    private AppointmentObject createAppointment() {
+    private Appointment createAppointment() {
         final Calendar calendar = TimeTools.createCalendar(TimeZone
             .getTimeZone("UTC"));
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("test for bug 12496");
         appointment.setParentFolderID(folderId);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -131,15 +131,15 @@ public final class Bug12496Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setFullTime(true);
         appointment.setIgnoreConflicts(true);
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(2);
         return appointment;
     }
 
-    private AppointmentObject changeAppointment() {
+    private Appointment changeAppointment() {
         final Calendar calendar = TimeTools.createCalendar(tz);
-        final AppointmentObject changed = new AppointmentObject();
+        final Appointment changed = new Appointment();
         changed.setTitle("test for bug 12496 changed");
         changed.setParentFolderID(folderId);
         changed.setObjectID(appointment.getObjectID());
@@ -153,7 +153,7 @@ public final class Bug12496Test extends AbstractAJAXSession {
     }
 
     private static final class SpecialUpdateRequest extends UpdateRequest {
-        public SpecialUpdateRequest(final AppointmentObject appointment,
+        public SpecialUpdateRequest(final Appointment appointment,
             final TimeZone tz) {
             super(appointment, tz);
         }

@@ -54,7 +54,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 
 /**
@@ -65,11 +65,11 @@ import com.openexchange.groupware.search.Order;
 public class AllRequest extends CommonAllRequest {
 
     public static final int[] GUI_COLUMNS = new int[] {
-    	ContactObject.OBJECT_ID,
-    	ContactObject.FOLDER_ID
+    	Contact.OBJECT_ID,
+    	Contact.FOLDER_ID
     };
 
-    public static final int GUI_SORT = ContactObject.SUR_NAME;
+    public static final int GUI_SORT = Contact.SUR_NAME;
 
     public static final Order GUI_ORDER = Order.ASCENDING;
 

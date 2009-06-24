@@ -66,7 +66,7 @@ import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Checks if the calendar has a vulnerability in the list request.
@@ -95,7 +95,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
 		final int folderA = clientA.getValues().getPrivateAppointmentFolder();
 		final int folderB = clientB.getValues().getPrivateAppointmentFolder();
 		final TimeZone tz = clientA.getValues().getTimeZone();
-		final AppointmentObject app = new AppointmentObject();
+		final Appointment app = new Appointment();
 		app.setParentFolderID(folderA);
 		app.setTitle("Bug10836Test");
 		app.setStartDate(new Date(TimeTools.getHour(0, tz)));
@@ -106,7 +106,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
 		    final ListIDs list = new ListIDs();
 		    list.add(new ListIDInt(folderB, insertR.getId()));
 			final CommonListResponse listR = clientB.execute(new ListRequest(list,
-		        new int[] { AppointmentObject.TITLE }, false));
+		        new int[] { Appointment.TITLE }, false));
 
 			assertTrue(listR.hasError());
 			/*

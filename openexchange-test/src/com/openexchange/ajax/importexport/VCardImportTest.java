@@ -60,7 +60,7 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
@@ -86,12 +86,12 @@ public class VCardImportTest extends AbstractVCardTest {
 	}
 	
 	public void testImportVCard() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testImportVCard" + System.currentTimeMillis());
 		contactObj.setGivenName("givenName");
 		contactObj.setBirthday(simpleDateFormat.parse("2007-04-04"));
 
-		final ImportResult[] importResult = importVCard(getWebConversation(), new ContactObject[]  { contactObj }, contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		final ImportResult[] importResult = importVCard(getWebConversation(), new Contact[]  { contactObj }, contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
@@ -100,7 +100,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final Contact[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -190,7 +190,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
-		final ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n" , myImport.getDisplayName());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
@@ -207,7 +207,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertFalse("Import worked?", importResult[0].hasError());
 		
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
-		final ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "Colombara" , myImport.getSurName());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
@@ -222,7 +222,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
-		final ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "Conference_Room_Olpe" , myImport.getDisplayName());
 		assertEquals("Checking email1 (must be null):" , null , myImport.getEmail1());
 		assertEquals("Checking email2 (must be null):" , null , myImport.getEmail2());
@@ -240,7 +240,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
-		final ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "B\u00f6rnig" , myImport.getSurName());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());

@@ -53,7 +53,7 @@ import java.util.Date;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -83,7 +83,7 @@ public class Bug12413Test extends CalendarSqlTest {
             final Date octQueryStart = new Date(1222819200000L);
             // 1. November 2008 00:00:00 UTC
             final Date octQueryEnd = new Date(1225497600000L);
-            final SearchIterator<AppointmentObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
+            final SearchIterator<Appointment> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
                 appointments.getPrivateFolder(),
                 ACTION_ALL_FIELDS,
                 octQueryStart,
@@ -108,7 +108,7 @@ public class Bug12413Test extends CalendarSqlTest {
             final Date novQueryStart = new Date(1225497600000L);
             // 1. December 2008 00:00:00 UTC
             final Date novQueryEnd = new Date(1228089600000L);
-            final SearchIterator<AppointmentObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
+            final SearchIterator<Appointment> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
                 appointments.getPrivateFolder(),
                 ACTION_ALL_FIELDS,
                 novQueryStart,

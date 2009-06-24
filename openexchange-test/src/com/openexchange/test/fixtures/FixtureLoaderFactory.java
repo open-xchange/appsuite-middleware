@@ -52,8 +52,8 @@ import java.io.File;
 
 import com.openexchange.group.Group;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.resource.Resource;
 
@@ -68,8 +68,8 @@ public class FixtureLoaderFactory {
     	
     	loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
     	// TODO: create and use groupResolver 
-        loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), AppointmentObject.class);
-        loader.addFixtureFactory(new ContactFixtureFactory(loader), ContactObject.class);
+        loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), Appointment.class);
+        loader.addFixtureFactory(new ContactFixtureFactory(loader), Contact.class);
         loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
         // TODO: create and use TestUserConfigFactory 
         // TODO: create and use ContactFinder

@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -25,17 +25,17 @@ public class Bug8724Test extends AppointmentTest {
 		CommonObject.PRIVATE_FLAG,
 		CommonObject.CATEGORIES,
 		CalendarObject.TITLE,
-		AppointmentObject.LOCATION,
+		Appointment.LOCATION,
 		CalendarObject.START_DATE,
 		CalendarObject.END_DATE,
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
-		AppointmentObject.SHOWN_AS,
-		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL,
-		AppointmentObject.TIMEZONE
+		Appointment.SHOWN_AS,
+		Appointment.FULL_TIME,
+		Appointment.COLOR_LABEL,
+		Appointment.TIMEZONE
 	};
 
 	private static final Log LOG = LogFactory.getLog(Bug8724Test.class);
@@ -54,21 +54,21 @@ public class Bug8724Test extends AppointmentTest {
 	 * if one id is requested trhat doesn't exist
 	 */
 	public void testBug8724_I() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testBug8724_I");
+		final Appointment appointmentObj = createAppointmentObject("testBug8724_I");
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
-		final AppointmentObject appointmentListObject = new AppointmentObject();
+		final Appointment appointmentListObject = new Appointment();
 		appointmentListObject.setObjectID(objectId+1000);
 		appointmentListObject.setParentFolderID(appointmentFolderId);
 		
 		try {
-			listAppointment(getWebConversation(), new AppointmentObject[] { appointmentListObject }, _appointmentFields, timeZone, getHostName(), getSessionId());
+			listAppointment(getWebConversation(), new Appointment[] { appointmentListObject }, _appointmentFields, timeZone, getHostName(), getSessionId());
 		} catch (final TestException exc) {
 			assertTrue(true);
 		}
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId());
@@ -79,19 +79,19 @@ public class Bug8724Test extends AppointmentTest {
 	 * if one id is requested trhat doesn't exist
 	 */
 	public void testBug8724_II() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testBug8724_II");
+		final Appointment appointmentObj = createAppointmentObject("testBug8724_II");
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
-		final AppointmentObject appointmentListObject1 = new AppointmentObject();
+		final Appointment appointmentListObject1 = new Appointment();
 		appointmentListObject1.setObjectID(objectId+1000);
 		appointmentListObject1.setParentFolderID(appointmentFolderId);
 
-		final AppointmentObject appointmentListObject2 = new AppointmentObject();
+		final Appointment appointmentListObject2 = new Appointment();
 		appointmentListObject2.setObjectID(objectId+1001);
 		appointmentListObject2.setParentFolderID(appointmentFolderId);
 		
-		final AppointmentObject[] appointmentArray = { appointmentListObject1, appointmentListObject2 };
+		final Appointment[] appointmentArray = { appointmentListObject1, appointmentListObject2 };
 		
 		try {
 			listAppointment(getWebConversation(), appointmentArray, _appointmentFields, timeZone, getHostName(), getSessionId());
@@ -99,7 +99,7 @@ public class Bug8724Test extends AppointmentTest {
 			assertTrue(true);
 		}
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId());

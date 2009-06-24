@@ -54,7 +54,7 @@ import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.AbstractStep;
 import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
 /**
@@ -64,13 +64,13 @@ import com.openexchange.test.ContactTestManager;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class ContactCreateStep extends AbstractStep implements IdentitySource<ContactObject>{
+public class ContactCreateStep extends AbstractStep implements IdentitySource<Contact>{
 
-    private ContactObject entry;
+    private Contact entry;
     private boolean inserted;
     private ContactTestManager manager;
     
-    public ContactCreateStep(ContactObject entry, String name, String expectedError) {
+    public ContactCreateStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
@@ -93,23 +93,23 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
         checkError(insertResponse);        
     }
 
-    public void assumeIdentity(ContactObject contact) {
+    public void assumeIdentity(Contact contact) {
         contact.setObjectID( entry.getObjectID() );
         contact.setParentFolderID( entry.getParentFolderID());
         contact.setLastModified( entry.getLastModified());        
     }
 
-    public void rememberIdentityValues(ContactObject contact) {
+    public void rememberIdentityValues(Contact contact) {
         contact.setLastModified( entry.getLastModified());  
         contact.setParentFolderID(entry.getParentFolderID());
     }
 
-    public void forgetIdentity(ContactObject entry) {
+    public void forgetIdentity(Contact entry) {
         inserted = false;
     }
     
-    public Class<ContactObject> getType() {
-        return ContactObject.class;
+    public Class<Contact> getType() {
+        return Contact.class;
     }
 
 }

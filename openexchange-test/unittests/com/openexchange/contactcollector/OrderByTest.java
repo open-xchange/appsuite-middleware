@@ -60,7 +60,7 @@ import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -117,9 +117,9 @@ public class OrderByTest extends TestCase {
             ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
             session);
 
-        final ContactObject contact1 = new ContactObject();
-        final ContactObject contact2 = new ContactObject();
-        final ContactObject contact3 = new ContactObject();
+        final Contact contact1 = new Contact();
+        final Contact contact2 = new Contact();
+        final Contact contact3 = new Contact();
         contact1.setParentFolderID(contactFolder.getObjectID());
         contact2.setParentFolderID(contactFolder.getObjectID());
         contact3.setParentFolderID(contactFolder.getObjectID());
@@ -140,19 +140,19 @@ public class OrderByTest extends TestCase {
 
             final ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmailAutoComplete(true);
-            searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
+            searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { "orderbyTest", "orderbyTest", "orderbyTest" });
             final int[] columns = new int[] {
-                FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, DataObject.OBJECT_ID, ContactObject.SUR_NAME };
-            final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(
+                FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, DataObject.OBJECT_ID, Contact.SUR_NAME };
+            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(
                 searchObject,
-                ContactObject.USERFIELD20,
+                Contact.USERFIELD20,
                 "ASC",
                 columns);
 
             final List<String> surnames = new ArrayList<String>();
             while (iterator.hasNext()) {
-                ContactObject foundContact;
+                Contact foundContact;
                 try {
                     foundContact = iterator.next();
                 } catch (final SearchIteratorException e) {

@@ -67,7 +67,7 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.ajax.user.UserTools;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
@@ -76,11 +76,11 @@ public class UserTest extends AbstractAJAXTest {
 
     public final static int[] CONTACT_FIELDS = {
         DataObject.OBJECT_ID,
-        ContactObject.INTERNAL_USERID,
-        ContactObject.EMAIL1,
-        ContactObject.GIVEN_NAME,
-        ContactObject.SUR_NAME,
-        ContactObject.DISPLAY_NAME
+        Contact.INTERNAL_USERID,
+        Contact.EMAIL1,
+        Contact.GIVEN_NAME,
+        Contact.SUR_NAME,
+        Contact.DISPLAY_NAME
     };
 
     public UserTest(final String name) {

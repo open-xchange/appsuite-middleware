@@ -53,7 +53,7 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -71,16 +71,16 @@ public class Bug4778Test extends CalendarSqlTest {
         try {
             appointments.switchUser(secondUser);
 
-            final SearchIterator<AppointmentObject> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
+            final SearchIterator<Appointment> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
                 userId,
                 Participant.USER,
                 D("23/02/1981 00:00"),
                 D("25/02/1981 00:00"));
 
-            final List<AppointmentObject> appointments = read(freebusy);
+            final List<Appointment> appointments = read(freebusy);
 
             assertEquals(1, appointments.size());
-            final AppointmentObject result = appointments.get(0);
+            final Appointment result = appointments.get(0);
             // Assert the title is visible
 
             assertEquals(appointment.getTitle(), result.getTitle());

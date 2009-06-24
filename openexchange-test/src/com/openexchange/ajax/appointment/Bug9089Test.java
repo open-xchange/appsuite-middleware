@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
@@ -44,12 +44,12 @@ public class Bug9089Test extends AppointmentTest {
 		
 		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 		
-		final AppointmentObject appointmentObj = createAppointmentObject("testBug9089");
+		final Appointment appointmentObj = createAppointmentObject("testBug9089");
 		appointmentObj.setParentFolderID(newFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
 		Date modified = loadAppointment.getLastModified();
 		
 		appointmentObj.setPrivateFlag(true);

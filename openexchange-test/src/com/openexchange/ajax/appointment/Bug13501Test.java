@@ -62,14 +62,14 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 
 public class Bug13501Test extends AbstractAJAXSession {
 
     private TimeZone tz;
 
-    private AppointmentObject appointment, update;
+    private Appointment appointment, update;
 
     private int[] columns;
 
@@ -106,7 +106,7 @@ public class Bug13501Test extends AbstractAJAXSession {
 
         GetRequest getRequest = new GetRequest(client.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         GetResponse getResponse = client.execute(getRequest);
-        AppointmentObject sequenceApp = getResponse.getAppointment(client.getValues().getTimeZone());
+        Appointment sequenceApp = getResponse.getAppointment(client.getValues().getTimeZone());
         
         assertEquals("Wrong occurrences value", 5, sequenceApp.getOccurrence());
     }
@@ -127,7 +127,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(start.getTimeInMillis() + 3600000);
 
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setTitle("bug 13501 test");
         appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
@@ -147,14 +147,14 @@ public class Bug13501Test extends AbstractAJAXSession {
         until.set(Calendar.MONTH, Calendar.JULY);
         until.set(Calendar.YEAR, 2009);
 
-        update = new AppointmentObject();
+        update = new Appointment();
         update.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         update.setRecurrenceType(CalendarObject.WEEKLY);
         update.setDays(CalendarObject.MONDAY);
         update.setOccurrence(5);
         update.setInterval(1);
 
-        columns = new int[] { AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_COUNT, AppointmentObject.START_DATE, AppointmentObject.END_DATE };
+        columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_COUNT, Appointment.START_DATE, Appointment.END_DATE };
 
         startSearch = new Date(1246233600000l); // 29.06.2009 00:00:00
         endSearch = new Date(1249257600000l); // 03.08.2009 00:00:00

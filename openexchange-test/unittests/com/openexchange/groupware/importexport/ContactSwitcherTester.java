@@ -64,7 +64,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
 /**
@@ -77,63 +77,63 @@ public class ContactSwitcherTester extends TestCase {
 	
 	public void testSetStringValue() throws ContactException{
 		// preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.GIVEN_NAME;
 		final String value = "Prinz";
 		
 		//setting
-		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
+		conObj = (Contact) field.doSwitch(new ContactSetter(), conObj, value);
 		
 		assertEquals("Setting of String value does work" , conObj.getGivenName(), value);
 	}
 	
 	public void testSetMailValue() throws ContactException{
 		// preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.EMAIL1;
 		final String value = "prinz@example.invalid";
 		
 		//setting
-		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
+		conObj = (Contact) field.doSwitch(new ContactSetter(), conObj, value);
 		
 		assertEquals("Setting of e-mail does work" , conObj.getEmail1(), value);
 	}
 	
 	public void testSetDateValue() throws ContactException{
 		// preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
 		final Date value = new Date(System.currentTimeMillis());
 		
 		//preparing setter for a normal date
-		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
+		conObj = (Contact) field.doSwitch(new ContactSetter(), conObj, value);
 		
 		assertEquals("Setting of Date value does work" , conObj.getBirthday(), value);
 	}
 	
 	public void testSetDateValueViaTimestamp() throws ContactException{
 		// preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
 		final long value = System.currentTimeMillis();
 		
 		//setting up setter for Timestamp instead of date
 		final ContactSwitcherForTimestamp switcher = new ContactSwitcherForTimestamp();
 		switcher.setDelegate(new ContactSetter());
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		
 		assertEquals("Setting of date via timestamp (as long) does work" , conObj.getBirthday(), new Date(value));
 		
 		final String value2 = new Long(value).toString();
 		switcher.setDelegate(new ContactSetter());
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		
 		assertEquals("Setting of date via timestamp (as String) does work" , conObj.getBirthday(), new Date(value));
 	}
 	
 	public void testSetDateValueViaSimpleDate() throws ContactException, ParseException{
 		// preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
 		final String value = "1981/03/05";
 
@@ -145,14 +145,14 @@ public class ContactSwitcherTester extends TestCase {
 		switcher.addDateFormat(sdf);
 
 		//setting
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), sdf.parse(value));
 	}
 	
 	public void testGetDateAndName() throws ContactException{
 		//preparations
-		final ContactObject conObj = new ContactObject();
+		final Contact conObj = new Contact();
 		final Date date = new Date(System.currentTimeMillis());
 		final String nickname = "Tierlieb";
 		
@@ -171,7 +171,7 @@ public class ContactSwitcherTester extends TestCase {
 	
 	public void testDateSwitchingForBug7552() throws ParseException, ContactException{
 		//preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
 
 		//setting up a proper setter for SimpleDateFormat
@@ -182,17 +182,17 @@ public class ContactSwitcherTester extends TestCase {
 
 		//setting
 		String value = "1981/03/05";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getAmericanDateNotation().parse(value));
 		
 		value = "05.03.1981";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getGermanDateNotation().parse(value));
 	}
 	
 	public void testBooleanSwitchingForBug7710() throws ContactException{
 		//preparations
-		ContactObject conObj = new ContactObject();
+		Contact conObj = new Contact();
 		final ContactField field = ContactField.PRIVATE_FLAG;
 
 		//setting up a proper setter for SimpleDateFormat
@@ -201,70 +201,70 @@ public class ContactSwitcherTester extends TestCase {
 
 		//positive string tests
 		String value = "true"; //english outlook
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
 		
 		value = "1";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
 		
 		value = "yes";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
 		
 		value = "y";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
 
 		value = "Priv\u00e9"; //french outlook
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
 
 		//negative string tests
 		value = "no";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does no work" , false, conObj.getPrivateFlag());
 		
 		value = "false"; //english outlook
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 		
 		value = "wrong";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 		
 		value = "0";
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 		
 		value = "normal"; //french outlook
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 
 		//positive object tests
 		Object value2 = 1;
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
 		
 		value2 = true;
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
 		
 		value2 = new Boolean(true);
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
 		
 		//negative object tests
 		value2 = 0;
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does not work" , false, conObj.getPrivateFlag());
 		
 		value2 = false;
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does not work" , false, conObj.getPrivateFlag());
 		
 		value2 = new Boolean(false);
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		conObj = (Contact) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does not work" , false, conObj.getPrivateFlag());
 		
 		

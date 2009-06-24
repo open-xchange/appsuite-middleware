@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
@@ -30,7 +30,7 @@ public class ConfirmTest extends AppointmentTest {
 		final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
-        final AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
+        final Appointment appointmentObj = createAppointmentObject("testConfirm");
 		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
@@ -43,9 +43,9 @@ public class ConfirmTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
-        confirmAppointment(getSecondWebConversation(), objectId, sharedFolderObject.getObjectID(), AppointmentObject.ACCEPT, "Yap.", PROTOCOL + getHostName(), getSecondSessionId());
+        confirmAppointment(getSecondWebConversation(), objectId, sharedFolderObject.getObjectID(), Appointment.ACCEPT, "Yap.", PROTOCOL + getHostName(), getSecondSessionId());
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -53,7 +53,7 @@ public class ConfirmTest extends AppointmentTest {
 		for (int a = 0; a < users.length; a++) {
 			if (users[a].getIdentifier() == secondUserId) {
 				found = true;
-				assertEquals("wrong confirm status", AppointmentObject.ACCEPT, users[a].getConfirm());
+				assertEquals("wrong confirm status", Appointment.ACCEPT, users[a].getConfirm());
 			}
 		}
 		

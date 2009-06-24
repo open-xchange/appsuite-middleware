@@ -3,7 +3,7 @@ package com.openexchange.webdav.xml.appointment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
@@ -38,7 +38,7 @@ public class Bug5933Test extends AppointmentTest {
 		
 		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 		
-		final AppointmentObject appointmentObj = createAppointmentObject("Bug5933Test");
+		final Appointment appointmentObj = createAppointmentObject("Bug5933Test");
 		appointmentObj.setParentFolderID(newFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
@@ -54,7 +54,7 @@ public class Bug5933Test extends AppointmentTest {
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 		appointmentObj.setObjectID(objectId);
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 	
 		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());

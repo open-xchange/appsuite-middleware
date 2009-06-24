@@ -66,7 +66,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.URLParameter;
 
 /**
@@ -112,7 +112,7 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
             /*
              * Check behavior if inserting a new appointment
              */
-            final AppointmentObject newApp = createAppointmentObject(
+            final Appointment newApp = createAppointmentObject(
                 "TestAppointment",
                 System.currentTimeMillis(),
                 System.currentTimeMillis() + 3600l,
@@ -135,7 +135,7 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
         }
     }
 
-    private static JSONObject insertAppointment(final WebConversation webCon, final AppointmentObject appointmentObj, final TimeZone userTimeZone, final String host, final String session) throws JSONException, MalformedURLException, IOException, SAXException {
+    private static JSONObject insertAppointment(final WebConversation webCon, final Appointment appointmentObj, final TimeZone userTimeZone, final String host, final String session) throws JSONException, MalformedURLException, IOException, SAXException {
         final StringWriter stringWriter = new StringWriter();
 
         final JSONObject jsonObj = new JSONObject();
@@ -167,13 +167,13 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
         return json;
     }
 
-    private static AppointmentObject createAppointmentObject(final String title, final long startTime, final long endTime, final int appointmentFolderId) {
-        final AppointmentObject appointmentobject = new AppointmentObject();
+    private static Appointment createAppointmentObject(final String title, final long startTime, final long endTime, final int appointmentFolderId) {
+        final Appointment appointmentobject = new Appointment();
         appointmentobject.setTitle(title);
         appointmentobject.setStartDate(new Date(startTime));
         appointmentobject.setEndDate(new Date(endTime));
         appointmentobject.setLocation("Location");
-        appointmentobject.setShownAs(AppointmentObject.ABSENT);
+        appointmentobject.setShownAs(Appointment.ABSENT);
         appointmentobject.setParentFolderID(appointmentFolderId);
 
         return appointmentobject;

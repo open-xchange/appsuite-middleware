@@ -20,7 +20,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -35,7 +35,7 @@ public class Bug12264Test extends AbstractAJAXSession {
     private int folderId = 0;
     private Date lastModified = null;
     private TimeZone tz = null;
-    private AppointmentObject appointment = null;
+    private Appointment appointment = null;
 
     public Bug12264Test(String name) {
         super(name);
@@ -185,8 +185,8 @@ public class Bug12264Test extends AbstractAJAXSession {
             
             //Steps 3,4,5
             //Change to sequence, weekly, wednesday, ends after 2 occurrences
-            appointment.setRecurrenceType(AppointmentObject.WEEKLY);
-            appointment.setDays(AppointmentObject.WEDNESDAY);
+            appointment.setRecurrenceType(Appointment.WEEKLY);
+            appointment.setDays(Appointment.WEDNESDAY);
             appointment.setInterval(1);
             appointment.setOccurrence(2);
             
@@ -270,7 +270,7 @@ public class Bug12264Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         folderId = client.getValues().getPrivateAppointmentFolder();
         
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setTitle(title);
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
@@ -279,8 +279,8 @@ public class Bug12264Test extends AbstractAJAXSession {
         appointment.setStartDate(calendar.getTime());
         calendar.set(Calendar.HOUR_OF_DAY, 9);
         appointment.setEndDate(calendar.getTime());
-        appointment.setRecurrenceType(AppointmentObject.WEEKLY);
-        appointment.setDays(AppointmentObject.WEDNESDAY);
+        appointment.setRecurrenceType(Appointment.WEEKLY);
+        appointment.setDays(Appointment.WEDNESDAY);
         appointment.setInterval(1);
         appointment.setOccurrence(2);
     }
@@ -290,7 +290,7 @@ public class Bug12264Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         folderId = client.getValues().getPrivateAppointmentFolder();
         
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setTitle(title);
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
@@ -299,8 +299,8 @@ public class Bug12264Test extends AbstractAJAXSession {
         appointment.setStartDate(calendar.getTime());
         calendar.set(Calendar.HOUR_OF_DAY, 9);
         appointment.setEndDate(calendar.getTime());
-        appointment.setRecurrenceType(AppointmentObject.WEEKLY);
-        appointment.setDays(AppointmentObject.WEDNESDAY);
+        appointment.setRecurrenceType(Appointment.WEEKLY);
+        appointment.setDays(Appointment.WEDNESDAY);
         appointment.setInterval(1);
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -331,7 +331,7 @@ public class Bug12264Test extends AbstractAJAXSession {
      */
     private class UntilNullAppointmentUpdateRequest extends UpdateRequest {
 
-        public UntilNullAppointmentUpdateRequest(AppointmentObject appointmentObj, TimeZone timeZone) {
+        public UntilNullAppointmentUpdateRequest(Appointment appointmentObj, TimeZone timeZone) {
             super(appointmentObj, timeZone);
         }
         
@@ -349,7 +349,7 @@ public class Bug12264Test extends AbstractAJAXSession {
      *
      */
     private class OccurrencesNullAppointmentUpdateRequest extends UpdateRequest {
-        public OccurrencesNullAppointmentUpdateRequest(AppointmentObject appointmentObj, TimeZone timeZone) {
+        public OccurrencesNullAppointmentUpdateRequest(Appointment appointmentObj, TimeZone timeZone) {
             super(appointmentObj, timeZone);
         }
         @Override

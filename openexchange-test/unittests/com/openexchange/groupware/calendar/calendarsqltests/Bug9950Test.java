@@ -53,7 +53,7 @@ import static com.openexchange.tools.events.EventAssertions.assertModificationEv
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.events.TestEventAdmin;
 
 
@@ -73,7 +73,7 @@ public class Bug9950Test extends CalendarSqlTest {
         update.setParticipants(tools.users(ctx, participant1, participant2));
         appointments.save(update);
 
-        assertModificationEventWithOldObject(AppointmentObject.class, appointment.getParentFolderID(), appointment.getObjectID());
+        assertModificationEventWithOldObject(Appointment.class, appointment.getParentFolderID(), appointment.getObjectID());
 
     }
 }

@@ -12,7 +12,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.user.actions.ListResponse;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 public class ListTest extends ContactTest {
 	
@@ -28,7 +28,7 @@ public class ListTest extends ContactTest {
 	}
 
 	public void testList() throws Exception {
-		final ContactObject contactObj = createContactObject("testList");
+		final Contact contactObj = createContactObject("testList");
 		final int id1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		final int id2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		final int id3 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -38,41 +38,41 @@ public class ListTest extends ContactTest {
 		
 		final int[][] objectIdAndFolderId = { { id1, contactFolderId }, { id2, contactFolderId }, { id3, contactFolderId } };
 		
-		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
+		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME } ;
 		
-		final ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, cols, PROTOCOL + getHostName(), getSessionId());
+		final Contact[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, cols, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 3, contactArray.length);
 	}
 	
 	public void testListWithAllFields() throws Exception {
-		final ContactObject contactObject = createCompleteContactObject();
+		final Contact contactObject = createCompleteContactObject();
 
 		final int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
 		
 		final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
 		
-		final ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, CONTACT_FIELDS, PROTOCOL + getHostName(), getSessionId());
+		final Contact[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, CONTACT_FIELDS, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 1, contactArray.length);
 		
-		final ContactObject loadContact = contactArray[0];
+		final Contact loadContact = contactArray[0];
 		
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
 
 	public void testListWithNotExistingEntries() throws Exception {
-		final ContactObject contactObject = createCompleteContactObject();
+		final Contact contactObject = createCompleteContactObject();
 		
 		final int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
 		final int objectId2 = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
 		
-		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
+		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME } ;
 		
 		// not existing object last
 		final int[][] objectIdAndFolderId1 = { { objectId, contactFolderId }, { objectId+100, contactFolderId } };
-		ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId1, cols, getHostName(), getSessionId());		
+		Contact[] contactArray = listContact(getWebConversation(), objectIdAndFolderId1, cols, getHostName(), getSessionId());		
 		assertEquals("check response array", 1, contactArray.length);
 
 		// not existing object first
@@ -90,19 +90,19 @@ public class ListTest extends ContactTest {
 	
 	public void testListUser() throws Exception {
 		final int[] userIdArray = { userId };
-		final int[] cols = { ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME };
+		final int[] cols = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME };
 		final com.openexchange.ajax.user.actions.ListRequest request = new com.openexchange.ajax.user.actions.ListRequest(userIdArray, cols);
 		final ListResponse response = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId())).execute(request);
-		final ContactObject[] contactArray = response.getUsers();
+		final Contact[] contactArray = response.getUsers();
 		assertEquals("check response array", userIdArray.length, contactArray.length);
 	}
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED_UTC};
+        final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC};
 
-        final ContactObject contactObj = createContactObject("testLastModifiedUTC");
+        final Contact contactObj = createContactObject("testLastModifiedUTC");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         try {
             final ListRequest listRequest = new ListRequest(ListIDs.l(new int[]{contactFolderId, objectId}), cols, true);

@@ -56,7 +56,7 @@ import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.AppointmentObject;
  */
 public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 
-	private AppointmentObject[] appointmentObj;
+	private Appointment[] appointmentObj;
 	
 	private final int[] columns;
 	
@@ -79,7 +79,7 @@ public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 		this.timeZone = timeZone;
     }
 	
-	public AppointmentObject[] getAppointments() throws Exception {
+	public Appointment[] getAppointments() throws Exception {
 		final JSONArray jsonArray = (JSONArray)getResponse().getData();
 		return AppointmentTest.jsonArray2AppointmentArray(jsonArray, columns, timeZone);
 	}

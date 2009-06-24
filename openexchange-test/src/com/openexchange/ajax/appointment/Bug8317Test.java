@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug8317Test extends AppointmentTest {
 	
@@ -96,13 +96,13 @@ public class Bug8317Test extends AppointmentTest {
         calendar.add(Calendar.DATE, 1);
         Date endDate = calendar.getTime();
 
-        AppointmentObject appointmentObj = new AppointmentObject();
+        Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug8317");
         appointmentObj.setStartDate(startDate);
         appointmentObj.setEndDate(endDate);
         appointmentObj.setFullTime(true);
         appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setShownAs(AppointmentObject.ABSENT);
+        appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 
@@ -113,12 +113,12 @@ public class Bug8317Test extends AppointmentTest {
         calendar.set(year, month, day, 1, 0, 0);
         endDate = calendar.getTime();
 
-        appointmentObj = new AppointmentObject();
+        appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug8317 II");
         appointmentObj.setStartDate(startDate);
         appointmentObj.setEndDate(endDate);
         appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setShownAs(AppointmentObject.ABSENT);
+        appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setIgnoreConflicts(false);
 
         try {

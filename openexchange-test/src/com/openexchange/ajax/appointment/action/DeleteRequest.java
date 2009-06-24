@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
@@ -88,7 +88,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     	this(objectId, inFolder, 0, lastModified, true);
 	}
 
-    public DeleteRequest(final AppointmentObject appointment) {
+    public DeleteRequest(final Appointment appointment) {
         this(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified());
     }
 

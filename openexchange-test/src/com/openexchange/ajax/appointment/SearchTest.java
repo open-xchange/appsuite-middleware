@@ -59,7 +59,7 @@ import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class SearchTest extends AppointmentTest {
 
@@ -75,7 +75,7 @@ public class SearchTest extends AppointmentTest {
     }
 
     public void testSimpleSearch() throws Exception {
-        final AppointmentObject appointmentObj = new AppointmentObject();
+        final Appointment appointmentObj = new Appointment();
         final String date = String.valueOf(System.currentTimeMillis());
         appointmentObj.setTitle("testSimpleSearch" + date);
         appointmentObj.setStartDate(new Date(startTime));
@@ -85,7 +85,7 @@ public class SearchTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        final AppointmentObject[] appointmentArray = searchAppointment(
+        final Appointment[] appointmentArray = searchAppointment(
             getWebConversation(),
             "testSimpleSearch" + date,
             appointmentFolderId,
@@ -103,9 +103,9 @@ public class SearchTest extends AppointmentTest {
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        final int cols[] = new int[] { AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.LAST_MODIFIED_UTC };
+        final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };
 
-        final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
+        final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60 * 60 * 1000));
         appointmentObj.setIgnoreConflicts(true);

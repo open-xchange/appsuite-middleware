@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * 
@@ -29,7 +29,7 @@ public class Bug4409Test extends ContactTest {
 	}
 	
 	public void testBug4409() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testBug4409");
 		contactObj.setParentFolderID(contactFolderId);
 		

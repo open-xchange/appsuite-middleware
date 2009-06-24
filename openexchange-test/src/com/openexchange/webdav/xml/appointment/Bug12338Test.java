@@ -61,7 +61,7 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -99,7 +99,7 @@ public final class Bug12338Test extends AbstractWebDAVSession {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("Test appointment for bug 12338");
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setStartDate(calendar.getTime());
@@ -122,7 +122,7 @@ public final class Bug12338Test extends AbstractWebDAVSession {
 
         private final int userId;
 
-        public SpecialInsertRequest(final AppointmentObject appointment, final int userId) {
+        public SpecialInsertRequest(final Appointment appointment, final int userId) {
             super(appointment);
             this.userId = userId;
         }

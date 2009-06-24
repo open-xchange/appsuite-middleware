@@ -2,7 +2,7 @@ package com.openexchange.webdav.xml.contact;
 
 import java.util.Date;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -14,7 +14,7 @@ public class DeleteTest extends ContactTest {
 	}
 	
 	public void testDelete() throws Exception {
-		final ContactObject contactObj = createContactObject("testDelete");
+		final Contact contactObj = createContactObject("testDelete");
 		final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		final int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
@@ -24,7 +24,7 @@ public class DeleteTest extends ContactTest {
 	}
 	
 	public void testDeleteConcurentConflict() throws Exception {
-		final ContactObject contactObj = createContactObject("testDeleteConcurentConflict");
+		final Contact contactObj = createContactObject("testDeleteConcurentConflict");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		try {
@@ -38,7 +38,7 @@ public class DeleteTest extends ContactTest {
 	}
 	
 	public void testDeleteNotFound() throws Exception {
-		final ContactObject contactObj = createContactObject("testUpdateContactNotFound");
+		final Contact contactObj = createContactObject("testUpdateContactNotFound");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		try {

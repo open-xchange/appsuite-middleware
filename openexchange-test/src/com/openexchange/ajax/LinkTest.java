@@ -18,8 +18,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.URLParameter;
@@ -36,7 +36,7 @@ public class LinkTest extends AbstractAJAXTest {
 
 		FolderObject fo = FolderTest.getStandardContactFolder(webCon, host, session);
 		final int  fid1 = fo.getObjectID();
-		final ContactObject co = new ContactObject();
+		final Contact co = new Contact();
 		co.setSurName("Meier");
 		co.setGivenName("Herbert");
 		co.setDisplayName("Meier, Herbert");
@@ -45,7 +45,7 @@ public class LinkTest extends AbstractAJAXTest {
 		
 		fo = FolderTest.getStandardCalendarFolder(webCon, host, session);
 		final int fid2 = fo.getObjectID();
-		final AppointmentObject ao = new AppointmentObject();
+		final Appointment ao = new Appointment();
 		ao.setTitle("Nasenmann");
 		final Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 8);
@@ -60,7 +60,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setStartDate(new Date(startTime));
 		ao.setEndDate(new Date(endTime));
 		ao.setLocation("Location");
-		ao.setShownAs(AppointmentObject.ABSENT);
+		ao.setShownAs(Appointment.ABSENT);
 		ao.setParentFolderID(fid2);
 		ao.setIgnoreConflicts(true);
 		

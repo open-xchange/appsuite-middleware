@@ -57,7 +57,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -93,14 +93,14 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest {
 		CommonObject.PRIVATE_FLAG,
 		CommonObject.CATEGORIES,
 		CalendarObject.TITLE,
-		AppointmentObject.LOCATION,
+		Appointment.LOCATION,
 		CalendarObject.START_DATE,
 		CalendarObject.END_DATE,
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
-		AppointmentObject.SHOWN_AS,
-		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL
+		Appointment.SHOWN_AS,
+		Appointment.FULL_TIME,
+		Appointment.COLOR_LABEL
 	};
 	
 	/**

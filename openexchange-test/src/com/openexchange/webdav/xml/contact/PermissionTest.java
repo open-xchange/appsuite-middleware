@@ -1,6 +1,6 @@
 package com.openexchange.webdav.xml.contact;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
@@ -33,7 +33,7 @@ public class PermissionTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testInsertContactInPrivateFolderWithoutPermission");
 		contactObj.setParentFolderID(parentFolderId);
 		
@@ -62,7 +62,7 @@ public class PermissionTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testInsertContactInPublicFolderWithoutPermission");
 		contactObj.setParentFolderID(parentFolderId);
 		
@@ -91,7 +91,7 @@ public class PermissionTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testUpdateContactInPrivateFolderWithoutPermission");
 		contactObj.setParentFolderID(parentFolderId);
 		
@@ -123,7 +123,7 @@ public class PermissionTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testUpdateContactInPublicFolderWithoutPermission");
 		contactObj.setParentFolderID(parentFolderId);
 		
@@ -155,7 +155,7 @@ public class PermissionTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testDeleteContactInPrivateFolderWithoutPermission");
 		contactObj.setParentFolderID(parentFolderId);
 		
@@ -187,7 +187,7 @@ public class PermissionTest extends ContactTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testDeleteContactInPublicFolderWithoutPermission");
 		contactObj.setParentFolderID(parentFolderId);
 		

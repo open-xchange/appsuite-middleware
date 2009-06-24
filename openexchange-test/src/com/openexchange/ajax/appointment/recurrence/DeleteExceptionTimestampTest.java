@@ -56,7 +56,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
@@ -70,7 +70,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
 
     private CalendarTestManager manager;
-    private AppointmentObject appointment;
+    private Appointment appointment;
 
     public DeleteExceptionTimestampTest(String name) {
         super(name);
@@ -81,11 +81,11 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         super.setUp();
         // Create series
         manager = new CalendarTestManager(getClient());
-        appointment = new AppointmentObject();
+        appointment = new Appointment();
         appointment.setTitle(getName());
         appointment.setStartDate(D("24/02/2007 10:00"));
         appointment.setEndDate(D("24/02/2007 12:00"));
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(5);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());

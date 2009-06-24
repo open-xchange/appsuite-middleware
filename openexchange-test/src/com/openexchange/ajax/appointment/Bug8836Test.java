@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug8836Test extends AppointmentTest {
 
@@ -22,14 +22,14 @@ public class Bug8836Test extends AppointmentTest {
 	}
 	
 	public void testBug8836() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testBug8836");
+		final Appointment appointmentObj = createAppointmentObject("testBug8836");
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setPrivateFlag(true);
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		Date modified = new Date(loadAppointment.getLastModified().getTime()+1);
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, modified, timeZone, getHostName(), getSessionId());

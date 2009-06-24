@@ -70,7 +70,7 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -93,9 +93,9 @@ public final class Bug12595Test extends AbstractAJAXSession {
 
     private FolderObject sharedFolder;
 
-    private AppointmentObject series;
+    private Appointment series;
 
-    private AppointmentObject exception;
+    private Appointment exception;
 
     /**
      * Default constructor.
@@ -164,14 +164,14 @@ public final class Bug12595Test extends AbstractAJAXSession {
 
     private void createSeries() throws AjaxException, IOException, SAXException,
         JSONException {
-        series = new AppointmentObject();
+        series = new Appointment();
         series.setParentFolderID(sharedFolder.getObjectID());
         series.setTitle("test for bug 12595");
         final Calendar calendar = TimeTools.createCalendar(secTZ);
         series.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         series.setEndDate(calendar.getTime());
-        series.setRecurrenceType(AppointmentObject.DAILY);
+        series.setRecurrenceType(Appointment.DAILY);
         series.setInterval(1);
         series.setOccurrence(2);
         series.setParticipants(new Participant[] {
@@ -191,8 +191,8 @@ public final class Bug12595Test extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(sharedFolder.getObjectID(),
             series.getObjectID(), 2);
         final GetResponse response = secretary.execute(request);
-        final AppointmentObject occurrence = response.getAppointment(secTZ);
-        exception = new AppointmentObject();
+        final Appointment occurrence = response.getAppointment(secTZ);
+        exception = new Appointment();
         // TODO server gives private folder of secretary instead of boss' shared
         // folder.
         exception.setParentFolderID(sharedFolder.getObjectID());

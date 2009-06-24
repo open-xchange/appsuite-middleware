@@ -18,7 +18,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -111,7 +111,7 @@ public class ParticipantNotifyTest extends TestCase{
 
 
 
-    public AppointmentObject convertFromICal(final InputStream icalFile) throws Exception{
+    public Appointment convertFromICal(final InputStream icalFile) throws Exception{
         OXContainerConverter oxContainerConverter = null;
 
 	    oxContainerConverter = new OXContainerConverter(session.getContext(), TimeZone.getDefault());

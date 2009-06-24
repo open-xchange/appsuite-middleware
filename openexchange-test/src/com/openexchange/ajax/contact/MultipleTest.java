@@ -12,7 +12,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 public class MultipleTest extends ContactTest {
 	
@@ -30,7 +30,7 @@ public class MultipleTest extends ContactTest {
 	}
 	
 	public void testMultipleInsert() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testMultipleInsert");
 		contactObj.setParentFolderID(contactFolderId);
 		

@@ -64,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * This class contains test methods of calendar problems described by Funambol.
@@ -90,7 +90,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final int folder = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-        final AppointmentObject app = new AppointmentObject();
+        final Appointment app = new Appointment();
         app.setParentFolderID(folder);
         app.setTitle("TestCreationTime");
         app.setStartDate(new Date(TimeTools.getHour(0)));
@@ -101,7 +101,7 @@ public final class FunambolTest extends AbstractAJAXSession {
             client, new InsertRequest(app, tz));
         final GetResponse getR = Executor.execute(client,
             new GetRequest(folder, insertR));
-        final AppointmentObject reload = getR.getAppointment(tz);
+        final Appointment reload = getR.getAppointment(tz);
         final Date creationDate = reload.getCreationDate();
         final Date modified = reload.getLastModified();
         final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());

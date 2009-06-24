@@ -51,7 +51,7 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import java.util.List;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 
 public class Bug12662Test extends CalendarSqlTest {
@@ -92,9 +92,9 @@ public class Bug12662Test extends CalendarSqlTest {
 
             {
                 // Check that whole series is gone for second participant
-                final List<AppointmentObject> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
+                final List<Appointment> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
                 boolean occurred = false;
-                for (final AppointmentObject cdao : list) {
+                for (final Appointment cdao : list) {
                     final int cur = cdao.getObjectID();
                     if (cur > 0 && (cur == objectId || cur == changeId)) {
                         occurred = true;
@@ -107,9 +107,9 @@ public class Bug12662Test extends CalendarSqlTest {
             {
                 // Check whole series still exists for owner
                 appointments.switchUser(user);
-                final List<AppointmentObject> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
+                final List<Appointment> list = appointments.getAppointmentsInFolder(appointments.getPrivateFolder());
                 int occurred = 0;
-                for (final AppointmentObject cdao : list) {
+                for (final Appointment cdao : list) {
                     final int cur = cdao.getObjectID();
                     if (cur > 0) {
                         if (cur == objectId) {

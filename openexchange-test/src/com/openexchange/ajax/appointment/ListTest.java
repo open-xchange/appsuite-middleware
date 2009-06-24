@@ -20,8 +20,8 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -42,7 +42,7 @@ public class ListTest extends AppointmentTest {
 	}
 
 	public void testList() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testList");
+		final Appointment appointmentObj = createAppointmentObject("testList");
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -51,9 +51,9 @@ public class ListTest extends AppointmentTest {
 		
 		final int[][] objectIdAndFolderId = { { id1, appointmentFolderId }, { id2, appointmentFolderId }, { id3, appointmentFolderId } };
 		
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+		final int cols[] = new int[]{ Appointment.OBJECT_ID, Appointment.TITLE, Appointment.CREATED_BY, Appointment.FOLDER_ID, Appointment.USERS };
 		
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 3, appointmentArray.length);
 		
@@ -63,7 +63,7 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testListWithNoEntries() throws Exception {
-		final AppointmentObject appointmentObj = createAppointmentObject("testList");
+		final Appointment appointmentObj = createAppointmentObject("testList");
 		appointmentObj.setIgnoreConflicts(true);
 		final int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		final int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -71,9 +71,9 @@ public class ListTest extends AppointmentTest {
 		
 		final int[][] objectIdAndFolderId = { };
 		
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+		final int cols[] = new int[]{ Appointment.OBJECT_ID, Appointment.TITLE, Appointment.CREATED_BY, Appointment.FOLDER_ID, Appointment.USERS };
 		
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 0, appointmentArray.length);
 		
@@ -83,12 +83,12 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testListWithAllFields() throws Exception {
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testListWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setLocation("Location");
-		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setShownAs(Appointment.FREE);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		//appointmentObj.setPrivateFlag(true); // Currently not supported!
 		appointmentObj.setFullTime(true);
@@ -96,7 +96,7 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setNote("note");
 		appointmentObj.setCategories("testcat1,testcat2,testcat3");
 		
-		final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
 		final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, getHostName(), getSessionId())[0].getIdentifier();
 		final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
@@ -118,11 +118,11 @@ public class ListTest extends AppointmentTest {
 			
 			final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
 			
-			final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
+			final Appointment[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
 			
 			assertEquals("check response array", 1, appointmentArray.length);
 			
-			final AppointmentObject loadAppointment = appointmentArray[0];
+			final Appointment loadAppointment = appointmentArray[0];
 			
 			final Calendar c = Calendar.getInstance();
 			c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -145,7 +145,7 @@ public class ListTest extends AppointmentTest {
 	}
 
 	public void testListWithRecurrencePosition() throws Exception {
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.RECURRENCE_POSITION };
+		final int cols[] = new int[]{ Appointment.OBJECT_ID, Appointment.TITLE, Appointment.CREATED_BY, Appointment.FOLDER_ID, Appointment.USERS, Appointment.RECURRENCE_POSITION };
 		
 		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testListWithRecurrencePosition" + System.currentTimeMillis());
@@ -170,41 +170,41 @@ public class ListTest extends AppointmentTest {
 		
 		final Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testListWithRecurrencePosition");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(publicFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		appointmentObj = new AppointmentObject();
+		appointmentObj = new Appointment();
 		appointmentObj.setTitle("testListWithRecurrencePosition2");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		final AppointmentObject[] appointmentList = new AppointmentObject[3];
-		appointmentList[0] = new AppointmentObject();
+		final Appointment[] appointmentList = new Appointment[3];
+		appointmentList[0] = new Appointment();
 		appointmentList[0].setObjectID(objectId1);
 		appointmentList[0].setParentFolderID(publicFolderId);
 		appointmentList[0].setRecurrencePosition(2);
-		appointmentList[1] = new AppointmentObject();
+		appointmentList[1] = new Appointment();
 		appointmentList[1].setObjectID(objectId1);
 		appointmentList[1].setParentFolderID(publicFolderId);
 		appointmentList[1].setRecurrencePosition(3);
-		appointmentList[2] = new AppointmentObject();
+		appointmentList[2] = new Appointment();
 		appointmentList[2].setObjectID(objectId2);
 		appointmentList[2].setParentFolderID(appointmentFolderId);
 		
-		final AppointmentObject[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), appointmentList, cols, timeZone, getHostName(), getSessionId());
+		final Appointment[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), appointmentList, cols, timeZone, getHostName(), getSessionId());
 		
 		assertEquals("3 elements expected", 3, appointmentArray.length);
 		
@@ -231,9 +231,9 @@ public class ListTest extends AppointmentTest {
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.LAST_MODIFIED_UTC};
+        final int cols[] = new int[]{ Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC};
 
-        final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
+        final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60*60*1000));
         appointmentObj.setIgnoreConflicts(true);

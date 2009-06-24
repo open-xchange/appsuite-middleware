@@ -22,7 +22,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -71,11 +71,11 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		LOG.debug(new StringBuilder().append("use timezone: ").append(
 				timeZone).toString());
 		
-		final ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
+		final Contact contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
 		emailaddress = contactObj.getEmail1();
 	}
 	
-	public static ImportResult[] importVCard(final WebConversation webCon, final ContactObject[] contactObj, final int folderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
+	public static ImportResult[] importVCard(final WebConversation webCon, final Contact[] contactObj, final int folderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -140,7 +140,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		return importResult;
 	}
 	
-	public ContactObject[] exportContact(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
+	public Contact[] exportContact(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter(true);
@@ -156,14 +156,14 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mailaddress);
 		 
-		final List<ContactObject> exportData = new ArrayList<ContactObject>();
+		final List<Contact> exportData = new ArrayList<Contact>();
 		 
 		try {
 			final VersitDefinition def = Versit.getDefinition("text/vcard");
 			final VersitDefinition.Reader versitReader = def.getReader(byteArrayInputStream, "UTF-8");
 			VersitObject versitObject = def.parse(versitReader);
 			while (versitObject != null) {
-				final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
+				final Contact contactObj = oxContainerConverter.convertContact(versitObject);
 				contactObj.setParentFolderID(contactFolderId);
 				exportData.add(contactObj);
 	 
@@ -173,6 +173,6 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 			throw new Exception(exc);
 		}
 		 
-		return exportData.toArray(new ContactObject[exportData.size()]);
+		return exportData.toArray(new Contact[exportData.size()]);
 	}
 }

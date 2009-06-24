@@ -19,7 +19,7 @@ import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -68,7 +68,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     		CalendarObject.PRIVATE_FLAG,
     		CalendarObject.CATEGORIES,
     		CalendarObject.TITLE,
-    		AppointmentObject.LOCATION,
+    		Appointment.LOCATION,
     		CalendarObject.START_DATE,
     		CalendarObject.END_DATE,
     		CalendarObject.NOTE,
@@ -78,11 +78,11 @@ public abstract class AbstractCalendarTest extends TestCase {
     		CalendarObject.RECURRENCE_POSITION,
     		CalendarObject.PARTICIPANTS,
     		CalendarObject.USERS,
-    		AppointmentObject.SHOWN_AS,
-    		AppointmentObject.DELETE_EXCEPTIONS,
-    		AppointmentObject.CHANGE_EXCEPTIONS,
-    		AppointmentObject.FULL_TIME,
-    		AppointmentObject.COLOR_LABEL,
+    		Appointment.SHOWN_AS,
+    		Appointment.DELETE_EXCEPTIONS,
+    		Appointment.CHANGE_EXCEPTIONS,
+    		Appointment.FULL_TIME,
+    		Appointment.COLOR_LABEL,
     		CalendarDataObject.TIMEZONE
     	};
 
@@ -211,7 +211,7 @@ public abstract class AbstractCalendarTest extends TestCase {
             List<Object> args = new ArrayList<Object>();
             private Verifyer verifyer;
     
-            public void createdChangeExceptionInRecurringAppointment(final AppointmentObject master, final AppointmentObject changeException,int inFolder, final ServerSession session) {
+            public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,int inFolder, final ServerSession session) {
                 this.called = "createdChangeExceptionInRecurringAppointment";
                 this.args.add(master);
                 this.args.add(changeException);
@@ -249,8 +249,8 @@ public abstract class AbstractCalendarTest extends TestCase {
             }
         }
 
-    protected List<AppointmentObject> read(final SearchIterator<AppointmentObject> si) throws OXException, SearchIteratorException {
-        final List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
+    protected List<Appointment> read(final SearchIterator<Appointment> si) throws OXException, SearchIteratorException {
+        final List<Appointment> appointments = new ArrayList<Appointment>();
         while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;
     }

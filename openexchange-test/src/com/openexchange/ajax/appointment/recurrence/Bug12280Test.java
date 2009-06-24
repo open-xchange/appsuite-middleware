@@ -60,7 +60,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * Verifies the until date of a full time daily series appointment.
@@ -72,7 +72,7 @@ public final class Bug12280Test extends AbstractAJAXSession {
 
     private int folderId;
 
-    private AppointmentObject appointment;
+    private Appointment appointment;
 
     /**
      * Default constructor.
@@ -111,14 +111,14 @@ public final class Bug12280Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final GetRequest request = new GetRequest(appointment);
         final GetResponse response = client.execute(request);
-        final AppointmentObject load = response.getAppointment(tz);
+        final Appointment load = response.getAppointment(tz);
         
     }
 
-    private final AppointmentObject createAppointment() {
+    private final Appointment createAppointment() {
         final Calendar calendar = TimeTools.createCalendar(TimeZone
             .getTimeZone("UTC"));
-        final AppointmentObject appointment = new AppointmentObject();
+        final Appointment appointment = new Appointment();
         appointment.setTitle("test for bug 12280");
         appointment.setParentFolderID(folderId);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -127,7 +127,7 @@ public final class Bug12280Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setFullTime(true);
         appointment.setIgnoreConflicts(true);
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(3);
         return appointment;

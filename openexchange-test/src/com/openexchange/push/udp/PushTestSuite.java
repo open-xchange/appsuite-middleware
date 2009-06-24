@@ -10,7 +10,7 @@ import junit.framework.TestSuite;
 
 import com.clarkware.junitperf.TimedTest;
 import com.meterware.httpunit.WebConversation;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
@@ -35,12 +35,12 @@ public class PushTestSuite extends TestSuite{
 		final Test registerTest = new RegisterTest("testRegister", datagramSocket, userId, contextId);
         final Test registerTimedTest = new TimedTest(registerTest, maxElapsedTime, false);
 		
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("pushTestSuite");
 		appointmentObj.setStartDate(new Date());
 		appointmentObj.setEndDate(new Date());
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);		
+		appointmentObj.setShownAs(Appointment.ABSENT);		
 		
 		AppointmentTest.insertAppointment(webConversation, appointmentObj, "localhost", "offspring", "netline");
 		

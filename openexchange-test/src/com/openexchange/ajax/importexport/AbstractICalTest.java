@@ -90,8 +90,8 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.Format;
@@ -151,7 +151,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		LOG.debug(new StringBuilder().append("use timezone: ").append(
 				timeZone).toString());
 		
-		final ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
+		final Contact contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
 		emailaddress = contactObj.getEmail1();
 		
 		final Calendar c = Calendar.getInstance();
@@ -177,7 +177,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
     }
 	
 	public static ImportResult[] importICal(final WebConversation webCon,
-	    final AppointmentObject[] appointments, final int folderId, final String host,
+	    final Appointment[] appointments, final int folderId, final String host,
 	    final String session) throws ConversionError, AjaxException, IOException,
 	    SAXException, JSONException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -218,7 +218,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return iResponse.getImports();
 	}
 
-	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
+	public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
         final AJAXSession aSession = new AJAXSession(webCon, session);
 	    final ICalExportRequest request = new ICalExportRequest(folderId);
 	    final ICalExportResponse response = Executor.execute(aSession, request);
@@ -233,7 +233,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         if (!warnings.isEmpty()) {
             throw warnings.get(0);
         }
-		return exportData.toArray(new AppointmentObject[exportData.size()]);
+		return exportData.toArray(new Appointment[exportData.size()]);
 	}
 
 	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {

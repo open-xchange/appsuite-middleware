@@ -57,7 +57,7 @@ import com.openexchange.ajax.links.actions.*;
 import com.openexchange.ajax.links.actions.AllRequest;
 import com.openexchange.ajax.links.actions.AllResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.LinkObject;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
@@ -81,11 +81,11 @@ import java.util.Date;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Bug12377Test extends AbstractAJAXSession {
-    private AppointmentObject appointment;
+    private Appointment appointment;
     private TimeZone timeZone;
-    private AppointmentObject exception;
+    private Appointment exception;
     private File file;
-    private AppointmentObject linkedAppointment;
+    private Appointment linkedAppointment;
 
     /**
      * Default constructor.
@@ -121,12 +121,12 @@ public class Bug12377Test extends AbstractAJAXSession {
     }
 
     private void createAppointmentSeries() throws JSONException, AjaxException, IOException, SAXException {
-        this.appointment = new AppointmentObject();
+        this.appointment = new Appointment();
         appointment.setTitle("testBug12377");
         appointment.setStartDate(D("12/02/1999 10:00"));
         appointment.setEndDate(D("12/02/1999 12:00"));
 
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setIgnoreConflicts(true);
 
@@ -140,7 +140,7 @@ public class Bug12377Test extends AbstractAJAXSession {
     }
 
     private void createException() throws JSONException, AjaxException, IOException, SAXException {
-        this.exception = new AppointmentObject();
+        this.exception = new Appointment();
         exception.setStartDate(D("15/02/1999 13:00"));
         exception.setEndDate(D("15/02/1999 15:00"));
         exception.setRecurrencePosition(4);
@@ -157,7 +157,7 @@ public class Bug12377Test extends AbstractAJAXSession {
     }
 
     private void createAppointmentToLinkTo() throws JSONException, AjaxException, IOException, SAXException {
-        this.linkedAppointment = new AppointmentObject();
+        this.linkedAppointment = new Appointment();
         linkedAppointment.setTitle("testBug12377 link to me");
         linkedAppointment.setStartDate(D("12/02/1999 16:00"));
         linkedAppointment.setEndDate(D("12/02/1999 17:00"));
@@ -189,7 +189,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         getClient().execute(request);
     }
 
-    private void removeAppointment(AppointmentObject appointment) throws JSONException, AjaxException, IOException, SAXException {
+    private void removeAppointment(Appointment appointment) throws JSONException, AjaxException, IOException, SAXException {
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest delete = new DeleteRequest(appointment);
         getClient().execute(delete);
@@ -216,7 +216,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         assertTrue(found);
     }
 
-    private AppointmentObject reloadException() throws JSONException, AjaxException, IOException, SAXException, OXException {
+    private Appointment reloadException() throws JSONException, AjaxException, IOException, SAXException, OXException {
         AJAXClient client = getClient();
         GetRequest get = new GetRequest(exception.getParentFolderID(), exception.getObjectID());
         GetResponse response = client.execute(get);
@@ -224,7 +224,7 @@ public class Bug12377Test extends AbstractAJAXSession {
     }
 
     private void verifyAttachmentCount() throws JSONException, AjaxException, IOException, SAXException, OXException {
-        AppointmentObject reloadedException = reloadException();
+        Appointment reloadedException = reloadException();
         assertEquals(1, reloadedException.getNumberOfAttachments());
     }
 

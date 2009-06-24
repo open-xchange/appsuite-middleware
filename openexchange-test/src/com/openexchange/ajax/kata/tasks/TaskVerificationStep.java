@@ -77,7 +77,7 @@ import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -335,7 +335,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
             }
             return participants.toArray(new Participant[participants.size()]);
             
-        case AppointmentObject.USERS:
+        case Appointment.USERS:
             JSONArray userParticipantArr = (JSONArray) actual;
             List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
             for (int i = 0, size = userParticipantArr.length(); i < size; i++) {

@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -39,20 +39,20 @@ public class Bug6056Test extends AppointmentTest {
 		
 		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 		
-		final AppointmentObject appointmentObj = createAppointmentObject("Bug6065Test");
+		final Appointment appointmentObj = createAppointmentObject("Bug6065Test");
 		appointmentObj.setParentFolderID(newFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 		appointmentObj.setObjectID(objectId);
 		
-		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
 		final Date lastModified = loadAppointment.getLastModified();
 		
 		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
-		final AppointmentObject[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), newFolderId, lastModified, false, true, getHostName(), getLogin(), getPassword());
+		final Appointment[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), newFolderId, lastModified, false, true, getHostName(), getLogin(), getPassword());
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				found = true;

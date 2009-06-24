@@ -72,7 +72,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -84,7 +84,7 @@ public class CalendarTestManager {
 
     private AJAXClient client;
 
-    private List<AppointmentObject> createdEntities = new ArrayList<AppointmentObject>();
+    private List<Appointment> createdEntities = new ArrayList<Appointment>();
 
     private TimeZone timezone;
 
@@ -104,7 +104,7 @@ public class CalendarTestManager {
         }
     }
 
-    public void insertAppointmentOnServer(AppointmentObject appointment) {
+    public void insertAppointmentOnServer(Appointment appointment) {
         InsertRequest insertRequest = new InsertRequest(appointment, timezone);
         AppointmentInsertResponse insertResponse = execute(insertRequest);
 
@@ -112,7 +112,7 @@ public class CalendarTestManager {
         insertResponse.fillAppointment(appointment);
     }
 
-    public void deleteAppointmentOnServer(AppointmentObject appointment, boolean failOnError) {
+    public void deleteAppointmentOnServer(Appointment appointment, boolean failOnError) {
         createdEntities.remove(appointment);
         DeleteRequest deleteRequest = new DeleteRequest(
             appointment.getObjectID(),
@@ -122,7 +122,7 @@ public class CalendarTestManager {
         execute(deleteRequest);
     }
 
-    public void deleteAppointmentOnServer(AppointmentObject appointment) {
+    public void deleteAppointmentOnServer(Appointment appointment) {
         createdEntities.remove(appointment);
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest deleteRequest = new DeleteRequest(appointment);
@@ -130,7 +130,7 @@ public class CalendarTestManager {
     }
 
     public void cleanUp() {
-        for (AppointmentObject appointment : new ArrayList<AppointmentObject>(createdEntities)) {
+        for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             deleteAppointmentOnServer(appointment);
         }
     }
@@ -161,21 +161,21 @@ public class CalendarTestManager {
      * @throws JSONException
      * @throws OXException
      */
-    public AppointmentObject getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
         GetRequest get = new GetRequest(parentFolderID, objectID);
         GetResponse response = execute(get);
 
         return response.getAppointment(timezone);
     }
 
-    public AppointmentObject getAppointmentFromServer(AppointmentObject appointment) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(Appointment appointment) throws OXException, JSONException {
         GetRequest get = new GetRequest(appointment);
         GetResponse response = execute(get);
 
         return response.getAppointment(timezone);
     }
     
-    public AppointmentObject getAppointmentFromServer(AppointmentObject appointment, boolean failOnError) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(Appointment appointment, boolean failOnError) throws OXException, JSONException {
         try {
             GetRequest get = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
             GetResponse response = execute(get);        
@@ -187,7 +187,7 @@ public class CalendarTestManager {
         }
     }
     
-    public AppointmentObject getAppointmentFromServer(int parentFolderID, int objectID, boolean failOnError) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean failOnError) throws OXException, JSONException {
         try {
             GetRequest get = new GetRequest(parentFolderID, objectID, failOnError);
             GetResponse response = execute(get);        
@@ -203,19 +203,19 @@ public class CalendarTestManager {
      * @param appointment
      * @return
      */
-    public AppointmentObject createIdentifyingCopy(AppointmentObject appointment) {
-        AppointmentObject copy = new AppointmentObject();
+    public Appointment createIdentifyingCopy(Appointment appointment) {
+        Appointment copy = new Appointment();
         copy.setObjectID(appointment.getObjectID());
         copy.setParentFolderID(appointment.getParentFolderID());
         copy.setLastModified(appointment.getLastModified());
         return copy;
     }
 
-    public void updateAppointmentOnServer(AppointmentObject updatedAppointment) {
+    public void updateAppointmentOnServer(Appointment updatedAppointment) {
         UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone);
         UpdateResponse updateResponse = execute(updateRequest);
         updatedAppointment.setLastModified(updateResponse.getTimestamp());
-        for (AppointmentObject createdAppoinment : createdEntities) {
+        for (Appointment createdAppoinment : createdEntities) {
             if (createdAppoinment.getObjectID() == updatedAppointment.getObjectID()) {
                 createdAppoinment.setLastModified(updatedAppointment.getLastModified());
                 continue;
@@ -227,38 +227,38 @@ public class CalendarTestManager {
      * @param parentFolderID
      * @return
      */
-    public AppointmentObject[] getAllAppointmentsOnServer(int parentFolderID, Date start, Date end) {
-        AllRequest request = new AllRequest(parentFolderID, AppointmentObject.ALL_COLUMNS, start, end, timezone);
+    public Appointment[] getAllAppointmentsOnServer(int parentFolderID, Date start, Date end) {
+        AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
 
-        List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
+        List<Appointment> appointments = new ArrayList<Appointment>();
 
         for (Object[] row : response.getArray()) {
-            AppointmentObject app = new AppointmentObject();
+            Appointment app = new Appointment();
             appointments.add(app);
             for (int i = 0; i < row.length; i++) {
                 if (row[i] == null) {
                     continue;
                 }
-                if (AppointmentObject.ALL_COLUMNS[i] == AppointmentObject.LAST_MODIFIED_UTC) {
+                if (Appointment.ALL_COLUMNS[i] == Appointment.LAST_MODIFIED_UTC) {
                     continue;
                 }
                 try {
-                    app.set(AppointmentObject.ALL_COLUMNS[i], row[i]);
+                    app.set(Appointment.ALL_COLUMNS[i], row[i]);
                 } catch (ClassCastException x) {
                     if (x.getMessage().equals("java.lang.Long")) {
-                        if (!tryDate(app, AppointmentObject.ALL_COLUMNS[i], (Long) row[i])) {
-                            tryInteger(app, AppointmentObject.ALL_COLUMNS[i], (Long) row[i]);
+                        if (!tryDate(app, Appointment.ALL_COLUMNS[i], (Long) row[i])) {
+                            tryInteger(app, Appointment.ALL_COLUMNS[i], (Long) row[i]);
                         }
                     }
                 }
             }
         }
 
-        return appointments.toArray(new AppointmentObject[appointments.size()]);
+        return appointments.toArray(new Appointment[appointments.size()]);
     }
 
-    private boolean tryInteger(AppointmentObject app, int field, Long value) {
+    private boolean tryInteger(Appointment app, int field, Long value) {
         try {
             app.set(field, new Integer(value.intValue()));
             return true;
@@ -267,7 +267,7 @@ public class CalendarTestManager {
         }
     }
 
-    private boolean tryDate(AppointmentObject app, int field, Long value) {
+    private boolean tryDate(Appointment app, int field, Long value) {
         try {
             app.set(field, new Date(value));
             return true;
@@ -277,7 +277,7 @@ public class CalendarTestManager {
     }
 
     public void clearFolder(int folderId, Date start, Date end) {
-        for (AppointmentObject app : getAllAppointmentsOnServer(folderId, start, end)) {
+        for (Appointment app : getAllAppointmentsOnServer(folderId, start, end)) {
             deleteAppointmentOnServer(app);
         }
     }

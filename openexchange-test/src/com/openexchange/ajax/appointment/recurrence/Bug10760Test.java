@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -29,13 +29,13 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 
     public void testBug10760() throws Exception {
 		final String title = "testBug10760";
-		final AppointmentObject appointmentObj = new AppointmentObject();
+		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(title);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(Appointment.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setIgnoreConflicts(true);
 		objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -48,8 +48,8 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 		    tmp.add(Integer.valueOf(APPOINTMENT_FIELDS[i]));
 		}
 		final Integer[] checkedFields = new Integer[] {
-		    Integer.valueOf(AppointmentObject.RECURRENCE_ID),
-		    Integer.valueOf(AppointmentObject.RECURRENCE_POSITION) };
+		    Integer.valueOf(Appointment.RECURRENCE_ID),
+		    Integer.valueOf(Appointment.RECURRENCE_POSITION) };
         for (int i = 0; i < checkedFields.length; i++) {
     		if (!tmp.contains(checkedFields[i])) {
     		    tmp.add(checkedFields[i]);
@@ -59,7 +59,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
         for (int i = 0; i < fields.length; i++) {
             fields[i] = tmp.get(i).intValue();
         }
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, fields, new Date(), new Date(), timeZone, false, getHostName(), getSessionId());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, fields, new Date(), new Date(), timeZone, false, getHostName(), getSessionId());
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == newObjectId) {
 				assertEquals("recurrence id is not equals expected", objectId, appointmentArray[a].getRecurrenceID());

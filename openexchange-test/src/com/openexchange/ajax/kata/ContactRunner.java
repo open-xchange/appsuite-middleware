@@ -1,6 +1,6 @@
 package com.openexchange.ajax.kata;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link ContactRunner}
@@ -10,6 +10,6 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class ContactRunner extends AbstractDirectoryRunner {
     public ContactRunner(String name) {
-        super(name, "contactKatas" , ContactObject.class);
+        super(name, "contactKatas" , Contact.class);
     }
 }

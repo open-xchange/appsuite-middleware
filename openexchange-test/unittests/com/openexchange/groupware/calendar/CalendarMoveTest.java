@@ -54,7 +54,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -105,11 +105,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -117,9 +117,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -176,13 +176,13 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, appointments.getPrivateFolder());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(
+            final List<Appointment> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(
                 appointments.getPrivateFolder(),
                 columns);
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInPrivateFolder) {
+            for (final Appointment object : appointmentsInPrivateFolder) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -190,9 +190,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -248,13 +248,13 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, appointments.getPrivateFolder());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsPrivateFolder = appointments.getAppointmentsInFolder(
+            final List<Appointment> appointmentsPrivateFolder = appointments.getAppointmentsInFolder(
                 appointments.getPrivateFolder(),
                 columns);
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsPrivateFolder) {
+            for (final Appointment object : appointmentsPrivateFolder) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -262,9 +262,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -321,13 +321,13 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(
                 appointments.getPrivateFolder(),
                 columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -335,9 +335,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInPrivateFolder) {
+            for (final Appointment object : appointmentsInPrivateFolder) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -399,11 +399,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -411,9 +411,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -478,11 +478,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -490,9 +490,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -547,13 +547,13 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
                 appointments.getPrivateFolder(),
                 columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -561,9 +561,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -620,13 +620,13 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
                 appointments.getPrivateFolder(),
                 columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -634,9 +634,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -705,11 +705,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -717,9 +717,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -783,11 +783,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -795,9 +795,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -869,11 +869,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, folder1.getObjectID());
 
             // Search appointment in folders
-            final List<AppointmentObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<AppointmentObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(folder2.getObjectID(), columns);
 
             boolean found = false;
-            for (final AppointmentObject object : appointmentsInFolder1) {
+            for (final Appointment object : appointmentsInFolder1) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     break;
@@ -881,9 +881,9 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             }
             assertFalse("Appointment not expected in first folder.", found);
 
-            AppointmentObject foundAppointment = null;
+            Appointment foundAppointment = null;
             found = false;
-            for (final AppointmentObject object : appointmentsInFolder2) {
+            for (final Appointment object : appointmentsInFolder2) {
                 if (object.getObjectID() == objectId) {
                     found = true;
                     foundAppointment = object;
@@ -902,7 +902,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
         }
     }
 
-    private void compareParticipants(AppointmentObject expected, AppointmentObject actual) {
+    private void compareParticipants(Appointment expected, Appointment actual) {
         assertEquals("Number of participants do not match", expected.containsParticipants(), actual.containsParticipants());
         if (expected.containsParticipants()) {
             assertEquals("Number of participants do not match.", expected.getParticipants().length, actual.getParticipants().length);
@@ -910,7 +910,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
         compareParticipants(expected.getParticipants(), actual.getParticipants());
     }
 
-    private void compareUsers(AppointmentObject expected, AppointmentObject actual) {
+    private void compareUsers(Appointment expected, Appointment actual) {
         assertEquals("Number of users do not match.", expected.containsUserParticipants(), actual.containsUserParticipants());
         if (expected.containsUserParticipants()) {
             assertEquals("Number of users do not match.", expected.getUsers().length, actual.getUsers().length);

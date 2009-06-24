@@ -59,8 +59,8 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -97,16 +97,16 @@ public class OXContainerConverterTest extends TestCase {
 		return converter.convertTask(obj);
 	}
 
-	public AppointmentObject convertAppointment(final VersitObject obj) throws ConverterException{
+	public Appointment convertAppointment(final VersitObject obj) throws ConverterException{
 		return converter.convertAppointment(obj);
 	}
 
-	public ContactObject convertContact(final VersitObject obj) throws ConverterException{
+	public Contact convertContact(final VersitObject obj) throws ConverterException{
 		return converter.convertContact(obj);
 	}
 	
 	public void test8411() throws ConverterException{
-		final AppointmentObject app = new AppointmentObject();
+		final Appointment app = new Appointment();
 		app.setTitle("Tierlieb's birthday");
 		final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		app.setTimezone("UTC");
@@ -116,9 +116,9 @@ public class OXContainerConverterTest extends TestCase {
 		cal.set(1981, 3, 2, 0, 0);
 		app.setEndDate(cal.getTime()); //+24 std
 		
-		app.setShownAs(AppointmentObject.FREE);
+		app.setShownAs(Appointment.FREE);
 		app.setFullTime(true);
-		app.setRecurrenceType(AppointmentObject.YEARLY);
+		app.setRecurrenceType(Appointment.YEARLY);
 		app.setDayInMonth(1);
 		app.setMonth(3);
 		app.setInterval(1);
@@ -177,7 +177,7 @@ public class OXContainerConverterTest extends TestCase {
 		
 		
 		final List<VersitObject> list = parser.parseICal(ical2);
-		final AppointmentObject obj = convertAppointment( list.get(1) );
+		final Appointment obj = convertAppointment( list.get(1) );
 		final Participant[] participants = obj.getParticipants();
 		assertEquals("One participant?" , participants.length, 1);
 		assertEquals("User is the right one?" , "cbartkowiak@oxhemail.open-xchange.com", participants[0].getEmailAddress());
@@ -189,7 +189,7 @@ public class OXContainerConverterTest extends TestCase {
         final List<VersitObject> list = parser.parseVCard3(vcard);
         final VersitObject obj = list.get(0);
         
-        ContactObject contact = convertContact( obj );
+        Contact contact = convertContact( obj );
         
         assertFalse(contact.containsTelephoneHome1());
         assertTrue(contact.containsCellularTelephone1());

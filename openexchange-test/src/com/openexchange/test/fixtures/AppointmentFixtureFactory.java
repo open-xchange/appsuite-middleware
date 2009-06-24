@@ -53,8 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -68,7 +68,7 @@ import com.openexchange.test.fixtures.transformators.ShowAsTransformator;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  */
-public class AppointmentFixtureFactory implements FixtureFactory<AppointmentObject>{
+public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
     private FixtureLoader fixtureLoader;
 	private GroupResolver groupResolver;
 
@@ -78,19 +78,19 @@ public class AppointmentFixtureFactory implements FixtureFactory<AppointmentObje
 		this.groupResolver = groupResolver;
 	}
 
-	public Fixtures<AppointmentObject> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	public Fixtures<Appointment> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new AppointmentFixtures(fixtureName, entries, fixtureLoader, groupResolver);
     }
 
-    private class AppointmentFixtures extends DefaultFixtures<AppointmentObject> implements Fixtures<AppointmentObject> {
+    private class AppointmentFixtures extends DefaultFixtures<Appointment> implements Fixtures<Appointment> {
         private Map<String, Map<String, String>> entries;
 
-        private final Map<String, Fixture<AppointmentObject>> appointments = new HashMap<String, Fixture<AppointmentObject>>();
+        private final Map<String, Fixture<Appointment>> appointments = new HashMap<String, Fixture<Appointment>>();
 
 		private GroupResolver groupResolver;
 
         public AppointmentFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
-            super(AppointmentObject.class, entries, fixtureLoader);
+            super(Appointment.class, entries, fixtureLoader);
             this.entries = entries;
             this.groupResolver = groupResolver;
 
@@ -102,7 +102,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<AppointmentObje
             addTransformator(new RecurrenceTypeTransformator(), "recurrence_type");
         }
 
-        public Fixture<AppointmentObject> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Appointment> getEntry(final String entryName) throws FixtureException {
             if (appointments.containsKey(entryName)) {
                 return appointments.get(entryName);
             }
@@ -110,15 +110,15 @@ public class AppointmentFixtureFactory implements FixtureFactory<AppointmentObje
             if (null == values) {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
-            final AppointmentObject appointment = new AppointmentObject();
+            final Appointment appointment = new Appointment();
             apply(appointment,values);
             applyUsers(appointment, groupResolver);
-            final Fixture<AppointmentObject> fixture = new Fixture<AppointmentObject>(appointment, values.keySet().toArray(new String[values.size()]), values);
+            final Fixture<Appointment> fixture = new Fixture<Appointment>(appointment, values.keySet().toArray(new String[values.size()]), values);
             appointments.put(entryName, fixture);
             return fixture;
         }
         
-        private void applyUsers(final AppointmentObject appointment, GroupResolver groupResolver) {
+        private void applyUsers(final Appointment appointment, GroupResolver groupResolver) {
         	if (null != appointment) {
         		final Participant[] participants = appointment.getParticipants();
         		if (null != participants) {
@@ -128,9 +128,9 @@ public class AppointmentFixtureFactory implements FixtureFactory<AppointmentObje
 							users.add((UserParticipant)participant);
 						} else if (Participant.GROUP == participant.getType()) {
 							final GroupParticipant group = (GroupParticipant)participant;
-							final ContactObject[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
+							final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
 							if (null != groupMembers) {
-								for (ContactObject groupMember : groupMembers) {
+								for (Contact groupMember : groupMembers) {
 									final UserParticipant userParticipant = new UserParticipant(groupMember.getInternalUserId());
 									userParticipant.setDisplayName(groupMember.getDisplayName());
 									userParticipant.setEmailAddress(groupMember.getEmail1());

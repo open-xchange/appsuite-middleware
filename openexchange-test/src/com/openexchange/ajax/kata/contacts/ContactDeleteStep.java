@@ -51,18 +51,18 @@ import org.junit.Assert;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactDeleteStep extends NeedExistingStep<ContactObject> {
+public class ContactDeleteStep extends NeedExistingStep<Contact> {
 	
-	private ContactObject entry;
+	private Contact entry;
 
-    public ContactDeleteStep(ContactObject entry, String name, String expectedError) {
+    public ContactDeleteStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }

@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -37,7 +37,7 @@ public class Bug11250Test extends AppointmentTest {
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
 		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testBug11250_1");
+		Appointment appointmentObj = createAppointmentObject("testBug11250_1");
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setParentFolderID(targetFolder);
 		
@@ -76,7 +76,7 @@ public class Bug11250Test extends AppointmentTest {
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
 		
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(2);
 		appointmentObj.setRecurrenceCount(2);
 		
@@ -91,7 +91,7 @@ public class Bug11250Test extends AppointmentTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SORT, CalendarObject.START_DATE);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, targetFolder);
 		
-		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), _appointmentFields, parameter, timeZone, getHostName(), getSessionId());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), _appointmentFields, parameter, timeZone, getHostName(), getSessionId());
 		assertEquals("appointment array size not equals", 4, appointmentArray.length);
 		
 		assertEquals("appointment id at position 1 not equals", objectId1, appointmentArray[0].getObjectID());

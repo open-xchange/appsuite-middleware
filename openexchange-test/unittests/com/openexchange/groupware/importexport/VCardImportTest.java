@@ -70,7 +70,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.LdapException;
@@ -113,7 +113,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Should have no error" , null, res.getException() );
 
 		final ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
-		final ContactObject co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
 	
@@ -129,6 +129,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Should have no error" , null, res.getException() );
 
 		final ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
-		final ContactObject co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 	}
 }

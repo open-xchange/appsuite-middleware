@@ -16,7 +16,7 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
 
@@ -34,7 +34,7 @@ public class CopyTest extends ContactTest {
 	}
 	
 	public void testCopy() throws Exception {
-		final ContactObject contactObj = new ContactObject();
+		final Contact contactObj = new Contact();
 		contactObj.setSurName("testCopy");
 		contactObj.setParentFolderID(contactFolderId);
 		final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
