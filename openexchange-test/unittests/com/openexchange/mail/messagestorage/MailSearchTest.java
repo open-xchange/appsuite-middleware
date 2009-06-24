@@ -535,7 +535,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 				boolean found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by To search term", found);
 
@@ -544,7 +544,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by From search term", found);
 
@@ -553,7 +553,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by From search term", found);
 
@@ -562,7 +562,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by Subject search term", found);
 
@@ -572,7 +572,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by Sent Date search term", found);
 
@@ -581,7 +581,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by Header \"X-Priority\" search term", found);
 
@@ -591,7 +591,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				assertTrue("Unexpected result size: " + result.length, result.length == 1);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by Header \"In-Reply-To\" search term", found);
 
@@ -600,7 +600,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by body search term", found);
 
@@ -610,7 +610,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by size search term", found);
 
@@ -619,7 +619,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by size search term", found);
 
@@ -628,7 +628,7 @@ public final class MailSearchTest extends AbstractMailTest {
 						FIELDS_ID);
 				found = false;
 				for (int i = 0; i < result.length && !found; i++) {
-					found = result[i].getMailId() == uid;
+					found = null != result[i].getMailId() && result[i].getMailId().equals(uid);
 				}
 				assertTrue("Message not found by size search term", found);
 
