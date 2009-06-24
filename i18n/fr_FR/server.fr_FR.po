@@ -1,17 +1,16 @@
-# translation of server.fr_FR-new.po to deutsch
-# translation of server.fr.po to deutsch
-# translation of server.fr_FR.po to Français
+# translation of server.po to Français
+# Joëlle Cornavin <joelle@bureau-cornavin.com>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: server.fr_FR-new\n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-01-14 11:11+0100\n"
-"Last-Translator: \n"
-"Language-Team: deutsch \n"
+"Project-Id-Version: server\n"
+"PO-Revision-Date: 2009-06-18 18:12+0200\n"
+"Last-Translator: Joëlle Cornavin <joelle@bureau-cornavin.com>\n"
+"Language-Team: Français <fr@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.10.2\n"
+"X-Generator: KBabel 1.11.4\n"
+
 #. Name of the parent folder for the private user folders.
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:60
 msgid "Private folders"
@@ -89,12 +88,15 @@ msgstr "Contacts"
 msgid "Collected addresses"
 msgstr "Adresses externes collectées"
 
-#. *
-#. * Display name of group with identifier 0.
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
-msgid "All internal users"
-msgstr "Tous les utilisateurs internes"
+#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:66
+msgid "All users"
+msgstr "Tous les utilisateurs"
+
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:69
+msgid "Standard group"
+msgstr "Groupe par défaut"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:66
 msgid "Read Acknowledgement"
@@ -108,30 +110,71 @@ msgid ""
 "Note: This delivery receipt only acknowledges that the message was displayed "
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
-msgstr "Ceci est un accusé de réception pour le courrier électronique que vous avez envoyé le #DATE# à #RECIPIENT# avec l'objet « #SUBJECT# ».\n"
+msgstr ""
+"Ceci est un accusé de réception pour le courrier électronique que vous avez "
+"envoyé le #DATE# à #RECIPIENT# avec l'objet « #SUBJECT# ».\n"
 "\n"
-"Note : cet accusé de réception établit seulement que le message a été affiché sur l'ordinateur du destinataire. Il n'y a aucune garantie que le destinataire ait lu ou compris le contenu du message."
+"Note : cet accusé de réception établit seulement que le message a été "
+"affiché sur l'ordinateur du destinataire. Il n'y a aucune garantie que le "
+"destinataire ait lu ou compris le contenu du message."
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:70
+#. *
+#. * The prefixed text on reply:
+#. *
+#. * <pre>
+#. * On 12 June 2009 at 08:30h Jane Doe &lt;jane.doe@somewhere.com&gt; wrote:
+#. * </pre>
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:77
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "Le #DATE# à #TIME#, #SENDER# a écrit :"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
+#. *
+#. * The prefixed text on inline forward:
+#. *
+#. * <pre>
+#. * ---------- Original Message ----------
+#. * From: Hotel XYZ &lt;hotel@xyz.com&gt;
+#. * To: Jane Doe &lt;jane.doe@somewhere.com&gt;
+#. * Date: 12 June 2009 at 08:30h
+#. * Subject: The message's subject
+#. *
+#. * <pre>
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:91
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
-"To: #TO#\n"
+"To: #TO##CC_LINE#\n"
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
-msgstr "---------- Message original ----------\n"
+msgstr ""
+"---------- Message original ----------\n"
 "De : #FROM#\n"
 "À :  #TO#\n"
 "Date : #DATE# à #TIME#\n"
 "Sujet : #SUBJECT#"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:74
+#. *
+#. * The default subject.
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:96
 msgid "[No Subject]"
 msgstr "[Pas de sujet]"
+
+#. *
+#. * The available attachments for this E-Mail can be accessed via the links:
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+msgid "The available attachments for this E-Mail can be accessed via the links:"
+msgstr "Les pièces jointes disponibles pour ce courriel sont accessibles au moyen des liens :"
+
+#. *
+#. * The links will be deleted by #DATE#
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:106
+msgid "The links will be deleted by #DATE#"
+msgstr "Les liens seront supprimés par #DATE#"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:59
 msgid ""
@@ -159,7 +202,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "========================================== "
-msgstr "Un nouveau rendez-vous a été créé par [created_by].\n"
+msgstr ""
+"Un nouveau rendez-vous a été créé par [created_by].\n"
 "Vous pouvez vérifier ce rendez-vous dans votre calendrier :\n"
 "[link]\n"
 "\n"
@@ -207,7 +251,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "========================================== "
-msgstr "Un nouveau rendez-vous été créé par [created_by].\n"
+msgstr ""
+"Un nouveau rendez-vous été créé par [created_by].\n"
 "\n"
 "Rendez-vous\n"
 "===========\n"
@@ -257,7 +302,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "========================================== "
-msgstr "Une nouvelle tâche a été créée par [created_by].\n"
+msgstr ""
+"Une nouvelle tâche a été créée par [created_by].\n"
 "Vous pouvez vérifier cette tâche dans vos tâches :\n"
 "[link]\n"
 "\n"
@@ -310,7 +356,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "========================================== "
-msgstr "Une nouvelle tâche a été créée par [created_by].\n"
+msgstr ""
+"Une nouvelle tâche a été créée par [created_by].\n"
 "\n"
 "Tâche\n"
 "=====\n"
@@ -361,7 +408,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "Ce rendez-vous n'a pas lieu.\n"
+msgstr ""
+"Ce rendez-vous n'a pas lieu.\n"
 "Soit il a été supprimé par [changed_by] soit\n"
 "votre nom a été retiré de la liste des participants.\n"
 "\n"
@@ -413,7 +461,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "========================================== "
-msgstr "Cette tâche a été soit supprimée par [changed_by], soit\n"
+msgstr ""
+"Cette tâche a été soit supprimée par [changed_by], soit\n"
 "votre nom a été retiré de la liste des participants.\n"
 "\n"
 "Tâche\n"
@@ -465,7 +514,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "Ce rendez-vous a été modifié par [changed_by].\n"
+msgstr ""
+"Ce rendez-vous a été modifié par [changed_by].\n"
 "Vous pouvez vérifier ce rendez-vous dans votre calendrier :\n"
 "[link]\n"
 "\n"
@@ -514,7 +564,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "Ce rendez-vous a été modifié par [changed_by].\n"
+msgstr ""
+"Ce rendez-vous a été modifié par [changed_by].\n"
 "\n"
 "Rendez-vous\n"
 "===========\n"
@@ -565,7 +616,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "Cette tâche a été modifiée par [changed_by].\n"
+msgstr ""
+"Cette tâche a été modifiée par [changed_by].\n"
 "Vous pouvez vérifier cette tâche dans vos tâches :\n"
 "[link]\n"
 "\n"
@@ -618,7 +670,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "Cette tâche a été modifiée par [changed_by].\n"
+msgstr ""
+"Cette tâche a été modifiée par [changed_by].\n"
 "\n"
 "Tâche\n"
 "=====\n"
@@ -669,7 +722,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "[changed_by] a [confirmation_action] ce rendez-vous.\n"
+msgstr ""
+"[changed_by] a [confirmation_action] ce rendez-vous.\n"
 "Vous pouvez vérifier ce rendez-vous dans votre calendrier :\n"
 "[link]\n"
 "\n"
@@ -722,7 +776,8 @@ msgid ""
 "[resources]\n"
 "\n"
 "=========================================="
-msgstr "[changed_by] a [confirmation_action] cette tâche.\n"
+msgstr ""
+"[changed_by] a [confirmation_action] cette tâche.\n"
 "Vous pouvez vérifier cette tâche dans vos tâches :\n"
 "[link]\n"
 "\n"
@@ -997,7 +1052,8 @@ msgstr "Série : %1$s"
 msgid ""
 "Comments:\n"
 "%1$s"
-msgstr "Commentaires :\n"
+msgstr ""
+"Commentaires :\n"
 "%1$s"
 
 #. *
@@ -1410,5 +1466,3 @@ msgstr "quatrième"
 msgid "last"
 msgstr "dernier"
 
-#~ msgid "Fwd: "
-#~ msgstr "Transm : "
