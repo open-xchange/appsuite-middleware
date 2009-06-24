@@ -331,11 +331,12 @@ public class PublicationSQLStorage implements PublicationStorage {
                 SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE(
                     new IN("configuration_id", SQLTools.createLIST(configurationIds.size(), PLACEHOLDER)).AND(new EQUALS(
                         "target_id",
-                        PLACEHOLDER)));
+                        PLACEHOLDER)).AND(new EQUALS("cid", PLACEHOLDER)));
 
                 List<Object> values = new ArrayList<Object>();
                 values.addAll(configurationIds);
                 values.add(targetId);
+                values.add(ctx.getContextId());
 
                 builder = new StatementBuilder();
                 resultSet = builder.executeQuery(readConnection, select, values);
