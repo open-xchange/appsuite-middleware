@@ -56,4 +56,3 @@ Bundle-ClassPath: .,
  lib/htmlunit-2.5.jar,
  lib/htmlunit-core-js-2.5.jar
 Eclipse-RegisterBuddy: com.openexchange.xerces
-Require-Bundle: com.openexchange.subscribe.crawler;bundle-version="6.9.0"
