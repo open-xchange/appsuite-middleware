@@ -133,8 +133,8 @@ public final class MailAppendTest extends MessageStorageTest {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         try {
             // Check only for the one values here (that is the size of the enum out of all combinations):
-            for (int o = 0; o < MailField.values().length; o++) {
-                final MailField[] fields = variations[o];
+            for (int k = 0; k < MailField.values().length; k++) {
+                final MailField[] fields = variations[k];
                 final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids, fields);
                 assertTrue("The size of the uids is not equal with the size of the fetched mails which is returned from the getMessages method", fetchedMails.length == uids.length);
                 for (int i = 0; i < fetchedMails.length; i++) {
