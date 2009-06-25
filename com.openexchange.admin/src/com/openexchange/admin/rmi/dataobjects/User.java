@@ -46,9 +46,9 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.dataobjects;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -566,7 +566,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public User(final int id) {
         super();
         init();
-        this.id = I(id);
+        this.id = Integer.valueOf(id);
     }
 
     /**

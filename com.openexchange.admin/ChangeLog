@@ -1,3 +1,7 @@
+* 2009-06-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #13987: Removed using of general classes that are not available in command line tools.  
+
 * 2009-06-24 - marcus.klein@open-xchange.com
 
  - Bugfix #13360: Display, first and sure name are not mandatory attributes for a user anymore.  
