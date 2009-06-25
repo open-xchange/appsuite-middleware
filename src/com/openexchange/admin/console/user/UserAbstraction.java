@@ -46,8 +46,8 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.console.user;
 
+package com.openexchange.admin.console.user;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -949,7 +949,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void parseAndSetUserId(final AdminParser parser, final User usr) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
-            userid = Integer.valueOf(optionValue);
+            userid = Integer.parseInt(optionValue);
             usr.setId(userid);
         }
     }
