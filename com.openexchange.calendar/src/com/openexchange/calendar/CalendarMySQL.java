@@ -1899,7 +1899,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         
         if (cdao.getFolderMove() && edao.getRecurrenceType() != Appointment.NO_RECURRENCE) {
-            throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.RCURRING_FOLDER_MOVE));
+            throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.RECURRING_FOLDER_MOVE));
         }
 
         collection.detectFolderMoveAction(cdao, edao);
