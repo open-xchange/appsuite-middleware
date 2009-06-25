@@ -72,12 +72,12 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 public class Bug12380RecoveryParserTest extends TestCase {
 
     private SimICalParser parser;
-    private Bug12380RecoveryParser bugParser;
+    private ExtraneousSeriesMasterRecoveryParser bugParser;
 
     public void setUp() {
         parser = new SimICalParser();
         ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-        bugParser = new Bug12380RecoveryParser(parser, registry);
+        bugParser = new ExtraneousSeriesMasterRecoveryParser(parser, registry);
         if(null == registry.getService(CalendarCollectionService.class)) {
             registry.addService(CalendarCollectionService.class, new CalendarCollection());
         }
