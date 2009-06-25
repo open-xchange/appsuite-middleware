@@ -1028,7 +1028,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                     break;
                 case Participant.RESOURCE:
-                    p = getResourceParticipant(participant, ctx);
+                    p = getResourceParticipant(participant, session);
                     if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
                         folderRepl.setChanged(p.folderId != folderId);
                         return;
@@ -1099,7 +1099,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 break;
             case Participant.RESOURCE:
-                p = getResourceParticipant(participant, ctx);
+                p = getResourceParticipant(participant, session);
                 if (p == null) {
                     // Might be user added as resource (!)
                     p = getUserParticipant(participant, ctx);
@@ -1135,7 +1135,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
                 break;
             case Participant.RESOURCE:
-                p = getResourceParticipant(participant, ctx);
+                p = getResourceParticipant(participant, session);
                 if (p == null) {
                     // Might be user added as resource (!)
                     p = getUserParticipant(participant, ctx);
@@ -1180,7 +1180,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 break;
             case Participant.RESOURCE:
-                p = getResourceParticipant(participant, ctx);
+                p = getResourceParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
                     addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
@@ -1251,7 +1251,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
                 break;
             case Participant.RESOURCE:
-                p = getResourceParticipant(participant, ctx);
+                p = getResourceParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
                     addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
@@ -1403,10 +1403,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return null;
     }
 
-    private EmailableParticipant getResourceParticipant(final Participant participant, final Context ctx) {
+    private EmailableParticipant getResourceParticipant(final Participant participant, final ServerSession session) {
         final int[] groups = new int[0];
         String mail = null;
         String displayName = null;
+        final Context ctx = session.getContext();
         try {
             final Resource resource = resolveResources(ctx, participant.getIdentifier())[0];
             mail = resource.getMail();
@@ -1420,6 +1421,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         } catch (final LdapException e) {
             LL.log(e);
         }
+        
+        Locale l;
+        try {
+            User user = resolveUsers(session.getContext(), session.getUserId())[0];
+            l = user.getLocale();
+        } catch (final LdapException e) {
+            // Should not happen
+            LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
+            l = Locale.getDefault();
+        }
 
         EmailableParticipant p;
         if (mail != null) {
@@ -1430,7 +1441,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 groups,
                 mail,
                 displayName,
-                Locale.getDefault(),
+                l,
                 TimeZone.getDefault(),
                 -1,
                 MailObject.DONT_SET,

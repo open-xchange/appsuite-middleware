@@ -1,6 +1,7 @@
 * 2009-06-25 - francisco.laguna@open-xchange.com
 
  - Bugfix #12380: When during iCal import a series master is found to be outside the recurrence, create an additional appointment at the masters date.
+ - Bugfix #13963: Default to editors language in notification mails for resource admins.
 
 * 2009-06-25 - martin.herfurth@open-xchange.com
 
