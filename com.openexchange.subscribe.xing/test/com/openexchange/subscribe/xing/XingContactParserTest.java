@@ -7,8 +7,8 @@ import com.openexchange.groupware.container.Contact;
 public class XingContactParserTest extends TestCase {
 
     //TODO: Insert valid credentials for www.xing.com here
-    protected String xingUser="karsten.will@gmx.de";
-    protected String xingPassword ="P1lotXIN";
+    protected String xingUser="";
+    protected String xingPassword ="";
     
     //TODO: Insert INVALID credentials for www.xing.com here
     protected String invalidXingUser="login";
