@@ -50,8 +50,6 @@
 package com.openexchange.imap.command;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,15 +62,10 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.Message.RecipientType;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
-import javax.mail.internet.MailDateFormat;
-import javax.mail.internet.MimeUtility;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -631,19 +624,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         }
     }
 
-    private static interface HeaderHandler {
-
-        /**
-         * Handles given header value and applies it to given message.
-         * 
-         * @param hdrValue The header value
-         * @param msg The message to apply to
-         * @throws MessagingException If a messaging error occurs
-         * @throws MailException If a mail error occurs
-         */
-        public void handleHeader(String hdrValue, ExtendedMimeMessage msg) throws MessagingException, MailException;
-    }
-
     private static interface FetchItemHandler {
 
         /**
@@ -660,12 +640,27 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final class HeaderFetchItemHandler implements FetchItemHandler {
 
-        static final MailDateFormat mailDateFormat = new MailDateFormat();
+        // private static interface HeaderHandler {
+        //
+        // /**
+        // * Handles given header value and applies it to given message.
+        // *
+        // * @param hdrValue The header value
+        // * @param msg The message to apply to
+        // * @throws MessagingException If a messaging error occurs
+        // * @throws MailException If a mail error occurs
+        // */
+        // public void handleHeader(String hdrValue, ExtendedMimeMessage msg) throws MessagingException, MailException;
+        // }
 
-        private final Map<String, HeaderHandler> hdrHandlers;
+        // static final MailDateFormat mailDateFormat = new MailDateFormat();
+
+        // private final Map<String, HeaderHandler> hdrHandlers;
 
         public HeaderFetchItemHandler() {
             super();
+            /*-
+             * 
             this.hdrHandlers = new HashMap<String, HeaderHandler>();
             hdrHandlers.put(MessageHeaders.HDR_FROM, new HeaderHandler() {
 
@@ -733,6 +728,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     }
                 }
             });
+             */
         }
 
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
@@ -762,32 +758,20 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
+                msg.setHeader(hdr.getName(), hdr.getValue());
+                /*-
+                 * 
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
                 if (hdrHandler == null) {
                     msg.setHeader(hdr.getName(), hdr.getValue());
                 } else {
                     hdrHandler.handleHeader(hdr.getValue(), msg);
                 }
+                 */
             }
         }
 
-        public Map<String, HeaderHandler> getHdrHandlers() {
-            return hdrHandlers;
-        }
-
-        public HeaderHandler getHdrHandler(final String headerName) {
-            return hdrHandlers.get(headerName);
-        }
-
-        public int getHeadersSize() {
-            return hdrHandlers.size();
-        }
-
-        public boolean containsHeaderHandlers() {
-            return this.hdrHandlers != null;
-        }
-
-    }
+    } // End of HeaderFetchItemHandler
 
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
@@ -813,15 +797,28 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setReplyTo(env.replyTo);
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
-            try {
-                msg.setSubject(
-                    env.subject == null ? "" : MimeUtility.decodeText(env.subject),
-                    MailProperties.getInstance().getDefaultMimeCharset());
-            } catch (final UnsupportedEncodingException e) {
-                logger.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-                MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(env.subject));
+
+            final String subject;
+            if (env.subject == null) {
+                subject = "";
+            } else {
+                final char[] chars = env.subject.toCharArray();
+                final StringBuilder sb = new StringBuilder(chars.length);
+                int i = 0;
+                while (i < chars.length) {
+                    final char c = chars[i];
+                    if ('\t' != c && '\r' != c && '\n' != c) {
+                        if (' ' == c && (i + 1) < chars.length && ' ' == chars[i + 1]) {
+                            i++;
+                        }
+                        sb.append(c);
+                    }
+                    i++;
+                }
+                subject = MIMEMessageUtility.decodeMultiEncodedHeader(sb.toString());
             }
+            msg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
+
             msg.setSentDate(env.date);
         }
     };

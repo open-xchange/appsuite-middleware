@@ -205,7 +205,9 @@ public final class MIMEMessageConverter {
         try {
             final int size = (int) mail.getSize();
             final MimeMessage mimeMessage;
-            {
+            if (mail instanceof MIMEMailMessage) {
+                mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
+            } else {
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
                 mail.writeTo(out);
                 mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(
@@ -494,7 +496,7 @@ public final class MIMEMessageConverter {
                 /*
                  * Subject
                  */
-                mailMessage.setSubject(extMimeMessage.getSubject());
+                mailMessage.setSubject(getSubject(msg));
                 /*
                  * Date
                  */
@@ -604,7 +606,7 @@ public final class MIMEMessageConverter {
         FILLER_MAP_EXT.put(MailField.SUBJECT, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                mailMessage.setSubject(((ExtendedMimeMessage) msg).getSubject());
+                mailMessage.setSubject(getSubject(msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.SIZE, new MailMessageFieldFiller() {
@@ -759,7 +761,7 @@ public final class MIMEMessageConverter {
                 /*
                  * Subject
                  */
-                mailMessage.setSubject(msg.getSubject());
+                mailMessage.setSubject(getSubject(msg));
                 /*
                  * Date
                  */
@@ -888,7 +890,7 @@ public final class MIMEMessageConverter {
         FILLER_MAP.put(MailField.SUBJECT, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                mailMessage.setSubject(decodeMultiEncodedHeader(msg.getSubject()));
+                mailMessage.setSubject(getSubject(msg));
             }
         });
         FILLER_MAP.put(MailField.SIZE, new MailMessageFieldFiller() {
@@ -1184,10 +1186,7 @@ public final class MIMEMessageConverter {
              * Date: Thu, 18 Sep 1997 10:49:08 +0200
              * </pre>
              */
-            {
-                final String subject = decodeMultiEncodedHeader(mail.getFirstHeader(MessageHeaders.HDR_SUBJECT));
-                mail.setSubject(null == subject ? "" : subject);
-            }
+            mail.setSubject(getSubject(msg));
             mail.setThreadLevel(0);
             return mail;
         } catch (final MessagingException e) {
@@ -1618,6 +1617,71 @@ public final class MIMEMessageConverter {
     }
 
     /**
+     * Gets the first header denoted by specified header name and decodes its value to a unicode string if necessary.
+     * 
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&amp;uumlber&quot;
+     * </pre>
+     * 
+     * @param name The header name
+     * @param message The message providing the header
+     * @return The decoded header
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static String getSubject(final Message message) throws MessagingException {
+        final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
+        return null == subject ? "" : subject;
+    }
+
+    /**
+     * Gets the first header denoted by specified header name and decodes its value to a unicode string if necessary.
+     * 
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&amp;uumlber&quot;
+     * </pre>
+     * 
+     * @param name The header name
+     * @param message The message providing the header
+     * @return The decoded header
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static String getStringHeader(final String name, final Message message) throws MessagingException {
+        return getStringHeader(name, message, '\0');
+    }
+
+    /**
+     * Gets the headers denoted by specified header name and decodes its value to a unicode string if necessary.
+     * 
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&amp;uumlber&quot;
+     * </pre>
+     * 
+     * @param name The header name
+     * @param message The message providing the header
+     * @param delimiter The delimiter character if message contains multiple header values; set to <code>'\0'</code> to only consider first
+     *            one
+     * @return The decoded header
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static String getStringHeader(final String name, final Message message, final char delimiter) throws MessagingException {
+        final String[] valueArr = message.getHeader(name);
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        final String values;
+        if ('\0' != delimiter && valueArr.length > 1) {
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
+            for (int i = 1; i < valueArr.length; i++) {
+                sb.append(delimiter).append(valueArr[i]);
+            }
+            values = sb.toString();
+        } else {
+            values = valueArr[0];
+        }
+        return decodeMultiEncodedHeader(values);
+    }
+
+    /**
      * Gets the address headers denoted by specified header name in a safe manner.
      * <p>
      * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
@@ -1644,7 +1708,7 @@ public final class MIMEMessageConverter {
             addresses = addressArray[0];
         }
         try {
-            return InternetAddress.parseHeader(addresses, true);
+            return InternetAddress.parseHeader(decodeMultiEncodedHeader(addresses), true);
         } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(

@@ -62,7 +62,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
 import net.freeutils.tnef.Attachment;
 import net.freeutils.tnef.Attr;
 import net.freeutils.tnef.MAPIProp;
@@ -665,11 +664,12 @@ public final class MailMessageParser {
             }
             filename = sb.toString();
         } else {
-            try {
-                filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
-            } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
+            filename = MIMEMessageUtility.decodeMultiEncodedHeader(filename);
+            // try {
+            // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
+            // } catch (final Exception e) {
+            // LOG.error(e.getMessage(), e);
+            // }
         }
         return filename;
     }

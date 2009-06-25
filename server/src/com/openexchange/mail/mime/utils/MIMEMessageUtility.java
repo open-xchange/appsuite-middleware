@@ -374,6 +374,12 @@ public final class MIMEMessageUtility {
             return null;
         }
         final String hdrVal = MIMEMessageUtility.unfold(headerValue);
+        /*
+         * Whether the sequence "=?" exists at all
+         */
+        if (hdrVal.indexOf("=?") == -1) {
+            return hdrVal;
+        }
         final Matcher m = ENC_PATTERN.matcher(hdrVal);
         if (m.find()) {
             final StringBuilder sb = new StringBuilder(hdrVal.length());
@@ -734,7 +740,12 @@ public final class MIMEMessageUtility {
          * In this case the SPACE character is not part of the header and should
          * be discarded.
          */
-        String s = unfoldEncodedWords(headerLine);
+        String s;
+        if (headerLine.indexOf("=?") == -1) {
+            s = headerLine;
+        } else {
+            s = unfoldEncodedWords(headerLine);
+        }
         while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0) {
             final int start = i;
             final int len = s.length();
@@ -789,7 +800,7 @@ public final class MIMEMessageUtility {
         return s;
     }
 
-    private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\\r?\\n(?:\\t| ))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
+    private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\r?\n(?:\t| ))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
 
     /**
      * Unfolds encoded-words as per RFC 2047. When unfolding a non-encoded-word the preceding space character should not be stripped out,

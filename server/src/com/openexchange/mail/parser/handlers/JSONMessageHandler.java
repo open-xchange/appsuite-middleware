@@ -55,7 +55,6 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.File;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -69,7 +68,6 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,6 +92,7 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
@@ -225,7 +224,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
-                //jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
+                // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
                 jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
             }
         } catch (final JSONException e) {
@@ -906,11 +905,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             if (fileName == null) {
                 jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
             } else {
-                try {
-                    jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(fileName));
-                } catch (final UnsupportedEncodingException e) {
-                    jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
-                }
+                jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MIMEMessageUtility.decodeMultiEncodedHeader(fileName));
             }
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
@@ -974,11 +969,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 if (fileName == null) {
                     originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
                 } else {
-                    try {
-                        originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(fileName));
-                    } catch (final UnsupportedEncodingException e) {
-                        originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
-                    }
+                    originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MIMEMessageUtility.decodeMultiEncodedHeader(fileName));
                 }
                 getAttachmentsArr().put(originalVersion);
             }

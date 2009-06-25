@@ -49,12 +49,10 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +68,6 @@ import javax.mail.MessagingException;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -214,18 +211,11 @@ public final class MimeReply {
                 subjectHdrValue = "";
             }
             final String rawSubject = MIMEMessageUtility.unfold(subjectHdrValue);
-            try {
-                final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility.decodeText(rawSubject));
+            {
+                final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(rawSubject);
                 final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(
                     subjectPrefix).append(decodedSubject).toString();
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                /*
-                 * Handle raw value: setting prefix to raw subject value still leaves a valid and correct encoded header
-                 */
-                replyMsg.setHeader(MessageHeaders.HDR_SUBJECT, new StringBuilder().append(subjectPrefix).append(rawSubject).toString());
             }
             /*
              * Set the appropriate recipients. Taken from RFC 822 section 4.4.4: If the "Reply-To" field exists, then the reply should go to

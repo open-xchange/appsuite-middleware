@@ -49,14 +49,11 @@
 
 package com.openexchange.mail.json.writer;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import java.io.UnsupportedEncodingException;
 import java.util.EnumMap;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -587,17 +584,11 @@ public final class MessageWriter {
     private static final String DUMMY_DOMAIN = "@unspecified-domain";
 
     private static String prepareAddress(final String address) {
-        try {
-            final String decoded = MimeUtility.decodeText(address);
-            if (decoded.endsWith(DUMMY_DOMAIN)) {
-                return decoded.substring(0, decoded.indexOf('@'));
-            }
-            return decoded;
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-            return MIMEMessageUtility.decodeMultiEncodedHeader(address);
+        final String decoded = MIMEMessageUtility.decodeMultiEncodedHeader(address);
+        if (decoded.endsWith(DUMMY_DOMAIN)) {
+            return decoded.substring(0, decoded.indexOf('@'));
         }
+        return decoded;
     }
 
 }
