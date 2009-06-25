@@ -97,7 +97,7 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 		
 		for (HtmlPage page : pages) {			
     		try {
-    			Contact contactObject = new Contact();
+    			Contact contact = new Contact();
     			TextPage vcardPage = null;
     			String imageUrl = "";
     			
@@ -108,7 +108,7 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
     				}
     			}
     			
-    			//if there is a contact picture in an <img>-tag
+    			//if there is a contact picture in an <img>-tag get its Url
     			if (page.getWebResponse().getContentAsString().contains(pictureUrl)){
 	    			int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
 	    			String substring = page.getWebResponse().getContentAsString().substring(startIndex);
@@ -117,26 +117,22 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 				
     			
     			if (vcardPage != null){
-    				String vcardString = vcardPage.getWebResponse().getContentAsString(encoding);
-    				// include the picture url in the vcard if there is one
-    				if (!imageUrl.equals("")){
-    					int indexEnd = vcardString.indexOf("END:VCARD");
-    					String textUntilEnd = vcardString.substring(0, indexEnd);
-    					vcardString = textUntilEnd + "PHOTO;VALUE=URI:" + imageUrl + "\n" + "END:VCARD" + "\n";
-    				}
-    				byte[] vcard = vcardString.getBytes();
+    				byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
+    				
     				versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
         			VersitObject versitObject = def.parse(versitReader);
-        			Property property = versitObject.getProperty("FN");
-        			//System.out.println("Full name in the versit object : " + property.getValue().toString());
-        			contactObject = oxContainerConverter.convertContact(versitObject);
-        			//System.out.println("Full name in the contact object : " +contactObject.getDisplayName());
+        			contact = oxContainerConverter.convertContact(versitObject);
     			}
+    			
+    			//add the image from a url to the contact
+    			if (!imageUrl.equals("")){
+    				OXContainerConverter.loadImageFromURL(contact, imageUrl);
+    			}	
     			
     			//TODO: Add other form of getting content from a page here (a list of regex2contactobject-field mappings ordered by appearance on the page)
     			
-    			SANITIZER.sanitize(contactObject);
-    			contactObjects.add(contactObject);
+    			SANITIZER.sanitize(contact);
+    			contactObjects.add(contact);
     			
     		} catch (final VersitException e){
     			e.printStackTrace();

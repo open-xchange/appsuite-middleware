@@ -1048,7 +1048,7 @@ public class OXContainerConverter {
      * @param uri The URI parameter's value
      * @throws ConverterException If converting image's data fails
      */
-    private static void loadImageFromURL(final Contact contactContainer, final String uri) throws ConverterException {
+    public static void loadImageFromURL(final Contact contactContainer, final String uri) throws ConverterException {
         try {
             loadImageFromURL(contactContainer, new URL(uri));
         } catch (final MalformedURLException e) {
