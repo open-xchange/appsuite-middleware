@@ -52,9 +52,12 @@ package com.openexchange.subscribe.microformats.datasources;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,8 +80,12 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
 
         try {
             HttpClient client = new HttpClient();
-            client.getParams().setParameter("http.socket.timeout", new Integer(5000));
-
+            client.getParams().setSoTimeout(3000);
+            client.getParams().setIntParameter("http.connection.timeout", 3000);
+            
+            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
+                new DefaultHttpMethodRetryHandler(0, false));
+            
             String urlString = (String) subscription.getConfiguration().get(URL);
 
             java.net.URL javaURL = new java.net.URL(urlString);
@@ -94,8 +101,10 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
                 
                 
                 GetMethod getMethod = new GetMethod(javaURL.getFile());
+                getMethod.getParams().setSoTimeout(1000);
                 getMethod.setQueryString(javaURL.getQuery());
                 client.executeMethod(getMethod);
+                
                 return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
             } else {
                 GetMethod getMethod = new GetMethod(urlString);

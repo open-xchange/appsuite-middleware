@@ -145,5 +145,10 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     public void addPrefix(String string) {
         prefixes.add(string);
     }
+    
+    @Override
+    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+        subscription.setDisplayName((String)subscription.getConfiguration().get("url"));
+    }
 
 }
