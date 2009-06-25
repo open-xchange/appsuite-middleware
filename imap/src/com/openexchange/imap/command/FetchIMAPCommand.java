@@ -758,7 +758,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
-                msg.setHeader(hdr.getName(), hdr.getValue());
+                msg.addHeader(hdr.getName(), hdr.getValue());
                 /*-
                  * 
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
