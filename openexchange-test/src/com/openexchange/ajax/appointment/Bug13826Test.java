@@ -125,7 +125,7 @@ public class Bug13826Test extends AbstractAJAXSession {
             currentFolder = updateAppointment.getParentFolderID();
             fail("Expected error.");
         } else {
-            assertEquals("Wrong error message", OXCalendarException.Code.RCURRING_FOLDER_MOVE.getDetailNumber(), updateResponse.getException().getDetailNumber());
+            assertEquals("Wrong error message", OXCalendarException.Code.RECURRING_FOLDER_MOVE.getDetailNumber(), updateResponse.getException().getDetailNumber());
         }
         Appointment loadedAppointment = getClient().execute(new GetRequest(sourceFolderId, appointment.getObjectID(), true)).getAppointment(getClient().getValues().getTimeZone());
         setCurrentValues(loadedAppointment);
