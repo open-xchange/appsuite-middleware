@@ -12,7 +12,7 @@
 <booleanAttribute key="includeOptional" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#10;-Xmx1024M&#10;-XX:+UseConcMarkSweepGC&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange-development/tmp}&#10;-Djava.util.logging.config.file=${workspace_loc:/open-xchange-development/tmp/logging.properties}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#10;-Xmx1024M&#10;-XX:+UseConcMarkSweepGC&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange-development/tmp}&#10;-Dopenexchange.propdir2=${workspace_loc:/open-xchange-development/commonTmp}&#10;-Djava.util.logging.config.file=${workspace_loc:/open-xchange-development/tmp/logging.properties}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="target_bundles" value="org.apache.xml.serializer@default:default,org.eclipse.osgi@:,org.apache.commons.lang@default:default,org.apache.xml.resolver@default:default,org.eclipse.osgi.services@default:default,org.apache.commons.cli@default:default,org.apache.commons.codec@default:default,javax.servlet@default:default,javax.xml@default:default,org.apache.commons.logging@default:default,org.apache.commons.httpclient@default:default,org.apache.xerces@default:default,javax.mail@default:default,org.eclipse.equinox.event@default:default"/>
