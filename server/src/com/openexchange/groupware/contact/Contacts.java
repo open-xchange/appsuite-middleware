@@ -149,7 +149,12 @@ public final class Contacts {
         super();
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The entered E-Mail address is not confirm to RFC822 and therefore it is not accepted.", exceptionId = 0, msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address.")
+    @OXThrows(
+        category = Category.USER_INPUT,
+        desc = "The entered E-Mail address is not confirm to RFC822 and therefore it is not accepted.",
+        exceptionId = 0,
+        msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+    )
     private static void validateEmailAddress(final Contact co) throws OXException {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
@@ -169,10 +174,15 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { "1", "2", "70" }, exceptionId = {
-        1, 2, 70 }, msg = {
-        "Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
-        "This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null" })
+    @OXThrowsMultiple(
+        category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT },
+        desc = { "1", "2", "70" },
+        exceptionId = { 1, 2, 70 },
+        msg = {
+            "Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
+            "This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null"
+        }
+    )
     private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
         if (null == mime) {
             throw EXCEPTIONS.create(70, new Object[0]);
@@ -348,23 +358,38 @@ public final class Contacts {
         return img;
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT }, desc = { "72" }, exceptionId = { 72 }, msg = { "Image size too large. Image size: %1$d. Max. size: %2$d." })
+    @OXThrowsMultiple(
+        category = { Category.USER_INPUT },
+        desc = { "72" },
+        exceptionId = { 72 },
+        msg = { "Image size too large. Image size: %1$d. Max. size: %2$d." }
+    )
     private static void checkImageSize(final int imageSize, final int maxSize) throws ContactException {
         if (maxSize > 0 && imageSize > maxSize) {
             throw EXCEPTIONS.create(72, Integer.valueOf(imageSize), Integer.valueOf(maxSize));
         }
     }
 
-    @OXThrowsMultiple(category = {
-        Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
-        Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = {
-        "3", "4", "5", "6", "7", "8", "9", "51", "53", "58", "62", "71" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 }, msg = {
-        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG, ContactException.NO_PERMISSION_MSG,
-        "Unable to insert contacts! Context: %d", "Got a -1 ID from IDGenerator", "Unable to scale image down.",
-        "Unable to insert Contact. Context: %d", ContactException.INIT_CONNECTION_FROM_DBPOOL,
-        ContactException.INIT_CONNECTION_FROM_DBPOOL,
-        "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-        "Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER })
+    @OXThrowsMultiple(
+        category = {
+            Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
+            Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT
+        },
+        desc = { "3", "4", "5", "6", "7", "8", "9", "51", "53", "58", "62", "71" },
+        exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 },
+        msg = {
+            ContactException.NON_CONTACT_FOLDER_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            "Unable to insert contacts! Context: %d", "Got a -1 ID from IDGenerator",
+            "Unable to scale image down.",
+            "Unable to insert Contact. Context: %d",
+            ContactException.INIT_CONNECTION_FROM_DBPOOL,
+            ContactException.INIT_CONNECTION_FROM_DBPOOL,
+            "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
+            "Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER
+        }
+    )
     public static void performContactStorageInsert(final Contact co, final int user, final Session so) throws OXConflictException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
@@ -614,32 +639,48 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = {
-        Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
-        Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
-        Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
-        Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
-        Category.PERMISSION }, desc = {
-        "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63", "66", "67",
-        "69", "73", "74" }, exceptionId = {
-        10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74 }, msg = {
-        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG, ContactException.NO_PERMISSION_MSG,
-        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG, ContactException.NO_PERMISSION_MSG,
-        "Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d", ContactException.NO_PERMISSION_MSG,
-        "Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
-        "You are not allowed to mark this contact as private contact: Context %1$d Object %2$d", ContactException.OBJECT_HAS_CHANGED_MSG,
-        "Unable to update contact. Context %1$d Object %2$d", "An error occurred: Object id is -1",
-        "No changes found. No update requiered. Context %1$d Object %2$d", "Unable to scale image down.",
-        "Unable to update contact. Context %1$d Object %2$d", ContactException.INIT_CONNECTION_FROM_DBPOOL,
-        "One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
-        "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-        "Mandatory field last name is not set.",
-        "Unable to compare contacts for update. Make sure you have entered a valid display name. Context %1$d Object %2$d",
-        "The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
-        ContactException.NO_DELETE_PERMISSION_MSG,
-        "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d", ContactException.NOT_IN_FOLDER })
+    @OXThrowsMultiple(
+        category = {
+            Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
+            Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
+            Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
+            Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
+            Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT
+        },
+        desc = {
+            "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63", "66",
+            "67", "69", "73", "74", "75", "64"
+        },
+        exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74, 75, 64 },
+        msg = {
+            ContactException.NON_CONTACT_FOLDER_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            ContactException.NON_CONTACT_FOLDER_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            "Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d",
+            ContactException.NO_PERMISSION_MSG,
+            "Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
+            "You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
+            ContactException.OBJECT_HAS_CHANGED_MSG,
+            "Unable to update contact. Context %1$d Object %2$d", "An error occurred: Object id is -1",
+            "No changes found. No update requiered. Context %1$d Object %2$d", "Unable to scale image down.",
+            "Unable to update contact. Context %1$d Object %2$d",
+            ContactException.INIT_CONNECTION_FROM_DBPOOL,
+            "One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
+            "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
+            "Mandatory field last name is not set.",
+            "Your display name is mandatory. Please enter it.",
+            "The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
+            ContactException.NO_DELETE_PERMISSION_MSG,
+            "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d",
+            ContactException.NOT_IN_FOLDER,
+            "Your last name is mandatory. Please enter it.",
+            "Your first name is mandatory. Please enter it.",
+        }
+    )
     public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
-
         // TODO
         /*
          * if ((!co.containsSurName() || co.getSurName() == null || co.getSurName().length() < 1) && (!co.containsDisplayName() ||
@@ -860,12 +901,16 @@ public final class Contacts {
                 throw xoxo;
             }
 
-            /**
-             * TODO
-             */
-            if ((co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) && co.containsDisplayName() && ((co.getDisplayName() == null) || co.getDisplayName().equals(
-                ""))) {
-                throw EXCEPTIONS.create(66, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
+            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == co.getParentFolderID()) {
+                if (co.containsDisplayName() && (null == co.getDisplayName() || "".equals(co.getDisplayName()))) {
+                    throw EXCEPTIONS.create(66);
+                }
+                if (co.containsSurName() && (null == co.getSurName() || "".equals(co.getSurName()))) {
+                    throw EXCEPTIONS.create(75);
+                }
+                if (co.containsGivenName() && (null == co.getGivenName() || "".equals(co.getGivenName()))) {
+                    throw EXCEPTIONS.create(64);
+                }
             }
 
             if ((co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) && co.containsDisplayName() && (co.getDisplayName() != null)) {

@@ -1,3 +1,7 @@
+* 2009-06-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #13360: Display, first and sure name are mandatory attributes for editing user contacts.
+
 * 2009-06-25 - francisco.laguna@open-xchange.com
 
  - Bugfix #12380: When during iCal import a series master is found to be outside the recurrence, create an additional appointment at the masters date.
