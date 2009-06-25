@@ -116,16 +116,18 @@ public class XingContactParser {
 		return contactObjectsArray;
 	}
 
-	private Vector<Contact> getContactsFromVcardLinks (List<HtmlAnchor> allLinks) throws IOException{
+	private Vector<Contact> getContactsFromVcardLinks (List<HtmlAnchor> allLinks) throws IOException, XingSubscriptionException{
 		Vector<Contact> contactObjects = new Vector<Contact>();
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 	    for (HtmlAnchor tempLink : allLinks){
 	    	// there should be some vcard links here. If there are none something is probably wrong
 	    	if (tempLink.getHrefAttribute().startsWith("/app/vcard")){
-	    		//System.out.println("*****" +tempLink.getHrefAttribute());
 	    		Page vcardPage = tempLink.click(); 
+	    		// if it is no TextPage it is not usable as a vcard
+	    		if (vcardPage instanceof HtmlPage){
+	    			throw XingSubscriptionErrorMessage.ERROR_WHEN_DOWNLOADING_VCARDS.create();
+	    		}
 	    		byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
-	    		//System.out.println(vcardPage.getContent());
 	    		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
 	    		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
 	    		try {
