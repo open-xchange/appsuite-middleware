@@ -7,6 +7,7 @@ import java.util.TimeZone;
 import java.util.Vector;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -122,7 +123,7 @@ public class XingContactParser {
 	    	// there should be some vcard links here. If there are none something is probably wrong
 	    	if (tempLink.getHrefAttribute().startsWith("/app/vcard")){
 	    		//System.out.println("*****" +tempLink.getHrefAttribute());
-	    		TextPage vcardPage = tempLink.click(); 
+	    		Page vcardPage = tempLink.click(); 
 	    		byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 	    		//System.out.println(vcardPage.getContent());
 	    		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
