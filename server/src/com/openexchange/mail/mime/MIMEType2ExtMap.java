@@ -88,9 +88,9 @@ public final class MIMEType2ExtMap {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static Map<String, String> type_hash;
+    private static Map<String, String> typeMap;
 
-    private static Map<String, List<String>> ext_hash;
+    private static Map<String, List<String>> extMap;
 
     /**
      * No instance.
@@ -108,8 +108,8 @@ public final class MIMEType2ExtMap {
                 if (!initialized.get()) {
                     return;
                 }
-                type_hash = null;
-                ext_hash = null;
+                typeMap = null;
+                extMap = null;
                 initialized.set(false);
             }
         }
@@ -121,12 +121,12 @@ public final class MIMEType2ExtMap {
     public static void init() {
         if (!initialized.get()) {
             synchronized (initialized) {
+                if (initialized.get()) {
+                    return;
+                }
                 try {
-                    if (initialized.get()) {
-                        return;
-                    }
-                    type_hash = new HashMap<String, String>();
-                    ext_hash = new HashMap<String, List<String>>();
+                    typeMap = new HashMap<String, String>();
+                    extMap = new HashMap<String, List<String>>();
                     final StringBuilder sb = new StringBuilder(128);
                     {
                         final String homeDir = System.getProperty("user.home");
@@ -205,7 +205,7 @@ public final class MIMEType2ExtMap {
      * Gets the MIME type associated with given file.
      * 
      * @param file The file
-     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
      */
     public static String getContentType(final File file) {
         return getContentType(file.getName());
@@ -214,13 +214,11 @@ public final class MIMEType2ExtMap {
     /**
      * Gets the MIME type associated with given file name.
      * 
-     * @param fileName The file name
-     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     * @param fileName The file name; e.g. <code>"file.html"</code>
+     * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
      */
     public static String getContentType(final String fileName) {
-        if (!initialized.get()) {
-            init();
-        }
+        init();
         if (null == fileName) {
             return MIMETypes.MIME_APPL_OCTET;
         }
@@ -232,7 +230,25 @@ public final class MIMEType2ExtMap {
         if (s1.length() == 0) {
             return MIMETypes.MIME_APPL_OCTET;
         }
-        final String type = type_hash.get(s1.toLowerCase(Locale.ENGLISH));
+        final String type = typeMap.get(s1.toLowerCase(Locale.ENGLISH));
+        if (null == type) {
+            return MIMETypes.MIME_APPL_OCTET;
+        }
+        return type;
+    }
+
+    /**
+     * Gets the MIME type associated with given file extension.
+     * 
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     */
+    public static String getContentTypeByExtension(final String extension) {
+        init();
+        if (null == extension || 0 == extension.length()) {
+            return MIMETypes.MIME_APPL_OCTET;
+        }
+        final String type = typeMap.get(extension.toLowerCase(Locale.ENGLISH));
         if (null == type) {
             return MIMETypes.MIME_APPL_OCTET;
         }
@@ -254,10 +270,8 @@ public final class MIMEType2ExtMap {
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
     public static List<String> getFileExtensions(final String mimeType) {
-        if (!initialized.get()) {
-            init();
-        }
-        return ext_hash.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(ext_hash.get(mimeType)) : DEFAULT_EXT;
+        init();
+        return extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(extMap.get(mimeType)) : DEFAULT_EXT;
     }
 
     /**
@@ -266,9 +280,7 @@ public final class MIMEType2ExtMap {
      * @param fileStr The MIME type file to load
      */
     public static void load(final String fileStr) {
-        if (!initialized.get()) {
-            init();
-        }
+        init();
         load(new File(fileStr));
     }
 
@@ -278,9 +290,7 @@ public final class MIMEType2ExtMap {
      * @param file The MIME type file to load
      */
     public static void load(final File file) {
-        if (!initialized.get()) {
-            init();
-        }
+        init();
         loadInternal(file);
     }
 
@@ -368,12 +378,12 @@ public final class MIMEType2ExtMap {
             final List<String> exts = parser.getExtensions();
             if ((type != null) && (exts != null)) {
                 for (final String ext : exts) {
-                    type_hash.put(ext, type);
+                    typeMap.put(ext, type);
                 }
-                if (ext_hash.containsKey(type)) {
-                    ext_hash.get(type).addAll(exts);
+                if (extMap.containsKey(type)) {
+                    extMap.get(type).addAll(exts);
                 } else {
-                    ext_hash.put(type, exts);
+                    extMap.put(type, exts);
                 }
             }
         } else {
@@ -384,12 +394,12 @@ public final class MIMEType2ExtMap {
                 for (int i = 1; i < tokens.length; i++) {
                     final String ext = tokens[i].toLowerCase(Locale.ENGLISH);
                     set.add(ext);
-                    type_hash.put(ext, type);
+                    typeMap.put(ext, type);
                 }
-                if (ext_hash.containsKey(type)) {
-                    ext_hash.get(type).addAll(set);
+                if (extMap.containsKey(type)) {
+                    extMap.get(type).addAll(set);
                 } else {
-                    ext_hash.put(type, set);
+                    extMap.put(type, set);
                 }
             }
         }
