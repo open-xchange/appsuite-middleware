@@ -78,7 +78,11 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
-        ServerServiceRegistry.getInstance().addService(clazz, service);
+        ServerServiceRegistry.getInstance().addService(clazz, customize((T)service));
+        return service;
+    }
+
+    protected T customize(T service) {
         return service;
     }
 
