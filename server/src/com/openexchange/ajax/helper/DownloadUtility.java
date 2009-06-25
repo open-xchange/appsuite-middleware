@@ -111,7 +111,7 @@ public final class DownloadUtility {
         /*
          * Check if it's image content requested by Internet Explorer < v8
          */
-        if (contentType.isMimeType("image/*") && msieOnWindows && 8F < browserDetector.getBrowserVersion()) {
+        if (contentType.isMimeType("image/*") && msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
             /*
              * Get first 256 bytes
              */
