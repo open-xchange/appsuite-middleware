@@ -368,11 +368,15 @@ public class HeaderCollection implements Serializable {
             values.clear();
         }
         if (MessageHeaders.RECEIVED.equals(headerName) || MessageHeaders.RETURN_PATH.equals(headerName)) {
-            // Prepend
-            values.add(0, value);
-        } else {
-            // Append
+            /*
+             * Append
+             */
             values.add(value);
+        } else {
+            /*
+             * Prepend
+             */
+            values.add(0, value);
         }
         count++;
     }
@@ -623,6 +627,8 @@ public class HeaderCollection implements Serializable {
 
         private final boolean matches;
 
+        private int size;
+
         private int index;
 
         private Map.Entry<HeaderName, List<String>> entry;
@@ -642,33 +648,35 @@ public class HeaderCollection implements Serializable {
         }
 
         public boolean hasNext() {
-            if (entry == null || index < 0) {
+            if (entry == null || index >= size) {
                 while (iter.hasNext()) {
                     entry = iter.next();
                     if (headers == null || (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
-                        index = entry.getValue().size() - 1;
+                        size = entry.getValue().size();
+                        index = 0;
                         return true;
                     }
                 }
                 entry = null;
                 return false;
             }
-            return (index >= 0);
+            return (index < size);
         }
 
         public Entry<String, String> next() {
-            if (entry == null || index < 0) {
+            if (entry == null || index >= size) {
                 while (iter.hasNext()) {
                     entry = iter.next();
                     if (headers == null || (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
-                        index = entry.getValue().size() - 1;
-                        return new HeaderEntry(entry, index--);
+                        size = entry.getValue().size();
+                        index = 0;
+                        return new HeaderEntry(entry, index++);
                     }
                 }
                 entry = null;
                 throw new NoSuchElementException();
             }
-            return new HeaderEntry(entry, index--);
+            return new HeaderEntry(entry, index++);
         }
 
         public void remove() {
