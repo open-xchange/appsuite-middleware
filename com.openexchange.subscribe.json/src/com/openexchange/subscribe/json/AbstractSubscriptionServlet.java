@@ -52,6 +52,7 @@ package com.openexchange.subscribe.json;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
@@ -67,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     
+    private static final Log LOG = LogFactory.getLog(AbstractSubscriptionServlet.class);
     
     @Override
     protected boolean hasModulePermission(ServerSession session) {
@@ -87,6 +89,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     }
     
     protected AbstractOXException wrapThrowable(Throwable t) {
+        LOG.error(t.getMessage(), t);
         return SubscriptionJSONErrorMessages.THROWABLE.createException(t, t.getMessage());
     }
     
