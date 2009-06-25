@@ -1,0 +1,3 @@
+* 2009-06-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #13886: Fixed NPE when starting bundle.
