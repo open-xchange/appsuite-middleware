@@ -223,7 +223,7 @@ public final class MIMEType2ExtMap {
             return MIMETypes.MIME_APPL_OCTET;
         }
         final int pos = fileName.lastIndexOf('.');
-        if (pos < 0 || pos >= (fileName.length() - 1)) {
+        if (pos < 0) {
             return MIMETypes.MIME_APPL_OCTET;
         }
         final String s1 = fileName.substring(pos + 1);
