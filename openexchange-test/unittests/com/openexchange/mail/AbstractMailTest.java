@@ -114,27 +114,22 @@ public abstract class AbstractMailTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		try {
-			/*
-			 * Init
-			 */
-			Init.startServer();
-			/*
-			 * Init test environment
-			 */
-			MailConfig.init();
-			server = MailConfig.getProperty(MailConfig.Property.SERVER);
-			port = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT));
-			login = MailConfig.getProperty(MailConfig.Property.LOGIN);
-			secondUser = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.SECOND_USER));
-			password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
-			user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
-			cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
-			testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
+		/*
+		 * Init
+		 */
+		Init.startServer();
+		/*
+		 * Init test environment
+		 */
+		MailConfig.init();
+		server = MailConfig.getProperty(MailConfig.Property.SERVER);
+		port = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT));
+		login = MailConfig.getProperty(MailConfig.Property.LOGIN);
+		secondUser = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.SECOND_USER));
+		password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
+		user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
+		cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
+		testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
 	}
 
 	@Override
