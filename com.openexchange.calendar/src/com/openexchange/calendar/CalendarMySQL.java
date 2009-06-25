@@ -153,6 +153,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final String PDM_PFID_IS = " AND pdm.pfid = ";
 
     private static final String PDM_AND = " AND ";
+    
+    private static final String PDM_OR = " OR ";
 
     private static final String PDM_ORDER_BY = " ORDER BY ";
 
@@ -1167,8 +1169,13 @@ public class CalendarMySQL implements CalendarSqlImp {
         String pattern = searchobject.getPattern();
         if (pattern != null) {
             sb.append(PDM_AND);
+            sb.append(" (");
             sb.append(collection.getFieldName(Appointment.TITLE));
             sb.append(" LIKE ?");
+            sb.append(PDM_OR);
+            sb.append(collection.getFieldName(Appointment.CATEGORIES));
+            sb.append(" LIKE ?");
+            sb.append(")");
             pattern = StringCollection.prepareForSearch(pattern);
         }
 
@@ -1192,6 +1199,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (pattern != null) {
+            pst.setString(x++, pattern);
             pst.setString(x++, pattern);
         }
 

@@ -1,3 +1,7 @@
+* 2009-06-25 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13625: Search for Tags in appointments.
+
 * 2009-06-24 - martin.herfurth@open-xchange.com
 
  - Bugfix #13826: No move between folders for recurring appointments.
