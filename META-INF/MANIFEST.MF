@@ -35,4 +35,5 @@ Require-Bundle: com.openexchange.admin
 Export-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
+Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
