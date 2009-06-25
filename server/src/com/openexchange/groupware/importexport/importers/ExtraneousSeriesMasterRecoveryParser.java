@@ -65,17 +65,17 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * {@link Bug12380RecoveryParser}
+ * {@link ExtraneousSeriesMasterRecoveryParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Bug12380RecoveryParser implements ICalParser {
+public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
 
     private ICalParser delegate;
     private ServerServiceRegistry registry;
     
-    public Bug12380RecoveryParser(ICalParser delegate, ServerServiceRegistry registry) {
+    public ExtraneousSeriesMasterRecoveryParser(ICalParser delegate, ServerServiceRegistry registry) {
         this.delegate = delegate;
         this.registry = registry;
     }

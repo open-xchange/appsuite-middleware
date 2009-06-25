@@ -111,7 +111,7 @@ import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.importexport.importers.Bug12380RecoveryParser;
+import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
@@ -348,7 +348,7 @@ public final class ServerActivator extends DeferredActivator {
             
             @Override
             protected ICalParser customize(ICalParser service) {
-                return new Bug12380RecoveryParser(service, ServerServiceRegistry.getInstance());
+                return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
             }
             
         }));
