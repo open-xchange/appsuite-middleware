@@ -77,6 +77,7 @@ import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -102,6 +103,8 @@ public class Multiple extends SessionServlet {
     private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
 
     private static final transient Log LOG = LogFactory.getLog(Multiple.class);
+    
+    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Multiple.class, LOG);
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -210,7 +213,7 @@ public class Multiple extends SessionServlet {
                         jsonWriter.key(ResponseFields.TIMESTAMP).value(timestamp.getTime());
                     }
                 } catch (final AbstractOXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LL.log(e);
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
                     }
