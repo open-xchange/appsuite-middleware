@@ -677,7 +677,7 @@ public final class Contacts {
             "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d",
             ContactException.NOT_IN_FOLDER,
             "Your last name is mandatory. Please enter it.",
-            "Your first name is mandatory. Please enter it.",
+            "Your first name is mandatory. Please enter it."
         }
     )
     public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
