@@ -94,10 +94,10 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
-import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -112,7 +112,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
 	private final Log log = LogFactory.getLog(this.getClass());
 
-	private PropertyHandlerExtended prop = null;
+	private PropertyHandler prop = null;
 
     public OXContext(final BundleContext context) throws StorageException {
         super();
@@ -120,10 +120,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }
-        final AdminCacheExtended cache = new AdminCacheExtended();
+        final AdminCache cache = new AdminCache();
         cache.initCache();
-        ClientAdminThreadExtended.cache = cache;
-        prop = ClientAdminThreadExtended.cache.getProperties();
+        prop = cache.getProperties();
     }
 
     public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
