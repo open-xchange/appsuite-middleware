@@ -684,7 +684,7 @@ public final class MIMEMessageConverter {
         for (int i = 0; i < fields.length; i++) {
             final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(fields[i]);
             if (filler == null) {
-                if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i])) {
+                if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i]) || MailField.ACCOUNT_NAME.equals(fields[i])) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Ignoring mail field " + fields[i]);
                     }
@@ -992,7 +992,7 @@ public final class MIMEMessageConverter {
                             mailMessage.setFolder(folder.getFullName());
                         }
                     };
-                } else if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i])) {
+                } else if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i]) || MailField.ACCOUNT_NAME.equals(fields[i])) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Ignoring mail field " + fields[i]);
                     }
