@@ -97,7 +97,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreFacadeTest.class);
         tests.addTestSuite(com.openexchange.groupware.folder.FolderTreeUtilTest.class);
         tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);
-        
+
         tests.addTestSuite(com.openexchange.groupware.infostore.AbstractDocumentListActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.CreateDocumentActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.CreateVersionActionTest.class);
@@ -136,7 +136,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class);
 
         tests.addTestSuite(com.openexchange.webdav.action.ApacheURLDecoderTest.class);
-        
+
         tests.addTestSuite(com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class);
         tests.addTestSuite(com.openexchange.groupware.links.CopyLinksForChangeExceptionsTest.class);
 
@@ -148,34 +148,26 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.container.CalendarObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.AppointmentObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.ContactObjectTest.class);
-        
+
         tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
-        
-        
+
         // Slow Tests
-        
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
         tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.calendar.SlowCalendarTests.class);
         tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
         tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
         tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
-        tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
 
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
-        /*
-         * tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
-         * tests.addTestSuite(com.openexchange.mail.MailConverterTest.class);
-         * tests.addTestSuite(com.openexchange.mail.MailFolderTest.class);
-         * tests.addTestSuite(com.openexchange.mail.MailLogicToolsTest.class);
-         * tests.addTestSuite(com.openexchange.mail.MailMessageTest.class);
-         * tests.addTestSuite(com.openexchange.mail.MailParserWriterTest.class);
-         */
-        // TODO: Enable Mail Tests (TODO: Insert imapServer into DB in test setup.
+
+        // This test destroys the server service registry to prevent failing. So this must always be the last test.
+        tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
+
         return tests;
     }
 }
