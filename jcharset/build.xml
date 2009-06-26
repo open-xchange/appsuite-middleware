@@ -56,7 +56,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/net.freeutils.charset.osgi.jar">
+        <jar jarfile="${tmp.dir}/net.freeutils.jcharset.osgi.jar">
             <fileset dir="${output..}"/>
         </jar>
     </target>
@@ -80,7 +80,7 @@
         </copy>
         <copy todir="${jcharsetdir}">
             <fileset refid="metainf"/>
-            <fileset dir="${tmp.dir}" includes="net.freeutils.charset.osgi.jar"/>
+            <fileset dir="${tmp.dir}" includes="net.freeutils.jcharset.osgi.jar"/>
         </copy>
     </target>
 
