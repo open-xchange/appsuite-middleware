@@ -49,7 +49,6 @@
 
 package com.openexchange.charset.osgi;
 
-import java.lang.reflect.Field;
 import java.nio.charset.spi.CharsetProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -57,6 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.charset.CollectionCharsetProvider;
+import com.openexchange.charset.ModifyCharsetExtendedProvider;
 
 /**
  * {@link CharsetActivator} - Activator for com.openexchange.charset bundle
@@ -104,60 +104,6 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
     public void modifiedService(final ServiceReference reference, final Object service) {
     }
 
-    /**
-     * Modifies field <code>java.nio.charset.Charset.extendedProvider</code>
-     * 
-     * @throws NoSuchFieldException If field "extendedProvider" does not exist
-     * @throws IllegalAccessException If field "extendedProvider" is not accessible
-     */
-    private void modifyCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException {
-        /*
-         * Force initialization of Charset.extendedProvider. Otherwise target field "extendedProvider" is not initialized.
-         */
-        java.nio.charset.Charset.isSupported("X-Unknown-Charset");
-        /*
-         * Modify java.nio.charset.Charset class
-         */
-        final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
-        extendedProviderField.setAccessible(true);
-        /*
-         * Backup old charset provider
-         */
-        backupCharsetProvider = (CharsetProvider) extendedProviderField.get(null);
-        /*
-         * Add previous charset provider
-         */
-        if (null == backupCharsetProvider) {
-            collectionCharsetProvider = new CollectionCharsetProvider();
-        } else {
-            collectionCharsetProvider = new CollectionCharsetProvider((CharsetProvider) extendedProviderField.get(null));
-        }
-        /*
-         * Reinitialize field
-         */
-        extendedProviderField.set(null, collectionCharsetProvider);
-    }
-
-    /**
-     * Restores field <code>java.nio.charset.Charset.extendedProvider</code>
-     * 
-     * @throws NoSuchFieldException If field "extendedProvider" does not exist
-     * @throws IllegalAccessException If field "extendedProvider" is not accessible
-     */
-    private void restoreCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException {
-        /*
-         * Restore java.nio.charset.Charset class
-         */
-        final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
-        extendedProviderField.setAccessible(true);
-        /*
-         * Assign previously remembered charset provider
-         */
-        extendedProviderField.set(null, backupCharsetProvider);
-        backupCharsetProvider = null;
-        collectionCharsetProvider = null;
-    }
-
     /*
      * (non-Javadoc)
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -180,7 +126,9 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         LOG.info("starting bundle: com.openexchange.charset");
 
         try {
-            modifyCharsetExtendedProvider();
+            final CharsetProvider[] results = ModifyCharsetExtendedProvider.modifyCharsetExtendedProvider();
+            backupCharsetProvider = results[0];
+            collectionCharsetProvider = (CollectionCharsetProvider) results[1];
             if (LOG.isInfoEnabled()) {
                 LOG.info("External charset provider replaced with collection charset provider");
             }
@@ -211,7 +159,9 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
             /*
              * Restore original
              */
-            restoreCharsetExtendedProvider();
+            ModifyCharsetExtendedProvider.restoreCharsetExtendedProvider(backupCharsetProvider);
+            backupCharsetProvider = null;
+            collectionCharsetProvider = null;
             if (LOG.isInfoEnabled()) {
                 LOG.info("Collection charset provider replaced with former external charset provider");
                 LOG.info("Charset bundle successfully stopped");
