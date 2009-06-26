@@ -69,6 +69,7 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -85,7 +86,7 @@ public class ConflictHandler {
     
     private final CalendarDataObject cdao;
     private final Session so;
-    private boolean action = true;
+    private boolean create = true;
     private int current_results;
     
     public static final int MAX_CONFLICT_RESULTS = 999;
@@ -96,11 +97,11 @@ public class ConflictHandler {
     private CalendarDataObject edao;
     private CalendarCollection recColl;
 
-    public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean action) {
+    public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean create) {
         this.cdao = cdao;
         this.edao = edao;
         this.so = so;
-        this.action = action;
+        this.create = create;
         this.recColl = new CalendarCollection();
     }
     
@@ -108,14 +109,14 @@ public class ConflictHandler {
         final Context ctx = Tools.getContext(so);
         if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
-        } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
+        } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
             }
             return NO_CONFLICTS;
         } else if (cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past apps should never conflict
-        } else if (!action && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
+        } else if (!create && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
             return NO_CONFLICTS; // According to bug #5267
             //}
@@ -128,12 +129,12 @@ public class ConflictHandler {
         	if (cdao.getIgnoreConflicts()) {
         		return NO_CONFLICTS;
         	}
-            if (cdao.getRecurrenceType() == 0) {
+            if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
                 return prepareResolving(true);
             }
             return NO_CONFLICTS;
         }
-        final CalendarDataObject[] resources = prepareResolving( false );
+        final CalendarDataObject[] resources = prepareResolving(false);
         if (resources.length > 0) {
             return resources;
         }
@@ -142,14 +143,14 @@ public class ConflictHandler {
         }
         return NO_CONFLICTS;
     }
-    
-    private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {
+
+    private CalendarDataObject[] prepareResolving(boolean request_participants) throws OXException {
         /*
          * Using original method {@link #resolveResourceConflicts(Date, Date)}
          * for non series appointments.
          */
         if (cdao.getRecurrenceType() == 0) {
-            if (action) {
+            if (create) {
                 if (request_participants) {
                     return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
                 }
@@ -218,7 +219,7 @@ public class ConflictHandler {
                         li = new ArrayList<CalendarDataObject>();
                     }
 
-                    if ((action || cdao.getObjectID() != conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
+                    if ((create || cdao.getObjectID() != conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
                         if (!conflict_dao.containsRecurrencePosition()) {
                             if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                                 li.add(conflict_dao);
@@ -302,7 +303,7 @@ public class ConflictHandler {
                         li = new ArrayList<CalendarDataObject>();
                     }
                     
-                    if (!(!action && cdao.getObjectID() == conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
+                    if (!(!create && cdao.getObjectID() == conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
                         if (!cdao.containsRecurrencePosition()) {
                             if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                                 if (!conflict_dao.containsRecurrencePosition()) {
@@ -414,7 +415,7 @@ public class ConflictHandler {
                 if (recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                     continue;
                 }
-                if (!action && cdao.getObjectID() == conflict_dao.getObjectID()) { // Same id should never conflict if we are running an update
+                if (!create && cdao.getObjectID() == conflict_dao.getObjectID()) { // Same id should never conflict if we are running an update
                     continue;
                 }
                 for (int i = 0; i < results.size() && current_results < MAX_CONFLICT_RESULTS; i++) {
