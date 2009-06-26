@@ -18,7 +18,6 @@
 	<classpathentry kind="lib" path="lib/nekohtml.jar"/>
 	<classpathentry kind="lib" path="lib/spring-beans.jar"/>
 	<classpathentry kind="lib" path="lib/spring-core.jar"/>
-	<classpathentry kind="lib" path="lib/Tidy.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xmlParserAPIs.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
@@ -47,5 +46,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.timer"/>
 	<classpathentry kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/javax.activation"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/net.freeutils.jcharset"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
