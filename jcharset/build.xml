@@ -6,7 +6,7 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
     <!-- Constants -->
-    <property name="tmp.dir" value="tmp"/>
+    <property name="tmpDir" value="tmp"/>
     <property name="libDir" value="lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
@@ -46,7 +46,7 @@
     <!-- Compile -->
     <target name="prepare">
         <mkdir dir="${output.net.freeutils.jcharset.osgi.jar}"/>
-        <mkdir dir="${tmp.dir}"/>
+        <mkdir dir="${tmpDir}"/>
     </target>
 
     <target name="compile" depends="prepare">
@@ -56,7 +56,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/net.freeutils.jcharset.osgi.jar">
+        <jar jarfile="${tmpDir}/net.freeutils.jcharset.osgi.jar">
             <fileset dir="${output.net.freeutils.jcharset.osgi.jar}"/>
         </jar>
     </target>
@@ -80,7 +80,7 @@
         </copy>
         <copy todir="${jcharsetdir}">
             <fileset refid="metainf"/>
-            <fileset dir="${tmp.dir}" includes="net.freeutils.jcharset.osgi.jar"/>
+            <fileset dir="${tmpDir}" includes="net.freeutils.jcharset.osgi.jar"/>
         </copy>
     </target>
 
@@ -105,7 +105,7 @@
     </target>
 
     <target name="clean">
-        <delete dir="${tmp.dir}"/>
+        <delete dir="${tmpDir}"/>
         <delete dir="${output..}"/>
     </target>
 
