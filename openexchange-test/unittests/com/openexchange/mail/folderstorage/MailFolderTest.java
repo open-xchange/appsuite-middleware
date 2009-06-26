@@ -535,8 +535,9 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				String newFullname = parentIsDefault ? "TemporaryFolderMoved" : new StringBuilder(parentFullname)
 						.append(separator).append("TemporaryFolderMoved").toString();
+				// MOVE FOLDER
 				mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
-
+				// ENSURE OLD ONE DOES NO MORE EXIST
 				Exception exc = null;
 				try {
 					mailAccess.getFolderStorage().getFolder(fullname);
@@ -550,10 +551,6 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				assertEquals("Unexpected name: " + mf.getName(), "TemporaryFolderMoved", mf.getName());
 				assertEquals("Unexpected parent: " + mf.getParentFullname(), parentFullname, mf.getParentFullname());
-				if (fullname != null) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					fullname = null;
-				}
 
 				/*
 				 * Move below root folder
@@ -583,6 +580,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderMovedAgain".equals(mf.getName()));
 					assertTrue("Unexpected parent: " + mf.getParentFullname(), parentFullname
 							.equals(MailFolder.DEFAULT_FOLDER_ID));
+				} else {
+				    fullname = null;
 				}
 
 			} finally {
