@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><psf version="2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.authentication.imap,com.openexchange.authentication.imap"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.authentication.ldap,com.openexchange.authentication.ldap"/>
@@ -58,5 +59,7 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.templating,com.openexchange.templating"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.publish.basic,com.openexchange.publish.basic"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.xerces.sun,com.openexchange.xerces.sun"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.crawler,com.openexchange.subscribe.crawler"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.linkedin,com.openexchange.subscribe.linkedin"/>
 </provider>
 </psf>
