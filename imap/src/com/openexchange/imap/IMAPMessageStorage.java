@@ -1147,7 +1147,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             /*
              * Convert messages to JavaMail message objects
              */
-            final Message[] msgs = MIMEMessageConverter.convertMailMessages(mailMessages);
+            final Message[] msgs = MIMEMessageConverter.convertMailMessages(mailMessages, true);
             /*
              * Check if destination folder supports user flags
              */

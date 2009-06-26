@@ -179,13 +179,28 @@ public final class MIMEMessageConverter {
      * @throws MailException If conversion fails
      */
     public static Message[] convertMailMessages(final MailMessage[] mails) throws MailException {
+        return convertMailMessages(mails, true);
+    }
+
+    /**
+     * Converts given instances of {@link MailMessage} into JavaMail-conform {@link Message} objects.
+     * <p>
+     * <b>Note</b>: This is just a convenience method that invokes {@link #convertMailMessage(MailMessage)} for each instance of
+     * {@link MailMessage}
+     * 
+     * @param mails The source instances of {@link MailMessage}
+     * @param clone <code>true</code> to clone message source; otherwise <code>false</code> to return a reference if possible
+     * @return JavaMail-conform {@link Message} objects.
+     * @throws MailException If conversion fails
+     */
+    public static Message[] convertMailMessages(final MailMessage[] mails, final boolean clone) throws MailException {
         if (null == mails) {
             return null;
         }
         final Message[] retval = new Message[mails.length];
         for (int i = 0; i < retval.length; i++) {
             if (null != mails[i]) {
-                retval[i] = convertMailMessage(mails[i]);
+                retval[i] = convertMailMessage(mails[i], clone);
             }
         }
         return retval;
@@ -199,13 +214,25 @@ public final class MIMEMessageConverter {
      * @throws MailException If conversion fails
      */
     public static Message convertMailMessage(final MailMessage mail) throws MailException {
+        return convertMailMessage(mail, true);
+    }
+
+    /**
+     * Converts given instance of {@link MailMessage} into a JavaMail-conform {@link Message} object.
+     * 
+     * @param mail The source instance of {@link MailMessage}
+     * @param clone <code>true</code> to clone message source; otherwise <code>false</code> to return a reference if possible
+     * @return A JavaMail-conform {@link Message} object
+     * @throws MailException If conversion fails
+     */
+    public static Message convertMailMessage(final MailMessage mail, final boolean clone) throws MailException {
         if (mail instanceof ComposedMailMessage) {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
             final int size = (int) mail.getSize();
             final MimeMessage mimeMessage;
-            if (mail instanceof MIMEMailMessage) {
+            if (!clone && (mail instanceof MIMEMailMessage)) {
                 mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
             } else {
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
