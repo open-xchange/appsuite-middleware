@@ -79,6 +79,11 @@ public class SimContextService implements ContextService{
         return null;
     }
 
+    public Context loadContext(int contextId) throws ContextException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#getContextId(java.lang.String)
      */
