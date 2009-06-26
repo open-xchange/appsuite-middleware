@@ -1439,7 +1439,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
 
             try {
-                cache.pushConnectionForContext(ctx.getId(), con);
+                cache.pushConnectionForContext(ctx.getId().intValue(), con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox db write connection to pool!", e);
             }
@@ -1448,45 +1448,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException {
+        final ContextService contextService;
         try {
-            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
-            com.openexchange.groupware.contexts.Context gwContext = contextService.getContext(ctx.getId());
-            return condCheckAndUpdateSchemaIfRequired(gwContext, true);
+            contextService = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
         } catch (ServiceException e) {
             throw new StorageException(e.getMessage(), e);
+        }
+        try {
+            com.openexchange.groupware.contexts.Context gwCtx = contextService.loadContext(ctx.getId().intValue());
+            return gwCtx.isUpdating();
         } catch (ContextException e) {
             throw new StorageException(e.getMessage(), e);
-        }
-    }
-
-    private boolean condCheckAndUpdateSchemaIfRequired(com.openexchange.groupware.contexts.Context context, boolean doupdate) throws StorageException {
-        Updater updater;
-        try {
-            updater = Updater.getInstance();
-            if (updater.isLocked(context)) {
-                log.info("Another database update process is already running");
-                return true;
-            }
-            // we only reach this point, if no other thread is already locking us
-            final boolean needupdate = updater.toUpdate(context); 
-            if (!needupdate) {
-                return false;
-            }
-            // we only reach this point, if we need an update
-            if (doupdate) {
-                updater.startUpdate(context);
-            }
-            // either with or without starting an update task, when we reach this point, we
-            // must return true
-            return true;
-        } catch (UpdateException e) {
-            if (e.getDetailNumber() == 102) {
-                // NOTE: this situation should not happen!
-                // it can only happen, when a schema has not been initialized correctly!
-                log.debug("FATAL: this error must not happen",e);
-            }
-            log.error("Error in checking/updating schema",e);
-            throw new StorageException(e.toString());
         }
     }
 
