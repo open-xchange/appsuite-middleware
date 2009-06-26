@@ -93,7 +93,7 @@ public class AlphanumComparator implements Comparator<String> {
                     }
                 }
             } else {
-                result = thisChunk.compareTo(thatChunk);
+                result = thisChunk.compareToIgnoreCase(thatChunk);
             }
             if (result != 0) {
                 return result;
