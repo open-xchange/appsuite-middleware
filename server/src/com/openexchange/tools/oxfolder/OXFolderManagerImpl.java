@@ -485,14 +485,14 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 if (!perm.getUnderlyingPermission().isFolderVisible()) {
                     throw new OXFolderPermissionException(
                         FolderCode.NOT_VISIBLE,
-                        OXFolderUtility.getFolderName(fo),
+                        Integer.valueOf(fo.getObjectID()),
                         OXFolderUtility.getUserName(session, user),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 throw new OXFolderException(
                     FolderCode.NOT_VISIBLE,
                     Category.USER_CONFIGURATION,
-                    OXFolderUtility.getFolderName(fo),
+                    Integer.valueOf(fo.getObjectID()),
                     OXFolderUtility.getUserName(session, user),
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -1193,14 +1193,14 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
                     throw new OXFolderPermissionException(
                         FolderCode.NOT_VISIBLE,
-                        OXFolderUtility.getFolderName(fo),
+                        Integer.valueOf(fo.getObjectID()),
                         OXFolderUtility.getUserName(user.getId(), ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 throw new OXFolderException(
                     FolderCode.NOT_VISIBLE,
                     Category.USER_CONFIGURATION,
-                    OXFolderUtility.getFolderName(fo),
+                    Integer.valueOf(fo.getObjectID()),
                     OXFolderUtility.getUserName(user.getId(), ctx),
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -1276,14 +1276,14 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
                     throw new OXFolderPermissionException(
                         FolderCode.NOT_VISIBLE,
-                        OXFolderUtility.getFolderName(fo),
+                        Integer.valueOf(fo.getObjectID()),
                         OXFolderUtility.getUserName(user.getId(), ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 throw new OXFolderException(
                     FolderCode.NOT_VISIBLE,
                     Category.USER_CONFIGURATION,
-                    OXFolderUtility.getFolderName(fo),
+                    Integer.valueOf(fo.getObjectID()),
                     OXFolderUtility.getUserName(user.getId(), ctx),
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -1628,11 +1628,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
         if (!effectivePerm.isFolderVisible()) {
             if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
                 if (initParent == folderID) {
-                    throw new OXFolderPermissionException(
-                        FolderCode.NOT_VISIBLE,
-                        OXFolderUtility.getFolderName(folderID, ctx),
-                        OXFolderUtility.getUserName(userId, ctx),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, Integer.valueOf(folderID), OXFolderUtility.getUserName(
+                        userId,
+                        ctx), Integer.valueOf(ctx.getContextId()));
                 }
                 throw new OXFolderPermissionException(
                     FolderCode.HIDDEN_FOLDER_ON_DELETION,
@@ -1641,9 +1639,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     OXFolderUtility.getUserName(userId, ctx));
             }
             if (initParent == folderID) {
-                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, OXFolderUtility.getFolderName(
-                    folderID,
-                    ctx), OXFolderUtility.getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NOT_VISIBLE,
+                    Category.USER_CONFIGURATION,
+                    Integer.valueOf(folderID),
+                    OXFolderUtility.getUserName(userId, ctx),
+                    Integer.valueOf(ctx.getContextId()));
             }
             throw new OXFolderException(FolderCode.HIDDEN_FOLDER_ON_DELETION, Category.USER_CONFIGURATION, OXFolderUtility.getFolderName(
                 initParent,

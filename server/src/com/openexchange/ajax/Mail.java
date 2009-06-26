@@ -3118,7 +3118,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (!p.isFolderVisible()) {
                         throw new OXFolderException(
                             FolderCode.NOT_VISIBLE,
-                            getFolderName(folderObj),
+                            Integer.valueOf(folderObj.getObjectID()),
                             getUserName(session),
                             Integer.valueOf(ctx.getContextId()));
                     }

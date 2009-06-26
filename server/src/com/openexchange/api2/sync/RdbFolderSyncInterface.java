@@ -115,47 +115,48 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
      * (non-Javadoc)
      * @see com.openexchange.api2.sync.FolderSyncInterface#deleteFolderContent(int)
      */
-    public int clearFolder(final FolderObject folderobject, final Date clientLastModified) throws OXException {
+    public int clearFolder(final FolderObject folder, final Date clientLastModified) throws OXException {
         try {
-            if (folderobject.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
+            if (folder.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
                 throw new OXFolderException(
                     FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
                     getUserName(session, user),
-                    getFolderName(folderobject),
+                    getFolderName(folder),
                     Integer.valueOf(ctx.getContextId()));
             }
-            if (!folderobject.exists(ctx)) {
-                throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx);
+            if (!folder.exists(ctx)) {
+                throw new OXFolderNotFoundException(folder.getObjectID(), ctx);
             }
-            if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
+            if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folder.getObjectID()).after(clientLastModified)) {
                 throw new OXConcurrentModificationException(
                     EnumComponent.FOLDER,
                     OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
                     new Object[0]);
             }
-            final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, userConfiguration);
-            if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
+            final EffectivePermission effectivePerm = folder.getEffectiveUserPermission(userId, userConfiguration);
+            if (!effectivePerm.hasModuleAccess(folder.getModule())) {
                 throw new OXFolderException(
                     FolderCode.NO_MODULE_ACCESS,
                     getUserName(session, user),
-                    folderModule2String(folderobject.getModule()),
+                    folderModule2String(folder.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(
-                        FolderCode.NOT_VISIBLE,
-                        getFolderName(folderobject),
-                        getUserName(session, user),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, Integer.valueOf(folder.getObjectID()), getUserName(
+                        session,
+                        user), Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, getFolderName(folderobject), getUserName(
-                    session,
-                    user), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NOT_VISIBLE,
+                    Category.USER_CONFIGURATION,
+                    Integer.valueOf(folder.getObjectID()),
+                    getUserName(session, user),
+                    Integer.valueOf(ctx.getContextId()));
             }
             final long lastModified = System.currentTimeMillis();
-            OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
-            return folderobject.getObjectID();
+            OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);
+            return folder.getObjectID();
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {

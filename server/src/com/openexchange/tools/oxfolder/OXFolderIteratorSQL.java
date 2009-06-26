@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.sql.Connection;
@@ -641,7 +640,7 @@ public final class OXFolderIteratorSQL {
                      */
                     throw new OXFolderException(
                         FolderCode.NOT_VISIBLE,
-                        getFolderName(folderId, ctx),
+                        Integer.valueOf(folderId),
                         getUserName(userId, ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }

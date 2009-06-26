@@ -131,8 +131,8 @@ public class OXFolderTools {
             if (!fo.getEffectiveUserPermission(userId, userConfig).isFolderVisible()) {
                 throw new OXFolderPermissionException(
                     FolderCode.NOT_VISIBLE,
-                    Integer.valueOf(userId),
                     Integer.valueOf(folderId),
+                    Integer.valueOf(userId),
                     Integer.valueOf(ctx.getContextId()));
             }
             return fo.getType(userId);
@@ -970,7 +970,7 @@ public class OXFolderTools {
                     /*
                      * Starting folder is not visible to user
                      */
-                    throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderUtility.getFolderName(folderId, ctx), getUserName(
+                    throw new OXFolderException(FolderCode.NOT_VISIBLE, Integer.valueOf(folderId), getUserName(
                         userId,
                         ctx), Integer.valueOf(ctx.getContextId()));
                 }
