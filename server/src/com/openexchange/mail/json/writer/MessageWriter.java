@@ -52,7 +52,6 @@ package com.openexchange.mail.json.writer;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.EnumMap;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -563,30 +562,29 @@ public final class MessageWriter {
      */
     private static JSONArray getAddressAsArray(final InternetAddress addr) {
         final JSONArray retval = new JSONArray();
-        retval.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL : preparePersonal(addr.getPersonal()));
-        retval.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : prepareAddress(addr.getAddress()));
+        // Personal
+        final String personal = addr.getPersonal();
+        retval.put(personal == null || personal.length() == 0 ? JSONObject.NULL : preparePersonal(personal));
+        // Address
+        final String address = addr.getAddress();
+        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(address));
+
         return retval;
     }
 
-    private static final Pattern PATTERN_QUOTE = Pattern.compile("[.,:;<>\"]");
+    // private static final Pattern PATTERN_QUOTE = Pattern.compile("[.,:;<>\"]");
 
     private static String preparePersonal(final String personal) {
-        if (PATTERN_QUOTE.matcher(personal).find()) {
-            /*
-             * Surround with double-quotes
-             */
-            final String pp = MIMEMessageUtility.decodeMultiEncodedHeader(personal);
-            return new StringBuilder(pp.length()).append('"').append(pp.replaceAll("\"", "\\\\\\\"")).append('"').toString();
-        }
-        return MIMEMessageUtility.decodeMultiEncodedHeader(personal);
+        return MIMEMessageUtility.quotePhrase(MIMEMessageUtility.decodeMultiEncodedHeader(personal), false);
     }
 
     private static final String DUMMY_DOMAIN = "@unspecified-domain";
 
     private static String prepareAddress(final String address) {
         final String decoded = MIMEMessageUtility.decodeMultiEncodedHeader(address);
-        if (decoded.endsWith(DUMMY_DOMAIN)) {
-            return decoded.substring(0, decoded.indexOf('@'));
+        final int pos = decoded.indexOf(DUMMY_DOMAIN);
+        if (pos >= 0) {
+            return decoded.substring(0, pos);
         }
         return decoded;
     }

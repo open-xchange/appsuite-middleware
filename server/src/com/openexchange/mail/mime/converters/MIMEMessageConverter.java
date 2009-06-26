@@ -1708,7 +1708,7 @@ public final class MIMEMessageConverter {
             addresses = addressArray[0];
         }
         try {
-            return InternetAddress.parseHeader(decodeMultiEncodedHeader(addresses), true);
+            return InternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(

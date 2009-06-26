@@ -600,9 +600,11 @@ public final class MIMEMessageUtility {
         return addressList;
     }
 
-    private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
+    // private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
 
-    private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
+    // private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
+
+    private final static String RFC822 = "()<>@,;:\\\".[]";
 
     /**
      * Quotes given personal part of an Internet address according to RFC 822 syntax if needed; otherwise the personal is returned
@@ -627,19 +629,43 @@ public final class MIMEMessageUtility {
      * @return The properly quoted personal for building an Internet address according to RFC 822 syntax
      */
     public static String quotePersonal(final String personal) {
+        return quotePhrase(personal, true);
+    }
+
+    /**
+     * Quotes given phrase if needed.
+     * 
+     * @param phrase The phrase
+     * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
+     * @return The quoted phrase
+     */
+    public static String quotePhrase(final String phrase, final boolean encode) {
+        if (null == phrase || phrase.length() == 0) {
+            return phrase;
+        }
+        final char[] chars = phrase.toCharArray();
+        final int len = chars.length;
+        if ('"' == chars[0] && '"' == chars[len - 1]) {
+            /*
+             * Already quoted
+             */
+            return phrase;
+        }
+        boolean needQuoting = false;
+        for (int i = 0; !needQuoting && i < len; i++) {
+            final char c = chars[i];
+            needQuoting = (c == '"' || c == '\\' || (c < 040 && c != '\r' && c != '\n' && c != '\t') || c >= 0177 || RFC822.indexOf(c) >= 0);
+        }
         try {
-            final String pers = MimeUtility.encodeWord(personal);
-            if (PAT_QUOTED.matcher(pers).matches() ? false : PAT_QUOTABLE_CHAR.matcher(pers).find()) {
-                /*
-                 * Quote
-                 */
-                return new StringBuilder(pers.length() + 2).append('"').append(pers.replaceAll("\"", "\\\\\\\"")).append('"').toString();
+            if (!needQuoting) {
+                return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
-            return pers;
+            final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
+            return new StringBuilder(len + 2).append('"').append(encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-            return personal;
+            return phrase;
         }
     }
 
