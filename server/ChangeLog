@@ -1,3 +1,7 @@
+* 2009-06-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #13380: Changed the default scaling size for contact images to 90x90 pixels.
+
 * 2009-06-26 - choeger@open-xchange.com
 
  - Bugfix #13997: IBM and SUN xerces packages contain package description for SUN Java
