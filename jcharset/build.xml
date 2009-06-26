@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="net.freeutils.jcharset" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -6,33 +7,40 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="libDir" value="lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
     <property name="distpackage.name" value="open-xchange-jcharset"/>
-    <property name="composite.name" value="${distpackage.name}-${version}" />
-
-    <fileset dir="." id="jarfiles">
-        <include name="lib/*"/>
-        <exclude name="CVS"/>
-    </fileset>
+    <property name="composite.name" value="${distpackage.name}-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
+    <!-- Third party libs -->
+    <fileset dir="${libDir}" id="3rdpartyjars">
+        <include name="*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
+        <exclude name="CVS"/>
+    </fileset>
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-    
+
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-        <pathelement location="lib/jcharset-1.3.jar"/>
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -42,35 +50,37 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath refid="project.classpath" />
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath"/>
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/net.freeutils.charset.osgi.jar">
             <fileset dir="${output..}"/>
-            <fileset refid="jarfiles"/>
         </jar>
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install" depends="installJars,installConfig"/>
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
-    <target name="installJar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}">
-            <fileset dir="${tmp.dir}">
-                <include name="${bundle.name}"/>
-            </fileset>
+    <target name="installJars" depends="jar">
+        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
+        <mkdir dir="${bundlesdestdir}"/>
+        <property name="jcharsetdir" value="${bundlesdestdir}/${bundle.name}"/>
+        <mkdir dir="${jcharsetdir}"/>
+        <mkdir dir="${jcharsetdir}/lib"/>
+        <copy todir="${jcharsetdir}/lib">
+            <fileset refid="3rdpartyjars"/>
+        </copy>
+        <copy todir="${jcharsetdir}">
+            <fileset refid="metainf"/>
+            <fileset dir="${tmp.dir}" includes="net.freeutils.charset.osgi.jar"/>
         </copy>
     </target>
 
