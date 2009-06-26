@@ -235,7 +235,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                         System.arraycopy(positions, 0, newbuf, 0, positions.length);
                         positions = newbuf;
                     }
-                    positions[count] = index;
+                    positions[count] = index > 0 && '\r' == dataBytes[index - 1] ? index - 1 : index;
                 } else {
                     /*
                      * Ensure CRLF or LF immediately follows boundary, else continue boundary look-up
@@ -246,7 +246,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                             System.arraycopy(positions, 0, newbuf, 0, positions.length);
                             positions = newbuf;
                         }
-                        positions[count - 1] = index;
+                        positions[count - 1] = index > 0 && '\r' == dataBytes[index - 1] ? index - 1 : index;
                     }
                     index = newIndex;
                 }
@@ -340,12 +340,19 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
         int i = index;
-        int startIndex = positions[i++] + getBoundaryBytes().length;
+        int startIndex = positions[i++];
+        if ('\r' == dataBytes[startIndex]) {
+            startIndex += (getBoundaryBytes().length + 1);
+        } else {
+            startIndex += (getBoundaryBytes().length);
+        }
         /*
-         * Omit starting CRLF
+         * Omit starting CR?LF
          */
-        while ('\r' == dataBytes[startIndex] || '\n' == dataBytes[startIndex]) {
+        if ('\n' == dataBytes[startIndex]) {
             startIndex++;
+        } else if ('\r' == dataBytes[startIndex] && '\n' == dataBytes[startIndex + 1]) {
+            startIndex += 2;
         }
         final int endIndex = i >= positions.length ? dataBytes.length : positions[i];
         final byte[] subArr = new byte[endIndex - startIndex];

@@ -13,7 +13,8 @@
 
 * 2009-06-26 - thorben.betten@open-xchange.com
 
- - Bugfix #13975: Replaced folder name with fodler ID in error message FLD-0003
+ - Bugfix #13975: Replaced folder name with folder ID in error message FLD-0003
+ - Bugfix #14001: Proper multipart/* parsing if message contains empty text content
 
 * 2009-06-24 - martin.herfurth@open-xchange.com
 

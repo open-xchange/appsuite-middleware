@@ -65,6 +65,7 @@ import javax.mail.internet.MimeMessage;
 import net.freeutils.tnef.Attachment;
 import net.freeutils.tnef.Attr;
 import net.freeutils.tnef.MAPIProp;
+import net.freeutils.tnef.MAPIProps;
 import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
@@ -138,6 +139,8 @@ public final class MailMessageParser {
     private static final String TNEF_IPM_CONTACT = "IPM.Contact";
 
     private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
+
+    // private static final String TNEF_IPM_MS_SCHEDULE = "IPM.Microsoft Schedule.MtgCncl";
 
     /*
      * +++++++++++++++++++ MEMBERS +++++++++++++++++++
@@ -451,8 +454,9 @@ public final class MailMessageParser {
                     bodyPart.setSize(((String) attrBody.getValue()).length());
                     parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
-                if (message.getMAPIProps() != null) {
-                    final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(MAPIProp.PR_RTF_COMPRESSED);
+                final MAPIProps mapiProps = message.getMAPIProps();
+                if (mapiProps != null) {
+                    final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
                     if (ris != null) {
                         final TNEFBodyPart bodyPart = new TNEFBodyPart();
                         /*
@@ -530,6 +534,39 @@ public final class MailMessageParser {
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
                             parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
+                    }
+                } else {
+                    // As attachment
+                    if (null == messageClass) {
+                        if (!mailPart.containsSequenceId()) {
+                            mailPart.setSequenceId(getSequenceId(prefix, partCount));
+                        }
+                        if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+                            stop = true;
+                            return;
+                        }
+                    } else {
+                        final TNEFBodyPart bodyPart = new TNEFBodyPart();
+                        /*
+                         * Add TNEF attributes
+                         */
+                        bodyPart.setTNEFAttributes(message.getAttributes());
+                        /*
+                         * Translate TNEF attributes to MIME
+                         */
+                        final String attachFilename = filename;
+                        final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
+                        bodyPart.setDataHandler(new DataHandler(ds));
+                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
+                            MIMETypes.MIME_APPL_OCTET,
+                            attachFilename));
+                        if (attachFilename != null) {
+                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                            cd.setFilenameParameter(attachFilename);
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+                        }
+                        bodyPart.setSize(messageClass.getLength());
+                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
             } catch (final IOException tnefExc) {
