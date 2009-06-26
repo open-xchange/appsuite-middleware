@@ -1,4 +1,10 @@
-* 2009-06-24 - marcus.klein@open-xchange.com
+* 2009-06-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #13975: Replaced folder name with folder ID in error message FLD-0003
+ - Bugfix #14001: Proper multipart/* parsing if message contains empty text content
+ - Bugfix #14000: Maintaining file extension when composing new file name on duplicate infostore file
+
+* 2009-06-26 - marcus.klein@open-xchange.com
 
  - Bugfix #13360: Display, first and sure name are mandatory attributes for editing user contacts.
 
@@ -10,12 +16,6 @@
 * 2009-06-25 - martin.herfurth@open-xchange.com
 
  - Bugfix #13625: Search for Tags in appointments.
-
-* 2009-06-26 - thorben.betten@open-xchange.com
-
- - Bugfix #13975: Replaced folder name with folder ID in error message FLD-0003
- - Bugfix #14001: Proper multipart/* parsing if message contains empty text content
- - Bugfix #14000: Maintaining file extension when composing new file name on duplicate infostore file
 
 * 2009-06-24 - martin.herfurth@open-xchange.com
 

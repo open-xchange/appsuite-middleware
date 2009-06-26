@@ -488,7 +488,13 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                      * Duplicate document name, thus retry with a new name
                      */
                     hlp.setLength(0);
-                    final String newName = hlp.append(name).append(" (").append(++count).append(')').toString();
+                    final int pos = name.indexOf('.');
+                    final String newName;
+                    if (pos >= 0) {
+                        newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                    } else {
+                        newName = hlp.append(name).append("_(").append(++count).append(')').toString();
+                    }
                     documentMetadata.setFileName(newName);
                     documentMetadata.setTitle(newName);
                 } else {
