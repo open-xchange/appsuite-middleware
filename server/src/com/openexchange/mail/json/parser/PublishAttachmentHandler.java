@@ -488,7 +488,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                      * Duplicate document name, thus retry with a new name
                      */
                     hlp.setLength(0);
-                    final int pos = name.indexOf('.');
+                    final int pos = name.lastIndexOf('.');
                     final String newName;
                     if (pos >= 0) {
                         newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
