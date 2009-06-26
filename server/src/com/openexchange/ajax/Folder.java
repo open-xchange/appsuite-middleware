@@ -681,7 +681,13 @@ public class Folder extends SessionServlet {
                                                 mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                                                 rootFolder = mailAccess.getRootFolder();
                                             } catch (final MailException e) {
-                                                LOG.error(e.getMessage(), e);
+                                                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                                                    if (LOG.isDebugEnabled()) {
+                                                        LOG.debug(e.getMessage(), e);
+                                                    }
+                                                } else {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
                                                 arrays[index] = null;
                                                 return null;
                                             }

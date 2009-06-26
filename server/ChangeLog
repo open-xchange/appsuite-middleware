@@ -12,6 +12,7 @@
  - Bugfix #14001: Proper multipart/* parsing if message contains empty text content
  - Bugfix #14000: Maintaining file extension when composing new file name on duplicate infostore file
  - Bugfix #14005: Dealing with corrupt image path on reply/forward
+ - Bugfix #13971: Suppressing error logs on disabled mail account for admin
 
 * 2009-06-25 - marcus.klein@open-xchange.com
 

@@ -74,112 +74,115 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QuotaRequest extends CommonRequest {
 
-	private static final Log LOG = LogFactory.getLog(QuotaRequest.class);
+    private static final Log LOG = LogFactory.getLog(QuotaRequest.class);
 
-	private QuotaFileStorage qfs;
+    private QuotaFileStorage qfs;
 
-	private AbstractOXException fsException;
+    private AbstractOXException fsException;
 
-	private final ServerSession session;
+    private final ServerSession session;
 
-	public QuotaRequest(final ServerSession session, final JSONWriter w) {
-		super(w);
-		try {
-			final Context ctx = session.getContext();
-			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
-					new DBPoolProvider());
-		} catch (final AbstractOXException e) {
-			this.fsException = e;
-		}
+    public QuotaRequest(final ServerSession session, final JSONWriter w) {
+        super(w);
+        try {
+            final Context ctx = session.getContext();
+            this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, new DBPoolProvider());
+        } catch (final AbstractOXException e) {
+            this.fsException = e;
+        }
 
-		this.session = session;
-	}
+        this.session = session;
+    }
 
-	public boolean action(final String action) {
-		if (AJAXServlet.ACTION_GET.equals(action)) {
-			filestore();
-			return true;
-		} else if ("filestore".equals(action)) {
-			filestore();
-			return true;
-		} else if ("mail".equals(action)) {
-			mail();
-			return true;
-		}
-		return false;
-	}
+    public boolean action(final String action) {
+        if (AJAXServlet.ACTION_GET.equals(action)) {
+            filestore();
+            return true;
+        } else if ("filestore".equals(action)) {
+            filestore();
+            return true;
+        } else if ("mail".equals(action)) {
+            mail();
+            return true;
+        }
+        return false;
+    }
 
-	private void exception(final AbstractOXException exception) {
-		final Response resp = new Response();
-		resp.setException(exception);
-		try {
-			LOG.error(exception.getMessage(), exception);
-			ResponseWriter.write(resp, w);
-		} catch (final JSONException e) {
-			LOG.error(e);
-		}
-	}
+    private void exception(final AbstractOXException exception) {
+        final Response resp = new Response();
+        resp.setException(exception);
+        try {
+            LOG.error(exception.getMessage(), exception);
+            ResponseWriter.write(resp, w);
+        } catch (final JSONException e) {
+            LOG.error(e);
+        }
+    }
 
-	private void filestore() {
-		if (fsException != null) {
-			exception(fsException);
-			return;
-		}
-		try {
-			final long use = qfs.getUsage();
-			final long quota = qfs.getQuota();
-			final JSONObject data = new JSONObject();
-			data.put("quota", quota);
-			data.put("use", use);
-			/*
-			 * Write JSON object into writer as data content of a response
-			 * object
-			 */
-			w.object();
-			w.key(ResponseFields.DATA).value(data);
-			w.endObject();
-		} catch (final Exception e) {
-			handle(e);
-		}
-	}
+    private void filestore() {
+        if (fsException != null) {
+            exception(fsException);
+            return;
+        }
+        try {
+            final long use = qfs.getUsage();
+            final long quota = qfs.getQuota();
+            final JSONObject data = new JSONObject();
+            data.put("quota", quota);
+            data.put("use", use);
+            /*
+             * Write JSON object into writer as data content of a response object
+             */
+            w.object();
+            w.key(ResponseFields.DATA).value(data);
+            w.endObject();
+        } catch (final Exception e) {
+            handle(e);
+        }
+    }
 
-	private void mail() {
-		MailServletInterface mi = null;
-		try {
-			long[][] quotaInfo = null;
-			try {
-				mi = MailServletInterface.getInstance(this.session);
-				quotaInfo = mi.getQuotas(new int[] { MailServletInterface.QUOTA_RESOURCE_STORAGE,
-						MailServletInterface.QUOTA_RESOURCE_MESSAGE });
-			} catch (final MailException e) {
-				LOG.error(e.getMessage(), e);
-				quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
-			}
-			final JSONObject data = new JSONObject();
-			// STORAGE
-			data.put("quota", quotaInfo[0][0] << 10);
-			data.put("use", quotaInfo[0][1] << 10);
-			// MESSAGE
-			data.put("countquota", quotaInfo[1][0]);
-			data.put("countuse", quotaInfo[1][1]);
-			/*
-			 * Write JSON object into writer as data content of a response
-			 * object
-			 */
-			w.object();
-			w.key(ResponseFields.DATA).value(data);
-			w.endObject();
-		} catch (final Exception e) {
-			handle(e);
-		} finally {
-			try {
-				if (mi != null) {
-					mi.close(false);
-				}
-			} catch (final MailException e) {
-				LOG.error(e);
-			}
-		}
-	}
+    private void mail() {
+        MailServletInterface mi = null;
+        try {
+            long[][] quotaInfo = null;
+            try {
+                mi = MailServletInterface.getInstance(this.session);
+                quotaInfo = mi.getQuotas(new int[] {
+                    MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
+            } catch (final MailException e) {
+                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getMessage(), e);
+                    }
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
+                quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
+            }
+            final JSONObject data = new JSONObject();
+            // STORAGE
+            data.put("quota", quotaInfo[0][0] << 10);
+            data.put("use", quotaInfo[0][1] << 10);
+            // MESSAGE
+            data.put("countquota", quotaInfo[1][0]);
+            data.put("countuse", quotaInfo[1][1]);
+            /*
+             * Write JSON object into writer as data content of a response object
+             */
+            w.object();
+            w.key(ResponseFields.DATA).value(data);
+            w.endObject();
+        } catch (final Exception e) {
+            handle(e);
+        } finally {
+            try {
+                if (mi != null) {
+                    mi.close(false);
+                }
+            } catch (final MailException e) {
+                LOG.error(e);
+            }
+        }
+    }
 
 }

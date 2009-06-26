@@ -105,7 +105,12 @@ public class Spam implements PreferencesItemService {
                     mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getSpamFolder(MailAccount.DEFAULT_ID));
                 } catch (final MailException e) {
-                    throw new SettingException(e);
+                    if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                        // Admin has no mail access
+                        setting.setSingleValue(null);
+                    } else {
+                        throw new SettingException(e);
+                    }
                 } finally {
                     if (mail != null) {
                         try {
