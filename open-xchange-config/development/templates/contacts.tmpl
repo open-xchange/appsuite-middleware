@@ -59,13 +59,13 @@
 
 <#macro image contact>
 	<#if contact.containsImage1()>
-		<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
+		<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" alt="" />
 	</#if>
 </#macro>
 
 <#macro imageMicroformatted contact>
 	<#if contact.containsImage1()>
-		<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" />
+		<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}"  alt="" />
 	</#if>
 </#macro>
 
