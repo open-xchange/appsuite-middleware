@@ -129,4 +129,9 @@ public final class PlainTextAddress extends InternetAddress {
         return hashCode;
     }
 
+    @Override
+    public String toUnicodeString() {
+        return MIMEMessageUtility.decodeMultiEncodedHeader(address);
+    }
+
 }
