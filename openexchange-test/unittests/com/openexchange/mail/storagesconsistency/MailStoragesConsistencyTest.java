@@ -265,11 +265,11 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     newIds.removeAll(oldIds);
 
                     trashedIds = new String[newIds.size()];
-                    assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
                     int i = 0;
                     for (final String id : newIds) {
                         trashedIds[i++] = id;
                     }
+                    assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
                 }
 
             } finally {
