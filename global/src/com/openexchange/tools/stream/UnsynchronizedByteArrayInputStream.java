@@ -206,4 +206,13 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
     public void close() throws IOException {
     }
 
+    /**
+     * Gets this <tt>ByteArrayInputStream</tt>'s current position.
+     * 
+     * @return The position
+     */
+    public int getPosition() {
+        return pos;
+    }
+
 }
