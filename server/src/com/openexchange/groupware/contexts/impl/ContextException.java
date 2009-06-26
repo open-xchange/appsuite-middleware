@@ -87,10 +87,8 @@ public class ContextException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public ContextException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.CONTEXT, code.category, code.number, code.message,
-            cause);
+    public ContextException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.CONTEXT, code.category, code.number, code.message, cause);
         setMessageArgs(messageArgs);
     }
 
@@ -102,8 +100,7 @@ public class ContextException extends AbstractOXException {
         /**
          * Mailadmin for a context is missing.
          */
-        NO_MAILADMIN("Cannot resolve mailadmin for context %d.",
-            Category.SETUP_ERROR, 1),
+        NO_MAILADMIN("Cannot resolve mailadmin for context %d.", Category.SETUP_ERROR, 1),
         /**
          * Cannot find context %d.
          */
@@ -111,13 +108,11 @@ public class ContextException extends AbstractOXException {
         /**
          * Putting an object into the cache failed.
          */
-        CACHE_PUT("Cannot put object %s into cache.", Category.INTERNAL_ERROR,
-            3),
+        CACHE_PUT("Cannot put object %s into cache.", Category.INTERNAL_ERROR, 3),
         /**
          * No connection to database.
          */
-        NO_CONNECTION("Cannot get connection to database.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
+        NO_CONNECTION("Cannot get connection to database.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
         /**
          * SQL problem: %1$s.
          */
@@ -125,8 +120,7 @@ public class ContextException extends AbstractOXException {
         /**
          * Updating database ... Try again later.
          */
-        UPDATE("Updating database ... Try again later.", Category
-            .TRY_AGAIN, 7),
+        UPDATE("Updating database ... Try again later.", Category.TRY_AGAIN, 7),
         /**
          * Problem initializing the cache.
          */
@@ -134,8 +128,7 @@ public class ContextException extends AbstractOXException {
         /**
          * Cannot remove object %s from cache.
          */
-        CACHE_REMOVE("Cannot remove object %s from cache.", Category
-            .INTERNAL_ERROR, 9),
+        CACHE_REMOVE("Cannot remove object %s from cache.", Category.INTERNAL_ERROR, 9),
         /**
          * Cannot find context "%s".
          */

@@ -79,6 +79,10 @@ public final class ContextServiceImpl implements ContextService {
         return ContextStorage.getInstance().getContext(contextId);
     }
 
+    public Context loadContext(int contextId) throws ContextException {
+        return ContextStorage.getInstance().loadContext(contextId);
+    }
+
     public int getContextId(final String loginContextInfo) throws ContextException {
         return ContextStorage.getInstance().getContextId(loginContextInfo);
     }

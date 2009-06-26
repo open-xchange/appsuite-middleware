@@ -103,6 +103,10 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
         return getDelegate().getContext(contextId);
     }
 
+    public Context loadContext(int contextId) throws ContextException {
+        return getDelegate().loadContext(contextId);
+    }
+
     public int getContextId(String loginContextInfo) throws ContextException {
         return getDelegate().getContextId(loginContextInfo);
     }

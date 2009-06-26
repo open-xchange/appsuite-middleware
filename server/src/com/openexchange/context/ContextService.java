@@ -78,14 +78,21 @@ public interface ContextService {
     /**
      * Creates a context implementation for the given context unique identifier.
      * 
-     * @param contextId
-     *            unique identifier of the context.
+     * @param contextId unique identifier of the context.
      * @return an implementation of the context or <code>null</code> if the
      *         context with the given identifier can't be found.
-     * @throws ContextException
-     *             if an error occurs.
+     * @throws ContextException if an error occurs or the update is running or is started.
      */
     public Context getContext(int contextId) throws ContextException;
+
+    /**
+     * This method works like {@link #getContext(int)} but it does not give a {@link ContextException} if an update is running or must is
+     * started.
+     * @param contextId unique identifier of the context.
+     * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
+     * @throws ContextException if an error occurs.
+     */
+    public Context loadContext(int contextId) throws ContextException;
 
     /**
      * Invalidates the context object in cache(s).

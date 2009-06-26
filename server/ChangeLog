@@ -1,6 +1,7 @@
 * 2009-06-26 - marcus.klein@open-xchange.com
 
  - Bugfix #13380: Changed the default scaling size for contact images to 90x90 pixels.
+ - Bugfix #13951: Writing understandable exception to RMI client if database is updated.  
 
 * 2009-06-26 - choeger@open-xchange.com
 
