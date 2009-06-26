@@ -1,1 +1,1 @@
-com.openexchange.charset.AliasCharsetProvider
+com.openexchange.charset.CustomCharsetProvider
