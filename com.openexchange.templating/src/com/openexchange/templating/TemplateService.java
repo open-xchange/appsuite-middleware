@@ -49,8 +49,6 @@
 
 package com.openexchange.templating;
 
-import com.openexchange.config.ConfigurationService;
-
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
