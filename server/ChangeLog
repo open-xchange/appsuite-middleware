@@ -15,6 +15,7 @@
 
  - Bugfix #13975: Replaced folder name with folder ID in error message FLD-0003
  - Bugfix #14001: Proper multipart/* parsing if message contains empty text content
+ - Bugfix #14000: Maintaining file extension when composing new file name on duplicate infostore file
 
 * 2009-06-24 - martin.herfurth@open-xchange.com
 
