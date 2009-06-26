@@ -1245,7 +1245,18 @@ public class MIMEMessageFiller {
                             tmp.append(id).append('@').append("notfound").toString()));
                         continue;
                     }
-                    imageProvider = new ImageDataImageProvider(imageData, session);
+                    try {
+                        imageProvider = new ImageDataImageProvider(imageData, session);
+                    } catch (final MailException e) {
+                        if (MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                            tmp.setLength(0);
+                            mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
+                                "#1#",
+                                tmp.append(id).append('@').append("notfound").toString()));
+                            continue;
+                        }
+                        throw e;
+                    }
                 }
                 final boolean appendBodyPart;
                 if (msgFiller.uploadFileIDs.contains(id)) {
