@@ -51,6 +51,7 @@ package com.openexchange.groupware;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,10 @@ import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.charset.CollectionCharsetProvider;
+import com.openexchange.charset.CustomCharsetProvider;
+import com.openexchange.charset.CustomCharsetProviderInit;
+import com.openexchange.charset.ModifyCharsetExtendedProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
@@ -93,6 +98,7 @@ import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.group.internal.GroupInit;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
@@ -303,6 +309,18 @@ public final class Init {
     }
 
     private static void startAndInjectBasicServices() throws AbstractOXException {
+        try {
+            // Add charset providers
+            new CustomCharsetProviderInit().start();
+            final CharsetProvider[] results = ModifyCharsetExtendedProvider.modifyCharsetExtendedProvider();
+            final CollectionCharsetProvider collectionCharsetProvider = (CollectionCharsetProvider) results[1];
+            collectionCharsetProvider.addCharsetProvider(new net.freeutils.charset.CharsetProvider());
+            collectionCharsetProvider.addCharsetProvider(new CustomCharsetProvider());
+        } catch (final NoSuchFieldException e) {
+            throw getWrappingOXException(e);
+        } catch (final IllegalAccessException e) {
+            throw getWrappingOXException(e);
+        }
         services.put(ContextService.class, new ContextServiceImpl());
         services.put(UserService.class, new UserServiceImpl());
         services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
@@ -315,6 +333,22 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(
             ContactInterfaceDiscoveryService.class,
             services.get(ContactInterfaceDiscoveryService.class));
+    }
+
+    private static final AbstractOXException getWrappingOXException(final Exception cause) {
+        final String message = cause.getMessage();
+        final Component c = new Component() {
+
+            public String getAbbreviation() {
+                return "TEST";
+            }
+        };
+        return new AbstractOXException(
+            c,
+            Category.INTERNAL_ERROR,
+            9999,
+            null == message ? "[Not available]" : message,
+            cause);
     }
 
     /**
