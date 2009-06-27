@@ -1,3 +1,7 @@
+* 2009-06-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #14010: Added timeout to IMAP default folder check routine
+
 * 2009-06-26 - marcus.klein@open-xchange.com
 
  - Bugfix #13380: Changed the default scaling size for contact images to 90x90 pixels.

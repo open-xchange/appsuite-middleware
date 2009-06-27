@@ -1029,7 +1029,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
             } catch (final MailException e) {
-                if (e.getDetailNumber() == 2) {
+                final int number = e.getDetailNumber();
+                if (number == MIMEMailException.Code.LOGIN_FAILED.getNumber() || number == MIMEMailException.Code.INVALID_CREDENTIALS.getNumber()) {
                     MailServletInterface.mailInterfaceMonitor.changeNumFailedLogins(true);
                 }
                 throw e;

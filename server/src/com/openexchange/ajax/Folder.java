@@ -69,6 +69,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -91,6 +93,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -143,6 +146,8 @@ public class Folder extends SessionServlet {
     private static final String DEF_NAME_INBOX = "Inbox";
 
     private static final String STR_INBOX = "INBOX";
+
+    private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
 
     private static final long serialVersionUID = -889739420660750770L;
 
@@ -741,9 +746,13 @@ public class Folder extends SessionServlet {
                                 /*
                                  * Wait for completion
                                  */
+                                final int maxRunningMillis = getMaxRunningMillis();
                                 try {
                                     for (int i = 0; i < size; i++) {
-                                        completionService.take().get();
+                                        final Future<Object> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                                        if (null != f) {
+                                            f.get();
+                                        }
                                     }
                                 } catch (final InterruptedException e) {
                                     Thread.currentThread().interrupt();
@@ -1001,6 +1010,16 @@ public class Folder extends SessionServlet {
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
         return response;
+    }
+
+    private int getMaxRunningMillis() {
+        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == confService) {
+            // Default of 2 minutes
+            return DEFAULT_MAX_RUNNING_MILLIS;
+        }
+        // 2 * AJP_WATCHER_MAX_RUNNING_TIME
+        return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
     }
 
     /**
