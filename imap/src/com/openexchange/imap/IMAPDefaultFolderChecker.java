@@ -419,19 +419,6 @@ public final class IMAPDefaultFolderChecker {
         });
     }
 
-    private static abstract class AbstractCallable implements Callable<Object> {
-
-        protected final IMAPConfig config;
-
-        protected final Session sess;
-
-        protected AbstractCallable(final IMAPConfig config, final Session sess) {
-            super();
-            this.config = config;
-            this.sess = sess;
-        }
-    }
-
     private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final StringBuilder tmp) throws MessagingException, IMAPException {
         /*
          * Check for NAMESPACE capability
@@ -896,5 +883,18 @@ public final class IMAPDefaultFolderChecker {
             // Nothing to do
         }
     } // End of StringWriter
+
+    private static abstract class AbstractCallable implements Callable<Object> {
+
+        protected final IMAPConfig config;
+
+        protected final Session sess;
+
+        protected AbstractCallable(final IMAPConfig config, final Session sess) {
+            super();
+            this.config = config;
+            this.sess = sess;
+        }
+    } // End of AbstractCallable
 
 }
