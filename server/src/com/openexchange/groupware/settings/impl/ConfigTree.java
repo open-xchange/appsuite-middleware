@@ -159,18 +159,25 @@ public final class ConfigTree {
                 }
                 dbIdentifier.add(tmp);
             }
-            actual.addElement(new Setting(path[0], shared.getId(), shared));
+            addElementWithoutOverwriting(actual, new Setting(path[0], shared.getId(), shared));
         } else {
             Setting sub = actual.getElement(path[0]);
             if (null == sub) {
                 final IValueHandler node = new SharedNode(path[0]);
                 sub = new Setting(path[0], node.getId(), node);
-                actual.addElement(sub);
+                addElementWithoutOverwriting(actual, sub);
             }
             final String[] subPath = new String[path.length - 1];
             System.arraycopy(path, 1, subPath, 0, subPath.length);
             addSharedValue(sub, subPath, shared);
         }
+    }
+
+    private static void addElementWithoutOverwriting(Setting actual, Setting subSetting) throws SettingException {
+        if(actual.getElement(subSetting.getName()) != null) {
+            throw new SettingException(Code.DUPLICATE_PATH, actual.getPath()+"/"+subSetting.getName());
+        }
+        actual.addElement(subSetting);
     }
 
     public static void removePreferencesItem(final PreferencesItemService item) {

@@ -1,3 +1,7 @@
+* 2009-06-29 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13811: Throw an exception if a preferences item path is claimed more than once.
+
 * 2009-06-26 - marcus.klein@open-xchange.com
 
  - Bugfix #14022: Adding additional unique indexes on prg_dates_members table to improve performance.

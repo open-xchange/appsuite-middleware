@@ -148,7 +148,11 @@ public class SettingException extends AbstractOXException {
          * Exception while writing JSON object.
          */
         JSON_WRITE_ERROR("Exception while writing JSON object.",
-            Category.CODE_ERROR, 11);
+            Category.CODE_ERROR, 11), 
+        /**
+         * Found duplicate path %s.
+         */
+        DUPLICATE_PATH("Found duplicate path %s.", Category.CODE_ERROR, 12);
 
         /**
          * Message of the exception.
