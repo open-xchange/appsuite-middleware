@@ -10,6 +10,7 @@
 
  - Bugfix #14008: Fixed notification messages for resource participants
  - Bugfix #14024: Removed byte formatting in error message
+ - Bugfix #14023: Fixed static insertion of primary account's default folder on action=path to folder servlet
 
 * 2009-06-27 - thorben.betten@open-xchange.com
 

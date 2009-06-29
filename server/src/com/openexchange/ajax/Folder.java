@@ -1128,35 +1128,46 @@ public class Folder extends SessionServlet {
                         columns,
                         mailInterface.getMailConfig());
                     final int size = it.size();
+                    final int accountID = mailInterface.getAccountID();
                     for (int i = 0; i < size; i++) {
                         final MailFolder fld = it.next();
                         final JSONArray ja = new JSONArray();
                         for (final MailFolderFieldWriter w : writers) {
-                            w.writeField(ja, mailInterface.getAccountID(), fld, false);
+                            w.writeField(ja, accountID, fld, false);
                         }
                         jsonWriter.value(ja);
                     }
                     it.close();
                     it = null;
-                    /*
-                     * Write virtual folder "E-Mail"
-                     */
-                    final MailFolder defaultFolder = mailInterface.getFolder(MailFolder.DEFAULT_FOLDER_ID, true);
-                    if (defaultFolder != null) {
-                        final JSONArray ja = new JSONArray();
-                        for (final MailFolderFieldWriter w : writers) {
-                            w.writeField(
-                                ja,
-                                mailInterface.getAccountID(),
-                                defaultFolder,
-                                false,
-                                MailFolder.DEFAULT_FOLDER_NAME,
-                                1,
-                                MailFolder.DEFAULT_FOLDER_ID,
-                                FolderObject.SYSTEM_MODULE,
-                                false);
+                    {
+                        final String preparedFullname = MailFolderUtility.prepareFullname(accountID, MailFolder.DEFAULT_FOLDER_ID);
+                        /*
+                         * Write virtual folder "E-Mail"
+                         */
+                        final MailFolder defaultFolder = mailInterface.getFolder(preparedFullname, true);
+                        if (defaultFolder != null) {
+                            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                                MailAccountStorageService.class,
+                                true);
+                            final MailAccount mailAccount = storageService.getMailAccount(
+                                accountID,
+                                session.getUserId(),
+                                session.getContextId());
+                            final JSONArray ja = new JSONArray();
+                            for (final MailFolderFieldWriter w : writers) {
+                                w.writeField(
+                                    ja,
+                                    accountID,
+                                    defaultFolder,
+                                    false,
+                                    mailAccount.getName(),
+                                    1,
+                                    preparedFullname,
+                                    FolderObject.SYSTEM_MODULE,
+                                    false);
+                            }
+                            jsonWriter.value(ja);
                         }
-                        jsonWriter.value(ja);
                     }
                     /*
                      * Finally, write "private" folder
