@@ -112,7 +112,7 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
     }
 
     public void removedService(ServiceReference reference, Object service) {
-        removeSubscribeService(((SubscribeService) reference).getSubscriptionSource().getId());
+        removeSubscribeService(((SubscribeService) service).getSubscriptionSource().getId());
     }
 
     @Override
