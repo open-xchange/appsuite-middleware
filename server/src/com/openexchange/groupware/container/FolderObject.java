@@ -1163,25 +1163,24 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         final List<OCLPermission> list = getPermissions();
         final int permissionsSize = list.size();
         final Iterator<OCLPermission> iter = list.iterator();
-        NextPerm: for (int i = 0; i < permissionsSize; i++) {
+        for (int i = 0; i < permissionsSize; i++) {
             final OCLPermission oclPerm = iter.next();
-            if (Arrays.binarySearch(idArr, oclPerm.getEntity()) < 0) {
-                continue NextPerm;
-            }
-            if (oclPerm.getFolderPermission() > maxPerm.getFolderPermission()) {
-                maxPerm.setFolderPermission(oclPerm.getFolderPermission());
-            }
-            if (oclPerm.getReadPermission() > maxPerm.getReadPermission()) {
-                maxPerm.setReadObjectPermission(oclPerm.getReadPermission());
-            }
-            if (oclPerm.getWritePermission() > maxPerm.getWritePermission()) {
-                maxPerm.setWriteObjectPermission(oclPerm.getWritePermission());
-            }
-            if (oclPerm.getDeletePermission() > maxPerm.getDeletePermission()) {
-                maxPerm.setDeleteObjectPermission(oclPerm.getDeletePermission());
-            }
-            if (!maxPerm.isFolderAdmin() && oclPerm.isFolderAdmin()) {
-                maxPerm.setFolderAdmin(true);
+            if (Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
+                if (oclPerm.getFolderPermission() > maxPerm.getFolderPermission()) {
+                    maxPerm.setFolderPermission(oclPerm.getFolderPermission());
+                }
+                if (oclPerm.getReadPermission() > maxPerm.getReadPermission()) {
+                    maxPerm.setReadObjectPermission(oclPerm.getReadPermission());
+                }
+                if (oclPerm.getWritePermission() > maxPerm.getWritePermission()) {
+                    maxPerm.setWriteObjectPermission(oclPerm.getWritePermission());
+                }
+                if (oclPerm.getDeletePermission() > maxPerm.getDeletePermission()) {
+                    maxPerm.setDeleteObjectPermission(oclPerm.getDeletePermission());
+                }
+                if (!maxPerm.isFolderAdmin() && oclPerm.isFolderAdmin()) {
+                    maxPerm.setFolderAdmin(true);
+                }
             }
         }
         return maxPerm;
@@ -1319,22 +1318,22 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     public void set(final int field, final Object value) {
         switch (field) {
         case MODULE:
-            setModule( ((Integer)value ).intValue());
+            setModule(((Integer) value).intValue());
             break;
         case FOLDER_NAME:
             setFolderName((String) value);
             break;
         case TYPE:
-            setType( ((Integer) value).intValue());
+            setType(((Integer) value).intValue());
             break;
         case SUBFOLDERS:
-            setSubfolderFlag( ( (Boolean) value ).booleanValue() );
+            setSubfolderFlag(((Boolean) value).booleanValue());
             break;
         case PERMISSIONS_BITS:
-            if( value.getClass().isInstance( new OCLPermission[0]) ){
-                setPermissionsAsArray( (OCLPermission[]) value );
+            if (value.getClass().isInstance(new OCLPermission[0])) {
+                setPermissionsAsArray((OCLPermission[]) value);
             } else {
-                setPermissions( (List<OCLPermission>) value );
+                setPermissions((List<OCLPermission>) value);
             }
             break;
         default:
@@ -1352,7 +1351,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         case TYPE:
             return Integer.valueOf(getType());
         case SUBFOLDERS:
-            return Boolean.valueOf( hasSubfolders() );
+            return Boolean.valueOf(hasSubfolders());
         case PERMISSIONS_BITS:
             return getPermissions();
         default:
