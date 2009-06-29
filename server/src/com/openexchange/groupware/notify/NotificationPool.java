@@ -62,6 +62,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -267,20 +268,32 @@ public final class NotificationPool {
                     final State state = cur.getState();
                     final CalendarObject calendarObject = cur.getCalendarObject();
                     if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
-                        boolean canRead = ParticipantNotify.userCanReadObject(p, calendarObject, cur.getSession());
                         /*
                          * Create message
                          */
-                        final MailMessage mmsg = ParticipantNotify.createParticipantMessage(
-                            p,
-                            canRead,
-                            cur.getTitle(),
-                            cur.getState().getAction(),
-                            state,
-                            cur.getLocale(),
-                            cur.getRenderMap(),
-                            true,
-                            b);
+                        final MailMessage mmsg;
+                        if (Participant.USER == p.type) {
+                            mmsg = ParticipantNotify.createUserMessage(
+                                p,
+                                (ParticipantNotify.userCanReadObject(p, calendarObject, cur.getSession())),
+                                cur.getTitle(),
+                                cur.getState().getAction(),
+                                state,
+                                cur.getLocale(),
+                                cur.getRenderMap(),
+                                true,
+                                b);
+                        } else {
+                            mmsg = ParticipantNotify.createParticipantMessage(
+                                p,
+                                cur.getTitle(),
+                                cur.getState().getAction(),
+                                state,
+                                cur.getLocale(),
+                                cur.getRenderMap(),
+                                true,
+                                b);
+                        }
                         if (logger.isDebugEnabled()) {
                             logger.debug(b.append("Pooled ").append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                 " (id = ").append(calendarObject.getObjectID()).append(") notification message generated for receiver ").append(
@@ -293,7 +306,7 @@ public final class NotificationPool {
                         ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
                     }
                 }
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 logger.error(t.getMessage(), t);
             } finally {
                 taskWriteLock.unlock();

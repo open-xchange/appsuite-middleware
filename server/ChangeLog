@@ -1,6 +1,7 @@
 * 2009-06-27 - thorben.betten@open-xchange.com
 
  - Bugfix #14010: Added timeout to IMAP default folder check routine
+ - Bugfix #14008: Fixed notification messages for resource participants
 
 * 2009-06-26 - marcus.klein@open-xchange.com
 
