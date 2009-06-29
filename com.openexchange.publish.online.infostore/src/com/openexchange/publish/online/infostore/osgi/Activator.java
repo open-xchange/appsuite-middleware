@@ -63,6 +63,7 @@ public class Activator extends DeferredActivator {
         HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
             httpService.unregister(ALIAS);
+            servlet = null;
         }
         
     }
