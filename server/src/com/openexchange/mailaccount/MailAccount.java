@@ -170,8 +170,11 @@ public interface MailAccount extends Serializable {
 
     /**
      * Gets the password.
+     * <p>
+     * Beware that password might be encoded when fetching from storage. Use one of the <code>decrypt()</code> methods of
+     * {@link com.openexchange.mail.utils.MailPasswordUtil MailPasswordUtil} plus session password to obtain plain-text password.
      * 
-     * @return The password
+     * @return The encoded password
      */
     public String getPassword();
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.servlet.request;
 
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -74,6 +75,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -287,10 +289,12 @@ public final class MailAccountRequest {
                 final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                     MailAccountStorageService.class,
                     true);
-                accountDescription.setPassword(storageService.getMailAccount(
+
+                final String encodedPassword = storageService.getMailAccount(
                     accountDescription.getId(),
                     session.getUserId(),
-                    session.getContextId()).getPassword());
+                    session.getContextId()).getPassword();
+                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, session.getPassword()));
             }
 
             checkNeededFields(accountDescription);
@@ -306,6 +310,11 @@ public final class MailAccountRequest {
             return actionValidateBoolean(accountDescription);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
+        } catch (final GeneralSecurityException e) {
+            throw new OXException(MailAccountExceptionFactory.getInstance().create(
+                MailAccountExceptionMessages.UNEXPECTED_ERROR,
+                e,
+                e.getMessage()));
         }
     }
 
