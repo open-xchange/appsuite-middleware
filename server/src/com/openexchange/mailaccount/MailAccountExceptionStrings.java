@@ -58,8 +58,8 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public final class MailAccountExceptionStrings implements LocalizableStrings {
 
-    // Unknown operation: %1$s.
-    public static final String UNKNOWN_OPERATION_MSG = "Unknown operation: %1$s.";
+    // Unexpected error: %1$s.
+    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s.";
 
     // Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
     public static final String NOT_FOUND_MSG = "Cannot find mail account with identifier %1$s for user %2$s in context %3$s.";

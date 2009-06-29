@@ -60,9 +60,9 @@ import com.openexchange.groupware.AbstractOXException.Category;
 public enum MailAccountExceptionMessages implements OXErrorMessage {
 
     /**
-     * Unknown operation: %1$s.
+     * Unexpected error: %1$s.
      */
-    UNKNOWN_OPERATION(MailAccountExceptionStrings.UNKNOWN_OPERATION_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(MailAccountExceptionStrings.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
     /**
      * Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
      */
