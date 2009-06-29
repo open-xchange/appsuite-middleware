@@ -89,7 +89,8 @@ CREATE TABLE del_dates_members (
     pfid INT4,
     reminder INT4 UNSIGNED,
     cid INT4 UNSIGNED NOT NULL,
-    PRIMARY KEY (cid, object_id, member_uid)
+    PRIMARY KEY (cid, object_id, member_uid),
+    UNIQUE INDEX member (cid, member_uid, object_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE prg_dates_members (
@@ -100,5 +101,6 @@ CREATE TABLE prg_dates_members (
     pfid INT4,
     reminder INT4 UNSIGNED,
     cid INT4 UNSIGNED NOT NULL,
-    PRIMARY KEY (cid, object_id, member_uid)
+    PRIMARY KEY (cid, object_id, member_uid),
+    UNIQUE INDEX member (cid, member_uid, object_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
