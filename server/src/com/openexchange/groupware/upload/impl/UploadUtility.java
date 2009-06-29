@@ -86,7 +86,7 @@ public final class UploadUtility {
     }
 
     /**
-     * Converts given number of bytes to a human readable format
+     * Converts given number of bytes to a human readable format.
      * 
      * @param size The number of bytes
      * @param precision The number of digits allowed after dot
@@ -109,7 +109,11 @@ public final class UploadUtility {
             sb.append(getSizePrefix(pos)).append("bytes");
         } else {
             final String prefix = getSizePrefix(pos);
-            sb.append(prefix.length() == 0 ? "" : String.valueOf(prefix.charAt(0))).append('B');
+            if (0 == prefix.length()) {
+                sb.append("bytes");
+            } else {
+                sb.append(String.valueOf(prefix.charAt(0))).append('B');
+            }
         }
         return sb.toString();
     }
