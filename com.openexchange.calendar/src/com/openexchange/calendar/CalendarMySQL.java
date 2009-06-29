@@ -2897,7 +2897,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             cup.setMBoolean(true);
             PreparedStatement pd = null;
             try {
-                pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+                pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
                 for (int a = 0; a < deleted_userparticipants.length; a++) {
                     pd.setInt(1, cdao.getObjectID());
                     pd.setInt(2, cid);
@@ -2988,7 +2988,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             cup.setMBoolean(true);
             PreparedStatement pdd = null;
             try {
-                pdd = writecon.prepareStatement("delete from del_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+                pdd = writecon.prepareStatement("delete from del_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
                 for (int a = 0; a < del_up.length; a++) {
                     pdd.setInt(1, cdao.getObjectID());
                     pdd.setInt(2, cid);
@@ -3422,7 +3422,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             OXMandatoryFieldException, OXConflictException, OXException {
         final long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon
-                .prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+                .prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
         try {
             pd.setInt(1, oid);
             pd.setInt(2, cid);
