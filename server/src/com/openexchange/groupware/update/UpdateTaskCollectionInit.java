@@ -309,6 +309,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 46
             // Renames the standard group of all users.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RenameGroupTask());
+            // Version 48
+            // This update tasks changes the order of the primary key of prg_dates_members for improving performance.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectIndexes6_10());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");

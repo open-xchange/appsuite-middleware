@@ -1,3 +1,7 @@
+* 2009-06-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #14022: Adding additional unique indexes on prg_dates_members table to improve performance.
+
 * 2009-06-29 - thorben.betten@open-xchange.com
 
  - Bugfix #14008: Fixed notification messages for resource participants

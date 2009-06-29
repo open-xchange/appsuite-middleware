@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.update;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.File;
 import java.net.URI;
@@ -103,6 +104,30 @@ public final class Tools {
             closeSQLStuff(result);
         }
         return retval;
+    }
+
+    public static final boolean existsPrimaryKey(Connection con, String table, String[] columns) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        final List<String> foundColumns = new ArrayList<String>();
+        ResultSet result = null;
+        try {
+            result = metaData.getPrimaryKeys(null, null, table);
+            while (result.next()) {
+                String columnName = result.getString(4);
+                int columnPos = result.getInt(5);
+                while (foundColumns.size() < columnPos) {
+                    foundColumns.add(null);
+                }
+                foundColumns.set(columnPos - 1, columnName);
+            }
+        } finally {
+            closeSQLStuff(result);
+        }
+        boolean matches = columns.length == foundColumns.size();
+        for (int i = 0; matches && i < columns.length; i++) {
+            matches = columns[i].equals(foundColumns.get(i));
+        }
+        return matches;
     }
 
     /**
@@ -176,6 +201,64 @@ public final class Tools {
     }
 
     /**
+     * This method drops the primary key on the table. Beware, this method is vulnerable to SQL injection because table and index name can
+     * not be set through a {@link PreparedStatement}.
+     * @param con writable database connection.
+     * @param table table name that primary key should be dropped.
+     * @throws SQLExceptionif some SQL problem occurs.
+     */
+    public static final void dropPrimaryKey(Connection con, String table) throws SQLException {
+        final String sql = "ALTER TABLE `" + table + "` DROP PRIMARY KEY";
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
+     * This method creates a new index on a table. Beware, this method is vulnerable to SQL injection because table and column names can not
+     * be set through a {@link PreparedStatement}.
+     * 
+     * @param con writable database connection.
+     * @param table name of the table that should get a new index.
+     * @param name name of the index or <code>null</code> to let the database define the name.
+     * @param columns names of the columns the index should cover.
+     * @param unique if this should be a unique index.
+     * @throws SQLException if some SQL problem occurs.
+     */
+    public static final void createIndex(Connection con, String table, String name, String[] columns, boolean unique) throws SQLException {
+        final StringBuilder sql = new StringBuilder("ALTER TABLE `");
+        sql.append(table);
+        sql.append("` ADD ");
+        if (unique) {
+            sql.append("UNIQUE ");
+        }
+        sql.append("INDEX ");
+        if (null != name) {
+            sql.append('`');
+            sql.append(name);
+            sql.append("` ");
+        }
+        sql.append("(`");
+        for (final String column : columns) {
+            sql.append(column);
+            sql.append("`,`");
+        }
+        sql.setLength(sql.length() - 2);
+        sql.append(')');
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
      * This method creates a new index on a table. Beware, this method is vulnerable to SQL injection because table and column names can not
      * be set through a {@link PreparedStatement}.
      * 
@@ -184,10 +267,23 @@ public final class Tools {
      * @param columns names of the columns the index should cover.
      * @throws SQLException if some SQL problem occurs.
      */
-    public static final void createIndex(final Connection con, final String table, final String[] columns) throws SQLException {
+    public static final void createIndex(Connection con, String table, String[] columns) throws SQLException {
+        createIndex(con, table, null, columns, false);
+    }
+
+    /**
+     * This method creates a new primary key on a table. Beware, this method is vulnerable to SQL injection because table and column names
+     * can not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table name of the table that should get a new primary key.
+     * @param columns names of the columns the primary key should cover.
+     * @throws SQLException if some SQL problem occurs.
+     */
+    public static final void createPrimaryKey(Connection con, String table, String[] columns) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(table);
-        sql.append("` ADD INDEX (`");
+        sql.append("` ADD PRIMARY KEY (`");
         for (final String column : columns) {
             sql.append(column);
             sql.append("`,`");
@@ -270,7 +366,7 @@ public final class Tools {
             stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
             rs = stmt.executeQuery();
             while(rs.next()) {
-                contextIds.add(rs.getInt(1));
+                contextIds.add(I(rs.getInt(1)));
             }
             return contextIds;
         } finally {
