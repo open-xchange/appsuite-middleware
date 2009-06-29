@@ -1160,8 +1160,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         if (!containsPermissions()) {
             setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));
         }
-        final int permissionsSize = getPermissions().size();
-        final Iterator<OCLPermission> iter = getPermissions().iterator();
+        final List<OCLPermission> list = getPermissions();
+        final int permissionsSize = list.size();
+        final Iterator<OCLPermission> iter = list.iterator();
         NextPerm: for (int i = 0; i < permissionsSize; i++) {
             final OCLPermission oclPerm = iter.next();
             if (Arrays.binarySearch(idArr, oclPerm.getEntity()) < 0) {
