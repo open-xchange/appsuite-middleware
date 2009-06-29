@@ -402,17 +402,34 @@ public final class IMAPDefaultFolderChecker {
     }
 
     private void submitFolderCheckTask(final CompletionService<Object> completionService, final int index, final String prefix, final String fullname, final String defaultFolderName, final char sep, final int type, final int subscribe, final StringBuilder tmp) {
-        completionService.submit(new Callable<Object>() {
+        completionService.submit(new AbstractCallable(imapConfig, session) {
 
-            public Object call() throws Exception {
-                if (null == fullname || 0 == fullname.length()) {
-                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, defaultFolderName, sep, type, subscribe, false, tmp));
-                } else {
-                    setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, subscribe, true, tmp));
+            public Object call() throws MailException {
+                try {
+                    if (null == fullname || 0 == fullname.length()) {
+                        setDefaultMailFolder(index, checkDefaultFolder(index, prefix, defaultFolderName, sep, type, subscribe, false, tmp));
+                    } else {
+                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, subscribe, true, tmp));
+                    }
+                    return null;
+                } catch (final MessagingException e) {
+                    throw MIMEMailException.handleMessagingException(e, config, sess);
                 }
-                return null;
             }
         });
+    }
+
+    private static abstract class AbstractCallable implements Callable<Object> {
+
+        protected final IMAPConfig config;
+
+        protected final Session sess;
+
+        protected AbstractCallable(final IMAPConfig config, final Session sess) {
+            super();
+            this.config = config;
+            this.sess = sess;
+        }
     }
 
     private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final StringBuilder tmp) throws MessagingException, IMAPException {
