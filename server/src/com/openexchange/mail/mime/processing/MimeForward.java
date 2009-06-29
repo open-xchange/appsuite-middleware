@@ -523,13 +523,14 @@ public final class MimeForward {
                 from == null || from.length == 0 ? "" : from[0].toUnicodeString());
         }
         {
-            final InternetAddress[] cc = msg.getCc();
-            forwardPrefix = PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(MimeProcessingUtility.addrs2String(cc)).toString());
-
             final InternetAddress[] to = msg.getTo();
             forwardPrefix = PATTERN_TO.matcher(forwardPrefix).replaceFirst(
                 to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
+        }
+        {
+            final InternetAddress[] cc = msg.getCc();
+            forwardPrefix = PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
+                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(MimeProcessingUtility.addrs2String(cc)).toString());
         }
         {
             final Date date = msg.getSentDate();
