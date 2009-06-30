@@ -243,17 +243,21 @@ public final class MIMEMessageConverter {
             if (mail.containsFlags()) {
                 parseMimeFlags(mail.getFlags(), mimeMessage);
             }
+            Flags flags = null;
             if (mail.containsColorLabel()) {
-                final Flags flags = new Flags();
+                flags = new Flags();
                 flags.add(MailMessage.getColorLabelStringValue(mail.getColorLabel()));
-                mimeMessage.setFlags(flags, true);
             }
             if (mail.containsUserFlags()) {
-                final Flags flags = new Flags();
+                if (null == flags) {
+                    flags = new Flags();
+                }
                 final String[] userFlags = mail.getUserFlags();
                 for (final String userFlag : userFlags) {
                     flags.add(userFlag);
                 }
+            }
+            if (null != flags) {
                 mimeMessage.setFlags(flags, true);
             }
             return mimeMessage;
