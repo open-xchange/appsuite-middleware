@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.mysqlStorage;
 
 import java.io.UnsupportedEncodingException;
@@ -739,7 +740,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 // language cannot be null, that's checked in checkCreateUserData()
-		final String lang = usrdata.getLanguage();
+                final String lang = usrdata.getLanguage();
                 stmt.setString(8, lang);
 
                 // mailenabled
@@ -1728,35 +1729,29 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public void delete(final Context ctx, final User[] users) throws StorageException {
-        Connection write_ox_con = null;
-
+        final Connection con;
         try {
-            write_ox_con = cache.getConnectionForContext(ctx.getId());
-            write_ox_con.setAutoCommit(false);
-
-            delete(ctx, users, write_ox_con);
-
-            write_ox_con.commit();
+            con = cache.getConnectionForContextNoTimeout(ctx.getId());
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            delete(ctx, users, con);
+            con.commit();
         } catch (final StorageException st) {
             log.error("Storage Error", st);
             try {
-                write_ox_con.rollback();
+                con.rollback();
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
             throw st;
-        } catch (final PoolException pep) {
-            log.error("Pool Error", pep);
-            try {
-                write_ox_con.rollback();
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw new StorageException(pep);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             try {
-                write_ox_con.rollback();
+                con.rollback();
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
@@ -1764,21 +1759,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             try {
-                write_ox_con.rollback();
+                con.rollback();
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
             throw e;
         } finally {
             try {
-                if (write_ox_con != null) {
-                    cache.pushConnectionForContext(ctx.getId(), write_ox_con);
-                }
-            } catch (final PoolException aexp) {
-                log.error("Pool Error pushing ox write connection to pool!", aexp);
+                cache.pushConnectionForContextNoTimeout(ctx.getId(), con);
+            } catch (final PoolException e) {
+                log.error("Pool Error pushing ox write connection to pool!", e);
             }
         }
-
     }
 
     @Override
@@ -1910,7 +1902,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException {
+    public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException {
         PreparedStatement prep_edit_user = null;
         try {
             prep_edit_user = write_ox_con.prepareStatement("UPDATE prg_contacts SET changing_date=? WHERE cid=? AND userid=?;");
@@ -1934,7 +1926,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException {
+    public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException {
         // move user to del_user table if table is ready
         PreparedStatement del_st = null;
         ResultSet rs = null;
@@ -2083,7 +2075,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
+    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
@@ -2105,7 +2097,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-	public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException {
+    public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException {
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
