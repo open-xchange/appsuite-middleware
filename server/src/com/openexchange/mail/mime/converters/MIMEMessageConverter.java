@@ -1782,7 +1782,7 @@ public final class MIMEMessageConverter {
                 priority = Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: " + priorityStr, nfe);
+                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: " + priorityStr);
                 }
                 priority = MailMessage.PRIORITY_NORMAL;
             }

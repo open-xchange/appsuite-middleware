@@ -18,6 +18,7 @@
 * 2009-06-30 - marcus.klein@open-xchange.com
 
  - Bugfix #13487: Improved indexes on InfoStore tables to improve performance.
+ - Bugfix #12251: Removed stack trace on warning message about not parseable Priority header in an email.
 
 * 2009-06-29 - francisco.laguna@open-xchange.com
 
