@@ -62,7 +62,7 @@ public class ExternalTest extends ParticipantNotifyTest {
         final Message msg = notify.getMessages().get(0);
         final String[] participantNames = parseParticipants( msg );
         assertNames(msg.addresses, "don.external@external.invalid");
-        assertNames(participantNames, "don.external@external.invalid (external)");
+        assertNames(participantNames, "don.external@external.invalid (extern)");
         assertFalse(msg.internal);
     }
 }
