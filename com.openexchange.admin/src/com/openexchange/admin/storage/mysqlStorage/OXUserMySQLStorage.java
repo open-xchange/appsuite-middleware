@@ -1850,41 +1850,29 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public void delete(final Context ctx, final User[] users) throws StorageException {
-        Connection write_ox_con = null;
-
+        final Connection con;
         try {
-            write_ox_con = cache.getConnectionForContext(ctx.getId());
-            write_ox_con.setAutoCommit(false);
-
-            delete(ctx, users, write_ox_con);
-
-            write_ox_con.commit();
+            con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            delete(ctx, users, con);
+            con.commit();
         } catch (final StorageException st) {
             log.error("Storage Error", st);
             try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
+                con.rollback();
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
             throw st;
-        } catch (final PoolException pep) {
-            log.error("Pool Error", pep);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw new StorageException(pep);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
+                con.rollback();
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
@@ -1892,23 +1880,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
+                con.rollback();
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
             throw e;
         } finally {
             try {
-                if (write_ox_con != null) {
-                    cache.pushConnectionForContext(ctx.getId(), write_ox_con);
-                }
-            } catch (final PoolException aexp) {
-                log.error("Pool Error pushing ox write connection to pool!", aexp);
+                cache.pushConnectionForContextNoTimeout(ctx.getId().intValue(), con);
+            } catch (final PoolException e) {
+                log.error("Pool Error pushing ox write connection to pool!", e);
             }
         }
-
     }
 
     @Override

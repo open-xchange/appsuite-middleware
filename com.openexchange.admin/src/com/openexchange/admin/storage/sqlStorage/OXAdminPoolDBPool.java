@@ -46,88 +46,98 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.sqlStorage;
 
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import java.sql.Connection;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.server.impl.DBPool;
-
+import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
-    
+
     private Log log = LogFactory.getLog(this.getClass());
-    
+
     public OXAdminPoolDBPool(PropertyHandler prop) {
         super();
     }
-    
+
     public Connection getConnectionForConfigDB() throws PoolException {
-        Connection con = null;
-        try{
-            con =  DBPool.pickupWriteable();
-        }catch(DBPoolingException ep){
-            if (log.isErrorEnabled()) {
-            log.error("Error pickup configdb database write connection from ox pool!",ep);
-            }
-            throw new PoolException(""+ep.getMessage());
+        final Connection con;
+        try {
+            con = Database.get(true);
+        } catch (DBPoolingException e) {
+            log.error("Error pickup configdb database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
         }
         return con;
     }
-    
-    public Connection getConnectionForContext(int context_id) throws PoolException {
-        Context ctx = new ContextImpl(context_id);
-        Connection con = null;
-        try{
-            con =  DBPool.pickupWriteable(ctx);
-        }catch(DBPoolingException ep){
-            if (log.isErrorEnabled()) {
-            log.error("Error pickup oxdb database write connection from ox pool!",ep);
-            }
-            throw new PoolException(""+ep.getMessage());
+
+    public Connection getConnectionForContext(int contextId) throws PoolException {
+        final Connection con;
+        try {
+            con = Database.get(contextId, true);
+        } catch (DBPoolingException e) {
+            log.error("Error pickup context database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
         }
         return con;
     }
-    
+
+    public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
+        final Connection con;
+        try {
+            con = Database.getNoTimeout(contextId, true);
+        } catch (DBPoolingException e) {
+            log.error("Error pickup context database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+        return con;
+    }
+
     public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
-        boolean ret = false;
-        
         try {
-            if(con != null && !con.getAutoCommit() && !con.isClosed() ){
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
-            ret = DBPool.pushWrite(con);
-        } catch (Exception e) {
-            if (log.isErrorEnabled()) {
-            log.error("Error pushing configdb write connection to pool!",e);
-            }
-            throw new PoolException(""+e.getMessage());
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            Database.back(true, con);
         }
-        return ret;
+        return true;
     }
-    
-    public boolean pushConnectionForContext(int context_id, Connection con) throws PoolException {
-        boolean ret = false;
-        Context ctx = new ContextImpl(context_id);
-        
+
+    public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
         try {
-            if(con != null && !con.getAutoCommit() && !con.isClosed() ){
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
-            ret = DBPool.pushWrite(ctx,con);
-        } catch (Exception e) {
-            if (log.isErrorEnabled()) {
-            log.error("Error pushing ox db write connection to pool!",e);
-            }
-            throw new PoolException(""+e.getMessage());
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            Database.back(contextId, true, con);
         }
-        return ret;
+        return true;
+    }
+
+    public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
+        try {
+            if (null != con && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            Database.backNoTimeout(contextId, true, con);
+        }
+        return true;
     }
 }
