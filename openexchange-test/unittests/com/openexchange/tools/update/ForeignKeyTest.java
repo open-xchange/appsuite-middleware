@@ -90,12 +90,12 @@ public class ForeignKeyTest extends TestCase {
 
 
     public void testDiscoverForeignKeys() throws SQLException {
-        List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "test_child");
+        List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
 
         assertNotNull(foreignKeys);
         assertEquals(1, foreignKeys.size());
 
-        ForeignKey key = foreignKeys.get(0);
+        ForeignKeyOld key = foreignKeys.get(0);
 
         assertEquals("test_child", key.getSourceTable());
         assertEquals("test_parent", key.getTargetTable());
@@ -107,29 +107,29 @@ public class ForeignKeyTest extends TestCase {
     }
 
     public void testDropForeignKey() throws SQLException {
-        new ForeignKey("test_child", "parent_id", "test_parent", "id").drop(con);
-        List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "test_child");
+        new ForeignKeyOld("test_child", "parent_id", "test_parent", "id").drop(con);
+        List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
         assertTrue(foreignKeys.isEmpty());       
     }
 
     public void testCreateForeignKey() throws SQLException {
-        ForeignKey key = new ForeignKey("test_child", "parent_id", "test_parent", "id");
+        ForeignKeyOld key = new ForeignKeyOld("test_child", "parent_id", "test_parent", "id");
         key.drop(con);
-        List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "test_child");
+        List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
         assertTrue(foreignKeys.isEmpty());
         key.create(con);
 
-        foreignKeys = ForeignKey.getForeignKeys(con, "test_child");
+        foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
         assertEquals(1, foreignKeys.size());
         assertEquals(key, foreignKeys.get(0));
     }
 
     public void testCreateIfNotExists() throws SQLException {
-        ForeignKey key = new ForeignKey("test_child", "parent_id", "test_parent", "id");
+        ForeignKeyOld key = new ForeignKeyOld("test_child", "parent_id", "test_parent", "id");
         key.createIfNotExists(con);
         key.drop(con);
         key.createIfNotExists(con);
-        List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "test_child");
+        List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
         assertEquals(1, foreignKeys.size());
         assertEquals(key, foreignKeys.get(0));
     }

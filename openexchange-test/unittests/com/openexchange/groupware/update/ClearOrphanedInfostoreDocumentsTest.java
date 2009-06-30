@@ -57,7 +57,7 @@ import com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
-import com.openexchange.tools.update.ForeignKey;
+import com.openexchange.tools.update.ForeignKeyOld;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -77,8 +77,8 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
     public void setUp() throws Exception {
         super.setUp();
         Connection con = getProvider().getWriteConnection(ctx);
-        List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "infostore_document");
-        for (ForeignKey foreignKey : foreignKeys) {
+        List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "infostore_document");
+        for (ForeignKeyOld foreignKey : foreignKeys) {
             try {
                 foreignKey.drop(con);
             } catch (SQLException x) {
@@ -103,8 +103,8 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
             fs.deleteFile(path);        
         }
         Connection con = getProvider().getWriteConnection(ctx);
-        List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "infostore_document");
-        for (ForeignKey foreignKey : foreignKeys) {
+        List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "infostore_document");
+        for (ForeignKeyOld foreignKey : foreignKeys) {
             try {
                 foreignKey.drop(con);
             } catch (SQLException x) {
@@ -112,8 +112,8 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
             }
         }
 
-        foreignKeys = ForeignKey.getForeignKeys(con, "del_infostore_document");
-        for (ForeignKey foreignKey : foreignKeys) {
+        foreignKeys = ForeignKeyOld.getForeignKeys(con, "del_infostore_document");
+        for (ForeignKeyOld foreignKey : foreignKeys) {
             try {
                 foreignKey.drop(con);
             } catch (SQLException x) {
@@ -137,8 +137,8 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
     public void testShouldCreateIndexOnInfostoreDocument() throws AbstractOXException, SQLException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
-        ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
-        List<ForeignKey> keys = ForeignKey.getForeignKeys(getProvider().getWriteConnection(ctx), "infostore_document");
+        ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
+        List<ForeignKeyOld> keys = ForeignKeyOld.getForeignKeys(getProvider().getWriteConnection(ctx), "infostore_document");
         assertTrue(keys.contains(fk));
     }
 
