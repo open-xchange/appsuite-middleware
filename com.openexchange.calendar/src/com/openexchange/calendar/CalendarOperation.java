@@ -482,10 +482,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setParticipants(edao.getParticipants());
                     cdao.setUsers(edao.getUsers());
                 }
-                final UserParticipant up = new UserParticipant(uid);
-                up.setConfirm(CalendarDataObject.ACCEPT);
-                recColl.checkAndConfirmIfUserUserIsParticipant(cdao, up);
             }
+            final UserParticipant up = new UserParticipant(uid);
+            up.setConfirm(CalendarDataObject.ACCEPT);
+            recColl.checkAndConfirmIfUserUserIsParticipant(cdao, up);
         }
 
         UserParticipant p = null;
