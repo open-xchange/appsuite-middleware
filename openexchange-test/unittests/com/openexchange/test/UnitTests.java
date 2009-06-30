@@ -131,6 +131,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserTest.class);
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalEmitterTest.class);
         tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
+        tests.addTestSuite(com.openexchange.groupware.importexport.importers.Bug12380RecoveryParserTest.class);
 
         tests.addTestSuite(com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class);
         tests.addTestSuite(com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class);
@@ -149,6 +150,12 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.container.AppointmentObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.ContactObjectTest.class);
 
+        tests.addTestSuite(com.openexchange.groupware.contact.ContactMergeratorTest.class);
+        tests.addTestSuite(com.openexchange.groupware.contact.UseCountGlobalFirstComparatorTest.class);
+        tests.addTestSuite(com.openexchange.groupware.contact.DefaultContactComparatorTest.class);
+        tests.addTestSuite(com.openexchange.groupware.contact.ContactSearchMuliplexerTest.class);
+        
+        
         tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
