@@ -11,8 +11,9 @@ CREATE TABLE `infostore` (
   `last_modified` int8 NOT NULL,
   `created_by` int4 unsigned NOT NULL,
   `changed_by` int4 unsigned ,
-  PRIMARY KEY  (`cid`,`id`,`folder_id`),
-  INDEX `last_modified` (`last_modified`)
+  PRIMARY KEY (`cid`,`id`),
+  INDEX `lastModified` (`cid`,`last_modified`),
+  INDEX `folder` (`cid`,`folder_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `infostore_document` (
@@ -33,8 +34,7 @@ CREATE TABLE `infostore_document` (
   `file_mimetype` varchar(255) ,
   `file_md5sum` varchar(32)  ,
   `file_version_comment` text,
-  PRIMARY KEY  (`cid`,`infostore_id`,`version_number`),
-  INDEX `last_modified` (last_modified),
+  PRIMARY KEY (`cid`,`infostore_id`,`version_number`),
   FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -48,8 +48,9 @@ CREATE TABLE `del_infostore` (
   `last_modified` int8 NOT NULL,
   `created_by` int4 unsigned NOT NULL,
   `changed_by` int4 unsigned ,
-  PRIMARY KEY  (`cid`,`id`,`folder_id`),
-  INDEX `last_modified`  (`last_modified`)
+  PRIMARY KEY (`cid`,`id`),
+  INDEX `lastModified` (`cid`,`last_modified`),
+  INDEX `folder` (`cid`,`folder_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `del_infostore_document` (
@@ -70,8 +71,7 @@ CREATE TABLE `del_infostore_document` (
   `file_mimetype` varchar(255) ,
   `file_md5sum` varchar(32) ,
   `file_version_comment` text ,
-  PRIMARY KEY  (`cid`,`infostore_id`,`version_number`),
-  INDEX `last_modified`  (`last_modified`)
+  PRIMARY KEY (`cid`,`infostore_id`,`version_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `infostore_property` (
@@ -82,7 +82,7 @@ CREATE TABLE `infostore_property` (
   `value` varchar(255) ,
   `language` varchar(128) ,
   `xml` boolean,
-  PRIMARY KEY  (`cid`,`id`,`name`,`namespace`)
+  PRIMARY KEY (`cid`,`id`,`name`,`namespace`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `infostore_lock` (
@@ -94,16 +94,15 @@ CREATE TABLE `infostore_lock` (
   `type` tinyint unsigned NOT NULL,
   `scope` tinyint unsigned NOT NULL,
   `ownerDesc` varchar(128) ,
-  PRIMARY KEY  (`cid`,`id`)
+  PRIMARY KEY (`cid`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `lock_null` (
   `cid` int4 unsigned NOT NULL,
   `id` int4 unsigned NOT NULL,
   `url` varchar(255) NOT NULL,
-  PRIMARY KEY  (`cid`,`id`)
+  PRIMARY KEY (`cid`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE `lock_null_lock` (
   `cid` int4 unsigned NOT NULL,
@@ -114,6 +113,5 @@ CREATE TABLE `lock_null_lock` (
   `type` tinyint unsigned ,
   `scope` tinyint unsigned ,
   `ownerDesc` varchar(128) ,
-  PRIMARY KEY  (`cid`,`id`)
+  PRIMARY KEY (`cid`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
