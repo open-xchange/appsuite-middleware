@@ -97,6 +97,21 @@ public final class OXFolderIteratorSQL {
         super();
     }
 
+    /*-
+     * SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = 1337 AND (ot.permission_flag = 1 AND ot.created_from = 17) 
+     * UNION SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = 1337 AND op.cid = 1337 WHERE (op.admin_flag = 1 AND op.permission_id = 17) 
+     * UNION SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = 1337 AND op.cid = 1337 WHERE (op.fp > 0 AND op.permission_id IN (17,0,1)) 
+     * ORDER BY fuid;
+
+
+    private static String getSQLUNIONUserVisibleFolders(final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy) {
+        STR_SELECT+fields+" FROM oxfolder_tree AS ot WHERE ot.cid = 1337 AND (ot.permission_flag = "+FolderObject.PRIVATE_PERMISSION+" AND ot.created_from = 17)"+
+        " UNION SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = 1337 AND op.cid = 1337 WHERE (op.admin_flag = 1 AND op.permission_id = 17) "+
+        " UNION SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = 1337 AND op.cid = 1337 WHERE (op.fp > 0 AND op.permission_id IN (17,0,1))"+
+        " ORDER BY fuid";
+    }
+     */
+
     /**
      * Returns the core sql statement to query user-visible folders. This query can be further parameterized by additional conditions (e.g.
      * only folders of a certain type or module)
