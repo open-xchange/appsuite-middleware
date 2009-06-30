@@ -419,6 +419,24 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (newObj.getEndDate() == null && oldObj != null && oldObj.getEndDate() != null) {
             newObj.setEndDate(oldObj.getEndDate());
         }
+        if (CalendarObject.NO_RECURRENCE == newObj.getRecurrenceType() && oldObj != null && CalendarObject.NO_RECURRENCE != oldObj.getRecurrenceType()) {
+            newObj.setRecurrenceType(oldObj.getRecurrenceType());
+            if (oldObj.containsOccurrence()) {
+                newObj.setOccurrence(oldObj.getOccurrence());
+            }
+            if (oldObj.containsInterval()) {
+                newObj.setInterval(oldObj.getInterval());
+            }
+            if (oldObj.containsDays()) {
+                newObj.setDays(oldObj.getDays());
+            }
+            if (oldObj.containsDayInMonth()) {
+                newObj.setDayInMonth(oldObj.getDayInMonth());
+            }
+            if (oldObj.containsUntil()) {
+                newObj.setUntil(oldObj.getUntil());
+            }
+        }
         if (!checkStartAndEndDate(newObj, state.getModule())) {
             return;
         }
@@ -1706,7 +1724,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      */
     static final boolean checkStartAndEndDate(final CalendarObject calendarObj, final int module) {
         final long now = System.currentTimeMillis();
-        if (calendarObj.getRecurrenceType() == CalendarObject.NONE) {
+        if (CalendarObject.NO_RECURRENCE == calendarObj.getRecurrenceType()) {
             {
                 // Do not send notification mails for tasks and appointments in the
                 // past. Bug #12063
