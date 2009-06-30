@@ -176,7 +176,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         if (participant.type == Participant.USER) {
             b.append(" (");
             b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-            if (participant.confirmMessage != null) {
+            if (!isEmpty(participant.confirmMessage)) {
                 b.append(": ").append(participant.confirmMessage);
             }
             b.append(')');
@@ -185,6 +185,18 @@ public final class ParticipantsReplacement implements TemplateReplacement {
             b.append(stringHelper.getString(Notifications.STATUS_EXTERNAL));
             b.append(')');
         }
+    }
+
+    private static boolean isEmpty(final String s) {
+        if (null == s) {
+            return true;
+        }
+        final char[] chars = s.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
     }
 
     public TemplateToken getToken() {
