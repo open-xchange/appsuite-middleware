@@ -57,10 +57,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -74,6 +72,8 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.helper.DownloadUtility;
+import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.request.InfostoreRequest;
@@ -134,7 +134,7 @@ public class Infostore extends PermissionServlet {
 
 	public static final InfostoreFacade VIRTUAL_FACADE = new VirtualFolderInfostoreFacade();
 
-	public static final InfostoreFacade FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
+	public static final InfostoreFacadeImpl FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
 	static {
 		FACADE.setTransactional(true);
 		FACADE.setSessionHolder(ThreadLocalSessionHolder.getInstance());
@@ -214,7 +214,7 @@ public class Infostore extends PermissionServlet {
 
 			final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
 
-			document(res, isIE(req), isIE7(req), id, version, contentType, ctx, user, userConfig);
+			document(res, req.getHeader("user-agent"), isIE(req), isIE7(req), id, version, contentType, ctx, user, userConfig);
 
 			return;
 		}
@@ -612,7 +612,7 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 
-	protected void document(final HttpServletResponse res, final boolean ie, final boolean ie7, final int id,
+	protected void document(final HttpServletResponse res, final String userAgent, final boolean ie, final boolean ie7, final int id,
 			final int version, final String contentType, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws IOException {
 		final InfostoreFacade infostore = getInfostore();
@@ -625,34 +625,39 @@ public class Infostore extends PermissionServlet {
 			os = res.getOutputStream();
 
 			res.setContentLength((int) metadata.getFileSize());
-			res.setContentType(contentType == null ? metadata.getFileMIMEType() : contentType);
-			if (contentType != null && contentType.equals(SAVE_AS_TYPE)) {
+			if (SAVE_AS_TYPE.equals(contentType)) {
 				res.setHeader("Content-Disposition", "attachment; filename=\""
 						+ Helper.encodeFilename(metadata.getFileName(), "UTF-8", ie) + "\"");
+				res.setContentType(contentType);
 			} else {
-				res.setHeader("Content-Disposition", "filename=\""
-						+ Helper.encodeFilename(metadata.getFileName(), "UTF-8", ie) + "\"");
-			}
-
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
+                    documentData,
+                    metadata.getFileName(),
+                    metadata.getFileMIMEType(),
+                    userAgent);
+                res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+                res.setContentType(checkedDownload.getContentType());
+                documentData = checkedDownload.getInputStream();
+            }
 			// Browsers doesn't like the Pragma header the way we usually set
 			// this. Especially if files are sent to the browser. So removing
 			// pragma header
 			Tools.removeCachingHeader(res);
 
-			final byte[] buffer = new byte[200];
+			final byte[] buffer = new byte[0xFFFF];
 			int bytesRead = 0;
 
 			while ((bytesRead = documentData.read(buffer)) != -1) {
 				os.write(buffer, 0, bytesRead);
-				os.flush();
 			}
+			os.flush();
 			os = null;
 
-		} catch (final OXException x) {
-			LOG.debug(x.getMessage(), x);
-			handleOXException(res, x, STR_ERROR, true, JS_FRAGMENT);
-			return;
-		} finally {
+		} catch (final AbstractOXException x) {
+            LOG.debug(x.getMessage(), x);
+            handleOXException(res, x, STR_ERROR, true, JS_FRAGMENT);
+            return;
+        } finally {
 
 			if (os != null) {
 				try {

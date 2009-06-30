@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,22 +73,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.helper.BrowserDetector;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -124,6 +131,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -133,7 +141,6 @@ import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;
@@ -686,28 +693,6 @@ public class Mail extends PermissionServlet implements UploadListener {
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
-            final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
-                session.getUserId(),
-                session.getContextId());
-            /*
-             * Deny saving for this request-specific settings
-             */
-            usmNoSave.setNoSave(true);
-            /*
-             * Overwrite settings with request's parameters
-             */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
-                }
-            }
             /*
              * Get reply message
              */
@@ -719,10 +704,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     closeMailInterface = true;
                 }
                 data = MessageWriter.writeMailMessage(
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave),
+                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all),
                     DisplayMode.MODIFYABLE,
                     session,
-                    usmNoSave);
+                    null);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -785,28 +770,6 @@ public class Mail extends PermissionServlet implements UploadListener {
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
-            final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
-                session.getUserId(),
-                session.getContextId());
-            /*
-             * Deny saving for this request-specific settings
-             */
-            usmNoSave.setNoSave(true);
-            /*
-             * Overwrite settings with request's parameters
-             */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
-                }
-            }
             /*
              * Get forward message
              */
@@ -819,8 +782,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(
                     new String[] { folderPath },
-                    new long[] { uid },
-                    usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
+                    new long[] { uid }), DisplayMode.MODIFYABLE, session, null);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -1368,12 +1330,12 @@ public class Mail extends PermissionServlet implements UploadListener {
              */
             final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
             try {
-                if (sequenceId == null && imageContentId == null) {
+            	if (sequenceId == null && imageContentId == null) {
                     throw new MailException(MailException.Code.MISSING_PARAM, new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(
                         " | ").append(PARAMETER_MAILCID).toString());
                 }
                 final MailPart mailPart;
-                final InputStream attachmentInputStream;
+                InputStream attachmentInputStream;
                 if (imageContentId == null) {
                     mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                     if (mailPart == null) {
@@ -1384,7 +1346,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                          * Apply filter
                          */
                         final ContentType contentType = mailPart.getContentType();
-                        final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailConfig.getDefaultMimeCharset();
+                        final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                         final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                         final HTMLFilterHandler filterHandler = new HTMLFilterHandler(htmlContent.length());
                         HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, contentType), filterHandler);
@@ -1392,10 +1354,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                     } else {
                         attachmentInputStream = mailPart.getInputStream();
                     }
-                    /**
+                    /*-
                      * TODO: Does not work, yet.
-                     * 
-                     * <pre>
                      * 
                      * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
                      *     // Treat as a mail get
@@ -1406,7 +1366,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                      *     ResponseWriter.write(response, resp.getWriter());
                      *     return;
                      * }
-                     * </pre>
                      */
                 } else {
                     mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
@@ -1416,41 +1375,35 @@ public class Mail extends PermissionServlet implements UploadListener {
                     attachmentInputStream = mailPart.getInputStream();
                 }
                 /*
-                 * Write to response
+                 * Set Content-Type and Content-Disposition header
                  */
-                final String userAgent = req.getHeader(STR_USER_AGENT) == null ? null : req.getHeader(STR_USER_AGENT).toLowerCase(
-                    Locale.ENGLISH);
-                final boolean internetExplorer = (userAgent != null && userAgent.indexOf(STR_MSIE) > -1 && userAgent.indexOf(STR_WINDOWS) > -1);
-                final ContentType contentType;
+                final String fileName = mailPart.getFileName();
                 if (saveToDisk) {
-                    contentType = new ContentType();
-                    contentType.setPrimaryType(STR_APPLICATION);
-                    contentType.setSubType(STR_OCTET_STREAM);
-                    resp.setHeader(
-                        STR_CONTENT_DISPOSITION,
-                        new StringBuilder(64).append(STR_ATTACHMENT_FILENAME).append(
-                            getSaveAsFileName(mailPart.getFileName(), internetExplorer, mailPart.getContentType().toString())).append('"').toString());
-                } else {
-                    final String fileName = getSaveAsFileName(
-                        mailPart.getFileName(),
-                        internetExplorer,
+                    /*
+                     * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
+                     * disposition.
+                     */
+                    final ContentType contentType = new ContentType();
+                    contentType.setPrimaryType("application");
+                    contentType.setSubType("octet-stream");
+                    resp.setContentType(contentType.toString());
+                    final String preparedFileName = getSaveAsFileName(
+                        fileName,
+                        isMSIEOnWindows(req.getHeader(STR_USER_AGENT)),
                         mailPart.getContentType().toString());
-                    contentType = mailPart.getContentType();
-                    if (contentType.isMimeType(MIME_APPLICATION_OCTET_STREAM)) {
-                        /*
-                         * Try to determine MIME type
-                         */
-                        final String ct = MIMEType2ExtMap.getContentType(fileName);
-                        final int pos = ct.indexOf('/');
-                        contentType.setPrimaryType(ct.substring(0, pos));
-                        contentType.setSubType(ct.substring(pos + 1));
-                    }
-                    contentType.setParameter(STR_NAME, fileName);
                     resp.setHeader(
-                        STR_CONTENT_DISPOSITION,
-                        new StringBuilder(50).append(STR_INLINE_FILENAME).append(fileName).append('"').toString());
+                        "Content-disposition",
+                        new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                } else {
+                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
+                        attachmentInputStream,
+                        fileName,
+                        mailPart.getContentType().toString(),
+                        req.getHeader(STR_USER_AGENT));
+                    resp.setContentType(checkedDownload.getContentType());
+                    resp.setHeader("Content-disposition", checkedDownload.getContentDisposition());
+                    attachmentInputStream = checkedDownload.getInputStream();
                 }
-                resp.setContentType(contentType.toString());
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -1553,6 +1506,11 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
+    private static boolean isMSIEOnWindows(final String userAgent) {
+        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+        return (browserDetector.isMSIE() && browserDetector.isWindows());
+    }
+
     private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
 
     private static final String DEFAULT_FILENAME = "file.dat";
@@ -1635,28 +1593,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                 folders[i] = folderAndID.getString(PARAMETER_FOLDERID);
                 ids[i] = Long.parseLong(folderAndID.get(PARAMETER_ID).toString());
             }
-            final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
-                session.getUserId(),
-                session.getContextId());
-            /*
-             * Deny saving for this request-specific settings
-             */
-            usmNoSave.setNoSave(true);
-            /*
-             * Overwrite settings with request's parameters
-             */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
-                }
-            }
             /*
              * Get forward message
              */
@@ -1668,10 +1604,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     closeMailInterface = true;
                 }
                 data = MessageWriter.writeMailMessage(
-                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
+                    mailInterface.getForwardMessageForDisplay(folders, ids),
                     DisplayMode.MODIFYABLE,
                     session,
-                    usmNoSave);
+                    null);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
