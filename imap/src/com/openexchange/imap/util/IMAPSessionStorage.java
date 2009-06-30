@@ -57,47 +57,72 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link IMAPSessionUtility} - IMAP utility class for session.
+ * {@link IMAPSessionStorage} - An IMAP storage held by a session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPSessionUtility {
+final class IMAPSessionStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPSessionUtility.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPSessionStorage.class);
+
+    private final Object lock;
+
+    private final ConcurrentMap<AccAndFN, Set<IMAPUpdateableData>> dataMap;
 
     /**
-     * Initializes a new {@link IMAPSessionUtility}.
+     * Initializes a new {@link IMAPSessionStorage}.
+     * 
+     * @param lock The lock object
      */
-    private IMAPSessionUtility() {
+    IMAPSessionStorage(final Object lock) {
         super();
+        dataMap = new ConcurrentHashMap<AccAndFN, Set<IMAPUpdateableData>>();
+        this.lock = lock;
     }
 
     /**
-     * Fills session storage with data fetched from specified IMAP folder.
+     * Checks if session storage contains entries for given folder.
      * 
      * @param accountId The account ID
      * @param imapFolder The IMAP folder
-     * @param key The session key
-     * @param session The session providing user data
+     * @return <code>true</code> if session storage contains entries for given folder; otherwise <code>false</code>
+     */
+    public boolean hasSessionStorage(final int accountId, final IMAPFolder imapFolder) {
+        return (null != dataMap.get(new AccAndFN(accountId, imapFolder.getFullName())));
+    }
+
+    /**
+     * Fills storage with data fetched from specified IMAP folder.
+     * 
+     * @param accountId The account ID
+     * @param imapFolder The IMAP folder
      * @throws MailException If a mail error occurs
      */
-    public static void fillSessionStorage(final int accountId, final IMAPFolder imapFolder, final String key, final Session session) throws MailException {
-        synchronized (session) {
-            final Set<IMAPUpdateableData> sessionData = new HashSet<IMAPUpdateableData>();
-            session.setParameter(key, sessionData);
+    public void fillSessionStorage(final int accountId, final IMAPFolder imapFolder) throws MailException {
+        synchronized (lock) {
+            final Set<IMAPUpdateableData> currentData = new HashSet<IMAPUpdateableData>();
             try {
-                sessionData.addAll(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
+                currentData.addAll(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e);
+            }
+            final AccAndFN key = new AccAndFN(accountId, imapFolder.getFullName());
+            Set<IMAPUpdateableData> data = dataMap.get(key);
+            if (null == data) {
+                data = currentData;
+                dataMap.put(key, data);
+            } else {
+                data.addAll(currentData);
             }
         }
     }
@@ -107,29 +132,25 @@ public final class IMAPSessionUtility {
      * 
      * @param accountId The account ID
      * @param imapFolder The IMAP folder of which messages are examined
-     * @param session The session providing user data
      * @param mode The mode; either <code>1</code> for new-and-modified only, <code>2</code> for deleted only, or <code>3</code> for
      *            new-and-modified and deleted
+     * @param userId The user ID
+     * @param contextId The context ID
      * @return The IMAP messages of which flags have been changed since specified time stamp
      * @throws MailException If a mail error occurs
      */
-    public static long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final Session session, final int mode) throws MailException {
-        synchronized (session) {
+    public long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final int mode, final int userId, final int contextId) throws MailException {
+        synchronized (lock) {
             try {
                 final String fullName = imapFolder.getFullName();
                 // Load IMAP storage data
                 final IMAPUpdateableData[] actualData = IMAPCommandsCollection.fetchUIDAndFlags(imapFolder);
                 // Load DB storage data
-                final String key = getSessionKey(accountId, fullName);
-                final Set<IMAPUpdateableData> sessionData;
-                {
-                    final Object parameter = session.getParameter(key);
-                    if (null == parameter) {
-                        sessionData = new HashSet<IMAPUpdateableData>();
-                        session.setParameter(key, sessionData);
-                    } else {
-                        sessionData = (Set<IMAPUpdateableData>) parameter;
-                    }
+                final AccAndFN key = new AccAndFN(accountId, fullName);
+                Set<IMAPUpdateableData> sessionData = dataMap.get(key);
+                if (null == sessionData) {
+                    sessionData = new HashSet<IMAPUpdateableData>();
+                    dataMap.put(key, sessionData);
                 }
                 // Generate UID sets
                 final Set<Long> actualUIDs = data2UIDSet(actualData);
@@ -217,11 +238,7 @@ public final class IMAPSessionUtility {
                  */
                 if (!newAndModified.isEmpty() || !deleted.isEmpty()) {
                     try {
-                        MailMessageCache.getInstance().removeFolderMessages(
-                            accountId,
-                            fullName,
-                            session.getUserId(),
-                            session.getContextId());
+                        MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, userId, contextId);
                     } catch (final Exception e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -241,16 +258,15 @@ public final class IMAPSessionUtility {
      * 
      * @param deletedUIDs The set of deleted UIDs
      * @param accountId The account ID
-     * @param session The session
      * @param fullName The IMAP folder's full name
      * @throws MailException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final Session session, final String fullName) {
+    public void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final String fullName) {
         final Set<Long> s = new HashSet<Long>(deletedUIDs.length);
         for (int i = 0; i < deletedUIDs.length; i++) {
             s.add(Long.valueOf(deletedUIDs[i]));
         }
-        removeDeletedSessionData(s, accountId, session, fullName);
+        removeDeletedSessionData(s, accountId, fullName);
     }
 
     /**
@@ -258,22 +274,16 @@ public final class IMAPSessionUtility {
      * 
      * @param deletedUIDs The set of deleted UIDs
      * @param accountId The account ID
-     * @param session The session
      * @param fullName The IMAP folder's full name
      * @throws MailException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) {
-        synchronized (session) {
-            final String key = getSessionKey(accountId, fullName);
-            final Set<IMAPUpdateableData> sessionData;
-            {
-                final Object parameter = session.getParameter(key);
-                if (null == parameter) {
-                    sessionData = new HashSet<IMAPUpdateableData>();
-                    session.setParameter(key, sessionData);
-                    return;
-                }
-                sessionData = (Set<IMAPUpdateableData>) parameter;
+    public void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final String fullName) {
+        synchronized (lock) {
+            final AccAndFN key = new AccAndFN(accountId, fullName);
+            Set<IMAPUpdateableData> sessionData = dataMap.get(key);
+            if (null == sessionData) {
+                sessionData = new HashSet<IMAPUpdateableData>();
+                dataMap.put(key, sessionData);
             }
             for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
                 final IMAPUpdateableData tmp = iter.next();
@@ -288,20 +298,23 @@ public final class IMAPSessionUtility {
      * Removes specified deleted UIDs from session storage.
      * 
      * @param accountId The account ID
-     * @param session The session
      * @param fullName The IMAP folder's full name
      * @throws MailException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedFolder(final int accountId, final Session session, final String fullName) {
-        synchronized (session) {
-            final String key = getSessionKey(accountId, fullName);
-            final Object parameter = session.getParameter(key);
-            if (null == parameter) {
+    public void removeDeletedFolder(final int accountId, final String fullName) {
+        synchronized (lock) {
+            final AccAndFN key = new AccAndFN(accountId, fullName);
+            final Set<IMAPUpdateableData> sessionData = dataMap.get(key);
+            if (null == sessionData) {
                 return;
             }
-            session.setParameter(key, null);
+            dataMap.remove(key);
         }
     }
+
+    /*-
+     * ############################ HELPER METHODS ############################
+     */
 
     private static Set<Long> data2UIDSet(final IMAPUpdateableData[] updateableDatas) {
         final Set<Long> uids = new HashSet<Long>(updateableDatas.length);
@@ -349,15 +362,54 @@ public final class IMAPSessionUtility {
         return longs;
     }
 
-    /**
-     * Generates the session key for given arguments.
-     * 
-     * @param accountId The account ID
-     * @param fullName The full name
-     * @return The session key for given arguments
+    /*-
+     * ############################ HELPER CLASSES ############################
      */
-    public static String getSessionKey(final int accountId, final String fullName) {
-        return new StringBuilder(32).append("imap.data@").append(accountId).append('@').append(fullName).toString();
-    }
 
+    private static final class AccAndFN {
+
+        private final int acc;
+
+        private final String fn;
+
+        public AccAndFN(final int acc, final String fn) {
+            super();
+            this.acc = acc;
+            this.fn = fn;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + acc;
+            result = prime * result + ((fn == null) ? 0 : fn.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof AccAndFN)) {
+                return false;
+            }
+            final AccAndFN other = (AccAndFN) obj;
+            if (acc != other.acc) {
+                return false;
+            }
+            if (fn == null) {
+                if (other.fn != null) {
+                    return false;
+                }
+            } else if (!fn.equals(other.fn)) {
+                return false;
+            }
+            return true;
+        }
+    }
 }

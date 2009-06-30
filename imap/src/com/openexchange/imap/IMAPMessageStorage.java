@@ -82,7 +82,7 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.threadsort.ThreadSortMailMessage;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
-import com.openexchange.imap.util.IMAPSessionUtility;
+import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -380,17 +380,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             final int[] filter;
             if (null == searchTerm) {
                 // TODO: enable if action=updates shall be performed
-                if (false) {
-                    final String key = IMAPSessionUtility.getSessionKey(accountId, fullname);
-                    Object param = session.getParameter(key);
-                    if (null == param) {
-                        synchronized (session) {
-                            param = session.getParameter(key);
-                            if (null == param) {
-                                IMAPSessionUtility.fillSessionStorage(accountId, imapFolder, key, session);
-                            }
-                        }
-                    }
+                if (!IMAPSessionStorageAccess.hasSessionStorage(accountId, imapFolder, session)) {
+                    IMAPSessionStorageAccess.fillSessionStorage(accountId, imapFolder, session);
                 }
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
@@ -739,7 +730,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             }
             final boolean backup = (!(fullname.startsWith(trashFullname)));
             blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
-            IMAPSessionUtility.removeDeletedSessionData(msgUIDs, accountId, session, fullname);
+            IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullname);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -1013,7 +1004,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (move) {
-                IMAPSessionUtility.removeDeletedSessionData(mailIds, accountId, session, sourceFullname);
+                IMAPSessionStorageAccess.removeDeletedSessionData(mailIds, accountId, session, sourceFullname);
             }
             return result;
         } catch (final MessagingException e) {
@@ -1497,7 +1488,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
-            final long[] uids = IMAPSessionUtility.getChanges(accountId, imapFolder, session, index + 1)[index];
+            final long[] uids = IMAPSessionStorageAccess.getChanges(accountId, imapFolder, session, index + 1)[index];
             return getMessagesLong(folder, uids, fields);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);

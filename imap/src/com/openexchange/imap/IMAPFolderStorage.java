@@ -83,7 +83,7 @@ import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
-import com.openexchange.imap.util.IMAPSessionUtility;
+import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailFolderStorage;
@@ -1118,7 +1118,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             /*
              * Remove from session storage
              */
-            IMAPSessionUtility.removeDeletedFolder(accountId, session, fullname);
+            IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullname);
             f.open(Folder.READ_WRITE);
             try {
                 int msgCount = f.getMessageCount();
@@ -1716,7 +1716,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
          */
         RightsCache.removeCachedRights(toMove, session, accountId);
         UserFlagsCache.removeUserFlags(toMove, session, accountId);
-        IMAPSessionUtility.removeDeletedFolder(accountId, session, moveFullname);
+        IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
         return newFolder;
     }
 
@@ -1913,7 +1913,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             for (int i = 0; i < fs.length; i++) {
                 removeSessionData(fs[i]);
             }
-            IMAPSessionUtility.removeDeletedFolder(accountId, session, f.getFullName());
+            IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, f.getFullName());
         } catch (final MessagingException e) {
             LOG.error(e.getMessage(), e);
         }
