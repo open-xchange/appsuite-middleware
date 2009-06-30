@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	12
+Release:	13
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 30 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13968: Fixed IE < 8 vulnerability for HTML content nested inside corrupt image files.
 * Fri Jun 19 2009 - thorben.betten@open-xchange.com
  - Bugfix #13882: Prevent UI looping.
 * Tue Jun 16 2009 - marcus.klein@open-xchange.com
