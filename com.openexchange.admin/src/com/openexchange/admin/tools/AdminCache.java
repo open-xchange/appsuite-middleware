@@ -350,8 +350,17 @@ public class AdminCache {
         return this.pool.getConnectionForContext(context_id);
     }
 
+    public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
+        checkDatabaseLocked();
+        return this.pool.getConnectionForContextNoTimeout(contextId);
+    }
+    
     public boolean pushConnectionForContext(final int context_id, final Connection con) throws PoolException {
         return this.pool.pushConnectionForContext(context_id, con);
+    }
+
+    public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
+        return this.pool.pushConnectionForContextNoTimeout(contextId, con);
     }
 
     public Connection getConnectionForConfigDB() throws PoolException {
