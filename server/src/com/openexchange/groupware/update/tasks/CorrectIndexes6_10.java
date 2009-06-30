@@ -52,7 +52,11 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.createIndex;
+import static com.openexchange.tools.update.Tools.createPrimaryKey;
+import static com.openexchange.tools.update.Tools.dropIndex;
+import static com.openexchange.tools.update.Tools.dropPrimaryKey;
 import static com.openexchange.tools.update.Tools.existsIndex;
+import static com.openexchange.tools.update.Tools.existsPrimaryKey;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,6 +74,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.update.Tools;
 
 /**
  * Update task for improving indexes with version 6.10.
@@ -104,6 +109,10 @@ public class CorrectIndexes6_10 implements UpdateTask {
         try {
             con.setAutoCommit(false);
             correctAppointmentParticipantIndexes(con);
+            correctInfoStorePrimaryKey(con);
+            correctInfoStoreLastModified(con);
+            dropInfoStoreDocumentLastModified(con);
+            createInfoStoreFolderIndex(con);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -115,7 +124,7 @@ public class CorrectIndexes6_10 implements UpdateTask {
     }
 
     private void correctAppointmentParticipantIndexes(Connection con) {
-        String[] columns = new String[] { "cid", "member_uid", "object_id" };
+        String[] columns = { "cid", "member_uid", "object_id" };
         for (String table : new String[] { "prg_dates_members", "del_dates_members" }) {
             try {
                 String indexName = existsIndex(con, table, columns);
@@ -124,6 +133,96 @@ public class CorrectIndexes6_10 implements UpdateTask {
                     createIndex(con, table, "member", columns, true);
                 } else {
                     LOG.info("New unique index named " + indexName + " with columns (cid,member_uid,object_id) already exists on table " + table + ".");
+                }
+            } catch (SQLException e) {
+                LOG.error("Problem correcting indexes on table " + table + ".", e);
+            }
+        }
+    }
+
+    private void correctInfoStorePrimaryKey(Connection con) {
+        for (String table : new String[] { "infostore", "del_infostore" }) {
+            String[] columns = { "cid", "id" };
+            String documentTable = table + "_document";
+            String[] documentForeignKeyColumns = { "cid", "infostore_id" };
+            try {
+                if (!existsPrimaryKey(con, table, columns)) {
+                    String foreignKey = Tools.existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
+                    if (null != foreignKey) {
+                        LOG.info("Removing foreign key on " + documentTable + " referencing " + table + " temporarily.");
+                        Tools.dropForeignKey(con, documentTable, foreignKey);
+                    }
+                    LOG.info("Removing old primary key (cid,id,folder_id) from table " + table + ".");
+                    dropPrimaryKey(con, table);
+                    LOG.info("Creating new primary key (cid,id) on table " + table + ".");
+                    createPrimaryKey(con, table, columns);
+                    if (null != foreignKey) {
+                        foreignKey = Tools.existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
+                        if (null == foreignKey) {
+                            LOG.info("Recreating foreign key on " + documentTable + " referencing " + table + ".");
+                            Tools.createForeignKey(con, documentTable, documentForeignKeyColumns, table, columns);
+                        }
+                    }
+                } else {
+                    LOG.info("New primary key (ci,id) already exists on table " + table + ".");
+                }
+            } catch (SQLException e) {
+                LOG.error("Problem correcting primary key on table " + table + ".", e);
+            }
+        }
+    }
+
+    private void correctInfoStoreLastModified(Connection con) {
+        String[] columns = { "cid", "last_modified" };
+        for (String table : new String[] { "infostore", "del_infostore" }) {
+            try {
+                String indexName = existsIndex(con, table, new String[] { "last_modified" });
+                if (null != indexName) {
+                    LOG.info("Removing old index with columns (last_modified) on table " + table + ".");
+                    dropIndex(con, table, indexName);
+                } else {
+                    LOG.info("Old index with columns (last_modified) on table " + table  + " not found.");
+                }
+                indexName = existsIndex(con, table, columns);
+                if (null == indexName) {
+                    LOG.info("Creating new index named lastModified with columns (cid,last_modified) on table " + table + ".");
+                    createIndex(con, table, "lastModified", columns, false);
+                } else {
+                    LOG.info("New index named " + indexName + " with columns (cid,last_modified) already exists on table " + table + ".");
+                }
+            } catch (SQLException e) {
+                LOG.error("Problem correcting indexes on table " + table + ".", e);
+            }
+        }
+    }
+
+    private void dropInfoStoreDocumentLastModified(Connection con) {
+        String[] columns = { "last_modified" };
+        for (String table : new String[] { "infostore_document", "del_infostore_document" }) {
+            try {
+                String indexName = existsIndex(con, table, columns);
+                if (null != indexName) {
+                    LOG.info("Removing old index with columns (last_modified) on table " + table + ".");
+                    dropIndex(con, table, indexName);
+                } else {
+                    LOG.info("Old index with columns (last_modified) on table " + table + " not found.");
+                }
+            } catch (SQLException e) {
+                LOG.error("Problem correcting indexes on table " + table + ".", e);
+            }
+        }
+    }
+
+    private void createInfoStoreFolderIndex(Connection con) {
+        String[] columns = { "cid", "folder_id" };
+        for (String table : new String[] { "infostore", "del_infostore" }) {
+            try {
+                String indexName = existsIndex(con, table, columns);
+                if (null == indexName) {
+                    LOG.info("Creating new index named folder with columns (cid,folder_id) on table " + table + ".");
+                    createIndex(con, table, "folder", columns, false);
+                } else {
+                    LOG.info("New index named " + indexName + " with columns (cid,folder_id) already exists on table " + table + ".");
                 }
             } catch (SQLException e) {
                 LOG.error("Problem correcting indexes on table " + table + ".", e);

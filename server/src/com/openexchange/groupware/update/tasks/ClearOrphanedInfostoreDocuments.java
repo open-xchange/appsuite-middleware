@@ -58,7 +58,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.databaseold.Database;
 import com.openexchange.tools.update.Tools;
-import com.openexchange.tools.update.ForeignKey;
+import com.openexchange.tools.update.ForeignKeyOld;
 import com.openexchange.tools.sql.DBUtils;
 
 import java.sql.Connection;
@@ -103,8 +103,8 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             LOG.info("Clearing orphaned infostore document versions");
             con = Database.getNoTimeout(contextId, true);
 
-            List<ForeignKey> keys = ForeignKey.getForeignKeys(con, "infostore_document");
-            ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
+            List<ForeignKeyOld> keys = ForeignKeyOld.getForeignKeys(con, "infostore_document");
+            ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
           
             if( keys.contains(fk)) {
                 LOG.info("Foreign Key "+fk+" exists. Skipping Update Task.");
